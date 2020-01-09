@@ -26,9 +26,9 @@ There are also some tools for helping debug type-related errors:
 ### `T.reveal_type`
 
 If we wrap a variable or method call in `T.reveal_type`, Sorbet will show us
-what type it thinks that variable has. This is a super powerful debugging
-technique! `T.reveal_type` should be **one of the first tools** to reach for
-when debugging a confusing error.
+what type it thinks that variable has in the output of `srb tc`. This is a super
+powerful debugging technique! `T.reveal_type` should be **one of the first
+tools** to reach for when debugging a confusing error.
 
 Try making a hypothesis of what the problem is ("I think the problem is...") and
 then create small examples in <https://sorbet.run> to test the hypothesis with

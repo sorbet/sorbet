@@ -39,7 +39,15 @@ string Dedenter::dedent(string_view str) {
                     break;
                 case '\t': {
                     int indent = dedentLevel - spacesToRemove;
-                    spacesToRemove -= (8 - indent % 8);
+                    int delta = 8 - indent % 8;
+                    if (delta > spacesToRemove) {
+                        // Prevent against underflow on unsigned integer.
+                        // In this case, the tab doesn't get chomped.
+                        out.push_back(ch);
+                        spacesToRemove = 0;
+                    } else {
+                        spacesToRemove -= delta;
+                    }
                     break;
                 }
                 default:

@@ -1432,6 +1432,20 @@ class Array < Object
   end
   def member?(arg0); end
 
+  # Returns a two element array which contains the minimum and the
+  # maximum value in the array.
+  #
+  # Can be given an optional block to override the default comparison
+  # method `a <=> b`.
+  sig {returns([T.nilable(Elem), T.nilable(Elem)])}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns([T.nilable(Elem), T.nilable(Elem)])
+  end
+  def minmax(&blk); end
+
   # When invoked with a block, yield all permutations of length `n` of the
   # elements of the array, then return the array itself.
   #
@@ -1826,14 +1840,14 @@ class Array < Object
   # a.sample(random: Random.new(1))     #=> 6
   # a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
   # ```
-  sig {returns(T.nilable(Elem))}
   sig do
     params(
         arg0: Integer,
+        random: Random::Formatter,
     )
-    .returns(T::Array[Elem])
+    .returns(T.any(T.nilable(Elem), T::Array[Elem]))
   end
-  def sample(arg0=T.unsafe(nil)); end
+  def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
 
   # Returns a new array containing all elements of `ary` for which the given
   # `block` returns a true value.
@@ -2328,11 +2342,17 @@ class Array < Object
   # ```
   sig do
     type_parameters(:U).params(
-        arg0: T::Array[T.type_parameter(:U)],
+        arg: T::Enumerable[T.type_parameter(:U)]
     )
     .returns(T::Array[[Elem, T.nilable(T.type_parameter(:U))]])
   end
-  def zip(*arg0); end
+  sig do
+    type_parameters(:U).params(
+        arg: T::Enumerable[T.type_parameter(:U)],
+        blk: T.proc.params(x: Elem, y: T.nilable(T.type_parameter(:U))).void
+    ).void
+  end
+  def zip(*arg, &blk); end
 
   # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) Union --- Returns a
   # new array by joining `ary` with `other_ary`, excluding any duplicates and

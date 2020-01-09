@@ -59,7 +59,7 @@ CheckSize(FileRef, 2, 2);
 
 class File final {
 public:
-    enum Type {
+    enum class Type {
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
@@ -70,6 +70,9 @@ public:
     bool cachedParseTree = false;
     bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     bool pluginGenerated = false;
+    // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
+    // TODO(jvilk): Delurk epoch usage and use something like pointer equality to check if a file has changed.
+    const u4 epoch;
 
     friend class GlobalState;
     friend class ::sorbet::core::serialize::SerializerImpl;
@@ -84,7 +87,7 @@ public:
     bool isRBI() const;
     bool isStdlib() const;
 
-    File(std::string &&path_, std::string &&source_, Type sourceType);
+    File(std::string &&path_, std::string &&source_, Type sourceType, u4 epoch = 0);
     File(File &&other) = delete;
     File(const File &other) = delete;
     File() = delete;

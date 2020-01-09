@@ -435,6 +435,18 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<string-interpolate>(arg: *T.untyped) => String
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::stringInterpolate());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::String();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
@@ -625,7 +637,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         auto resData = res->second.data(*this);
         if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
             (resData->methodArgumentHash(*this) == methodHash ||
-             (resData->intrinsic != nullptr && resData->resultType == nullptr))) {
+             (resData->intrinsic != nullptr && !resData->hasSig()))) {
             return res->second;
         }
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
@@ -1536,6 +1548,8 @@ bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> t
     // Typechecking does not run under the mutex, as it would prevent another thread from running `tryCancelSlowPath`
     // during typechecking.
     typecheck();
+
+    bool committed = false;
     {
         absl::MutexLock lock(epochMutex.get());
         // Try to commit.
@@ -1545,14 +1559,15 @@ bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> t
             ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
             // OK to commit!
             lastCommittedLSPEpoch->store(processing);
-            return true;
+            committed = true;
+        } else {
+            // Typechecking was canceled.
+            const u4 lastCommitted = lastCommittedLSPEpoch->load();
+            currentlyProcessingLSPEpoch->store(lastCommitted);
+            lspEpochInvalidator->store(lastCommitted);
         }
-        // Typechecking was canceled.
-        const u4 lastCommitted = lastCommittedLSPEpoch->load();
-        currentlyProcessingLSPEpoch->store(lastCommitted);
-        lspEpochInvalidator->store(lastCommitted);
     }
-    return false;
+    return committed;
 }
 
 void GlobalState::trace(string_view msg) const {

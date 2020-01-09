@@ -4,14 +4,14 @@ class T::Enum
   extend T::Props::CustomType
 
   ## Enum class methods ##
-  sig {returns(T::Array[T.experimental_attached_class])}
+  sig {returns(T::Array[T.attached_class])}
   def self.values; end
 
   # Convert from serialized value to enum instance.
   #
   # Note: It would have been nice to make this method final before people started overriding it.
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {overridable.params(serialized_val: T.untyped).returns(T.nilable(T.experimental_attached_class)).checked(:never)}
+  sig {overridable.params(serialized_val: T.untyped).returns(T.nilable(T.attached_class)).checked(:never)}
   def self.try_deserialize(serialized_val); end
 
   # Convert from serialized value to enum instance.
@@ -21,7 +21,7 @@ class T::Enum
   #
   # @return [self]
   # @raise [KeyError] if serialized value does not match any instance.
-  sig {overridable.params(serialized_val: T.untyped).returns(T.experimental_attached_class).checked(:never)}
+  sig {overridable.params(serialized_val: T.untyped).returns(T.attached_class).checked(:never)}
   def self.from_serialized(serialized_val); end
 
   # Note: It would have been nice to make this method final before people started overriding it.
@@ -38,7 +38,7 @@ class T::Enum
   sig {params(instance: T.nilable(T::Enum)).returns(T.untyped).checked(:never)}
   def self.serialize(instance); end
 
-  sig {params(mongo_value: T.untyped).returns(T.experimental_attached_class).checked(:never)}
+  sig {params(mongo_value: T.untyped).returns(T.attached_class).checked(:never)}
   def self.deserialize(mongo_value); end
 
 

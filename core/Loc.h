@@ -52,7 +52,7 @@ public:
         if (!f.exists()) {
             return false;
         } else {
-            return file().data(gs).sourceType == File::TombStone;
+            return file().data(gs).sourceType == File::Type::TombStone;
         }
     }
 

@@ -6,7 +6,8 @@ class Box
 
   Elem = type_member
 
-  sig {params(val: Ele).void} # error: Unable to resolve
+  # We get a duplicate constant resolution error here because of the Initializer rewrite pass.
+  sig {params(val: Ele).void} # error-with-dupes: Unable to resolve
   #                   ^ completion: Elem
   def initialize(val)
     @val = val

@@ -96,7 +96,7 @@ module T::Utils
   def self.unwrap_nilable(type)
     case type
     when T::Types::Union
-      non_nil_types = type.types.reject {|t| t == T::Utils.coerce(NilClass)}
+      non_nil_types = type.types.reject {|t| t == Nilable::NIL_TYPE}
       if non_nil_types.length == 1
         non_nil_types.first
       else
@@ -156,6 +156,8 @@ module T::Utils
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.
     TypeInfo = Struct.new(:is_union_type, :non_nilable_type)
 
+    NIL_TYPE = T::Utils.coerce(NilClass)
+
     def self.get_type_info(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = T::Utils.unwrap_nilable(prop_type)
@@ -191,7 +193,7 @@ module T::Utils
     def self.is_union_with_nilclass(prop_type)
       case prop_type
       when T::Types::Union
-        prop_type.types.any? {|t| t == T::Utils.coerce(NilClass)}
+        prop_type.types.include?(NIL_TYPE)
       else
         false
       end

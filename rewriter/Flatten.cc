@@ -1,4 +1,4 @@
-#include "rewriter/flatten.h"
+#include "rewriter/Flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -274,9 +274,9 @@ class FlattenWalk {
         for (auto &body : nestedBlocks) {
             auto classDef =
                 ast::MK::Class(loc, loc,
-                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Class,
+                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Kind::Class,
                                                                  core::Names::singleton()),
-                               {}, std::move(body), ast::ClassDefKind::Class);
+                               {}, std::move(body));
             rhs.emplace_back(std::move(classDef));
         }
 

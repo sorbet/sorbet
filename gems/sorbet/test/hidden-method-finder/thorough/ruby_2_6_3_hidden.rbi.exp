@@ -3983,8 +3983,6 @@ module Enumerable
   def to_set(klass=T.unsafe(nil), *args, &block); end
 
   def uniq(); end
-
-  def zip(*_); end
 end
 
 class Enumerator
@@ -8480,7 +8478,6 @@ module Random::Formatter
 end
 
 class Random
-  extend ::Random::Formatter
   def self.bytes(_); end
 
   def self.urandom(_); end
@@ -8775,6 +8772,8 @@ module Sorbet::Private::RealStdlib
   def self.real_instance_methods(mod, arg); end
 
   def self.real_is_a?(o, klass); end
+
+  def self.real_method(obj, sym); end
 
   def self.real_name(o); end
 

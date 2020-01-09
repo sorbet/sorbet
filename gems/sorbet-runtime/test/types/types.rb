@@ -661,7 +661,6 @@ module Opus::Types::Test
           def self.foo(x); end
         end
 
-        # TODO(jez) check TypeError messages
         c.foo(::MyEnum::A) # should not raise
         assert_raises(TypeError) do
           c.foo(::MyEnum::B)

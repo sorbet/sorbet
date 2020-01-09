@@ -188,7 +188,7 @@ rescue <emptyTree>::<C E> => x
     <assignTemp>$12
   end
 
-  "foo".concat(<self>.bar().to_s()).intern()
+  ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()
 
   [:"sym"]
 

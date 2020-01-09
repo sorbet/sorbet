@@ -550,8 +550,9 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
         auto lastPayload =
-            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Payload; });
-        ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Payload; }));
+            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Type::Payload; });
+        ENFORCE(
+            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Type::Payload; }));
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
     } else {
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());
@@ -847,7 +848,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ClassDef *c) {
             pickleAstHeader(p, 21, c);
             pickle(p, c->declLoc);
-            p.putU1(c->kind);
+            p.putU1(static_cast<u2>(c->kind));
             p.putU4(c->symbol._id);
             p.putU4(c->ancestors.size());
             p.putU4(c->singletonAncestors.size());
@@ -918,7 +919,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a); },
         [&](ast::UnresolvedIdent *a) {
             pickleAstHeader(p, 31, a);
-            p.putU1((int)a->kind);
+            p.putU1(static_cast<u1>(a->kind));
             p.putU4(a->name._id);
         },
         [&](ast::ConstantLit *a) {
@@ -1067,8 +1068,8 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             for (auto &r : rhs) {
                 r = unpickleExpr(p, gs, file);
             }
-            auto ret = ast::MK::Class(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                      (ast::ClassDefKind)kind);
+            auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
+                                              (ast::ClassDef::Kind)kind);
             ret->singletonAncestors = std::move(singletonAncestors);
             ret->symbol = symbol;
             return ret;
@@ -1142,7 +1143,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::ZSuperArgs>(loc);
         }
         case 31: {
-            auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
+            auto kind = (ast::UnresolvedIdent::Kind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }

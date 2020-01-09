@@ -16,7 +16,7 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableCon
     if (sendMsgclass->fun != core::Names::msgclass() && sendMsgclass->fun != core::Names::enummodule()) {
         return empty;
     }
-    auto kind = sendMsgclass->fun == core::Names::msgclass() ? ast::ClassDefKind::Class : ast::ClassDefKind::Module;
+    auto kind = sendMsgclass->fun == core::Names::msgclass() ? ast::ClassDef::Kind::Class : ast::ClassDef::Kind::Module;
 
     auto sendLookup = ast::cast_tree<ast::Send>(sendMsgclass->recv.get());
     if (sendLookup == nullptr || sendLookup->fun != core::Names::lookup()) {
@@ -60,7 +60,7 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableCon
     }
 
     vector<unique_ptr<ast::Expression>> res;
-    res.emplace_back(ast::MK::Class(asgn->loc, asgn->loc, asgn->lhs->deepCopy(), {}, std::move(rhs), kind));
+    res.emplace_back(ast::MK::ClassOrModule(asgn->loc, asgn->loc, asgn->lhs->deepCopy(), {}, std::move(rhs), kind));
     return res;
 }
 

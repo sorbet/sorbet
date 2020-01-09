@@ -5,7 +5,7 @@ class Module
 end
 
 class Parent
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.foo
     # Goal of test: no < ... > in the user-visible type.
     T.reveal_type(new) # error: Revealed type: `T.attached_class (of Parent)`
@@ -13,7 +13,7 @@ class Parent
 end
 
 class Child < Parent
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.foo
     # Goal of test: no < ... > in the user-visible type.
     T.reveal_type(new) # error: Revealed type: `T.attached_class (of Child)`

@@ -121,7 +121,7 @@ public:
     static TypePtr approximateSubtract(Context ctx, const TypePtr &from, const TypePtr &what);
     static bool canBeTruthy(Context ctx, const TypePtr &what);
     static bool canBeFalsy(Context ctx, const TypePtr &what);
-    enum Combinator { OR, AND };
+    enum class Combinator { OR, AND };
 
     static TypePtr resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                         const std::vector<TypePtr> &targs);

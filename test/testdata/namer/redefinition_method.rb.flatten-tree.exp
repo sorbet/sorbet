@@ -32,10 +32,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
+        <self>.extend(::T::Sig)
         <self>.sig() do ||
           <self>.params({:"a" => ::Integer}).returns(::Integer)
         end
-        ::Sorbet::Private::Static.keep_for_ide(::T::Sig)
         <emptyTree>
       end
     end

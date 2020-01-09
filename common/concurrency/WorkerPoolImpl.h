@@ -14,7 +14,7 @@ class WorkerPoolImpl : public WorkerPool {
     // Tune queue for small size
     struct ConcurrentQueueCustomTraits {
         // General-purpose size type. std::size_t is strongly recommended.
-        typedef std::size_t size_t;
+        using size_t = std::size_t;
 
         // The type used for the enqueue and dequeue indices. Must be at least as
         // large as size_t. Should be significantly larger than the number of elements
@@ -26,7 +26,7 @@ class WorkerPoolImpl : public WorkerPool {
         // prevent a race condition no matter the usage of the queue. Note that
         // whether the queue is lock-free with a 64-int type depends on the whether
         // std::atomic<std::uint64_t> is lock-free, which is platform-specific.
-        typedef std::size_t index_t;
+        using index_t = std::size_t;
 
         // Internally, all elements are enqueued and dequeued from multi-element
         // blocks; this is the smallest controllable unit. If you expect few elements
@@ -76,8 +76,8 @@ class WorkerPoolImpl : public WorkerPool {
             return std::free(ptr);
         }
     };
-    typedef std::function<bool()> Task_; // return value indicates if the worker should continie gathering jobs
-    typedef moodycamel::BlockingConcurrentQueue<Task_, ConcurrentQueueCustomTraits> Queue;
+    using Task_ = std::function<bool()>; // return value indicates if the worker should continie gathering jobs
+    using Queue = moodycamel::BlockingConcurrentQueue<Task_, ConcurrentQueueCustomTraits>;
     // ORDER IS IMPORTANT. threads must be killed before Queues.
     std::vector<std::unique_ptr<Queue>> threadQueues;
     std::vector<std::unique_ptr<Joinable>> threads;

@@ -19,7 +19,7 @@ enum class FromWhere {
 };
 
 bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (klass->kind != ast::Class || klass->ancestors.empty()) {
+    if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
     auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front().get());
@@ -56,7 +56,6 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
-// TODO(jez) Change this error message after making everything T::Enum
 vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
     if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
@@ -132,8 +131,7 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     classRhs.emplace_back(ast::MK::Send1(stat->loc, ast::MK::Self(stat->loc), core::Names::include(),
                                          ast::MK::Constant(stat->loc, core::Symbols::Singleton())));
     classRhs.emplace_back(ast::MK::Send0(stat->loc, ast::MK::Self(stat->loc), core::Names::declareFinal()));
-    auto classDef = ast::MK::Class(stat->loc, stat->loc, classCnst->deepCopy(), std::move(parent), std::move(classRhs),
-                                   ast::ClassDefKind::Class);
+    auto classDef = ast::MK::Class(stat->loc, stat->loc, classCnst->deepCopy(), std::move(parent), std::move(classRhs));
 
     auto singletonAsgn =
         ast::MK::Assign(stat->loc, std::move(asgn->lhs),
@@ -179,7 +177,6 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
-        // TODO(jez) Clean this up when there is only one way to define enum variants
         if (auto enumsDo = asEnumsDo(stat.get())) {
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(enumsDo->block->body.get())) {
                 for (auto &stat : insSeq->stats) {

@@ -36,44 +36,48 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 }
 } // namespace
 
-LSPTypechecker::LSPTypechecker(const std::shared_ptr<const LSPConfiguration> &config)
-    : typecheckerThreadId(this_thread::get_id()), config(config) {}
+LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
+    : typecheckerThreadId(this_thread::get_id()), config(move(config)) {}
 
-void LSPTypechecker::initialize(LSPFileUpdates updates) {
+void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
+    // Initialize to all zeroes.
+    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
     // Initialization typecheck is not cancelable.
-    auto run = runSlowPath(move(updates), /* cancelable */ false);
-    ENFORCE(!run.canceled);
-    ENFORCE(run.newGS.has_value());
-    gs = move(run.newGS.value());
-    pushDiagnostics(move(run));
+    auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+    ENFORCE(committed);
+    ENFORCE(globalStateHashes.size() == indexed.size());
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates) {
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.canTakeFastPath, {});
-    auto run = runTypechecking(move(updates));
-    auto committed = !run.canceled;
-    vector<core::FileRef> filesTypechecked = run.filesTypechecked;
-    const bool isFastPath = run.updates.canTakeFastPath;
-    commitTypecheckRun(move(run));
+bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
+    vector<core::FileRef> filesTypechecked;
+    bool committed = true;
+    const bool isFastPath = updates.canTakeFastPath;
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
+    if (isFastPath) {
+        auto run = runFastPath(move(updates), workers);
+        filesTypechecked = run.filesTypechecked;
+        commitTypecheckRun(move(run));
+    } else {
+        committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+    }
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
     return committed;
 }
 
-TypecheckRun LSPTypechecker::runTypechecking(LSPFileUpdates updates) const {
-    ENFORCE(this_thread::get_id() == typecheckerThreadId,
-            "runTypechecking can only be called from the typechecker thread.");
+TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &workers) const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
-
-    if (!updates.canTakeFastPath) {
-        return runSlowPath(move(updates), true);
-    }
     // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
     ENFORCE(!updates.cancellationExpected);
+    // This path only works for fast path updates.
+    ENFORCE(updates.canTakeFastPath);
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
@@ -140,7 +144,7 @@ TypecheckRun LSPTypechecker::runTypechecking(LSPFileUpdates updates) const {
 
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
+    pipeline::typecheck(gs, move(resolved), config->opts, workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     return TypecheckRun(move(out.first), move(subset), move(updates), true);
@@ -161,7 +165,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
-TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelable) const {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -175,8 +179,6 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
     }
     logger->debug("Taking slow path");
 
-    UnorderedSet<int> updatedFiles;
-    vector<ast::ParsedFile> indexedCopies;
     vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
     // Replace error queue with one that is owned by this thread.
@@ -184,7 +186,10 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
     finalGS->errorQueue->ignoreFlushes = true;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, isCancelable, [&]() -> void {
+    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, cancelable, [&]() -> void {
+        UnorderedSet<int> updatedFiles;
+        vector<ast::ParsedFile> indexedCopies;
+
         // Index the updated files using finalGS.
         {
             core::UnfreezeFileTable fileTableAccess(*finalGS);
@@ -216,7 +221,7 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
         auto maybeResolved =
-            pipeline::resolve(finalGS, move(indexedCopies), config->opts, config->workers, config->skipConfigatron);
+            pipeline::resolve(finalGS, move(indexedCopies), config->opts, workers, config->skipConfigatron);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -238,29 +243,42 @@ TypecheckRun LSPTypechecker::runSlowPath(LSPFileUpdates updates, bool isCancelab
             return;
         }
 
-        pipeline::typecheck(finalGS, move(resolved), config->opts, config->workers);
+        pipeline::typecheck(finalGS, move(resolved), config->opts, workers);
     });
 
+    // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the
+    // aborted typechecking run.
     auto out = finalGS->errorQueue->drainWithQueryResponses();
     finalGS->lspTypecheckCount++;
     finalGS->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {
         prodCategoryCounterInc("lsp.updates", "slowpath");
-        return TypecheckRun(move(out.first), move(affectedFiles), move(updates), false, move(finalGS));
+        commitTypecheckRun(TypecheckRun(move(out.first), move(affectedFiles), move(updates), false, move(finalGS)));
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
-        // Drain any enqueued errors from aborted typechecking run.
-        gs->errorQueue->drainWithQueryResponses();
-        return TypecheckRun::makeCanceled();
+        ENFORCE(cancelable);
+        commitTypecheckRun(TypecheckRun::makeCanceled());
     }
+    return committed;
 }
 
 void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const auto &filesTypechecked = run.filesTypechecked;
+    const u4 epoch = run.updates.versionEnd;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+
+    // Update epochs of all files that were typechecked, since we've recalculated the set of diagnostics in these files.
+    for (auto f : filesTypechecked) {
+        // N.B.: Overflow could theoretically happen. It would take an absurdly long time for someone to make
+        // 4294967295 edits in one session. One way to handle that case: Have a special overflow request that blocks
+        // preemption and resets all versions to 0.
+        if (diagnosticEpochs[f.id()] < epoch) {
+            diagnosticEpochs[f.id()] = epoch;
+        }
+    }
 
     for (auto &e : run.errors) {
         if (e->isSilenced) {
@@ -271,6 +289,11 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     }
 
     for (auto &accumulated : errorsAccumulated) {
+        // TODO(jvilk): When we land preemption, this code will ignore errors from files that have been typechecked on
+        // newer versions (e.g. because they preempted the slow path) N.B.: See overflow comment above.
+        // Assert that we don't have a weird epoch bug here. We should only have errors for files we typechecked.
+        // Note: We can get errors on files that don't exist, and those don't have epochs associated with them.
+        ENFORCE(!accumulated.first.exists() || diagnosticEpochs[accumulated.first.id()] == epoch);
         errorFilesInNewRun.push_back(accumulated.first);
     }
 
@@ -300,59 +323,61 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     this->filesThatHaveErrors = errorFilesInNewRun;
 
     for (auto file : filesToUpdateErrorListFor) {
-        if (file.exists()) {
-            string uri;
-            { // uri
-                if (file.data(*gs).sourceType == core::File::Type::Payload) {
-                    uri = string(file.data(*gs).path());
-                } else {
-                    uri = config->fileRef2Uri(*gs, file);
-                }
+        if (!file.exists()) {
+            continue;
+        }
+        ENFORCE(diagnosticEpochs[file.id()] <= epoch);
+        string uri;
+        { // uri
+            if (file.data(*gs).sourceType == core::File::Type::Payload) {
+                uri = string(file.data(*gs).path());
+            } else {
+                uri = config->fileRef2Uri(*gs, file);
             }
+        }
 
-            vector<unique_ptr<Diagnostic>> diagnostics;
-            {
-                // diagnostics
-                if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
-                    for (auto &e : errorsAccumulated[file]) {
-                        auto range = Range::fromLoc(*gs, e->loc);
-                        if (range == nullptr) {
-                            continue;
-                        }
-                        auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
-                        diagnostic->code = e->what.code;
-                        diagnostic->severity = DiagnosticSeverity::Error;
-
-                        typecase(e.get(), [&](core::Error *ce) {
-                            vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-                            for (auto &section : ce->sections) {
-                                string sectionHeader = section.header;
-
-                                for (auto &errorLine : section.messages) {
-                                    string message;
-                                    if (errorLine.formattedMessage.length() > 0) {
-                                        message = errorLine.formattedMessage;
-                                    } else {
-                                        message = sectionHeader;
-                                    }
-                                    auto location = config->loc2Location(*gs, errorLine.loc);
-                                    if (location == nullptr) {
-                                        continue;
-                                    }
-                                    relatedInformation.push_back(
-                                        make_unique<DiagnosticRelatedInformation>(std::move(location), message));
-                                }
-                            }
-                            // Add link to error documentation.
-                            relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                                make_unique<Location>(
-                                    absl::StrCat(config->opts.errorUrlBase, e->what.code),
-                                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                                "Click for more information on this error."));
-                            diagnostic->relatedInformation = move(relatedInformation);
-                        });
-                        diagnostics.push_back(move(diagnostic));
+        vector<unique_ptr<Diagnostic>> diagnostics;
+        {
+            // diagnostics
+            if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
+                for (auto &e : errorsAccumulated[file]) {
+                    auto range = Range::fromLoc(*gs, e->loc);
+                    if (range == nullptr) {
+                        continue;
                     }
+                    auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
+                    diagnostic->code = e->what.code;
+                    diagnostic->severity = DiagnosticSeverity::Error;
+
+                    typecase(e.get(), [&](core::Error *ce) {
+                        vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
+                        for (auto &section : ce->sections) {
+                            string sectionHeader = section.header;
+
+                            for (auto &errorLine : section.messages) {
+                                string message;
+                                if (errorLine.formattedMessage.length() > 0) {
+                                    message = errorLine.formattedMessage;
+                                } else {
+                                    message = sectionHeader;
+                                }
+                                auto location = config->loc2Location(*gs, errorLine.loc);
+                                if (location == nullptr) {
+                                    continue;
+                                }
+                                relatedInformation.push_back(
+                                    make_unique<DiagnosticRelatedInformation>(std::move(location), message));
+                            }
+                        }
+                        // Add link to error documentation.
+                        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+                            make_unique<Location>(
+                                absl::StrCat(config->opts.errorUrlBase, e->what.code),
+                                make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+                            "Click for more information on this error."));
+                        diagnostic->relatedInformation = move(relatedInformation);
+                    });
+                    diagnostics.push_back(move(diagnostic));
                 }
             }
 
@@ -361,7 +386,6 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
                                                  make_unique<PublishDiagnosticsParams>(uri, move(diagnostics)))));
         }
     }
-    return;
 }
 
 void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
@@ -384,14 +408,14 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     int i = -1;
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() &&
             updates.updatedFileHashes.size() == updates.updatedFiles.size());
+    ENFORCE(globalStateHashes.size() == indexed.size() && globalStateHashes.size() == diagnosticEpochs.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
-        }
-        if (id >= globalStateHashes.size()) {
             globalStateHashes.resize(id + 1);
+            diagnosticEpochs.resize(id + 1);
         }
         indexed[id] = move(ast);
         globalStateHashes[id] = move(updates.updatedFileHashes[i]);
@@ -436,7 +460,9 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 } // namespace
 
-LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const {
+LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
+                                     WorkerPool &workers) const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
@@ -449,7 +475,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-    pipeline::typecheck(gs, move(resolved), config->opts, config->workers);
+    pipeline::typecheck(gs, move(resolved), config->opts, workers);
     auto out = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
@@ -473,9 +499,9 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
     return noop;
 }
 
-TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs) const {
+TypecheckRun LSPTypechecker::retypecheck(vector<core::FileRef> frefs, WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
-    return runTypechecking(move(updates));
+    return runFastPath(move(updates), workers);
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
@@ -489,6 +515,7 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
 }
 
 vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
     for (auto fref : frefs) {
         auto &indexed = getIndexed(fref);
@@ -500,10 +527,12 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
 }
 
 const std::vector<core::FileHash> &LSPTypechecker::getFileHashes() const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     return globalStateHashes;
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     return *gs;
 }
 
@@ -523,6 +552,43 @@ TypecheckRun TypecheckRun::makeCanceled() {
     TypecheckRun run;
     run.canceled = true;
     return run;
+}
+
+LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
+    : workers(workers), typechecker(typechecker) {}
+
+void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates) {
+    if (!updates.canTakeFastPath) {
+        Exception::raise("Tried to typecheck a slow path edit on the fast path.");
+    }
+    auto committed = typechecker.typecheck(move(updates), workers);
+    // Fast path edits can't be canceled.
+    ENFORCE(committed);
+}
+
+TypecheckRun LSPTypecheckerDelegate::retypecheck(std::vector<core::FileRef> frefs) const {
+    return typechecker.retypecheck(frefs, workers);
+}
+
+LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
+                                             const std::vector<core::FileRef> &filesForQuery) const {
+    return typechecker.query(q, filesForQuery, workers);
+}
+
+const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
+    return typechecker.getIndexed(fref);
+}
+
+std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
+    return typechecker.getResolved(frefs);
+}
+
+const std::vector<core::FileHash> &LSPTypecheckerDelegate::getFileHashes() const {
+    return typechecker.getFileHashes();
+}
+
+const core::GlobalState &LSPTypecheckerDelegate::state() const {
+    return typechecker.state();
 }
 
 } // namespace sorbet::realmain::lsp

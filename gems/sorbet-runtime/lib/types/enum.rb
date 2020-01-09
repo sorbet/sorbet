@@ -48,7 +48,7 @@ class T::Enum
   private_constant :SerializedVal
 
   ## Enum class methods ##
-  sig {returns(T::Array[T.experimental_attached_class])}
+  sig {returns(T::Array[T.attached_class])}
   def self.values
     if @values.nil?
       raise "Attempting to access values of #{self.class} before it has been initialized." \
@@ -61,7 +61,7 @@ class T::Enum
   #
   # Note: It would have been nice to make this method final before people started overriding it.
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {params(serialized_val: SerializedVal).returns(T.nilable(T.experimental_attached_class)).checked(:never)}
+  sig {params(serialized_val: SerializedVal).returns(T.nilable(T.attached_class)).checked(:never)}
   def self.try_deserialize(serialized_val)
     if @mapping.nil?
       raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
@@ -77,7 +77,7 @@ class T::Enum
   #
   # @return [self]
   # @raise [KeyError] if serialized value does not match any instance.
-  sig {overridable.params(serialized_val: SerializedVal).returns(T.experimental_attached_class).checked(:never)}
+  sig {overridable.params(serialized_val: SerializedVal).returns(T.attached_class).checked(:never)}
   def self.from_serialized(serialized_val)
     res = try_deserialize(serialized_val)
     if res.nil?
@@ -124,7 +124,7 @@ class T::Enum
   end
 
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {params(mongo_value: SerializedVal).returns(T.experimental_attached_class).checked(:never)}
+  sig {params(mongo_value: SerializedVal).returns(T.attached_class).checked(:never)}
   def self.deserialize(mongo_value)
     if self == T::Enum
       raise "Cannot call T::Enum.deserialize directly. You must call on a specific child class."
@@ -310,8 +310,8 @@ class T::Enum
 
     yield
 
-    @values = T.let(nil, T.nilable(T::Array[T.experimental_attached_class]))
-    @mapping = T.let(nil, T.nilable(T::Hash[SerializedVal, T.experimental_attached_class]))
+    @values = T.let(nil, T.nilable(T::Array[T.attached_class]))
+    @mapping = T.let(nil, T.nilable(T::Hash[SerializedVal, T.attached_class]))
 
     # Freeze the Enum class and bind the constant names into each of the instances.
     @mapping = {}

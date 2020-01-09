@@ -32,7 +32,7 @@ enum class BaseKind {
     ComplexKind,
 };
 
-typedef std::function<void(fmt::memory_buffer &out, std::string_view)> AssignLambda;
+using AssignLambda = std::function<void(fmt::memory_buffer &out, std::string_view)>;
 
 class JSONType {
 public:

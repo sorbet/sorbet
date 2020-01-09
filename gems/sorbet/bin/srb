@@ -88,7 +88,7 @@ typecheck() {
     # perhaps this is the java platform
     if ! [[ -f "${sorbet}" ]]; then
       if gem env platform | grep -q "java"; then
-        # certain platforms (i.e. java) include multiple binaries 
+        # certain platforms (i.e. java) include multiple binaries
         # mac.sorbet & linux.sorbet -- since they can't use the host platform (i.e. darwin or linux)
         # to collect the correct sorbet binary
         case "$(uname -s)" in
@@ -96,7 +96,7 @@ typecheck() {
         Darwin*)    prefix="mac.";;
         *)          prefix=""
         esac
-        
+
         guess_sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/"${prefix}sorbet")
         if [[ -f "${guess_sorbet[0]}" ]]; then
           sorbet="${guess_sorbet[0]}"

@@ -47,6 +47,12 @@ There was a Ruby syntax error. Sorbet was unable to parse the source code. If
 you encounter this error but your code is accepted by Ruby itself, this is a bug
 in our parser; please [report an issue] to us so we can address it.
 
+The only intentional break with Ruby compatibility is that method names that are
+keywords have some limitations with multi-line code, as explained in [#1993],
+and should not be reported.
+
+[#1993]: https://github.com/sorbet/sorbet/pull/1993
+
 ## 4002
 
 Sorbet requires that every `include` references a constant literal. For example,
@@ -731,8 +737,9 @@ with `T.unsafe(...)`. T.unsafe is one of a handful of
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
-debugging. `T.reveal_type(expr)` will report an error that shows what the static
-component of Sorbet thinks the result type of `expr` is.
+debugging. `T.reveal_type(expr)` will report an error in the output of `srb tc`
+that shows what the static component of Sorbet thinks the result type of `expr`
+is.
 
 Making this an error is nice for two reasons:
 

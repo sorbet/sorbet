@@ -423,7 +423,7 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 
 void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
                                      const options::Options &opts) {
-    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
+    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
@@ -444,7 +444,8 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     {
         core::UnfreezeFileTable unfreezeFiles(*gs);
         auto entered = gs->enterNewFileAt(
-            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Normal), file);
+            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal),
+            file);
         ENFORCE(entered == file);
     }
     if (enable_counters) {
@@ -459,7 +460,7 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     }
 
     if (!opts.storeState.empty()) {
-        fileData.sourceType = core::File::PayloadGeneration;
+        fileData.sourceType = core::File::Type::PayloadGeneration;
     }
 
     auto level = decideStrictLevel(*gs, file, opts);
@@ -1089,7 +1090,7 @@ public:
 
     unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
                                                                   unique_ptr<ast::UnresolvedIdent> id) {
-        if (id->kind != ast::UnresolvedIdent::Local) {
+        if (id->kind != ast::UnresolvedIdent::Kind::Local) {
             acc.constants.emplace_back(ctx.state, id->name.data(ctx));
         }
         return id;

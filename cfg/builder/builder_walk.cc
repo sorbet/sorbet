@@ -69,17 +69,17 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     core::SymbolRef klass;
 
     switch (id->kind) {
-        case ast::UnresolvedIdent::Class:
+        case ast::UnresolvedIdent::Kind::Class:
             klass = cctx.ctx.owner.data(cctx.ctx)->enclosingClass(cctx.ctx);
             while (klass.data(cctx.ctx)->attachedClass(cctx.ctx).exists()) {
                 klass = klass.data(cctx.ctx)->attachedClass(cctx.ctx);
             }
             break;
-        case ast::UnresolvedIdent::Instance:
+        case ast::UnresolvedIdent::Kind::Instance:
             ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
             klass = cctx.ctx.owner.data(cctx.ctx)->owner;
             break;
-        case ast::UnresolvedIdent::Global:
+        case ast::UnresolvedIdent::Kind::Global:
             klass = core::Symbols::root();
             break;
         default:
@@ -92,7 +92,7 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (id->kind != ast::UnresolvedIdent::Global) {
+            if (id->kind != ast::UnresolvedIdent::Kind::Global) {
                 if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
                 }

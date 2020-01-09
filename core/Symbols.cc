@@ -1,5 +1,6 @@
 #include "core/Symbols.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
 #include "common/formatting.h"
@@ -518,7 +519,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
         return true;
     }
     for (auto loc : locs_) {
-        if (loc.file().data(gs).sourceType == File::Payload) {
+        if (loc.file().data(gs).sourceType == File::Type::Payload) {
             return true;
         }
     }
@@ -607,8 +608,13 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         }
     }
     if (this->resultType && !isClassOrModule()) {
-        fmt::format_to(buf, " -> {}",
-                       showRaw ? this->resultType->toStringWithTabs(gs, tabs) : this->resultType->show(gs));
+        string resultType;
+        if (showRaw) {
+            resultType = absl::StrReplaceAll(this->resultType->toStringWithTabs(gs, tabs), {{"\n", " "}});
+        } else {
+            resultType = this->resultType->show(gs);
+        }
+        fmt::format_to(buf, " -> {}", resultType);
     }
     if (!locs_.empty()) {
         fmt::format_to(buf, " @ ");
@@ -665,6 +671,8 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                                    : this->rebind().data(gs)->showFullName(gs));
         }
     }
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
 
     fmt::format_to(buf, "\n");
     for (auto pair : membersStableOrderSlow(gs)) {

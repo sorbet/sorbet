@@ -66,7 +66,7 @@ module T
   end
 
   # Matches the instance type in a singleton-class context
-  def self.experimental_attached_class
+  def self.attached_class
     T::Types::AttachedClassType.new
   end
 

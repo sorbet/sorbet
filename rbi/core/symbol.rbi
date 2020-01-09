@@ -167,6 +167,23 @@ class Symbol < Object
   sig {returns(Encoding)}
   def encoding(); end
 
+  # Returns true if `sym` ends with one of the `suffixes` given.
+  #
+  # ```ruby
+  # :hello.end_with?("ello")               #=> true
+  #
+  # # returns true if one of the suffixes matches.
+  # :hello.end_with?("heaven", "ello")     #=> true
+  # :hello.end_with?("heaven", "paradise") #=> false
+  # ```
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T::Boolean)
+  end
+  def end_with?(*arg0); end
+
   # Returns the name or string corresponding to *sym*.
   #
   # ```ruby
@@ -259,6 +276,26 @@ class Symbol < Object
     .returns(String)
   end
   def slice(idx_or_range, n=T.unsafe(nil)); end
+
+  # Returns true if `sym` starts with one of the `prefixes` given.
+  #
+  # Each of the `prefixes` should be a String or a Regexp.
+  #
+  # ```ruby
+  # :hello.start_with?("hell")               #=> true
+  # :hello.start_with?(/H/i)                 #=> true
+  #
+  # # returns true if one of the prefixes matches.
+  # :hello.start_with?("heaven", "hell")     #=> true
+  # :hello.start_with?("heaven", "paradise") #=> false
+  # ```
+  sig do
+    params(
+        arg0: T.any(String, Regexp),
+    )
+    .returns(T::Boolean)
+  end
+  def start_with?(*arg0); end
 
   # Returns the name or string corresponding to *sym*.
   #

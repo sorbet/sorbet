@@ -236,6 +236,30 @@ string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, 
                        prettyDefForMethod(gs, method));
 }
 
+string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
+    // Request that the constant already be dealiased, rather than dealias here to avoid defensively dealiasing.
+    // We should understand where dealias calls go.
+    ENFORCE(constant == constant.data(gs)->dealias(gs));
+
+    core::TypePtr result;
+    if (constant.data(gs)->isClassOrModule()) {
+        auto targetClass = constant;
+        if (!targetClass.data(gs)->attachedClass(gs).exists()) {
+            targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
+        }
+        result = targetClass.data(gs)->externalType(gs);
+    } else {
+        auto resultType = constant.data(gs)->resultType;
+        result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;
+    }
+
+    if (constant.data(gs)->isTypeAlias()) {
+        // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
+        result = core::make_type<core::MetaType>(result);
+    }
+    return result->showWithMoreInfo(gs);
+}
+
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
     core::Context ctx(gs, inWhat);

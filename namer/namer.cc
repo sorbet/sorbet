@@ -31,7 +31,7 @@ class NameInserter {
                 return id->symbol.data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
-                if (uid->kind != ast::UnresolvedIdent::Class || uid->name != core::Names::singleton()) {
+                if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
                     if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
@@ -131,11 +131,12 @@ class NameInserter {
         return move(localExpr);
     }
 
-    bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
+    void addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
+                     const unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
-            return false;
+            return;
         }
 
         ast::ClassDef::ANCESTORS_store *dest;
@@ -144,25 +145,25 @@ class NameInserter {
         } else if (send->fun == core::Names::extend()) {
             dest = &klass->singletonAncestors;
         } else {
-            return false;
+            return;
         }
         if (!send->recv->isSelfReference()) {
             // ignore `something.include`
-            return false;
+            return;
         }
 
         if (send->args.empty()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
                 e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
             }
-            return false;
+            return;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
                 e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
             }
-            return false;
+            return;
         }
 
         for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
@@ -172,11 +173,11 @@ class NameInserter {
                 continue;
             }
             if (arg->isSelfReference()) {
-                dest->emplace_back(std::move(arg));
+                dest->emplace_back(arg->deepCopy());
                 continue;
             }
             if (isValidAncestor(arg.get())) {
-                dest->emplace_back(std::move(arg));
+                dest->emplace_back(arg->deepCopy());
             } else {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
@@ -184,8 +185,6 @@ class NameInserter {
                 arg = ast::MK::EmptyTree();
             }
         }
-
-        return true;
     }
 
     void aliasMethod(core::MutableContext ctx, core::Loc loc, core::SymbolRef owner, core::NameRef newName,
@@ -217,7 +216,7 @@ public:
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
-            ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
+            ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
             klass->symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         } else {
             if (klass->symbol == core::Symbols::todo()) {
@@ -227,7 +226,7 @@ public:
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
-            bool isModule = klass->kind == ast::ClassDefKind::Module;
+            bool isModule = klass->kind == ast::ClassDef::Kind::Module;
             if (!klass->symbol.data(ctx)->isClassOrModule()) {
                 // we might have already mangled the class symbol, so see if we have a symbol that is a class already
                 auto klassSymbol =
@@ -271,15 +270,12 @@ public:
         return klass;
     }
 
-    bool handleNamerRewriter(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass,
-                             unique_ptr<ast::Expression> &line) {
-        if (addAncestor(ctx, klass, line)) {
-            return true;
-        }
+    void handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+        addAncestor(ctx, klass, line);
 
         auto *send = ast::cast_tree<ast::Send>(line.get());
         if (send == nullptr) {
-            return false;
+            return;
         }
         if (send->fun == core::Names::declareFinal()) {
             klass->symbol.data(ctx)->setClassFinal();
@@ -305,16 +301,13 @@ public:
         }
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
-            if (klass->kind == ast::Class) {
+            if (klass->kind == ast::ClassDef::Kind::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
                     e.replaceWith("Change `interface!` to `abstract!`", send->loc, "abstract!");
                 }
             }
         }
-
-        // explicitly keep the namer dsl functions present
-        return false;
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
@@ -331,7 +324,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass().exists() &&
+        if (klass->kind == ast::ClassDef::Kind::Class && !klass->symbol.data(ctx)->superClass().exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
             klass->symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
@@ -346,10 +339,9 @@ public:
         klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
-        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(), [&](unique_ptr<ast::Expression> &line) {
-            return handleNamerRewriter(ctx, klass, line);
-        });
-        klass->rhs.erase(toRemove, klass->rhs.end());
+        for (auto &exp : klass->rhs) {
+            handleNamerDSL(ctx, klass, exp);
+        }
 
         if (!klass->ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
@@ -359,16 +351,6 @@ public:
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
-                } else if (shouldLeaveAncestorForIDE(anc) &&
-                           (klass->kind == ast::Module || anc != klass->ancestors.front())) {
-                    klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
-                }
-            }
-        }
-        if (!klass->singletonAncestors.empty()) {
-            for (auto &sanc : klass->singletonAncestors) {
-                if (shouldLeaveAncestorForIDE(sanc)) {
-                    klass->rhs.emplace_back(ast::MK::KeepForIDE(sanc->deepCopy()));
                 }
             }
         }
@@ -376,7 +358,7 @@ public:
         if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
         }
-        if (klass->kind == ast::Class && !klass->ancestors.empty() &&
+        if (klass->kind == ast::ClassDef::Kind::Class && !klass->ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
@@ -499,7 +481,7 @@ public:
     // with real types from code
     bool isIntrinsic(core::Context ctx, core::SymbolRef sym) {
         auto data = sym.data(ctx);
-        return data->intrinsic != nullptr && data->resultType == nullptr;
+        return data->intrinsic != nullptr && !data->hasSig();
     }
 
     bool paramsMatch(core::MutableContext ctx, core::SymbolRef method, const vector<ast::ParsedArg> &parsedArgs) {

@@ -89,7 +89,7 @@ class LSPPreprocessor final {
 
 public:
     LSPPreprocessor(std::unique_ptr<core::GlobalState> initialGS, const std::shared_ptr<LSPConfiguration> &config,
-                    u4 initialVersion = 0);
+                    WorkerPool &workers, u4 initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.

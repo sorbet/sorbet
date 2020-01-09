@@ -44,4 +44,11 @@ class DidYouMean::NullChecker < Object
 end
 
 class DidYouMean::SpellChecker < Object
+  sig {params(dictionary: T::Array[T.any(String, Symbol)]).returns(DidYouMean::SpellChecker)}
+  def initialize(dictionary:)
+  end
+
+  sig {params(input: T.any(String, Symbol)).returns(T::Array[T.any(String, Symbol)])}
+  def correct(input)
+  end
 end

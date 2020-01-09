@@ -118,7 +118,8 @@ NameDef names[] = {
     {"class_", "class"},
     {"classOf", "class_of"},
     {"selfType", "self_type"},
-    {"attachedClass", "experimental_attached_class"},
+    {"experimentalAttachedClass", "experimental_attached_class"},
+    {"attachedClass", "attached_class"},
     {"coerce"},
 
     {"assertType", "assert_type!"},
@@ -210,6 +211,9 @@ NameDef names[] = {
     {"before"},
     {"after"},
     {"afterAngles", "<after>"},
+    {"testEach", "test_each"},
+    {"constSet", "const_set"},
+    {"collect"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
@@ -338,6 +342,7 @@ NameDef names[] = {
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
     {"selfNew", "<self-new>"},
+    {"stringInterpolate", "<string-interpolate>"},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},

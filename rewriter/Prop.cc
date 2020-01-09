@@ -4,8 +4,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
-#include "rewriter/helpers.h"
-#include "rewriter/util.h"
+#include "rewriter/Util.h"
 
 using namespace std;
 
@@ -129,7 +128,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         if (send->args.size() == 3) {
             // Three args. We need name, type, and either rules, or, for
             // DataInterface, a foreign type, wrapped in a thunk.
-            if (auto thunk = thunkBody(ctx, send->args.back().get())) {
+            if (auto thunk = ASTUtil::thunkBody(ctx, send->args.back().get())) {
                 foreign = std::move(thunk);
             } else {
                 return std::nullopt;
@@ -221,7 +220,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             foreign = move(foreignTree);
-            if (auto body = thunkBody(ctx, foreign.get())) {
+            if (auto body = ASTUtil::thunkBody(ctx, foreign.get())) {
                 foreign = std::move(body);
             }
         }
@@ -239,9 +238,9 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                                                  computedByMethodName, std::move(unsafeNil));
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
-        ret.nodes.emplace_back(mkGet(loc, name, std::move(assertTypeMatches)));
+        ret.nodes.emplace_back(ASTUtil::mkGet(loc, name, std::move(assertTypeMatches)));
     } else {
-        ret.nodes.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+        ret.nodes.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -252,7 +251,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         ret.nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        ret.nodes.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        ret.nodes.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
     }
 
     // Compute the `_` foreign accessor
@@ -308,12 +307,12 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        rhs.emplace_back(mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        rhs.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
-        if (isProbablySymbol(ctx, type.get(), core::Symbols::Hash())) {
-            mutator = mkMutator(ctx, loc, core::Names::Constants::HashMutator());
+        if (ASTUtil::isProbablySymbol(ctx, type.get(), core::Symbols::Hash())) {
+            mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::HashMutator());
             auto send = ast::cast_tree<ast::Send>(type.get());
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 2) {
                 mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(),
@@ -322,8 +321,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                 mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc),
                                          ast::MK::Untyped(loc));
             }
-        } else if (isProbablySymbol(ctx, type.get(), core::Symbols::Array())) {
-            mutator = mkMutator(ctx, loc, core::Names::Constants::ArrayMutator());
+        } else if (ASTUtil::isProbablySymbol(ctx, type.get(), core::Symbols::Array())) {
+            mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::ArrayMutator());
             auto send = ast::cast_tree<ast::Send>(type.get());
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 1) {
                 mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(),
@@ -339,13 +338,13 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
         if (mutator.get()) {
             rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
-            rhs.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, std::move(mutator))));
+            rhs.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, std::move(mutator))));
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();
             ret.nodes.emplace_back(ast::MK::Class(loc, loc,
                                                   ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
-                                                  std::move(ancestors), std::move(rhs), ast::ClassDefKind::Class));
+                                                  std::move(ancestors), std::move(rhs)));
         }
     }
 

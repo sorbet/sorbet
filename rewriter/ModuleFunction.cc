@@ -1,4 +1,4 @@
-#include "rewriter/module_function.h"
+#include "rewriter/ModuleFunction.h"
 #include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"

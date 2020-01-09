@@ -1,7 +1,6 @@
 #ifndef RUBY_TYPER_LSPCONFIGURATION_H
 #define RUBY_TYPER_LSPCONFIGURATION_H
 
-#include "common/concurrency/WorkerPool.h"
 #include "main/lsp/json_types.h"
 #include "main/options/options.h"
 
@@ -73,7 +72,6 @@ public:
     /** Command line / startup options. */
     const options::Options &opts;
     const std::shared_ptr<LSPOutput> output;
-    WorkerPool &workers;
     const std::shared_ptr<spdlog::logger> logger;
     /** If true, LSPLoop will skip configatron during type checking */
     const bool skipConfigatron;
@@ -84,7 +82,7 @@ public:
 
     // The following properties are configured during initialization.
 
-    LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output, WorkerPool &workers,
+    LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output,
                      const std::shared_ptr<spdlog::logger> &logger, bool skipConfigatron = false,
                      bool disableFastPath = false);
 

@@ -40,6 +40,7 @@
       "stdlib-generics",
       "self-type",
       "noreturn",
+      "attached-class",
       "intersection-types"
     ],
     "Experimental Features": [
@@ -54,7 +55,8 @@
       "talks/strange-loop-2018",
       "talks/ruby-kaigi-2019",
       "talks/curry-on-2019",
-      "talks/jvm-ls-2019"
+      "talks/jvm-ls-2019",
+      "talks/ruby-conf-2019"
     ]
   },
   "legal": { "Legal": [ "legal/trademark-policy" ] }

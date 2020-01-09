@@ -361,11 +361,11 @@ module Kernel
 
   sig do
     params(
-        mod: Module,
+        arg0: Module,
     )
-    .returns(NilClass)
+    .returns(T.self_type)
   end
-  def extend(mod); end
+  def extend(*arg0); end
 
   # Creates a subprocess. If a block is specified, that block is run in the
   # subprocess, and the subprocess terminates with a status of zero. Otherwise,
@@ -1643,13 +1643,22 @@ module Kernel
   # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open_uri_original_open)
   sig do
     params(
-        name: String,
-        rest: T.any(String, Integer),
-        block: String,
-    )
-    .returns(T.nilable(IO))
+      path: String,
+      mode: T.any(Integer, String),
+      perm: T.nilable(Integer),
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+    ).returns(T.nilable(IO))
   end
-  def open(name, rest=T.unsafe(nil), block=T.unsafe(nil)); end
+  sig do
+    type_parameters(:U).params(
+      path: String,
+      mode: T.any(Integer, String),
+      perm: T.nilable(Integer),
+      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      blk: T.proc.params(io: IO).returns(T.type_parameter(:U))
+    ).returns(T.type_parameter(:U))
+  end
+  def open(path, mode='r', perm=nil, opt=nil, &blk); end
 
   # Prints each object in turn to `$stdout`. If the output field separator
   # (`$,`) is not `nil`, its contents will appear between each field. If the

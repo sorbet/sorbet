@@ -8,14 +8,17 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 vector<unique_ptr<DocumentHighlight>>
-LSPLoop::getHighlightsToSymbolInFile(LSPTypechecker &typechecker, string_view const uri, core::SymbolRef symbol,
+LSPLoop::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string_view const uri, core::SymbolRef symbol,
                                      vector<unique_ptr<DocumentHighlight>> highlights) const {
     if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, symbol, uri);
-        auto locations = extractLocations(typechecker.state(), run2.responses);
-        for (auto const &location : locations) {
-            auto highlight = make_unique<DocumentHighlight>(move(location->range));
-            highlights.push_back(move(highlight));
+        auto fref = config->uri2FileRef(typechecker.state(), uri);
+        if (fref.exists()) {
+            auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
+            auto locations = extractLocations(typechecker.state(), run2.responses);
+            for (auto const &location : locations) {
+                auto highlight = make_unique<DocumentHighlight>(move(location->range));
+                highlights.push_back(move(highlight));
+            }
         }
     }
     return highlights;
@@ -31,7 +34,7 @@ vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<uniqu
 }
 
 unique_ptr<ResponseMessage>
-LSPLoop::handleTextDocumentDocumentHighlight(LSPTypechecker &typechecker, const MessageId &id,
+LSPLoop::handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker, const MessageId &id,
                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);
     if (!config->opts.lspDocumentHighlightEnabled) {

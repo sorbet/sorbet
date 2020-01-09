@@ -1,4 +1,4 @@
-#include "rewriter/cleanup.h"
+#include "rewriter/Cleanup.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"

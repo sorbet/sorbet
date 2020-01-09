@@ -348,7 +348,7 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, job.rhs)) {
-            // this todo will be resolved during ResolveTypeParamsWalk below
+            // this todo will be resolved during ResolveTypeMembersWalk below
             job.lhs.data(ctx)->resultType = core::make_type<core::ClassType>(core::Symbols::todo());
             return true;
         }
@@ -576,8 +576,8 @@ public:
         core::SymbolRef klass = original->symbol;
 
         for (auto &ancst : original->ancestors) {
-            bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front() &&
-                                 !klass.data(ctx)->isSingletonClass(ctx));
+            bool isSuperclass = (original->kind == ast::ClassDef::Kind::Class &&
+                                 &ancst == &original->ancestors.front() && !klass.data(ctx)->isSingletonClass(ctx));
             transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isSuperclass);
         }
 
@@ -881,7 +881,7 @@ public:
     }
 };
 
-class ResolveTypeParamsWalk {
+class ResolveTypeMembersWalk {
     // A type_member, type_template, or T.type_alias that needs to have types
     // resolved.
     struct ResolveAssignItem {
@@ -1255,29 +1255,29 @@ public:
     }
 
     static vector<ast::ParsedFile> run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
-        ResolveTypeParamsWalk params;
+        ResolveTypeMembersWalk walk;
         Timer timeit(ctx.state.tracer(), "resolver.type_params");
 
         for (auto &tree : trees) {
-            tree.tree = ast::ShallowMap::apply(ctx, params, std::move(tree.tree));
+            tree.tree = ast::ShallowMap::apply(ctx, walk, std::move(tree.tree));
         }
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
-        while (progress && !params.todoAssigns_.empty()) {
-            auto origSize = params.todoAssigns_.size();
-            auto it = std::remove_if(params.todoAssigns_.begin(), params.todoAssigns_.end(),
+        while (progress && !walk.todoAssigns_.empty()) {
+            auto origSize = walk.todoAssigns_.size();
+            auto it = std::remove_if(walk.todoAssigns_.begin(), walk.todoAssigns_.end(),
                                      [&](ResolveAssignItem &job) { return resolveJob(ctx, job); });
-            params.todoAssigns_.erase(it, params.todoAssigns_.end());
-            progress = params.todoAssigns_.size() != origSize;
+            walk.todoAssigns_.erase(it, walk.todoAssigns_.end());
+            progress = walk.todoAssigns_.size() != origSize;
         }
 
         // If there was a step with no progress, there's a cycle in the
         // type member/alias declarations. This is handled by reporting an error
         // at `typed: false`, and marking all of the involved type
         // members/aliases as T.untyped.
-        if (!params.todoAssigns_.empty()) {
-            for (auto &job : params.todoAssigns_) {
+        if (!walk.todoAssigns_.empty()) {
+            for (auto &job : walk.todoAssigns_) {
                 auto data = job.lhs.data(ctx);
 
                 if (data->isTypeMember()) {
@@ -1687,7 +1687,7 @@ private:
             return false;
         }
 
-        if (uid->kind != ast::UnresolvedIdent::Instance && uid->kind != ast::UnresolvedIdent::Class) {
+        if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
             return false;
         }
         ast::Expression *recur = asgn->rhs.get();
@@ -1705,7 +1705,7 @@ private:
         }
 
         core::SymbolRef scope;
-        if (uid->kind == ast::UnresolvedIdent::Class) {
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
@@ -1767,7 +1767,7 @@ private:
         }
         core::SymbolRef var;
 
-        if (uid->kind == ast::UnresolvedIdent::Class) {
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             var = ctx.state.enterStaticFieldSymbol(uid->loc, scope, uid->name);
         } else {
             var = ctx.state.enterFieldSymbol(uid->loc, scope, uid->name);
@@ -2069,7 +2069,7 @@ public:
     }
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> original) {
-        ENFORCE(original->kind != ast::UnresolvedIdent::Local, "{} should have been removed by local_vars",
+        ENFORCE(original->kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 original->toString(ctx));
         return original;
     }
@@ -2099,7 +2099,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = ResolveTypeParamsWalk::run(ctx, std::move(trees));
+    trees = ResolveTypeMembersWalk::run(ctx, std::move(trees));
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2146,7 +2146,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
     computeLinearization(ctx.state);
-    trees = ResolveTypeParamsWalk::run(ctx, std::move(trees));
+    trees = ResolveTypeMembersWalk::run(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.

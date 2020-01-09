@@ -367,21 +367,25 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
 }
 
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                        const core::SymbolRef what, const core::Loc queryLoc,
+                                                        const core::SymbolRef maybeAlias, const core::Loc queryLoc,
                                                         string_view prefix, size_t sortIdx) {
-    ENFORCE(what.exists());
-    auto supportSnippets = config.getClientConfig().clientCompletionItemSnippetSupport;
-    auto label = string(what.data(gs)->name.data(gs)->shortName(gs));
+    ENFORCE(maybeAlias.exists());
+
+    auto clientConfig = config.getClientConfig();
+    auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    auto markupKind = clientConfig.clientCompletionItemMarkupKind;
+
+    auto label = string(maybeAlias.data(gs)->name.data(gs)->shortName(gs));
+
+    // Intuition for when to use maybeAlias vs what: if it needs to know the original name: maybeAlias.
+    // If it needs to know the types / arity: what. Default to `what` if you don't know.
+    auto what = maybeAlias.data(gs)->dealias(gs);
+
     auto item = make_unique<CompletionItem>(label);
 
     // Completion items are sorted by sortText if present, or label if not. We unconditionally use an index to sort.
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
-
-    auto resultType = what.data(gs)->resultType;
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
 
     if (what.data(gs)->isClassOrModule()) {
         if (what.data(gs)->isClassOrModuleClass()) {
@@ -397,20 +401,16 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
                 item->kind = CompletionItemKind::Module;
             }
         }
-    } else if (what.data(gs)->isTypeMember()) {
-        item->kind = CompletionItemKind::TypeParameter;
-    } else if (what.data(gs)->isStaticField()) {
-        if (what.data(gs)->isTypeAlias()) {
-            item->kind = CompletionItemKind::TypeParameter;
-        } else {
-            item->kind = CompletionItemKind::Field;
-        }
+    } else if (what.data(gs)->isTypeMember() || what.data(gs)->isStaticField()) {
+        item->kind = CompletionItemKind::Field;
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
+    item->detail = maybeAlias.data(gs)->show(gs);
+
     string replacementText;
-    if (supportSnippets) {
+    if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
         replacementText = fmt::format("{}${{0}}", label);
     } else {
@@ -424,7 +424,14 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         item->insertText = replacementText;
     }
 
-    // TODO(jez) Find documentation for constants
+    optional<string> documentation = nullopt;
+    auto whatFile = what.data(gs)->loc().file();
+    if (whatFile.exists()) {
+        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
+    }
+
+    auto prettyType = prettyTypeForConstant(gs, what);
+    item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     return item;
 }
@@ -449,7 +456,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypechecker &typechecker,
+vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
                                             const core::SymbolRef method) {
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
@@ -480,7 +487,7 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return result;
 }
 
-core::SymbolRef firstMethodAfterQuery(LSPTypechecker &typechecker, const core::Loc queryLoc) {
+core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -521,9 +528,10 @@ constexpr string_view suggestSigDocs =
     "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
     "guess the correct types (or any types at all), but they're usually a good starting point."sv;
 
-unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPClientConfiguration &clientConfig,
-                                         core::SymbolRef what, core::TypePtr receiverType, const core::Loc queryLoc,
-                                         string_view prefix, size_t sortIdx) {
+unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
+                                         const LSPClientConfiguration &clientConfig, core::SymbolRef what,
+                                         core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
+                                         size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
     const auto &gs = typechecker.state();
@@ -605,10 +613,16 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypechecker &typechecker, const LSPC
     return item;
 }
 
+bool isTEnumName(const core::GlobalState &gs, core::NameRef name) {
+    auto original = name.data(gs)->cnst.original;
+    return original.data(gs)->kind == core::NameKind::UNIQUE &&
+           original.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::TEnum;
+}
+
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &typechecker, core::SymbolRef maybeAlias,
-                                                               core::TypePtr receiverType,
+unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
+                                                               core::SymbolRef maybeAlias, core::TypePtr receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                const core::Loc queryLoc, string_view prefix,
                                                                size_t sortIdx) const {
@@ -637,11 +651,6 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
 
-    auto resultType = what.data(gs)->resultType;
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
-
     item->kind = CompletionItemKind::Method;
     item->detail = maybeAlias.data(gs)->show(gs);
 
@@ -661,9 +670,9 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypechecker &t
     }
 
     optional<string> documentation = nullopt;
-    if (what.data(gs)->loc().file().exists()) {
-        documentation =
-            findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
+    auto whatFile = what.data(gs)->loc().file();
+    if (whatFile.exists()) {
+        documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
     auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
@@ -684,19 +693,42 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
     do {
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
             auto sym = member.second;
-            if (sym.exists() &&
-                (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember()) &&
-                sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
-                // hide singletons
-                hasSimilarName(gs, sym.data(gs)->name, prefix)) {
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+            if (!sym.exists()) {
+                continue;
             }
+
+            if (!(sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
+                continue;
+            }
+
+            auto memberName = sym.data(gs)->name;
+            if (memberName.data(gs)->kind != core::NameKind::CONSTANT) {
+                continue;
+            }
+
+            if (isTEnumName(gs, memberName)) {
+                // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
+                // This manifests as showing two completion results when we should only show one, so skip the bad kind.
+                continue;
+            }
+
+            if (hasAngleBrackets(memberName.data(gs)->shortName(gs))) {
+                // Gets rid of classes like `<Magic>`; they can't be typed by a user anyways.
+                continue;
+            }
+
+            if (!hasSimilarName(gs, memberName, prefix)) {
+                continue;
+            }
+
+            items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
         }
         scope = scope.data(gs)->owner;
     } while (scope != core::Symbols::root());
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,
+                                                                  const MessageId &id,
                                                                   const CompletionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});

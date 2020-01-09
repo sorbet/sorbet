@@ -7,7 +7,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypechecker &typechecker, core::SymbolRef symbol,
+vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                                             vector<unique_ptr<Location>> locations) const {
     if (symbol.exists()) {
         auto run2 = queryBySymbol(typechecker, symbol);
@@ -16,7 +16,8 @@ vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypechecker &type
     return locations;
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypecheckerDelegate &typechecker,
+                                                                  const MessageId &id,
                                                                   const ReferenceParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
     ShowOperation op(*config, "References", "Finding all references...");

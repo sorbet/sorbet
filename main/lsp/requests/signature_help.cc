@@ -47,7 +47,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     sigs.push_back(move(sig));
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypechecker &typechecker, const MessageId &id,
+unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypecheckerDelegate &typechecker, const MessageId &id,
                                                              const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!config->opts.lspSignatureHelpEnabled) {

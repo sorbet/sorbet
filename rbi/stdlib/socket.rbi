@@ -5039,6 +5039,17 @@ class TCPSocket < IPSocket
   end
   def initialize(host=T.unsafe(nil), port=T.unsafe(nil), local_host=T.unsafe(nil), local_port=T.unsafe(nil)); end
 
+  sig do
+    params(
+      host: String,
+      port: Integer,
+      local_host: T.nilable(String),
+      local_port: T.nilable(Integer),
+    )
+    .returns(::T.untyped)
+  end
+  def self.open(host, port, local_host=nil, local_port=nil); end
+
   sig {returns(::T.untyped)}
   def socks_authenticate(); end
 

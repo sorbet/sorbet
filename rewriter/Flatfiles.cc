@@ -59,7 +59,7 @@ void handleFieldDefinition(core::MutableContext ctx, unique_ptr<ast::Expression>
 }
 
 void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (klass->kind != ast::Class || klass->ancestors.empty()) {
+    if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return;
     }
 

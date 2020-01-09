@@ -109,16 +109,17 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     }
     auto it = nodes.begin();
     auto end = nodes.end();
-    unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
     InlinedVector<unique_ptr<Expression>, 4> stringsAccumulated;
+
+    Send::ARGS_store interpArgs;
+
     bool allStringsSoFar;
     if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first.get())) {
         stringsAccumulated.emplace_back(std::move(first));
         allStringsSoFar = true;
     } else {
-        auto pieceLoc = first->loc;
-        res = MK::Send0(pieceLoc, std::move(first), core::Names::toS());
+        interpArgs.emplace_back(std::move(first));
         allStringsSoFar = false;
     }
     ++it;
@@ -126,10 +127,6 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
-        if (!isStringLit(dctx, narg) && !isa_tree<EmptyTree>(narg.get())) {
-            auto pieceLoc = narg->loc;
-            narg = MK::Send0(pieceLoc, std::move(narg), core::Names::toS());
-        }
         if (allStringsSoFar && isStringLit(dctx, narg)) {
             stringsAccumulated.emplace_back(std::move(narg));
         } else if (isa_tree<EmptyTree>(narg.get())) {
@@ -137,15 +134,17 @@ unique_ptr<Expression> desugarDString(DesugarContext dctx, core::Loc loc, parser
         } else {
             if (allStringsSoFar) {
                 allStringsSoFar = false;
-                res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+                interpArgs.emplace_back(mergeStrings(dctx, loc, std::move(stringsAccumulated)));
             }
-            res = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
+            interpArgs.emplace_back(std::move(narg));
         }
     };
     if (allStringsSoFar) {
-        res = mergeStrings(dctx, loc, std::move(stringsAccumulated));
+        return mergeStrings(dctx, loc, std::move(stringsAccumulated));
+    } else {
+        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        return MK::Send(loc, std::move(recv), core::Names::stringInterpolate(), std::move(interpArgs));
     }
-    return res;
 }
 
 bool isIVarAssign(Expression *stat) {
@@ -157,7 +156,7 @@ bool isIVarAssign(Expression *stat) {
     if (!ident) {
         return false;
     }
-    if (ident->kind != UnresolvedIdent::Instance) {
+    if (ident->kind != UnresolvedIdent::Kind::Instance) {
         return false;
     }
     return true;
@@ -818,26 +817,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     return;
                 }
 
-                auto it = dsymbol->nodes.begin();
-                auto end = dsymbol->nodes.end();
-                unique_ptr<Expression> res;
-                unique_ptr<Expression> first = node2TreeImpl(dctx, std::move(*it));
-                if (isStringLit(dctx, first)) {
-                    res = std::move(first);
-                } else {
-                    res = MK::Send0(loc, std::move(first), core::Names::toS());
-                }
-                ++it;
-                for (; it != end; ++it) {
-                    auto &stat = *it;
-                    unique_ptr<Expression> narg = node2TreeImpl(dctx, std::move(stat));
-                    if (!isStringLit(dctx, narg)) {
-                        narg = MK::Send0(loc, std::move(narg), core::Names::toS());
-                    }
-                    auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
-                    res.reset(n.release());
-                };
-                res = MK::Send0(loc, std::move(res), core::Names::intern());
+                auto str = desugarDString(dctx, loc, std::move(dsymbol->nodes));
+                unique_ptr<Expression> res = MK::Send0(loc, std::move(str), core::Names::intern());
 
                 result.swap(res);
             },
@@ -877,8 +858,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res =
-                    MK::Class(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
-                              std::move(ancestors), std::move(body), ClassDefKind::Module);
+                    MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
+                               std::move(ancestors), std::move(body));
                 result.swap(res);
             },
             [&](parser::Class *claz) {
@@ -891,7 +872,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 }
                 unique_ptr<Expression> res =
                     MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
-                              std::move(ancestors), std::move(body), ClassDefKind::Class);
+                              std::move(ancestors), std::move(body));
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
@@ -967,10 +948,11 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
-                unique_ptr<Expression> res = make_unique<ClassDef>(
-                    sclass->loc, sclass->declLoc, core::Symbols::todo(),
-                    make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class, core::Names::singleton()),
-                    std::move(emptyAncestors), std::move(body), ClassDefKind::Class);
+                unique_ptr<Expression> res =
+                    MK::Class(sclass->loc, sclass->declLoc,
+                              make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Kind::Class,
+                                                           core::Names::singleton()),
+                              std::move(emptyAncestors), std::move(body));
                 result.swap(res);
             },
             [&](parser::Block *block) {
@@ -1044,15 +1026,17 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::IVar *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, var->name);
+                unique_ptr<Expression> res =
+                    make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result.swap(res);
             },
             [&](parser::GVar *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Global, var->name);
+                unique_ptr<Expression> res =
+                    make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
                 result.swap(res);
             },
             [&](parser::CVar *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Class, var->name);
+                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
                 result.swap(res);
             },
             [&](parser::LVarLhs *var) {
@@ -1060,20 +1044,22 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::GVarLhs *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Global, var->name);
+                unique_ptr<Expression> res =
+                    make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
                 result.swap(res);
             },
             [&](parser::CVarLhs *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Class, var->name);
+                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
                 result.swap(res);
             },
             [&](parser::IVarLhs *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, var->name);
+                unique_ptr<Expression> res =
+                    make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result.swap(res);
             },
             [&](parser::NthRef *var) {
                 unique_ptr<Expression> res = make_unique<UnresolvedIdent>(
-                    loc, UnresolvedIdent::Global, dctx.ctx.state.enterNameUTF8(to_string(var->ref)));
+                    loc, UnresolvedIdent::Kind::Global, dctx.ctx.state.enterNameUTF8(to_string(var->ref)));
                 result.swap(res);
             },
             [&](parser::Assign *asgn) {
@@ -1097,7 +1083,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 result.swap(res);
             },
             [&](parser::For *for_) {
-                ast::MethodDef::ARGS_store args;
+                MethodDef::ARGS_store args;
                 bool canProvideNiceDesugar = true;
                 auto mlhsNode = std::move(for_->vars);
                 if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
@@ -1126,7 +1112,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 auto body = node2TreeImpl(dctx, std::move(for_->body));
 
-                unique_ptr<ast::Block> block;
+                unique_ptr<Block> block;
                 if (canProvideNiceDesugar) {
                     block = MK::Block(loc, std::move(body), std::move(args));
                 } else {
@@ -1533,7 +1519,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto varLoc = varExpr->loc;
                 auto var = core::NameRef::noName();
                 if (auto *id = cast_tree<UnresolvedIdent>(varExpr.get())) {
-                    if (id->kind == UnresolvedIdent::Local) {
+                    if (id->kind == UnresolvedIdent::Kind::Local) {
                         var = id->name;
                         varExpr.reset(nullptr);
                     }
@@ -1747,7 +1733,7 @@ unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_p
         rhs.emplace_back(std::move(what));
     }
     return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), ClassDef::ANCESTORS_store(),
-                                 std::move(rhs), Class);
+                                 std::move(rhs), ClassDef::Kind::Class);
 }
 } // namespace
 

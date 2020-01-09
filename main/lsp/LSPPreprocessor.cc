@@ -86,8 +86,8 @@ string_view getFileContents(LSPFileUpdates &updates, const core::GlobalState &in
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(unique_ptr<core::GlobalState> initialGS, const shared_ptr<LSPConfiguration> &config,
-                                 u4 initialVersion)
-    : ttgs(TimeTravelingGlobalState(config, move(initialGS), initialVersion)), config(config),
+                                 WorkerPool &workers, u4 initialVersion)
+    : ttgs(TimeTravelingGlobalState(config, move(initialGS), workers, initialVersion)), config(config),
       owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
 void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
@@ -360,32 +360,12 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentPa
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (config->isFileIgnored(localPath)) {
-            return;
+        if (!config->isFileIgnored(localPath)) {
+            string fileContents =
+                changeParams->getSource(string(getFileContents(updates, ttgs.getGlobalState(), localPath)));
+            updates.updatedFiles.push_back(
+                make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal, v));
         }
-        string fileContents;
-        for (auto &change : changeParams->contentChanges) {
-            if (change->range) {
-                fileContents = string(getFileContents(updates, ttgs.getGlobalState(), localPath));
-                auto &range = *change->range;
-                // incremental update
-                core::Loc::Detail start, end;
-                start.line = range->start->line + 1;
-                start.column = range->start->character + 1;
-                end.line = range->end->line + 1;
-                end.column = range->end->character + 1;
-                core::File old(string(localPath), string(fileContents), core::File::Type::Normal);
-                // These offsets are non-nullopt assuming the input range is a valid range.
-                auto startOffset = core::Loc::pos2Offset(old, start).value();
-                auto endOffset = core::Loc::pos2Offset(old, end).value();
-                fileContents = fileContents.replace(startOffset, endOffset - startOffset, change->text);
-            } else {
-                // replace
-                fileContents = move(change->text);
-            }
-        }
-        updates.updatedFiles.push_back(
-            make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal));
     }
 }
 
@@ -398,7 +378,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentPara
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), move(openParams->textDocument->text), core::File::Type::Normal));
+                move(localPath), move(openParams->textDocument->text), core::File::Type::Normal, v));
         }
     }
 }
@@ -413,7 +393,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentPar
         if (!config->isFileIgnored(localPath)) {
             // Use contents of file on disk.
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal, v));
         }
     }
 }
@@ -428,7 +408,7 @@ void LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> 
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             updates.updatedFiles.push_back(make_shared<core::File>(
-                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal));
+                move(localPath), readFile(localPath, *config->opts.fs), core::File::Type::Normal, v));
         }
     }
 }

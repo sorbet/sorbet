@@ -81,6 +81,19 @@ which errors are reported.
 > a signature in a `# typed: false` file might introduce new type errors if it's
 > called from a `# typed: true` file.
 
+### Upgrading a file from `ignore` to any other sigil
+
+After changing the sigil of an `ignore`d file, you must run
+`srb rbi hidden-definitions`.
+
+The last time hidden definitions were generated, the file was `ignore`d, sorbet
+didn't load it, so anything in it was treated as "hidden" and defined in
+`sorbet/rbi/hidden-definitions/hidden.rbi`. Now that sorbet is allowed to load
+it, those definitions must be removed from `hidden.rbi`.
+
+If you don't regenerate `hidden.rbi`, you are likely to encounter
+[error 4010](https://srb.help/4010) (two definitions of the same method).
+
 ## Method-level granularity: `sig`
 
 After enabling `# typed: true` in some files, we can opt individual methods into
