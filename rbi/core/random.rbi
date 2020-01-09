@@ -30,6 +30,7 @@
 # of 2\*\*19937-1.
 class Random < Object
   include Random::Formatter
+  extend Random::Formatter
 
   # The default Pseudorandom number generator. Used by class methods of
   # [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html).
@@ -469,6 +470,8 @@ end
 # p SecureRandom.random_bytes(10) #=> "\323U\030TO\234\357\020\a\337"
 # ~~~
 module SecureRandom
+  extend Random::Formatter
+
   # SecureRandom.base64 generates a random base64 string.
   #
   # The argument _n_ specifies the length, in bytes, of the random number
