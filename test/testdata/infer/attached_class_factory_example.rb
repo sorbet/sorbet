@@ -7,7 +7,7 @@ end
 class Parent
   private_class_method :new
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make
     new
   end
