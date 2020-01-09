@@ -402,14 +402,8 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
                 item->kind = CompletionItemKind::Module;
             }
         }
-    } else if (what.data(gs)->isTypeMember()) {
-        item->kind = CompletionItemKind::TypeParameter;
-    } else if (what.data(gs)->isStaticField()) {
-        if (what.data(gs)->isTypeAlias()) {
-            item->kind = CompletionItemKind::TypeParameter;
-        } else {
-            item->kind = CompletionItemKind::Field;
-        }
+    } else if (what.data(gs)->isTypeMember() || what.data(gs)->isStaticField()) {
+        item->kind = CompletionItemKind::Field;
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
