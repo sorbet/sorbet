@@ -17,6 +17,7 @@ class MyTest
     it "works with instance methods" do
       puts value.foo
       outside_method
+      T.reveal_type(value) # error: type: `A`
     end
   end
 
@@ -24,22 +25,32 @@ class MyTest
   test_each CONST_LIST do |value|
     it "succeeds with a constant list" do
       puts value.foo
+      T.reveal_type(value) # error: type: `T.untyped`
+    end
+  end
+
+  ANOTHER_CONST_LIST = T.let([A.new, B.new], T::Array[A])
+  test_each ANOTHER_CONST_LIST do |value|
+    it "succeeds with a typed constant list" do
+      puts value.foo
+      T.reveal_type(value) # error: type: `A`
     end
   end
 
   local = [A.new, B.new]
-  test_each local do |value| # error: `test_each` can only be used with constants or array literals
-    it "fails with a local variable" do
+  test_each local do |value|
+    it "succeed with a local variable but cannot type it" do
       puts value.foo
+      T.reveal_type(value) # error: type: `T.untyped`
     end
   end
 
   test_each [A.new, B.new] do |x|
-    y = x # error: Only `it` blocks are allowed inside `test_each`
+    y = x # error: Only valid `it`-blocks can appear within `test_each`
   end
 
   test_each [A.new, B.new] do |value|
-    x = value.foo  # error: Only `it` blocks are allowed inside `test_each`
+    x = value.foo  # error: Only valid `it`-blocks can appear within `test_each`
     it "fails with non-it statements" do
       puts x
     end
