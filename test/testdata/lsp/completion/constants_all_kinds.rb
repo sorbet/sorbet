@@ -68,8 +68,7 @@ p MMM::ZZ # error: Unable to resolve
 
 # -- extras --
 
-# TODO(jez) We show duplicate results because of how the T::Enum DSL pass works
 p MyEnum::Va # error: Unable to resolve
-#           ^ completion: Val, Val
+#           ^ completion: Val
 p MyStruc # error: Unable to resolve
 #        ^ completion: MyStruct
