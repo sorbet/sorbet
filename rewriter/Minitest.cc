@@ -111,53 +111,7 @@ unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
 }
 } // namespace
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body,
-                                    optional<ast::Expression *> context);
-
-unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
-                                        optional<ast::Expression *> context) {
-    body = recurse(ctx, std::move(body), context);
-
-    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
-        for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, std::move(exp), context);
-        }
-
-        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr), context);
-    }
-    return body;
-}
-
-void checkItBlock(core::MutableContext ctx, ast::Expression *exp) {
-    auto send = ast::cast_tree<ast::Send>(exp);
-    if (send) {
-        if (send->fun == core::Names::it() && send->args.size() == 1 && send->block != nullptr) {
-            return;
-        }
-    }
-
-    if (auto e = ctx.state.beginError(exp->loc, core::errors::Rewriter::NonItInTestEach)) {
-        e.setHeader("Only `{}` blocks are allowed inside `{}`", "it", "test_each");
-    }
-}
-
-unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
-                                                optional<ast::Expression *> methodPrologue) {
-    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
-    if (bodySeq) {
-        for (auto &exp : bodySeq->stats) {
-            checkItBlock(ctx, exp.get());
-            exp = recurse(ctx, std::move(exp), methodPrologue);
-        }
-
-        checkItBlock(ctx, bodySeq->expr.get());
-        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr), methodPrologue);
-    } else {
-        checkItBlock(ctx, body.get());
-        body = recurse(ctx, std::move(body), methodPrologue);
-    }
-    return body;
-}
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
 
 string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg.get());
@@ -176,42 +130,104 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     return arg->toString(ctx);
 }
 
-// The 'prologue' here is any expressions which are put at the top of the 'it' blocks. If we've looked at an instance of
-// `test_each`, then we need to somehow pull the variable being introduced by the `each` into the body of the method. We
-// do that by taking
-//
-//   test_each(expr) do |var|
-//
-// and turning it into an assignment like
-//
-//   var = T.must(expr.collect.first)
-//
-// which will have both the correct type and the correct name. (The reason for the `collect` is that if `expr` is an
-// array literal, then Sorbet would treat it as a tuple type, and `first` would be the first thing in the tuple,
-// i.e. `[1,true].first` has the type `Integer`, but we're using this to stand in for an arbitrary member of the
-// collection, not actually the first one: what we want is something with the type `T.any(Integer,TrueClass)` here. The
-// `.collect` will give us an array instead of a tuple, then `first` will give us a nilable element, and then the `must`
-// will remove the nilable.
-unique_ptr<ast::Expression> makePrologue(core::MutableContext ctx, unique_ptr<ast::Expression> blockArg,
-                                         unique_ptr<ast::Expression> &as, optional<ast::Expression *> methodPrologue) {
-    ENFORCE(ast::isa_tree<ast::Array>(as.get()) || ast::isa_tree<ast::UnresolvedConstantLit>(as.get()));
-    auto enumToList = ast::MK::Send0(as->loc, as->deepCopy(), core::Names::collect());
-    auto firstOfList = ast::MK::Send0(as->loc, move(enumToList), core::Names::first());
-    auto mustOfList =
-        ast::MK::Send1(as->loc, ast::MK::UnresolvedConstant(as->loc, ast::MK::EmptyTree(), core::Names::Constants::T()),
-                       core::Names::must(), move(firstOfList));
-    auto assn = ast::MK::Assign(as->loc, move(blockArg), move(mustOfList));
-    if (methodPrologue.has_value()) {
-        ast::InsSeq::STATS_store ins;
-        ins.emplace_back(methodPrologue.value()->deepCopy());
-        assn = ast::MK::InsSeq(as->loc, std::move(ins), std::move(assn));
+// This returns `true` for expressions which can be moved from class to method scope without changing their meaning, and
+// `false` otherwise. This mostly encompasses literals (arrays, hashes, basic literals), constants, and sends that only
+// involve the other things described.
+bool canMoveIntoMethodDef(const unique_ptr<ast::Expression> &exp) {
+    if (ast::isa_tree<ast::Literal>(exp.get())) {
+        return true;
+    } else if (auto list = ast::cast_tree<ast::Array>(exp.get())) {
+        return absl::c_all_of(list->elems, [](auto &elem) { return canMoveIntoMethodDef(elem); });
+    } else if (auto hash = ast::cast_tree<ast::Hash>(exp.get())) {
+        return absl::c_all_of(hash->keys, [](auto &elem) { return canMoveIntoMethodDef(elem); }) &&
+               absl::c_all_of(hash->values, [](auto &elem) { return canMoveIntoMethodDef(elem); });
+    } else if (auto send = ast::cast_tree<ast::Send>(exp.get())) {
+        return canMoveIntoMethodDef(send->recv) &&
+               absl::c_all_of(send->args, [](auto &elem) { return canMoveIntoMethodDef(elem); });
+    } else if (ast::isa_tree<ast::UnresolvedConstantLit>(exp.get())) {
+        return true;
     }
-
-    return assn;
+    return false;
 }
 
-unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
-                                      optional<ast::Expression *> methodPrologue) {
+// if the thing can be moved into a method def, then the thing we iterate over can be copied into the body of the
+// method, and otherwise we replace it with a synthesized 'nil'
+unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
+    if (canMoveIntoMethodDef(exp)) {
+        return exp->deepCopy();
+    } else {
+        return ast::MK::Nil(exp->loc);
+    }
+}
+
+unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+    body = recurse(ctx, std::move(body));
+
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
+        for (auto &exp : bodySeq->stats) {
+            exp = recurse(ctx, std::move(exp));
+        }
+
+        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
+    }
+    return body;
+}
+
+// this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
+// otherwise flag an error about it
+unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<ast::Expression> stmt,
+                                         unique_ptr<ast::Expression> &arg, unique_ptr<ast::Expression> &iteratee) {
+    // this statement must be a send
+    if (auto send = ast::cast_tree<ast::Send>(stmt.get())) {
+        // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
+        if (send->fun == core::Names::it() && send->args.size() == 1 && send->block != nullptr &&
+            send->block->args.size() == 0) {
+            // we use this for the name of our test
+            auto argString = to_s(ctx, send->args.front());
+            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+
+            // pull constants out of the block
+            ConstantMover constantMover;
+            unique_ptr<ast::Expression> body = move(send->block->body);
+            body = ast::TreeMap::apply(ctx, constantMover, move(body));
+
+            // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
+            auto blk = ast::MK::Block1(send->loc, move(body), arg->deepCopy());
+            auto each = ast::MK::Send0Block(send->loc, iteratee->deepCopy(), core::Names::each(), move(blk));
+            // put that into a method def named the appropriate thing
+            auto method = addSigVoid(
+                ast::MK::Method0(send->loc, send->loc, move(name), move(each), ast::MethodDef::RewriterSynthesized));
+            // add back any moved constants
+            return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+    }
+    // if any of the above tests were not satisfied, then mark this statement as being invalid here
+    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::NonConstantTestEach)) {
+        e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", "test_each");
+    }
+
+    return stmt;
+}
+
+// this just walks the body of a `test_each` and tries to transform every statement
+unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
+                                                unique_ptr<ast::Expression> &arg,
+                                                unique_ptr<ast::Expression> &iteratee) {
+    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
+    if (bodySeq) {
+        for (auto &exp : bodySeq->stats) {
+            exp = runUnderEach(ctx, std::move(exp), arg, iteratee);
+        }
+
+        bodySeq->expr = runUnderEach(ctx, std::move(bodySeq->expr), arg, iteratee);
+    } else {
+        body = runUnderEach(ctx, std::move(body), arg, iteratee);
+    }
+
+    return body;
+}
+
+unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send) {
     if (send->block == nullptr) {
         return nullptr;
     }
@@ -220,26 +236,18 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         return nullptr;
     }
 
-    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr) {
-        auto &expr = send->args.front();
-        if (!ast::isa_tree<ast::Array>(expr.get()) && !ast::isa_tree<ast::UnresolvedConstantLit>(expr.get())) {
-            if (auto e = ctx.state.beginError(expr->loc, core::errors::Rewriter::NonConstantTestEach)) {
-                e.setHeader("`{}` can only be used with constants or array literals", "test_each");
-            }
-
-            return nullptr;
-        }
-
+    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr &&
+        send->block->args.size() == 1) {
         // if this is a test_each, build a binding for the variable used in iteration
-        auto assn = makePrologue(ctx, send->block->args.front()->deepCopy(), expr, methodPrologue);
-
+        auto iteratee = getIteratee(send->args.front());
         ast::Send::ARGS_store args;
-        args.emplace_back(move(expr));
+        args.emplace_back(move(send->args.front()));
         // reconstruct the send but with a modified body, making sure we pass the constructed assignment in
-        return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
-                             ast::MK::Block(send->block->loc,
-                                            prepareTestEachBody(ctx, std::move(send->block->body), assn.get()),
-                                            std::move(send->block->args)));
+        return ast::MK::Send(
+            send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
+            ast::MK::Block(send->block->loc,
+                           prepareTestEachBody(ctx, std::move(send->block->body), send->block->args.front(), iteratee),
+                           std::move(send->block->args)));
     }
 
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
@@ -247,9 +255,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         unique_ptr<ast::Expression> body = std::move(send->block->body);
-        auto method =
-            addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(body), methodPrologue),
-                                        ast::MethodDef::RewriterSynthesized));
+        auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, name, prepareBody(ctx, std::move(body)),
+                                                  ast::MethodDef::RewriterSynthesized));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -264,7 +271,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         ancestors.emplace_back(ast::MK::Self(arg->loc));
         ast::ClassDef::RHS_store rhs;
 
-        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body), methodPrologue));
+        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
@@ -273,28 +280,19 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send,
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         unique_ptr<ast::Expression> body = std::move(send->block->body);
-        // if we have context, then it means we've got a binding to add to the top of 'it'-blocks here: add it to the
-        // front of the body so we re-introduce that variable into scope
-        if (methodPrologue.has_value()) {
-            ast::InsSeq::STATS_store ins;
-            ins.emplace_back(methodPrologue.value()->deepCopy());
-            body = ast::MK::InsSeq(send->loc, std::move(ins), std::move(body));
-        }
-        auto method = addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name),
-                                                  prepareBody(ctx, std::move(body), methodPrologue),
-                                                  ast::MethodDef::RewriterSynthesized));
-        method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
+        auto method =
+            addSigVoid(ast::MK::Method0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(body)),
+                                        ast::MethodDef::RewriterSynthesized));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
     return nullptr;
 }
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body,
-                                    optional<ast::Expression *> context) {
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
     auto bodySend = ast::cast_tree<ast::Send>(body.get());
     if (bodySend) {
-        auto change = runSingle(ctx, bodySend, context);
+        auto change = runSingle(ctx, bodySend);
         if (change) {
             return change;
         }
@@ -308,7 +306,7 @@ vector<unique_ptr<ast::Expression>> Minitest::run(core::MutableContext ctx, ast:
         return stats;
     }
 
-    auto exp = runSingle(ctx, send, nullopt);
+    auto exp = runSingle(ctx, send);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
