@@ -38,9 +38,6 @@ def register_sorbet_dependencies():
         sha256 = "e4f8bedb19a93d0dccc359a126f51158282e0b24d92e0cad9c76a9699698268d",
         strip_prefix = "protobuf-3.11.2",
         urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.2.zip"],
-        # sha256 = "d7a221b3d4fb4f05b7473795ccea9e05dab3b8721f6286a95fffbffc2d926f8b",
-        # strip_prefix = "protobuf-3.6.1",
-        # urls = ["https://github.com/google/protobuf/archive/v3.6.1.zip"],
     )
 
     new_git_repository(
@@ -126,7 +123,6 @@ def register_sorbet_dependencies():
     git_repository(
         name = "com_google_absl",
         remote = "https://github.com/abseil/abseil-cpp.git",
-        # commit = "63ee2f8877915a3565c29707dba8fe4d7822596a",
         commit = "d9aa92d7fb324314f9df487ac23d32a25650b742",
         shallow_since = "1565720473 -0400",
     )
