@@ -654,7 +654,6 @@ void sorbet_setLineNumber(int offset, VALUE **storeLocation) {
 }
 
 VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *argArray) {
-    fprintf(stderr, "max: %i, actual: %i\n", maxPositionalArgCount, actualArgCount);
     if (maxPositionalArgCount >= actualArgCount) {
         return rb_ary_new();
     }
