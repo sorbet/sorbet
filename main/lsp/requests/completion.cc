@@ -698,16 +698,29 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
     do {
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
             auto sym = member.second;
-            if (sym.exists() &&
-                (sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember()) &&
-                sym.data(gs)->name.data(gs)->kind == core::NameKind::CONSTANT &&
+            if (!sym.exists()) {
+                continue;
+            }
+
+            if (!(sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
+                continue;
+            }
+
+            if (sym.data(gs)->name.data(gs)->kind != core::NameKind::CONSTANT) {
+                continue;
+            }
+
+            if (isTEnumName(gs, sym.data(gs)->name)) {
                 // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
                 // This manifests as showing two completion results when we should only show one, so skip the bad kind.
-                !isTEnumName(gs, sym.data(gs)->name) &&
-                // hide singletons
-                hasSimilarName(gs, sym.data(gs)->name, prefix)) {
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+                continue;
             }
+
+            if (!hasSimilarName(gs, sym.data(gs)->name, prefix)) {
+                continue;
+            }
+
+            items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
         }
         scope = scope.data(gs)->owner;
     } while (scope != core::Symbols::root());
