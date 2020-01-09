@@ -259,6 +259,7 @@ private:
             return;
         }
         ENFORCE(!resolved.exists());
+        ENFORCE(!job.out->symbol.exists());
 
         core::SymbolRef scope;
         if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
