@@ -5,4 +5,4 @@
 # various reasons.
 
 Magic # error: Unable to resolve
-#    ^ completion: <Magic>
+#    ^ completion: (nothing)
