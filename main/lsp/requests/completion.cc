@@ -651,11 +651,6 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDel
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
 
-    auto resultType = what.data(gs)->resultType;
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
-
     item->kind = CompletionItemKind::Method;
     item->detail = maybeAlias.data(gs)->show(gs);
 
