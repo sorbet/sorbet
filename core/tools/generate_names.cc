@@ -211,6 +211,9 @@ NameDef names[] = {
     {"before"},
     {"after"},
     {"afterAngles", "<after>"},
+    {"testEach", "test_each"},
+    {"constSet", "const_set"},
+    {"collect"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
