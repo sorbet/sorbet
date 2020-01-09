@@ -1,9 +1,9 @@
 # typed: true
 
-class A
+class Parent
   def foo; end
 end
-class B < A
+class Child < Parent
 end
 
 class MyTest
@@ -13,15 +13,15 @@ class MyTest
   def self.test_each(arg, &blk); end
   def self.it(name, &blk); end
 
-  test_each [A.new, B.new] do |value|
+  test_each [Parent.new, Child.new] do |value|
     it "works with instance methods" do
       puts value.foo
       outside_method
-      T.reveal_type(value) # error: type: `A`
+      T.reveal_type(value) # error: type: `Parent`
     end
   end
 
-  CONST_LIST = [A.new, B.new]
+  CONST_LIST = [Parent.new, Child.new]
   test_each CONST_LIST do |value|
     it "succeeds with a constant list" do
       puts value.foo
@@ -29,15 +29,15 @@ class MyTest
     end
   end
 
-  ANOTHER_CONST_LIST = T.let([A.new, B.new], T::Array[A])
+  ANOTHER_CONST_LIST = T.let([Parent.new, Child.new], T::Array[Parent])
   test_each ANOTHER_CONST_LIST do |value|
     it "succeeds with a typed constant list" do
       puts value.foo
-      T.reveal_type(value) # error: type: `A`
+      T.reveal_type(value) # error: type: `Parent`
     end
   end
 
-  local = [A.new, B.new]
+  local = [Parent.new, Child.new]
   test_each local do |value|
     it "succeed with a local variable but cannot type it" do
       puts value.foo
@@ -45,11 +45,11 @@ class MyTest
     end
   end
 
-  test_each [A.new, B.new] do |x|
+  test_each [Parent.new, Child.new] do |x|
     y = x # error: Only valid `it`-blocks can appear within `test_each`
   end
 
-  test_each [A.new, B.new] do |value|
+  test_each [Parent.new, Child.new] do |value|
     x = value.foo  # error: Only valid `it`-blocks can appear within `test_each`
     it "fails with non-it statements" do
       puts x
