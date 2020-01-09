@@ -113,6 +113,19 @@ unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
 
 unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
 
+unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+    body = recurse(ctx, std::move(body));
+
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
+        for (auto &exp : bodySeq->stats) {
+            exp = recurse(ctx, std::move(exp));
+        }
+
+        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
+    }
+    return body;
+}
+
 string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg.get());
     string argString;
@@ -156,21 +169,8 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
     if (canMoveIntoMethodDef(exp)) {
         return exp->deepCopy();
     } else {
-        return ast::MK::Nil(exp->loc);
+        return ast::MK::Unsafe(exp->loc, ast::MK::Nil(exp->loc));
     }
-}
-
-unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
-    body = recurse(ctx, std::move(body));
-
-    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
-        for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, std::move(exp));
-        }
-
-        bodySeq->expr = recurse(ctx, std::move(bodySeq->expr));
-    }
-    return body;
 }
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
@@ -202,7 +202,7 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<as
         }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::NonConstantTestEach)) {
+    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::NonItInTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", "test_each");
     }
 
@@ -238,11 +238,12 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
 
     if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr &&
         send->block->args.size() == 1) {
-        // if this is a test_each, build a binding for the variable used in iteration
+        // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
+        // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->args.front());
+        // and then reconstruct the send but with a modified body
         ast::Send::ARGS_store args;
         args.emplace_back(move(send->args.front()));
-        // reconstruct the send but with a modified body, making sure we pass the constructed assignment in
         return ast::MK::Send(
             send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
             ast::MK::Block(send->block->loc,
