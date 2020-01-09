@@ -183,13 +183,14 @@ module Benchmark
   sig do
     params(
         caption: String,
-        label_width: Integer,
-        format: String,
+        label_width: T.nilable(Integer),
+        format: T.nilable(String),
         labels: String,
+        blk: T.proc.params(report: Report).void,
     )
     .returns(T::Array[Benchmark::Tms])
   end
-  def self.benchmark(caption, label_width=T.unsafe(nil), format=T.unsafe(nil), *labels); end
+  def self.benchmark(caption, label_width=T.unsafe(nil), format=T.unsafe(nil), *labels, &blk); end
 
   # A simple interface to the
   # [`benchmark`](https://docs.ruby-lang.org/en/2.6.0/Benchmark.html#method-i-benchmark)
@@ -222,7 +223,7 @@ module Benchmark
     params(
         label_width: Integer,
         labels: String,
-        blk: T.proc.params(arg0: Process).returns(NilClass),
+        blk: T.proc.params(report: Report).void,
     )
     .returns(T::Array[Benchmark::Tms])
   end
@@ -277,7 +278,7 @@ module Benchmark
   sig do
     params(
         width: Integer,
-        blk: T.proc.params(arg0: Process).returns(NilClass),
+        blk: T.proc.params(job: Job).void,
     )
     .returns(T::Array[Benchmark::Tms])
   end
@@ -306,17 +307,18 @@ module Benchmark
   sig do
     params(
         label: String,
+        blk: T.proc.void,
     )
     .returns(Benchmark::Tms)
   end
-  def self.measure(label=T.unsafe(nil)); end
+  def self.measure(label=T.unsafe(nil), &blk); end
 
   # Returns the elapsed real time used to execute the given block.
   sig do
     params(
-        blk: BasicObject,
+        blk: T.proc.void,
     )
-    .returns(Integer)
+    .returns(Float)
   end
   def self.realtime(&blk); end
 end
