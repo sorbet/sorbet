@@ -3,12 +3,12 @@
 class NoArgs
   extend T::Sig
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make
     T.reveal_type(self.new) # error: Revealed type: `T.attached_class (of NoArgs)`
   end
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make_implicit_new
     T.reveal_type(new) # error: Revealed type: `T.attached_class (of NoArgs)`
   end
@@ -21,7 +21,7 @@ class PosArgs
   sig {params(x: Integer, y: String).void}
   def initialize(x, y); end
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make
     T.reveal_type(self.new(10, "foo")) # error: Revealed type: `T.attached_class (of PosArgs)`
 
@@ -38,7 +38,7 @@ class NamedArgs
   sig {params(x: Integer, y: String).void}
   def initialize(x:, y:); end
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make
     T.reveal_type(self.new(x: 10, y: "foo")) # error: Revealed type: `T.attached_class (of NamedArgs)`
 
@@ -55,7 +55,7 @@ class BlockArg
   sig {params(blk: T.proc.params(x: Integer).void).void}
   def initialize(&blk); end
 
-  sig {returns(T.experimental_attached_class)}
+  sig {returns(T.attached_class)}
   def self.make
     T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `T.attached_class (of BlockArg)`
 

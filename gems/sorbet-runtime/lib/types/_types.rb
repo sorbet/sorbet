@@ -65,12 +65,8 @@ module T
     T::Types::SelfType.new
   end
 
-  # TODO(jez) Matches the instance type in a singleton-class context
-  def self.attached_class
-    T::Types::AttachedClassType.new
-  end
   # Matches the instance type in a singleton-class context
-  def self.experimental_attached_class
+  def self.attached_class
     T::Types::AttachedClassType.new
   end
 
