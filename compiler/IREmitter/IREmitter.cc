@@ -54,16 +54,23 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         auto maxPositionalArgCount = 0;
         auto minPositionalArgCount = 0;
         auto isBlock = funcId != 0;
+        auto hasRestArgs = false;
         llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
         llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
 
         core::LocalVariable blkArgName;
+        core::LocalVariable restArgName;
         {
             auto argId = -1;
             auto args = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
             ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
             for (auto &argFlags : args) {
                 argId += 1;
+                if (argFlags.isRepeated) {
+                    restArgName = blockMap.rubyBlockArgs[funcId][argId];
+                    hasRestArgs = true;
+                    continue;
+                }
                 if (argFlags.isDefault) {
                     maxPositionalArgCount += 1;
                     continue;
@@ -126,10 +133,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
             auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
 
-            auto tooManyArgs = builder.CreateICmpUGT(
-                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), "tooManyArgs");
-            auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
-            builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
+            if (!hasRestArgs) {
+                auto tooManyArgs = builder.CreateICmpUGT(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), "tooManyArgs");
+                auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
+                builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
+            } else {
+                builder.CreateBr(argCountSecondCheckBlock);
+            }
 
             builder.SetInsertPoint(argCountSecondCheckBlock);
             auto tooFewArgs = builder.CreateICmpULT(
@@ -138,7 +149,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
 
             builder.SetInsertPoint(argCountFailBlock);
-            Payload::raiseArity(cs, builder, argCountRaw, minPositionalArgCount, maxPositionalArgCount);
+            Payload::raiseArity(cs, builder, argCountRaw, minPositionalArgCount,
+                                hasRestArgs ? -1 : maxPositionalArgCount);
 
             builder.SetInsertPoint(argCountSuccessBlock);
         }
@@ -211,9 +223,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             for (auto i = 0; i < numOptionalArgs; i++) {
                 auto &block = checkBlocks[i];
                 builder.SetInsertPoint(block);
-                auto argCount =
-                    builder.CreateICmpEQ(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minPositionalArgCount)),
-                                         llvm::Twine("default") + llvm::Twine(i));
+                auto argCount = builder.CreateICmpEQ(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minPositionalArgCount)),
+                    llvm::Twine("default") + llvm::Twine(i));
                 auto expected = Payload::setExpectedBool(cs, builder, argCount, false);
                 builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
             }
@@ -259,6 +271,11 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
             builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
             builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
+            if (hasRestArgs) {
+                Payload::varSet(cs, restArgName,
+                                Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
+                                builder, blockMap, aliases, funcId);
+            }
         }
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
@@ -266,9 +283,10 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         }
 
         if (!isBlock) {
-            // jump to user body
+            // jump to sig verification that will come before user body
             builder.CreateBr(blockMap.sigVerificationBlock);
         } else {
+            // jump dirrectly to user body
             builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
         }
     }

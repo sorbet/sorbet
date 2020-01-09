@@ -653,6 +653,14 @@ void sorbet_setLineNumber(int offset, VALUE **storeLocation) {
     (*storeLocation) = ((VALUE *)0x0) + offset + 1;
 }
 
+VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *argArray) {
+    fprintf(stderr, "max: %i, actual: %i\n", maxPositionalArgCount, actualArgCount);
+    if (maxPositionalArgCount >= actualArgCount) {
+        return rb_ary_new();
+    }
+    return rb_ary_new_from_values(actualArgCount - maxPositionalArgCount, argArray + maxPositionalArgCount);
+}
+
 // ****
 // ****                       Implementation helpers for type tests
 // ****

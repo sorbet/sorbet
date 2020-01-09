@@ -367,6 +367,14 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     return loc;
 }
 
+llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,
+                                   llvm::Value *argCountRaw, llvm::Value *argArrayRaw) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(
+        cs.module->getFunction("sorbet_readRestArgs"),
+        {llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), argCountRaw, argArrayRaw});
+}
+
 llvm::Value *Payload::loadSelf(CompilerState &cs, llvm::IRBuilderBase &build) {
     auto &builder = builderCast(build);
     auto ret = builder.CreateCall(cs.module->getFunction("sorbet_loadSelf"), {});
