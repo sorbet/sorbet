@@ -706,17 +706,23 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                 continue;
             }
 
-            if (sym.data(gs)->name.data(gs)->kind != core::NameKind::CONSTANT) {
+            auto memberName = sym.data(gs)->name;
+            if (memberName.data(gs)->kind != core::NameKind::CONSTANT) {
                 continue;
             }
 
-            if (isTEnumName(gs, sym.data(gs)->name)) {
+            if (isTEnumName(gs, memberName)) {
                 // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
                 // This manifests as showing two completion results when we should only show one, so skip the bad kind.
                 continue;
             }
 
-            if (!hasSimilarName(gs, sym.data(gs)->name, prefix)) {
+            if (hasAngleBrackets(memberName.data(gs)->shortName(gs))) {
+                // Gets rid of classes like `<Magic>`; they can't be typed by a user anyways.
+                continue;
+            }
+
+            if (!hasSimilarName(gs, memberName, prefix)) {
                 continue;
             }
 
