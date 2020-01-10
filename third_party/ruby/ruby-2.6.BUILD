@@ -282,6 +282,7 @@ cc_binary(
             "-lpthread",
             "-lcrypt",
             "-lrt",
+            "-ldl",
         ],
         ":darwin": [
             "-framework",
@@ -529,6 +530,7 @@ cc_library(
         ":linux": [
             "-lpthread",
             "-lrt",
+            "-ldl",
         ],
         ":darwin": [
             "-framework",
