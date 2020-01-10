@@ -76,19 +76,12 @@ class T::Props::Decorator
     extra
     optional
     _tnilable
-  }.to_set.freeze
+  }.map {|k| [k, true]}.to_h.freeze
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
   def valid_rule_key?(key)
-    valid_props.include?(key)
-  end
-
-  # Deprecated, kept temporarily to support overrides in pay-server
-  # during the transition to `valid_rule_key?`
-  sig {returns(T::Set[Symbol]).checked(:never)}
-  def valid_props
-    VALID_RULE_KEYS
+    VALID_RULE_KEYS[key]
   end
 
   # checked(:never) - O(prop accesses)

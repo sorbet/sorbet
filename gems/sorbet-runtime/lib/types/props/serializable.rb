@@ -275,11 +275,11 @@ end
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
 module T::Props::Serializable::DecoratorMethods
 
-  VALID_RULE_KEYS = Set[:dont_store, :name, :raise_on_nil_write].freeze
+  VALID_RULE_KEYS = {dont_store: true, name: true, raise_on_nil_write: true}.freeze
   private_constant :VALID_RULE_KEYS
 
   def valid_rule_key?(key)
-    super || VALID_RULE_KEYS.include?(key)
+    super || VALID_RULE_KEYS[key]
   end
 
   def required_props

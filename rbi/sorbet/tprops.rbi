@@ -80,7 +80,6 @@ class T::Props::Decorator
   def set(*args, &blk); end
   def shallow_clone_ok(*args, &blk); end
   def smart_coerce(*args, &blk); end
-  def valid_props; end
   def valid_rule_key?(key); end
   def validate_foreign_option(*args, &blk); end
   def validate_not_missing_sensitivity(*args, &blk); end
@@ -123,7 +122,6 @@ module T::Props::Optional::DecoratorMethods
   def mutate_prop_backdoor!(prop, key, value); end
   def prop_optional?(prop); end
   def prop_validate_definition!(name, cls, rules, type); end
-  def valid_props; end
   def valid_rule_key?(key); end
 end
 
@@ -150,7 +148,6 @@ module T::Props::PrettyPrintable::DecoratorMethods
   def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  ', &blk); end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
-  def valid_props; end
   def valid_rule_key?(key); end
   extend T::Sig
 end
@@ -181,7 +178,6 @@ module T::Props::Serializable::DecoratorMethods
   def prop_validate_definition!(name, cls, rules, type); end
   def required_props; end
   def serialized_form_prop(serialized_form); end
-  def valid_props; end
   def valid_rule_key?(key); end
 end
 
@@ -204,7 +200,6 @@ module T::Props::TypeValidation::DecoratorMethods
   def self.method_added(name); end
   def self.singleton_method_added(name); end
   def type_error_message(*args, &blk); end
-  def valid_props; end
   def valid_rule_key?(key); end
   def validate_type(*args, &blk); end
   extend T::Sig
