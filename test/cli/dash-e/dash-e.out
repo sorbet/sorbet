@@ -1,5 +1,5 @@
 No errors! Great job.
-class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1, https://github.com/sorbet/sorbet/tree/master/bazel-out/host/bin/rbi/procs.rbi#L1)
+class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1)
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
