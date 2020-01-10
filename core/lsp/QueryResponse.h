@@ -41,12 +41,13 @@ public:
 
 class ConstantResponse final {
 public:
-    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, core::SymbolRef scope, core::NameRef name,
+    using Scopes = InlinedVector<core::SymbolRef, 1>;
+    ConstantResponse(core::SymbolRef symbol, core::Loc termLoc, Scopes scopes, core::NameRef name,
                      core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), scope(scope), name(name), retType(std::move(retType)){};
+        : symbol(symbol), termLoc(termLoc), scopes(scopes), name(name), retType(std::move(retType)){};
     const core::SymbolRef symbol;
     const core::Loc termLoc;
-    const core::SymbolRef scope;
+    const Scopes scopes;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
