@@ -11,6 +11,9 @@ module Outer
 
       DefinedIn # error: Unable to resolve
       #        ^ completion: DefinedInInner, DefinedInMiddle, DefinedInOuter
+
+      Integer::DefinedIn # error: Unable to resolve
+      #                 ^ completion: (nothing)
     end
 
     DefinedIn # error: Unable to resolve
