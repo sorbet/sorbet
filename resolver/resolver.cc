@@ -259,14 +259,14 @@ private:
             return;
         }
         ENFORCE(!resolved.exists());
+        ENFORCE(!job.out->symbol.exists());
 
         core::SymbolRef scope;
-        if (job.out->symbol.exists()) {
-            scope = job.out->symbol.data(ctx)->dealias(ctx);
-        } else if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
             scope = id->symbol.data(ctx)->dealias(ctx);
         } else {
             scope = job.scope->scope;
+            ENFORCE(scope != core::Symbols::StubModule());
         }
 
         auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
