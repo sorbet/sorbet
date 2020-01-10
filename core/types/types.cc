@@ -281,7 +281,7 @@ TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
 }
 
 TypePtr Types::dropNil(Context ctx, const TypePtr &from) {
-  return Types::dropSubtypesOf(ctx, from, Symbols::NilClass());
+    return Types::dropSubtypesOf(ctx, from, Symbols::NilClass());
 }
 
 std::optional<int> Types::getProcArity(const AppliedType &type) {
