@@ -620,7 +620,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         fmt::format_to(buf, " @ ");
         if (locs_.size() > 1) {
             if (ref(gs) == core::Symbols::root() && gs.censorForSnapshotTests) {
-                const auto payloadPathPrefix = "https://github.com/sorbet/sorbet/tree/master/rbi/";
+                const auto payloadPathPrefix = "https://github.com/sorbet/sorbet/tree/master/";
                 bool hasPayloadLoc = absl::c_any_of(locs_, [&](const auto loc) {
                     return absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix);
                 });
