@@ -266,6 +266,7 @@ private:
             scope = id->symbol.data(ctx)->dealias(ctx);
         } else {
             scope = job.scope->scope;
+            ENFORCE(scope != core::Symbols::StubModule());
         }
 
         auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
