@@ -89,9 +89,10 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             core::SymbolRef scope;
-            if (lit->resolutionScope.exists()) {
+            // TODO(jez) The whole point is that we don't want front() here.
+            if (lit->resolutionScope.front().exists()) {
                 ENFORCE(symbol == core::Symbols::StubModule());
-                scope = lit->resolutionScope;
+                scope = lit->resolutionScope.front();
             } else {
                 scope = symbol.data(ctx)->owner;
             }

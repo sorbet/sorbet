@@ -240,7 +240,7 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     vector<core::NameRef> namesFailedToResolve;
     auto nested = this;
     {
-        while (!nested->resolutionScope.exists()) {
+        while (!nested->resolutionScope.front().exists()) {
             ENFORCE(nested->symbol == core::Symbols::StubModule());
             namesFailedToResolve.emplace_back(nested->original->cnst);
             ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
@@ -249,7 +249,7 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
         namesFailedToResolve.emplace_back(nested->original->cnst);
         std::reverse(namesFailedToResolve.begin(), namesFailedToResolve.end());
     }
-    return make_pair(nested->resolutionScope, move(namesFailedToResolve));
+    return make_pair(nested->resolutionScope.front(), move(namesFailedToResolve));
 }
 
 Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
@@ -593,9 +593,10 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
-    if (resolutionScope.exists()) {
+    // TODO(jez) print all of resolution scope
+    if (resolutionScope.front().exists()) {
         printTabs(buf, tabs + 1);
-        buf << "resolutionScope = " << this->resolutionScope.data(gs)->showFullName(gs) << '\n';
+        buf << "resolutionScope = " << this->resolutionScope.front().data(gs)->showFullName(gs) << '\n';
     }
     printTabs(buf, tabs);
 
