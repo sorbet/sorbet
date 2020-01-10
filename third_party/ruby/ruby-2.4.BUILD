@@ -264,6 +264,7 @@ cc_binary(
         ":linux": [
             "-lpthread",
             "-lcrypt",
+            "-ldl",
         ],
         ":darwin": [
             "-framework",
@@ -505,7 +506,10 @@ cc_library(
         "-DRUBY",
     ],
     linkopts = select({
-        ":linux": ["-lpthread"],
+        ":linux": [
+            "-lpthread",
+            "-ldl",
+        ],
         ":darwin": [
             "-framework",
             "Foundation",
