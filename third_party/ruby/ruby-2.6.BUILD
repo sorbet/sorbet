@@ -295,7 +295,7 @@ cc_binary(
         ":miniruby_private_headers",
         ":ruby_headers",
         ":ruby_private_headers",
-        "@zlib",
+        "@zlib_static//:zlib",
     ],
 )
 
@@ -556,7 +556,7 @@ cc_library(
         ":ext/digest",
         ":ext/psych",
         ":ext/strscan",
-        "@zlib//:zlib",
+        "@zlib_static//:zlib",
     ] + select({
         ":linux": [":ruby_crypt"],
         ":darwin": [],
@@ -1044,7 +1044,7 @@ cc_library(
     linkstatic = 1,
     deps = [
         ":ruby_headers",
-        "@zlib",
+        "@zlib_static//:zlib",
     ],
 )
 

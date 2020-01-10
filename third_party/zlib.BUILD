@@ -25,5 +25,6 @@ cc_library(
         "-Wno-implicit-function-declaration",
     ],
     includes = ["."],
+    linkstatic = 1,
     visibility = ["//visibility:public"],
 )
