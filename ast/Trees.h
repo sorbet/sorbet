@@ -588,7 +588,8 @@ public:
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
     // For constants that failed resolution, symbol will be set to StubModule and resolutionScope
     // will be set to whatever nesting scope we estimate the constant could have been defined in.
-    InlinedVector<core::SymbolRef, 1> resolutionScope;
+    using ResolutionScope = InlinedVector<core::SymbolRef, 1>;
+    ResolutionScope resolutionScope;
     std::unique_ptr<UnresolvedConstantLit> original;
 
     ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
