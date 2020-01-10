@@ -4,7 +4,6 @@
 
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
-common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
@@ -216,10 +215,6 @@ build:backtracesymbols --spawn_strategy=standalone
 build:backtracesymbols --genrule_strategy=standalone
 
 build --strip=never
-
-# Enable nice UIs. Taken from bazel.rc of Bazel itself.
-common --experimental_ui --experimental_ui_actions_shown 8
-common --show_progress_rate_limit=0.25
 
 ##
 ## Fuzzing

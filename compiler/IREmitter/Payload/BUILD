@@ -52,8 +52,11 @@ cc_library(
         "-fPIC",
         "-march=x86-64",
     ],
+
+    # disable opt flags, as they add `-ffunction-sections` and `-fdata-sections`
+    # See https://github.com/bazelbuild/bazel/issues/8706 for why `nocopts` is gone
+    features = ["-opt"],
     linkstatic = 1,  # we are doing this only for llvm ir
-    nocopts = "-f.*-sections",
     visibility = ["//visibility:public"],
     deps = [
         "@ruby_2_6_3//:ruby_headers",

@@ -20,8 +20,7 @@ _clang_tool = rule(
     _clang_tool_impl,
     attrs = {
         "tool": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             cfg = "host",
         ),
     },
