@@ -74,14 +74,19 @@ cc_toolchain(
     name = "webasm_toolchain_darwin",
     all_files = ":all-darwin",
     compiler_files = ":all-darwin",
-    cpu = "webasm-darwin",
     dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
     linker_files = ":all-darwin",
     objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
     tags = ["manual"],
+    toolchain_config = "darwin-wasm",
     toolchain_identifier = "webasm-toolchain",
+)
+
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
+
+cc_toolchain_config(
+    name = "darwin-wasm",
+    cpu = "webasm",
 )

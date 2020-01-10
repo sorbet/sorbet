@@ -74,14 +74,19 @@ cc_toolchain(
     name = "webasm_toolchain_linux",
     all_files = ":all-linux",
     compiler_files = ":all-linux",
-    cpu = "webasm-linux",
     dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
     linker_files = ":all-linux",
     objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
     tags = ["manual"],
+    toolchain_config = "wasm-linux",
     toolchain_identifier = "webasm-toolchain",
+)
+
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
+
+cc_toolchain_config(
+    name = "wasm-linux",
+    cpu = "webasm",
 )

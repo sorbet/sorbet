@@ -33,14 +33,14 @@ cc_library(
     includes = [
         "googletest/include",
     ],
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":gtest_prod",
     ],
-    linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
 )
 
 cc_library(
@@ -49,14 +49,14 @@ cc_library(
     srcs = [
         "googletest/src/gtest_main.cc",
     ],
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":gtest",
     ],
-    linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
 )
 
 cc_library(
@@ -64,11 +64,11 @@ cc_library(
     hdrs = [
         "googletest/include/gtest/gtest_prod.h",
     ],
-    visibility = ["//visibility:public"],
     linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -99,14 +99,14 @@ cc_library(
     includes = [
         "googlemock/include",
     ],
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":gtest",
     ],
-    linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
 )
 
 cc_library(
@@ -114,12 +114,12 @@ cc_library(
     srcs = [
         "googlemock/src/gmock_main.cc",
     ],
+    linkstatic = select({
+        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":gmock",
     ],
-    linkstatic = select({
-            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-            "//conditions:default": 1,
-        }),
 )

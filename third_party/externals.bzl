@@ -35,9 +35,9 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "d7a221b3d4fb4f05b7473795ccea9e05dab3b8721f6286a95fffbffc2d926f8b",
-        strip_prefix = "protobuf-3.6.1",
-        urls = ["https://github.com/google/protobuf/archive/v3.6.1.zip"],
+        sha256 = "e4f8bedb19a93d0dccc359a126f51158282e0b24d92e0cad9c76a9699698268d",
+        strip_prefix = "protobuf-3.11.2",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.2.zip"],
     )
 
     new_git_repository(
@@ -45,7 +45,7 @@ def register_sorbet_dependencies():
         remote = "https://github.com/google/libprotobuf-mutator.git",
         commit = "d761b622751ae8c226db3d8daaaf4c6aab5e5243",
         build_file = "@com_stripe_ruby_typer//third_party:libprotobuf-mutator.BUILD",
-        shallow_since = "1549313935 -0800",
+        shallow_since = "1564447427 -0700",
     )
 
     new_git_repository(
@@ -130,13 +130,13 @@ def register_sorbet_dependencies():
     new_git_repository(
         name = "compdb",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
-        commit = "7bc80f9355b09466fffabce24d463d65e37fcc0f",
+        commit = "0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
         build_file_content = (
             """
 package(default_visibility = ["//visibility:public"])
 """
         ),
-        shallow_since = "1541620420 -0800",
+        shallow_since = "1571098200 -0700",
     )
 
     # NOTE: using this branch:
@@ -144,22 +144,22 @@ package(default_visibility = ["//visibility:public"])
     git_repository(
         name = "com_grail_bazel_toolchain",
         remote = "https://github.com/DarkDimius/bazel-toolchain.git",
-        commit = "4db2af1249fa1c20f5f12830e4ad209e56c870a4",
-        shallow_since = "1571938947 -0700",
+        commit = "dce4dc28a78fc7d2c89439cf40327e2b3da20d5c",
+        shallow_since = "1578516414 -0800",
     )
 
     git_repository(
         name = "io_bazel_rules_go",
         remote = "https://github.com/bazelbuild/rules_go.git",
-        commit = "153c823428660f14b6e028cc71086833e445b2da",
-        shallow_since = "1545156968 -0500",
+        commit = "dd4fb4f8128b83f189f7bdda663e65b915a6d3c4",
+        shallow_since = "1575558387 -0500",
     )
 
     git_repository(
         name = "com_github_bazelbuild_buildtools",
         remote = "https://github.com/bazelbuild/buildifier.git",
-        commit = "8a1359dc25add12a6e724f6a2bded60fbc23d08a",
-        shallow_since = "1537534502 +0200",
+        commit = "5bcc31df55ec1de770cb52887f2e989e7068301f",
+        shallow_since = "1568030193 +0200",
     )
 
     # optimized version of blake2 hashing algorithm
@@ -221,24 +221,22 @@ package(default_visibility = ["//visibility:public"])
     )
 
     git_repository(
-        name = "io_bazel_rules_ragel",
+        name = "rules_ragel",
         remote = "https://github.com/jmillikin/rules_ragel.git",
-        commit = "5723d752a53dd8e25eb4509f3ed869196a06cb2a",
-        shallow_since = "1547960305 -0800",
+        commit = "f99f17fcad2e155646745f4827ac636a3b5d4d15",
+        shallow_since = "1572758547 +0900",
     )
 
-    git_repository(
-        name = "io_bazel_rules_bison",
-        remote = "https://github.com/jmillikin/rules_bison.git",
-        commit = "3809da0cea172c320f1fb7cd94bcb9be97897b14",
-        shallow_since = "1549513081 -0800",
+    http_archive(
+        name = "rules_bison",
+        urls = ["https://github.com/jmillikin/rules_bison/releases/download/v0.2/rules_bison-v0.2.tar.xz"],
+        sha256 = "6ee9b396f450ca9753c3283944f9a6015b61227f8386893fb59d593455141481",
     )
 
-    git_repository(
-        name = "io_bazel_rules_m4",
-        remote = "https://github.com/jmillikin/rules_m4",
-        commit = "ae19f8df57f680c6dbad4887e162ca17ee97a13e",
-        shallow_since = "1549512390 -0800",
+    http_archive(
+        name = "rules_m4",
+        urls = ["https://github.com/jmillikin/rules_m4/releases/download/v0.2/rules_m4-v0.2.tar.xz"],
+        sha256 = "c67fa9891bb19e9e6c1050003ba648d35383b8cb3c9572f397ad24040fb7f0eb",
     )
 
     new_git_repository(
