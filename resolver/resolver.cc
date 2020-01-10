@@ -565,7 +565,7 @@ private:
     }
 
 public:
-    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
+    ResolveConstantsWalk(core::Context ctx) : nesting_(nullptr) {}
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         nesting_ = make_unique<Nesting>(std::move(nesting_), original->symbol);
