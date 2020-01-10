@@ -102,7 +102,7 @@ InsSeq{
               cnst = <C <U DOES_NOT_EXIST>>
             }
             symbol = ::Sorbet::Private::Static::StubModule
-            resolutionScope = ::A
+            resolutionScope = [::A, ::<root>, ::<root>]
           }
         }
 

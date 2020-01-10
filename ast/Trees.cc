@@ -1,4 +1,5 @@
 #include "ast/Trees.h"
+#include "common/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
 #include <sstream>
@@ -596,10 +597,12 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
-    // TODO(jez) print all of resolution scope
     if (!resolutionScope.empty()) {
         printTabs(buf, tabs + 1);
-        buf << "resolutionScope = " << this->resolutionScope.front().data(gs)->showFullName(gs) << '\n';
+        buf << "resolutionScope = "
+            << fmt::format("[{}]", fmt::map_join(this->resolutionScope.begin(), this->resolutionScope.end(), ", ",
+                                                 [&](auto sym) { return sym.data(gs)->showFullName(gs); }))
+            << '\n';
     }
     printTabs(buf, tabs);
 
