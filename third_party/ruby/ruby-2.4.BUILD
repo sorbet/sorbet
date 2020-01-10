@@ -1016,7 +1016,7 @@ cc_library(
     linkstatic = 1,
     deps = [
         ":ruby_headers",
-        "@zlib",
+        "@zlib_static//:zlib",
     ],
 )
 
