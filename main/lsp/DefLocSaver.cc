@@ -89,9 +89,11 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             core::SymbolRef scope;
-            if (lit->resolutionScope.exists()) {
-                ENFORCE(symbol == core::Symbols::StubModule());
-                scope = lit->resolutionScope;
+            if (symbol == core::Symbols::StubModule()) {
+                ENFORCE(!lit->resolutionScope.empty());
+                // TODO(jez) The whole point is that we don't want front() here.
+                // TODO(jez) If front() is noSymbol, it means they're trying to complete A::B| when A doesn't exist.
+                scope = lit->resolutionScope.front();
             } else {
                 scope = symbol.data(ctx)->owner;
             }
