@@ -586,10 +586,10 @@ private:
 class ConstantLit final : public Expression {
 public:
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
-    // For constants that failed resolution, symbol will be set to StubModule and resolutionScope
+    // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
     // will be set to whatever nesting scope we estimate the constant could have been defined in.
-    using ResolutionScope = InlinedVector<core::SymbolRef, 1>;
-    ResolutionScope resolutionScope;
+    using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
+    ResolutionScopes resolutionScopes;
     std::unique_ptr<UnresolvedConstantLit> original;
 
     ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
