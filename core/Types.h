@@ -155,6 +155,7 @@ public:
     static TypePtr lubAll(Context ctx, std::vector<TypePtr> &elements);
     static TypePtr arrayOf(Context ctx, const TypePtr &elem);
     static TypePtr hashOf(Context ctx, const TypePtr &elem);
+    static TypePtr dropNil(Context ctx, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */
     static TypePtr widen(Context ctx, const TypePtr &type);

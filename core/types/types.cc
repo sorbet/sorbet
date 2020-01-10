@@ -280,6 +280,10 @@ TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), targs);
 }
 
+TypePtr Types::dropNil(Context ctx, const TypePtr &from) {
+    return Types::dropSubtypesOf(ctx, from, Symbols::NilClass());
+}
+
 std::optional<int> Types::getProcArity(const AppliedType &type) {
     for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
         if (type.klass == Symbols::Proc(i)) {
