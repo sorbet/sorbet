@@ -619,6 +619,34 @@ bool isTEnumName(const core::GlobalState &gs, core::NameRef name) {
            original.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::TEnum;
 }
 
+bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::SymbolRef sym) {
+    if (!sym.exists()) {
+        return false;
+    }
+
+    if (!(sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
+        return false;
+    }
+
+    auto name = sym.data(gs)->name;
+    if (name.data(gs)->kind != core::NameKind::CONSTANT) {
+        return false;
+    }
+
+    if (isTEnumName(gs, name)) {
+        // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
+        // This manifests as showing two completion results when we should only show one, so skip the bad kind.
+        return false;
+    }
+
+    if (hasAngleBrackets(name.data(gs)->shortName(gs))) {
+        // Gets rid of classes like `<Magic>`; they can't be typed by a user anyways.
+        return false;
+    }
+
+    return hasSimilarName(gs, name, prefix);
+}
+
 } // namespace
 
 unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
@@ -685,45 +713,18 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDel
     return item;
 }
 
-void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
-                                  const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
+void LSPLoop::findSimilarConstants(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
+                                   const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     auto prefix = resp.name.data(gs)->shortName(gs);
     config->logger->debug("Looking for constant similar to {}", prefix);
     ENFORCE(!resp.scopes.empty());
     for (auto scope : resp.scopes) {
         // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
         // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
-            auto sym = member.second;
-            if (!sym.exists()) {
-                continue;
+        for (auto [_name, sym] : scope.data(gs)->membersStableOrderSlow(gs)) {
+            if (isSimilarConstant(gs, prefix, sym)) {
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }
-
-            if (!(sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
-                continue;
-            }
-
-            auto memberName = sym.data(gs)->name;
-            if (memberName.data(gs)->kind != core::NameKind::CONSTANT) {
-                continue;
-            }
-
-            if (isTEnumName(gs, memberName)) {
-                // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
-                // This manifests as showing two completion results when we should only show one, so skip the bad kind.
-                continue;
-            }
-
-            if (hasAngleBrackets(memberName.data(gs)->shortName(gs))) {
-                // Gets rid of classes like `<Magic>`; they can't be typed by a user anyways.
-                continue;
-            }
-
-            if (!hasSimilarName(gs, memberName, prefix)) {
-                continue;
-            }
-
-            items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
         }
     }
 }
@@ -845,7 +846,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
             response->result = std::move(emptyResult);
             return response;
         }
-        findSimilarConstant(gs, *constantResp, queryLoc, items);
+        findSimilarConstants(gs, *constantResp, queryLoc, items);
     }
 
     response->result = make_unique<CompletionList>(false, move(items));
