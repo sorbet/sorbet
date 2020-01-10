@@ -58,7 +58,6 @@ gemfile_lock_deps(
             "partial/rails6",
             "partial/rails-double-require",
             "partial/real_singleton_class",
-            "partial/require_relative",
             "partial/rspec-lots",
             "partial/stack_master",
             "partial/stupidedi",
