@@ -68,6 +68,10 @@ class MyTest
     y = x # error: Only valid `it`-blocks can appear within `test_each`
   end
 
+  test_each_hash({}) do |k, v|
+    y = k + v # error: Only valid `it`-blocks can appear within `test_each_hash`
+  end
+
   test_each CONST_LIST do |value|
     x = value.foo  # error: Only valid `it`-blocks can appear within `test_each`
     it "fails with non-it statements" do
