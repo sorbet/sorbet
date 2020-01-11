@@ -324,7 +324,7 @@ VALUE sorbet_getConstantAt(VALUE mod, ID id) __attribute__((noinline)) {
     int recur = 1;
     int DISABLED_CODE = 0;
 
-    name = ID2SYM(id);
+    name = rb_id2str(id);
     enc = rb_enc_get(name);
     path = rb_id2name(id);
 
