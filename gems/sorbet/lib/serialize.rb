@@ -238,7 +238,7 @@ class Sorbet::Private::Serialize
     ret = String.new
     if !valid_method_name(name)
       ret << "# Illegal method name: #{name}"
-      return
+      return ret
     end
     parameters = from_method(method)
     # a hack for appeasing Sorbet in the presence of the Enumerable interface
