@@ -237,7 +237,7 @@ class Sorbet::Private::Serialize
     name = method.name.to_s
     ret = String.new
     if !valid_method_name(name)
-      ret << "# Illegal method name: #{name}"
+      ret << "# Illegal method name: #{name}\n"
       return ret
     end
     parameters = from_method(method)
