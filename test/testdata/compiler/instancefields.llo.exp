@@ -199,7 +199,7 @@ declare i64 @rb_ivar_set(i64, i64, i64) local_unnamed_addr #0
 
 ; Function Attrs: noinline nounwind ssp uwtable
 define internal fastcc i64 @sorbet_getConstantAt(i64 %0, i64 %1) unnamed_addr #3 {
-  %3 = tail call i64 @rb_id2sym(i64 %1) #17
+  %3 = tail call i64 @rb_id2str(i64 %1) #17
   %4 = tail call %struct.OnigEncodingTypeST* @rb_enc_get(i64 %3) #17
   %5 = tail call i8* @rb_id2name(i64 %1) #17
   %6 = tail call i64 @strlen(i8* nonnull dereferenceable(1) %5)
@@ -396,6 +396,8 @@ rb_class_of.exit:                                 ; preds = %91
   %118 = phi i64 [ %0, %2 ], [ %116, %115 ]
   ret i64 %118
 }
+
+declare i64 @rb_id2str(i64) local_unnamed_addr #0
 
 declare %struct.OnigEncodingTypeST* @rb_enc_get(i64) local_unnamed_addr #0
 
