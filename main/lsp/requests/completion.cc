@@ -718,10 +718,40 @@ void LSPLoop::findSimilarConstants(const core::GlobalState &gs, const core::lsp:
     auto prefix = resp.name.data(gs)->shortName(gs);
     config->logger->debug("Looking for constant similar to {}", prefix);
     ENFORCE(!resp.scopes.empty());
+
+    if (resp.scopes.size() == 1 && !resp.scopes[0].exists()) {
+        // This happens when there was a contant literal like C::D but `C` itself was stubbed,
+        // so we have no idea what `D` is or what its resolution scope is.
+        return;
+    }
+
     for (auto scope : resp.scopes) {
         // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
         // We should probably at least sort by whether the prefix of the suggested constant matches.
         for (auto [_name, sym] : scope.data(gs)->membersStableOrderSlow(gs)) {
+            if (isSimilarConstant(gs, prefix, sym)) {
+                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+            }
+        }
+    }
+
+    if (resp.scopes.size() == 1) {
+        // If scope is size one, that means we were either given an explicit scope (::A, B::C),
+        // or we've been requested to resolve a bare constant at the top level.
+        // In either case, we want to skip looking through ancestors and instead suggest constants only on that scope.
+        return;
+    }
+
+    int i = -1;
+    for (auto ancestor : ancestors(gs, resp.scopes[0])) {
+        i++;
+
+        if (i == 0) {
+            // Skip first ancestor; it already showed up in the search over nesting scope.
+            continue;
+        }
+
+        for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
                 items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
             }

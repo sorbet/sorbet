@@ -8,14 +8,12 @@ module MixinB
   include MixinA
 
   YY # error: Unable to resolve
-  # ^ completion: (nothing)
-  # TODO(jez) This should be YYY
+  # ^ completion: YYY
 end
 
 class Has_Result_via_B_via_A
   include MixinB
 
   YY # error: Unable to resolve
-  # ^ completion: (nothing)
-  # TODO(jez) This should be YYY
+  # ^ completion: YYY
 end
