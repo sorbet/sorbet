@@ -241,7 +241,7 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-std::string TypeConstraint::toString(Context ctx) const {
+std::string TypeConstraint::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "upperBounds: [{}]\n",
                    fmt::map_join(
