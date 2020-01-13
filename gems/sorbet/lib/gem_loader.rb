@@ -148,6 +148,9 @@ class Sorbet::Private::GemLoader
       my_require 'sinatra/multi_route'
       my_require 'sinatra/contrib/version'
     end,
+    'sqreen' => proc do
+      puts "Sqreen is incompatible with Sorbet"
+    end,
     'thin-attach_socket' => proc do
       my_require 'thin'
       my_require 'thin/attach_socket'
