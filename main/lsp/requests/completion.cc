@@ -872,10 +872,6 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
                                                        similarMethod.constr.get(), queryLoc, prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
-        if (!config->opts.lspAutocompleteEnabled) {
-            response->result = std::move(emptyResult);
-            return response;
-        }
         findSimilarConstants(gs, *constantResp, queryLoc, items);
     }
 

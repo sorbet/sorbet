@@ -74,8 +74,6 @@ Usage:
                                 disable file watching via Watchman
       --watchman-path arg       Path to watchman executable. Defaults to
                                 using `watchman` on your PATH. (default: watchman)
-      --enable-experimental-lsp-autocomplete
-                                Enable experimental LSP feature: Autocomplete
       --enable-experimental-lsp-document-symbol
                                 Enable experimental LSP feature: Document
                                 Symbol

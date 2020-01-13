@@ -336,8 +336,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("enable-experimental-lsp-autocomplete",
-                                    "Enable experimental LSP feature: Autocomplete");
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-document-highlight",
@@ -669,7 +667,6 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
-        opts.lspAutocompleteEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-autocomplete"].as<bool>();
         opts.lspQuickFixEnabled = opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();

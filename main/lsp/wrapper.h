@@ -37,7 +37,6 @@ protected:
 
 public:
     enum class LSPExperimentalFeature {
-        Autocomplete = 4,
         DocumentSymbol = 6,
         SignatureHelp = 7,
         QuickFix = 8,

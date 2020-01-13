@@ -146,7 +146,6 @@ unique_ptr<LSPMessage> MultiThreadedLSPWrapper::read(int timeoutMs) {
 }
 
 void LSPWrapper::enableAllExperimentalFeatures() {
-    enableExperimentalFeature(LSPExperimentalFeature::Autocomplete);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentHighlight);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
@@ -155,9 +154,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     switch (feature) {
-        case LSPExperimentalFeature::Autocomplete:
-            opts->lspAutocompleteEnabled = true;
-            break;
         case LSPExperimentalFeature::QuickFix:
             opts->lspQuickFixEnabled = true;
             break;
