@@ -302,7 +302,7 @@ entryInitializers:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 2, i32* %7, align 4, !tbaa !27
+  store i32 3, i32* %7, align 4, !tbaa !27
   %8 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %9 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %8, align 8, !tbaa !29
   %10 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 5, i32 0

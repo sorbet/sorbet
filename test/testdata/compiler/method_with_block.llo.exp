@@ -333,19 +333,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 3, i32* %7, align 4, !tbaa !21
+  store i32 4, i32* %7, align 4, !tbaa !21
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 4, i32* %11, align 4, !tbaa !21
+  store i32 5, i32* %11, align 4, !tbaa !21
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 5, i32* %15, align 4, !tbaa !21
+  store i32 6, i32* %15, align 4, !tbaa !21
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !23
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -447,19 +447,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 7, i32* %7, align 4, !tbaa !21
+  store i32 8, i32* %7, align 4, !tbaa !21
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 8, i32* %11, align 4, !tbaa !21
+  store i32 9, i32* %11, align 4, !tbaa !21
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 9, i32* %15, align 4, !tbaa !21
+  store i32 10, i32* %15, align 4, !tbaa !21
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !23
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -556,19 +556,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 11, i32* %7, align 4, !tbaa !21
+  store i32 12, i32* %7, align 4, !tbaa !21
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 12, i32* %11, align 4, !tbaa !21
+  store i32 13, i32* %11, align 4, !tbaa !21
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 13, i32* %15, align 4, !tbaa !21
+  store i32 14, i32* %15, align 4, !tbaa !21
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !23
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -672,19 +672,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 15, i32* %7, align 4, !tbaa !21
+  store i32 16, i32* %7, align 4, !tbaa !21
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 16, i32* %11, align 4, !tbaa !21
+  store i32 17, i32* %11, align 4, !tbaa !21
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 17, i32* %15, align 4, !tbaa !21
+  store i32 18, i32* %15, align 4, !tbaa !21
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !23
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -1006,14 +1006,14 @@ vector.body:                                      ; preds = %entryInitializers
   %21 = bitcast i8* %20 to i32*
   %22 = getelementptr inbounds i8, i8* %4, i64 56
   %23 = bitcast i8* %22 to i32*
-  store i32 3, i32* %9, align 4, !tbaa !21, !alias.scope !44
-  store i32 4, i32* %11, align 4, !tbaa !21, !alias.scope !44
-  store i32 5, i32* %13, align 4, !tbaa !21, !alias.scope !44
-  store i32 6, i32* %15, align 4, !tbaa !21, !alias.scope !44
-  store i32 7, i32* %17, align 4, !tbaa !21, !alias.scope !44
-  store i32 8, i32* %19, align 4, !tbaa !21, !alias.scope !44
-  store i32 9, i32* %21, align 4, !tbaa !21, !alias.scope !44
-  store i32 10, i32* %23, align 4, !tbaa !21, !alias.scope !44
+  store i32 4, i32* %9, align 4, !tbaa !21, !alias.scope !44
+  store i32 5, i32* %11, align 4, !tbaa !21, !alias.scope !44
+  store i32 6, i32* %13, align 4, !tbaa !21, !alias.scope !44
+  store i32 7, i32* %15, align 4, !tbaa !21, !alias.scope !44
+  store i32 8, i32* %17, align 4, !tbaa !21, !alias.scope !44
+  store i32 9, i32* %19, align 4, !tbaa !21, !alias.scope !44
+  store i32 10, i32* %21, align 4, !tbaa !21, !alias.scope !44
+  store i32 11, i32* %23, align 4, !tbaa !21, !alias.scope !44
   %24 = getelementptr inbounds i8, i8* %6, i64 32
   %25 = bitcast i8* %24 to <8 x i32>*
   store <8 x i32> <i32 8, i32 9, i32 10, i32 11, i32 12, i32 13, i32 14, i32 15>, <8 x i32>* %25, align 4, !tbaa !0, !alias.scope !41, !noalias !44
@@ -1033,14 +1033,14 @@ vector.body:                                      ; preds = %entryInitializers
   %39 = bitcast i8* %38 to i32*
   %40 = getelementptr inbounds i8, i8* %4, i64 120
   %41 = bitcast i8* %40 to i32*
-  store i32 11, i32* %27, align 4, !tbaa !21, !alias.scope !44
-  store i32 12, i32* %29, align 4, !tbaa !21, !alias.scope !44
-  store i32 13, i32* %31, align 4, !tbaa !21, !alias.scope !44
-  store i32 14, i32* %33, align 4, !tbaa !21, !alias.scope !44
-  store i32 15, i32* %35, align 4, !tbaa !21, !alias.scope !44
-  store i32 16, i32* %37, align 4, !tbaa !21, !alias.scope !44
-  store i32 17, i32* %39, align 4, !tbaa !21, !alias.scope !44
-  store i32 18, i32* %41, align 4, !tbaa !21, !alias.scope !44
+  store i32 12, i32* %27, align 4, !tbaa !21, !alias.scope !44
+  store i32 13, i32* %29, align 4, !tbaa !21, !alias.scope !44
+  store i32 14, i32* %31, align 4, !tbaa !21, !alias.scope !44
+  store i32 15, i32* %33, align 4, !tbaa !21, !alias.scope !44
+  store i32 16, i32* %35, align 4, !tbaa !21, !alias.scope !44
+  store i32 17, i32* %37, align 4, !tbaa !21, !alias.scope !44
+  store i32 18, i32* %39, align 4, !tbaa !21, !alias.scope !44
+  store i32 19, i32* %41, align 4, !tbaa !21, !alias.scope !44
   %42 = getelementptr inbounds i8, i8* %6, i64 64
   %43 = bitcast i8* %42 to <8 x i32>*
   store <8 x i32> <i32 16, i32 17, i32 18, i32 19, i32 20, i32 21, i32 22, i32 23>, <8 x i32>* %43, align 4, !tbaa !0, !alias.scope !41, !noalias !44
@@ -1060,14 +1060,14 @@ vector.body:                                      ; preds = %entryInitializers
   %57 = bitcast i8* %56 to i32*
   %58 = getelementptr inbounds i8, i8* %4, i64 184
   %59 = bitcast i8* %58 to i32*
-  store i32 19, i32* %45, align 4, !tbaa !21, !alias.scope !44
-  store i32 20, i32* %47, align 4, !tbaa !21, !alias.scope !44
-  store i32 21, i32* %49, align 4, !tbaa !21, !alias.scope !44
-  store i32 22, i32* %51, align 4, !tbaa !21, !alias.scope !44
-  store i32 23, i32* %53, align 4, !tbaa !21, !alias.scope !44
-  store i32 24, i32* %55, align 4, !tbaa !21, !alias.scope !44
-  store i32 25, i32* %57, align 4, !tbaa !21, !alias.scope !44
-  store i32 26, i32* %59, align 4, !tbaa !21, !alias.scope !44
+  store i32 20, i32* %45, align 4, !tbaa !21, !alias.scope !44
+  store i32 21, i32* %47, align 4, !tbaa !21, !alias.scope !44
+  store i32 22, i32* %49, align 4, !tbaa !21, !alias.scope !44
+  store i32 23, i32* %51, align 4, !tbaa !21, !alias.scope !44
+  store i32 24, i32* %53, align 4, !tbaa !21, !alias.scope !44
+  store i32 25, i32* %55, align 4, !tbaa !21, !alias.scope !44
+  store i32 26, i32* %57, align 4, !tbaa !21, !alias.scope !44
+  store i32 27, i32* %59, align 4, !tbaa !21, !alias.scope !44
   br label %scalar.ph.prol.preheader
 
 scalar.ph.prol.preheader:                         ; preds = %entryInitializers, %vector.body
@@ -1079,7 +1079,7 @@ scalar.ph.prol:                                   ; preds = %scalar.ph.prol, %sc
   %60 = phi i64 [ %65, %scalar.ph.prol ], [ %.ph, %scalar.ph.prol.preheader ]
   %prol.iter = phi i64 [ %prol.iter.sub, %scalar.ph.prol ], [ 6, %scalar.ph.prol.preheader ]
   %61 = trunc i64 %60 to i32
-  %62 = add nsw i32 %61, 3
+  %62 = add nsw i32 %61, 4
   %63 = getelementptr inbounds i32, i32* %7, i64 %60
   store i32 %61, i32* %63, align 4, !tbaa !0
   %64 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %60, i32 0
@@ -1095,56 +1095,56 @@ scalar.ph.prol.loopexit:                          ; preds = %scalar.ph.prol
 scalar.ph:                                        ; preds = %scalar.ph.prol.loopexit, %scalar.ph
   %66 = phi i64 [ %106, %scalar.ph ], [ %65, %scalar.ph.prol.loopexit ]
   %67 = trunc i64 %66 to i32
-  %68 = add nsw i32 %67, 3
+  %68 = add nsw i32 %67, 4
   %69 = getelementptr inbounds i32, i32* %7, i64 %66
   store i32 %67, i32* %69, align 4, !tbaa !0
   %70 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %66, i32 0
   store i32 %68, i32* %70, align 4, !tbaa !21
   %71 = add nuw nsw i64 %66, 1
   %72 = trunc i64 %71 to i32
-  %73 = add nsw i32 %72, 3
+  %73 = add nsw i32 %72, 4
   %74 = getelementptr inbounds i32, i32* %7, i64 %71
   store i32 %72, i32* %74, align 4, !tbaa !0
   %75 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %71, i32 0
   store i32 %73, i32* %75, align 4, !tbaa !21
   %76 = add nuw nsw i64 %66, 2
   %77 = trunc i64 %76 to i32
-  %78 = add nsw i32 %77, 3
+  %78 = add nsw i32 %77, 4
   %79 = getelementptr inbounds i32, i32* %7, i64 %76
   store i32 %77, i32* %79, align 4, !tbaa !0
   %80 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %76, i32 0
   store i32 %78, i32* %80, align 4, !tbaa !21
   %81 = add nuw nsw i64 %66, 3
   %82 = trunc i64 %81 to i32
-  %83 = add nsw i32 %82, 3
+  %83 = add nsw i32 %82, 4
   %84 = getelementptr inbounds i32, i32* %7, i64 %81
   store i32 %82, i32* %84, align 4, !tbaa !0
   %85 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %81, i32 0
   store i32 %83, i32* %85, align 4, !tbaa !21
   %86 = add nuw nsw i64 %66, 4
   %87 = trunc i64 %86 to i32
-  %88 = add nsw i32 %87, 3
+  %88 = add nsw i32 %87, 4
   %89 = getelementptr inbounds i32, i32* %7, i64 %86
   store i32 %87, i32* %89, align 4, !tbaa !0
   %90 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %86, i32 0
   store i32 %88, i32* %90, align 4, !tbaa !21
   %91 = add nuw nsw i64 %66, 5
   %92 = trunc i64 %91 to i32
-  %93 = add nsw i32 %92, 3
+  %93 = add nsw i32 %92, 4
   %94 = getelementptr inbounds i32, i32* %7, i64 %91
   store i32 %92, i32* %94, align 4, !tbaa !0
   %95 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %91, i32 0
   store i32 %93, i32* %95, align 4, !tbaa !21
   %96 = add nuw nsw i64 %66, 6
   %97 = trunc i64 %96 to i32
-  %98 = add nsw i32 %97, 3
+  %98 = add nsw i32 %97, 4
   %99 = getelementptr inbounds i32, i32* %7, i64 %96
   store i32 %97, i32* %99, align 4, !tbaa !0
   %100 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %96, i32 0
   store i32 %98, i32* %100, align 4, !tbaa !21
   %101 = add nuw nsw i64 %66, 7
   %102 = trunc i64 %101 to i32
-  %103 = add nsw i32 %102, 3
+  %103 = add nsw i32 %102, 4
   %104 = getelementptr inbounds i32, i32* %7, i64 %101
   store i32 %102, i32* %104, align 4, !tbaa !0
   %105 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %5, i64 %101, i32 0

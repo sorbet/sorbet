@@ -207,31 +207,31 @@ entryInitializers:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 2, i32* %7, align 4, !tbaa !18
+  store i32 3, i32* %7, align 4, !tbaa !18
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 3, i32* %11, align 4, !tbaa !18
+  store i32 4, i32* %11, align 4, !tbaa !18
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 4, i32* %15, align 4, !tbaa !18
+  store i32 5, i32* %15, align 4, !tbaa !18
   %16 = getelementptr inbounds i8, i8* %5, i64 12
   %17 = bitcast i8* %16 to i32*
   store i32 3, i32* %17, align 4, !tbaa !0
   %18 = getelementptr inbounds i8, i8* %4, i64 24
   %19 = bitcast i8* %18 to i32*
-  store i32 5, i32* %19, align 4, !tbaa !18
+  store i32 6, i32* %19, align 4, !tbaa !18
   %20 = getelementptr inbounds i8, i8* %5, i64 16
   %21 = bitcast i8* %20 to i32*
   store i32 4, i32* %21, align 4, !tbaa !0
   %22 = getelementptr inbounds i8, i8* %4, i64 32
   %23 = bitcast i8* %22 to i32*
-  store i32 6, i32* %23, align 4, !tbaa !18
+  store i32 7, i32* %23, align 4, !tbaa !18
   %24 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %25 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %24, align 8, !tbaa !20
   %26 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %25, i64 0, i32 5, i32 0

@@ -538,91 +538,91 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 3, i32* %7, align 4, !tbaa !19
+  store i32 4, i32* %7, align 4, !tbaa !19
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 4, i32* %11, align 4, !tbaa !19
+  store i32 5, i32* %11, align 4, !tbaa !19
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 5, i32* %15, align 4, !tbaa !19
+  store i32 6, i32* %15, align 4, !tbaa !19
   %16 = getelementptr inbounds i8, i8* %5, i64 12
   %17 = bitcast i8* %16 to i32*
   store i32 3, i32* %17, align 4, !tbaa !0
   %18 = getelementptr inbounds i8, i8* %4, i64 24
   %19 = bitcast i8* %18 to i32*
-  store i32 6, i32* %19, align 4, !tbaa !19
+  store i32 7, i32* %19, align 4, !tbaa !19
   %20 = getelementptr inbounds i8, i8* %5, i64 16
   %21 = bitcast i8* %20 to i32*
   store i32 4, i32* %21, align 4, !tbaa !0
   %22 = getelementptr inbounds i8, i8* %4, i64 32
   %23 = bitcast i8* %22 to i32*
-  store i32 7, i32* %23, align 4, !tbaa !19
+  store i32 8, i32* %23, align 4, !tbaa !19
   %24 = getelementptr inbounds i8, i8* %5, i64 20
   %25 = bitcast i8* %24 to i32*
   store i32 5, i32* %25, align 4, !tbaa !0
   %26 = getelementptr inbounds i8, i8* %4, i64 40
   %27 = bitcast i8* %26 to i32*
-  store i32 8, i32* %27, align 4, !tbaa !19
+  store i32 9, i32* %27, align 4, !tbaa !19
   %28 = getelementptr inbounds i8, i8* %5, i64 24
   %29 = bitcast i8* %28 to i32*
   store i32 6, i32* %29, align 4, !tbaa !0
   %30 = getelementptr inbounds i8, i8* %4, i64 48
   %31 = bitcast i8* %30 to i32*
-  store i32 9, i32* %31, align 4, !tbaa !19
+  store i32 10, i32* %31, align 4, !tbaa !19
   %32 = getelementptr inbounds i8, i8* %5, i64 28
   %33 = bitcast i8* %32 to i32*
   store i32 7, i32* %33, align 4, !tbaa !0
   %34 = getelementptr inbounds i8, i8* %4, i64 56
   %35 = bitcast i8* %34 to i32*
-  store i32 10, i32* %35, align 4, !tbaa !19
+  store i32 11, i32* %35, align 4, !tbaa !19
   %36 = getelementptr inbounds i8, i8* %5, i64 32
   %37 = bitcast i8* %36 to i32*
   store i32 8, i32* %37, align 4, !tbaa !0
   %38 = getelementptr inbounds i8, i8* %4, i64 64
   %39 = bitcast i8* %38 to i32*
-  store i32 11, i32* %39, align 4, !tbaa !19
+  store i32 12, i32* %39, align 4, !tbaa !19
   %40 = getelementptr inbounds i8, i8* %5, i64 36
   %41 = bitcast i8* %40 to i32*
   store i32 9, i32* %41, align 4, !tbaa !0
   %42 = getelementptr inbounds i8, i8* %4, i64 72
   %43 = bitcast i8* %42 to i32*
-  store i32 12, i32* %43, align 4, !tbaa !19
+  store i32 13, i32* %43, align 4, !tbaa !19
   %44 = getelementptr inbounds i8, i8* %5, i64 40
   %45 = bitcast i8* %44 to i32*
   store i32 10, i32* %45, align 4, !tbaa !0
   %46 = getelementptr inbounds i8, i8* %4, i64 80
   %47 = bitcast i8* %46 to i32*
-  store i32 13, i32* %47, align 4, !tbaa !19
+  store i32 14, i32* %47, align 4, !tbaa !19
   %48 = getelementptr inbounds i8, i8* %5, i64 44
   %49 = bitcast i8* %48 to i32*
   store i32 11, i32* %49, align 4, !tbaa !0
   %50 = getelementptr inbounds i8, i8* %4, i64 88
   %51 = bitcast i8* %50 to i32*
-  store i32 14, i32* %51, align 4, !tbaa !19
+  store i32 15, i32* %51, align 4, !tbaa !19
   %52 = getelementptr inbounds i8, i8* %5, i64 48
   %53 = bitcast i8* %52 to i32*
   store i32 12, i32* %53, align 4, !tbaa !0
   %54 = getelementptr inbounds i8, i8* %4, i64 96
   %55 = bitcast i8* %54 to i32*
-  store i32 15, i32* %55, align 4, !tbaa !19
+  store i32 16, i32* %55, align 4, !tbaa !19
   %56 = getelementptr inbounds i8, i8* %5, i64 52
   %57 = bitcast i8* %56 to i32*
   store i32 13, i32* %57, align 4, !tbaa !0
   %58 = getelementptr inbounds i8, i8* %4, i64 104
   %59 = bitcast i8* %58 to i32*
-  store i32 16, i32* %59, align 4, !tbaa !19
+  store i32 17, i32* %59, align 4, !tbaa !19
   %60 = getelementptr inbounds i8, i8* %5, i64 56
   %61 = bitcast i8* %60 to i32*
   store i32 14, i32* %61, align 4, !tbaa !0
   %62 = getelementptr inbounds i8, i8* %4, i64 112
   %63 = bitcast i8* %62 to i32*
-  store i32 17, i32* %63, align 4, !tbaa !19
+  store i32 18, i32* %63, align 4, !tbaa !19
   %64 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %65 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %64, align 8, !tbaa !21
   %66 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %65, i64 0, i32 5, i32 0
@@ -847,19 +847,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 4, i32* %7, align 4, !tbaa !19
+  store i32 5, i32* %7, align 4, !tbaa !19
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 5, i32* %11, align 4, !tbaa !19
+  store i32 6, i32* %11, align 4, !tbaa !19
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 6, i32* %15, align 4, !tbaa !19
+  store i32 7, i32* %15, align 4, !tbaa !19
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !21
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -946,19 +946,19 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 7, i32* %7, align 4, !tbaa !19
+  store i32 8, i32* %7, align 4, !tbaa !19
   %8 = getelementptr inbounds i8, i8* %5, i64 4
   %9 = bitcast i8* %8 to i32*
   store i32 1, i32* %9, align 4, !tbaa !0
   %10 = getelementptr inbounds i8, i8* %4, i64 8
   %11 = bitcast i8* %10 to i32*
-  store i32 8, i32* %11, align 4, !tbaa !19
+  store i32 9, i32* %11, align 4, !tbaa !19
   %12 = getelementptr inbounds i8, i8* %5, i64 8
   %13 = bitcast i8* %12 to i32*
   store i32 2, i32* %13, align 4, !tbaa !0
   %14 = getelementptr inbounds i8, i8* %4, i64 16
   %15 = bitcast i8* %14 to i32*
-  store i32 9, i32* %15, align 4, !tbaa !19
+  store i32 10, i32* %15, align 4, !tbaa !19
   %16 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %16, align 8, !tbaa !21
   %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 5, i32 0
@@ -991,7 +991,7 @@ sorbet_allocateRubyStackFrames.exit:
   %6 = bitcast i8* %5 to i32*
   store i32 0, i32* %6, align 4, !tbaa !0
   %7 = bitcast i8* %4 to i32*
-  store i32 3, i32* %7, align 4, !tbaa !19
+  store i32 4, i32* %7, align 4, !tbaa !19
   %8 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
   %9 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %8, align 8, !tbaa !21
   %10 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 5, i32 0
