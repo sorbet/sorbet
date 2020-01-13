@@ -689,8 +689,10 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
                                   const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     auto prefix = resp.name.data(gs)->shortName(gs);
     config->logger->debug("Looking for constant similar to {}", prefix);
-    auto scope = resp.scope;
-    do {
+    ENFORCE(!resp.scopes.empty());
+    for (auto scope : resp.scopes) {
+        // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
+        // We should probably at least sort by whether the prefix of the suggested constant matches.
         for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
             auto sym = member.second;
             if (!sym.exists()) {
@@ -723,8 +725,7 @@ void LSPLoop::findSimilarConstant(const core::GlobalState &gs, const core::lsp::
 
             items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
         }
-        scope = scope.data(gs)->owner;
-    } while (scope != core::Symbols::root());
+    }
 }
 
 unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,

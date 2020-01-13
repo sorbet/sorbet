@@ -12,7 +12,7 @@ module MixinB
   # TODO(jez) This should be YYY
 end
 
-class Has_YYY_via_B_via_A
+class Has_Result_via_B_via_A
   include MixinB
 
   YY # error: Unable to resolve
