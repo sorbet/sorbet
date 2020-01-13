@@ -4,8 +4,6 @@ title: Blocks, Procs and Lambda Types
 sidebar_label: Blocks, Procs, & Lambdas
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
-
 ```ruby
 T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)
 ```
@@ -165,3 +163,36 @@ end
 
 puts(upcased) # => "HELLO"
 ```
+
+## Proc.new vs proc
+
+In Ruby there's several ways to create a Proc: `proc` and `Proc.new`. Sorbet
+handles them differently because of how parameter arity works internally.
+Basically, you can use `T.proc` as the type for a `proc` (or `lambda {}` or
+`-> {}`), but you create your Proc using `Proc.new`, then the type is a `Proc`.
+
+The main downside of the `Proc.new` approach is that you can't set argument
+types on it.
+
+Here's an example:
+
+```ruby
+sig {returns(T.proc.params(a1: Integer).returns(Integer))}
+def lowercase_proc
+  # if you are using `proc`, use `T.proc` in your sig
+  # this is the preferred approach
+  proc {|n| n * 2 }
+end
+
+sig {returns(Proc)}
+def proc_dot_new
+  # if you are using `Proc.new`, use `Proc` in your sig
+  # note that you won't be able to define arguments/return types in your sig
+  # avoid this approach if possible
+  Proc.new {|n| n * 2 }
+end
+```
+
+In general, you're better off avoiding `Proc.new` if you can. There's a
+[rubocop rule](https://www.rubocop.org/en/stable/cops_style/#styleproc) you can
+use to enforce this.
