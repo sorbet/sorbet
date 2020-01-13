@@ -20,7 +20,7 @@ if [ "$#" -eq 0 ]; then
     # No args passed. Run `srb` to find the right place
     SRB_SORBET_EXE=$sorbet srb tc --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir"
 else
-    $sorbet --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" --force-compiled "$@"
+    $sorbet --silence-dev-message --no-error-count --llvm-ir-folder "$llvmir" "$@"
 fi
 
 outputfiles=$(find "$llvmir"/ -maxdepth 1 -name "*.so" -o -name "*.bundle")

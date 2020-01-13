@@ -64,7 +64,7 @@ info "* Stderr:  ${stderr}"
 
 info "--- Building Extension ---"
 if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
-  --force-compiled "${ruby_source[@]}" 2> "$stderr" > "$stdout" ; then
+  "${ruby_source[@]}" 2> "$stderr" > "$stdout" ; then
 
   info "--- Stdout ---"
   cat "$stdout"

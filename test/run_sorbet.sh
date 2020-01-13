@@ -41,7 +41,6 @@ fi
 command=( "${command[@]}" \
   --silence-dev-message \
   "--llvm-ir-folder=$llvmir" \
-  --force-compiled \
   "$@"  \
 )
 
