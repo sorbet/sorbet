@@ -168,7 +168,7 @@ void KnowledgeFact::sanityCheck() const {
     }
 }
 
-string KnowledgeFact::toString(core::Context ctx) const {
+string KnowledgeFact::toString(const core::GlobalState &gs) const {
     vector<string> buf1, buf2;
 
     for (auto &el : yesTypeTests) {
@@ -200,7 +200,7 @@ KnowledgeFact &KnowledgeRef::mutate() {
     return *knowledge.get();
 }
 
-string TestedKnowledge::toString(core::Context ctx) const {
+string TestedKnowledge::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
         fmt::format_to(buf, "  Being truthy entails:\n{}", truthy->toString(ctx));
@@ -223,7 +223,7 @@ void TestedKnowledge::sanityCheck() const {
     ENFORCE(TestedKnowledge::empty.truthy->yesTypeTests.empty());
 }
 
-string Environment::toString(core::Context ctx) const {
+string Environment::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     if (isDead) {
         fmt::format_to(buf, "dead={:d}\n", isDead);

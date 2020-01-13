@@ -55,7 +55,7 @@ struct KnowledgeFact {
 
     void sanityCheck() const;
 
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
 };
 
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
@@ -85,7 +85,7 @@ public:
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
 
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
 
     static TestedKnowledge empty; // optimization
 
@@ -131,7 +131,7 @@ public:
 
     UnorderedMap<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
 
     bool hasType(core::Context ctx, core::LocalVariable symbol) const;
 

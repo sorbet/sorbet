@@ -261,7 +261,7 @@ vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef 
     return scope;
 }
 
-string ParsedFile::toString(core::Context ctx) const {
+string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
 

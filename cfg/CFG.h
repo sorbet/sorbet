@@ -65,7 +65,7 @@ public:
         counterInc("basicblocks");
     };
 
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
     std::string showRaw(core::Context ctx) const;
 };
 
@@ -98,7 +98,7 @@ public:
     };
 
     // Abbreviated debug output, useful if you already know what you're looking at
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
     // Verbose debug output
     std::string showRaw(core::Context ctx) const;
 

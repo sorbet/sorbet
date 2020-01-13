@@ -142,7 +142,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 }
 
-string CFG::toString(core::Context ctx) const {
+string CFG::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->showFullName(ctx);
     fmt::format_to(buf,
@@ -208,7 +208,7 @@ string CFG::showRaw(core::Context ctx) const {
     return to_string(buf);
 }
 
-string BasicBlock::toString(core::Context ctx) const {
+string BasicBlock::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(
         buf, "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
