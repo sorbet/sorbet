@@ -66,7 +66,7 @@ public:
             }
         }
         if (print.CFG.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->toString(ctx.state));
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
@@ -1056,7 +1056,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        acc.constants.emplace_back(ctx.state, original->name.data(ctx.state));
+        acc.constants.emplace_back(ctx.state, original->name.data(ctx));
         return original;
     }
 
@@ -1070,7 +1070,7 @@ public:
 
     unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
         acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
-        original->name->showRaw(ctx.state);
+        original->name->showRaw(ctx);
 
         handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get()));
 

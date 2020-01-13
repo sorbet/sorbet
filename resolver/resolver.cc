@@ -2105,7 +2105,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    finalizeAncestors(ctx.state);
+    finalizeAncestors(ctx);
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2113,7 +2113,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    finalizeSymbols(ctx.state);
+    finalizeSymbols(ctx);
     if (ctx.state.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2163,7 +2163,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     auto workers = WorkerPool::create(0, ctx.state.tracer());
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), *workers);
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
-    computeLinearization(ctx.state);
+    computeLinearization(ctx);
     trees = ResolveTypeMembersWalk::run(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);

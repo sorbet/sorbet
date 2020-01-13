@@ -124,7 +124,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 
     for (auto &bb : this->basicBlocks) {
-        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block {}", bb->toString(ctx.state));
+        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block {}", bb->toString(ctx));
 
         if (bb.get() == deadBlock()) {
             continue;
