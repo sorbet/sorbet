@@ -77,13 +77,20 @@ fi
 
 if [ -z "$(ls -A "$target")" ]; then
 
+  if ! grep '# typed:' "${ruby_source[*]}" > /dev/null; then
+      fatal "You forgot to put '# typed: true' in your file"
+  fi
+
+  if ! grep '# compiled:' "${ruby_source[*]}" > /dev/null; then
+      fatal "You forgot to put '# compiled: true' in your file"
+  fi
+
   info "--- Stdout ---"
   cat "$stdout"
 
   info "--- Stderr ---"
   cat "$stderr"
 
-  attn "Is ${ruby_source[*]} marked '# typed: true'?"
   fatal "No output produced by sorbet"
 fi
 
