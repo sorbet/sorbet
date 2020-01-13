@@ -710,8 +710,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                             continue;
                         }
 
-                        NameRef arg(ctx.state, key->value);
-                        if (consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
+                        NameRef arg(ctx, key->value);
+                        if (consumed.find(NameRef(ctx, key->value)) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -755,10 +755,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             for (auto &keyType : hash->keys) {
                 auto key = cast_type<LiteralType>(keyType.get());
                 SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.find(NameRef(ctx, key->value)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(ctx.state, key->value);
+                NameRef arg(ctx, key->value);
 
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(ctx),
@@ -1374,7 +1374,7 @@ public:
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(ctx.state, (u4)lit->value);
+        NameRef fn(ctx, (u4)lit->value);
         if (args.args[2]->type->isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1594,7 +1594,7 @@ public:
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(ctx.state, (u4)lit->value);
+        NameRef fn(ctx, (u4)lit->value);
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<Loc, 2> sendArgLocs;
@@ -1647,7 +1647,7 @@ public:
         if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(ctx.state, (u4)lit->value);
+        NameRef fn(ctx, (u4)lit->value);
 
         if (args.args[2]->type->isUntyped()) {
             res.returnType = args.args[2]->type;
