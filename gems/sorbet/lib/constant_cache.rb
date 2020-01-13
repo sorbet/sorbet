@@ -51,6 +51,18 @@ class Sorbet::Private::ConstantLookupCache
     'Sequel::UnbindDuplicate',
     'Sequel::Unbinder',
     'YARD::Parser::Ruby::Legacy::RipperParser',
+    'Java::ComHeadiusRacc::Cparse::CparseParams::NEVER',
+    'Java::ComHeadiusRacc::Cparse::CparseParams::UNDEF',
+    'Java::ComHeadiusRacc::Cparse::Parser::NEVER',
+    'Java::ComHeadiusRacc::Cparse::Parser::UNDEF',
+    'Java::OrgJruby::RubyBasicObject::NEVER',
+    'Java::OrgJruby::RubyBasicObject::UNDEF',
+    'Java::OrgJruby::RubyClass::NEVER',
+    'Java::OrgJruby::RubyClass::UNDEF',
+    'Java::OrgJruby::RubyModule::NEVER',
+    'Java::OrgJruby::RubyModule::UNDEF',
+    'Java::OrgJruby::RubyObject::NEVER',
+    'Java::OrgJruby::RubyObject::UNDEF',
   ].freeze
 
   def initialize
@@ -123,11 +135,11 @@ class Sorbet::Private::ConstantLookupCache
 
         begin
           nested_constant = Sorbet::Private::RealStdlib.real_const_get(mod, nested, false) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-        rescue LoadError
-          puts "Failed to load #{name}::#{nested}"
+        rescue LoadError => err
+          puts "Got #{err.class} when trying to get nested name #{name}::#{nested}"
           next
-        rescue NameError, ArgumentError
-          puts "Failed to load #{name}::#{nested}"
+        rescue NameError, ArgumentError => err
+          puts "Got #{err.class} when trying to get nested name #{name}::#{nested}_"
           # some stuff fails to load, like
           # `const_get': uninitialized constant YARD::Parser::Ruby::Legacy::RipperParser (NameError)
           # Did you mean?  YARD::Parser::Ruby::Legacy::RipperParser

@@ -1,5 +1,6 @@
 #include "core/AutocorrectSuggestion.h"
 #include "absl/strings/str_cat.h"
+#include "common/sort.h"
 
 using namespace std;
 
@@ -27,8 +28,13 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
 
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
                                                            UnorderedMap<FileRef, string> sources) {
+    vector<AutocorrectSuggestion::Edit> edits;
+    for (auto &autocorrect : autocorrects) {
+        move(autocorrect.edits.begin(), autocorrect.edits.end(), back_inserter(edits));
+    }
+
     // Sort the locs backwards
-    auto compare = [](const AutocorrectSuggestion &left, const AutocorrectSuggestion &right) {
+    auto compare = [](const AutocorrectSuggestion::Edit &left, const AutocorrectSuggestion::Edit &right) {
         if (left.loc.file() != right.loc.file()) {
             return left.loc.file().id() > right.loc.file().id();
         }
@@ -41,12 +47,12 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
 
         return false;
     };
-    fast_sort(autocorrects, compare);
+    fast_sort(edits, compare);
 
     UnorderedSet<Loc> seen; // used to make sure nothing overlaps
     UnorderedMap<FileRef, string> ret;
-    for (auto &autocorrect : autocorrects) {
-        auto &loc = autocorrect.loc;
+    for (auto &edit : edits) {
+        core::Loc loc = edit.loc;
         if (!ret.count(loc.file())) {
             ret[loc.file()] = sources[loc.file()];
         }
@@ -58,7 +64,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
             continue;
         }
         seen.emplace(loc);
-        ret[loc.file()] = absl::StrCat(source.substr(0, start), autocorrect.replacement, source.substr(end, -1));
+        ret[loc.file()] = absl::StrCat(source.substr(0, start), edit.replacement, source.substr(end, -1));
     }
     return ret;
 }

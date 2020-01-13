@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
 task :test do
-  Dir.glob('./test/**/*.rb').each(&method(:require))
+  Dir.glob('./test/**/*.rb').reject {|path| path.match(/^.\/test\/types\/fixtures\//)}.each(&method(:require))
+end
+
+begin
+  require './bench/tasks.rb'
+rescue LoadError
+  # Expected when using packaged gem
 end

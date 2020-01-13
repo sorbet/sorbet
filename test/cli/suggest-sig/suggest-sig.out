@@ -12,6 +12,22 @@ suggest-sig.rb:92: Method `with_block` uses `yield` but does not mention a block
     93 |  yield
           ^^^^^
 
+suggest-sig.rb:124: Malformed signature: `generated` is invalid in this context https://srb.help/5003
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    suggest-sig.rb:124: Consult https://sorbet.org/docs/sigs for signature syntax
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+suggest-sig.rb:135: Malformed signature: `generated` is invalid in this context https://srb.help/5003
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+     136 |  returns(T.untyped).
+     137 |  generated
+    suggest-sig.rb:135: Consult https://sorbet.org/docs/sigs for signature syntax
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+     136 |  returns(T.untyped).
+     137 |  generated
+
 suggest-sig.rb:5: This function does not have a `sig` https://srb.help/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
@@ -188,27 +204,31 @@ suggest-sig.rb:118: This function does not have a `sig` https://srb.help/7017
      118 |def cantRun(a)
           ^
 
-suggest-sig.rb:125: This function does not have a `sig` https://srb.help/7017
-     125 |def fooCondGeneratedCurly(a, cond)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+suggest-sig.rb:155: This function does not have a `sig` https://srb.help/7017
+     155 |def explicitly_named_block_parameter(&blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:124: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
+    suggest-sig.rb:155: Inserted `sig {params(blk: T.untyped).returns(Integer)}
 `
-     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated}
-     125 |def fooCondGeneratedCurly(a, cond)
+     155 |def explicitly_named_block_parameter(&blk)
+          ^
 
-suggest-sig.rb:139: This function does not have a `sig` https://srb.help/7017
-     139 |def fooCondGeneratedDo(a, cond)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:134: Replaced with `sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
-`
-     134 |sig do
-     135 |  params(a: T.untyped, cond: T::Boolean).
+    suggest-sig.rb:124: Replaced with `inherited`
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+                                                                         ^^^^^^^^^
+
+
+suggest-sig.rb:135: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
      136 |  returns(T.untyped).
      137 |  generated
-     138 |end
-     139 |def fooCondGeneratedDo(a, cond)
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L128: Did you mean: `Class#inherited`?
+     128 |  def inherited(arg0); end
+            ^^^^^^^^^^^^^^^^^^^
 
 suggest-sig.rb:41: This function does not have a `sig` https://srb.help/7017
     41 |  private def a_private; end
@@ -230,19 +250,19 @@ suggest-sig.rb:43: This function does not have a `sig` https://srb.help/7017
 
 suggest-sig.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                            ^
 
 suggest-sig.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                            ^
 
 suggest-sig.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                                ^
 
 suggest-sig.rb:102: This function does not have a `sig` https://srb.help/7017
      102 |Foo = Struct.new(:a, :b)
-          ^^^^^^^^^^^^^^^^^^^^^^^^
+                                ^
 
 suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
@@ -265,7 +285,7 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 37
+Errors: 40
 
 --------------------------------------------------------------------------
 
@@ -412,7 +432,7 @@ def cantRun(a)
   1
 end
 
-sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
+sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).inherited} # error: `generated` is deprecated
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -422,7 +442,11 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {params(a: T.any(Integer, String), cond: T::Boolean).returns(T.untyped)}
+sig do
+  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+  returns(T.untyped).
+  generated
+end
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)
@@ -437,4 +461,9 @@ class Abstract
   abstract!
   sig {abstract.params(a: T.untyped).void}
   def abstract_foo(a); end
+end
+
+sig {params(blk: T.untyped).returns(Integer)}
+def explicitly_named_block_parameter(&blk)
+  42
 end

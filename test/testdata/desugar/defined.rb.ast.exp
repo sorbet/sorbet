@@ -1,3 +1,0 @@
-class <emptyTree><<C <root>>> < ()
-  ::<Magic>.defined?(nil)
-end

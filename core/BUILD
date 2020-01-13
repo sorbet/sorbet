@@ -27,6 +27,7 @@ cc_library(
     deps = [
         "//common",
         "//common/concurrency",
+        "//main/pipeline/semantic_extension:interface",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@rang",
@@ -43,6 +44,7 @@ cc_test(
             "**/flycheck_*",
         ],
     ),
+    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,

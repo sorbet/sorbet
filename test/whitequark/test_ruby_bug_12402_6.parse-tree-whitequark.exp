@@ -1,0 +1,8 @@
+s(:or_asgn,
+  s(:casgn,
+    s(:lvar, :foo), :C),
+  s(:rescue,
+    s(:send, nil, :raise,
+      s(:lvar, :bar)),
+    s(:resbody, nil, nil,
+      s(:nil)), nil))

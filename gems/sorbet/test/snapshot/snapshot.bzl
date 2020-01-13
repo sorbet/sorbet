@@ -1,14 +1,20 @@
-def snapshot_tests(name = "snapshot", update_name = "update", tests = []):
+def snapshot_tests(ruby = None, tests = []):
     """
     Define a bunch of snapshot tests all at once. The paths must all be of the
     form "partial/<test>" or "total/<test>".
     """
 
+    if ruby == None:
+        fail(msg = "No ruby version specified in snapshot_tests")
+
+    name = "snapshot-{}".format(ruby)
+    update_name = "update-{}".format(ruby)
+
     test_rules = []
     update_rules = []
 
     for test_path in tests:
-        res = _snapshot_test(test_path)
+        res = _snapshot_test(test_path, ruby)
         test_rules.append(res["test_name"])
 
         if res.get("update_name") != None:
@@ -28,17 +34,18 @@ def snapshot_tests(name = "snapshot", update_name = "update", tests = []):
         tags = ["manual"],
     )
 
-def _snapshot_test(test_path):
+def _snapshot_test(test_path, ruby):
     """
     test_path is of the form `total/test` or `partial/test`.
+    ruby is the version of ruby to use (named in //third_party/externals.bzl)
     """
 
     res = {}
-    actual = "{}/actual.tar.gz".format(test_path)
+    actual = "{}/actual_{}.tar.gz".format(test_path, ruby)
 
     native.genrule(
-        name = "actual_{}".format(test_path),
-        message = "Running {}".format(test_path),
+        name = "actual_{}/{}".format(ruby, test_path),
+        message = "Running {} ({})".format(test_path, ruby),
         tools = [
             ":run_one_bazel",
         ],
@@ -65,12 +72,12 @@ def _snapshot_test(test_path):
         # failure.
         cmd =
             """
-        $(location :run_one_bazel) ruby_2_4_3 $(location {}) {} &> genrule.log \
+        $(location :run_one_bazel) {} $(location {}) {} &> genrule.log \
                 || (cat genrule.log && exit 1)
-        """.format(actual, test_path),
+        """.format(ruby, actual, test_path),
     )
 
-    test_name = "test_{}".format(test_path)
+    test_name = "test_{}/{}".format(ruby, test_path)
 
     native.sh_test(
         name = test_name,
@@ -80,7 +87,7 @@ def _snapshot_test(test_path):
             "{}/expected/**/*".format(test_path),
             "{}/gems/**/*".format(test_path),
         ]),
-        deps = [":logging"],
+        deps = [":logging", ":validate_utils"],
         args = [
             "$(location {})".format(actual),
             test_path,
@@ -99,16 +106,15 @@ def _snapshot_test(test_path):
     )
 
     if len(expected) > 0:
-        update_name = "update_{}".format(test_path)
+        update_name = "update_{}/{}".format(ruby, test_path)
 
         native.sh_test(
-            name = "update_{}".format(test_path),
+            name = update_name,
             data = [actual] + expected,
-            deps = [":logging"],
+            deps = [":logging", ":validate_utils"],
             srcs = ["update_one_bazel.sh"],
             args = [
                 "$(location {})".format(actual),
-                "$(location {}/expected)".format(test_path),
                 test_path,
             ],
 

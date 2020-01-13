@@ -35,7 +35,7 @@ class Sorbet::Private::FetchRBIs
     end
 
     FileUtils.cd(RBI_CACHE_DIR) do
-      IO.popen(%w{git fetch origin}) {|pipe| pipe.read}
+      IO.popen(%w{git fetch --all}) {|pipe| pipe.read}
       raise "Failed to git fetch" if $?.exitstatus != 0
       IO.popen(%w{git checkout -q} + [SORBET_TYPED_REVISION]) {|pipe| pipe.read}
       raise "Failed to git checkout" if $?.exitstatus != 0
@@ -112,6 +112,8 @@ class Sorbet::Private::FetchRBIs
       vendor_paths += paths_for_gem_version(gemspec)
     end
 
+    # Remove the sorbet-typed directory before repopulating it.
+    FileUtils.rm_r(SORBET_RBI_SORBET_TYPED) if Dir.exist?(SORBET_RBI_SORBET_TYPED)
     if vendor_paths.length > 0
       vendor_rbis_within_paths(vendor_paths)
     end

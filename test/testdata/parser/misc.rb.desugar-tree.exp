@@ -1,0 +1,224 @@
+class <emptyTree><<C <root>>> < ()
+  <self>.alias_method(:"afoo", :"bar")
+
+  @iv = 1
+
+  @@cv = 1
+
+  $gv = 1
+
+  begin
+    <assignTemp>$2 = [nil, nil]
+    <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
+    <self>.x().var=(<assignTemp>$3.[](0))
+    y = <assignTemp>$3.[](1)
+    <assignTemp>$2
+  end
+
+  begin
+    <assignTemp>$4 = <self>.zaaaz()
+    <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
+    baaaar = <assignTemp>$5.[](0)
+    naaar = <assignTemp>$5.[](1)
+    <assignTemp>$4
+  end
+
+  xaaaaz = [<self>.yayayaya(), <self>.tutututu()]
+
+  <emptyTree>
+
+  nil
+
+  begin
+    <self>.a()
+    <self>.b()
+  end
+
+  def bfoo<<C <todo sym>>>(&x)
+    <emptyTree>
+  end
+
+  <self>.lambda() do ||
+    <emptyTree>
+  end
+
+  begin
+    <assignTemp>$6 = <self>.x()
+    if y.===(<assignTemp>$6)
+      1
+    else
+      <self>.z()
+    end
+  end
+
+  "x"
+
+  1.+(::Kernel.Complex(0, "4"))
+
+  0.500000
+
+  ::Kernel.Complex(0, "1.5")
+
+  def self.classmeth<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+  end
+
+  class <singleton class><<C <todo sym>>> < ()
+    <emptyTree>
+  end
+
+  begin
+    ||$7 = true
+    if ||$7
+      ||$7
+    else
+      false
+    end
+  end
+
+  <self>.arr().each() do |x|
+    <emptyTree>
+  end
+
+  while 0.!=(1)
+    <emptyTree>
+  end
+
+  x.[]=(1, 0)
+
+  break(<emptyTree>)
+
+  break(1)
+
+  break([1, 2])
+
+  next(<emptyTree>)
+
+  next(1)
+
+  next([1, 2])
+
+  ::<Magic>.defined?("X")
+
+  <self>.super(ZSuperArgs)
+
+  def kwfoo<<C <todo sym>>>(x:, y: = 1, *z:, &<blk>)
+    <emptyTree>
+  end
+
+  x.to_hash()
+
+  87
+
+  while true
+    nil
+  end
+
+  while true
+    nil
+  end
+
+  while true.!()
+    nil
+  end
+
+  while true.!()
+    nil
+  end
+
+  while true
+    begin
+      <self>.puts(1)
+      if false.!()
+        break(<emptyTree>)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  while true
+    begin
+      <self>.puts(1)
+      if true
+        break(<emptyTree>)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    <assignTemp>$8 = 1
+    <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
+    a = <assignTemp>$9.[](0)
+    begin
+      <assignTemp>$10 = <assignTemp>$9.[](1)
+      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 1, 0)
+      x = <assignTemp>$11.[](0)
+      <assignTemp>$10
+    end
+    <assignTemp>$8
+  end
+
+  4
+
+  def optfoo<<C <todo sym>>>(x = 1, *y, &<blk>)
+    <emptyTree>
+  end
+
+  {x => y, :"foo" => 1}
+
+  <emptyTree>
+
+  <emptyTree>
+
+  ::Kernel.Rational("4")
+
+  ::Kernel.Complex(0, "5")
+
+  <emptyTree>
+rescue <emptyTree>::<C E> => x
+  nil
+
+  begin
+    <assignTemp>$12 = y.to_a()
+    <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 0, 0)
+    x = <assignTemp>$13.slice(::Range.new(0, -1, false))
+    <assignTemp>$12
+  end
+
+  ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()
+
+  [:"sym"]
+
+  if x
+    1
+  else
+    7
+  end
+
+  ::Kernel.undef(:"x", :"y")
+
+  ["a", "b"]
+
+  ["a", "b"]
+
+  <self>.`("true")
+
+  <self>.proc() do |x|
+    <emptyTree>
+  end
+
+  break(<self>.cfoo(1) do ||
+      <emptyTree>
+    end)
+
+  def sfoo<<C <todo sym>>>(**$2, &<blk>)
+    <emptyTree>
+  end
+
+  def ssfoo<<C <todo sym>>>(***$3:, &<blk>)
+    <emptyTree>
+  end
+end

@@ -7,7 +7,10 @@ module T::Private::Abstract::Declare
 
   def self.declare_abstract(mod, type:)
     if AbstractUtils.abstract_module?(mod)
-      raise "#{mod.name} is already declared as abstract"
+      raise "#{mod} is already declared as abstract"
+    end
+    if T::Private::Final.final_module?(mod)
+      raise "#{mod} was already declared as final and cannot be declared as abstract"
     end
 
     Abstract::Data.set(mod, :can_have_abstract_methods, true)
@@ -27,6 +30,9 @@ module T::Private::Abstract::Declare
       if mod.instance_method(:initialize).owner == mod
         raise "You must call `abstract!` *before* defining an initialize method"
       end
+
+      # Don't need to silence warnings via without_ruby_warnings when calling
+      # define_method because of the guard above
 
       mod.send(:define_method, :initialize) do |*args, &blk|
         if self.class == mod

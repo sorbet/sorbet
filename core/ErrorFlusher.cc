@@ -20,7 +20,8 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
             if (out.size() != 0) {
                 fmt::format_to(out, "\n\n");
             }
-            fmt::format_to(out, "{}", error->text);
+            ENFORCE(error->text.has_value());
+            fmt::format_to(out, "{}", error->text.value_or(""));
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));
@@ -57,9 +58,11 @@ void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
 void ErrorFlusher::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
-        auto file = autocorrect.loc.file();
-        if (!sources.count(file)) {
-            sources[file] = fs.readFile(file.data(gs).path());
+        for (auto &edit : autocorrect.edits) {
+            auto file = edit.loc.file();
+            if (!sources.count(file)) {
+                sources[file] = fs.readFile(file.data(gs).path());
+            }
         }
     }
 

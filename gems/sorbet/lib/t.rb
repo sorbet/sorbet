@@ -12,7 +12,7 @@
 module T
   module Sig
     module WithoutRuntime
-      def self.sig(&blk); end
+      def self.sig(arg=nil, &blk); end
     end
   end
 
@@ -25,7 +25,7 @@ module T
   def self.proc; end
   def self.self_type; end
   def self.class_of(klass); end
-  def self.type_alias(type); end
+  def self.type_alias(type=nil, &blk); end
   def self.type_parameter(name); end
 
   def self.cast(value, type, checked: true); value; end
@@ -55,4 +55,3 @@ module T
     def self.[](type); end
   end
 end
-

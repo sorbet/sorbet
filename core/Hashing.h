@@ -32,7 +32,7 @@ inline unsigned int _hash(std::string_view utf8) {
         res = mix(res, *it - '!'); // "!" is the first printable letter in ASCII.
         // This will help Latin1 but may harm utf8 multibyte
     }
-    return res * HASH_MULT2 + _NameKind2Id_UTF8(UTF8);
+    return res * HASH_MULT2 + _NameKind2Id_UTF8(NameKind::UTF8);
 }
 } // namespace sorbet::core
 #endif // SORBET_HASHING_H

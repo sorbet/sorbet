@@ -16,4 +16,4 @@ echo
 cat suggest-type-alias.rb
 
 rm suggest-type-alias.rb
-rm "$tmp"
+rm -r "$tmp"

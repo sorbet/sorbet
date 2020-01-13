@@ -31,7 +31,7 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
                 tp.type = argType.type;
                 tp.origins.emplace_back(localExp->loc);
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(methodDef->symbol, localExp->loc, localExp->localVariable, tp));
+                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
                 return methodDef;
             }
         }
@@ -47,10 +47,10 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
 
 unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core::Context ctx,
                                                                            unique_ptr<ast::UnresolvedIdent> id) {
-    if (id->kind == ast::UnresolvedIdent::Instance || id->kind == ast::UnresolvedIdent::Class) {
+    if (id->kind == ast::UnresolvedIdent::Kind::Instance || id->kind == ast::UnresolvedIdent::Kind::Class) {
         core::SymbolRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
-        if (id->kind == ast::UnresolvedIdent::Instance) {
+        if (id->kind == ast::UnresolvedIdent::Kind::Instance) {
             ENFORCE(ctx.owner.data(ctx)->isMethod());
             klass = ctx.owner.data(ctx)->owner;
         } else {
@@ -67,11 +67,50 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx.state)->resultType;
             tp.origins.emplace_back(sym.data(ctx.state)->loc());
-            core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::ConstantResponse(klass, sym, id->loc, id->name, tp, tp));
+            core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::FieldResponse(sym, id->loc, id->name, tp));
         }
     }
     return id;
+}
+
+void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery, core::SymbolRef symbol) {
+    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
+    while (lit && symbol.exists() && lit->original) {
+        if (lspQuery.matchesLoc(lit->loc) || lspQuery.matchesSymbol(symbol)) {
+            // This basically approximates the cfg::Alias case from Environment::processBinding.
+            core::TypeAndOrigins tp;
+            tp.origins.emplace_back(symbol.data(ctx)->loc());
+
+            if (symbol.data(ctx)->isClassOrModule()) {
+                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
+            } else {
+                auto resultType = symbol.data(ctx)->resultType;
+                tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
+            }
+
+            core::lsp::ConstantResponse::Scopes scopes;
+            if (symbol == core::Symbols::StubModule()) {
+                scopes = lit->resolutionScopes;
+            } else {
+                scopes = {symbol.data(ctx)->owner};
+            }
+
+            auto resp = core::lsp::ConstantResponse(symbol, lit->loc, scopes, lit->original->cnst, tp);
+            core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
+        }
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
+        if (lit) {
+            symbol = lit->symbol.data(ctx)->dealias(ctx);
+        }
+    }
+}
+
+unique_ptr<ast::ConstantLit> DefLocSaver::postTransformConstantLit(core::Context ctx,
+                                                                   unique_ptr<ast::ConstantLit> lit) {
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    auto symbol = lit->symbol.data(ctx)->dealias(ctx);
+    matchesQuery(ctx, lit.get(), lspQuery, symbol);
+    return lit;
 }
 
 } // namespace sorbet::realmain::lsp

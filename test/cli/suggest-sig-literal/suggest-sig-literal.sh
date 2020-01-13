@@ -17,4 +17,4 @@ echo
 cat suggest-sig-literal.rb
 
 rm suggest-sig-literal.rb
-rm "$tmp"
+rm -r "$tmp"

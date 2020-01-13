@@ -1,0 +1,86 @@
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "requestMethod": "textDocument/documentSymbol",
+    "result": [
+        {
+            "name": "C",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 1,
+                    "character": 0
+                },
+                "end": {
+                    "line": 1,
+                    "character": 7
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 1,
+                    "character": 0
+                },
+                "end": {
+                    "line": 1,
+                    "character": 7
+                }
+            },
+            "children": [
+                {
+                    "name": "@@foo",
+                    "detail": "",
+                    "kind": 14,
+                    "range": {
+                        "start": {
+                            "line": 2,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 2,
+                            "character": 7
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 2,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 2,
+                            "character": 7
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "bar",
+                    "detail": "sig {returns(T.untyped)}\ndef bar; end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 4,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 9
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 4,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 9
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        }
+    ]
+}

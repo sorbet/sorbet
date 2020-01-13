@@ -1,0 +1,6 @@
+s(:send, nil, :fun,
+  s(:lvar, :foo),
+  s(:hash,
+    s(:pair,
+      s(:sym, :foo),
+      s(:int, "1"))))

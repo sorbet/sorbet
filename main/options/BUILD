@@ -13,7 +13,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
-        "//third_party/licences",
+        "//third_party/licenses",
         "//version",
         "@cxxopts",
         "@spdlog",

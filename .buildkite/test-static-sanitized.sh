@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [ "${SIMULATE_FAIL:-}" != "" ]; then
+  echo "Simulating build failure. Exiting status 1"
+  exit 1
+fi
+
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     platform="linux";;
@@ -24,8 +29,8 @@ echo will run with $CONFIG_OPTS
 err=0
 
 # NOTE: running ruby/gem/srb testing without the sanitized flags
-./bazel test @ruby_2_4_3//... @gems//... //gems/sorbet/test/snapshot \
-  --config=buildfarm-ruby || err=$?
+./bazel test @ruby_2_6_3//... @ruby_2_4_3//... @gems//... //gems/sorbet/test/snapshot \
+  //gems/sorbet/test/hidden-method-finder --config=buildfarm-ruby || err=$?
 
 ./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
 

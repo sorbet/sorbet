@@ -1,9 +1,0 @@
-class <emptyTree><<C <root>>> < ()
-  :"foo"
-
-  "foo".intern()
-
-  :""
-
-  "hello_".concat(<self>.name().to_s()).concat("!").intern()
-end

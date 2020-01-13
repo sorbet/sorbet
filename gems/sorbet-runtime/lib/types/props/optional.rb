@@ -21,12 +21,15 @@ module T::Props::Optional::DecoratorMethods
     true,
   ].freeze
 
-  def valid_props
-    super + [
-      :default,
-      :factory,
-      :optional,
-    ]
+  VALID_RULE_KEYS = {
+    default: true,
+    factory: true,
+    optional: true,
+  }.freeze
+  private_constant :VALID_RULE_KEYS
+
+  def valid_rule_key?(key)
+    super || VALID_RULE_KEYS[key]
   end
 
   def prop_optional?(prop); prop_rules(prop)[:fully_optional]; end

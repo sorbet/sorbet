@@ -1,0 +1,3 @@
+s(:array,
+  s(:splat,
+    s(:lvar, :foo)))

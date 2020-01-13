@@ -5,7 +5,7 @@ class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
-              :check_level, :generated, :parameters, :on_failure, :override_allow_incompatible, :ever_failed
+              :check_level, :parameters, :on_failure, :override_allow_incompatible
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
@@ -28,11 +28,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def mark_failed
-    @ever_failed = true
-  end
-
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, on_failure:, generated: false, override_allow_incompatible: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, on_failure:, override_allow_incompatible: false)
     @method = method
     @method_name = method_name
     @arg_types = []
@@ -54,8 +50,6 @@ class T::Private::Methods::Signature
     @parameters = parameters
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
-    @generated = generated
-    @ever_failed = false
 
     param_names = parameters.map {|_, name| name}
     declared_param_names = raw_arg_types.keys

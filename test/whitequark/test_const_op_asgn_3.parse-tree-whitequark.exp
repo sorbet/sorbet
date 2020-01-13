@@ -1,0 +1,5 @@
+s(:def, :x, nil,
+  s(:or_asgn,
+    s(:casgn,
+      s(:self), :A),
+    s(:int, "1")))

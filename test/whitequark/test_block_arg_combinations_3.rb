@@ -1,0 +1,5 @@
+# typed: true
+
+f{ |;
+a
+| }

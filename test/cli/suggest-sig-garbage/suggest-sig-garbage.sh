@@ -17,4 +17,4 @@ echo
 cat suggest-sig-garbage.rb
 
 rm suggest-sig-garbage.rb
-rm "$tmp"
+rm -r "$tmp"

@@ -11,6 +11,7 @@
  end
 
  class MySet
+    extend T::Generic
     include MyEnumerable
     A = type_member
  end

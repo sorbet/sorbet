@@ -93,6 +93,17 @@ srb="${repo_root}/gems/sorbet/bin/srb"
 info "├─ sorbet:           $SRB_SORBET_EXE"
 info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 
+SORBET_TYPED_REV="$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/sorbet-typed.rev)"
+SRB_SORBET_TYPED_REVISION="$(<"$SORBET_TYPED_REV")"
+export SRB_SORBET_TYPED_REVISION
+
+if [ "$SRB_SORBET_TYPED_REVISION" = "" ]; then
+  error "└─ empty sorbet-typed revision from: ${SORBET_TYPED_REV}"
+  exit 1
+else
+  info "├─ sorbet-typed:     $SRB_SORBET_TYPED_REVISION"
+fi
+
 
 # ----- Build the test sandbox -----
 

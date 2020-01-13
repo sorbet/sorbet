@@ -16,6 +16,16 @@ blockquote.monotone {
 }
 
 /*
+ * Docusaurus uses blockquote to show warnings / yellow callouts.
+ * Sometimes, we want it to stand out even more.
+ */
+blockquote.red,
+.red blockquote {
+  background-color: rgba(255, 109, 84, 0.3);
+  border-color: rgb(255, 132, 132);
+}
+
+/*
  * By default, the link color is the same as the primaryColor.
  * For us, this color is too dark, and links don't pop enough.
  * Thus, we override the link color to be more vibrant.
@@ -104,6 +114,21 @@ sup {
  */
 .productShowcaseSection .logos {
   align-items: flex-start;
+}
+
+/*
+ * To avoid squashing non-square logos
+ */
+.productShowcaseSection .logos img {
+  height: 110px;
+  width: auto;
+}
+
+@media only screen and (max-width: 735px) {
+  .productShowcaseSection .logos img {
+    height: 64px;
+    width: auto;
+  }
 }
 
 /*

@@ -9,8 +9,8 @@ test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilC
 test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
         ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L24: Method `String#+` has specified `arg0` as `String`
-    24 |        arg0: String,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58: Method `String#+` has specified `arg0` as `String`
+    58 |        arg0: String,
                 ^^^^
   Got T.nilable(String) originating from:
     test/cli/suggest_t_must/suggest_t_must.rb:3:

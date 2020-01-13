@@ -4,14 +4,15 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/spdlog.h"
 // has to come before the next one. This comment stops formatter from reordering them
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -48,11 +49,11 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::MutableContext ctx(cb, core::Symbols::root());
     auto fileId = ast->loc.file();
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
-    tree.tree = dsl::DSL::run(ctx, move(tree.tree));
+    tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
     tree = local_vars::LocalVars::run(ctx, move(tree));
-    tree = namer::Namer::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
+    trees = namer::Namer::run(ctx, move(trees));
     auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
     for (auto &tree : trees) {

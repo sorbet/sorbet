@@ -1,4 +1,108 @@
 # typed: __STDLIB_INTERNAL
 
+# Objects of class `Binding` encapsulate the execution context at some
+# particular place in the code and retain this context for future use. The
+# variables, methods, value of `self`, and possibly an iterator block that can
+# be accessed in this context are all retained.
+# [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) objects can be
+# created using `Kernel#binding`, and are made available to the callback of
+# `Kernel#set_trace_func`.
+#
+# These binding objects can be passed as the second argument of the
+# `Kernel#eval` method, establishing an environment for the evaluation.
+#
+# ```ruby
+# class Demo
+#   def initialize(n)
+#     @secret = n
+#   end
+#   def get_binding
+#     binding
+#   end
+# end
+#
+# k1 = Demo.new(99)
+# b1 = k1.get_binding
+# k2 = Demo.new(-3)
+# b2 = k2.get_binding
+#
+# eval("@secret", b1)   #=> 99
+# eval("@secret", b2)   #=> -3
+# eval("@secret")       #=> nil
+# ```
+#
+# [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) objects have no
+# class-specific methods.
 class Binding < Object
+  # Returns `true` if a local variable `symbol` exists.
+  #
+  # ```ruby
+  # def foo
+  #   a = 1
+  #   binding.local_variable_defined?(:a) #=> true
+  #   binding.local_variable_defined?(:b) #=> false
+  # end
+  # ```
+  #
+  # This method is the short version of the following code:
+  #
+  # ```ruby
+  # binding.eval("defined?(#{symbol}) == 'local-variable'")
+  # ```
+  sig {params(symbol: T.any(String, Symbol)).returns(T::Boolean)}
+  def local_variable_defined?(symbol); end
+
+  # Returns the value of the local variable `symbol`.
+  #
+  # ```ruby
+  # def foo
+  #   a = 1
+  #   binding.local_variable_get(:a) #=> 1
+  #   binding.local_variable_get(:b) #=> NameError
+  # end
+  # ```
+  #
+  # This method is the short version of the following code:
+  #
+  # ```ruby
+  # binding.eval("#{symbol}")
+  # ```
+  sig {params(symbol: T.any(String, Symbol)).returns(T.untyped)}
+  def local_variable_get(symbol); end
+
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) local variable named
+  # `symbol` as `obj`.
+  #
+  # ```ruby
+  # def foo
+  #   a = 1
+  #   bind = binding
+  #   bind.local_variable_set(:a, 2) # set existing local variable `a'
+  #   bind.local_variable_set(:b, 3) # create new local variable `b'
+  #                                  # `b' exists only in binding
+  #
+  #   p bind.local_variable_get(:a)  #=> 2
+  #   p bind.local_variable_get(:b)  #=> 3
+  #   p a                            #=> 2
+  #   p b                            #=> NameError
+  # end
+  # ```
+  #
+  # This method behaves similarly to the following code:
+  #
+  # ```ruby
+  # binding.eval("#{symbol} = #{obj}")
+  # ```
+  #
+  # if `obj` can be dumped in Ruby code.
+  sig {params(symbol: T.any(String, Symbol), obj: T.untyped).returns(T.untyped)}
+  def local_variable_set(symbol, obj); end
+
+  # Returns the bound receiver of the binding object.
+  sig {returns(Object)}
+  def receiver(); end
+
+  # Returns the Ruby source filename and line number of the binding object.
+  sig {returns([String, Integer])}
+  def source_location(); end
 end

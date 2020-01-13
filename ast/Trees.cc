@@ -1,4 +1,5 @@
 #include "ast/Trees.h"
+#include "common/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
 #include <sstream>
@@ -17,7 +18,6 @@ template class std::unique_ptr<sorbet::ast::Next>;
 template class std::unique_ptr<sorbet::ast::Return>;
 template class std::unique_ptr<sorbet::ast::RescueCase>;
 template class std::unique_ptr<sorbet::ast::Rescue>;
-template class std::unique_ptr<sorbet::ast::Field>;
 template class std::unique_ptr<sorbet::ast::Local>;
 template class std::unique_ptr<sorbet::ast::UnresolvedIdent>;
 template class std::unique_ptr<sorbet::ast::RestArg>;
@@ -81,7 +81,7 @@ Expression::Expression(core::Loc loc) : loc(loc) {}
 Reference::Reference(core::Loc loc) : Expression(loc) {}
 
 ClassDef::ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, unique_ptr<Expression> name,
-                   ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind)
+                   ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : Declaration(loc, declLoc, symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
     categoryCounterInc("trees", "classdef");
@@ -150,17 +150,12 @@ Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store res
     _sanityCheck();
 }
 
-Field::Field(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
-    categoryCounterInc("trees", "field");
-    _sanityCheck();
-}
-
 Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Reference(loc), localVariable(localVariable1) {
     categoryCounterInc("trees", "local");
     _sanityCheck();
 }
 
-UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
+UnresolvedIdent::UnresolvedIdent(core::Loc loc, Kind kind, core::NameRef name)
     : Reference(loc), name(name), kind(kind) {
     categoryCounterInc("trees", "unresolvedident");
     _sanityCheck();
@@ -174,8 +169,8 @@ Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression>
 }
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
-           unique_ptr<Block> block)
-    : Expression(loc), fun(fun), recv(std::move(recv)), args(std::move(args)), block(std::move(block)) {
+           unique_ptr<Block> block, u4 flags)
+    : Expression(loc), fun(fun), flags(flags), recv(std::move(recv)), args(std::move(args)), block(std::move(block)) {
     categoryCounterInc("trees", "send");
     if (block) {
         counterInc("trees.send.with_block");
@@ -243,19 +238,22 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
+    ENFORCE(!this->resolutionScopes.empty());
     vector<core::NameRef> namesFailedToResolve;
     auto nested = this;
     {
-        while (!nested->resolutionScope.exists()) {
-            ENFORCE(nested->symbol == core::Symbols::StubModule());
+        while (!nested->resolutionScopes.front().exists()) {
             namesFailedToResolve.emplace_back(nested->original->cnst);
             ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
             nested = ast::cast_tree<ast::ConstantLit>(nested->original->scope.get());
+            ENFORCE(nested->symbol == core::Symbols::StubModule());
+            ENFORCE(!nested->resolutionScopes.empty());
         }
         namesFailedToResolve.emplace_back(nested->original->cnst);
-        std::reverse(namesFailedToResolve.begin(), namesFailedToResolve.end());
+        absl::c_reverse(namesFailedToResolve);
     }
-    return make_pair(nested->resolutionScope, move(namesFailedToResolve));
+    auto prefix = nested->resolutionScopes.front();
+    return make_pair(prefix, move(namesFailedToResolve));
 }
 
 Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
@@ -314,7 +312,7 @@ template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf
 
 string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
-    if (kind == ClassDefKind::Module) {
+    if (kind == ClassDef::Kind::Module) {
         buf << "module ";
     } else {
         buf << "class ";
@@ -338,7 +336,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "kind = " << (kind == ClassDefKind::Module ? "module" : "class") << '\n';
+    buf << "kind = " << (kind == ClassDef::Kind::Module ? "module" : "class") << '\n';
     printTabs(buf, tabs + 1);
     buf << "name = " << name->showRaw(gs, tabs + 1) << "<"
         << this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs) << ">" << '\n';
@@ -413,8 +411,11 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     } else {
         buf << "def ";
     }
+    buf << name.data(gs)->toString(gs);
     auto &data = this->symbol.dataAllowingNone(gs);
-    buf << name.data(gs)->toString(gs) << "<" << data->name.data(gs)->toString(gs) << ">";
+    if (name != data->name) {
+        buf << "<" << data->name.data(gs)->toString(gs) << ">";
+    }
     buf << "(";
     bool first = true;
     if (this->symbol == core::Symbols::todo()) {
@@ -450,7 +451,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "flags =";
     const pair<int, string_view> flags[] = {
         {SelfMethod, "self"sv},
-        {DSLSynthesized, "dsl"sv},
+        {RewriterSynthesized, "rewriter"sv},
     };
     for (auto &ent : flags) {
         if ((this->flags & ent.first) != 0) {
@@ -596,18 +597,17 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
-    if (resolutionScope.exists()) {
+    if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);
-        buf << "resolutionScope = " << this->resolutionScope.data(gs)->showFullName(gs) << '\n';
+        buf << "resolutionScopes = "
+            << fmt::format("[{}]", fmt::map_join(this->resolutionScopes.begin(), this->resolutionScopes.end(), ", ",
+                                                 [&](auto sym) { return sym.data(gs)->showFullName(gs); }))
+            << '\n';
     }
     printTabs(buf, tabs);
 
     buf << "}";
     return buf.str();
-}
-
-string Field::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->symbol.dataAllowingNone(gs)->showFullName(gs);
 }
 
 string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -621,16 +621,6 @@ string Local::nodeName() {
 bool Expression::isSelfReference() const {
     auto asLocal = cast_tree_const<Local>(this);
     return asLocal && asLocal->localVariable == core::LocalVariable::selfVariable();
-}
-
-string Field::showRaw(const core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs) << '\n';
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
 }
 
 string Local::showRaw(const core::GlobalState &gs, int tabs) {
@@ -653,16 +643,16 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "kind = ";
     switch (this->kind) {
-        case Local:
+        case Kind::Local:
             buf << "Local";
             break;
-        case Instance:
+        case Kind::Instance:
             buf << "Instance";
             break;
-        case Class:
+        case Kind::Class:
             buf << "Class";
             break;
-        case Global:
+        case Kind::Global:
             buf << "Global";
             break;
     }
@@ -1002,7 +992,12 @@ string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const
 }
 
 string OptionalArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr->toStringWithTabs(gs, tabs) + " = " + this->default_->toStringWithTabs(gs, tabs);
+    stringstream buf;
+    buf << this->expr->toStringWithTabs(gs, tabs);
+    if (this->default_) {
+        buf << " = " << this->default_->toStringWithTabs(gs, tabs);
+    }
+    return buf.str();
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1034,9 +1029,6 @@ string If::nodeName() {
 }
 string While::nodeName() {
     return "While";
-}
-string Field::nodeName() {
-    return "Field";
 }
 string UnresolvedIdent::nodeName() {
     return "UnresolvedIdent";
@@ -1160,8 +1152,10 @@ string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "expr = " + expr->showRaw(gs, tabs + 1) << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "default_ = " + default_->showRaw(gs, tabs + 1) << '\n';
+    if (default_) {
+        printTabs(buf, tabs + 1);
+        buf << "default_ = " + default_->showRaw(gs, tabs + 1) << '\n';
+    }
     printTabs(buf, tabs);
     buf << "}";
 
@@ -1186,6 +1180,20 @@ string ShadowArg::nodeName() {
 
 string BlockArg::nodeName() {
     return "BlockArg";
+}
+
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+
+bool ParsedFilesOrCancelled::hasResult() const {
+    return trees.has_value();
+}
+
+vector<ParsedFile> &ParsedFilesOrCancelled::result() {
+    if (trees.has_value()) {
+        return trees.value();
+    }
+    Exception::raise("Attempted to retrieve result of an AST pass that did not complete.");
 }
 
 } // namespace sorbet::ast

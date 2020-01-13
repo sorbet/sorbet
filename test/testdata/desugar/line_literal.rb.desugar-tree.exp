@@ -1,0 +1,3 @@
+class <emptyTree><<C <root>>> < ()
+  <self>.puts(::<Magic>.<string-interpolate>("\n", 4))
+end

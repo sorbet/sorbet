@@ -4,6 +4,7 @@
 module T::Types
   class Base
     def self.method_added(method_name)
+      super(method_name)
       # What is now `subtype_of_single?` used to be named `subtype_of?`. Make sure people don't
       # override the wrong thing.
       #
@@ -39,6 +40,14 @@ module T::Types
     # Subclasses only need to implement `subtype_of_single?`).
     def subtype_of?(t2)
       t1 = self
+
+      if t2.is_a?(T::Private::Types::TypeAlias)
+        t2 = t2.aliased_type
+      end
+
+      if t1.is_a?(T::Private::Types::TypeAlias)
+        return t1.aliased_type.subtype_of?(t2)
+      end
 
       # pairs to cover: 1  (_, _)
       #                 2  (_, And)
@@ -133,7 +142,8 @@ module T::Types
     end
 
     def ==(other)
-      other.class == self.class && other.name == self.name
+      (T::Utils.resolve_alias(other).class == T::Utils.resolve_alias(self).class) &&
+        other.name == self.name
     end
 
     alias_method :eql?, :==

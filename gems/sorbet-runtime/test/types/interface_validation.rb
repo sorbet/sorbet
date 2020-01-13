@@ -137,7 +137,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       include base
 
-      sig {implementation.void}
+      sig {override.void}
       def foo; end
     end
 
@@ -159,7 +159,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       include base
 
-      sig {implementation.returns(Integer)}
+      sig {override.returns(Integer)}
       def foo; 1; end
     end
 

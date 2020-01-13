@@ -1,0 +1,4 @@
+s(:send,
+  s(:lvar, :foo), :[],
+  s(:int, "1"),
+  s(:int, "2"))

@@ -31,35 +31,33 @@ public:
         u4 maxOff = file.data(gs).source().size();
         file.data(gs).hasParseErrors = true;
         for (auto &diag : diagnostics) {
-            string_view level = "unknown"sv;
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
                 case ruby_parser::dlevel::WARNING:
                     continue;
                 case ruby_parser::dlevel::ERROR:
-                    level = "Error"sv;
-                    break;
                 case ruby_parser::dlevel::FATAL:
-                    level = "Fatal"sv;
                     break;
-                default:
-                    Exception::notImplemented();
             }
-            string msg("Parse {}: ");
-            msg.append(dclassStrings[(int)diag.error_class()]);
             core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                           translatePos(diag.location().endPos, maxOff));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
-                e.setHeader(msg, level, diag.data());
+                e.setHeader("{}", fmt::format(dclassStrings[(int)diag.error_class()], diag.data()));
             }
         }
     }
 };
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file,
+                             std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
     ruby_parser::typedruby25 driver(string(source.begin(), source.end()), Builder::interface);
+
+    for (string local : initialLocals) {
+        driver.lex.declare(local);
+    }
+
     auto ast = unique_ptr<Node>(builder.build(&driver));
     ErrorToError::run(gs, file, driver.diagnostics);
 
@@ -72,9 +70,10 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) 
     return ast;
 }
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, string_view path, string_view src) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, string_view path, string_view src,
+                             std::vector<std::string> initialLocals) {
     core::FileRef file = gs.enterFile(path, src);
-    return run(gs, file);
+    return run(gs, file, initialLocals);
 }
 
 }; // namespace sorbet::parser

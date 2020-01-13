@@ -1,4 +1,22 @@
 digraph "ivar_assign.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(TestIVar) = alias <C TestIVar>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(TestIVar))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::TestIVar#initialize" {
     label = "::TestIVar#initialize";
     color = blue;
@@ -6,12 +24,12 @@ subgraph "cluster_::TestIVar#initialize" {
     "bb::TestIVar#initialize_1" [shape = parallelogram];
 
     "bb::TestIVar#initialize_0" [
-        label = "block[id=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: Integer(0) = 0\l@foo$3: Integer = cast(<castTemp>$7: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: Integer(0) = 0\l@foo$3: Integer = cast(<castTemp>$7: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
     "bb::TestIVar#initialize_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestIVar#initialize_1" -> "bb::TestIVar#initialize_1" [style="bold"];
@@ -24,15 +42,33 @@ subgraph "cluster_::TestIVar#test" {
     "bb::TestIVar#test_1" [shape = parallelogram];
 
     "bb::TestIVar#test_0" [
-        label = "block[id=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l@foo$3: Integer = nil\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l@foo$3: Integer = nil\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];
     "bb::TestIVar#test_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestIVar#test_1" -> "bb::TestIVar#test_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:TestIVar>#<static-init>" {
+    label = "::<Class:TestIVar>#<static-init>";
+    color = blue;
+    "bb::<Class:TestIVar>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:TestIVar>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:TestIVar>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestIVar) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestIVar>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestIVar>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestIVar>#<static-init>_0" -> "bb::<Class:TestIVar>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestIVar>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestIVar>#<static-init>_1" -> "bb::<Class:TestIVar>#<static-init>_1" [style="bold"];
 }
 
 }

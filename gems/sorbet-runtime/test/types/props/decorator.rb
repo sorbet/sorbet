@@ -99,7 +99,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
   describe 'When validating prop definitions' do
     it 'Validates prop options are symbols' do
-      assert_prop_error(error: TypeError) do
+      assert_prop_error(error: ArgumentError) do
         prop :foo, String, 'name' => 'mongoprop'
       end
     end
@@ -111,7 +111,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
 
     it 'Validates you pass a type' do
-      assert_prop_error(/Invalid value for type constraint/, error: RuntimeError) do
+      assert_prop_error(/Invalid String literal for type constraint.*Got a String with value `goat`/, error: RuntimeError) do
         prop :foo, "goat"
       end
     end
@@ -175,13 +175,12 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   describe 'validating prop values' do
     it 'validates subdoc hashes have the correct values' do
 
-      assert_raises(T::Props::InvalidValueError) do
+      assert_raises(TypeError) do
         StructHash.new(the_hash: {'foo' => {}})
       end
 
       # no raise:
       StructHash.new(the_hash: {'foo' => StructHash::InnerStruct.new})
-
     end
   end
 
@@ -284,10 +283,10 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
     it 'does not allow setting' do
       m = ImmutablePropStruct.new(immutable: 'hello')
-      e = assert_raises(T::Props::ImmutableProp) do
+      e = assert_raises(NoMethodError) do
         m.immutable = 'world'
       end
-      assert_match(/ImmutablePropStruct#immutable/, e.message)
+      assert_match(/undefined method `immutable='/, e.message)
     end
 
     it 'const creates an immutable prop' do
@@ -331,7 +330,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     e = assert_raises do
       MatrixStruct.new.c = nil
     end
-    assert_match(/cannot be modified/, e.message)
+    assert_match(/undefined method `c='/, e.message)
     e = assert_raises do
       MatrixStruct.new.d = nil
     end
@@ -382,5 +381,14 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
     end
     assert_match(/Use of `optional: :existing` is not allowed/, e.message)
+  end
+
+  it 'raises if the word secret appears in a prop without a sensitivity annotation' do
+    e = assert_raises do
+      Class.new(T::Struct) do
+        prop :secret, String
+      end
+    end
+    assert_match(/has the word 'secret' in its name/, e.message)
   end
 end

@@ -1,0 +1,10 @@
+s(:case,
+  s(:lvar, :foo),
+  s(:when,
+    s(:int, "1"),
+    s(:splat,
+      s(:lvar, :baz)),
+    s(:lvar, :bar)),
+  s(:when,
+    s(:splat,
+      s(:lvar, :foo)), nil), nil)

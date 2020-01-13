@@ -17,6 +17,31 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
+  # Announce to Sorbet that we would like the final checks to be enabled when
+  # including and extending modules. Iff this is not called, then the following
+  # example will not raise an error.
+  #
+  # ```ruby
+  # module M
+  #   extend T::Sig
+  #   sig(:final) {void}
+  #   def foo; end
+  # end
+  # class C
+  #   include M
+  #   def foo; end
+  # end
+  # ```
+  def self.enable_final_checks_on_hooks
+    T::Private::Methods.set_final_checks_on_hooks(true)
+  end
+
+  # Undo the effects of a previous call to
+  # `enable_final_checks_on_hooks`.
+  def self.reset_final_checks_on_hooks
+    T::Private::Methods.set_final_checks_on_hooks(false)
+  end
+
   # Configure the default checked level for a sig with no explicit `.checked`
   # builder. When unset, the default checked level is `:always`.
   #
@@ -64,6 +89,7 @@ module T::Configuration
     else
       inline_type_error_handler_default(error)
     end
+    nil
   end
 
   # Set a handler to handle errors that occur when the builder methods in the
@@ -94,7 +120,7 @@ module T::Configuration
   end
 
   private_class_method def self.sig_builder_error_handler_default(error, location)
-    T::Private::Methods.sig_error(location, error.message)
+    raise ArgumentError.new("#{location.path}:#{location.lineno}: Error interpreting `sig`:\n  #{error.message}\n\n")
   end
 
   def self.sig_builder_error_handler(error, location)
@@ -103,6 +129,7 @@ module T::Configuration
     else
       sig_builder_error_handler_default(error, location)
     end
+    nil
   end
 
   # Set a handler to handle sig validation errors.
@@ -146,12 +173,13 @@ module T::Configuration
     raise error
   end
 
-  def self.sig_validation_error_handler(error, opts)
+  def self.sig_validation_error_handler(error, opts={})
     if @sig_validation_error_handler
       @sig_validation_error_handler.call(error, opts)
     else
       sig_validation_error_handler_default(error, opts)
     end
+    nil
   end
 
   # Set a handler for type errors that result from calling a method.
@@ -191,12 +219,13 @@ module T::Configuration
     raise TypeError.new(opts[:pretty_message])
   end
 
-  def self.call_validation_error_handler(signature, opts)
+  def self.call_validation_error_handler(signature, opts={})
     if @call_validation_error_handler
       @call_validation_error_handler.call(signature, opts)
     else
       call_validation_error_handler_default(signature, opts)
     end
+    nil
   end
 
   # Set a handler for logging
@@ -290,7 +319,7 @@ module T::Configuration
     raise str
   end
 
-  def self.hard_assert_handler(str, extra)
+  def self.hard_assert_handler(str, extra={})
     if @hard_assert_handler
       @hard_assert_handler.call(str, extra)
     else
@@ -327,12 +356,42 @@ module T::Configuration
     String
     Symbol
     Time
+    T::Enum
   }).freeze
 
   def self.scalar_types
     @scalar_types || @default_scalar_types
   end
 
+  # Temporarily disable ruby warnings while executing the given block. This is
+  # useful when doing something that would normally cause a warning to be
+  # emitted in Ruby verbose mode ($VERBOSE = true).
+  #
+  # @yield
+  #
+  def self.without_ruby_warnings
+    if $VERBOSE
+      begin
+        original_verbose = $VERBOSE
+        $VERBOSE = false
+        yield
+      ensure
+        $VERBOSE = original_verbose
+      end
+    else
+      yield
+    end
+  end
+
+  def self.enable_legacy_t_enum_migration_mode
+    @legacy_t_enum_migration_mode = true
+  end
+  def self.disable_legacy_t_enum_migration_mode
+    @legacy_t_enum_migration_mode = false
+  end
+  def self.legacy_t_enum_migration_mode?
+    @legacy_t_enum_migration_mode || false
+  end
 
   private_class_method def self.validate_lambda_given!(value)
     if !value.nil? && !value.respond_to?(:call)

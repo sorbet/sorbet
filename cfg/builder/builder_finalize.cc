@@ -1,4 +1,6 @@
 #include "cfg/builder/builder.h"
+#include "common/Timer.h"
+#include "common/sort.h"
 #include "core/Names.h"
 
 #include <algorithm> // sort, remove, unique
@@ -199,6 +201,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                     for (auto &arg : v->args) {
                         arg = maybeDealias(ctx, arg.variable, current);
                     }
+                } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
+                    v->what = maybeDealias(ctx, v->what.variable, current);
                 } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                     v->what = maybeDealias(ctx, v->what.variable, current);
                 }

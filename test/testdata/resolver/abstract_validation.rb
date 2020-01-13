@@ -1,4 +1,5 @@
 # typed: true
+# Fast path causes duplicate errors.
 
 module AbstractMixin
   extend T::Sig
@@ -51,8 +52,8 @@ end
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
-# ^^^^^^^^^ error-with-dupes: Missing definition for abstract method `AbstractMixin#bar`
-# ^^^^^^^^^ error-with-dupes: Missing definition for abstract method `AbstractMixin#foo`
+# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#bar`
+# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#foo`
   extend T::Helpers
   include AbstractMixin
 end
@@ -62,7 +63,7 @@ class C3 < AbstractClass
     # ^^ error: Missing definition for abstract method `AbstractClass.foo`
   extend T::Sig
   extend T::Helpers
-  sig { implementation.returns(Object) }
+  sig { override.returns(Object) }
   def bar; end
 end
 
@@ -71,7 +72,7 @@ end
 # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass#bar`
   extend T::Sig
   extend T::Helpers
-  sig {implementation.returns(Object)}
+  sig {override.returns(Object)}
   def self.foo; end
 end
 
@@ -160,7 +161,8 @@ end
 module BadTypedImpl
   extend T::Sig
   extend T::Helpers
+  include GoodInterface
 
-  sig {implementation.returns(Integer)} # incompatible return type: Integer
-  def foo; 1; end
+  sig {override.returns(Integer)}
+  def foo; 1; end # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
 end

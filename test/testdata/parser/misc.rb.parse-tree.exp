@@ -172,12 +172,8 @@ Begin {
         ]
       }
     }
-    DString {
-      nodes = [
-        String {
-          val = <U x>
-        }
-      ]
+    String {
+      val = <U x>
     }
     Send {
       receiver = Integer {
@@ -341,7 +337,7 @@ Begin {
       body = Nil {
       }
     }
-    WhilePost {
+    While {
       cond = True {
       }
       body = Nil {
@@ -353,7 +349,7 @@ Begin {
       body = Nil {
       }
     }
-    UntilPost {
+    Until {
       cond = True {
       }
       body = Nil {
@@ -443,12 +439,8 @@ Begin {
           }
         }
         Pair {
-          key = DSymbol {
-            nodes = [
-              String {
-                val = <U foo>
-              }
-            ]
+          key = Symbol {
+            val = <U foo>
           }
           value = Integer {
             val = "1"
@@ -580,19 +572,11 @@ Begin {
     }
     Array {
       elts = [
-        DString {
-          nodes = [
-            String {
-              val = <U a>
-            }
-          ]
+        String {
+          val = <U a>
         }
-        DString {
-          nodes = [
-            String {
-              val = <U b>
-            }
-          ]
+        String {
+          val = <U b>
         }
       ]
     }

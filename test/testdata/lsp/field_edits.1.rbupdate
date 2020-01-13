@@ -1,0 +1,9 @@
+# typed: true
+# assert-fast-path: field_edits.rb
+class C
+  @@foo = T.let(3, Integer)
+
+  def bar
+    @@ # error-with-dupes: unexpected `@`
+  end
+end

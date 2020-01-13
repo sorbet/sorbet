@@ -1,5 +1,6 @@
 #include "WatchmanProcess.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "rapidjson/document.h"
 #include "subprocess.hpp"
 
@@ -58,12 +59,15 @@ void WatchmanProcess::start() {
 
         while (!isStopped()) {
             auto maybeLine = FileOps::readLineFromFd(fd, buffer);
-            if (!maybeLine) {
+            if (maybeLine.result == FileOps::ReadResult::Timeout) {
                 // Timeout occurred. See if we should abort before reading further.
                 continue;
+            } else if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+                // Exit loop; unable to read from Watchman process.
+                break;
             }
 
-            const string &line = *maybeLine;
+            const string &line = *maybeLine.output;
             // Line found!
             rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);

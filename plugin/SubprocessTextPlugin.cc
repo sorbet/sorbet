@@ -9,12 +9,12 @@ using namespace std;
 namespace sorbet::plugin {
 
 struct Namespace {
-    enum NamespaceType { Class, Module };
-    NamespaceType type;
+    enum class Type { Class, Module };
+    Type type;
     InlinedVector<core::NameRef, 3> components;
 
     Namespace(const unique_ptr<ast::ClassDef> &klass) {
-        type = (klass->kind == ast::ClassDefKind::Module ? Module : Class);
+        type = (klass->kind == ast::ClassDef::Kind::Module ? Namespace::Type::Module : Namespace::Type::Class);
         fillComponents(klass->name.get());
     }
     ~Namespace() = default;
@@ -87,7 +87,7 @@ struct SpawningWalker {
                         format_to(generatedSource, "{}", "class << self;");
                     } else {
                         bool first = true;
-                        format_to(generatedSource, "{}", (n.type == Namespace::Class ? "class " : "module "));
+                        format_to(generatedSource, "{}", (n.type == Namespace::Type::Class ? "class " : "module "));
                         for (auto it = n.components.rbegin(); it != n.components.rend(); it++) {
                             if (!first) {
                                 format_to(generatedSource, "{}", "::");
@@ -105,9 +105,10 @@ struct SpawningWalker {
                     format_to(generatedSource, "{}", "end;");
                 }
 
-                auto path = fmt::format("{}//plugin-generated|{}", klass->loc.file().data(ctx).path(),
+                auto path = fmt::format("{}//plugin-generated|{}.rbi", klass->loc.file().data(ctx).path(),
                                         subprocessResults.size());
-                auto file = make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Normal);
+                auto file =
+                    make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Type::Normal);
                 file->pluginGenerated = true;
                 subprocessResults.emplace_back(move(file));
             } else {

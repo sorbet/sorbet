@@ -38,6 +38,7 @@ module OnlyIn
   # should fail: `In` occurs in the contravariant position of Arrow, which is in
   # contravariant position.
   sig {abstract.params(arr: Arrow[In, Unit]).void}
+                     # ^^^ error: `type_member` `In` was defined as `:in` but is used in an `:out` context
   def arrow_fail(arr); end
 
   # should pass: `In` occurs in the contravariant position of Arrow, which is in
@@ -49,6 +50,7 @@ module OnlyIn
   # covariant position.
   sig {abstract.returns(Arrow[Unit,In])}
   def ret_arrow_fail; end
+# ^^^^^^^^^^^^^^^^^^ error: `type_member` `In` was defined as `:in` but is used in an `:out` context
 end
 
 module OnlyOut
@@ -63,6 +65,7 @@ module OnlyOut
   # should fail: `Out` occurs in the covariant position of Arrow, which is in
   # contravariant position.
   sig {abstract.params(arr: Arrow[Unit, Out]).void}
+                     # ^^^ error: `type_member` `Out` was defined as `:out` but is used in an `:in` context
   def arrow_fail(arr); end
 
   # should pass: `Out` occurs in the contravariant position of Arrow, which is
@@ -73,7 +76,8 @@ module OnlyOut
   # should fail: `Out` occurs in the contravariant position of Arrow, which is
   # in covariant position.
   sig {abstract.returns(Arrow[Out,Unit])}
-  def ret_arrow_pass; end
+  def ret_arrow_fail; end
+# ^^^^^^^^^^^^^^^^^^ error: `type_member` `Out` was defined as `:out` but is used in an `:in` context
 
   # should pass: `Out` occurs in the covariant position of Arrow, which is in
   # covariant position.

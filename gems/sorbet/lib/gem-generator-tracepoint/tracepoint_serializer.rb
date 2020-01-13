@@ -16,12 +16,17 @@ module Sorbet::Private
     class TracepointSerializer
       SPECIAL_METHOD_NAMES = %w[! ~ +@ ** -@ * / % + - << >> & | ^ < <= => > >= == === != =~ !~ <=> [] []= `]
 
-      # These methods don't match the signatures of their parents, so if we let
-      # them monkeypatch, they won't be subtypes anymore. Just don't support the
-      # bad monkeypatches.
       BAD_METHODS = [
+        # These methods don't match the signatures of their parents, so if we let
+        # them monkeypatch, they won't be subtypes anymore. Just don't support the
+        # bad monkeypatches.
         ['activesupport', 'Time', :to_s],
         ['activesupport', 'Time', :initialize],
+
+        # These methods cause TracepointSerializer to hang the Ruby process when
+        # running Ruby 2.3. See https://github.com/sorbet/sorbet/issues/1145
+        ['activesupport', 'ActiveSupport::Deprecation', :new],
+        ['activesupport', 'ActiveSupport::Deprecation', :allocate],
       ]
 
       HEADER = Sorbet::Private::Serialize.header('true', 'gems')
@@ -69,7 +74,8 @@ module Sorbet::Private
                     next
                   end
                   begin
-                    method = item[:singleton] ? klass.method(item[:method]) : klass.instance_method(item[:method])
+                    method = item[:singleton] ? Sorbet::Private::RealStdlib.real_method(klass, item[:method]) : klass.instance_method(item[:method])
+
                     "#{generate_method(method, !item[:singleton])}"
                   rescue NameError
                   end
@@ -107,6 +113,9 @@ module Sorbet::Private
           # everyone to the same version of bundler in tests and in CI.
           # There is an RBI for bundler in sorbet-typed.
           next if gem[:gem] == 'bundler'
+          # We ignore sorbet-runtime because because we write the RBI for it into our payload.
+          # For some reason, runtime reflection generates methods with incorrect arities.
+          next if gem[:gem] == 'sorbet-runtime'
 
           gem_class_defs[gem] ||= {}
           defined.each do |item|
@@ -207,8 +216,9 @@ module Sorbet::Private
       def gem_from_location(location)
         match =
           location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
+          location&.match(/^.*\/(j?ruby)-([\d.]+)\//) || # jvm ruby stdlib
           location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
-          location&.match(/^.*\/gems\/(?:ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
+          location&.match(/^.*\/gems\/(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {

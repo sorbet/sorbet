@@ -10,7 +10,9 @@ sidebar_label: Error Reference
 }
 </style>
 
-<div class="is-hidden" id="missing-doc-for-error-code-box">
+<div class="is-hidden red" id="missing-doc-for-error-code-box">
+
+<a class="anchor" aria-hidden="true" id="missing-doc-for-error-code-scroll"></a>
 
 > **Heads up**: There aren't any docs yet for <span id="missing-error-code">this
 > error code</span>. If you have suggestions for what would have helped you
@@ -44,6 +46,12 @@ Sorbet couldn't find a file.
 There was a Ruby syntax error. Sorbet was unable to parse the source code. If
 you encounter this error but your code is accepted by Ruby itself, this is a bug
 in our parser; please [report an issue] to us so we can address it.
+
+The only intentional break with Ruby compatibility is that method names that are
+keywords have some limitations with multi-line code, as explained in [#1993],
+and should not be reported.
+
+[#1993]: https://github.com/sorbet/sorbet/pull/1993
 
 ## 4002
 
@@ -239,12 +247,12 @@ A class was defined as the subclass of a `type_alias`. It also occurs if a
 
 ```ruby
 # typed: true
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 class B < A; end # error: Superclasses and mixins may not be type aliases
 
 module M; end
 
-AliasModule = T.type_alias(M)
+AliasModule = T.type_alias {M}
 class C
   include AliasModule # error: Superclasses and mixins may not be type aliases
 end
@@ -365,15 +373,15 @@ Once a type alias is created, all subsequent aliases must also be type aliases.
 Concretely, this is not allowed:
 
 ```ruby
-A = T.type_alias(Integer)
+A = T.type_alias {Integer}
 B = A # error: Reassigning a type alias is not allowed
 ```
 
 while this is:
 
 ```ruby
-A = T.type_alias(Integer)
-B = T.type_alias(A)
+A = T.type_alias {Integer}
+B = T.type_alias {A}
 ```
 
 (Why? This is due to design tradeoffs to enforce stronger internal invariants.
@@ -385,6 +393,97 @@ intent to create a new type alias.)
 See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
 to allow more common Ruby idioms to pass by in `# typed: true` (5036 is only
 reported in `# typed: strict`).
+
+## 5041
+
+Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
+
+```ruby
+class S < T::Struct
+  prop :foo, Integer
+end
+
+class Bad < S; end # error
+```
+
+This limitation exists because, in order to generate a static type for
+`initialize` for a struct, we need to know all of the `prop`s that are declared
+on this struct. By disallowing inheritance of structs, we can know that all of
+the props declared on this struct were syntactically present in the class body.
+
+One common situation where inheritance may be desired is when a parent struct
+declares some common props, and children structs declare their own props.
+
+```ruby
+class Parent < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < Parent # error
+  prop :bar, String
+end
+
+class ChildTwo < Parent # error
+  prop :quz, Symbol
+end
+```
+
+We can restructure the code to use composition instead of inheritance.
+
+```ruby
+class Common < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < T::Struct
+  prop :common, Common
+  prop :bar, String
+end
+
+class ChildTwo < T::Struct
+  prop :common, Common
+  prop :quz, Symbol
+end
+```
+
+## 5047
+
+A class or module tried to inherit, include, or extend a final class or module.
+
+```ruby
+class Final
+  extend T::Helpers
+  final!
+end
+
+class Bad < Final; end # error
+```
+
+## 5048
+
+A class or module was declared as final, but a method in the class or module was
+not explicitly declared as final with a final `sig`.
+
+```ruby
+class C
+  extend T::Helpers
+  final!
+
+  def no_sig; end # error
+
+  extend T::Sig
+
+  sig {void}
+  def non_final_sig; end # error
+
+  sig(:final) {void}
+  def final_sig; end # good
+end
+```
+
+## 5054
+
+Use of `implementation` has been replaced by `override`.
 
 ## 6002
 
@@ -459,6 +558,13 @@ list.each do |elem|
   found_valid = true if valid?(elem) # ok
 end
 ```
+
+## 5056
+
+The `generated` annotation in method signatures is deprecated.
+
+For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
+how to change the runtime behavior when method signatures encounter a problem.
 
 ## 7002
 
@@ -594,6 +700,11 @@ don't usually expect that some branch of code is never taken; usually dead code
 errors come from simple typos or misunderstandings about how Ruby works. In
 particular: the only two "falsy" values in Ruby are `nil` and `false`.
 
+Note if you intend for code to be dead because you've exhausted all the cases
+and are trying to raise in the default case, use `T.absurd` to assert that a
+case analysis is exhaustive. See [Exhaustiveness Checking](exhaustiveness.md)
+for more information.
+
 Sometimes, dead code errors can be hard to track down. The best way to pinpoint
 the cause of a dead code error is to wrap variables or expressions in
 `T.reveal_type(...)` to validate the assumptions that a piece of code is making.
@@ -626,8 +737,9 @@ with `T.unsafe(...)`. T.unsafe is one of a handful of
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
-debugging. `T.reveal_type(expr)` will report an error that shows what the static
-component of Sorbet thinks the result type of `expr` is.
+debugging. `T.reveal_type(expr)` will report an error in the output of `srb tc`
+that shows what the static component of Sorbet thinks the result type of `expr`
+is.
 
 Making this an error is nice for two reasons:
 
@@ -777,6 +889,14 @@ def bar(&blk)
 end
 # ---------------------------------------------
 ```
+
+## 7026
+
+Sorbet detected that it was possible for `T.absurd` to be reached. This usually
+means that something that was meant to cover all possible cases of a union type
+did not cover all the cases.
+
+See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 

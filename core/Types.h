@@ -67,6 +67,11 @@ template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
 }
 
+enum class UntypedMode {
+    AlwaysCompatible = 1,
+    AlwaysIncompatible = 2,
+};
+
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
@@ -75,12 +80,21 @@ public:
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
     static TypePtr any(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
-    /** is every instance of  t1 an  instance of t2? */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2);
+    /**
+     * is every instance of  t1 an  instance of t2?
+     *
+     * The parameter `mode` controls whether or not `T.untyped` is
+     * considered to be a super type or subtype of all other types */
+    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                         UntypedMode mode);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
     static bool equiv(Context ctx, const TypePtr &t1, const TypePtr &t2);
+
+    /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
+    static bool isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
     static TypePtr top();
     static TypePtr bottom();
@@ -107,7 +121,7 @@ public:
     static TypePtr approximateSubtract(Context ctx, const TypePtr &from, const TypePtr &what);
     static bool canBeTruthy(Context ctx, const TypePtr &what);
     static bool canBeFalsy(Context ctx, const TypePtr &what);
-    enum Combinator { OR, AND };
+    enum class Combinator { OR, AND };
 
     static TypePtr resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                         const std::vector<TypePtr> &targs);
@@ -141,10 +155,14 @@ public:
     static TypePtr lubAll(Context ctx, std::vector<TypePtr> &elements);
     static TypePtr arrayOf(Context ctx, const TypePtr &elem);
     static TypePtr hashOf(Context ctx, const TypePtr &elem);
+    static TypePtr dropNil(Context ctx, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */
     static TypePtr widen(Context ctx, const TypePtr &type);
     static std::optional<int> getProcArity(const AppliedType &type);
+
+    /** Unwrap SelfTypeParam instances that belong to the given owner, to a bare LambdaParam */
+    static TypePtr unwrapSelfTypeParam(Context ctx, const TypePtr &ty);
 
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
@@ -153,8 +171,12 @@ public:
 };
 
 struct Intrinsic {
+    enum class Kind : u1 {
+        Instance = 1,
+        Singleton = 2,
+    };
     const SymbolRef symbol;
-    const bool singleton;
+    const Kind singleton;
     const NameRef method;
     const IntrinsicMethod *impl;
 };
@@ -258,11 +280,20 @@ public:
 };
 CheckSize(ClassType, 16, 8);
 
+/*
+ * This is the type used to represent a use of a type_member or type_template in
+ * a signature.
+ */
 class LambdaParam final : public Type {
 public:
     SymbolRef definition;
 
-    LambdaParam(const SymbolRef definition);
+    // The type bounds provided in the definition of the type_member or
+    // type_template.
+    TypePtr lowerBound;
+    TypePtr upperBound;
+
+    LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
@@ -278,7 +309,7 @@ public:
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
-CheckSize(LambdaParam, 16, 8);
+CheckSize(LambdaParam, 48, 8);
 
 class SelfTypeParam final : public Type {
 public:
@@ -376,6 +407,9 @@ public:
 };
 CheckSize(LiteralType, 24, 8);
 
+/*
+ * TypeVars are the used for the type parameters of generic methods.
+ */
 class TypeVar final : public Type {
 public:
     SymbolRef sym;
@@ -440,6 +474,9 @@ private:
     friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);
+    friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
+    friend class Symbol; // the actual method is `recordSealedSubclass(MutableContext ctx, SymbolRef subclass)`,
+                         // but refering to it introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
@@ -482,6 +519,7 @@ private:
     friend TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
@@ -609,9 +647,10 @@ public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     std::vector<ArgInfo::ArgFlags> argFlags;
     core::NameRef fun;
+    int rubyBlockId;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
@@ -707,6 +746,17 @@ public:
     const std::vector<core::NameRef> names;
     UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
         : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
+    virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+};
+
+class UnresolvedAppliedType final : public ClassType {
+public:
+    const core::SymbolRef klass;
+    const std::vector<TypePtr> targs;
+    UnresolvedAppliedType(SymbolRef klass, std::vector<TypePtr> targs)
+        : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;

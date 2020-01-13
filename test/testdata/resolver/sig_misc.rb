@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 class T1; end
 class T2; end
 
@@ -79,12 +78,13 @@ class A
    # empty, because abstract
   end
 
-  sig { implementation.void }
-  def test_implementation(x) # error: Malformed `sig`. Type not specified for argument
+  sig { override.void }
+  def test_implementation(x) # error: Method `A#test_implementation` is marked `override` but does not override anything
+                        # ^ error: Malformed `sig`. Type not specified for argument
   end
 
   sig {override.returns(T1)}
-  def test_override;
+  def test_override; # error: Method `A#test_override` is marked `override` but does not override anything
     T1.new
   end
 
@@ -93,8 +93,8 @@ class A
     T1.new
   end
 
-  sig {implementation.overridable.returns(T1)}
-  def test_overridable_implementation;
+  sig {override.overridable.returns(T1)}
+  def test_overridable_implementation; # error: Method `A#test_overridable_implementation` is marked `override` but does not override anything
     T1.new
   end
 

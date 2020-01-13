@@ -1,0 +1,118 @@
+class <emptyTree><<C <root>>> < ()
+  class <emptyTree>::<C MyEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    <self>.extend(::T::Helpers)
+
+    <self>.abstract!()
+
+    <self>.sealed!()
+
+    class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
+
+    class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
+
+    class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
+  end
+
+  class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
+    <self>.enums() do ||
+      begin
+        <emptyTree>::<C X> = ::<Magic>.<self-new>(<self>)
+        <emptyTree>::<C Y> = <emptyTree>::<C T>.let(::<Magic>.<self-new>(<self>), <self>)
+      end
+    end
+  end
+
+  class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    <self>.extend(::T::Helpers)
+
+    <self>.abstract!()
+
+    <self>.sealed!()
+
+    class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
+
+    class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
+
+    class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
+
+    def something_outside<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    <self>.extend(::T::Helpers)
+
+    <self>.abstract!()
+
+    <self>.sealed!()
+
+    class <emptyTree>::<C Before$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Before> = ::T.let(<emptyTree>::<C Before$1>.instance(), <emptyTree>::<C Before$1>)
+
+    <emptyTree>::<C StaticField1> = 1
+
+    class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.instance(), <emptyTree>::<C Inside$1>)
+
+    <emptyTree>::<C StaticField2> = 2
+
+    class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+      <self>.include(::Singleton)
+
+      <self>.final!()
+    end
+
+    <emptyTree>::<C After> = ::T.let(<emptyTree>::<C After$1>.instance(), <emptyTree>::<C After$1>)
+
+    <emptyTree>::<C StaticField3> = 3
+
+    <emptyTree>::<C StaticField4> = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+  end
+end

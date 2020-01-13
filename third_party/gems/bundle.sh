@@ -12,10 +12,12 @@ else
   base_dir="$(dirname "${BASH_SOURCE[0]}")"
 fi
 
-BUNDLER_ROOT="${base_dir}/{{site_ruby}}/lib"
+RUBY_VERSION=$(ruby -e 'require "rbconfig"; puts RbConfig::CONFIG["ruby_version"]')
+
+BUNDLER_ROOT="${base_dir}/lib/ruby/site_ruby/${RUBY_VERSION}"
 export BUNDLER_ROOT
 
-RUBYLIB="${BUNDLER_ROOT}:${RUBYLIB:-}"
+RUBYLIB="${BUNDLER_ROOT}${RUBYLIB:+:}${RUBYLIB:-}"
 export RUBYLIB
 
 exec "${base_dir}/{{site_bin}}/bundle" "$@"

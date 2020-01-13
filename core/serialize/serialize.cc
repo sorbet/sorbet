@@ -3,6 +3,7 @@
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
@@ -238,13 +239,13 @@ shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const Name &what) {
-    p.putU1(what.kind);
+    p.putU1(static_cast<u1>(what.kind));
     switch (what.kind) {
         case NameKind::UTF8:
             p.putStr(what.raw.utf8);
             break;
         case NameKind::UNIQUE:
-            p.putU1(what.unique.uniqueNameKind);
+            p.putU1(static_cast<u1>(what.unique.uniqueNameKind));
             p.putU4(what.unique.original._id);
             p.putU4(what.unique.num);
             break;
@@ -317,6 +318,8 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
         p.putU4(alias->symbol._id);
     } else if (auto *lp = cast_type<LambdaParam>(what)) {
         p.putU4(8);
+        pickle(p, lp->lowerBound.get());
+        pickle(p, lp->upperBound.get());
         p.putU4(lp->definition._id);
     } else if (auto *at = cast_type<AppliedType>(what)) {
         p.putU4(9);
@@ -395,7 +398,9 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
         case 7:
             return make_type<AliasType>(SymbolRef(gs, p.getU4()));
         case 8: {
-            return make_type<LambdaParam>(SymbolRef(gs, p.getU4()));
+            auto lower = unpickleType(p, gs);
+            auto upper = unpickleType(p, gs);
+            return make_type<LambdaParam>(SymbolRef(gs, p.getU4()), lower, upper);
         }
         case 9: {
             SymbolRef klass(gs, p.getU4());
@@ -545,8 +550,9 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
         auto lastPayload =
-            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Payload; });
-        ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Payload; }));
+            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Type::Payload; });
+        ENFORCE(
+            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Type::Payload; }));
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
     } else {
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());
@@ -780,10 +786,6 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
             p.putU4(a->cnst._id);
             pickle(p, file, a->scope);
         },
-        [&](ast::Field *a) {
-            pickleAstHeader(p, 9, a);
-            p.putU4(a->symbol._id);
-        },
         [&](ast::Local *a) {
             pickleAstHeader(p, 10, a);
             p.putU4(a->localVariable._name._id);
@@ -846,7 +848,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ClassDef *c) {
             pickleAstHeader(p, 21, c);
             pickle(p, c->declLoc);
-            p.putU1(c->kind);
+            p.putU1(static_cast<u2>(c->kind));
             p.putU4(c->symbol._id);
             p.putU4(c->ancestors.size());
             p.putU4(c->singletonAncestors.size());
@@ -917,7 +919,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a); },
         [&](ast::UnresolvedIdent *a) {
             pickleAstHeader(p, 31, a);
-            p.putU1((int)a->kind);
+            p.putU1(static_cast<u1>(a->kind));
             p.putU4(a->name._id);
         },
         [&](ast::ConstantLit *a) {
@@ -985,10 +987,6 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             NameRef cnst = unpickleNameRef(p, gs);
             auto scope = unpickleExpr(p, gs, file);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
-        }
-        case 9: {
-            SymbolRef sym(gs, p.getU4());
-            return make_unique<ast::Field>(loc, sym);
         }
         case 10: {
             NameRef nm = unpickleNameRef(p, gs);
@@ -1070,8 +1068,8 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             for (auto &r : rhs) {
                 r = unpickleExpr(p, gs, file);
             }
-            auto ret = ast::MK::Class(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                      (ast::ClassDefKind)kind);
+            auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
+                                              (ast::ClassDef::Kind)kind);
             ret->singletonAncestors = std::move(singletonAncestors);
             ret->symbol = symbol;
             return ret;
@@ -1139,13 +1137,13 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             auto tmp = unpickleExpr(p, gs, file);
             unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
             auto default_ = unpickleExpr(p, gs, file);
-            return make_unique<ast::OptionalArg>(loc, std::move(ref), std::move(default_));
+            return ast::MK::OptionalArg(loc, std::move(ref), std::move(default_));
         }
         case 30: {
             return make_unique<ast::ZSuperArgs>(loc);
         }
         case 31: {
-            auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
+            auto kind = (ast::UnresolvedIdent::Kind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }

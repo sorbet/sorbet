@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
+require 'concurrent/atomic/cyclic_barrier'
 
 class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it 'can type ==' do
@@ -196,7 +197,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
   end
 
-  it 'calls original singleton_method_added when registering hooks' do
+  it "calls a user-defined singleton_method_added when registering hooks" do
     klass = Class.new do
       class << self
         def singleton_method_added(name)
@@ -215,14 +216,75 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(
       [
         :singleton_method_added,
-        :method_added,
-        # hook registration overwrites this method but it should
-        # still call the original defined above
-        :singleton_method_added,
         :post_hook,
       ],
       klass.instance_variable_get(:@called)
     )
+  end
+
+  it "allows custom hooks" do
+    parent = Class.new do
+      extend T::Sig
+      def self.method_added(method)
+        super(method)
+      end
+      def self.singleton_method_added(method)
+        super(method)
+      end
+    end
+    Class.new(parent) do
+      extend T::Sig
+      sig {void}
+      def a; end
+      sig {void}
+      def b; end
+      sig {void}
+      def c; end
+    end
+  end
+
+  it "still calls our hooks if the user supers up" do
+    c1 = Class.new do
+      extend T::Sig
+      sig {returns(Integer)}
+      def foo; 1; end
+      def self.method_added(method)
+        super(method)
+      end
+      def self.singleton_method_added(method)
+        super(method)
+      end
+      sig {returns(Integer)}
+      def bar; "bad"; end
+    end
+    assert_equal(1, c1.new.foo)
+    assert_raises(TypeError) { c1.new.bar }
+  end
+
+  it "forbids adding a sig to method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `method_added` is not supported")
+  end
+
+  it "forbids adding a sig to singleton_method_added" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Sig
+        sig {params(method: Symbol).void}
+        def self.singleton_method_added(method)
+          super(method)
+        end
+      end
+    end
+    assert_includes(err.message, "Putting a `sig` on `singleton_method_added` is not supported")
   end
 
   it "does not make sig available to attached class" do
@@ -275,4 +337,26 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/A previous invocation of #<UnboundMethod: /, e.message)
   end
 
+  it 'does not crash when two threads call the same wrapper' do
+    begin
+      barrier = Concurrent::CyclicBarrier.new(2)
+      mutex = Mutex.new
+      replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
+        barrier.wait
+        mutex.synchronize { replaced.bind(T::Private::Methods).call(*args) }
+      end
+
+      klass = Class.new do
+        extend T::Sig
+        sig {void}
+        def self.hello; end
+      end
+
+      thread = Thread.new { klass.hello }
+      klass.hello
+    ensure
+      thread&.join
+      replaced&.restore
+    end
+  end
 end

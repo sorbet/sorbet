@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eux
 
-test/test_corpus_sharded "$@"
+test/test_corpus_runner "$@"

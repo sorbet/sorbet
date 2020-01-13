@@ -56,6 +56,7 @@ public:
     int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
+    int rubyBlockId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -64,7 +65,8 @@ public:
         counterInc("basicblocks");
     };
 
-    std::string toString(core::Context ctx);
+    std::string toString(core::Context ctx) const;
+    std::string showRaw(core::Context ctx) const;
 };
 
 class CFGContext;
@@ -78,6 +80,7 @@ class CFG final {
 public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
+    int maxRubyBlockId = 0;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
      *
@@ -94,7 +97,10 @@ public:
         return basicBlocks[1].get();
     };
 
-    std::string toString(core::Context ctx);
+    // Abbreviated debug output, useful if you already know what you're looking at
+    std::string toString(core::Context ctx) const;
+    // Verbose debug output
+    std::string showRaw(core::Context ctx) const;
 
     // Flags
     static constexpr int LOOP_HEADER = 1 << 0;
@@ -122,12 +128,9 @@ public:
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 
-    // Should this CFG be exported?
-    bool shouldExport(const core::GlobalState &gs) const;
-
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops);
+    BasicBlock *freshBlock(int outerLoops, int rubyBlockid);
 };
 
 } // namespace sorbet::cfg

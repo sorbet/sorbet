@@ -69,7 +69,7 @@ class Main
       rest: String,   # ← For rest args, write the type of the element
       blk: T.proc.returns(NilClass),
     )
-    .returns(Integer)}
+    .returns(Integer)
   end
   def self.main(x, y:, *rest, &blk)
     # Sorbet infers (!) the type of a:

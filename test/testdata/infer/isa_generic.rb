@@ -7,6 +7,7 @@ class Base
 end
 
 class Concrete < Base
+  extend T::Generic
   Klass = type_template(fixed: String)
 end
 
@@ -31,3 +32,11 @@ def f(x)
     T.assert_type!(x, Concrete)
   end
 end
+
+sig { params(x: T.any(Base, Other)).void }
+def f2(x)
+  if x.is_a?(Base)
+    T.reveal_type(x) # error: Revealed type: `Base`
+  end
+end
+

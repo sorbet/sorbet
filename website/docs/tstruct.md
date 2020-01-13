@@ -1,6 +1,7 @@
 ---
 id: tstruct
-title: Typed Structs
+title: Typed Structs via T::Struct
+sidebar_label: T::Struct
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!
@@ -27,9 +28,7 @@ This is basically the same as having written code like this:
 ```ruby
 class MyStruct < T::Struct
   sig {params(x: Integer, y: String, z: Float).void}
-  def initialize(x:, y: nil, z: 0.5)
-    ...
-  end
+  def initialize(x:, y: nil, z: 0.5); ...; end
 
   sig {returns(Integer)}
   def x; ...; end
@@ -54,4 +53,13 @@ my_struct.y # => nil
 my_struct.z # => 0.5
 my_struct.x = 4
 my_struct.x # => 4
+```
+
+## Converting structs to other types
+
+A particularly common case is to convert an struct to a Hash. Because this is so
+common, this conversion has been built in (it still must be explicitly called):
+
+```ruby
+my_struct.serialize # => '{ x: 3 }'
 ```

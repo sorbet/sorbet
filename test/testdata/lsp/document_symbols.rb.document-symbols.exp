@@ -1,1 +1,507 @@
-{"jsonrpc":"2.0","id":1,"requestMethod":"textDocument/documentSymbol","result":[{"name":"BigDecimal","detail":"","kind":5,"range":{"start":{"line":12,"character":0},"end":{"line":12,"character":16}},"selectionRange":{"start":{"line":12,"character":0},"end":{"line":12,"character":16}},"children":[]},{"name":"A","detail":"","kind":5,"range":{"start":{"line":2,"character":0},"end":{"line":2,"character":7}},"selectionRange":{"start":{"line":2,"character":0},"end":{"line":2,"character":7}},"children":[{"name":"foo","detail":"sig {returns(T.untyped)}","kind":6,"range":{"start":{"line":3,"character":2},"end":{"line":3,"character":9}},"selectionRange":{"start":{"line":3,"character":2},"end":{"line":3,"character":9}},"children":[]},{"name":"self.<static-init>","detail":"sig {returns(T.untyped)}","kind":6,"range":{"start":{"line":2,"character":0},"end":{"line":10,"character":3}},"selectionRange":{"start":{"line":2,"character":0},"end":{"line":10,"character":3}},"children":[]},{"name":"self.bar","detail":"sig {returns(T.untyped)}","kind":6,"range":{"start":{"line":7,"character":2},"end":{"line":7,"character":14}},"selectionRange":{"start":{"line":7,"character":2},"end":{"line":7,"character":14}},"children":[]}]}]}
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "requestMethod": "textDocument/documentSymbol",
+    "result": [
+        {
+            "name": "A",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 2,
+                    "character": 7
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 2,
+                    "character": 7
+                }
+            },
+            "children": [
+                {
+                    "name": "@ivar",
+                    "detail": "",
+                    "kind": 8,
+                    "range": {
+                        "start": {
+                            "line": 7,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 7,
+                            "character": 9
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 7,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 7,
+                            "character": 9
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "initialize",
+                    "detail": "sig {void}\ndef initialize; end",
+                    "kind": 9,
+                    "range": {
+                        "start": {
+                            "line": 6,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 6,
+                            "character": 16
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 6,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 6,
+                            "character": 16
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "next",
+                    "detail": "sig {returns(Integer)}\ndef next; end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 11,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 11,
+                            "character": 10
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 11,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 11,
+                            "character": 10
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "self.bar",
+                    "detail": "sig {returns(T.untyped)}\ndef self.bar; end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 18,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 18,
+                            "character": 14
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 18,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 18,
+                            "character": 14
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "M",
+            "detail": "",
+            "kind": 2,
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 0
+                },
+                "end": {
+                    "line": 23,
+                    "character": 8
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 23,
+                    "character": 0
+                },
+                "end": {
+                    "line": 23,
+                    "character": 8
+                }
+            },
+            "children": [
+                {
+                    "name": "@@greeting",
+                    "detail": "",
+                    "kind": 14,
+                    "range": {
+                        "start": {
+                            "line": 29,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 29,
+                            "character": 12
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 29,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 29,
+                            "character": 12
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "bye",
+                    "detail": "sig(:final) {params(x: String).returns(String)}\ndef bye(x); end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 37,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 37,
+                            "character": 12
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 37,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 37,
+                            "character": 12
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "hi",
+                    "detail": "sig {params(x: String).returns(String)}\ndef hi(x); end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 32,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 32,
+                            "character": 11
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 32,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 32,
+                            "character": 11
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "Parent",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 43,
+                    "character": 0
+                },
+                "end": {
+                    "line": 43,
+                    "character": 12
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 43,
+                    "character": 0
+                },
+                "end": {
+                    "line": 43,
+                    "character": 12
+                }
+            },
+            "children": [
+                {
+                    "name": "sum_many",
+                    "detail": "sig do\n  abstract\n  .params(\n    first: Integer,\n    second: Integer,\n    third: Integer,\n    fourth: Integer,\n    fifth: Integer\n  )\n  .returns(Integer)\nend\ndef sum_many(first, second, third, fourth, fifth); end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 58,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 58,
+                            "character": 51
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 58,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 58,
+                            "character": 51
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "Child",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 62,
+                    "character": 0
+                },
+                "end": {
+                    "line": 62,
+                    "character": 20
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 62,
+                    "character": 0
+                },
+                "end": {
+                    "line": 62,
+                    "character": 20
+                }
+            },
+            "children": [
+                {
+                    "name": "sum_many",
+                    "detail": "sig do\n  override\n  .params(\n    first: Integer,\n    second: Integer,\n    third: Integer,\n    fourth: Integer,\n    fifth: Integer\n  )\n  .returns(Integer)\nend\ndef sum_many(first, second, third, fourth, fifth); end",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 75,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 75,
+                            "character": 51
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 75,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 75,
+                            "character": 51
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "OuterClass",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 80,
+                    "character": 0
+                },
+                "end": {
+                    "line": 80,
+                    "character": 16
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 80,
+                    "character": 0
+                },
+                "end": {
+                    "line": 80,
+                    "character": 16
+                }
+            },
+            "children": [
+                {
+                    "name": "InnerClass",
+                    "detail": "",
+                    "kind": 5,
+                    "range": {
+                        "start": {
+                            "line": 81,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 81,
+                            "character": 18
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 81,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 81,
+                            "character": 18
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "InnerModule",
+                    "detail": "",
+                    "kind": 2,
+                    "range": {
+                        "start": {
+                            "line": 82,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 82,
+                            "character": 20
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 82,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 82,
+                            "character": 20
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "OuterModule",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 85,
+                    "character": 0
+                },
+                "end": {
+                    "line": 85,
+                    "character": 17
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 85,
+                    "character": 0
+                },
+                "end": {
+                    "line": 85,
+                    "character": 17
+                }
+            },
+            "children": [
+                {
+                    "name": "InnerClass",
+                    "detail": "",
+                    "kind": 5,
+                    "range": {
+                        "start": {
+                            "line": 86,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 86,
+                            "character": 18
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 86,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 86,
+                            "character": 18
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "InnerModule",
+                    "detail": "",
+                    "kind": 2,
+                    "range": {
+                        "start": {
+                            "line": 87,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 87,
+                            "character": 20
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 87,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 87,
+                            "character": 20
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        }
+    ]
+}

@@ -12,14 +12,14 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
@@ -28,6 +28,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/LSPTest.h"
@@ -75,6 +76,13 @@ public:
     void TearDown() override {}
 };
 
+class WhitequarkParserTest : public testing::TestWithParam<Expectations> {
+public:
+    ~WhitequarkParserTest() override = default;
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
 #define PRINTF(...)                                                                        \
     do {                                                                                   \
         testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
@@ -99,16 +107,18 @@ public:
             return m;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+        auto symbol = cfg->symbol;
+        cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         cfgs.push_back(move(cfg));
         return m;
     }
 };
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",     "parse-tree-json",    "ast",       "ast-raw",       "dsl-tree",     "dsl-tree-raw",
-    "symbol-table",   "symbol-table-raw",   "name-tree", "name-tree-raw", "resolve-tree", "resolve-tree-raw",
-    "flattened-tree", "flattened-tree-raw", "cfg",       "cfg-json",      "autogen",      "document-symbols"};
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
+    "rewrite-tree-raw", "symbol-table",    "symbol-table-raw",      "name-tree",    "name-tree-raw",    "resolve-tree",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",          "cfg-raw",          "autogen",
+    "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
@@ -116,20 +126,390 @@ ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     return {move(restored), expr.file};
 }
 
-/** Converts a Sorbet Detail object into an equivalent LSP Position object. */
-unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
-    // 1-indexed => 0-indexed
-    return make_unique<Position>(detail.line - 1, detail.column - 1);
+/** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
+unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core::Error &error) {
+    if (!error.loc.exists()) {
+        return nullptr;
+    }
+    return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
 }
 
-/** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
-unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const core::Error &error) {
-    auto position = error.loc.position(gs);
-    auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
-    return make_unique<Diagnostic>(move(range), error.header);
-}
+class ExpectationHandler {
+    Expectations &test;
+    shared_ptr<core::ErrorQueue> &errorQueue;
+
+public:
+    vector<unique_ptr<core::Error>> errors;
+    UnorderedMap<string_view, string> got;
+
+    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue)
+        : test(test), errorQueue(errorQueue){};
+
+    void addObserved(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
+        if (test.expectations.contains(expectationType)) {
+            got[expectationType].append(mkExp());
+            if (addNewline) {
+                got[expectationType].append("\n");
+            }
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+    }
+
+    void checkExpectations(string prefix = "") {
+        for (auto &gotPhase : got) {
+            auto expectation = test.expectations.find(gotPhase.first);
+            ASSERT_TRUE(expectation != test.expectations.end())
+                << prefix << "missing expectation for " << gotPhase.first;
+            ASSERT_TRUE(expectation->second.size() == 1)
+                << prefix << "found unexpected multiple expectations of type " << gotPhase.first;
+
+            auto checker = test.folder + expectation->second.begin()->second;
+            auto expect = FileOps::read(checker);
+            EXPECT_EQ(expect, gotPhase.second) << prefix << "Mismatch on: " << checker;
+            if (expect == gotPhase.second) {
+                TEST_COUT << gotPhase.first << " OK" << '\n';
+            }
+        }
+    }
+
+    void drainErrors() {
+        auto newErrors = errorQueue->drainAllErrors();
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    }
+
+    void clear() {
+        got.clear();
+        errorQueue->drainAllErrors();
+    }
+};
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
+    Expectations test = GetParam();
+    auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
+    SCOPED_TRACE(inputPath);
+
+    for (auto &exp : test.expectations) {
+        if (!knownExpectations.contains(exp.first)) {
+            ADD_FAILURE() << "Unknown pass: " << exp.first;
+        }
+    }
+
+    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    auto gs = make_unique<core::GlobalState>(errorQueue);
+    gs->censorForSnapshotTests = true;
+    auto workers = WorkerPool::create(0, gs->tracer());
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+    }
+    core::MutableContext ctx(*gs, core::Symbols::root());
+    // Parser
+    vector<core::FileRef> files;
+    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+
+        for (auto &sourceFile : test.sourceFiles) {
+            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
+        }
+    }
+    vector<ast::ParsedFile> trees;
+    ExpectationHandler handler(test, errorQueue);
+
+    vector<core::ErrorRegion> errs;
+    for (auto file : files) {
+        errs.emplace_back(*gs, file);
+
+        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
+            file.data(ctx).source().find("# typed:") == string::npos) {
+            ADD_FAILURE_AT(file.data(*gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
+        }
+        unique_ptr<parser::Node> nodes;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+
+            nodes = parser::Parser::run(*gs, file);
+        }
+
+        handler.drainErrors();
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+
+        // Desugarer
+        ast::ParsedFile desugared;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            auto file = nodes->loc.file();
+            desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+        }
+
+        handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
+
+        ast::ParsedFile rewriten;
+        ast::ParsedFile localNamed;
+
+        if (!test.expectations.contains("autogen")) {
+            // Rewriter
+            {
+                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+
+                rewriten = testSerialize(
+                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            }
+
+            handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
+            handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
+
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
+        } else {
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
+            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
+                ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
+            }
+        }
+
+        // Namer
+        ast::ParsedFile namedTree;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(localNamed));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            namedTree = testSerialize(*gs, move(vTmp[0]));
+        }
+
+        handler.addObserved("name-tree", [&]() { return namedTree.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
+
+        trees.emplace_back(move(namedTree));
+    }
+
+    if (test.expectations.contains("autogen")) {
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);
+            core::UnfreezeSymbolTable symbolAccess(*gs);
+
+            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
+        }
+        handler.addObserved(
+            "autogen",
+            [&]() {
+                stringstream payload;
+                for (auto &tree : trees) {
+                    auto pf = autogen::Autogen::generate(ctx, move(tree));
+                    tree = move(pf.tree);
+                    payload << pf.toString(ctx);
+                }
+                return payload.str();
+            },
+            false);
+        // Autogen forces you to to put --stop-after=namer so lets not run
+        // anything else
+        return;
+    } else {
+        core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
+        trees = move(resolver::Resolver::run(ctx, move(trees), *workers).result());
+        handler.drainErrors();
+    }
+
+    handler.addObserved("symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved("symbol-table-raw", [&]() { return gs->showRaw(); });
+
+    for (auto &resolvedTree : trees) {
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+    }
+
+    // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
+    // distribution
+    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+        return lhs.file.data(ctx).source().size() > rhs.file.data(ctx).source().size();
+    });
+
+    for (auto &resolvedTree : trees) {
+        auto file = resolvedTree.file;
+
+        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
+        handler.drainErrors();
+
+        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+
+        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+
+        auto checkTree = [&]() {
+            if (resolvedTree.tree == nullptr) {
+                auto path = file.data(ctx).path();
+                ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
+            }
+        };
+        auto checkPragma = [&](string ext) {
+            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
+                auto path = file.data(ctx).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
+            }
+        };
+
+        // CFG
+        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw")) {
+            checkTree();
+            checkPragma("cfg");
+            CFGCollectorAndTyper collector;
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
+
+            handler.addObserved("cfg", [&]() {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->toString(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n';
+                return dot.str();
+            });
+
+            handler.addObserved("cfg-raw", [&]() {
+                stringstream dot;
+                dot << "digraph \"" << rbName << "\" {" << '\n';
+                dot << "  graph [fontname = \"Courier\"];\n";
+                dot << "  node [fontname = \"Courier\"];\n";
+                dot << "  edge [fontname = \"Courier\"];\n";
+                for (auto &cfg : collector.cfgs) {
+                    dot << cfg->showRaw(ctx) << '\n' << '\n';
+                }
+                dot << "}" << '\n';
+                return dot.str();
+            });
+        }
+
+        // If there is a tree left with a typed: pragma, run the inferencer
+        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
+            checkTree();
+            CFGCollectorAndTyper collector;
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
+            handler.drainErrors();
+        }
+    }
+
+    handler.checkExpectations();
+
+    if (test.expectations.contains("symbol-table")) {
+        string table = gs->toString() + '\n';
+        EXPECT_EQ(handler.got["symbol-table"], table) << " symbol-table should not be mutated by CFG+inference";
+    }
+
+    if (test.expectations.contains("symbol-table-raw")) {
+        string table = gs->showRaw() + '\n';
+        EXPECT_EQ(handler.got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
+    }
+
+    // Check warnings and errors
+    {
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+        for (auto &error : handler.errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+            auto diag = errorToDiagnostic(*gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
+            auto path = error->loc.file().data(*gs).path();
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+        }
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+    }
+
+    // Allow later phases to have errors that we didn't test for
+    errorQueue->drainAllErrors();
+
+    // now we test the incremental resolver
+
+    auto disableStressIncremental =
+        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
+    if (disableStressIncremental) {
+        TEST_COUT << "errors OK" << '\n';
+        return;
+    }
+
+    handler.clear();
+    auto symbolsBefore = gs->symbolsUsed();
+
+    vector<ast::ParsedFile> newTrees;
+    for (auto &f : trees) {
+        const int prohibitedLines = f.file.data(*gs).source().size();
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
+        auto newFile =
+            make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource), f.file.data(*gs).sourceType);
+        gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
+
+        // this replicates the logic of pipeline::indexOne
+        auto nodes = parser::Parser::run(*gs, f.file);
+        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+
+        core::MutableContext ctx(*gs, core::Symbols::root());
+        ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+        handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+
+        // Rewriter pass
+        file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
+        handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+
+        // local vars
+        file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
+
+        // namer
+        {
+            core::UnfreezeSymbolTable symbolTableAccess(*gs);
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(file));
+            vTmp = namer::Namer::run(ctx, move(vTmp));
+            file = testSerialize(*gs, move(vTmp[0]));
+        }
+
+        handler.addObserved("name-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved("name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        newTrees.emplace_back(move(file));
+    }
+
+    // resolver
+    trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
+
+    for (auto &resolvedTree : trees) {
+        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+    }
+
+    handler.checkExpectations("[stress-incremental] ");
+
+    // and drain all the remaining errors
+    errorQueue->drainAllErrors();
+
+    EXPECT_EQ(symbolsBefore, gs->symbolsUsed()) << "the incremental resolver should not add new symbols";
+
+    TEST_COUT << "errors OK" << '\n';
+} // namespace sorbet::test
+
+TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<core::Error>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
@@ -146,9 +526,15 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
-    gs.censorRawLocsWithinPayload = true;
+    gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
-    core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs.initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    }
     core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
@@ -179,243 +565,19 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            nodes = parser::Parser::run(gs, file);
+            // whitequark/parser declares these 3 meta variables to
+            // simplify testing cases around local variables
+            vector<string> initialLocals = {"foo", "bar", "baz"};
+            nodes = parser::Parser::run(gs, file, initialLocals);
         }
         {
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
-        auto expectation = test.expectations.find("parse-tree");
+        auto expectation = test.expectations.find("parse-tree-whitequark");
         if (expectation != test.expectations.end()) {
-            got["parse-tree"].append(nodes->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("parse-tree-json");
-        if (expectation != test.expectations.end()) {
-            got["parse-tree-json"].append(nodes->toJSON(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        // Desugarer
-        ast::ParsedFile desugared;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-            auto file = nodes->loc.file();
-            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
-        }
-
-        expectation = test.expectations.find("ast");
-        if (expectation != test.expectations.end()) {
-            got["ast"].append(desugared.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("ast-raw");
-        if (expectation != test.expectations.end()) {
-            got["ast-raw"].append(desugared.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-        ast::ParsedFile dslUnwound;
-        ast::ParsedFile localNamed;
-
-        if (test.expectations.find("autogen") == test.expectations.end()) {
-            // DSL
-            {
-                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-
-                dslUnwound =
-                    testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
-            }
-
-            expectation = test.expectations.find("dsl-tree");
-            if (expectation != test.expectations.end()) {
-                got["dsl-tree"].append(dslUnwound.tree->toString(gs)).append("\n");
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            expectation = test.expectations.find("dsl-tree-raw");
-            if (expectation != test.expectations.end()) {
-                got["dsl-tree-raw"].append(dslUnwound.tree->showRaw(gs)).append("\n");
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(dslUnwound)));
-        } else {
-            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.find("dsl-tree-raw") != test.expectations.end() ||
-
-                test.expectations.find("dsl-tree") != test.expectations.end()) {
-                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
-            }
-        }
-
-        // Namer
-        ast::ParsedFile namedTree;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(localNamed)));
-        }
-
-        expectation = test.expectations.find("name-tree");
-        if (expectation != test.expectations.end()) {
-            got["name-tree"].append(namedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("name-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["name-tree-raw"].append(namedTree.tree->showRaw(gs));
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        trees.emplace_back(move(namedTree));
-    }
-
-    auto expectation = test.expectations.find("autogen");
-    if (expectation != test.expectations.end()) {
-        {
-            core::UnfreezeNameTable nameTableAccess(gs);
-            core::UnfreezeSymbolTable symbolAccess(gs);
-
-            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
-        }
-
-        for (auto &tree : trees) {
-            auto pf = autogen::Autogen::generate(ctx, move(tree));
-            tree = move(pf.tree);
-            got["autogen"].append(pf.toString(ctx));
-        }
-
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    } else {
-        core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = resolver::Resolver::run(ctx, move(trees), *workers);
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("symbol-table");
-    if (expectation != test.expectations.end()) {
-        got["symbol-table"] = gs.toString() + '\n';
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("symbol-table-raw");
-    if (expectation != test.expectations.end()) {
-        got["symbol-table-raw"] = gs.showRaw() + '\n';
-        auto newErrors = errorQueue->drainAllErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-    }
-
-    for (auto &resolvedTree : trees) {
-        expectation = test.expectations.find("resolve-tree");
-        if (expectation != test.expectations.end()) {
-            got["resolve-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("resolve-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["resolve-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-    }
-
-    for (auto &resolvedTree : trees) {
-        auto file = resolvedTree.file;
-
-        {
-            resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
-
-        expectation = test.expectations.find("flattened-tree");
-        if (expectation != test.expectations.end()) {
-            got["flattened-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        expectation = test.expectations.find("flattened-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["flattened-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
-
-        auto checkTree = [&]() {
-            if (resolvedTree.tree == nullptr) {
-                auto path = file.data(ctx).path();
-                ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
-            }
-        };
-        auto checkPragma = [&](string ext) {
-            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
-                auto path = file.data(ctx).path();
-                ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
-            }
-        };
-
-        // CFG
-        auto expCfg = test.expectations.find("cfg");
-        auto expCfgJson = test.expectations.find("cfg-json");
-        if (expCfg != test.expectations.end() || expCfgJson != test.expectations.end()) {
-            checkTree();
-            checkPragma("cfg");
-            CFGCollectorAndTyper collector;
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
-
-            if (expCfg != test.expectations.end()) {
-                stringstream dot;
-                dot << "digraph \"" << rbName << "\" {" << '\n';
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->toString(ctx) << '\n' << '\n';
-                }
-                dot << "}" << '\n' << '\n';
-                got["cfg"].append(dot.str());
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-
-            if (expCfgJson != test.expectations.end()) {
-                for (auto &cfg : collector.cfgs) {
-                    if (cfg->shouldExport(ctx)) {
-                        auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-                        got["cfg-json"].append(core::Proto::toJSON(proto));
-                    }
-                }
-                auto newErrors = errorQueue->drainAllErrors();
-                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-            }
-        }
-
-        // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
-            checkTree();
-            CFGCollectorAndTyper collector;
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
-            resolvedTree.tree.reset();
+            got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
@@ -424,7 +586,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
-        auto checker = test.folder + expectation->second;
+        ASSERT_TRUE(expectation->second.size() == 1)
+            << "found unexpected multiple expectations of type " << gotPhase.first;
+
+        auto checker = test.folder + expectation->second.begin()->second;
         auto expect = FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
@@ -432,29 +597,19 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-    expectation = test.expectations.find("symbol-table");
-    if (expectation != test.expectations.end()) {
-        string table = gs.toString() + '\n';
-        EXPECT_EQ(got["symbol-table"], table) << " symbol-table should not be mutated by CFG+inference";
-    }
-
-    expectation = test.expectations.find("symbol-table-raw");
-    if (expectation != test.expectations.end()) {
-        string table = gs.showRaw() + '\n';
-        EXPECT_EQ(got["symbol-table-raw"], table) << " symbol-table-raw should not be mutated by CFG+inference";
-    }
-
     // Check warnings and errors
     {
-        auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         for (auto &error : errors) {
             if (error->isSilenced) {
                 continue;
             }
+            auto diag = errorToDiagnostic(gs, *error);
+            if (diag == nullptr) {
+                continue;
+            }
             auto path = error->loc.file().data(gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, *error));
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
@@ -471,24 +626,27 @@ bool isTestMessage(const LSPMessage &msg) {
 
 // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens
 // on the client side." Only keep the newest diagnostics for a file.
-void updateDiagnostics(string_view rootUri, UnorderedMap<string, string> &testFileUris,
+void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, string> &testFileUris,
                        vector<unique_ptr<LSPMessage>> &responses,
                        map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &response : responses) {
         if (isTestMessage(*response)) {
             continue;
         }
-        if (assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response)) {
-            auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
-            ASSERT_TRUE(maybeDiagnosticParams.has_value());
-            auto &diagnosticParams = *maybeDiagnosticParams;
-            auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
-            EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
-                << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+        ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *response));
+        auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
+        ASSERT_TRUE(maybeDiagnosticParams.has_value());
+        auto &diagnosticParams = *maybeDiagnosticParams;
+        auto filename = uriToFilePath(config, diagnosticParams->uri);
+        EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+            << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
-            // Will explicitly overwrite older diagnostics that are irrelevant.
-            diagnostics[filename] = move(diagnosticParams->diagnostics);
+        // Will explicitly overwrite older diagnostics that are irrelevant.
+        vector<unique_ptr<Diagnostic>> copiedDiagnostics;
+        for (const auto &d : diagnosticParams->diagnostics) {
+            copiedDiagnostics.push_back(d->copy());
         }
+        diagnostics[filename] = move(copiedDiagnostics);
     }
 }
 
@@ -508,25 +666,185 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     } else {
         auto &symbols = get<vector<unique_ptr<DocumentSymbol>>>(symbolResult);
         return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
-                                               [](const auto &sym) -> string { return sym->toJSON(); }));
+                                               [](const auto &sym) -> string { return sym->toJSON(true); }));
     }
 }
 
-TEST_P(LSPTest, All) {
-    string rootPath = "/Users/jvilk/stripe/pay-server";
-    string rootUri = fmt::format("file://{}", rootPath);
-
-    // filename => URI
-    UnorderedMap<string, string> testFileUris;
-    for (auto &filename : filenames) {
-        testFileUris[filename] = filePathToUri(rootUri, filename);
+void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
+                             vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
+                             int &nextId) {
+    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
+    for (auto &assertion : assertions) {
+        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
+        }
     }
+
+    bool exhaustiveApplyCodeAction =
+        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
+
+    if (applyCodeActionAssertionsByFilename.empty() && !exhaustiveApplyCodeAction) {
+        return;
+    }
+
+    auto errors = RangeAssertion::getErrorAssertions(assertions);
+    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    for (auto &error : errors) {
+        errorsByFilename[error->filename].emplace_back(error);
+    }
+
+    for (auto &filename : filenames) {
+        auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
+
+        // Request code actions for each of this file's error.
+        for (auto &error : errorsByFilename[filename]) {
+            vector<unique_ptr<Diagnostic>> diagnostics;
+            auto fileUri = testFileUris[filename];
+            // Unfortunately there's no simpler way to copy the range (yet).
+            auto params =
+                make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
+                                              make_unique<CodeActionContext>(move(diagnostics)));
+            auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+            auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+            EXPECT_EQ(responses.size(), 1) << "Did not receive exactly one response for a codeAction request.";
+            if (responses.size() != 1) {
+                continue;
+            }
+
+            auto &msg = responses.at(0);
+            EXPECT_TRUE(msg->isResponse());
+            if (!msg->isResponse()) {
+                continue;
+            }
+
+            auto &response = msg->asResponse();
+            ASSERT_TRUE(response.result) << "Code action request returned error: " << msg->toJSON();
+            auto &receivedCodeActionResponse =
+                get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+            EXPECT_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
+            if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+                continue;
+            }
+
+            UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+            auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+            for (auto &codeAction : receivedCodeActions) {
+                bool codeActionTitleUnique =
+                    receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+                EXPECT_TRUE(codeActionTitleUnique) << "Found code action with duplicate title: " << codeAction->title;
+
+                if (codeActionTitleUnique) {
+                    receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
+                }
+            }
+
+            u4 receivedCodeActionsCount = receivedCodeActionsByTitle.size();
+            vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
+
+            // Test code action assertions matching the range of this error.
+            auto it = applyCodeActionAssertions.begin();
+            while (it != applyCodeActionAssertions.end()) {
+                auto codeActionAssertion = it->get();
+                if (!(error->range->start->cmp(*codeActionAssertion->range->start) <= 0 &&
+                      error->range->end->cmp(*codeActionAssertion->range->end) >= 0)) {
+                    ++it;
+                    continue;
+                }
+
+                // Ensure we received a code action matching the assertion.
+                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+                EXPECT_NE(it2, receivedCodeActionsByTitle.end())
+                    << fmt::format("Did not receive code action matching assertion `{}` for error `{}`...",
+                                   codeActionAssertion->toString(), error->toString());
+
+                // Ensure that the received code action applies correctly.
+                if (it2 != receivedCodeActionsByTitle.end()) {
+                    auto codeAction = move(it2->second);
+                    codeActionAssertion->check(test.sourceFileContents, lspWrapper, *codeAction.get());
+
+                    // Some bookkeeping to make surfacing errors re. extra/insufficient
+                    // apply-code-action annotations easier.
+                    receivedCodeActionsByTitle.erase(it2);
+                    matchedCodeActionAssertions.emplace_back(*it);
+                    it = applyCodeActionAssertions.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            if (exhaustiveApplyCodeAction) {
+                if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Found apply-code-action assertions without "
+                        "corresponding code actions from the server:\n{}",
+                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                      [](const auto &assertion) -> string { return assertion->toString(); }));
+                } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
+                    ADD_FAILURE() << fmt::format(
+                        "Received code actions without corresponding apply-code-action assertions:\n{}",
+                        fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                      [](const auto &action) -> string { return action.second->toJSON(); }));
+                }
+            }
+        }
+
+        // We've already removed any code action assertions that matches a received code action assertion.
+        // Any remaining are therefore extraneous.
+        EXPECT_EQ(applyCodeActionAssertions.size(), 0)
+            << fmt::format("Found extraneous apply-code-action assertions:\n{}",
+                           fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
+                                         [](const auto &assertion) -> string { return assertion->toString(); }));
+    }
+}
+
+void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
+                         string_view testFile) {
+    auto expectationFileName = test.expectations["document-symbols"][testFile];
+    if (expectationFileName.empty()) {
+        // No .exp file found; nothing to do.
+        return;
+    }
+
+    auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
+    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+    ASSERT_EQ(responses.size(), 1) << "Did not receive exactly one response for a documentSymbols request.";
+    auto &msg = responses.at(0);
+    ASSERT_TRUE(msg->isResponse());
+    auto &response = msg->asResponse();
+    ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
+    auto &receivedSymbolResponse = get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
+
+    auto expectedSymbolsPath = test.folder + expectationFileName;
+    auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
+    auto &expectedResp = expected->asResponse();
+    auto &expectedSymbolResponse =
+        get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
+
+    // Simple string comparison, just like other *.exp files.
+    EXPECT_EQ(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse))
+        << "Mismatch on: " << expectedSymbolsPath;
+}
+
+TEST_P(LSPTest, All) {
+    const auto &config = lspWrapper->config();
 
     // Perform initialize / initialized handshake.
     {
-        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true);
+        string rootPath = fmt::format("/Users/{}/stripe/sorbet", std::getenv("USER"));
+        string rootUri = fmt::format("file://{}", rootPath);
+        auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
+        sorbetInitOptions->enableTypecheckInfo = true;
+        auto initializedResponses =
+            initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true, move(sorbetInitOptions));
         EXPECT_EQ(0, countNonTestMessages(initializedResponses))
             << "Should not receive any response to 'initialized' message.";
+    }
+
+    // filename => URI; do post-initialization so LSPConfiguration has rootUri set.
+    UnorderedMap<string, string> testFileUris;
+    for (auto &filename : filenames) {
+        testFileUris[filename] = filePathToUri(config, filename);
     }
 
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
@@ -534,8 +852,8 @@ TEST_P(LSPTest, All) {
         for (auto &filename : filenames) {
             auto params = make_unique<DidOpenTextDocumentParams>(
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
-            auto responses = lspWrapper->getLSPResponsesFor(
-                LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params))));
+            auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
+                                                                 "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             EXPECT_EQ(0, countNonTestMessages(responses))
                 << "Should not receive any response to opening an empty file.";
         }
@@ -556,11 +874,11 @@ TEST_P(LSPTest, All) {
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
                 auto textDocContents = test.sourceFileContents[filename]->source();
-                updates.push_back(makeDidChange(testFileUris[filename],
-                                                string(textDocContents.begin(), textDocContents.end()), 2 + i));
+                updates.push_back(
+                    makeChange(testFileUris[filename], string(textDocContents.begin(), textDocContents.end()), 2 + i));
             }
-            auto responses = lspWrapper->getLSPResponsesFor(updates);
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
             if (i == 2) {
@@ -569,46 +887,25 @@ TEST_P(LSPTest, All) {
         }
     }
 
-    // Document symbols
-    auto docSymbolExpectation = test.expectations.find("document-symbols");
-    if (docSymbolExpectation != test.expectations.end()) {
-        ASSERT_EQ(filenames.size(), 1) << "document-symbols only works with tests that have a single file.";
-        auto params =
-            make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testFileUris[*filenames.begin()]));
-        auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
-        auto responses = lspWrapper->getLSPResponsesFor(LSPMessage(move(req)));
-        EXPECT_EQ(responses.size(), 1) << "Did not receive a response for a documentSymbols request.";
-        if (responses.size() == 1) {
-            auto &msg = responses.at(0);
-            EXPECT_TRUE(msg->isResponse());
-            if (msg->isResponse()) {
-                auto &response = msg->asResponse();
-                ASSERT_TRUE(response.result) << "Document symbols request returned error: " << msg->toJSON();
-                auto &receivedSymbolResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
-
-                auto expectedSymbolsPath = test.folder + docSymbolExpectation->second;
-                auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
-                auto &expectedResp = expected->asResponse();
-                auto &expectedSymbolResponse =
-                    get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
-
-                // Simple string comparison, just like other *.exp files.
-                EXPECT_EQ(documentSymbolsToString(receivedSymbolResponse),
-                          documentSymbolsToString(expectedSymbolResponse))
-                    << "Mismatch on: " << expectedSymbolsPath;
-            }
-        }
+    for (auto &filename : filenames) {
+        testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
+    testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 
     // Usage and def assertions
     {
         // Sort by symbol.
-        // symbol => [version => DefAssertion, [DefAssertion+UsageAssertion][]]
+        // symbol => [ (version => DefAssertion), (DefAssertion | UsageAssertion)[] ]
         // Note: Using a vector in pair since order matters; assertions are ordered by location, which
         // is used when comparing against LSP responses.
         UnorderedMap<string, pair<UnorderedMap<int, shared_ptr<DefAssertion>>, vector<shared_ptr<RangeAssertion>>>>
             defUsageMap;
+
+        // symbol => [ TypeDefAssertion[], TypeAssertion[] ]
+        //
+        // (The first element of the pair is only ever TypeDefAssertions but we only ever care that they're
+        // RangeAssertions, so rather than fiddle with up casting, we'll just make the whole vector RangeAssertions)
+        UnorderedMap<string, pair<vector<shared_ptr<RangeAssertion>>, vector<shared_ptr<TypeAssertion>>>> typeDefMap;
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
@@ -623,16 +920,22 @@ TEST_P(LSPTest, All) {
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
                 entry.second.push_back(usageAssertion);
+            } else if (auto typeDefAssertion = dynamic_pointer_cast<TypeDefAssertion>(assertion)) {
+                auto &[typeDefs, _typeAssertions] = typeDefMap[typeDefAssertion->symbol];
+                typeDefs.push_back(typeDefAssertion);
+            } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
+                auto &[_typeDefs, typeAssertions] = typeDefMap[typeAssertion->symbol];
+                typeAssertions.push_back(typeAssertion);
             }
         }
 
-        // Check each assertion.
+        // Check each def/usage assertion.
         for (auto &entry : defUsageMap) {
             auto &entryAssertions = entry.second.second;
             // Sort assertions in (filename, range) order
             fast_sort(entryAssertions,
                       [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return errorComparison(a->filename, *a->range, "", b->filename, *b->range, "") == -1;
+                          return a->cmp(*b) < 0;
                       });
 
             auto &defAssertions = entry.second.first;
@@ -652,12 +955,22 @@ TEST_P(LSPTest, All) {
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
                     auto &def = entry->second;
-                    auto queryLoc = assertion->getLocation(rootUri);
+                    auto queryLoc = assertion->getLocation(config);
                     // Check that a definition request at this location returns def.
-                    def->check(test.sourceFileContents, *lspWrapper, nextId, rootUri, *queryLoc);
+                    def->check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc);
                     // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, rootUri, symbol, *queryLoc,
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           entryAssertions);
+                    // Check that a highlight request at this location returns all of the entryAssertions for the same
+                    // file as the request.
+                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                    for (auto &e : entryAssertions) {
+                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
+                            filteredEntryAssertions.push_back(e);
+                        }
+                    }
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                    filteredEntryAssertions);
                 } else {
                     ADD_FAILURE() << fmt::format(
                         "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
@@ -666,18 +979,35 @@ TEST_P(LSPTest, All) {
                 }
             }
         }
+
+        // Check each type-def/type assertion.
+        for (auto &[symbol, typeDefAndAssertions] : typeDefMap) {
+            auto &[typeDefs, typeAssertions] = typeDefAndAssertions;
+            for (auto &typeAssertion : typeAssertions) {
+                auto queryLoc = typeAssertion->getLocation(config);
+                // Check that a type definition request at this location returns type-def.
+                TypeDefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, typeDefs);
+            }
+        }
     }
 
     // Hover assertions
-    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId, rootUri);
+    HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
+    // Completion assertions
+    CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+    ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
+    // Workspace Symbol assertions
+    SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
-        // sourceFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
+        // sourceLSPFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
         // Sort by version.
         vector<int> sortedUpdates;
         const int baseVersion = 4;
-        for (auto &update : test.sourceFileUpdates) {
+        for (auto &update : test.sourceLSPFileUpdates) {
             sortedUpdates.push_back(update.first);
         }
         fast_sort(sortedUpdates);
@@ -685,7 +1015,7 @@ TEST_P(LSPTest, All) {
         // Apply updates in order.
         for (auto version : sortedUpdates) {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
-            auto &updates = test.sourceFileUpdates[version];
+            auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
@@ -693,27 +1023,31 @@ TEST_P(LSPTest, All) {
                 auto originalFile = test.folder + update.first;
                 auto updateFile = test.folder + update.second;
                 auto fileContents = FileOps::read(updateFile);
-                lspUpdates.push_back(makeDidChange(testFileUris[originalFile], fileContents, baseVersion + version));
+                lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
                 updatesAndContents[originalFile] =
                     make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);
             }
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto responses = lspWrapper->getLSPResponsesFor(lspUpdates);
+            auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
             bool foundTypecheckRunInfo = false;
 
             for (auto &r : responses) {
                 if (r->isNotification()) {
                     if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                        foundTypecheckRunInfo = true;
                         auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        if (assertSlowPath.value_or(false)) {
-                            EXPECT_EQ(params->tookFastPath, false)
-                                << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
-                        }
-                        if (assertFastPath.has_value()) {
-                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
+                        // test_corpus only runs LSP in single-threaded mode.
+                        if (params->status == SorbetTypecheckRunStatus::Ended) {
+                            foundTypecheckRunInfo = true;
+                            if (assertSlowPath.value_or(false)) {
+                                EXPECT_EQ(params->fastPath, false)
+                                    << errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.";
+                            }
+                            if (assertFastPath.has_value()) {
+                                (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                            }
                         }
                     } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
                         ADD_FAILURE() << errorPrefix
@@ -730,7 +1064,13 @@ TEST_P(LSPTest, All) {
                 ADD_FAILURE() << errorPrefix << "Sorbet did not send expected typechecking metadata.";
             }
 
-            updateDiagnostics(rootUri, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
+
+            for (auto &update : updates) {
+                auto originalFile = test.folder + update.first;
+                auto updateFile = test.folder + update.second;
+                testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
+            }
 
             const bool passed = ErrorAssertion::checkAll(
                 updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
@@ -741,13 +1081,16 @@ TEST_P(LSPTest, All) {
             }
 
             // Check any new HoverAssertions in the updates.
-            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId, rootUri);
+            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
-} // namespace sorbet::test
+}
+// namespace sorbet::test
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
-INSTANTIATE_TEST_CASE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(LSPTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_SUITE_P(WhitequarkParserTests, WhitequarkParserTest, ::testing::ValuesIn(getInputs(singleTest)),
+                         prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
@@ -806,7 +1149,7 @@ string rbFile2BaseTestName(string rbFileName) {
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
 
-    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbupdate", ".exp"}, false, {}, {});
+    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbi", ".rbupdate", ".exp"}, false, {}, {});
     const int prefixLen = strnlen(name, 1024) + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
@@ -815,7 +1158,7 @@ vector<Expectations> listDir(const char *name) {
 
     Expectations current;
     for (auto &s : names) {
-        if (absl::EndsWith(s, ".rb")) {
+        if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
             auto basename = rbFile2BaseTestName(s);
             if (basename != s) {
                 if (basename == current.basename) {
@@ -837,7 +1180,8 @@ vector<Expectations> listDir(const char *name) {
             if (absl::StartsWith(s, current.basename)) {
                 auto kind_start = s.rfind(".", s.size() - strlen(".exp") - 1);
                 string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
-                current.expectations[kind] = s;
+                string source_file_path = string(name) + "/" + s.substr(0, kind_start);
+                current.expectations[kind][source_file_path] = s;
             }
         } else if (absl::EndsWith(s, ".rbupdate")) {
             if (absl::StartsWith(s, current.basename)) {
@@ -845,7 +1189,7 @@ vector<Expectations> listDir(const char *name) {
                 auto pos = s.rfind('.', s.length() - 10);
                 if (pos != string::npos) {
                     int version = stoi(s.substr(pos + 1, s.length() - 9));
-                    current.sourceFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
+                    current.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
                 } else {
                     cout << "Ignoring " << s << ": No version number provided (expected .[number].rbupdate).\n";
                 }

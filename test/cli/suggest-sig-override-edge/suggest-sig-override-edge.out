@@ -12,53 +12,56 @@ class ChildInitialize < ParentInitialize
 end
 
 # Weird edge cases in string parsing for adding 'overridable.'
-class ParentNeedsOverridable
+class ParentIsAbstract
   # Every sig here should have `generated.overridable.` added to it.
   extend T::Sig
+  extend T::Helpers
 
-  sig {implementation.generated.overridable.void}
+  abstract!
+
+  sig {abstract.void}
   def just_void; end
 
-  sig {implementation.generated.overridable.returns(NilClass)}
+  sig {abstract.returns(NilClass)}
   def just_returns; end
 
-  sig {implementation.params(x: Integer).generated.overridable.void}
+  sig {abstract.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {implementation.params(x: Integer).generated.overridable.returns(NilClass)}
+  sig {abstract.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
   sig do
-    implementation
+    abstract
     .params(x: Integer)
-    .generated.overridable.void
+    .void
   end
   def multiline_x_to_void(x); end
 
   sig do
-    implementation
+    abstract
     .params(x: Integer)
-    .generated.overridable.returns(NilClass)
+    .returns(NilClass)
   end
   def multiline_x_to_returns(x); end
 end
-class ChildForcesOverridable < ParentNeedsOverridable
+class ChildNeedsOverride < ParentIsAbstract
   sig {override.void}
   def just_void; end
 
   sig {override.returns(NilClass)}
   def just_returns; end
 
-  sig {params(x: Integer).override.void}
+  sig {override.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig {override.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
-  sig {params(x: Integer).override.void}
+  sig {override.params(x: Integer).void}
   def multiline_x_to_void(x); end
 
-  sig {params(x: Integer).override.returns(NilClass)}
+  sig {override.params(x: Integer).returns(NilClass)}
   def multiline_x_to_returns(x); end
 end
 
@@ -80,7 +83,7 @@ end
 
 # Doesn't need generated because parent already has overridable
 class DoesntNeedGenerated
-  sig {implementation.overridable.void}
+  sig {override.overridable.void}
   def already_overridable; end
 end
 

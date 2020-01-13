@@ -26,9 +26,9 @@ There are also some tools for helping debug type-related errors:
 ### `T.reveal_type`
 
 If we wrap a variable or method call in `T.reveal_type`, Sorbet will show us
-what type it thinks that variable has. This is a super powerful debugging
-technique! `T.reveal_type` should be **one of the first tools** to reach for
-when debugging a confusing error.
+what type it thinks that variable has in the output of `srb tc`. This is a super
+powerful debugging technique! `T.reveal_type` should be **one of the first
+tools** to reach for when debugging a confusing error.
 
 Try making a hypothesis of what the problem is ("I think the problem is...") and
 then create small examples in <https://sorbet.run> to test the hypothesis with
@@ -210,11 +210,24 @@ class A
 end
 ```
 
-## Alternatives to `T.unsafe`
+### `T.cast`: a safer alternative to `T.unsafe`
 
 `T.unsafe` is maximally unsafe. It forces Sorbet to forget all type information
 statically---sometimes this is more power than we need. For the cases where we
 the programmer know of an invariant that isn't currently expressed in the type
 system, [`T.cast`](type-assertions#tcast) is a good middle-ground.
 
-<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
+### Changing when runtime exceptions are raised
+
+Both `T.unsafe` and `T.cast` relax Sorbet's static checks. They don't silence
+any exceptions that would be raised for type errors at runtime.
+
+There are also ways to change the runtime behavior; these escape hatches are
+documented elsewhere. See:
+
+- [Enabling Runtime Checks](runtime.md), which has docs on how to configure and
+  opt out of certain runtime checks.
+
+- [Runtime Configuration](tconfiguration.md), which has docs on how to write
+  low-level configuration handlers that intercept any exceptions that the
+  runtime could raise.

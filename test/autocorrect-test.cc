@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -30,21 +31,28 @@ TEST(ErrorTest, AutocorrectTest) { // NOLINT
 
     sources[file] = "123";
     vector<core::AutocorrectSuggestion> autocorrects;
-    autocorrects.emplace_back(core::Loc(file, 0, 0), "start");
-    autocorrects.emplace_back(core::Loc(file, 1, 1), "middle");
-    autocorrects.emplace_back(core::Loc(file, 2, 2), "end");
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 0, 0), "start"}}});
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 1), "middle"}}});
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 2, 2), "end"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
     ASSERT_EQ("start1middle2end3", result[file]);
 
     sources[file] = "12345";
-    autocorrects.emplace_back(core::Loc(file, 0, 2), "start");
-    autocorrects.emplace_back(core::Loc(file, 1, 3), "middle");
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 0, 2), "start"}}});
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 3), "middle"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
     ASSERT_EQ("1middle45", result[file]);
 
     sources[file] = "123";
-    autocorrects.emplace_back(core::Loc(file, 1, 2), "same");
-    autocorrects.emplace_back(core::Loc(file, 1, 2), "same");
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 2), "same"}}});
+    autocorrects.emplace_back(
+        core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 2), "same"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
     ASSERT_EQ("1same3", result[file]);
 }

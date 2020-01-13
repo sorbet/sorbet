@@ -1,0 +1,6 @@
+s(:send,
+  s(:lvar, :foo), :[],
+  s(:hash,
+    s(:pair,
+      s(:sym, :baz),
+      s(:int, "1"))))

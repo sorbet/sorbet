@@ -1,0 +1,6 @@
+s(:block,
+  s(:send, nil, :f),
+  s(:args,
+    s(:arg, :a),
+    s(:restarg, :*),
+    s(:blockarg, :b)), nil)

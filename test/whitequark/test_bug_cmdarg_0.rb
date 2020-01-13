@@ -1,0 +1,3 @@
+# typed: true
+
+assert dogs

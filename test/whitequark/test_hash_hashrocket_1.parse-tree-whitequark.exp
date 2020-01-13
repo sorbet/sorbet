@@ -1,0 +1,7 @@
+s(:hash,
+  s(:pair,
+    s(:int, "1"),
+    s(:int, "2")),
+  s(:pair,
+    s(:sym, :foo),
+    s(:str, "bar")))

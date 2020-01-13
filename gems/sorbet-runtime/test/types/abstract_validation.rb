@@ -111,10 +111,10 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       extend T::Helpers
       include AbstractMixin
 
-      sig {implementation.returns(Object)}
+      sig {override.returns(Object)}
       def foo; end
 
-      sig {implementation.returns(Object)}
+      sig {override.returns(Object)}
       def bar; end
     end
 
@@ -147,10 +147,10 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         extend T::Helpers
         extend AbstractMixin
 
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def self.foo; end
 
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def self.bar; end
       end
 
@@ -307,10 +307,10 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       klass = Class.new(AbstractClass) do
         extend T::Sig
         extend T::Helpers
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def self.foo; end
 
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def bar; end
       end
       klass.foo
@@ -321,7 +321,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       klass = Class.new(AbstractClass) do
         extend T::Sig
         extend T::Helpers
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def bar; end
       end
 
@@ -340,7 +340,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       klass = Class.new(AbstractClass) do
         extend T::Sig
         extend T::Helpers
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def self.foo; end
       end
 
@@ -370,10 +370,10 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       klass = Class.new(AbstractClass) do
         extend T::Sig
         extend T::Helpers
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def self.foo; end
 
-        sig {implementation.returns(Object)}
+        sig {override.returns(Object)}
         def bar; "baz"; end
       end
       assert_equal("baz", klass.new.bar)
@@ -412,7 +412,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         extend T::Sig
         tpl = type_template(fixed: Integer)
 
-        sig {implementation.returns(tpl)}
+        sig {override.returns(tpl)}
         def load_one
           0
         end
@@ -439,7 +439,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         extend T::Sig
         sig do
           type_parameters(:T)
-          .implementation
+          .override
           .params(x: T.type_parameter(:T))
           .returns(T.type_parameter(:T))
         end

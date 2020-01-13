@@ -34,8 +34,6 @@ struct ParsedSig {
         bool abstract = false;
         bool override_ = false;
         bool overridable = false;
-        bool implementation = false;
-        bool generated = false;
         bool returns = false;
         bool void_ = false;
         bool checked = false;
@@ -47,20 +45,42 @@ struct ParsedSig {
     const TypeArgSpec &findTypeArgByName(core::NameRef name) const;
 };
 
+struct TypeSyntaxArgs {
+    const bool allowSelfType = false;
+    const bool allowRebind = false;
+    const bool allowTypeMember = false;
+    const core::SymbolRef untypedBlame;
+
+    TypeSyntaxArgs withoutRebind() const {
+        return TypeSyntaxArgs{allowSelfType, false, allowTypeMember, untypedBlame};
+    }
+
+    TypeSyntaxArgs withRebind() const {
+        return TypeSyntaxArgs{allowSelfType, true, allowTypeMember, untypedBlame};
+    }
+
+    TypeSyntaxArgs withoutSelfType() const {
+        return TypeSyntaxArgs{false, allowRebind, allowTypeMember, untypedBlame};
+    }
+
+    TypeSyntaxArgs withoutTypeMember() const {
+        return TypeSyntaxArgs{allowSelfType, allowRebind, false, untypedBlame};
+    }
+};
+
 class TypeSyntax {
 public:
     static bool isSig(core::Context ctx, ast::Send *send);
-    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType,
-                              core::SymbolRef untypedBlame);
+    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, TypeSyntaxArgs args);
 
     struct ResultType {
         core::TypePtr type;
         core::SymbolRef rebind;
     };
     static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
-                                           bool allowSelfType, bool allowRebind, core::SymbolRef untypedBlame);
+                                           TypeSyntaxArgs args);
     static core::TypePtr getResultType(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
-                                       bool allowSelfType, core::SymbolRef untypedBlame);
+                                       TypeSyntaxArgs args);
 
     TypeSyntax() = delete;
 };

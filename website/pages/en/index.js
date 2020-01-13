@@ -297,7 +297,7 @@ class Index extends React.Component {
               {
                 title: 'Enabling Static Checks',
                 content:
-                  'Sorbet works with 100% of Ruby, but it does not work the same for all Ruby. Developers can opt into more static checks to get even more safety and productivity.\n\n[How to enable static static checks →](docs/static)',
+                  'Sorbet works with 100% of Ruby, but it does not work the same for all Ruby. Developers can opt into more static checks to get even more safety and productivity.\n\n[How to enable static checks →](docs/static)',
               },
               {
                 title: 'Flow-sensitive Typing',

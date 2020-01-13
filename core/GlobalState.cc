@@ -13,7 +13,9 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -32,7 +34,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->name = nameId;
     data->owner = Symbols::root();
     data->flags = 0;
-    data->setClass();
+    data->setClassOrModule();
     data->setIsModule(isModule);
     data->setSuperClass(SymbolRef(this, superclass));
 
@@ -45,9 +47,13 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<absl::Mutex> epochMutex,
+                         shared_ptr<atomic<u4>> currentlyProcessingLSPEpoch, shared_ptr<atomic<u4>> lspEpochInvalidator,
+                         shared_ptr<atomic<u4>> lastCommittedLSPEpoch)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()) {
+      lspQuery(lsp::Query::noQuery()), epochMutex(std::move(epochMutex)),
+      currentlyProcessingLSPEpoch(move(currentlyProcessingLSPEpoch)), lspEpochInvalidator(move(lspEpochInvalidator)),
+      lastCommittedLSPEpoch(move(lastCommittedLSPEpoch)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int maxNameCount = 8192;
@@ -261,10 +267,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Net_Protocol());
     Symbols::Net_Protocol().data(*this)->setIsModule(false);
 
-    // A magic symbol to cause CFGs to be exported
-    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::CFGExport());
-    ENFORCE(id == Symbols::T_CFGExport());
-
     id = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     ENFORCE(id == Symbols::T_Sig_WithoutRuntime());
 
@@ -276,13 +278,36 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     ENFORCE(id == Symbols::T_Struct());
 
+    id = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
+    ENFORCE(id == Symbols::Singleton());
+
+    id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::T_Enum());
+
+    // T::Sig#sig
+    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::sig());
+
+    // Enumerable::Lazy
+    id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    ENFORCE(id == Symbols::Enumerator_Lazy());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
     Context ctx(*this, Symbols::root());
 
-    // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
+    // Synthesize <Magic>#<build-hash>(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -294,7 +319,7 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
+    // Synthesize <Magic>#<build-array>(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildArray());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
@@ -319,11 +344,12 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
+    // Synthesize <Magic>#<defined>(*arg0: String) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defined_p());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::Object();
+        arg.flags.isRepeated = true;
+        arg.type = Types::String();
     }
     method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
     {
@@ -382,6 +408,41 @@ void GlobalState::initEmpty() {
         arg.flags.isRepeated = true;
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<suggest-type>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::suggestType());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<self-new>(arg: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::selfNew());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<string-interpolate>(arg: *T.untyped) => String
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::stringInterpolate());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
+    }
+    method.data(*this)->resultType = Types::String();
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
@@ -458,7 +519,7 @@ void GlobalState::initEmpty() {
     vector<SymbolRef> needSingletons;
     for (auto &sym : symbols) {
         auto ref = sym.ref(*this);
-        if (ref.exists() && sym.isClass()) {
+        if (ref.exists() && sym.isClassOrModule()) {
             needSingletons.emplace_back(ref);
         }
     }
@@ -506,15 +567,18 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
-
-    isInitialized = true;
 }
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        auto symbol = entry.symbol;
-        if (entry.singleton) {
-            symbol = symbol.data(*this)->singletonClass(*this);
+        SymbolRef symbol;
+        switch (entry.singleton) {
+            case Intrinsic::Kind::Instance:
+                symbol = entry.symbol;
+                break;
+            case Intrinsic::Kind::Singleton:
+                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                break;
         }
         auto countBefore = symbolsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
@@ -559,6 +623,102 @@ void GlobalState::reserveMemory(u4 kb) {
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
+SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, vector<u4> methodHash) const {
+    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    ENFORCE(name.exists(), "looking up symbol with non-existing name");
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
+
+    NameRef lookupName = name;
+    u2 unique = 1;
+    auto res = ownerScope->members().find(lookupName);
+    while (res != ownerScope->members().end()) {
+        ENFORCE(res->second.exists());
+        auto resData = res->second.data(*this);
+        if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
+            (resData->methodArgumentHash(*this) == methodHash ||
+             (resData->intrinsic != nullptr && !resData->hasSig()))) {
+            return res->second;
+        }
+        lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        if (!lookupName.exists()) {
+            break;
+        }
+        res = ownerScope->members().find(lookupName);
+        unique++;
+    }
+    return Symbols::noSymbol();
+}
+
+// look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
+// flags match. If no sych symbol exists, then it will return noSymbol.
+SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    ENFORCE(name.exists(), "looking up symbol with non-existing name");
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
+
+    NameRef lookupName = name;
+    u2 unique = 1;
+    auto res = ownerScope->members().find(lookupName);
+    while (res != ownerScope->members().end()) {
+        ENFORCE(res->second.exists());
+        if ((res->second.data(*this)->flags & flags) == flags) {
+            return res->second;
+        }
+        lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        if (!lookupName.exists()) {
+            break;
+        }
+        res = ownerScope->members().find(lookupName);
+        unique++;
+    }
+    return Symbols::noSymbol();
+}
+
+SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
+    // This method works by knowing how to replicate the logic of renaming in order to find whatever
+    // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
+    // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
+    ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
+    NameRef name = sym.data(*this)->name;
+    NameData nameData = name.data(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+
+    if (nameData->kind == NameKind::UNIQUE) {
+        if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
+            return Symbols::noSymbol();
+        }
+        if (nameData->unique.num == 1) {
+            return Symbols::noSymbol();
+        } else {
+            ENFORCE(nameData->unique.num > 1);
+            auto nm =
+                lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
+            if (!nm.exists()) {
+                return Symbols::noSymbol();
+            }
+            auto res = ownerScope->members()[nm];
+            ENFORCE(res.exists());
+            return res;
+        }
+    } else {
+        u2 unique = 1;
+        NameRef lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+        auto res = ownerScope->members().find(lookupName);
+        while (res != ownerScope->members().end()) {
+            ENFORCE(res->second.exists());
+            unique++;
+            lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
+            if (!lookupName.exists()) {
+                return res->second;
+            }
+            res = ownerScope->members().find(lookupName);
+        }
+        return Symbols::noSymbol();
+    }
+}
+
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
@@ -583,7 +743,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(
-        if (data->isClass()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
+        if (data->isClassOrModule()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
             categoryCounterInc("symbols", "method");
         } else if (data->isField()) { categoryCounterInc("symbols", "field"); } else if (data->isStaticField()) {
             categoryCounterInc("symbols", "static_field");
@@ -599,14 +759,14 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
-            owner.data(*this)->isClass());
+            owner.data(*this)->isClassOrModule());
     ENFORCE(name.data(*this)->isClassName(*this));
-    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
+    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS_OR_MODULE);
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
-    ENFORCE(owner.data(*this)->isClass());
+    ENFORCE(owner.data(*this)->isClassOrModule());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
     } else if (variance == Variance::CoVariant) {
@@ -647,7 +807,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
     bool isBlock =
         name.data(*this)->kind == NameKind::UNIQUE && name.data(*this)->unique.original == Names::blockTemp();
-    ENFORCE(isBlock || owner.data(*this)->isClass(), "entering method symbol into not-a-class");
+    ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
@@ -684,12 +844,12 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClass(), "entering field symbol into not-a-class");
+    ENFORCE(owner.data(*this)->isClassOrModule(), "entering field symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClass());
+    ENFORCE(owner.data(*this)->isClassOrModule());
     return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
 }
 
@@ -717,7 +877,7 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRe
 }
 
 string_view GlobalState::enterString(string_view nm) {
-    DEBUG_ONLY(if (isInitialized) {
+    DEBUG_ONLY(if (ensureCleanStrings) {
         if (nm != "<" && nm != "<<" && nm != "<=" && nm != "<=>" && nm != ">" && nm != ">>" && nm != ">=") {
             ENFORCE(nm.find("<") == string::npos);
             ENFORCE(nm.find(">") == string::npos);
@@ -744,6 +904,32 @@ string_view GlobalState::enterString(string_view nm) {
     memcpy(from, nm.data(), nm.size());
     stringsLastPageUsed += nm.size();
     return string_view(from, nm.size());
+}
+
+NameRef GlobalState::lookupNameUTF8(string_view nm) const {
+    const auto hs = _hash(nm);
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0u) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto nameId = bucket.second;
+            auto &nm2 = names[nameId];
+            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
+                counterInc("names.utf8.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.utf8");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
@@ -801,12 +987,13 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
-    ENFORCE(original.data(*this)->kind == UTF8 ||
-                (original.data(*this)->kind == UNIQUE &&
-                 original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
+                (original.data(*this)->kind == NameKind::UNIQUE &&
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
             "making a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(CONSTANT, original.id());
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -816,7 +1003,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
+            if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
                 counterInc("names.constant.hit");
                 return nm2.ref(*this);
             } else {
@@ -851,7 +1038,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     auto idx = names.size();
     names.emplace_back();
 
-    names[idx].kind = CONSTANT;
+    names[idx].kind = NameKind::CONSTANT;
     names[idx].cnst.original = original;
     ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
@@ -892,9 +1079,9 @@ void GlobalState::expandNames(int growBy) {
     namesByHash.swap(new_namesByHash);
 }
 
-NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
+NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -904,7 +1091,7 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
+            if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
                 return nm2.ref(*this);
@@ -915,12 +1102,12 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
         bucketId = (bucketId + probeCount) & mask;
         probeCount++;
     }
-    Exception::raise("should never happen");
+    return core::NameRef::noName();
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -930,7 +1117,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
+            if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
                 return nm2.ref(*this);
@@ -966,7 +1153,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     auto idx = names.size();
     names.emplace_back();
 
-    names[idx].kind = UNIQUE;
+    names[idx].kind = NameKind::UNIQUE;
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
@@ -1032,7 +1219,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
     whatData->name = name;
-    if (whatData->isClass()) {
+    if (whatData->isClassOrModule()) {
         auto singleton = whatData->lookupSingletonClass(*this);
         if (singleton.exists()) {
             mangleRenameSymbol(singleton, singleton.data(*this)->name);
@@ -1137,14 +1324,16 @@ bool GlobalState::unfreezeSymbolTable() {
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
-    auto result = make_unique<GlobalState>(this->errorQueue);
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochMutex, this->currentlyProcessingLSPEpoch,
+                                           this->lspEpochInvalidator, this->lastCommittedLSPEpoch);
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
     result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
-    result->isInitialized = this->isInitialized;
+    result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorRawLocsWithinPayload = this->censorRawLocsWithinPayload;
+    result->censorForSnapshotTests = this->censorForSnapshotTests;
+    result->sleepInSlowPath = this->sleepInSlowPath;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -1181,6 +1370,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->pathPrefix = this->pathPrefix;
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
     result->sanityCheck();
     {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
@@ -1222,9 +1414,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    bool report = (what == errors::Internal::InternalError) || (what == errors::Internal::FileNotFound) ||
-                  (shouldReportErrorOn(loc, what) && !this->silenceErrors);
-    return ErrorBuilder(*this, report, loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
 void GlobalState::suppressErrorClass(int code) {
@@ -1260,12 +1450,15 @@ bool GlobalState::hasAnyDslPlugin() const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+    if (what.minLevel == StrictLevel::Internal) {
+        return true;
+    }
+    if (this->silenceErrors) {
+        return false;
+    }
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
         level = loc.file().data(*this).strictLevel;
-    }
-    if (what.code == errors::Internal::InternalError.code) {
-        return true;
     }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
@@ -1282,8 +1475,9 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
                 return false;
             }
         } else if (level == StrictLevel::Stdlib) {
-            level = StrictLevel::True;
-            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass) {
+            level = StrictLevel::Strict;
+            if (what == errors::Resolver::OverloadNotAllowed || what == errors::Resolver::VariantTypeMemberInClass ||
+                what == errors::Infer::UntypedMethod) {
                 return false;
             }
         }
@@ -1295,6 +1489,85 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
 
 bool GlobalState::wasModified() const {
     return wasModified_;
+}
+
+bool GlobalState::wasTypecheckingCanceled() const {
+    return lspEpochInvalidator->load() != currentlyProcessingLSPEpoch->load();
+}
+
+void GlobalState::startCommitEpoch(u4 fromEpoch, u4 toEpoch) {
+    absl::MutexLock lock(epochMutex.get());
+    ENFORCE(fromEpoch != toEpoch);
+    ENFORCE(toEpoch != currentlyProcessingLSPEpoch->load());
+    ENFORCE(toEpoch != lastCommittedLSPEpoch->load());
+    // epoch should be a version 'ahead' of currentlyProcessingLSPEpoch. The distance between the two is the number of
+    // fast path edits that have come in since the last slow path. Since epochs overflow, there's nothing that I can
+    // easily assert here to ensure that we are not moving backward in time.
+    currentlyProcessingLSPEpoch->store(toEpoch);
+    lspEpochInvalidator->store(toEpoch);
+    // lastCommittedLSPEpoch currently contains the epoch of the last slow path we processed. Since then, we may have
+    // committed several fast paths. So, update it to the epoch of the last fast path committed.
+    // We do it this way rather than keep it up-to-date after every fast path to reduce footguns, especially in testing.
+    // With this design, when starting a commit epoch, you have to specify the (from, to] range, and it is compiler
+    // enforced.
+    lastCommittedLSPEpoch->store(fromEpoch);
+}
+
+optional<pair<u4, u4>> GlobalState::getRunningSlowPath() const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    const u4 committed = lastCommittedLSPEpoch->load();
+    if (processing == committed) {
+        return nullopt;
+    }
+    return make_pair(committed, processing);
+}
+
+bool GlobalState::tryCancelSlowPath(u4 newEpoch) const {
+    absl::MutexLock lock(epochMutex.get());
+    const u4 processing = currentlyProcessingLSPEpoch->load();
+    ENFORCE(newEpoch != processing); // This would prevent a cancelation from happening.
+    const u4 committed = lastCommittedLSPEpoch->load();
+    // The second condition should never happen, but guard against it in production.
+    if (processing == committed || newEpoch == processing) {
+        return false;
+    }
+    // Cancel slow path by bumping invalidator.
+    lspEpochInvalidator->store(newEpoch);
+    return true;
+}
+
+bool GlobalState::tryCommitEpoch(u4 epoch, bool isCancelable, function<void()> typecheck) {
+    if (!isCancelable) {
+        typecheck();
+        return true;
+    }
+
+    // Should have called "startCommitEpoch" *before* this method.
+    ENFORCE(currentlyProcessingLSPEpoch->load() == epoch);
+    // Typechecking does not run under the mutex, as it would prevent another thread from running `tryCancelSlowPath`
+    // during typechecking.
+    typecheck();
+
+    bool committed = false;
+    {
+        absl::MutexLock lock(epochMutex.get());
+        // Try to commit.
+        const u4 processing = currentlyProcessingLSPEpoch->load();
+        const u4 invalidator = lspEpochInvalidator->load();
+        if (processing == invalidator) {
+            ENFORCE(lastCommittedLSPEpoch->load() != processing, "Trying to commit an already-committed epoch.");
+            // OK to commit!
+            lastCommittedLSPEpoch->store(processing);
+            committed = true;
+        } else {
+            // Typechecking was canceled.
+            const u4 lastCommitted = lastCommittedLSPEpoch->load();
+            currentlyProcessingLSPEpoch->store(lastCommitted);
+            lspEpochInvalidator->store(lastCommitted);
+        }
+    }
+    return committed;
 }
 
 void GlobalState::trace(string_view msg) const {
@@ -1321,7 +1594,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
     return inWhat;
 }
 
-FileRef GlobalState::findFileByPath(string_view path) {
+FileRef GlobalState::findFileByPath(string_view path) const {
     auto fnd = fileRefByPath.find(string(path));
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
@@ -1372,7 +1645,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     return result;
 }
 
-vector<shared_ptr<File>> GlobalState::getFiles() const {
+const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
@@ -1389,7 +1662,7 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
 
 SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
     auto &classData = klass.data(*this);
-    ENFORCE(classData->isClass());
+    ENFORCE(classData->isClassOrModule());
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref;
@@ -1399,8 +1672,8 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->symbolsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
-    auto blkLoc = core::Loc::none(loc.file());
     if (prevCount != this->symbolsUsed()) {
+        auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
     }
@@ -1408,7 +1681,7 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
 }
 
 SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
-    auto nm = getNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
     return ref;

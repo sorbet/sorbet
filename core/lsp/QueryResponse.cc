@@ -1,5 +1,7 @@
 #include "core/lsp/QueryResponse.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalState.h"
+
 template class std::unique_ptr<sorbet::core::lsp::QueryResponse>;
 
 using namespace std;
@@ -27,8 +29,16 @@ const ConstantResponse *QueryResponse::isConstant() const {
     return get_if<ConstantResponse>(&response);
 }
 
+const FieldResponse *QueryResponse::isField() const {
+    return get_if<FieldResponse>(&response);
+}
+
 const DefinitionResponse *QueryResponse::isDefinition() const {
     return get_if<DefinitionResponse>(&response);
+}
+
+const EditResponse *QueryResponse::isEdit() const {
+    return get_if<EditResponse>(&response);
 }
 
 core::Loc QueryResponse::getLoc() const {
@@ -40,8 +50,12 @@ core::Loc QueryResponse::getLoc() const {
         return literal->termLoc;
     } else if (auto constant = isConstant()) {
         return constant->termLoc;
+    } else if (auto field = isField()) {
+        return field->termLoc;
     } else if (auto def = isDefinition()) {
         return def->termLoc;
+    } else if (auto edit = isEdit()) {
+        return edit->loc;
     } else {
         return core::Loc::none();
     }
@@ -56,10 +70,13 @@ core::TypePtr QueryResponse::getRetType() const {
         return literal->retType.type;
     } else if (auto constant = isConstant()) {
         return constant->retType.type;
+    } else if (auto field = isField()) {
+        return field->retType.type;
     } else if (auto def = isDefinition()) {
         return def->retType.type;
     } else {
-        return core::TypePtr();
+        // Should never happen, as the above checks should be exhaustive.
+        Exception::raise("QueryResponse is of type that does not have retType.");
     }
 }
 
@@ -70,6 +87,8 @@ const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
         return literal->retType;
     } else if (auto constant = isConstant()) {
         return constant->retType;
+    } else if (auto field = isField()) {
+        return field->retType;
     } else if (auto def = isDefinition()) {
         return def->retType;
     } else {

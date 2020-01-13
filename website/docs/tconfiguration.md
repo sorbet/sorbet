@@ -18,10 +18,8 @@ to Stripe's Ruby codebase.
 
 > **Note**: Think carefully before disabling runtime checks!
 
-There are four configuration hooks that can be set in the runtime.
-
-> **Note**: These docs are incomplete. For complete usage information, refer to
-> the YARD documentation for the `sorbet-runtime` gem.
+These docs are somewhat low-level. For a higher-level description of how to
+change Sorbet's runtime, see [Enabling Runtime Checks](runtime.md).
 
 ## Errors from inline type assertions
 
@@ -47,7 +45,7 @@ method with a signature is called incorrectly. For those, see the next section.
 
 ## Errors from invalid method calls
 
-To customize the behvaior when a method with a sig is called and the argument
+To customize the behavior when a method with a sig is called and the argument
 types or return types don't match the actual value present at runtime, use this:
 
 ```ruby
@@ -58,7 +56,24 @@ end
 
 The default error handler is to raise an error.
 
-<!-- TODO(jez) Document .on_failure / .checked once API is stable. -->
+The example handler above does the same thing for every method. One thing which
+can be useful is to pass custom metadata to the `call_validation` handler, which
+can be done with `.on_failure`:
+
+```ruby
+T::Configuration.call_validation_error_handler = lambda do |signature, opts|
+  if signature.on_failure
+    puts "Metadata: #{signature.on_failure}"
+  end
+  raise TypeError.new(opts[:pretty_message])
+end
+
+sig {params(x: Integer).void.on_failure(:hello, :world)}
+def foo(x); end
+```
+
+When the `call_validation_error_handler` is called this time, it will be passed
+all the args that were given to `on_failure` for the specific sig that failed.
 
 ## Errors from invalid sig procs
 

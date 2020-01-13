@@ -1,6 +1,7 @@
 #include "ast/ArgParsing.h"
 #include "common/typecase.h"
 #include "core/Context.h"
+#include "core/Hashing.h"
 
 using namespace std;
 
@@ -52,6 +53,34 @@ vector<ParsedArg> ArgParsing::parseArgs(core::Context ctx, ast::MethodDef::ARGS_
     }
 
     return parsedArgs;
+}
+
+std::vector<u4> ArgParsing::hashArgs(core::Context ctx, std::vector<ParsedArg> &args) {
+    std::vector<u4> result;
+    result.reserve(args.size());
+    for (const auto &e : args) {
+        u4 arg = 0;
+        u1 flags = 0;
+        if (e.keyword) {
+            arg = core::mix(arg, core::_hash(e.local._name.data(ctx)->shortName(ctx)));
+            flags += 1;
+        }
+        if (e.repeated) {
+            flags += 2;
+        }
+        if (e.default_) {
+            flags += 4;
+        }
+        if (e.shadow) {
+            flags += 8;
+        }
+        if (e.block) {
+            flags += 16;
+        }
+
+        result.push_back(core::mix(arg, flags));
+    }
+    return result;
 }
 
 } // namespace sorbet::ast

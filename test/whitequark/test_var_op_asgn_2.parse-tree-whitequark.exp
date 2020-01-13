@@ -1,0 +1,3 @@
+s(:op_asgn,
+  s(:cvasgn, :@@var), :|,
+  s(:int, "10"))

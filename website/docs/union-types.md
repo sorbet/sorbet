@@ -39,8 +39,8 @@ A.foo(true)
 
 Information can be learned about union types by examining its values in
 conditionals, or the `case` statement. For example, when using `Object#is_a?` in
-a conditional information Sorbet will learn information and propagate it down to
-branches of the conditional:
+a conditional, Sorbet will learn information and propagate it down to branches
+of the conditional:
 
 ```ruby
 class A
@@ -125,6 +125,28 @@ end
 
 <a
 href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0Aclass%20C%3B%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%3B%20end%0Aend%0A%0Aclass%20D%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.any(A%2C%20B%2C%20C)).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20x.bar%20%23%20error%3A%20method%20bar%20does%20not%20exist%20on%20A%20or%20B%0A%0A%20%20%20%20case%20x%0A%20%20%20%20when%20A%2C%20B%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20T.any(B%2C%20A)%0A%20%20%20%20else%0A%20%20%20%20%20%20T.reveal_type(x)%20%23%20Revealed%20type%3A%20C%0A%20%20%20%20%20%20x.bar%20%23%20OK%2C%20x%20is%20known%20to%20be%20an%20instance%20of%20C%0A%20%20%20%20end%0A%20%20end%0Aend">
+→ View on sorbet.run </a>
+
+In cases like this where the classes in the union don't actually cary around any
+extra data, Sorbet has an even more convenient way to define enumerations. See
+[Typed Enumerations via T::Enum](tenum.md).
+
+Note that enumerations using primitive or literal types is not supported. For
+example, the following is _not_ valid:
+
+```ruby
+class A
+  extend T::Sig
+
+  sig { params(input_param: T.any('foo', 'bar')).void }
+  def a(input_param)
+    puts input_param
+  end
+end
+```
+
+<a
+href="https://sorbet.run/#class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7B%20params(input_param%3A%20T.any('foo'%2C%20'bar')).void%20%7D%0A%20%20def%20a(input_param)%0A%20%20%20%20puts%20input_param%0A%20%20end%0Aend">
 → View on sorbet.run </a>
 
 ## `T.nilable` and `T::Boolean`

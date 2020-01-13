@@ -1,3 +1,4 @@
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
@@ -70,7 +71,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
 
     indexed = realmain::pipeline::index(gs, inputFiles, *opts, *workers, kvstore);
-    indexed = realmain::pipeline::resolve(gs, move(indexed), *opts, *workers);
-    indexed = realmain::pipeline::typecheck(gs, move(indexed), *opts, *workers);
+    indexed = move(realmain::pipeline::resolve(gs, move(indexed), *opts, *workers).result());
+    indexed = move(realmain::pipeline::typecheck(gs, move(indexed), *opts, *workers).result());
     return 0;
 }

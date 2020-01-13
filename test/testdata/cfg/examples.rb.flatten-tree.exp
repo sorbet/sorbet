@@ -1,0 +1,123 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Examples)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Examples<<C Examples>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def i_like_ifs(<blk>)
+      if true
+        return 1
+      else
+        return 2
+      end
+    end
+
+    def i_like_exps(<blk>)
+      if true
+        1
+      else
+        2
+      end
+    end
+
+    def return_in_one_branch1(<blk>)
+      if true
+        return 1
+      else
+        2
+      end
+    end
+
+    def return_in_one_branch2(<blk>)
+      if true
+        1
+      else
+        return 2
+      end
+    end
+
+    def variables(<blk>)
+      begin
+        if true
+          a = 1
+        else
+          a = 2
+        end
+        if false
+          b = 1
+        else
+          b = 2
+        end
+        a.+(b)
+      end
+    end
+
+    def variables_and_loop(cond, <blk>)
+      begin
+        if true
+          a = 1
+        else
+          a = 2
+        end
+        while true
+          if cond
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def variables_loop_if(cond, <blk>)
+      begin
+        while true
+          if cond
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def take_arguments(i, <blk>)
+      if false
+        2
+      else
+        i
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

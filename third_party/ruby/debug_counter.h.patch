@@ -1,0 +1,11 @@
+--- ruby-2.6.3/debug_counter.h	2018-12-13 17:10:15.000000000 -0800
++++ ruby-2.6.3-dirty/debug_counter.h	2019-07-29 23:15:26.000000000 -0700
+@@ -249,7 +249,7 @@
+ 
+ enum rb_debug_counter_type {
+ #define RB_DEBUG_COUNTER(name) RB_DEBUG_COUNTER_##name,
+-#include __FILE__
++#include "debug_counter.h"
+     RB_DEBUG_COUNTER_MAX
+ #undef RB_DEBUG_COUNTER
+ };

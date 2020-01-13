@@ -11,7 +11,7 @@
 namespace sorbet::core {
 class GlobalState;
 class Name;
-enum NameKind : u1 {
+enum class NameKind : u1 {
     UTF8 = 1,
     UNIQUE = 2,
     CONSTANT = 3,
@@ -20,17 +20,17 @@ enum NameKind : u1 {
 CheckSize(NameKind, 1, 1);
 
 inline int _NameKind2Id_UTF8(NameKind nm) {
-    ENFORCE(nm == UTF8);
+    ENFORCE(nm == NameKind::UTF8);
     return 1;
 }
 
 inline int _NameKind2Id_UNIQUE(NameKind nm) {
-    ENFORCE(nm == UNIQUE);
+    ENFORCE(nm == NameKind::UNIQUE);
     return 2;
 }
 
 inline int _NameKind2Id_CONSTANT(NameKind nm) {
-    ENFORCE(nm == CONSTANT);
+    ENFORCE(nm == NameKind::CONSTANT);
     return 3;
 }
 
@@ -39,7 +39,7 @@ struct RawName final {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 {
+enum class UniqueNameKind : u1 {
     Parser,
     Desugar,
     Namer,
@@ -47,9 +47,12 @@ enum UniqueNameKind : u2 {
     Singleton,
     Overload,
     TypeVarName,
-    PositionalArg,       // num >=0 - normal args, -1 ==> restarg, -2 => kwrest arg
-    ResolverMissingClass // used by resolver when we want to enter a stub class into a static field. see
-                         // test/resolver/stub_missing_class_alias.rb
+    PositionalArg,        // num >=0 - normal args, -1 ==> restarg, -2 => kwrest arg
+    MangledKeywordArg,    // only used when we have duplicated keyword arguments
+    ResolverMissingClass, // used by resolver when we want to enter a stub class into a static field. see
+                          // test/resolver/stub_missing_class_alias.rb
+    TEnum,
+    DefaultArg,
 };
 
 struct UniqueName final {

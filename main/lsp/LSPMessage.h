@@ -35,9 +35,8 @@ public:
  */
 class LSPMessage final {
 public:
-    typedef std::variant<std::unique_ptr<RequestMessage>, std::unique_ptr<NotificationMessage>,
-                         std::unique_ptr<ResponseMessage>>
-        RawLSPMessage;
+    using RawLSPMessage = std::variant<std::unique_ptr<RequestMessage>, std::unique_ptr<NotificationMessage>,
+                                       std::unique_ptr<ResponseMessage>>;
 
 private:
     RawLSPMessage msg;
@@ -58,12 +57,9 @@ public:
     /** A tracer for following LSP message in time traces. May contain multiple tracers if other messages were merged
      * into this one.*/
     std::vector<FlowId> startTracers;
-    /** Used to calculate latency of message processing. May contain multiple timers if other messages were merged into
-     * this one. */
-    std::vector<std::unique_ptr<Timer>> timers;
-
-    /** Request counter. */
-    int counter;
+    /** Used to calculate latency of message processing. If this message represents multiple edits, it contains the
+     * oldest timer.*/
+    std::unique_ptr<Timer> timer;
 
     /** If `true`, then this LSPMessage contains a canceled LSP request. */
     bool canceled = false;
@@ -138,7 +134,7 @@ public:
     /**
      * Returns the message in JSON form.
      */
-    std::string toJSON() const;
+    std::string toJSON(bool prettyPrint = false) const;
 };
 } // namespace sorbet::realmain::lsp
 

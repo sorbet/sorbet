@@ -1,0 +1,9 @@
+s(:begin,
+  s(:assign,
+    s(:lvasgn, :a),
+    s(:int, "1")),
+  s(:send, nil, :a,
+    s(:hash,
+      s(:pair,
+        s(:sym, :b),
+        s(:int, "1")))))

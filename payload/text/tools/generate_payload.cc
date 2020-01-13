@@ -19,22 +19,36 @@ string sourceName2funcName(string sourceName) {
     return sourceName;
 }
 
+string addSourceURLToTypedLine(string originalSource, string url) {
+    auto start = originalSource.find("typed:", 0);
+    if (start == string_view::npos) {
+        return originalSource;
+    }
+    auto endOfLine = originalSource.find("\n", start);
+    originalSource.insert(endOfLine, " source is at " + url);
+    return originalSource;
+}
+
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string_view>" << '\n' << "#include<vector>\nusing namespace std;\n";
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
+    string version;
+    if (sorbet::Version::isReleaseBuild) {
+        version = sorbet::Version::build_scm_revision;
+    } else {
+        version = "master";
+    }
     for (auto &file : sourceFiles) {
+        string permalink = "https://github.com/sorbet/sorbet/tree/" + version + "/" + file;
         out << "  string_view " + sourceName2funcName(file) << "() {" << '\n';
-        out << "  return \"" + absl::CEscape(sorbet::FileOps::read(file.c_str())) + "\"sv;" << '\n' << "}" << '\n';
+        out << "  return \"" + absl::CEscape(addSourceURLToTypedLine(sorbet::FileOps::read(file.c_str()), permalink)) +
+                   "\"sv;"
+            << '\n'
+            << "}" << '\n';
     }
     out << "vector<pair<string_view, string_view> > all() {" << '\n';
     out << "  vector<pair<string_view, string_view> > result;" << '\n';
     for (auto &file : sourceFiles) {
-        string version;
-        if (sorbet::Version::isReleaseBuild) {
-            version = sorbet::Version::build_scm_revision;
-        } else {
-            version = "master";
-        }
         string permalink = "https://github.com/sorbet/sorbet/tree/" + version + "/" + file;
         out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(permalink) + "\"sv, " +
                    sourceName2funcName(file) + "()));"

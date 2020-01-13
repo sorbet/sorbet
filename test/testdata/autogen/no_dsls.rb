@@ -1,3 +1,4 @@
 # typed: strict
-# disable-fast-path: true
+# disable-stress-incremental: true
+
 A = Struct.new(:a)

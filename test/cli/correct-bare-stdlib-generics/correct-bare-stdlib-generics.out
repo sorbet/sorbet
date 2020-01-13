@@ -1,0 +1,69 @@
+correct-bare-stdlib-generics.rb:8: Malformed type declaration. Generic class without type arguments `Array` https://srb.help/5046
+     8 |      a: Array,
+                 ^^^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:8: Replaced with `T::Array[T.untyped]`
+     8 |      a: Array,
+                 ^^^^^
+
+correct-bare-stdlib-generics.rb:9: Malformed type declaration. Generic class without type arguments `Hash` https://srb.help/5046
+     9 |      b: Hash,
+                 ^^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:9: Replaced with `T::Hash[T.untyped, T.untyped]`
+     9 |      b: Hash,
+                 ^^^^
+
+correct-bare-stdlib-generics.rb:10: Malformed type declaration. Generic class without type arguments `Set` https://srb.help/5046
+    10 |      c: Set,
+                 ^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:10: Replaced with `T::Set[T.untyped]`
+    10 |      c: Set,
+                 ^^^
+
+correct-bare-stdlib-generics.rb:11: Malformed type declaration. Generic class without type arguments `Range` https://srb.help/5046
+    11 |      d: Range,
+                 ^^^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:11: Replaced with `T::Range[T.untyped]`
+    11 |      d: Range,
+                 ^^^^^
+
+correct-bare-stdlib-generics.rb:12: Malformed type declaration. Generic class without type arguments `Enumerable` https://srb.help/5046
+    12 |      e: Enumerable,
+                 ^^^^^^^^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:12: Replaced with `T::Enumerable[T.untyped]`
+    12 |      e: Enumerable,
+                 ^^^^^^^^^^
+
+correct-bare-stdlib-generics.rb:13: Malformed type declaration. Generic class without type arguments `Enumerator` https://srb.help/5046
+    13 |      f: Enumerator,
+                 ^^^^^^^^^^
+  Autocorrect: Done
+    correct-bare-stdlib-generics.rb:13: Replaced with `T::Enumerator[T.untyped]`
+    13 |      f: Enumerator,
+                 ^^^^^^^^^^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+module StdlibTest
+  extend T::Sig
+
+  sig do
+    params(
+      a: T::Array[T.untyped],
+      b: T::Hash[T.untyped, T.untyped],
+      c: T::Set[T.untyped],
+      d: T::Range[T.untyped],
+      e: T::Enumerable[T.untyped],
+      f: T::Enumerator[T.untyped],
+    )
+    .void
+  end
+  def foo(a, b, c, d, e, f); end
+end

@@ -11,7 +11,7 @@ public:
         using namespace std::chrono_literals;
         return 250ms;
     }
-    typedef std::function<void()> Task;
+    using Task = std::function<void()>;
     static std::unique_ptr<WorkerPool> create(int size, spd::logger &logger);
     virtual void multiplexJob(std::string_view taskName, Task t) = 0;
     virtual ~WorkerPool() = 0;

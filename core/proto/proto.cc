@@ -16,14 +16,53 @@ namespace sorbet::core {
 com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name) {
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
+    protoName.set_unique(com::stripe::rubytyper::Name::NOT_UNIQUE);
     switch (name.data(gs)->kind) {
-        case UTF8:
+        case NameKind::UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
-        case UNIQUE:
+        case NameKind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
+            switch (name.data(gs)->unique.uniqueNameKind) {
+                case UniqueNameKind::Parser:
+                    protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
+                    break;
+                case UniqueNameKind::Desugar:
+                    protoName.set_unique(com::stripe::rubytyper::Name::DESUGAR);
+                    break;
+                case UniqueNameKind::Namer:
+                    protoName.set_unique(com::stripe::rubytyper::Name::NAMER);
+                    break;
+                case UniqueNameKind::MangleRename:
+                    protoName.set_unique(com::stripe::rubytyper::Name::MANGLE_RENAME);
+                    break;
+                case UniqueNameKind::Singleton:
+                    protoName.set_unique(com::stripe::rubytyper::Name::SINGLETON);
+                    break;
+                case UniqueNameKind::Overload:
+                    protoName.set_unique(com::stripe::rubytyper::Name::OVERLOAD);
+                    break;
+                case UniqueNameKind::TypeVarName:
+                    protoName.set_unique(com::stripe::rubytyper::Name::TYPE_VAR_NAME);
+                    break;
+                case UniqueNameKind::PositionalArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::POSITIONAL_ARG);
+                    break;
+                case UniqueNameKind::MangledKeywordArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::MANGLED_KEYWORD_ARG);
+                    break;
+                case UniqueNameKind::ResolverMissingClass:
+                    protoName.set_unique(com::stripe::rubytyper::Name::RESOLVER_MISSING_CLASS);
+                    break;
+                case UniqueNameKind::TEnum:
+                    protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
+                    break;
+                case UniqueNameKind::DefaultArg:
+                    protoName.set_unique(com::stripe::rubytyper::Name::DEFAULT_ARG);
+                    break;
+            }
             break;
-        case CONSTANT:
+        case NameKind::CONSTANT:
             protoName.set_kind(com::stripe::rubytyper::Name::CONSTANT);
             break;
     }
@@ -48,8 +87,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     symbolProto.set_id(sym._id);
     *symbolProto.mutable_name() = toProto(gs, data->name);
 
-    if (data->isClass()) {
-        symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS);
+    if (data->isClassOrModule()) {
+        symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS_OR_MODULE);
     } else if (data->isStaticField()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
     } else if (data->isField()) {
@@ -62,8 +101,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
-    if (data->isClass() || data->isMethod()) {
-        if (data->isClass()) {
+    if (data->isClassOrModule() || data->isMethod()) {
+        if (data->isClassOrModule()) {
             for (auto thing : data->mixins()) {
                 symbolProto.add_mixins(thing._id);
             }
@@ -73,7 +112,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             }
         }
 
-        if (data->isClass() && data->superClass().exists()) {
+        if (data->isClassOrModule() && data->superClass().exists()) {
             symbolProto.set_superclass(data->superClass()._id);
         }
     }
@@ -86,7 +125,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
 
     for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
+            pair.first == Names::classMethods() || pair.first == Names::Constants::AttachedClass()) {
             continue;
         }
 

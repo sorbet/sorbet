@@ -5,7 +5,7 @@ class TestClass
   def method(a, b, &block)
            # ^ def: arga
               # ^ def: b
-                 # ^^^^^^ def: block
+                  # ^^^^^ def: block
     c = a + b
   # ^ def: c
       # ^ usage: arga

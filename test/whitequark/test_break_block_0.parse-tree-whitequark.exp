@@ -1,0 +1,4 @@
+s(:break,
+  s(:block,
+    s(:send, nil, :fun,
+      s(:lvar, :foo)), nil, nil))

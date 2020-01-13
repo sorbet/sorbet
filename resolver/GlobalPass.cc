@@ -49,6 +49,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
             parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
                 ? core::errors::Resolver::EnumerableParentTypeNotDeclared
                 : core::errors::Resolver::ParentTypeNotDeclared;
+
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
                         parent.data(gs)->show(gs), sym.data(gs)->show(gs));
@@ -56,7 +57,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         my.data(gs)->setFixed();
-        my.data(gs)->resultType = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(gs, sym);
+        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
         return false;
     }
     const auto &data = my.data(gs);
@@ -67,7 +69,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
         my = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
         my.data(gs)->setFixed();
-        my.data(gs)->resultType = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(gs, sym);
+        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
         return false;
     }
     auto myVariance = data->variance();
@@ -81,11 +84,11 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     }
     typeAliases[sym._id].emplace_back(parentTypeMember, my);
     return true;
-}
+} // namespace
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
-    ENFORCE(sym.data(gs)->isClass());
+    ENFORCE(sym.data(gs)->isClassOrModule());
     if (resolved[sym._id]) {
         return;
     }
@@ -133,8 +136,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
         }
     }
 
-    if (sym.data(gs)->isClassClass()) {
+    if (sym.data(gs)->isClassOrModuleClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
+            // AttachedClass is covariant, but not controlled by the user.
+            if (tp.data(gs)->name == core::Names::Constants::AttachedClass()) {
+                continue;
+            }
+
             auto myVariance = tp.data(gs)->variance();
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs)->loc();
@@ -148,13 +156,28 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
         }
     }
 
-    // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
+    // If this class has no type members, fix attached class early.
+    if (sym.data(gs)->typeMembers().empty()) {
+        auto singleton = sym.data(gs)->lookupSingletonClass(gs);
+        if (singleton.exists()) {
+            // AttachedClass doesn't exist on `T.untyped`, which is a problem
+            // with RuntimeProfiled.
+            auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+            if (attachedClass.exists()) {
+                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType.get());
+                ENFORCE(lambdaParam != nullptr);
+
+                lambdaParam->lowerBound = core::Types::bottom();
+                lambdaParam->upperBound = sym.data(gs)->externalType(gs);
+            }
+        }
+    }
 }
 
 }; // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_ancestors");
+    Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -163,11 +186,11 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isMethod()) {
                 methodCount++;
-            } else if (ref.data(gs)->isClass()) {
+            } else if (ref.data(gs)->isClassOrModule()) {
                 classCount++;
             }
         }
-        if (!ref.data(gs)->isClass()) {
+        if (!ref.data(gs)->isClassOrModule()) {
             continue;
         }
         classCount++;
@@ -199,7 +222,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
             }
         } else {
-            if (ref.data(gs)->isClassClass()) {
+            if (ref.data(gs)->isClassOrModuleClass()) {
                 if (!core::Symbols::Object().data(gs)->derivesFrom(gs, ref) && core::Symbols::Object() != ref) {
                     ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }
@@ -248,13 +271,13 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
 // tails of class linearization aren't copied around.
 // In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
 // The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
-ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
+ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
     ENFORCE(ofClass.exists());
     auto data = ofClass.data(gs);
-    ENFORCE(data->isClass());
-    if (!data->isClassLinearizationComputed()) {
+    ENFORCE(data->isClassOrModule());
+    if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
-            computeLinearization(gs, data->superClass());
+            computeClassLinearization(gs, data->superClass());
         }
         InlinedVector<core::SymbolRef, 4> currentMixins = data->mixins();
         InlinedVector<core::SymbolRef, 4> newMixins;
@@ -267,10 +290,10 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 newMixins.emplace_back(mixin);
                 continue;
             }
-            ENFORCE(mixin.data(gs)->isClass());
-            ParentLinearizationInformation mixinLinearization = computeLinearization(gs, mixin);
+            ENFORCE(mixin.data(gs)->isClassOrModule());
+            ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
-            if (!mixin.data(gs)->isClassModule()) {
+            if (!mixin.data(gs)->isClassOrModuleModule()) {
                 if (mixin != core::Symbols::BasicObject()) {
                     if (auto e = gs.beginError(data->loc(), core::errors::Resolver::IncludesNonModule)) {
                         e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
@@ -297,7 +320,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
             }
         }
     }
-    ENFORCE(data->isClassLinearizationComputed());
+    ENFORCE(data->isClassOrModuleLinearizationComputed());
     return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
@@ -308,16 +331,16 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
 
     for (auto m : info.mixins) {
         if (!absl::c_linear_search(acc, m)) {
-            if (m.data(gs)->isClassModule()) {
+            if (m.data(gs)->isClassOrModuleModule()) {
                 acc.emplace_back(m);
             } else {
-                fullLinearizationSlowImpl(gs, computeLinearization(gs, m), acc);
+                fullLinearizationSlowImpl(gs, computeClassLinearization(gs, m), acc);
             }
         }
     }
     if (info.superClass.exists()) {
         if (!absl::c_linear_search(acc, info.superClass)) {
-            fullLinearizationSlowImpl(gs, computeLinearization(gs, info.superClass), acc);
+            fullLinearizationSlowImpl(gs, computeClassLinearization(gs, info.superClass), acc);
         }
     }
 };
@@ -327,21 +350,21 @@ InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizat
     return res;
 }
 
-void computeLinearization(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.compute_linearization");
+void Resolver::computeLinearization(core::GlobalState &gs) {
+    Timer timer(gs.tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         const auto &data = core::SymbolRef(&gs, i).data(gs);
-        if (!data->isClass()) {
+        if (!data->isClassOrModule()) {
             continue;
         }
-        computeLinearization(gs, core::SymbolRef(&gs, i));
+        computeClassLinearization(gs, core::SymbolRef(&gs, i));
     }
 }
 
 void Resolver::finalizeSymbols(core::GlobalState &gs) {
-    Timer timer(gs.errorQueue->logger, "resolver.finalize_resolution");
+    Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
     // that resolves types and we don't want to introduce additional passes if
@@ -349,7 +372,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->isClass()) {
+        if (!sym.data(gs)->isClassOrModule()) {
             continue;
         }
 
@@ -362,7 +385,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            singleton.data(gs)->mixins().emplace_back(classMethods);
+            singleton.data(gs)->addMixin(classMethods);
         }
     }
 
@@ -374,7 +397,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     resolved.resize(gs.symbolsUsed());
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
-        if (sym.data(gs)->isClass()) {
+        if (sym.data(gs)->isClassOrModule()) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
         }
     }

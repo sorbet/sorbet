@@ -1,8 +1,10 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
+#include "common/ConstExprStr.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::options {
@@ -21,8 +23,8 @@ public:
     bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const std::string &msg, const Args &... args) const {
-        print(fmt::format(msg, args...));
+    template <typename... Args> void fmt(const ConstExprStr msg, const Args &... args) const {
+        print(fmt::format(msg.str, args...));
     }
     void flush();
 
@@ -44,14 +46,23 @@ struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeWhitequark;
-    PrinterConfig Desugared;
-    PrinterConfig DesugaredRaw;
-    PrinterConfig DSLTree;
-    PrinterConfig DSLTreeRaw;
+    PrinterConfig DesugarTree;
+    PrinterConfig DesugarTreeRaw;
+    PrinterConfig RewriterTree;
+    PrinterConfig RewriterTreeRaw;
     PrinterConfig IndexTree;
     PrinterConfig IndexTreeRaw;
     PrinterConfig NameTree;
     PrinterConfig NameTreeRaw;
+    PrinterConfig ResolveTree;
+    PrinterConfig ResolveTreeRaw;
+    PrinterConfig FlattenTree;
+    PrinterConfig FlattenTreeRaw;
+    PrinterConfig AST;
+    PrinterConfig ASTRaw;
+    PrinterConfig CFG;
+    PrinterConfig CFGRaw;
+    PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
     PrinterConfig SymbolTableRaw;
     PrinterConfig SymbolTableJson;
@@ -59,36 +70,24 @@ struct Printers {
     PrinterConfig SymbolTableFullRaw;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
-    PrinterConfig ResolveTree;
-    PrinterConfig ResolveTreeRaw;
     PrinterConfig MissingConstants;
-    PrinterConfig FlattenedTree;
-    PrinterConfig FlattenedTreeRaw;
-    PrinterConfig CFG;
-    // cfg-json format outputs a JSON object for each CFG, separated by newlines.
-    // See https://en.wikipedia.org/wiki/JSON_streaming#Concatenated_JSON
-    PrinterConfig CFGJson;
-    // cfg-proto format outputs a binary MultiCFG for export to other tools.
-    // See CFG.proto for details
-    PrinterConfig CFGProto;
-    PrinterConfig TypedSource;
+    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
-    PrinterConfig PluginGeneratedCode;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
     bool isAutogen() const;
 };
 
-enum Phase {
+enum class Phase {
     INIT,
     PARSER,
     DESUGARER,
-    DSL,
+    REWRITER,
     LOCAL_VARS,
     NAMER,
     RESOLVER,
@@ -132,15 +131,17 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanPath = "watchman";
     bool stressIncrementalResolver = false;
+    bool sleepInSlowPath = false;
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
-    bool skipDSLPasses = false;
+    bool skipRewriterPasses = false;
     bool suggestRuntimeProfiledType = false;
-    bool censorRawLocsWithinPayload = false;
+    bool censorForSnapshotTests = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
+    bool stripeMode = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;
@@ -152,8 +153,8 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
     std::string errorUrlBase = "https://srb.help/";
-    std::vector<int> errorCodeWhiteList;
-    std::vector<int> errorCodeBlackList;
+    std::set<int> errorCodeWhiteList;
+    std::set<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
@@ -185,14 +186,17 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
+    // List of directories not available editor-side. References to files in these directories should be sent via
+    // sorbet: URIs to clients that support them.
+    std::vector<std::string> lspDirsMissingFromClient;
+    // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
+    bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
-    bool lspGoToDefinitionEnabled = false;
-    bool lspFindReferencesEnabled = false;
     bool lspAutocompleteEnabled = false;
-    bool lspWorkspaceSymbolsEnabled = false;
+    bool lspQuickFixEnabled = false;
+    bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspHoverEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
@@ -213,8 +217,11 @@ struct Options {
     Options &operator=(Options &&) = delete;
 };
 
-void readOptions(Options &, int argc, char *argv[],
-                 std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+void readOptions(
+    Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
+    int argc, char *argv[],
+    const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
+    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

@@ -1,0 +1,3 @@
+s(:send,
+  s(:lvar, :foo), :call,
+  s(:int, "1"))

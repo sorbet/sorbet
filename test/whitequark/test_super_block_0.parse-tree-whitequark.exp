@@ -1,0 +1,4 @@
+s(:block,
+  s(:super,
+    s(:lvar, :foo),
+    s(:lvar, :bar)), nil, nil)

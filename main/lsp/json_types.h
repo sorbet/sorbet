@@ -1,13 +1,38 @@
 #ifndef RUBY_TYPER_LSP_JSON_TYPES_H
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
+#include "ast/ast.h"
 #include "common/common.h"
+#include "core/NameHash.h"
+#include "core/core.h"
 #include "rapidjson/document.h"
 
 #include <optional>
 #include <variant>
 
 namespace sorbet::realmain::lsp {
+
+/**
+ * Encapsulates an update to LSP's file state in a compact form.
+ * Placed into json_types.h because it is referenced from InitializedParams.
+ */
+struct LSPFileUpdates {
+    // This specific update contains versions [versionStart, versionEnd].
+    u4 versionEnd = 0;
+    u4 versionStart = 0;
+    std::vector<std::shared_ptr<core::File>> updatedFiles;
+    bool canTakeFastPath = false;
+    // Indicates that this update contains a new file. Is a hack for TimeTravelingGlobalState.
+    bool hasNewFiles = false;
+    std::vector<core::FileHash> updatedFileHashes;
+    std::vector<ast::ParsedFile> updatedFileIndexes;
+    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
+    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
+    // (Optional) Updated global state object to use to typecheck this update.
+    std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
+    // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
+    bool cancellationExpected = false;
+};
 
 class DeserializationError : public std::runtime_error {
 public:
@@ -95,7 +120,7 @@ public:
     /**
      * Converts C++ object into a string containing a stringified JSON object.
      */
-    std::string toJSON() const;
+    std::string toJSON(bool prettyPrint = false) const;
 
     /**
      * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson allocator.

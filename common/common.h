@@ -8,12 +8,9 @@
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
-#include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
-#include "pdqsort.h"
-#include "spdlog/fmt/fmt.h"
 #include "spdlog/spdlog.h"
 #include <stdint.h>
 #include <string>
@@ -55,6 +52,11 @@ constexpr bool fuzz_mode = true;
 #endif
 
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
+
+// Used for cases like https://xkcd.com/2200/
+// where there is some assumption that you believe should always hold.
+// Please use this to explicitly write down what assumptions was the code written under.
+// One day they might be violated and you'll help the next person debug the issue.
 #define ENFORCE(x, ...)                                                                             \
     ((::sorbet::debug_mode && !(x)) ? ({                                                            \
         ::sorbet::Exception::failInFuzzer();                                                        \
@@ -98,16 +100,16 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 /**
  * Shorter aliases for unsigned ints of specified byte widths.
  */
-typedef uint8_t u1;
+using u1 = uint8_t;
 CheckSize(u1, 1, 1);
 
-typedef uint16_t u2;
+using u2 = uint16_t;
 CheckSize(u2, 2, 2);
 
-typedef uint32_t u4;
+using u4 = uint32_t;
 CheckSize(u4, 4, 4);
 
-typedef uint64_t u8;
+using u8 = uint64_t;
 CheckSize(u8, 8, 8);
 
 template <class From, class To> To *fast_cast(From *what) {
@@ -130,60 +132,6 @@ template <class From, class To> To *fast_cast(From *what) {
 } // namespace sorbet
 
 std::string demangle(const char *mangled);
-
-namespace fmt {
-template <typename It, typename Char, class UnaryOp, typename UnaryOpResult> struct arg_map_join {
-    It begin;
-    It end;
-    basic_string_view<Char> sep;
-    const UnaryOp &mapper;
-
-    arg_map_join(It begin, It end, basic_string_view<Char> sep, const UnaryOp &mapper)
-        : begin(begin), end(end), sep(sep), mapper(mapper) {}
-};
-
-template <typename It, typename Char, class UnaryOp, typename UnaryOpResult>
-struct formatter<arg_map_join<It, Char, UnaryOp, UnaryOpResult>, Char> : formatter<UnaryOpResult, Char> {
-    template <typename FormatContext>
-    auto format(const arg_map_join<It, Char, UnaryOp, UnaryOpResult> &value, FormatContext &ctx)
-        -> decltype(ctx.out()) {
-        typedef formatter<UnaryOpResult, Char> base;
-
-        auto it = value.begin;
-        auto out = ctx.out();
-        if (it != value.end) {
-            out = base::format(std::invoke(value.mapper, *it++), ctx);
-            while (it != value.end) {
-                out = std::copy(value.sep.begin(), value.sep.end(), out);
-                ctx.advance_to(out);
-                out = base::format(std::invoke(value.mapper, *it++), ctx);
-            }
-        }
-        return out;
-    }
-};
-
-template <typename It, class UnaryOp> auto map_join(It begin, It end, std::string_view sep, const UnaryOp &mapper) {
-    return arg_map_join<It, char, UnaryOp,
-                        typename std::result_of<UnaryOp(typename std::iterator_traits<It>::value_type)>::type>(
-        begin, end, sep, mapper);
-}
-template <typename Container, class UnaryOp>
-auto map_join(const Container &collection, std::string_view sep, const UnaryOp &mapper) {
-    return arg_map_join<typename Container::const_iterator, char, UnaryOp,
-                        typename std::result_of<UnaryOp(
-                            typename std::iterator_traits<typename Container::const_iterator>::value_type)>::type>(
-        collection.begin(), collection.end(), sep, mapper);
-}
-} // namespace fmt
-
-template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {
-    pdqsort(container.begin(), container.end(), std::forward<Compare>(comp));
-};
-
-template <class Container> inline void fast_sort(Container &container) {
-    pdqsort(container.begin(), container.end());
-};
 
 /* use fast_sort */
 #pragma GCC poison sort c_sort

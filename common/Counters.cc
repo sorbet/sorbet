@@ -1,6 +1,8 @@
 #include "common/Counters.h"
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
+#include "common/formatting.h"
+#include "common/sort.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -282,7 +284,7 @@ string getCounterStatistics(vector<string> names) {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", cat.first, "", (double)sum);
+        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15.15}\n", cat.first, "", (double)sum);
 
         if (sum == 0) {
             sum = 1;
@@ -290,7 +292,7 @@ string getCounterStatistics(vector<string> names) {
         for (auto &e : sorted) {
             auto perc = e.first * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
-            fmt::format_to(buf, "  {:>30.30} :{:10.10}, {:3.1f}% {}\n", e.second, (double)e.first, perc, hashes);
+            fmt::format_to(buf, "  {:>40.40} :{:15.15}, {:3.1f}% {}\n", e.second, (double)e.first, perc, hashes);
         }
         fmt::format_to(buf, "\n");
     }
@@ -307,7 +309,7 @@ string getCounterStatistics(vector<string> names) {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", hist.first, "", (double)sum);
+        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15.15}\n", hist.first, "", (double)sum);
 
         CounterImpl::CounterType header = 0;
         auto it = sorted.begin();
@@ -319,7 +321,7 @@ string getCounterStatistics(vector<string> names) {
         if (it != sorted.begin()) {
             auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
-            fmt::format_to(buf, "  <{:>29.29} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)header, perc,
+            fmt::format_to(buf, "  <{:>39.39} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)header, perc,
                            hashes);
         }
 
@@ -327,14 +329,14 @@ string getCounterStatistics(vector<string> names) {
             header += it->second;
             auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
-            fmt::format_to(buf, "  {:>30.30} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)it->second, perc,
+            fmt::format_to(buf, "  {:>40.40} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)it->second, perc,
                            hashes);
             it++;
         }
         if (it != sorted.end()) {
             auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
-            fmt::format_to(buf, "  >={:>28.28} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)(sum - header),
+            fmt::format_to(buf, "  >={:>38.38} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)(sum - header),
                            perc, hashes);
         }
         fmt::format_to(buf, "\n");
@@ -353,7 +355,7 @@ string getCounterStatistics(vector<string> names) {
                 continue;
             }
             if (e.second.size() == 1) {
-                string line = fmt::format("  {:>24.24}.value :{:10.4} ms\n", e.first, e.second[0]);
+                string line = fmt::format("  {:>34.34}.value :{:15.4} ms\n", e.first, e.second[0]);
                 sortedTimings.emplace_back(e.first, line);
                 continue;
             }
@@ -362,7 +364,7 @@ string getCounterStatistics(vector<string> names) {
             //                           *absl::c_min_element(e.second), e.first, *absl::c_max_element(e.second));
 
             string line = fmt::format(
-                "  {:>26.26}.min :{:10.2f} ms\n  {:>26.26}.max :{:10.2f} ms\n  {:>26.26}.avg :{:10.2f} ms\n", e.first,
+                "  {:>36.36}.min :{:15.2f} ms\n  {:>36.36}.max :{:15.2f} ms\n  {:>36.36}.avg :{:15.2f} ms\n", e.first,
                 *absl::c_min_element(e.second), e.first, *absl::c_max_element(e.second), e.first,
                 absl::c_accumulate(e.second, 0.0) / e.second.size());
             sortedTimings.emplace_back(e.first, line);
@@ -383,7 +385,7 @@ string getCounterStatistics(vector<string> names) {
                 continue;
             }
 
-            string line = fmt::format("  {:>30.30} :{:10.10}\n", e.first, (double)e.second);
+            string line = fmt::format("  {:>40.40} :{:15.15}\n", e.first, (double)e.second);
             sortedOther.emplace_back(e.first, line);
         }
 

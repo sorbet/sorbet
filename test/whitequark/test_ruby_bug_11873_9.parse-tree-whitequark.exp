@@ -1,0 +1,8 @@
+s(:block,
+  s(:send, nil, :a,
+    s(:send, nil, :b,
+      s(:send, nil, :c,
+        s(:send, nil, :d))),
+    s(:regexp,
+      s(:str, "x"),
+      s(:regopt, "m"))), nil, nil)

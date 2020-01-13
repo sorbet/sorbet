@@ -1,0 +1,76 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Main)
+          <emptyTree>
+        end
+        ::Main.new().main()
+        <emptyTree>
+      end
+    end
+  end
+  class ::Main<<C Main>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def yielder(<blk>)
+      begin
+        a = <blk>.call(1)
+        <blk>.call(a)
+      end
+    end
+
+    def blockpass(blk)
+      begin
+        a = blk.call(1)
+        blk.call(a)
+      end
+    end
+
+    def mixed(blk)
+      begin
+        a = blk.call(1)
+        blk.call(a)
+      end
+    end
+
+    def blockyield(<blk>)
+      <self>.yielder() do |i$1|
+        <blk>.call(i$1)
+      end
+    end
+
+    def main(<blk>)
+      begin
+        l = <self>.lambda() do |x$1|
+          begin
+            <self>.puts(x$1)
+            3
+          end
+        end
+        ::<Magic>.<call-with-block>(<self>, :"yielder", l)
+        ::<Magic>.<call-with-block>(<self>, :"blockpass", l)
+        ::<Magic>.<call-with-block>(<self>, :"mixed", l)
+        ::<Magic>.<call-with-block>(<self>, :"blockyield", l)
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

@@ -1,43 +1,171 @@
 # typed: __STDLIB_INTERNAL
 
+# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) to handle
+# processes.
 module Process
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_BOOTTIME = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_BOOTTIME_ALARM = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC_COARSE = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC_RAW = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_PROCESS_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME_ALARM = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME_COARSE = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_THREAD_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
   PRIO_PGRP = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
   PRIO_PROCESS = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
   PRIO_USER = T.let(T.unsafe(nil), Integer)
+  # Maximum size of the process's virtual memory (address space) in bytes.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_AS = T.let(T.unsafe(nil), Integer)
+  # Maximum size of the core file.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_CORE = T.let(T.unsafe(nil), Integer)
+  # CPU time limit in seconds.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_CPU = T.let(T.unsafe(nil), Integer)
+  # Maximum size of the process's data segment.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_DATA = T.let(T.unsafe(nil), Integer)
+  # Maximum size of files that the process may create.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_FSIZE = T.let(T.unsafe(nil), Integer)
+  # Maximum number of bytes of memory that may be locked into RAM.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_MEMLOCK = T.let(T.unsafe(nil), Integer)
+  # Specifies the limit on the number of bytes that can be allocated for POSIX
+  # message queues for the real user ID of the calling process.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_MSGQUEUE = T.let(T.unsafe(nil), Integer)
+  # Specifies a ceiling to which the process's nice value can be raised.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_NICE = T.let(T.unsafe(nil), Integer)
+  # Specifies a value one greater than the maximum file descriptor number that
+  # can be opened by this process.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_NOFILE = T.let(T.unsafe(nil), Integer)
+  # The maximum number of processes that can be created for the real user ID of
+  # the calling process.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_NPROC = T.let(T.unsafe(nil), Integer)
+  # Specifies the limit (in pages) of the process's resident set.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_RSS = T.let(T.unsafe(nil), Integer)
+  # Specifies a ceiling on the real-time priority that may be set for this
+  # process.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_RTPRIO = T.let(T.unsafe(nil), Integer)
+  # Specifies limit on CPU time this process scheduled under a real-time
+  # scheduling policy can consume.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_RTTIME = T.let(T.unsafe(nil), Integer)
+  # Specifies a limit on the number of signals that may be queued for the real
+  # user ID of the calling process.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_SIGPENDING = T.let(T.unsafe(nil), Integer)
+  # Maximum size of the stack, in bytes.
+  #
+  # see the system getrlimit(2) manual for details.
   RLIMIT_STACK = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
   RLIM_INFINITY = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
   RLIM_SAVED_CUR = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
   RLIM_SAVED_MAX = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-wait)
   WNOHANG = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-wait)
   WUNTRACED = T.let(T.unsafe(nil), Integer)
 
+  # Returns the name of the script being executed. The value is not affected by
+  # assigning a new value to $0.
+  #
+  # This method first appeared in Ruby 2.1 to serve as a global variable free
+  # means to get the script name.
   sig {returns(String)}
   def self.argv0(); end
 
+  # Returns the time resolution returned by POSIX
+  # [`clock_getres`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_getres)()
+  # function.
+  #
+  # `clock_id` specifies a kind of clock. See the document of
+  # `Process.clock_gettime` for details.
+  #
+  # `clock_id` can be a symbol as `Process.clock_gettime`. However the result
+  # may not be accurate. For example,
+  # +Process.clock\_getres(:GETTIMEOFDAY\_BASED\_CLOCK\_REALTIME)+ returns
+  # 1.0e-06 which means 1 microsecond, but actual resolution can be more coarse.
+  #
+  # If the given `clock_id` is not supported, Errno::EINVAL is raised.
+  #
+  # `unit` specifies a type of the return value. `Process.clock_getres` accepts
+  # `unit` as `Process.clock_gettime`. The default value, `:float_second`, is
+  # also same as `Process.clock_gettime`.
+  #
+  # `Process.clock_getres` also accepts `:hertz` as `unit`. `:hertz` means a the
+  # reciprocal of `:float_second`.
+  #
+  # `:hertz` can be used to obtain the exact value of the clock ticks per second
+  # for times() function and CLOCKS\_PER\_SEC for clock() function.
+  #
+  # +Process.clock\_getres(:TIMES\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID, :hertz)+
+  # returns the clock ticks per second.
+  #
+  # +Process.clock\_getres(:CLOCK\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID, :hertz)+
+  # returns CLOCKS\_PER\_SEC.
+  #
+  # ```ruby
+  # p Process.clock_getres(Process::CLOCK_MONOTONIC)
+  # #=> 1.0e-09
+  # ```
   sig do
     params(
         clock_id: T.any(Symbol, Integer),
@@ -47,6 +175,183 @@ module Process
   end
   def self.clock_getres(clock_id, unit=T.unsafe(nil)); end
 
+  # Returns a time returned by POSIX
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)()
+  # function.
+  #
+  # ```ruby
+  # p Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  # #=> 896053.968060096
+  # ```
+  #
+  # `clock_id` specifies a kind of clock. It is specified as a constant which
+  # begins with `Process::CLOCK_` such as
+  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # and
+  # [`Process::CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC).
+  #
+  # The supported constants depends on OS and version. Ruby provides following
+  # types of `clock_id` if available.
+  #
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # :   SUSv2 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 2.1, macOS
+  #     10.12
+  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC)
+  # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 3.4, macOS
+  #     10.12
+  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
+  # :   SUSv3 to 4, Linux 2.5.63, OpenBSD 5.4, macOS 10.12
+  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
+  # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 7.1, OpenBSD 5.4, macOS 10.12
+  # [`CLOCK_VIRTUAL`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_VIRTUAL)
+  # :   FreeBSD 3.0, OpenBSD 2.1
+  # [`CLOCK_PROF`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROF)
+  # :   FreeBSD 3.0, OpenBSD 2.1
+  # [`CLOCK_REALTIME_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_FAST)
+  # :   FreeBSD 8.1
+  # [`CLOCK_REALTIME_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_PRECISE)
+  # :   FreeBSD 8.1
+  # [`CLOCK_REALTIME_COARSE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_COARSE)
+  # :   Linux 2.6.32
+  # [`CLOCK_REALTIME_ALARM`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_ALARM)
+  # :   Linux 3.0
+  # [`CLOCK_MONOTONIC_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_FAST)
+  # :   FreeBSD 8.1
+  # [`CLOCK_MONOTONIC_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_PRECISE)
+  # :   FreeBSD 8.1
+  # [`CLOCK_MONOTONIC_COARSE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_COARSE)
+  # :   Linux 2.6.32
+  # [`CLOCK_MONOTONIC_RAW`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_RAW)
+  # :   Linux 2.6.28, macOS 10.12
+  # [`CLOCK_MONOTONIC_RAW_APPROX`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_RAW_APPROX)
+  # :   macOS 10.12
+  # [`CLOCK_BOOTTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_BOOTTIME)
+  # :   Linux 2.6.39
+  # [`CLOCK_BOOTTIME_ALARM`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_BOOTTIME_ALARM)
+  # :   Linux 3.0
+  # [`CLOCK_UPTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME)
+  # :   FreeBSD 7.0, OpenBSD 5.5
+  # [`CLOCK_UPTIME_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_FAST)
+  # :   FreeBSD 8.1
+  # [`CLOCK_UPTIME_RAW`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_RAW)
+  # :   macOS 10.12
+  # [`CLOCK_UPTIME_RAW_APPROX`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_RAW_APPROX)
+  # :   macOS 10.12
+  # [`CLOCK_UPTIME_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_PRECISE)
+  # :   FreeBSD 8.1
+  # [`CLOCK_SECOND`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_SECOND)
+  # :   FreeBSD 8.1
+  #
+  #
+  # Note that SUS stands for Single Unix Specification. SUS contains POSIX and
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # is defined in the POSIX part. SUS defines
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # mandatory but
+  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC),
+  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
+  # and
+  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
+  # are optional.
+  #
+  # Also, several symbols are accepted as `clock_id`. There are emulations for
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)().
+  #
+  # For example,
+  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # is defined as `:GETTIMEOFDAY_BASED_CLOCK_REALTIME` when
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)()
+  # is not available.
+  #
+  # Emulations for `CLOCK_REALTIME`:
+  # :GETTIMEOFDAY\_BASED\_CLOCK\_REALTIME
+  # :   Use gettimeofday() defined by SUS. (SUSv4 obsoleted it, though.) The
+  #     resolution is 1 microsecond.
+  # :TIME\_BASED\_CLOCK\_REALTIME
+  # :   Use time() defined by ISO C. The resolution is 1 second.
+  #
+  #
+  # Emulations for `CLOCK_MONOTONIC`:
+  # :MACH\_ABSOLUTE\_TIME\_BASED\_CLOCK\_MONOTONIC
+  # :   Use mach\_absolute\_time(), available on Darwin. The resolution is CPU
+  #     dependent.
+  # :TIMES\_BASED\_CLOCK\_MONOTONIC
+  # :   Use the result value of times() defined by POSIX. POSIX defines it as
+  #     "times() shall return the elapsed real time, in clock ticks, since an
+  #     arbitrary point in the past (for example, system start-up time)". For
+  #     example, GNU/Linux returns a value based on jiffies and it is monotonic.
+  #     However, 4.4BSD uses gettimeofday() and it is not monotonic. (FreeBSD
+  #     uses
+  #     [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)(CLOCK\_MONOTONIC)
+  #     instead, though.) The resolution is the clock tick. "getconf CLK\_TCK"
+  #     command shows the clock ticks per second. (The clock ticks per second is
+  #     defined by HZ macro in older systems.) If it is 100 and clock\_t is 32
+  #     bits integer type, the resolution is 10 millisecond and cannot represent
+  #     over 497 days.
+  #
+  #
+  # Emulations for `CLOCK_PROCESS_CPUTIME_ID`:
+  # :GETRUSAGE\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID
+  # :   Use getrusage() defined by SUS. getrusage() is used with RUSAGE\_SELF to
+  #     obtain the time only for the calling process (excluding the time for
+  #     child processes). The result is addition of user time (ru\_utime) and
+  #     system time (ru\_stime). The resolution is 1 microsecond.
+  # :TIMES\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID
+  # :   Use times() defined by POSIX. The result is addition of user time
+  #     (tms\_utime) and system time (tms\_stime). tms\_cutime and tms\_cstime
+  #     are ignored to exclude the time for child processes. The resolution is
+  #     the clock tick. "getconf CLK\_TCK" command shows the clock ticks per
+  #     second. (The clock ticks per second is defined by HZ macro in older
+  #     systems.) If it is 100, the resolution is 10 millisecond.
+  # :CLOCK\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID
+  # :   Use clock() defined by ISO C. The resolution is 1/CLOCKS\_PER\_SEC.
+  #     CLOCKS\_PER\_SEC is the C-level macro defined by time.h. SUS defines
+  #     CLOCKS\_PER\_SEC is 1000000. Non-Unix systems may define it a different
+  #     value, though. If CLOCKS\_PER\_SEC is 1000000 as SUS, the resolution is
+  #     1 microsecond. If CLOCKS\_PER\_SEC is 1000000 and clock\_t is 32 bits
+  #     integer type, it cannot represent over 72 minutes.
+  #
+  #
+  # If the given `clock_id` is not supported, Errno::EINVAL is raised.
+  #
+  # `unit` specifies a type of the return value.
+  #
+  # :float\_second
+  # :   number of seconds as a float (default)
+  # :float\_millisecond
+  # :   number of milliseconds as a float
+  # :float\_microsecond
+  # :   number of microseconds as a float
+  # :second
+  # :   number of seconds as an integer
+  # :millisecond
+  # :   number of milliseconds as an integer
+  # :microsecond
+  # :   number of microseconds as an integer
+  # :nanosecond
+  # :   number of nanoseconds as an integer
+  #
+  #
+  # The underlying function,
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)(),
+  # returns a number of nanoseconds.
+  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) object (IEEE 754
+  # double) is not enough to represent the return value for
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME).
+  # If the exact nanoseconds value is required, use `:nanoseconds` as the
+  # `unit`.
+  #
+  # The origin (zero) of the returned value varies. For example, system start up
+  # time, process start up time, the Epoch, etc.
+  #
+  # The origin in
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # is defined as the Epoch (1970-01-01 00:00:00 UTC). But some systems count
+  # leap seconds and others doesn't. So the result can be interpreted
+  # differently across systems.
+  # [`Time.now`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-now) is
+  # recommended over
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME).
   sig do
     params(
         clock_id: T.any(Symbol, Integer),
@@ -56,6 +361,12 @@ module Process
   end
   def self.clock_gettime(clock_id, unit=T.unsafe(nil)); end
 
+  # Detach the process from controlling terminal and run in the background as
+  # system daemon. Unless the argument nochdir is true (i.e. non false), it
+  # changes the current working directory to the root ("/"). Unless the argument
+  # noclose is true, daemon() will redirect standard input, standard output and
+  # standard error to /dev/null. Return zero on success, or raise one of
+  # Errno::\*.
   sig do
     params(
         nochdir: BasicObject,
@@ -65,6 +376,50 @@ module Process
   end
   def self.daemon(nochdir=T.unsafe(nil), noclose=T.unsafe(nil)); end
 
+  # Some operating systems retain the status of terminated child processes until
+  # the parent collects that status (normally using some variant of `wait()`).
+  # If the parent never collects this status, the child stays around as a
+  # *zombie* process. `Process::detach` prevents this by setting up a separate
+  # Ruby thread whose sole job is to reap the status of the process *pid* when
+  # it terminates. Use `detach` only when you do not intend to explicitly wait
+  # for the child to terminate.
+  #
+  # The waiting thread returns the exit status of the detached process when it
+  # terminates, so you can use `Thread#join` to know the result. If specified
+  # *pid* is not a valid child process ID, the thread returns `nil` immediately.
+  #
+  # The waiting thread has `pid` method which returns the pid.
+  #
+  # In this first example, we don't reap the first child process, so it appears
+  # as a zombie in the process status display.
+  #
+  # ```ruby
+  # p1 = fork { sleep 0.1 }
+  # p2 = fork { sleep 0.2 }
+  # Process.waitpid(p2)
+  # sleep 2
+  # system("ps -ho pid,state -p #{p1}")
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # 27389 Z
+  # ```
+  #
+  # In the next example, `Process::detach` is used to reap the child
+  # automatically.
+  #
+  # ```ruby
+  # p1 = fork { sleep 0.1 }
+  # p2 = fork { sleep 0.2 }
+  # Process.detach(p1)
+  # Process.waitpid(p2)
+  # sleep 2
+  # system("ps -ho pid,state -p #{p1}")
+  # ```
+  #
+  # *(produces no output)*
   sig do
     params(
         pid: Integer,
@@ -73,9 +428,17 @@ module Process
   end
   def self.detach(pid); end
 
+  # Returns the effective group ID for this process. Not available on all
+  # platforms.
+  #
+  # ```ruby
+  # Process.egid   #=> 500
+  # ```
   sig {returns(Integer)}
   def self.egid(); end
 
+  # Sets the effective group ID for this process. Not available on all
+  # platforms.
   sig do
     params(
         arg0: Integer,
@@ -84,9 +447,15 @@ module Process
   end
   def self.egid=(arg0); end
 
+  # Returns the effective user ID for this process.
+  #
+  # ```ruby
+  # Process.euid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.euid(); end
 
+  # Sets the effective user ID for this process. Not available on all platforms.
   sig do
     params(
         arg0: Integer,
@@ -95,6 +464,12 @@ module Process
   end
   def self.euid=(arg0); end
 
+  # Returns the process group ID for the given process id. Not available on all
+  # platforms.
+  #
+  # ```ruby
+  # Process.getpgid(Process.ppid())   #=> 25527
+  # ```
   sig do
     params(
         pid: Integer,
@@ -103,9 +478,27 @@ module Process
   end
   def self.getpgid(pid); end
 
+  # Returns the process group ID for this process. Not available on all
+  # platforms.
+  #
+  # ```ruby
+  # Process.getpgid(0)   #=> 25527
+  # Process.getpgrp      #=> 25527
+  # ```
   sig {returns(Integer)}
   def self.getpgrp(); end
 
+  # Gets the scheduling priority for specified process, process group, or user.
+  # *kind* indicates the kind of entity to find: one of `Process::PRIO_PGRP`,
+  # `Process::PRIO_USER`, or `Process::PRIO_PROCESS`. *integer* is an id
+  # indicating the particular process, process group, or user (an id of 0 means
+  # *current*). Lower priorities are more favorable for scheduling. Not
+  # available on all platforms.
+  #
+  # ```ruby
+  # Process.getpriority(Process::PRIO_USER, 0)      #=> 19
+  # Process.getpriority(Process::PRIO_PROCESS, 0)   #=> 19
+  # ```
   sig do
     params(
         kind: Integer,
@@ -115,6 +508,19 @@ module Process
   end
   def self.getpriority(kind, arg0); end
 
+  # Gets the resource limit of the process. *cur\_limit* means current (soft)
+  # limit and *max\_limit* means maximum (hard) limit.
+  #
+  # *resource* indicates the kind of resource to limit. It is specified as a
+  # symbol such as `:CORE`, a string such as `"CORE"` or a constant such as
+  # `Process::RLIMIT_CORE`. See
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # for details.
+  #
+  # *cur\_limit* and *max\_limit* may be `Process::RLIM_INFINITY`,
+  # `Process::RLIM_SAVED_MAX` or `Process::RLIM_SAVED_CUR`. See
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # and the system getrlimit(2) manual for details.
   sig do
     params(
         resource: T.any(Symbol, String, Integer),
@@ -123,6 +529,14 @@ module Process
   end
   def self.getrlimit(resource); end
 
+  # Returns the session ID for the given process id. If not given, return
+  # current process sid. Not available on all platforms.
+  #
+  # ```ruby
+  # Process.getsid()                #=> 27422
+  # Process.getsid(0)               #=> 27422
+  # Process.getsid(Process.pid())   #=> 27422
+  # ```
   sig do
     params(
         pid: Integer,
@@ -131,9 +545,15 @@ module Process
   end
   def self.getsid(pid=T.unsafe(nil)); end
 
+  # Returns the (real) group ID for this process.
+  #
+  # ```ruby
+  # Process.gid   #=> 500
+  # ```
   sig {returns(Integer)}
   def self.gid(); end
 
+  # Sets the group ID for this process.
   sig do
     params(
         arg0: Integer,
@@ -142,9 +562,38 @@ module Process
   end
   def self.gid=(arg0); end
 
+  # Get an `Array` of the group IDs in the supplemental group access list for
+  # this process.
+  #
+  # ```ruby
+  # Process.groups   #=> [27, 6, 10, 11]
+  # ```
+  #
+  # Note that this method is just a wrapper of getgroups(2). This means that the
+  # following characteristics of the result completely depend on your system:
+  #
+  # *   the result is sorted
+  # *   the result includes effective GIDs
+  # *   the result does not include duplicated GIDs
+  #
+  #
+  # You can make sure to get a sorted unique GID list of the current process by
+  # this expression:
+  #
+  # ```ruby
+  # Process.groups.uniq.sort
+  # ```
   sig {returns(T::Array[Integer])}
   def self.groups(); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the supplemental group
+  # access list to the given `Array` of group IDs.
+  #
+  # ```ruby
+  # Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
+  # Process.groups = [27, 6, 10, 11]   #=> [27, 6, 10, 11]
+  # Process.groups   #=> [27, 6, 10, 11]
+  # ```
   sig do
     params(
         arg0: T::Array[Integer],
@@ -153,6 +602,17 @@ module Process
   end
   def self.groups=(arg0); end
 
+  # Initializes the supplemental group access list by reading the system group
+  # database and using all groups of which the given user is a member. The group
+  # with the specified *gid* is also added to the list. Returns the resulting
+  # `Array` of the gids of all the groups in the supplementary group access
+  # list. Not available on all platforms.
+  #
+  # ```ruby
+  # Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
+  # Process.initgroups( "mgranger", 30 )   #=> [30, 6, 10, 11]
+  # Process.groups   #=> [30, 6, 10, 11]
+  # ```
   sig do
     params(
         username: String,
@@ -162,6 +622,37 @@ module Process
   end
   def self.initgroups(username, gid); end
 
+  # Sends the given signal to the specified process id(s) if *pid* is positive.
+  # If *pid* is zero *signal* is sent to all processes whose group ID is equal
+  # to the group ID of the process. *signal* may be an integer signal number or
+  # a POSIX signal name (either with or without a `SIG` prefix). If *signal* is
+  # negative (or starts with a minus sign), kills process groups instead of
+  # processes. Not all signals are available on all platforms. The keys and
+  # values of `Signal.list` are known signal names and numbers, respectively.
+  #
+  # ```ruby
+  # pid = fork do
+  #    Signal.trap("HUP") { puts "Ouch!"; exit }
+  #    # ... do some work ...
+  # end
+  # # ...
+  # Process.kill("HUP", pid)
+  # Process.wait
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # Ouch!
+  # ```
+  #
+  # If *signal* is an integer but wrong for signal, `Errno::EINVAL` or
+  # `RangeError` will be raised. Otherwise unless *signal* is a `String` or a
+  # `Symbol`, and a known signal name, `ArgumentError` will be raised.
+  #
+  # Also, `Errno::ESRCH` or `RangeError` for invalid *pid*, `Errno::EPERM` when
+  # failed because of no privilege, will be raised. In these cases, signals may
+  # have been sent to preceding processes.
   sig do
     params(
         signal: T.any(Integer, Symbol, String),
@@ -171,9 +662,17 @@ module Process
   end
   def self.kill(signal, *pids); end
 
+  # Returns the maximum number of gids allowed in the supplemental group access
+  # list.
+  #
+  # ```ruby
+  # Process.maxgroups   #=> 32
+  # ```
   sig {returns(Integer)}
   def self.maxgroups(); end
 
+  # Sets the maximum number of gids allowed in the supplemental group access
+  # list.
   sig do
     params(
         arg0: Integer,
@@ -182,12 +681,33 @@ module Process
   end
   def self.maxgroups=(arg0); end
 
+  # Returns the process id of this process. Not available on all platforms.
+  #
+  # ```ruby
+  # Process.pid   #=> 27415
+  # ```
   sig {returns(Integer)}
   def self.pid(); end
 
+  # Returns the process id of the parent of this process. Returns untrustworthy
+  # value on Win32/64. Not available on all platforms.
+  #
+  # ```ruby
+  # puts "I am #{Process.pid}"
+  # Process.fork { puts "Dad is #{Process.ppid}" }
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # I am 27417
+  # Dad is 27417
+  # ```
   sig {returns(Integer)}
   def self.ppid(); end
 
+  # Sets the process group ID of *pid* (0 indicates this process) to *integer*.
+  # Not available on all platforms.
   sig do
     params(
         pid: Integer,
@@ -197,6 +717,14 @@ module Process
   end
   def self.setpgid(pid, arg0); end
 
+  # See `Process#getpriority`.
+  #
+  # ```ruby
+  # Process.setpriority(Process::PRIO_USER, 0, 19)      #=> 0
+  # Process.setpriority(Process::PRIO_PROCESS, 0, 19)   #=> 0
+  # Process.getpriority(Process::PRIO_USER, 0)          #=> 19
+  # Process.getpriority(Process::PRIO_PROCESS, 0)       #=> 19
+  # ```
   sig do
     params(
         kind: Integer,
@@ -207,6 +735,20 @@ module Process
   end
   def self.setpriority(kind, arg0, priority); end
 
+  # Sets the process title that appears on the ps(1) command. Not necessarily
+  # effective on all platforms. No exception will be raised regardless of the
+  # result, nor will
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+  # be raised even if the platform does not support the feature.
+  #
+  # Calling this method does not affect the value of $0.
+  #
+  # ```ruby
+  # Process.setproctitle('myapp: worker #%d' % worker_id)
+  # ```
+  #
+  # This method first appeared in Ruby 2.1 to serve as a global variable free
+  # means to change the process title.
   sig do
     params(
         arg0: String,
@@ -215,6 +757,63 @@ module Process
   end
   def self.setproctitle(arg0); end
 
+  # Sets the resource limit of the process. *cur\_limit* means current (soft)
+  # limit and *max\_limit* means maximum (hard) limit.
+  #
+  # If *max\_limit* is not given, *cur\_limit* is used.
+  #
+  # *resource* indicates the kind of resource to limit. It should be a symbol
+  # such as `:CORE`, a string such as `"CORE"` or a constant such as
+  # `Process::RLIMIT_CORE`. The available resources are OS dependent. Ruby may
+  # support following resources.
+  #
+  # AS
+  # :   total available memory (bytes) (SUSv3, NetBSD, FreeBSD, OpenBSD but
+  #     4.4BSD-Lite)
+  # CORE
+  # :   core size (bytes) (SUSv3)
+  # CPU
+  # :   CPU time (seconds) (SUSv3)
+  # DATA
+  # :   data segment (bytes) (SUSv3)
+  # FSIZE
+  # :   file size (bytes) (SUSv3)
+  # MEMLOCK
+  # :   total size for mlock(2) (bytes) (4.4BSD, GNU/Linux)
+  # MSGQUEUE
+  # :   allocation for POSIX message queues (bytes) (GNU/Linux)
+  # NICE
+  # :   ceiling on process's nice(2) value (number) (GNU/Linux)
+  # NOFILE
+  # :   file descriptors (number) (SUSv3)
+  # NPROC
+  # :   number of processes for the user (number) (4.4BSD, GNU/Linux)
+  # [`RSS`](https://docs.ruby-lang.org/en/2.6.0/RSS.html)
+  # :   resident memory size (bytes) (4.2BSD, GNU/Linux)
+  # RTPRIO
+  # :   ceiling on the process's real-time priority (number) (GNU/Linux)
+  # RTTIME
+  # :   CPU time for real-time process (us) (GNU/Linux)
+  # SBSIZE
+  # :   all socket buffers (bytes) (NetBSD, FreeBSD)
+  # SIGPENDING
+  # :   number of queued signals allowed (signals) (GNU/Linux)
+  # STACK
+  # :   stack size (bytes) (SUSv3)
+  #
+  #
+  # *cur\_limit* and *max\_limit* may be `:INFINITY`, `"INFINITY"` or
+  # `Process::RLIM_INFINITY`, which means that the resource is not limited. They
+  # may be `Process::RLIM_SAVED_MAX`, `Process::RLIM_SAVED_CUR` and
+  # corresponding symbols and strings too. See system setrlimit(2) manual for
+  # details.
+  #
+  # The following example raises the soft limit of core size to the hard limit
+  # to try to make core dump possible.
+  #
+  # ```ruby
+  # Process.setrlimit(:CORE, Process.getrlimit(:CORE)[1])
+  # ```
   sig do
     params(
         resource: T.any(Symbol, String, Integer),
@@ -225,15 +824,34 @@ module Process
   end
   def self.setrlimit(resource, cur_limit, max_limit=T.unsafe(nil)); end
 
+  # Establishes this process as a new session and process group leader, with no
+  # controlling tty. Returns the session id. Not available on all platforms.
+  #
+  # ```ruby
+  # Process.setsid   #=> 27422
+  # ```
   sig {returns(Integer)}
   def self.setsid(); end
 
+  # Returns a `Tms` structure (see `Process::Tms`) that contains user and system
+  # CPU times for this process, and also for children processes.
+  #
+  # ```ruby
+  # t = Process.times
+  # [ t.utime, t.stime, t.cutime, t.cstime ]   #=> [0.0, 0.02, 0.00, 0.00]
+  # ```
   sig {returns(Process::Tms)}
   def self.times(); end
 
+  # Returns the (real) user ID of this process.
+  #
+  # ```ruby
+  # Process.uid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.uid(); end
 
+  # Sets the (user) user ID for this process. Not available on all platforms.
   sig do
     params(
         user: Integer,
@@ -242,6 +860,48 @@ module Process
   end
   def self.uid=(user); end
 
+  # Waits for a child process to exit, returns its process id, and sets `$?` to
+  # a `Process::Status` object containing information on that process. Which
+  # child it waits on depends on the value of *pid*:
+  #
+  # > 0
+  # :   Waits for the child whose process ID equals *pid*.
+  #
+  # 0
+  # :   Waits for any child whose process group ID equals that of the calling
+  #     process.
+  #
+  # -1
+  # :   Waits for any child process (the default if no *pid* is given).
+  #
+  # < -1
+  # :   Waits for any child whose process group ID equals the absolute value of
+  #     *pid*.
+  #
+  #
+  # The *flags* argument may be a logical or of the flag values
+  # `Process::WNOHANG` (do not block if no child available) or
+  # `Process::WUNTRACED` (return stopped children that haven't been reported).
+  # Not all flags are available on all platforms, but a flag value of zero will
+  # work on all platforms.
+  #
+  # Calling this method raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # if there are no child processes. Not available on all platforms.
+  #
+  # ```ruby
+  # include Process
+  # fork { exit 99 }                 #=> 27429
+  # wait                             #=> 27429
+  # $?.exitstatus                    #=> 99
+  #
+  # pid = fork { sleep 3 }           #=> 27440
+  # Time.now                         #=> 2008-03-08 19:56:16 +0900
+  # waitpid(pid, Process::WNOHANG)   #=> nil
+  # Time.now                         #=> 2008-03-08 19:56:16 +0900
+  # waitpid(pid, 0)                  #=> 27440
+  # Time.now                         #=> 2008-03-08 19:56:19 +0900
+  # ```
   sig do
     params(
         pid: Integer,
@@ -251,6 +911,19 @@ module Process
   end
   def self.wait(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
+  # Waits for a child process to exit (see
+  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-waitpid)
+  # for exact semantics) and returns an array containing the process id and the
+  # exit status (a `Process::Status` object) of that child. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # if there are no child processes.
+  #
+  # ```ruby
+  # Process.fork { exit 99 }   #=> 27437
+  # pid, status = Process.wait2
+  # pid                        #=> 27437
+  # status.exitstatus          #=> 99
+  # ```
   sig do
     params(
         pid: Integer,
@@ -260,9 +933,68 @@ module Process
   end
   def self.wait2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
+  # Waits for all children, returning an array of *pid*/*status* pairs (where
+  # *status* is a `Process::Status` object).
+  #
+  # ```ruby
+  # fork { sleep 0.2; exit 2 }   #=> 27432
+  # fork { sleep 0.1; exit 1 }   #=> 27433
+  # fork {            exit 0 }   #=> 27434
+  # p Process.waitall
+  # ```
+  #
+  # *produces*:
+  #
+  # ```
+  # [[30982, #<Process::Status: pid 30982 exit 0>],
+  #  [30979, #<Process::Status: pid 30979 exit 1>],
+  #  [30976, #<Process::Status: pid 30976 exit 2>]]
+  # ```
   sig {returns(T::Array[[Integer, Process::Status]])}
   def self.waitall(); end
 
+  # Waits for a child process to exit, returns its process id, and sets `$?` to
+  # a `Process::Status` object containing information on that process. Which
+  # child it waits on depends on the value of *pid*:
+  #
+  # > 0
+  # :   Waits for the child whose process ID equals *pid*.
+  #
+  # 0
+  # :   Waits for any child whose process group ID equals that of the calling
+  #     process.
+  #
+  # -1
+  # :   Waits for any child process (the default if no *pid* is given).
+  #
+  # < -1
+  # :   Waits for any child whose process group ID equals the absolute value of
+  #     *pid*.
+  #
+  #
+  # The *flags* argument may be a logical or of the flag values
+  # `Process::WNOHANG` (do not block if no child available) or
+  # `Process::WUNTRACED` (return stopped children that haven't been reported).
+  # Not all flags are available on all platforms, but a flag value of zero will
+  # work on all platforms.
+  #
+  # Calling this method raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # if there are no child processes. Not available on all platforms.
+  #
+  # ```ruby
+  # include Process
+  # fork { exit 99 }                 #=> 27429
+  # wait                             #=> 27429
+  # $?.exitstatus                    #=> 99
+  #
+  # pid = fork { sleep 3 }           #=> 27440
+  # Time.now                         #=> 2008-03-08 19:56:16 +0900
+  # waitpid(pid, Process::WNOHANG)   #=> nil
+  # Time.now                         #=> 2008-03-08 19:56:16 +0900
+  # waitpid(pid, 0)                  #=> 27440
+  # Time.now                         #=> 2008-03-08 19:56:19 +0900
+  # ```
   sig do
     params(
         pid: Integer,
@@ -272,6 +1004,19 @@ module Process
   end
   def self.waitpid(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
+  # Waits for a child process to exit (see
+  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-waitpid)
+  # for exact semantics) and returns an array containing the process id and the
+  # exit status (a `Process::Status` object) of that child. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # if there are no child processes.
+  #
+  # ```ruby
+  # Process.fork { exit 99 }   #=> 27437
+  # pid, status = Process.wait2
+  # pid                        #=> 27437
+  # status.exitstatus          #=> 99
+  # ```
   sig do
     params(
         pid: Integer,
@@ -282,7 +1027,18 @@ module Process
   def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 end
 
+# The `Process::GID` module contains a collection of module functions which can
+# be used to portably get, set, and switch the current process's real,
+# effective, and saved group IDs.
 module Process::GID
+  # Change the current process's real and effective group ID to that specified
+  # by *group*. Returns the new group ID. Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.gid, Process.egid]          #=> [0, 0]
+  # Process::GID.change_privilege(33)    #=> 33
+  # [Process.gid, Process.egid]          #=> [33, 33]
+  # ```
   sig do
     params(
         group: Integer,
@@ -291,9 +1047,22 @@ module Process::GID
   end
   def self.change_privilege(group); end
 
+  # Returns the effective group ID for this process. Not available on all
+  # platforms.
+  #
+  # ```ruby
+  # Process.egid   #=> 500
+  # ```
   sig {returns(Integer)}
   def self.eid(); end
 
+  # Get the group ID by the *name*. If the group is not found, `ArgumentError`
+  # will be raised.
+  #
+  # ```ruby
+  # Process::GID.from_name("wheel") #=> 0
+  # Process::GID.from_name("nosuchgroup") #=> can't find group for nosuchgroup (ArgumentError)
+  # ```
   sig do
     params(
         name: String,
@@ -302,6 +1071,15 @@ module Process::GID
   end
   def self.from_name(name); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective group
+  # ID, and if possible, the saved group ID of the process to the given *group*.
+  # Returns the new effective group ID. Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.gid, Process.egid]          #=> [0, 0]
+  # Process::GID.grant_privilege(31)     #=> 33
+  # [Process.gid, Process.egid]          #=> [0, 33]
+  # ```
   sig do
     params(
         group: Integer,
@@ -310,18 +1088,38 @@ module Process::GID
   end
   def self.grant_privilege(group); end
 
+  # Exchange real and effective group IDs and return the new effective group ID.
+  # Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.gid, Process.egid]   #=> [0, 33]
+  # Process::GID.re_exchange      #=> 0
+  # [Process.gid, Process.egid]   #=> [33, 0]
+  # ```
   sig {returns(Integer)}
   def self.re_exchange(); end
 
+  # Returns `true` if the real and effective group IDs of a process may be
+  # exchanged on the current platform.
   sig {returns(T::Boolean)}
   def self.re_exchangeable?(); end
 
+  # Returns the (real) group ID for this process.
+  #
+  # ```ruby
+  # Process.gid   #=> 500
+  # ```
   sig {returns(Integer)}
   def self.rid(); end
 
+  # Returns `true` if the current platform has saved group ID functionality.
   sig {returns(T::Boolean)}
   def self.sid_available?(); end
 
+  # Switch the effective and real group IDs of the current process. If a *block*
+  # is given, the group IDs will be switched back after the block is executed.
+  # Returns the new effective group ID if called without a block, and the return
+  # value of the block if one is given.
   sig {returns(Integer)}
   sig do
     type_parameters(:T).params(
@@ -340,7 +1138,38 @@ module Process::GID
   def self.eid=(group); end
 end
 
+# `Process::Status` encapsulates the information on the status of a running or
+# terminated system process. The built-in variable `$?` is either `nil` or a
+# `Process::Status` object.
+#
+# ```ruby
+# fork { exit 99 }   #=> 26557
+# Process.wait       #=> 26557
+# $?.class           #=> Process::Status
+# $?.to_i            #=> 25344
+# $? >> 8            #=> 99
+# $?.stopped?        #=> false
+# $?.exited?         #=> true
+# $?.exitstatus      #=> 99
+# ```
+#
+# Posix systems record information on processes using a 16-bit integer. The
+# lower bits record the process status (stopped, exited, signaled) and the upper
+# bits possibly contain additional information (for example the program's return
+# code in the case of exited processes). Pre Ruby 1.8, these bits were exposed
+# directly to the Ruby program. Ruby now encapsulates these in a
+# `Process::Status` object. To maximize compatibility, however, these objects
+# retain a bit-oriented interface. In the descriptions that follow, when we talk
+# about the integer value of *stat*, we're referring to this 16 bit value.
 class Process::Status < Object
+  # Logical AND of the bits in *stat* with *num*.
+  #
+  # ```ruby
+  # fork { exit 0x37 }
+  # Process.wait
+  # sprintf('%04x', $?.to_i)       #=> "3700"
+  # sprintf('%04x', $? & 0x1e00)   #=> "1600"
+  # ```
   sig do
     params(
         num: Integer,
@@ -349,6 +1178,7 @@ class Process::Status < Object
   end
   def &(num); end
 
+  # Returns `true` if the integer value of *stat* equals *other*.
   sig do
     params(
         other: BasicObject,
@@ -357,6 +1187,14 @@ class Process::Status < Object
   end
   def ==(other); end
 
+  # Shift the bits in *stat* right *num* places.
+  #
+  # ```ruby
+  # fork { exit 99 }   #=> 26563
+  # Process.wait       #=> 26563
+  # $?.to_i            #=> 25344
+  # $? >> 8            #=> 99
+  # ```
   sig do
     params(
         num: Integer,
@@ -365,56 +1203,135 @@ class Process::Status < Object
   end
   def >>(num); end
 
+  # Returns `true` if *stat* generated a coredump when it terminated. Not
+  # available on all platforms.
   sig {returns(T::Boolean)}
   def coredump?(); end
 
+  # Returns `true` if *stat* exited normally (for example using an `exit()` call
+  # or finishing the program).
   sig {returns(T::Boolean)}
   def exited?(); end
 
+  # Returns the least significant eight bits of the return code of *stat*. Only
+  # available if `exited?` is `true`.
+  #
+  # ```ruby
+  # fork { }           #=> 26572
+  # Process.wait       #=> 26572
+  # $?.exited?         #=> true
+  # $?.exitstatus      #=> 0
+  #
+  # fork { exit 99 }   #=> 26573
+  # Process.wait       #=> 26573
+  # $?.exited?         #=> true
+  # $?.exitstatus      #=> 99
+  # ```
   sig {returns(T.nilable(Integer))}
   def exitstatus(); end
 
+  # Override the inspection method.
+  #
+  # ```ruby
+  # system("false")
+  # p $?.inspect #=> "#<Process::Status: pid 12861 exit 1>"
+  # ```
   sig {returns(String)}
   def inspect(); end
 
+  # Returns the process ID that this status object represents.
+  #
+  # ```ruby
+  # fork { exit }   #=> 26569
+  # Process.wait    #=> 26569
+  # $?.pid          #=> 26569
+  # ```
   sig {returns(Integer)}
   def pid(); end
 
+  # Returns `true` if *stat* terminated because of an uncaught signal.
   sig {returns(T::Boolean)}
   def signaled?(); end
 
+  # Returns `true` if this process is stopped. This is only returned if the
+  # corresponding `wait` call had the `WUNTRACED` flag set.
   sig {returns(T::Boolean)}
   def stopped?(); end
 
+  # Returns the number of the signal that caused *stat* to stop (or `nil` if
+  # self is not stopped).
   sig {returns(T.nilable(Integer))}
   def stopsig(); end
 
+  # Returns `true` if *stat* is successful, `false` if not. Returns `nil` if
+  # `exited?` is not `true`.
   sig {returns(T::Boolean)}
   def success?(); end
 
+  # Returns the number of the signal that caused *stat* to terminate (or `nil`
+  # if self was not terminated by an uncaught signal).
   sig {returns(T.nilable(Integer))}
   def termsig(); end
 
+  # Returns the bits in *stat* as a `Integer`. Poking around in these bits is
+  # platform dependent.
+  #
+  # ```ruby
+  # fork { exit 0xab }         #=> 26566
+  # Process.wait               #=> 26566
+  # sprintf('%04x', $?.to_i)   #=> "ab00"
+  # ```
   sig {returns(Integer)}
   def to_i(); end
 
+  # Show pid and exit status as a string.
+  #
+  # ```ruby
+  # system("false")
+  # p $?.to_s         #=> "pid 12766 exit 1"
+  # ```
   sig {returns(String)}
   def to_s(); end
 end
 
+# The `Process::Sys` module contains UID and GID functions which provide direct
+# bindings to the system calls of the same names instead of the more-portable
+# versions of the same functionality found in the `Process`, `Process::UID`, and
+# `Process::GID` modules.
 module Process::Sys
+  # Returns the effective user ID for this process.
+  #
+  # ```ruby
+  # Process.euid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.geteuid(); end
 
+  # Returns the (real) group ID for this process.
+  #
+  # ```ruby
+  # Process.gid   #=> 500
+  # ```
   sig {returns(Integer)}
   def self.getgid(); end
 
+  # Returns the (real) user ID of this process.
+  #
+  # ```ruby
+  # Process.uid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.getuid(); end
 
+  # Returns `true` if the process was created as a result of an execve(2) system
+  # call which had either of the setuid or setgid bits set (and extra privileges
+  # were given as a result) or if it has changed any of its real, effective or
+  # saved user or group IDs since it began execution.
   sig {returns(T::Boolean)}
   def self.issetugid(); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective group ID
+  # of the calling process to *group*. Not available on all platforms.
   sig do
     params(
         group: Integer,
@@ -423,6 +1340,8 @@ module Process::Sys
   end
   def self.setegid(group); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective user ID
+  # of the calling process to *user*. Not available on all platforms.
   sig do
     params(
         user: Integer,
@@ -431,6 +1350,8 @@ module Process::Sys
   end
   def self.seteuid(user); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the group ID of the
+  # current process to *group*. Not available on all platforms.
   sig do
     params(
         group: Integer,
@@ -439,6 +1360,9 @@ module Process::Sys
   end
   def self.setgid(group); end
 
+  # Sets the (group) real and/or effective group IDs of the current process to
+  # *rid* and *eid*, respectively. A value of `-1` for either means to leave
+  # that ID unchanged. Not available on all platforms.
   sig do
     params(
         rid: Integer,
@@ -448,6 +1372,9 @@ module Process::Sys
   end
   def self.setregid(rid, eid); end
 
+  # Sets the (group) real, effective, and saved user IDs of the current process
+  # to *rid*, *eid*, and *sid* respectively. A value of `-1` for any value means
+  # to leave that ID unchanged. Not available on all platforms.
   sig do
     params(
         rid: Integer,
@@ -458,6 +1385,9 @@ module Process::Sys
   end
   def self.setresgid(rid, eid, sid); end
 
+  # Sets the (user) real, effective, and saved user IDs of the current process
+  # to *rid*, *eid*, and *sid* respectively. A value of `-1` for any value means
+  # to leave that ID unchanged. Not available on all platforms.
   sig do
     params(
         rid: Integer,
@@ -468,6 +1398,9 @@ module Process::Sys
   end
   def self.setresuid(rid, eid, sid); end
 
+  # Sets the (user) real and/or effective user IDs of the current process to
+  # *rid* and *eid*, respectively. A value of `-1` for either means to leave
+  # that ID unchanged. Not available on all platforms.
   sig do
     params(
         rid: Integer,
@@ -477,6 +1410,8 @@ module Process::Sys
   end
   def self.setreuid(rid, eid); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the real group ID of
+  # the calling process to *group*. Not available on all platforms.
   sig do
     params(
         group: Integer,
@@ -485,6 +1420,8 @@ module Process::Sys
   end
   def self.setrgid(group); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the real user ID of
+  # the calling process to *user*. Not available on all platforms.
   sig do
     params(
         user: Integer,
@@ -493,6 +1430,8 @@ module Process::Sys
   end
   def self.setruid(user); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the user ID of the
+  # current process to *user*. Not available on all platforms.
   sig do
     params(
         user: Integer,
@@ -502,7 +1441,18 @@ module Process::Sys
   def self.setuid(user); end
 end
 
+# The `Process::UID` module contains a collection of module functions which can
+# be used to portably get, set, and switch the current process's real,
+# effective, and saved user IDs.
 module Process::UID
+  # Change the current process's real and effective user ID to that specified by
+  # *user*. Returns the new user ID. Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.uid, Process.euid]          #=> [0, 0]
+  # Process::UID.change_privilege(31)    #=> 31
+  # [Process.uid, Process.euid]          #=> [31, 31]
+  # ```
   sig do
     params(
         user: Integer,
@@ -511,9 +1461,21 @@ module Process::UID
   end
   def self.change_privilege(user); end
 
+  # Returns the effective user ID for this process.
+  #
+  # ```ruby
+  # Process.euid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.eid(); end
 
+  # Get the user ID by the *name*. If the user is not found, `ArgumentError`
+  # will be raised.
+  #
+  # ```ruby
+  # Process::UID.from_name("root") #=> 0
+  # Process::UID.from_name("nosuchuser") #=> can't find user for nosuchuser (ArgumentError)
+  # ```
   sig do
     params(
         name: String,
@@ -522,6 +1484,15 @@ module Process::UID
   end
   def self.from_name(name); end
 
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective user ID,
+  # and if possible, the saved user ID of the process to the given *user*.
+  # Returns the new effective user ID. Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.uid, Process.euid]          #=> [0, 0]
+  # Process::UID.grant_privilege(31)     #=> 31
+  # [Process.uid, Process.euid]          #=> [0, 31]
+  # ```
   sig do
     params(
         user: Integer,
@@ -530,18 +1501,38 @@ module Process::UID
   end
   def self.grant_privilege(user); end
 
+  # Exchange real and effective user IDs and return the new effective user ID.
+  # Not available on all platforms.
+  #
+  # ```ruby
+  # [Process.uid, Process.euid]   #=> [0, 31]
+  # Process::UID.re_exchange      #=> 0
+  # [Process.uid, Process.euid]   #=> [31, 0]
+  # ```
   sig {returns(Integer)}
   def self.re_exchange(); end
 
+  # Returns `true` if the real and effective user IDs of a process may be
+  # exchanged on the current platform.
   sig {returns(T::Boolean)}
   def self.re_exchangeable?(); end
 
+  # Returns the (real) user ID of this process.
+  #
+  # ```ruby
+  # Process.uid   #=> 501
+  # ```
   sig {returns(Integer)}
   def self.rid(); end
 
+  # Returns `true` if the current platform has saved user ID functionality.
   sig {returns(T::Boolean)}
   def self.sid_available?(); end
 
+  # Switch the effective and real user IDs of the current process. If a *block*
+  # is given, the user IDs will be switched back after the block is executed.
+  # Returns the new effective user ID if called without a block, and the return
+  # value of the block if one is given.
   sig {returns(Integer)}
   sig do
     type_parameters(:T).params(

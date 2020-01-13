@@ -1,0 +1,77 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <emptyTree>
+        end
+        ::A.new().foo()
+        ::A.foo()
+        ::A.new().food()
+        ::A.food()
+        ::A.new().foos()
+        ::A.foos()
+        ::A.sfoo()
+        ::A.new().sfoo()
+        ::A.new().sfood()
+        ::A.sfood()
+        ::A.sfoos()
+        ::A.new().sfoos()
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo(<blk>)
+      begin
+        :"food"
+        :"foos"
+      end
+    end
+
+    def self.sfoo(<blk>)
+      begin
+        :"sfood"
+        :"sfoos"
+      end
+    end
+
+    def food(<blk>)
+      <emptyTree>
+    end
+
+    def foos(<blk>)
+      <emptyTree>
+    end
+
+    def sfood(<blk>)
+      <emptyTree>
+    end
+
+    def self.sfoos(<blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

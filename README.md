@@ -38,7 +38,9 @@ docs about Stripe-specific development workflows and historical Stripe context.
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
     - [Testing "Find Definition" and "Find All References"](#testing-find-definition-and-find-all-references)
+    - [Testing "Go to Type Definition"](#testing-go-to-type-definition)
     - [Testing hover](#testing-hover)
+    - [Testing completion](#testing-completion)
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
@@ -49,6 +51,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 - [Writing docs](#writing-docs)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
+  - [Multiple git worktrees](#multiple-git-worktrees)
   - [Shell](#shell)
   - [Formatting files](#formatting-files)
   - [Editor setup for C++](#editor-setup-for-c)
@@ -113,7 +116,7 @@ Early in our project we've defined some guidelines for how working with sorbet s
 
 3.  Build Sorbet
 
-    - `bazel build //main:sorbet --config=dbg`
+    - `./bazel build //main:sorbet --config=dbg`
 
 4.  Run Sorbet!
 
@@ -128,13 +131,18 @@ change it!
 
 [→ internals.md](docs/internals.md)
 
+There is also a talk online that describes Sorbet's high-level architecture and
+the reasons why it's fast:
+
+[→ Fast type checking for Ruby](https://sorbet.org/docs/talks/jvm-ls-2019)
+
 
 ## Building Sorbet
 
 There are multiple ways to build `sorbet`. This one is the most common:
 
 ```
-bazel build //main:sorbet --config=dbg
+./bazel build //main:sorbet --config=dbg
 ```
 
 This will build an executable in `bazel-bin/main/sorbet` (see "Running Sorbet"
@@ -417,6 +425,46 @@ If a location should not report any definition or usage, then use the magic labe
 # ^ def: (nothing)
 ```
 
+#### Testing "Go to Type Definition"
+
+This is somewhat similar to "Find Definition" above, but also slightly different
+because there's no analogue of "Find All Type Definitions."
+
+```ruby
+class A; end
+#     ^ type-def: some-label
+
+aaa = A.new
+# ^ type: some-label
+```
+
+The `type: some-label` assertion says "please simulate a Go to Type Definition
+here, named `some-label`" and the `type-def: some-label` assertion says "assert
+that the results for `some-label` are exactly these locations."
+
+That means if the type definition could return multiple locs, the assertions
+will have to cover all results:
+
+```ruby
+class A; end
+#     ^ type-def: AorB
+class B; end
+#     ^ type-def: AorB
+
+aaa = T.let(A.new, T.any(A, B))
+# ^ type: AorB
+```
+
+If a location should not report any definition or usage, then use the magic
+label `(nothing)`:
+
+```ruby
+# typed: false
+class A; end
+aaa = A.new
+# ^ def: (nothing)
+```
+
 #### Testing hover
 
 LSP tests can also assert the contents of hover responses with `hover` assertions:
@@ -432,6 +480,90 @@ If a location should report the empty string, use the special label `(nothing)`:
      a = 10
 # ^ hover: (nothing)
 ```
+
+#### Testing completion
+
+<!-- TODO(jez) Un-declare this under construction -->
+
+🚧 This section is under construction! 🚧
+
+LSP tests can also assert the contents of completion responses with `completion`
+assertions.
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  foo
+#    ^ completion: foo_1, foo_2
+end
+```
+
+The `^` corresponds to the position of the cursor. So in the above example, it's
+as if the cursor is like this: `foo│`. If the `^` had been directly under the
+last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
+you use `^^^` in the assertion, the test harness will use only the first caret.
+
+You can also write a test for a partial prefix of the completion results:
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  foo
+#    ^ completion: foo_1, ...
+end
+```
+
+Add the `, ...` suffix to the end of a partial list of completion results, and
+the test harness will ensure that the listed identifiers match a prefix of the
+completion items. This prefix must still be listed in order.
+
+If a location should report zero completion items, use the special message
+`(nothing)`:
+
+```ruby
+class A
+  def self.foo_1; end
+  def self.foo_2; end
+
+  zzz
+#    ^ completion: (nothing)
+end
+```
+
+To write a test for the snippet that would be inserted into the document if a
+particular completion item was selected, you can make two files:
+
+```
+# -- test/testdata/lsp/completion/mytest.rb --
+class A
+  def self.foo_1; end
+end
+
+A.foo_
+#     ^ apply-completion: [A] item: 0
+```
+
+The `apply-completion` assertion says "make sure the file `mytest.A.rbedited`
+contains the result of inserting the completion snippet for the 0th completion
+item into the file."
+
+```
+# -- test/testdata/lsp/completion/mytest.A.rbedited --
+class A
+  def self.foo_1; end
+end
+
+A.foo_1${0}
+#     ^ apply-completion: [A] item: 0
+```
+
+As you can see, the fancy `${...}` (tabstop placeholders) show up verbatim in
+the output if they were sent in the completion response.
+
 
 #### Testing incremental typechecking
 
@@ -476,6 +608,24 @@ tools/scripts/update_exp_files.sh
 
 You will probably want to look through the changes and `git checkout` any files
 with changes that you believe are actually bugs in your code and fix your code.
+
+`update_exp_files.sh` updates every snapshot file kind known to Sorbet. This can
+be slow, depending on what needs to be recompiled and updated. Some faster
+commands:
+
+```bash
+# Only update the `*.exp` files in `test/testdata`
+tools/scripts/update_testdata_exp.sh
+
+# Only update the `*.exp` files in `test/testdata/cfg`
+tools/scripts/update_testdata_exp.sh test/testdata/cfg
+
+# Only update a single exp file's test:
+tools/scripts/update_testdata_exp.sh test/testdata/cfg/next.rb
+
+# Only update the `*.out` files in `test/cli`
+bazel test //test/cli:update
+```
 
 
 ## C++ conventions
@@ -634,7 +784,7 @@ You are encouraged to play around with various clang-based tools which use the
 
     ```shell
     # Build clang-format with bazel
-    bazel build //tools:clang-format
+    ./bazel build //tools:clang-format
 
     # Once bazel runs again, this symlink to clang-format will go away.
     # We need to copy it out of bazel so our editor can use it:
@@ -683,3 +833,4 @@ Here are some sample config setups:
 - Vim
   - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
   - [clangd + clang-format (ALE)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L288-L303)
+  - [clangd + clang-format (coc.nvim)](https://github.com/elliottt/vim-config/blob/35f328765528f6b322fb7d5a03fb3edd81067805/coc-settings.json#L3-L15)

@@ -1,6 +1,7 @@
 #include "absl/base/casts.h"
 #include "absl/strings/escaping.h"
 #include "common/common.h"
+#include "common/formatting.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -36,6 +37,15 @@ string UnresolvedClassType::show(const GlobalState &gs) const {
     return fmt::format(
         "{}::{} (unresolved)", this->scope.data(gs)->show(gs),
         fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.data(gs)->show(gs); }));
+}
+
+string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return this->show(gs);
+}
+
+string UnresolvedAppliedType::show(const GlobalState &gs) const {
+    return fmt::format("{}[{}] (unresolved)", this->klass.data(gs)->show(gs),
+                       fmt::map_join(targs, ", ", [&](auto targ) { return targ->show(gs); }));
 }
 
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -355,7 +365,11 @@ string AppliedType::show(const GlobalState &gs) const {
                 fmt::format_to(buf, ")");
             }
 
-            fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            if (return_type == core::Types::void_()) {
+                fmt::format_to(buf, ".void");
+            } else {
+                fmt::format_to(buf, ".returns({})", return_type->show(gs));
+            }
             return to_string(buf);
         } else {
             fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
@@ -369,6 +383,8 @@ string AppliedType::show(const GlobalState &gs) const {
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
         if (typeMember.data(gs)->isFixed()) {
+            it = targs.erase(it);
+        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);
@@ -384,7 +400,14 @@ string AppliedType::show(const GlobalState &gs) const {
 }
 
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("LambdaParam({})", this->definition.data(gs)->toStringFullName(gs));
+    auto defName = this->definition.data(gs)->toStringFullName(gs);
+    auto upperStr = this->upperBound->toString(gs);
+    if (this->definition.data(gs)->isFixed()) {
+        return fmt::format("LambdaParam({}, fixed={})", defName, upperStr);
+    } else {
+        auto lowerStr = this->lowerBound->toString(gs);
+        return fmt::format("LambdaParam({}, lower={}, upper={})", defName, lowerStr, upperStr);
+    }
 }
 
 string LambdaParam::show(const GlobalState &gs) const {
@@ -417,6 +440,10 @@ string TypeVar::typeName() const {
 
 string UnresolvedClassType::typeName() const {
     return "UnresolvedClassType";
+}
+
+string UnresolvedAppliedType::typeName() const {
+    return "UnresolvedAppliedType";
 }
 
 string ClassType::typeName() const {

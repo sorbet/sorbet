@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 // has to go first as it violates are requirements
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
@@ -128,7 +129,7 @@ TEST(CoreTest, Substitute) { // NOLINT
 
     auto other2 = subst.substitute(other1);
     ASSERT_TRUE(other2.exists());
-    ASSERT_TRUE(other2.data(gs2)->kind == UTF8);
+    ASSERT_TRUE(other2.data(gs2)->kind == NameKind::UTF8);
     ASSERT_EQ("<U other>", other2.showRaw(gs2));
 }
 

@@ -1,0 +1,3 @@
+# typed: strict
+# assert-fast-path: string_literal_change.rb
+A = ["baar"] # error: Constants must have type annotations with `T.let` when specifying `# typed: strict`

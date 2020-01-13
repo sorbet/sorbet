@@ -124,6 +124,10 @@ class Sorbet::Private::HiddenMethodFinder
         # Make sure we don't load a sorbet/config in your cwd
         '--no-config',
         '--print=symbol-table-full-json',
+        # The hidden-definition serializer is not smart enough to put T::Enum
+        # constants it discovers inside an `enums do` block. We probably want
+        # to come up with a better long term solution here.
+        '--error-black-list=3506',
         # Method redefined with mismatched argument is ok since sometime
         # people monkeypatch over method
         '--error-black-list=4010',
@@ -191,6 +195,9 @@ class Sorbet::Private::HiddenMethodFinder
     ret = []
 
     rbi.each do |rbi_entry|
+      # skip duplicated constant fields
+      next if rbi_entry["name"]["kind"] == "UNIQUE" and rbi_entry["name"]["unique"] == "MANGLE_RENAME"
+
       source_entry = source_by_name[rbi_entry["name"]["name"]]
 
       ret << serialize_alias(source_entry, rbi_entry, klass, source_symbols, rbi_symbols)
@@ -201,7 +208,7 @@ class Sorbet::Private::HiddenMethodFinder
   end
 
   def serialize_class(source_entry, rbi_entry, klass, source_symbols, rbi_symbols, source_by_name)
-    return if rbi_entry["kind"] != "CLASS"
+    return if rbi_entry["kind"] != "CLASS_OR_MODULE"
 
     name = rbi_entry["name"]["name"]
     if name.start_with?('<Class:')
@@ -230,7 +237,7 @@ class Sorbet::Private::HiddenMethodFinder
     else
       source_type = source_entry["kind"]
     end
-    if source_type && source_type != "CLASS"
+    if source_type && source_type != "CLASS_OR_MODULE"
       return "# The source says #{real_name(my_klass)} is a #{source_type} but reflection says it is a #{rbi_entry['kind']}"
     end
 

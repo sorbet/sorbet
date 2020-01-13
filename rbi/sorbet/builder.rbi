@@ -4,10 +4,10 @@ class T::Private::Methods::DeclBuilder
   def type_parameters(*params); end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
-  def generated; end
+  def abstract; end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
-  def abstract; end
+  def final; end
 
   sig {returns(T::Private::Methods::DeclBuilder)}
   def implementation; end
@@ -29,9 +29,6 @@ class T::Private::Methods::DeclBuilder
 
   sig {returns(T::Private::Methods::DeclBuilder)}
   def void; end
-
-  sig {params(args: T.untyped).returns(T::Private::Methods::DeclBuilder)}
-  def soft(*args); end
 
   sig {params(args: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def on_failure(*args); end

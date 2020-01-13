@@ -2,7 +2,7 @@
 class A
 end
 
-class << A # error-with-dupes: `class << EXPRESSION` is only supported for `class << self`
+class << A # error: `class << EXPRESSION` is only supported for `class << self`
     def a
         'a'
     end
@@ -17,7 +17,7 @@ class B
 end
 
 $c = Object.new
-class << $c # error-with-dupes: `class << EXPRESSION` is only supported for `class << self`
+class << $c # error: `class << EXPRESSION` is only supported for `class << self`
     def c
         "c"
     end
@@ -61,10 +61,12 @@ class G
     def wrapper
         class << self
             def inner
-                T.reveal_type(self) # error: type: `T.class_of(G)`
+                T.reveal_type(self) # error: type: `G`
             end
         end
-        inner # error: Method `inner` does not exist on `G`
+        inner # this would not be allowed dynamically, but we treat
+              # methods defined within instance methods as instance
+              # methods
     end
     def self.g
         "g"

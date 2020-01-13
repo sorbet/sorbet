@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < ()
+  :"foo"
+
+  :"foo"
+
+  :""
+
+  ::<Magic>.<string-interpolate>("hello_", <self>.name(), "!").intern()
+end

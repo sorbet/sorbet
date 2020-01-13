@@ -100,13 +100,6 @@ unique_ptr<Expression> Rescue::_deepCopy(const Expression *avoid, bool root) con
                                else_->_deepCopy(avoid), ensure->_deepCopy(avoid));
 }
 
-unique_ptr<Expression> Field::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<Field>(loc, symbol);
-}
-
 unique_ptr<Expression> Local::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
@@ -168,9 +161,9 @@ unique_ptr<Expression> Send::_deepCopy(const Expression *avoid, bool root) const
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<Send>(loc, recv->_deepCopy(avoid), fun, deepCopyVec(avoid, args),
-                             block == nullptr ? nullptr
-                                              : unique_ptr<Block>(cast_tree<Block>(block->_deepCopy(avoid).release())));
+    return make_unique<Send>(
+        loc, recv->_deepCopy(avoid), fun, deepCopyVec(avoid, args),
+        block == nullptr ? nullptr : unique_ptr<Block>(cast_tree<Block>(block->_deepCopy(avoid).release())), flags);
 }
 
 unique_ptr<Expression> Cast::_deepCopy(const Expression *avoid, bool root) const {

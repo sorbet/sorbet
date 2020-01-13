@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < ()
+  def test_strings<<C <todo sym>>>(&<blk>)
+    begin
+      ""
+      "foo"
+      ::<Magic>.<string-interpolate>("foo", 1)
+    end
+  end
+end

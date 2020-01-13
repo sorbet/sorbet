@@ -1,8 +1,8 @@
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
-     4 |    raise "hi"
+     .. |    raise "hi"
             ^^^^^^^^^^
   Did you mean to `include Kernel` in this module?
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L870: Did you mean: `Kernel#raise`?
-     870 |  def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
+    ...: `Kernel#raise`?
+    .. |  def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

@@ -1,0 +1,10 @@
+{
+ "files": [
+  {
+   "path": "test/cli/file-table-json/file-table-json.rb",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Max"
+  }
+ ]
+}

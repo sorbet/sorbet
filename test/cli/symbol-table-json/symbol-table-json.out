@@ -5,23 +5,25 @@ No errors! Great job.
   "kind": "CONSTANT",
   "name": "\u003croot\u003e"
  },
- "kind": "CLASS",
- "superClass": 6,
+ "kind": "CLASS_OR_MODULE",
+ "id": <redacted>,
  "children": [
   {
    "id": <redacted>,
    "name": {
     "kind": "UNIQUE",
-    "name": "\u003cClass:\u003croot\u003e\u003e"
+    "name": "\u003cClass:\u003croot\u003e\u003e",
+    "unique": "SINGLETON"
    },
-   "kind": "CLASS",
-   "superClass": 96,
+   "kind": "CLASS_OR_MODULE",
+   "id": <redacted>,
    "children": [
     {
      "id": <redacted>,
      "name": {
       "kind": "UNIQUE",
-      "name": "\u003cstatic-init\u003e"
+      "name": "\u003cstatic-init\u003e",
+      "unique": "NAMER"
      },
      "kind": "METHOD",
      "arguments": [
@@ -42,17 +44,18 @@ No errors! Great job.
     "kind": "CONSTANT",
     "name": "A"
    },
-   "kind": "CLASS",
-   "superClass": 6
+   "kind": "CLASS_OR_MODULE",
+   "id": <redacted>
   },
   {
    "id": <redacted>,
    "name": {
     "kind": "UNIQUE",
-    "name": "\u003cClass:A\u003e"
+    "name": "\u003cClass:A\u003e",
+    "unique": "SINGLETON"
    },
-   "kind": "CLASS",
-   "superClass": 96,
+   "kind": "CLASS_OR_MODULE",
+   "id": <redacted>,
    "children": [
     {
      "id": <redacted>,
@@ -80,7 +83,7 @@ No errors! Great job.
     "name": "B"
    },
    "kind": "STATIC_FIELD",
-   "aliasTo": 10940
+   "aliasTo": <redacted>
   }
  ]
 }

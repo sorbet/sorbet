@@ -44,10 +44,10 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
   end
 
   it 'type check hash field correspondingly' do
-    assert_raises(T::Props::InvalidValueError) do
+    assert_raises(TypeError) do
       StructWithPredefinedHash.new(hash_field1: {a: 'foo', b: 200}, hash_field2: {a: 100, b: 200})
     end
-    assert_raises(T::Props::InvalidValueError) do
+    assert_raises(TypeError) do
       StructWithPredefinedHash.new(hash_field1: {a: 100, b: 200}, hash_field2: {a: 'foo', b: 200})
     end
   end

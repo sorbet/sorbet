@@ -3,7 +3,9 @@
 
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "configatron.h"
+#include "core/errors/namer.h"
 #include <cctype>
 #include <sys/types.h>
 #include <utility>
@@ -63,14 +65,14 @@ struct Path {
 
     Path(Path *parent, string selector) : parent(parent), selector(move(selector)){};
 
-    string toString() {
+    string toString() const {
         if (parent) {
             return parent->toString() + "." + selector;
         };
         return selector;
     }
 
-    string show(core::GlobalState &gs) {
+    string show(core::GlobalState &gs) const {
         fmt::memory_buffer buf;
         if (myType) {
             fmt::format_to(buf, "{} -> {}", toString(), myType->toString(gs));
@@ -173,7 +175,15 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
 }
 
 void handleFile(core::GlobalState &gs, const string &file, shared_ptr<Path> rootNode) {
-    YAML::Node config = YAML::LoadFile(file);
+    YAML::Node config;
+    try {
+        config = YAML::LoadFile(file);
+    } catch (YAML::ParserException &ex) {
+        if (auto e = gs.beginError(core::Loc::none(), core::errors::Namer::YAMLSyntaxError)) {
+            e.setHeader("YAML syntax error parsing file {}: {}", file, ex.msg);
+        }
+        return;
+    }
     switch (config.Type()) {
         case YAML::NodeType::Map:
             for (const auto &child : config) {

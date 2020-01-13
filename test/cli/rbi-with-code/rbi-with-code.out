@@ -1,12 +1,24 @@
 test/cli/rbi-with-code/rbi-with-code.rbi:2: RBI methods must not have code https://srb.help/3010
      2 |  1
           ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/rbi-with-code/rbi-with-code.rbi:2: Delete
+     2 |  1
+          ^
 
 test/cli/rbi-with-code/rbi-with-code.rbi:6: RBI methods must not have code https://srb.help/3010
      6 |  1
           ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/rbi-with-code/rbi-with-code.rbi:6: Delete
+     6 |  1
+     7 |  2
 
 test/cli/rbi-with-code/rbi-with-code.rbi:7: RBI methods must not have code https://srb.help/3010
      7 |  2
           ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/rbi-with-code/rbi-with-code.rbi:6: Delete
+     6 |  1
+     7 |  2
 Errors: 3

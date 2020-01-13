@@ -1,0 +1,5 @@
+s(:assign,
+  s(:lvasgn, :foo),
+  s(:array,
+    s(:lvar, :bar),
+    s(:int, "1")))

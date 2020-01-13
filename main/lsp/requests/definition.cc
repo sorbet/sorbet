@@ -4,60 +4,54 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) {
-    if (loc.file().exists()) {
-        locs.push_back(loc2Location(gs, loc));
+void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {
+    auto location = config->loc2Location(gs, loc);
+    if (location != nullptr) {
+        locs.push_back(std::move(location));
     }
 }
 
-LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs, const MessageId &id,
-                                                const TextDocumentPositionParams &params) {
+unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypecheckerDelegate &typechecker,
+                                                                  const MessageId &id,
+                                                                  const TextDocumentPositionParams &params) const {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
-    if (!opts.lspGoToDefinitionEnabled) {
-        response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                       "The `Go To Definition` LSP feature is experimental and disabled by default.");
-        return LSPResult::make(move(gs), move(response));
-    }
-
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
-    auto result = setupLSPQueryByLoc(move(gs), params.textDocument->uri, *params.position,
-                                     LSPMethod::TextDocumentDefinition, true);
-    if (auto run = get_if<TypecheckRun>(&result)) {
-        gs = move(run->gs);
-        auto &queryResponses = run->responses;
+    const core::GlobalState &gs = typechecker.state();
+    auto result =
+        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentDefinition, false);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+    } else {
+        auto &queryResponses = result.responses;
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
+            const bool fileIsTyped =
+                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
-            if (resp->isIdent() || resp->isConstant() || resp->isLiteral()) {
+            // Only support go-to-definition on constants and fields in untyped files.
+            if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
                 auto retType = resp->getTypeAndOrigins();
                 for (auto &originLoc : retType.origins) {
-                    addLocIfExists(*gs, result, originLoc);
+                    addLocIfExists(gs, result, originLoc);
                 }
-            } else if (auto defResp = resp->isDefinition()) {
-                result.push_back(loc2Location(*gs, defResp->termLoc));
-            } else if (auto sendResp = resp->isSend()) {
+            } else if (fileIsTyped && resp->isDefinition()) {
+                addLocIfExists(gs, result, resp->isDefinition()->termLoc);
+            } else if (fileIsTyped && resp->isSend()) {
+                auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
-                        addLocIfExists(*gs, result, start->main.method.data(*gs)->loc());
+                        addLocIfExists(gs, result, start->main.method.data(gs)->loc());
                     }
                     start = start->secondary.get();
                 }
             }
         }
-
         response->result = move(result);
-    } else if (auto error = get_if<pair<unique_ptr<ResponseError>, unique_ptr<core::GlobalState>>>(&result)) {
-        // An error happened while setting up the query.
-        response->error = move(error->first);
-        gs = move(error->second);
-    } else {
-        // Should never happen, but satisfy the compiler.
-        ENFORCE(false, "Internal error: setupLSPQueryByLoc returned invalid value.");
     }
-    return LSPResult::make(move(gs), move(response));
+    return response;
 }
 
 } // namespace sorbet::realmain::lsp

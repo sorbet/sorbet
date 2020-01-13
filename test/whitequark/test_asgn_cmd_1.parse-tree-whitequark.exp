@@ -1,0 +1,6 @@
+s(:assign,
+  s(:lvasgn, :foo),
+  s(:assign,
+    s(:lvasgn, :bar),
+    s(:send, nil, :m,
+      s(:lvar, :foo))))

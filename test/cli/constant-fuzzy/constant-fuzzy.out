@@ -1,40 +1,76 @@
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L99: Did you mean: `Enumerator::Yielder`?
-    99 |class Enumerator::Yielder < Object
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
-     3 |class Ripper
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Enumerator::Yielder`
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Ripper`
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Fiber`
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L660: Did you mean: `Enumerator::Yielder`?
+     660 |class Enumerator::Yielder < Object
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L78: Did you mean: `Ripper`?
+    78 |class Ripper
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L3: Did you mean: `Fiber`?
-     3 |class Fiber < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L67: Did you mean: `Fiber`?
+    67 |class Fiber < Object
         ^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date.rbi#L3: Did you mean: `Date`?
-     3 |class Date
-        ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L3: Did you mean: `Integer`?
-     3 |class Integer < Numeric
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Date`
+     3 |Yieldr.foo(Intege, Int)
+                   ^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Integer`
+     3 |Yieldr.foo(Intege, Int)
+                   ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date.rbi#L159: Did you mean: `Date`?
+     159 |class Date
+          ^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L8: Did you mean: `Integer`?
+     8 |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L3: Did you mean: `IO`?
-     3 |class IO < Object
-        ^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `IO`
+     3 |Yieldr.foo(Intege, Int)
+                           ^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Net`
+     3 |Yieldr.foo(Intege, Int)
+                           ^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Set`
+     3 |Yieldr.foo(Intege, Int)
+                           ^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L116: Did you mean: `IO`?
+     116 |class IO < Object
+          ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
      6 |module Net
         ^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L3: Did you mean: `Set`?
-     3 |class Set < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L58: Did you mean: `Set`?
+    58 |class Set < Object
         ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002
+     7 |module A::B; Constant; end
+                     ^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:7: Replace with `A::Constant`
      7 |module A::B; Constant; end
                      ^^^^^^^^
     test/cli/constant-fuzzy/constant-fuzzy.rb:5: Did you mean: `A::Constant`?

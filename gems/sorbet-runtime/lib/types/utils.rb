@@ -4,7 +4,9 @@
 module T::Utils
   # Used to convert from a type specification to a `T::Types::Base`.
   def self.coerce(val)
-    if val.is_a?(T::Types::Base)
+    if val.is_a?(T::Private::Types::TypeAlias)
+      val.aliased_type
+    elsif val.is_a?(T::Types::Base)
       val
     elsif val == ::Array
       T::Array[T.untyped]
@@ -26,6 +28,11 @@ module T::Utils
       T::Types::FixedHash.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(T::Private::Methods::DeclBuilder)
       T::Private::Methods.finalize_proc(val.decl)
+    elsif val.is_a?(::T::Enum)
+      T::Types::TEnum.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+    elsif val.is_a?(::String)
+      raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+            "class/module, or an array. Got a String with value `#{val}`."
     else
       raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
             "class/module, or an array. Got a `#{val.class}`."
@@ -74,12 +81,22 @@ module T::Utils
     T::Private::Methods.run_all_sig_blocks
   end
 
+  # Return the underlying type for a type alias. Otherwise returns type.
+  def self.resolve_alias(type)
+    case type
+    when T::Private::Types::TypeAlias
+      type.aliased_type
+    else
+      type
+    end
+  end
+
   # Give a type which is a subclass of T::Types::Base, determines if the type is a simple nilable type (union of NilClass and something else).
   # If so, returns the T::Types::Base of the something else. Otherwise, returns nil.
   def self.unwrap_nilable(type)
     case type
     when T::Types::Union
-      non_nil_types = type.types.reject {|t| t == T::Utils.coerce(NilClass)}
+      non_nil_types = type.types.reject {|t| t == Nilable::NIL_TYPE}
       if non_nil_types.length == 1
         non_nil_types.first
       else
@@ -139,6 +156,8 @@ module T::Utils
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.
     TypeInfo = Struct.new(:is_union_type, :non_nilable_type)
 
+    NIL_TYPE = T::Utils.coerce(NilClass)
+
     def self.get_type_info(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = T::Utils.unwrap_nilable(prop_type)
@@ -174,7 +193,7 @@ module T::Utils
     def self.is_union_with_nilclass(prop_type)
       case prop_type
       when T::Types::Union
-        prop_type.types.any? {|t| t == T::Utils.coerce(NilClass)}
+        prop_type.types.include?(NIL_TYPE)
       else
         false
       end

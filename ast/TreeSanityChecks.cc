@@ -71,10 +71,6 @@ void Hash::_sanityCheck() {
     ENFORCE(keys.size() == values.size());
 }
 
-void Field::_sanityCheck() {
-    ENFORCE(symbol.exists());
-}
-
 void If::_sanityCheck() {
     ENFORCE(cond);
     ENFORCE(thenp);

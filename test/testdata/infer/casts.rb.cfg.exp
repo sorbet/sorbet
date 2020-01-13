@@ -1,4 +1,22 @@
 digraph "casts.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(TestCasts) = alias <C TestCasts>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$6: T.class_of(TestCasts))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::TestCasts#untyped" {
     label = "::TestCasts#untyped";
     color = blue;
@@ -6,12 +24,12 @@ subgraph "cluster_::TestCasts#untyped" {
     "bb::TestCasts#untyped_1" [shape = parallelogram];
 
     "bb::TestCasts#untyped_0" [
-        label = "block[id=0]()\l<self>: TestCasts = cast(<self>: NilClass, TestCasts);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestCasts = cast(<self>: NilClass, TestCasts);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestCasts#untyped_0" -> "bb::TestCasts#untyped_1" [style="bold"];
     "bb::TestCasts#untyped_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestCasts#untyped_1" -> "bb::TestCasts#untyped_1" [style="bold"];
@@ -24,15 +42,33 @@ subgraph "cluster_::TestCasts#test_casts" {
     "bb::TestCasts#test_casts_1" [shape = parallelogram];
 
     "bb::TestCasts#test_casts_0" [
-        label = "block[id=0]()\l<self>: TestCasts = cast(<self>: NilClass, TestCasts);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: T.untyped = <self>: TestCasts.untyped()\lt: Integer = cast(<castTemp>$7: T.untyped, Integer);\l<statTemp>$11: Integer(4) = 4\l<statTemp>$9: Integer = t: Integer.+(<statTemp>$11: Integer(4))\l<statTemp>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$15: T.class_of(Integer) = alias <C Integer>\l<statTemp>$13: Sorbet::Private::Static::Void = <statTemp>$14: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$15: T.class_of(Integer))\l<castTemp>$16: String(\"hi\") = \"hi\"\lt1: Integer = cast(<castTemp>$16: String(\"hi\"), Integer);\l<statTemp>$19: Integer(1) = 1\l<statTemp>$17: Integer = t1: Integer.+(<statTemp>$19: Integer(1))\l<statTemp>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$21: Sorbet::Private::Static::Void = <statTemp>$22: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$23: T.class_of(String))\l<castTemp>$24: T.untyped = <self>: TestCasts.untyped()\ls: String = cast(<castTemp>$24: T.untyped, String);\l<statTemp>$28: String(\"hi\") = \"hi\"\l<statTemp>$26: String = s: String.+(<statTemp>$28: String(\"hi\"))\l<statTemp>$31: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$32: T.class_of(String) = alias <C String>\l<statTemp>$30: Sorbet::Private::Static::Void = <statTemp>$31: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$32: T.class_of(String))\l<castTemp>$33: Integer(6) = 6\ls: String = cast(<castTemp>$33: Integer(6), String);\l<statTemp>$36: String(\"hi\") = \"hi\"\l<statTemp>$34: String = s: String.+(<statTemp>$36: String(\"hi\"))\l<statTemp>$39: Integer(3) = 3\l<statTemp>$37: String = s: String.+(<statTemp>$39: Integer(3))\l<statTemp>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$43: T.class_of(Integer) = alias <C Integer>\l<statTemp>$41: Sorbet::Private::Static::Void = <statTemp>$42: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$43: T.class_of(Integer))\l<castTemp>$44: Integer(6) = 6\ls: Integer = cast(<castTemp>$44: Integer(6), Integer);\l<statTemp>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: T.class_of(T) = alias <C T>\l<statTemp>$48: T.untyped = <statTemp>$49: T.class_of(T).untyped()\l<statTemp>$46: Sorbet::Private::Static::Void = <statTemp>$47: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$48: T.untyped)\l<castTemp>$50: Integer(6) = 6\ls: T.untyped = cast(<castTemp>$50: Integer(6), T.untyped);\l<statTemp>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$54: Integer(7) = 7\l<statTemp>$52: Sorbet::Private::Static::Void = <statTemp>$53: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$54: Integer(7))\l<castTemp>$55: Integer(6) = 6\ls: T.untyped = cast(<castTemp>$55: Integer(6), T.untyped);\l<statTemp>$58: String(\"hi\") = \"hi\"\l<statTemp>$56: T.untyped = s: T.untyped.+(<statTemp>$58: String(\"hi\"))\l<statTemp>$60: Integer(3) = 3\l<returnMethodTemp>$2: T.untyped = s: T.untyped.+(<statTemp>$60: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestCasts = cast(<self>: NilClass, TestCasts);\l<statTemp>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$6: T.class_of(Integer))\l<castTemp>$7: T.untyped = <self>: TestCasts.untyped()\lt: Integer = cast(<castTemp>$7: T.untyped, Integer);\l<statTemp>$11: Integer(4) = 4\l<statTemp>$9: Integer = t: Integer.+(<statTemp>$11: Integer(4))\l<statTemp>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$15: T.class_of(Integer) = alias <C Integer>\l<statTemp>$13: Sorbet::Private::Static::Void = <statTemp>$14: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$15: T.class_of(Integer))\l<castTemp>$16: String(\"hi\") = \"hi\"\lt1: Integer = cast(<castTemp>$16: String(\"hi\"), Integer);\l<statTemp>$19: Integer(1) = 1\l<statTemp>$17: Integer = t1: Integer.+(<statTemp>$19: Integer(1))\l<statTemp>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$21: Sorbet::Private::Static::Void = <statTemp>$22: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$23: T.class_of(String))\l<castTemp>$24: T.untyped = <self>: TestCasts.untyped()\ls: String = cast(<castTemp>$24: T.untyped, String);\l<statTemp>$28: String(\"hi\") = \"hi\"\l<statTemp>$26: String = s: String.+(<statTemp>$28: String(\"hi\"))\l<statTemp>$31: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$32: T.class_of(String) = alias <C String>\l<statTemp>$30: Sorbet::Private::Static::Void = <statTemp>$31: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$32: T.class_of(String))\l<castTemp>$33: Integer(6) = 6\ls: String = cast(<castTemp>$33: Integer(6), String);\l<statTemp>$36: String(\"hi\") = \"hi\"\l<statTemp>$34: String = s: String.+(<statTemp>$36: String(\"hi\"))\l<statTemp>$39: Integer(3) = 3\l<statTemp>$37: String = s: String.+(<statTemp>$39: Integer(3))\l<statTemp>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$43: T.class_of(Integer) = alias <C Integer>\l<statTemp>$41: Sorbet::Private::Static::Void = <statTemp>$42: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$43: T.class_of(Integer))\l<castTemp>$44: Integer(6) = 6\ls: Integer = cast(<castTemp>$44: Integer(6), Integer);\l<statTemp>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: T.class_of(T) = alias <C T>\l<statTemp>$48: T.untyped = <statTemp>$49: T.class_of(T).untyped()\l<statTemp>$46: Sorbet::Private::Static::Void = <statTemp>$47: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$48: T.untyped)\l<castTemp>$50: Integer(6) = 6\ls: T.untyped = cast(<castTemp>$50: Integer(6), T.untyped);\l<statTemp>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$54: Integer(7) = 7\l<statTemp>$52: Sorbet::Private::Static::Void = <statTemp>$53: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$54: Integer(7))\l<castTemp>$55: Integer(6) = 6\ls: T.untyped = cast(<castTemp>$55: Integer(6), T.untyped);\l<statTemp>$58: String(\"hi\") = \"hi\"\l<statTemp>$56: T.untyped = s: T.untyped.+(<statTemp>$58: String(\"hi\"))\l<statTemp>$60: Integer(3) = 3\l<returnMethodTemp>$2: T.untyped = s: T.untyped.+(<statTemp>$60: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestCasts#test_casts_0" -> "bb::TestCasts#test_casts_1" [style="bold"];
     "bb::TestCasts#test_casts_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::TestCasts#test_casts_1" -> "bb::TestCasts#test_casts_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:TestCasts>#<static-init>" {
+    label = "::<Class:TestCasts>#<static-init>";
+    color = blue;
+    "bb::<Class:TestCasts>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:TestCasts>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:TestCasts>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestCasts) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestCasts>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestCasts>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestCasts>#<static-init>_0" -> "bb::<Class:TestCasts>#<static-init>_1" [style="bold"];
+    "bb::<Class:TestCasts>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:TestCasts>#<static-init>_1" -> "bb::<Class:TestCasts>#<static-init>_1" [style="bold"];
 }
 
 }

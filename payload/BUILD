@@ -28,7 +28,6 @@ cc_library(
         "//core",
         "//core/serialize",
         "//main/options",
-        "//main/pipeline",
         "//payload/binary",
         "//payload/text",
     ],

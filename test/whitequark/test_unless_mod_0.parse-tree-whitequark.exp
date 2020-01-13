@@ -1,0 +1,3 @@
+s(:if,
+  s(:lvar, :foo), nil,
+  s(:lvar, :bar))

@@ -7,6 +7,7 @@
 
 namespace sorbet::core {
 class GlobalState;
+class FileRef;
 class MutableContext;
 
 class Context {
@@ -22,7 +23,7 @@ public:
     Context(const Context &other) noexcept : state(other.state), owner(other.owner) {}
     Context(const MutableContext &other) noexcept;
 
-    bool permitOverloadDefinitions() const;
+    bool permitOverloadDefinitions(FileRef sigLoc) const;
 
     Context withOwner(SymbolRef sym) const;
 
@@ -52,7 +53,7 @@ public:
     // their singleton classes for most purposes)
     SymbolRef selfClass();
 
-    bool permitOverloadDefinitions() const;
+    bool permitOverloadDefinitions(FileRef sigLoc) const;
 
     MutableContext withOwner(SymbolRef sym) const {
         return MutableContext(state, sym);

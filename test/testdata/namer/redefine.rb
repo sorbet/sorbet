@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 extend T::Sig
 
 sig {returns(Integer)}
@@ -33,10 +33,19 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_args(a)
   1
 end
-def wrong_args(a:) # error: redefined with mismatched argument attribute `isKeyword`. Expected: `false`, got: `true`
+def wrong_args(a:) # error: Method `Object#wrong_args` redefined with argument `a` as a keyword argument
   2
 end
 T.reveal_type(wrong_args(a: 2)) # error: Revealed type: `T.untyped`
+
+sig {params(a: Integer).returns(Integer)}
+def wrong_args2(a:)
+  1
+end
+def wrong_args2(a) # error: Method `Object#wrong_args2` redefined with argument `a` as a non-keyword argument
+  2
+end
+T.reveal_type(wrong_args2(a: 2)) # error: Revealed type: `T.untyped`
 
 sig {params(a: Integer).returns(Integer)}
 def wrong_name(a)
@@ -51,10 +60,19 @@ sig {params(a: Integer).returns(Integer)}
 def wrong_repeatedness(a)
   1
 end
-def wrong_repeatedness(*a) # error: redefined with mismatched argument attribute `isRepeated`. Expected: `false`, got: `true`
+def wrong_repeatedness(*a) # error: Method `Object#wrong_repeatedness` redefined with argument `a` as a splat argument
   2
 end
 T.reveal_type(wrong_repeatedness(3)) # error: Revealed type: `T.untyped`
+
+sig {params(a: Integer).returns(Integer)}
+def wrong_repeatedness2(*a)
+  1
+end
+def wrong_repeatedness2(a) # error: Method `Object#wrong_repeatedness2` redefined with argument `a` as a non-splat argument
+  2
+end
+T.reveal_type(wrong_repeatedness2(3)) # error: Revealed type: `T.untyped`
 
 sig {params(a: Integer).returns(Integer)}
 def wrong_blockness(a)

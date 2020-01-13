@@ -1,0 +1,6 @@
+s(:send, nil, :fun,
+  s(:lvar, :foo),
+  s(:splat,
+    s(:lvar, :bar)),
+  s(:block_pass,
+    s(:lvar, :baz)))

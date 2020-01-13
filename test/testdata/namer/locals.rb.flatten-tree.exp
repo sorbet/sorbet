@@ -1,0 +1,42 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::TestLocals)
+        <emptyTree>
+      end
+    end
+  end
+  class ::TestLocals<<C TestLocals>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def method(<blk>)
+      begin
+        a = 1
+        c = 4
+        <self>.proc() do ||
+          begin
+            b$1 = 2
+            a.+(b$1)
+            <self>.proc() do ||
+              b$1.+(c)
+            end
+          end
+        end
+        b = 3
+        <self>.proc() do |a$3; b$3|
+          a$3.+(b$3)
+        end
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

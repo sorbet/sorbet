@@ -10,6 +10,23 @@ message Name {
         CONSTANT = 3;
     };
 
+    enum UniqueKind {
+         NOT_UNIQUE = 0;
+         PARSER = 1;
+         DESUGAR = 2;
+         NAMER = 3;
+         MANGLE_RENAME = 4;
+         SINGLETON = 5;
+         OVERLOAD = 6;
+         TYPE_VAR_NAME = 7;
+         POSITIONAL_ARG = 8;
+         MANGLED_KEYWORD_ARG = 9;
+         RESOLVER_MISSING_CLASS = 10;
+         OPUS_ENUM = 11;
+         DEFAULT_ARG = 12;
+    };
+
     Kind kind = 1;
     string name = 2;
+    UniqueKind unique = 3;
 }

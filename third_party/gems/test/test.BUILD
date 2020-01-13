@@ -1,16 +1,8 @@
+load(":smoke_test.bzl", "smoke_tests")
 
-sh_test(
-    name = "smoke_test",
-    data = [
-        "//bundler:bundle",
-        "vendor/cache/cantor-1.2.1.gem",
-        "Gemfile",
-        "Gemfile.lock",
-    ],
-    deps = [
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-    srcs = [
-        "smoke_test.sh",
-    ]
-)
+# NOTE: these ruby packages are expected to be declared in
+# //third_party/externals.bzl
+smoke_tests([
+    "ruby_2_4_3",
+    "ruby_2_6_3",
+])

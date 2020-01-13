@@ -1,0 +1,2 @@
+default: &default {}
+  test_bool: true

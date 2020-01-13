@@ -1,0 +1,6 @@
+s(:begin,
+  s(:block,
+    s(:send, nil, :lambda),
+    s(:args,
+      s(:arg, :scope)), nil),
+  s(:send, nil, :scope))

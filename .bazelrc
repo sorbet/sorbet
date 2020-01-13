@@ -4,7 +4,6 @@
 
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
-common  --incompatible_package_name_is_a_function=false # https://github.com/protocolbuffers/protobuf/issues/5547
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
@@ -14,7 +13,6 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##  Custom toolchain.
 ##
 build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
-test --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -65,7 +63,7 @@ build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status
 build:release-common --define release=true
 build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
-build:release-common --config=debugsymbols
+build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
 build:release-common --config=versioned
 
@@ -108,26 +106,20 @@ test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
 build:reduce-intermediate-file-size-base --strip=always
 build:reduce-intermediate-file-size-base --copt=-fno-standalone-debug --linkopt=-fno-standalone-debug # used by buildfarm to have less debug information on disk
-build:reduce-intermediate-file-size-base --config=shared-libs
 
 # extend reduce-intermediate-file-size with -Os
-build:reduce-intermediate-file-size --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
-
-build:buildfarm --curses=no --config=reduce-intermediate-file-size
-test:buildfarm --curses=no
+build:buildfarm --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-base
 test:buildfarm --test_output=errors
+
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
-build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm
+build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm --config=shared-libs
 
 build:travis --config=test-sanitized-linux
-build:travis --curses=no
 test:travis --ram_utilization_factor=10
 test:travis --test_strategy=standalone
-test:travis --curses=no
 test:travis --test_output=errors
 
 # this is a variant of buildfarm that doen't specify -Os or any sanitizer flags
-build:buildfarm-ruby --curses=no
 build:buildfarm-ruby --define jemalloc=false
 build:buildfarm-ruby --copt=-O2
 # this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
@@ -137,7 +129,7 @@ build:buildfarm-ruby --nostamp
 build:buildfarm-ruby --define release=false
 build:buildfarm-ruby --config=forcedebug
 build:buildfarm-ruby --config=reduce-intermediate-file-size-base
-test:buildfarm-ruby --curses=no --test_output=errors
+test:buildfarm-ruby --test_output=errors
 
 ##
 ## Shared fragments of configuration
@@ -159,12 +151,9 @@ build:lto-linux --config=lto
 # By default, we make static builds, but we can also use dynamic linking if asked to.
 # Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
 build --define=linkshared=false
+
 build:shared-libs --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
 
-# By default, we make dynamicly linked builds, while release builds are statically linked.
-# Note that dynamic linking is not fully supported by some of our toolchains and thus it may not always work.
-# Still, we try to use it by default as it has lower iteration time in dev
-build --define=linkshared=true --copt=-fPIC --linkopt=-fPIC
 build:static-libs --define=linkshared=false --copt=-fno-PIC --linkopt=-fno-PIC
 build:static-libs --linkopt=-fno-pie --copt=-fno-pie
 
@@ -189,9 +178,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/8.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -211,11 +200,13 @@ build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_
 build:debugsymbols --spawn_strategy=standalone
 build:debugsymbols --genrule_strategy=standalone
 
-build --strip=never
+# simpler & smaller debug symbols. Good enough for backtraces, but not for debugging.
+build:backtracesymbols --copt=-DDEBUG_SYMBOLS --copt=-gline-tables-only
+build:backtracesymbols --linkopt=-DDEBUG_SYMBOLS --linkopt=-gline-tables-only
+build:backtracesymbols --spawn_strategy=standalone
+build:backtracesymbols --genrule_strategy=standalone
 
-# Enable nice UIs. Taken from bazel.rc of Bazel itself.
-common --experimental_ui --experimental_ui_actions_shown 8
-common --show_progress_rate_limit=0.25
+build --strip=never
 
 ##
 ## Fuzzing
@@ -234,7 +225,6 @@ build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=web
 # Use --cpu as a differentiator.
 build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
-build:webasm --config=versioned
 build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3

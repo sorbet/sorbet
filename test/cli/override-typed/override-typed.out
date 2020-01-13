@@ -1,8 +1,30 @@
 test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      1 |1 + "s"
         ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L104: Method `Integer#+` has specified `arg0` as `Integer`
-     104 |        arg0: Integer,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
+     148 |        arg0: Integer,
+                  ^^^^
+  Got String("s") originating from:
+    test/cli/override-typed/override-typed.rb:1:
+     1 |1 + "s"
+            ^^^
+Errors: 1
+./test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+     1 |1 + "s"
+        ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
+     148 |        arg0: Integer,
+                  ^^^^
+  Got String("s") originating from:
+    ./test/cli/override-typed/override-typed.rb:1:
+     1 |1 + "s"
+            ^^^
+Errors: 1
+test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+     1 |1 + "s"
+        ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
+     148 |        arg0: Integer,
                   ^^^^
   Got String("s") originating from:
     test/cli/override-typed/override-typed.rb:1:

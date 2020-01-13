@@ -34,8 +34,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     prop :prop1, T.nilable(String), default: "this is prop 1"
     prop :prop2, T.nilable(Integer), factory: -> {raise "don't call me"}
-    prop     :trueprop, T::Boolean, default: true
-    prop     :falseprop, T::Boolean, default: false
+    prop :trueprop, T::Boolean, default: true
+    prop :falseprop, T::Boolean, default: false
+    prop :factoryprop, T::Boolean, factory: -> {true}
   end
 
   describe ':default and :factory' do
@@ -58,11 +59,21 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       m = DefaultsStruct.from_hash({})
       assert_nil(m.prop2)
     end
+
+    it 'does call default on required prop' do
+      m = DefaultsStruct.from_hash({})
+      assert(m.trueprop)
+    end
+
+    it 'does call factory on required prop' do
+      m = DefaultsStruct.from_hash({})
+      assert(m.factoryprop)
+    end
   end
 
   it 'returns the right required props' do
     assert_equal(
-      Set[:trueprop, :falseprop],
+      Set[:trueprop, :falseprop, :factoryprop],
       DefaultsStruct.decorator.required_props.to_set
     )
   end
@@ -98,7 +109,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'does not call the constructor' do
-      MySerializable.any_instance.expects(:initialize).never
+      MySerializable.any_instance.expects(:new).never
       MySerializable.from_hash({})
     end
   end
@@ -160,9 +171,19 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
-  class MigratingNilFieldModel2 < T::Struct
+  class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
+  end
+
+  class NilFieldWeakConstructor
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+    prop :prop, T.nilable(String), raise_on_nil_write: true
+  end
+
+  class NilDefaultStruct < T::Struct
+    prop :prop, T.nilable(String), raise_on_nil_write: true, default: nil
   end
 
   describe 'raise_on_nil_write' do
@@ -176,17 +197,90 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
     end
 
-    it 'throw exception on nil writes' do
-      foo = MigratingNilFieldModel2.new
-      ex = assert_raises do
+    it 'forbids nil in setter' do
+      struct = NilFieldStruct.new(foo: 1, bar: 'something')
+      ex = assert_raises(TypeError) do
+        struct.foo = nil
+      end
+      assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.foo to nil (instance of NilClass) - need a Integer")
+      ex = assert_raises(TypeError) do
+        struct.bar = nil
+      end
+      assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.bar to nil (instance of NilClass) - need a String")
+    end
+
+    # Is this intended? It seems like the behavior you'd want with T::Props::WeakConstructor,
+    # or perhaps with `default: nil`, but not T::Props::Constructor / T::Struct
+    it 'allows implicit but forbids explicit nil in constructor' do
+      struct = NilFieldStruct.new
+      assert_nil(struct.foo)
+      assert_nil(struct.bar)
+      assert_raises(TypeError) do
+        NilFieldStruct.new(foo: nil, bar: nil)
+      end
+    end
+
+    it 'throws exception on nil serialize' do
+      foo = NilFieldStruct.allocate
+      ex = assert_raises(T::Props::InvalidValueError) do
         foo.serialize
       end
-      assert_includes(ex.message, 'Opus::Types::Test::Props::SerializableTest::MigratingNilFieldModel2.foo not set for non-optional prop')
+      assert_includes(ex.message, 'Opus::Types::Test::Props::SerializableTest::NilFieldStruct.foo not set for non-optional prop')
     end
 
     it 'does not assert when strict=false' do
-      foo = MigratingNilFieldModel2.new
+      foo = NilFieldStruct.allocate
       foo.serialize(false)
+    end
+
+    describe 'with weak constructor' do
+      it 'forbids nil in setter' do
+        struct = NilFieldWeakConstructor.new(prop: 'something')
+        assert_raises(TypeError) do
+          struct.prop = nil
+        end
+      end
+
+      it 'allows implicit but forbids explicit nil in constructor' do
+        struct = NilFieldWeakConstructor.new
+        assert_nil(struct.prop)
+        assert_raises(TypeError) do
+          NilFieldWeakConstructor.new(prop: nil)
+        end
+      end
+
+      it 'throws exception on nil serialize' do
+        struct = NilFieldWeakConstructor.new
+        assert_raises(T::Props::InvalidValueError) do
+          struct.serialize
+        end
+      end
+    end
+
+    describe 'when default is nil' do
+      # Is this intended? It seems like the behavior you'd want with T::Props::WeakConstructor,
+      # not T::Props::Constructor / T::Struct
+      it 'allows nil in constructor' do
+        struct = NilDefaultStruct.new
+        assert_nil(struct.prop)
+        struct = NilDefaultStruct.new(prop: nil)
+        assert_nil(struct.prop)
+      end
+
+      # Is this intended? It doesn't seem like the default should affect the behavior
+      # of the setter
+      it 'allows nil in setter' do
+        struct = NilDefaultStruct.new(prop: 'something')
+        struct.prop = nil
+        assert_nil(struct.prop)
+      end
+
+      it 'throws exception on nil serialize' do
+        struct = NilDefaultStruct.new
+        assert_raises(T::Props::InvalidValueError) do
+          struct.serialize
+        end
+      end
     end
   end
 
@@ -245,6 +339,158 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       refute_nil(b.f2)
       assert_equal('foo', b.f2.foo)
       assert_equal(10, b.f2.bar)
+    end
+  end
+
+  class CustomType
+    extend T::Props::CustomType
+
+    def self.instance?(value)
+      value.is_a?(String)
+    end
+
+    def self.deserialize(value)
+      value.clone.freeze
+    end
+
+    def self.serialize(instance)
+      instance
+    end
+  end
+
+  class CustomTypeStruct < T::Struct
+    prop :single, T.nilable(CustomType)
+    prop :array, T::Array[CustomType], default: []
+    prop :hash_key, T::Hash[CustomType, String], default: {}
+    prop :hash_value, T::Hash[String, CustomType], default: {}
+    prop :hash_both, T::Hash[CustomType, CustomType], default: {}
+  end
+
+  describe 'custom type' do
+    it 'round trips as plain value' do
+      assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
+    end
+
+    it 'round trips as array value' do
+      assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
+    end
+
+    it 'round trips as hash key' do
+      assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_key' => {'foo' => 'bar'}}).serialize['hash_key'])
+    end
+
+    it 'round trips as hash value' do
+      assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_value' => {'foo' => 'bar'}}).serialize['hash_value'])
+    end
+
+    it 'round trips as hash key and value' do
+      assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_both' => {'foo' => 'bar'}}).serialize['hash_both'])
+    end
+  end
+
+  class MyEnum < T::Enum
+    enums do
+      FOO = new
+      BAR = new
+    end
+  end
+
+  class EnumStruct < T::Struct
+    prop :enum, MyEnum
+  end
+
+  describe 'enum' do
+    it 'round trips' do
+      s = EnumStruct.new(enum: MyEnum::FOO)
+      assert_equal(MyEnum::FOO, EnumStruct.from_hash(s.serialize).enum)
+    end
+  end
+
+  class SuperStruct
+    include T::Props::Serializable
+
+    prop :superprop, T.nilable(String)
+  end
+
+  module Mixin
+    include T::Props::Serializable
+    prop :mixinprop, T.nilable(String)
+  end
+
+  # In the style of ActiveSupport::Concern
+  module Concern
+    def self.included(other)
+      other.instance_exec do
+        prop :concernprop, T.nilable(String)
+      end
+    end
+  end
+
+  class SubStruct < SuperStruct
+    include Mixin
+    include Concern
+    prop :subprop, T.nilable(String)
+  end
+
+  describe 'with inheritance' do
+    it 'round trips parent prop' do
+      assert_equal('foo', SubStruct.from_hash('superprop' => 'foo').serialize['superprop'])
+    end
+
+    it 'round trips child prop' do
+      assert_equal('foo', SubStruct.from_hash('subprop' => 'foo').serialize['subprop'])
+    end
+
+    it 'round trips prop from T::Props::Serializable mixin' do
+      assert_equal('foo', SubStruct.from_hash('mixinprop' => 'foo').serialize['mixinprop'])
+    end
+
+    it 'round trips prop from mixin which uses def self.included' do
+      assert_equal('foo', SubStruct.from_hash('concernprop' => 'foo').serialize['concernprop'])
+    end
+  end
+
+  class ReopenedSuperStruct; end
+
+  class ReopenedSuperStruct
+    include T::Props::Serializable
+
+    prop :superprop, T.nilable(String)
+  end
+
+  class ReopenedSubStruct < ReopenedSuperStruct
+    include Mixin
+    include Concern
+  end
+
+  class ReopenedSubStruct < ReopenedSuperStruct
+    prop :subprop, T.nilable(String)
+  end
+
+  describe 'with reopening' do
+    it 'round trips parent prop' do
+      assert_equal('foo', ReopenedSubStruct.from_hash('superprop' => 'foo').serialize['superprop'])
+    end
+
+    it 'round trips child prop' do
+      assert_equal('foo', ReopenedSubStruct.from_hash('subprop' => 'foo').serialize['subprop'])
+    end
+
+    it 'round trips prop from T::Props::Serializable mixin' do
+      assert_equal('foo', ReopenedSubStruct.from_hash('mixinprop' => 'foo').serialize['mixinprop'])
+    end
+
+    it 'round trips prop from mixin which uses def self.included' do
+      assert_equal('foo', ReopenedSubStruct.from_hash('concernprop' => 'foo').serialize['concernprop'])
+    end
+  end
+
+  class NoPropsStruct < T::Struct
+  end
+
+  describe 'struct without props' do
+    it 'round trips' do
+      assert_equal({}, NoPropsStruct.from_hash({}).serialize)
     end
   end
 end

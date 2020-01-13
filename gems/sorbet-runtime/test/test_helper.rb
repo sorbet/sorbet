@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
+# Ideally we might run tests with warnings enabled, but currently this triggers
+# a number of uninitialized instance variable warnings.
+# $VERBOSE = true
+
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'mocha/minitest'
 
 require 'pathname'
+require 'tempfile'
+require 'json'
 
 require_relative '../lib/sorbet-runtime'
 
@@ -38,19 +44,21 @@ module Chalk::Tools::RedactionUtils
     end
   end
 end
-Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias(T.any(
-  T.enum([
-    :redact_digits,
-    :redact_digits_except_last4,
-    :redact_card,
-    :redact_all,
-    :truncate,
-  ]),
-  [T.enum([:truncate]), Integer],
-  [T.enum([:truncate_middle]), Integer, Integer],
-  [T.enum([:redact_middle]), Integer, Integer],
-  [T.enum([:replace]), String],
-))
+Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias do
+  T.any(
+    T.enum([
+      :redact_digits,
+      :redact_digits_except_last4,
+      :redact_card,
+      :redact_all,
+      :truncate,
+    ]),
+    [T.enum([:truncate]), Integer],
+    [T.enum([:truncate_middle]), Integer, Integer],
+    [T.enum([:redact_middle]), Integer, Integer],
+    [T.enum([:replace]), String],
+  )
+end
 
 module Opus::Types; end
 module Opus::Types::Test; end

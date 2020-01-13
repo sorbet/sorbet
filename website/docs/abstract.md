@@ -1,16 +1,14 @@
 ---
 id: abstract
 title: Abstract Classes and Interfaces
+sidebar_label: Abstract Classes & Interfaces
 ---
 
-Sorbet supports abstract classes, abstract methods, and interfaces.
-
-> **Note**: Much of the support for abstract classes, methods, and interfaces is
-> only implemented using the runtime system. Support for these checks in the
-> static system is planned for the future.
-
-Abstract methods ensure that a particular method gets implemented anywhere the
-class or module is inherited, included, or extended.
+Sorbet supports abstract classes, abstract methods, and interfaces. Abstract
+methods ensure that a particular method gets implemented anywhere the class or
+module is inherited, included, or extended. An abstract class or module is one
+that contains one or more abstract methods. An interface is a class or module
+that must have only abstract methods.
 
 Keep in mind:
 
@@ -19,6 +17,9 @@ Keep in mind:
   methods.
 - Mix in a module (via `include` or `extend`) to declare that a class implements
   an interface.
+
+> **Note**: Most of the abstract and override checks are implemented statically,
+> but some are still only implemented at runtime, most notably variance checks.
 
 ## Creating an abstract method
 
@@ -43,21 +44,19 @@ module Runnable
 end
 ```
 
-> **Note**: the class must extend `T::Helpers` to use `abstract!` or
-> `interface!`.
-
 ## Implementing an abstract method
 
-Define the method in the implementing class or module with the same signature as
-the parent, changing `abstract` to `implementation`. Sorbet cannot check types
-on the child, statically or at runtime, unless the signatures match.
+To implement an abstract method, define the method in the implementing class or
+module with an identical signature as the parent, except replacing `abstract`
+with `override`.
 
 ```ruby
 class HelloWorld
   extend T::Sig
   include Runnable
 
-  sig {implementation.params(args: T::Array[String]).void}
+  # This implements the abstract `main` method from our Runnable module:
+  sig {override.params(args: T::Array[String]).void}
   def main(args)
     puts 'Hello, world!'
   end
@@ -66,19 +65,21 @@ end
 
 ## Additional Requirements
 
-Use of `abstract!` and `interface!` requires that:
+There are some additional stipulations on the use of `abstract!` and
+`interface!`:
 
 - All methods in a module marked as `interface!` must have signatures, and must
-  be marked `abstract`
+  be marked `abstract`.
   - **Note**: this applies to all methods defined within the module, as well as
     any that are included from another module
-- The `interface!` can't have `private` or `protected` methods
-- `abstract` methods raise an exception when called in the runtime
+- A module marked `interface!` can't have `private` or `protected` methods.
+- Any method marked `abstract` must have no body. `sorbet-runtime` will take
+  care to raise an exception if an abstract method is called at runtime.
 - Classes without `abstract!` or `interface!` must implement all `abstract`
-  methods from their parents
+  methods from their parents.
 - `extend MyAbstractModule` works just like `include MyAbstractModule`, but for
-  singleton methods
-- `abstract!` classes cannot be instantiated
+  singleton methods.
+- `abstract!` classes cannot be instantiated (will raise at runtime).
 
 ## Abstract singleton methods
 
@@ -96,13 +97,13 @@ module M
   def self.foo; end
 end
 
-M.foo # raises an exception, as M.foo can never be implemented
+M.foo # error: `M.foo` can never be implemented
 ```
 
 ## Interfaces and the `included` hook
 
 A somewhat common pattern in Ruby is to use an `included` hook to mix class
-methods from the module onto the including class:
+methods from a module onto the including class:
 
 ```ruby
 module M
@@ -126,12 +127,14 @@ end
 A.foo
 ```
 
-To be more explicit, Sorbet provides a new construct: `mixes_in_class_methods`.
-At runtime, it behaves just like the above, but statically `srb` will know what
-class methods are being defined.
+This is hard to statically analyze, as it involves looking into the body of the
+`self.included` method, which might have arbitrary computation. As a compromise,
+Sorbet provides a new construct: `mixes_in_class_methods`. At runtime, it
+behaves as if we'd defined `self.included` like above, but will declare to `srb`
+statically what module is being extended.
 
-Updating the previous example to use `mixes_in_class_methods`, Sorbet catches
-the runtime error about `bar` not being defined on `A`.
+We can update our previous example to use `mixes_in_class_methods`, which lets
+Sorbet catch the runtime error about `bar` not being defined on `A`:
 
 ```ruby
 # typed: true
@@ -161,10 +164,23 @@ class A # error: Missing definition for abstract method
 
   extend T::Sig
 
-  sig {implementation.void}
+  sig {override.void}
   def self.bar; end
 end
 
 # Sorbet knows that `foo` is a class method on `A`
 A.foo
 ```
+
+## What's next?
+
+- [Override Checking](override-checking.md)
+
+  Sorbet has more ways to check overriding than just whether an abstract method
+  is implemented in a child. See this doc to learn about the ways to declare
+  what kinds of overriding should be allowed.
+
+- [Sealed Classes and Modules](sealed.md)
+
+  Abstract classes and interfaces are frequently used with sealed classes to
+  recreate a sort of "algebraic data type" in Sorbet.

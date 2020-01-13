@@ -10,13 +10,20 @@ test/cli/incremental-resolver/expect-failures/abstract_impl.rb:5: Malformed `sig
      4 |  sig { overridable.void }
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementation of abstract method `A#foo` must accept *`foo` https://srb.help/5035
+test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Malformed `sig`. Type not specified for argument `foo` https://srb.help/5003
+     123 |  def foo(*foo)end
+                     ^^^
+    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:122: Signature
+     122 |  sig { overridable.void }
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementation of overridable method `A#foo` must accept *`foo` https://srb.help/5035
      126 | def foo; end
            ^^^^^^^
     test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Base method defined here
      123 |  def foo(*foo)end
             ^^^^^^^^^^^^^
-Errors: 2
+Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_override.rb ---------------------
 test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining constant `B` https://srb.help/4012
      3 |module B
@@ -28,31 +35,97 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining
      2 |B = e
         ^
 
-test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Redefining constant `B` https://srb.help/4012
-     110 |B = e
-          ^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:19: Previous definition
-    19 |
-    20 |
-    21 |
-    22 |
-    23 |
-    24 |
-    25 |
-    26 |
-    27 |
-
 test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` https://srb.help/4012
      111 |module B
      112 |  extend T::Sig
      113 |  sig { returns(T.all(B,T)) }
      114 |  def foo; T.unsafe(nil); end
      115 |end
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Previous definition
-     110 |B = e
-          ^
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: Previous definition
+    13 |
+    14 |
 
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
-Errors: 4
+Errors: 3
+----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` https://srb.help/4012
+     4 |  A = nil
+          ^^^^^^^
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Previous definition
+     4 |  A = nil
+          ^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:43: Redefining constant `A` https://srb.help/4012
+    43 |
+    44 |
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Previous definition
+    59 |  A = nil
+          ^^^^^^^
+Errors: 2
+----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type annotation. No method def before next annotation https://srb.help/5040
+     3 |  sig {void}
+          ^^^^^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:4: Type annotation that will be used instead
+     4 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:5: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
+     5 |  def-f
+              ^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Signature
+     3 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:5: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
+     5 |  def-f
+              ^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:4: Signature
+     4 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Unused type annotation. No method def before next annotation https://srb.help/5040
+    68 |  sig {void}
+          ^^^^^^^^^^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Type annotation that will be used instead
+    69 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
+    70 |  def-f
+              ^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Signature
+    68 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `sig`. Type not specified for argument `f` https://srb.help/5003
+    70 |  def-f
+              ^
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Signature
+    69 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    68 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    68 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1491: Did you mean: `Kernel#load`?
+    1491 |  def load(filename, arg0=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    69 |  sig {void}
+          ^^^^^^^^^^
+
+test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    69 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1491: Did you mean: `Kernel#load`?
+    1491 |  def load(filename, arg0=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 10

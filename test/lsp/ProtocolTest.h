@@ -3,8 +3,8 @@
 
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
-#include "common/FileSystem.h"
 #include "main/lsp/wrapper.h"
+#include "test/helpers/MockFileSystem.h"
 
 namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
@@ -15,23 +15,10 @@ struct ExpectedDiagnostic {
     std::string message;
 };
 
-class MockFileSystem final : public FileSystem {
-private:
-    UnorderedMap<std::string, std::string> contents;
-    std::string rootPath;
-
-public:
-    MockFileSystem(std::string_view rootPath);
-    void writeFiles(const std::vector<std::pair<std::string, std::string>> &files);
-    std::string readFile(std::string_view path) const override;
-    void writeFile(std::string_view filename, std::string_view text) override;
-    void deleteFile(std::string_view filename);
-    std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                            bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
-                                            const std::vector<std::string> &relativeIgnorePatterns) const override;
-};
-
-class ProtocolTest : public testing::Test {
+/**
+ * If parameter is 'true', LSP is configured in multithreaded mode.
+ */
+class ProtocolTest : public testing::TestWithParam<bool> {
 protected:
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
@@ -44,27 +31,28 @@ protected:
     // Currently active diagnostics, specifically using map to enforce sort order on filename.
     std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> diagnostics;
     // Emulated file system.
-    std::shared_ptr<MockFileSystem> fs;
+    std::shared_ptr<sorbet::test::MockFileSystem> fs;
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    bool paused = false;
-
-    virtual ~ProtocolTest() = default;
+    ~ProtocolTest() override = default;
 
     void SetUp() override;
 
     /** Get an absolute file URI for the given relative file path. */
     std::string getUri(std::string_view filePath);
 
-    std::vector<std::unique_ptr<LSPMessage>> initializeLSP();
+    std::vector<std::unique_ptr<LSPMessage>>
+    initializeLSP(bool supportsMarkdown = true,
+                  std::optional<std::unique_ptr<SorbetInitializationOptions>> opts = std::nullopt);
 
     std::unique_ptr<LSPMessage> openFile(std::string_view path, std::string_view contents);
 
     std::unique_ptr<LSPMessage> closeFile(std::string_view path);
 
-    std::unique_ptr<LSPMessage> changeFile(std::string_view path, std::string_view newContents, int version);
+    std::unique_ptr<LSPMessage> changeFile(std::string_view path, std::string_view newContents, int version,
+                                           bool cancellationExpected = false);
 
     std::unique_ptr<LSPMessage> documentSymbol(std::string_view path);
 
@@ -86,7 +74,17 @@ protected:
 
     std::vector<std::unique_ptr<LSPMessage>> send(std::vector<std::unique_ptr<LSPMessage>> messages);
 
+    void sendAsyncRaw(const std::string &json);
+
+    void sendAsync(const LSPMessage &message);
+
+    std::unique_ptr<LSPMessage> readAsync();
+
     void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages, std::vector<ExpectedDiagnostic> expected);
+
+    std::string readFile(std::string_view uri);
+
+    std::vector<std::unique_ptr<Location>> getDefinitions(std::string_view uri, int line, int character);
 
     /**
      * ProtocolTest maintains the latest diagnostics for files received over a session, as LSP is not required to
@@ -94,6 +92,7 @@ protected:
      * invokes getLSPResponsesFor on lspWrapper, it should update diagnostics with this function.
      */
     void updateDiagnostics(const std::vector<std::unique_ptr<LSPMessage>> &messages);
+    void updateDiagnostics(const LSPMessage &message);
 };
 
 } // namespace sorbet::test::lsp

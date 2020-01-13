@@ -52,7 +52,7 @@ public:
         if (!f.exists()) {
             return false;
         } else {
-            return file().data(gs).sourceType == File::TombStone;
+            return file().data(gs).sourceType == File::Type::TombStone;
         }
     }
 
@@ -86,9 +86,9 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static u4 pos2Offset(const File &file, Detail pos);
+    static std::optional<u4> pos2Offset(const File &file, Detail pos);
     static Detail offset2Pos(const File &file, u4 off);
-    static Loc fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
+    static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
     std::pair<u4, u4> getAs2u4() const {
         auto low = (((u4)storage.beginLoc) << 8) + ((((u4)storage.fileRef) >> 8) & ((1 << 8) - 1));
         auto high = (((u4)storage.endLoc) << 8) + ((((u4)storage.fileRef)) & ((1 << 8) - 1));

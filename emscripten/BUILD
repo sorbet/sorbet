@@ -49,6 +49,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//main:realmain",
+        "//main/pipeline/semantic_extension:none",
         "//payload/binary:some",
         "//payload/text:empty",
     ],

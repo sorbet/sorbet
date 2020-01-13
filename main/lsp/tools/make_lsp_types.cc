@@ -29,8 +29,9 @@ shared_ptr<FieldDef> makeField(const string jsonName, const string cppName, shar
 }
 
 shared_ptr<JSONObjectType> makeObject(const string name, vector<shared_ptr<FieldDef>> fields,
-                                      vector<shared_ptr<JSONObjectType>> &classTypes) {
-    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields);
+                                      vector<shared_ptr<JSONObjectType>> &classTypes,
+                                      vector<string> extraMethodDefinitions = {}) {
+    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields, extraMethodDefinitions);
     classTypes.push_back(ct);
     return ct;
 }
@@ -91,28 +92,44 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    makeField("line", JSONInt),
                                    makeField("character", JSONInt),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Position &b) const;",
+                                   "std::unique_ptr<Position> copy() const;",
+                               });
 
     auto Range = makeObject("Range",
                             {
                                 makeField("start", Position),
                                 makeField("end", Position),
                             },
-                            classTypes);
+                            classTypes,
+                            {
+                                "// Returns nullptr if loc does not exist",
+                                "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
+                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
+                                "int cmp(const Range &b) const;",
+                                "std::unique_ptr<Range> copy() const;",
+                            });
 
     auto Location = makeObject("Location",
                                {
                                    makeField("uri", JSONString),
                                    makeField("range", Range),
                                },
-                               classTypes);
+                               classTypes,
+                               {
+                                   "int cmp(const Location &b) const;",
+                                   "std::unique_ptr<Location> copy() const;",
+                               });
 
-    auto DiagnosticRelatedInformation = makeObject("DiagnosticRelatedInformation",
-                                                   {
-                                                       makeField("location", Location),
-                                                       makeField("message", JSONString),
-                                                   },
-                                                   classTypes);
+    auto DiagnosticRelatedInformation =
+        makeObject("DiagnosticRelatedInformation",
+                   {
+                       makeField("location", Location),
+                       makeField("message", JSONString),
+                   },
+                   classTypes, {"std::unique_ptr<DiagnosticRelatedInformation> copy() const;"});
 
     auto DiagnosticSeverity =
         makeIntEnum("DiagnosticSeverity", {{"Error", 1}, {"Warning", 2}, {"Information", 3}, {"Hint", 4}}, enumTypes);
@@ -127,7 +144,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("message", JSONString),
                        makeField("relatedInformation", makeOptional(makeArray(DiagnosticRelatedInformation))),
                    },
-                   classTypes);
+                   classTypes, {"std::unique_ptr<Diagnostic> copy() const;"});
 
     auto Command = makeObject("Command",
                               {
@@ -197,16 +214,15 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
-    auto WorkspaceEdit =
-        makeObject("WorkspaceEdit",
-                   {
-                       // Map type (string => TextEdit[]). Unused by sorbet currently.
-                       // makeField("changes", makeArray(JSONAny)),
-                       // Unused in Sorbet currently. Need a variant that can discriminate based on a `kind` field and
-                       // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile | RenameFile
-                       // | DeleteFile)[]) makeField("documentChanges", makeOptional(makeArray(JSONAny))),
-                   },
-                   classTypes);
+    auto WorkspaceEdit = makeObject("WorkspaceEdit",
+                                    {// Map type (string => TextEdit[]). Unused by sorbet currently.
+                                     // makeField("changes", makeArray(JSONAny)),
+                                     // Need a variant that can discriminate based on a `kind` field and
+                                     // the presence of that field. (TextDocumentEdit[] | (TextDocumentEdit | CreateFile
+                                     // | RenameFile | DeleteFile)[]) makeField("documentChanges",
+                                     // makeOptional(makeArray(JSONAny))). What follows is a subset of the true type.
+                                     makeField("documentChanges", makeOptional(makeArray(TextDocumentEdit)))},
+                                    classTypes);
 
     auto TextDocumentIdentifier = makeObject("TextDocumentIdentifier",
                                              {
@@ -570,8 +586,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("completionProvider", makeOptional(CompletionOptions)),
             makeField("signatureHelpProvider", makeOptional(SignatureHelpOptions)),
             makeField("definitionProvider", makeOptional(JSONBool)),
-            makeField("typeDefinitionProvider",
-                      makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
+            makeField("typeDefinitionProvider", makeOptional(JSONBool)),
             makeField("implementationProvider",
                       makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
             makeField("referencesProvider", makeOptional(JSONBool)),
@@ -790,21 +805,24 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 },
                                                 classTypes);
 
-    auto TextDocumentContentChangeEvent = makeObject("TextDocumentContentChangeEvent",
-                                                     {
-                                                         makeField("range", makeOptional(Range)),
-                                                         makeField("rangeLength", makeOptional(JSONInt)),
-                                                         makeField("text", JSONString),
-                                                     },
-                                                     classTypes);
+    auto TextDocumentContentChangeEvent =
+        makeObject("TextDocumentContentChangeEvent",
+                   {
+                       makeField("range", makeOptional(Range)),
+                       makeField("rangeLength", makeOptional(JSONInt)),
+                       makeField("text", JSONString),
+                   },
+                   classTypes, {"std::string apply(std::string_view oldContents) const;"});
 
     auto DidChangeTextDocumentParams =
         makeObject("DidChangeTextDocumentParams",
                    {
                        makeField("textDocument", VersionedTextDocumentIdentifier),
                        makeField("contentChanges", makeArray(TextDocumentContentChangeEvent)),
+                       // Used in tests only.
+                       makeField("sorbetCancellationExpected", makeOptional(JSONBool)),
                    },
-                   classTypes);
+                   classTypes, {"std::string getSource(std::string_view oldFileContents) const;"});
 
     auto TextDocumentChangeRegistrationOptions =
         makeObject("TextDocumentChangeRegistrationOptions",
@@ -1208,6 +1226,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeObject("SorbetInitializationOptions",
                    {
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
+                       makeField("supportsSorbetURIs", makeOptional(JSONBool)),
                        makeField("enableTypecheckInfo", makeOptional(JSONBool)),
                    },
                    classTypes);
@@ -1225,7 +1244,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    classTypes);
 
     // Empty object.
-    auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
+    auto InitializedParams = makeObject("InitializedParams", {}, classTypes,
+                                        {
+                                            "// Contains initialization state from preprocessing step.",
+                                            "LSPFileUpdates updates;",
+                                        });
 
     /* Sorbet LSP extensions */
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
@@ -1253,43 +1276,20 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditType =
-        makeStrEnum("SorbetWorkspaceEditType", {"EditorOpen", "EditorChange", "EditorClose", "FileSystem"}, enumTypes);
-
-    auto editTypeField = makeField("type", SorbetWorkspaceEditType);
-    auto SorbetWorkspaceEdit =
-        makeObject("SorbetWorkspaceEdit",
+    auto SorbetWorkspaceEditParams =
+        makeObject("SorbetWorkspaceEditParams", {}, classTypes,
                    {
-                       editTypeField,
-                       makeField("contents", makeDiscriminatedUnion(editTypeField,
-                                                                    {
-                                                                        {"EditorOpen", DidOpenTextDocumentParams},
-                                                                        {"EditorChange", DidChangeTextDocumentParams},
-                                                                        {"EditorClose", DidCloseTextDocumentParams},
-                                                                        {"FileSystem", WatchmanQueryResponse},
-                                                                    })),
-                   },
-                   classTypes);
+                       "// Contains distilled file updates combined from one or more file update notifications.",
+                       "LSPFileUpdates updates;",
+                   });
 
-    auto SorbetWorkspaceEditCounts = makeObject("SorbetWorkspaceEditCounts",
-                                                {
-                                                    makeField("textDocumentDidOpen", JSONInt),
-                                                    makeField("textDocumentDidChange", JSONInt),
-                                                    makeField("textDocumentDidClose", JSONInt),
-                                                    makeField("sorbetWatchmanFileChange", JSONInt),
-                                                },
-                                                classTypes);
-
-    auto SorbetWorkspaceEditParams = makeObject("SorbetWorkspaceEditParams",
-                                                {
-                                                    makeField("counts", SorbetWorkspaceEditCounts),
-                                                    makeField("changes", makeArray(SorbetWorkspaceEdit)),
-                                                },
-                                                classTypes);
+    auto SorbetTypecheckRunStatus =
+        makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);
 
     auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
                                              {
-                                                 makeField("tookFastPath", JSONBool),
+                                                 makeField("status", SorbetTypecheckRunStatus),
+                                                 makeField("fastPath", JSONBool),
                                                  makeField("filesTypechecked", makeArray(JSONString)),
                                              },
                                              classTypes);
@@ -1299,30 +1299,35 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // All others are ignored.
     auto LSPMethod = makeStrEnum("LSPMethod",
                                  {
+                                     "__PAUSE__",
+                                     "__RESUME__",
                                      "$/cancelRequest",
+                                     "exit",
                                      "initialize",
                                      "initialized",
                                      "shutdown",
-                                     "exit",
-                                     "textDocument/publishDiagnostics",
-                                     "textDocument/didOpen",
+                                     "sorbet/error",
+                                     "sorbet/fence",
+                                     "sorbet/readFile",
+                                     "sorbet/showOperation",
+                                     "sorbet/typecheckRunInfo",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/workspaceEdit",
+                                     "textDocument/codeAction",
+                                     "textDocument/completion",
+                                     "textDocument/definition",
+                                     "textDocument/typeDefinition",
                                      "textDocument/didChange",
                                      "textDocument/didClose",
+                                     "textDocument/didOpen",
+                                     "textDocument/documentHighlight",
                                      "textDocument/documentSymbol",
-                                     "textDocument/definition",
                                      "textDocument/hover",
-                                     "textDocument/completion",
+                                     "textDocument/publishDiagnostics",
                                      "textDocument/references",
                                      "textDocument/signatureHelp",
-                                     "workspace/symbol",
                                      "window/showMessage",
-                                     "__PAUSE__",
-                                     "__RESUME__",
-                                     "sorbet/watchmanFileChange",
-                                     "sorbet/showOperation",
-                                     "sorbet/error",
-                                     "sorbet/workspaceEdit",
-                                     "sorbet/typecheckRunInfo",
+                                     "workspace/symbol",
                                  },
                                  enumTypes);
 
@@ -1331,14 +1336,18 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
         makeDiscriminatedUnion(methodField, {
                                                 {"initialize", InitializeParams},
                                                 {"shutdown", makeOptional(JSONNull)},
+                                                {"textDocument/documentHighlight", TextDocumentPositionParams},
                                                 {"textDocument/documentSymbol", DocumentSymbolParams},
                                                 {"textDocument/definition", TextDocumentPositionParams},
+                                                {"textDocument/typeDefinition", TextDocumentPositionParams},
                                                 {"textDocument/hover", TextDocumentPositionParams},
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/references", ReferenceParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
+                                                {"textDocument/codeAction", CodeActionParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/readFile", TextDocumentIdentifier},
                                             });
     auto RequestMessage =
         makeObject("RequestMessage",
@@ -1348,28 +1357,39 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto requestMethodField = makeField("requestMethod", LSPMethod);
     auto ResponseMessageResultType = makeDiscriminatedUnion(
-        requestMethodField, {
-                                {"initialize", InitializeResult},
-                                {"shutdown", JSONNull},
-                                // DocumentSymbol[] | SymbolInformation[] | null
-                                // Sorbet only uses DocumentSymbol[].
-                                {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
-                                // Location | Location[] | LocationLink[] | null
-                                // Sorbet only uses Location[].
-                                {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
-                                {"textDocument/hover", makeVariant({JSONNull, Hover})},
-                                // CompletionItem[] | CompletionList | null
-                                // Sorbet only sends CompletionList.
-                                {"textDocument/completion", CompletionList},
-                                {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
-                                {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
-                                {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
-                                {"sorbet/error", SorbetErrorParams},
-                            });
+        requestMethodField,
+        {
+            {"initialize", InitializeResult},
+            {"shutdown", JSONNull},
+            // DocumentHighlight[] | null
+            {"textDocument/documentHighlight", makeVariant({JSONNull, makeArray(DocumentHighlight)})},
+            // DocumentSymbol[] | SymbolInformation[] | null
+            // Sorbet only uses DocumentSymbol[].
+            {"textDocument/documentSymbol", makeVariant({JSONNull, makeArray(DocumentSymbol)})},
+            // Location | Location[] | LocationLink[] | null
+            // Sorbet only uses Location[].
+            {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/typeDefinition", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/hover", makeVariant({JSONNull, Hover})},
+            // CompletionItem[] | CompletionList | null
+            // Sorbet only sends CompletionList.
+            {"textDocument/completion", CompletionList},
+            {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
+            // (CodeAction | Command)[] | null
+            // Sorbet only sends CodeAction[].
+            {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
+            // TODO: the following are more correct but I can only get the above to work.
+            // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
+            // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
+            {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
+            {"sorbet/error", SorbetErrorParams},
+            {"sorbet/readFile", TextDocumentItem},
+        });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
-    // Also note that we cannot name this field 'method', as it tricks clients into thinking it's a request rather than
-    // a response.
+    // Also note that we cannot name this field 'method', as it tricks clients into thinking it's a request
+    // rather than a response.
     auto ResponseMessage = makeObject("ResponseMessage",
                                       {makeField("jsonrpc", JSONRPCConstant),
                                        makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
@@ -1392,6 +1412,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/fence", JSONInt},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });

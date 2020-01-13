@@ -1,12 +1,24 @@
-test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/errors/?error=5002
-     4 |    MissingConstant
-            ^^^^^^^^^^^^^^^
+test/cli/error-url/error-url.rb:5: Revealed type: `TrueClass` https://example.com/errors/?error=7014
+     5 |T.reveal_type(true)
+        ^^^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/error-url/error-url.rb:5:
+     5 |T.reveal_type(true)
+                      ^^^^
 Errors: 1
-test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error/5002
-     4 |    MissingConstant
-            ^^^^^^^^^^^^^^^
+test/cli/error-url/error-url.rb:5: Revealed type: `TrueClass` https://example.com/error/7014
+     5 |T.reveal_type(true)
+        ^^^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/error-url/error-url.rb:5:
+     5 |T.reveal_type(true)
+                      ^^^^
 Errors: 1
-test/cli/error-url/error-url.rb:4: Unable to resolve constant `MissingConstant` https://example.com/error#5002
-     4 |    MissingConstant
-            ^^^^^^^^^^^^^^^
+test/cli/error-url/error-url.rb:5: Revealed type: `TrueClass` https://example.com/error#7014
+     5 |T.reveal_type(true)
+        ^^^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/error-url/error-url.rb:5:
+     5 |T.reveal_type(true)
+                      ^^^^
 Errors: 1

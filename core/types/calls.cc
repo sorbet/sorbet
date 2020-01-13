@@ -1,4 +1,6 @@
+#include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
@@ -148,7 +150,7 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
 
     expectedType = Types::replaceSelfType(ctx, expectedType, selfType);
 
-    if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
+    if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible)) {
         return nullptr;
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
@@ -166,9 +168,10 @@ unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc,
         e.addErrorSection(
             ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:", argTpe.origins2Explanations(ctx)));
         auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
-        if (!withoutNil->isBottom() && Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
+        if (!withoutNil->isBottom() &&
+            Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
             if (loc.exists()) {
-                e.replaceWith(loc, "T.must({})", loc.source(ctx));
+                e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -200,7 +203,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
                         bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
+    ENFORCE(ctx.permitOverloadDefinitions(primary.data(ctx)->loc().file()), "overload not permitted here");
     SymbolRef fallback = primary;
     vector<SymbolRef> allCandidates;
 
@@ -210,7 +213,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
         SymbolRef current = primary;
         while (current.data(ctx)->isOverloaded()) {
             i++;
-            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
+            NameRef overloadName = ctx.state.lookupNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
             SymbolRef overload = primary.data(ctx)->owner.data(ctx)->findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
@@ -302,12 +305,47 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     return fallback;
 } // namespace sorbet::core
 
+/**
+ * unwrapType is used to take an expression that's parsed at the value-level,
+ * and turn it into a type. For example, consider the following two expressions:
+ *
+ * > Integer.sqrt 10
+ * > T::Array[Integer].new
+ *
+ * In both lines, `Integer` is initially resolved as the singleton class of
+ * `Integer`. This is because it's not immediately clear if we want to refer
+ * to the type `Integer` or if we want the singleton class of Integer for
+ * calling singleton methods. In the first line this was the correct choice, as
+ * we're just invoking the singleton method `sqrt`. In the second case we need
+ * to fix up the `Integer` sub-expression, and turn it back into the type of
+ * integer values. This is what `unwrapType` does, it turns the value-level
+ * expression back into a type-level one.
+ */
 TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     if (auto *metaType = cast_type<MetaType>(tp.get())) {
         return metaType->wrapped;
     }
+
     if (auto *classType = cast_type<ClassType>(tp.get())) {
+        if (classType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+            // T::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding T::Enum.
+            return tp;
+        }
+
         SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(ctx)->externalType(ctx);
+    }
+
+    if (auto *appType = cast_type<AppliedType>(tp.get())) {
+        SymbolRef attachedClass = appType->klass.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -372,7 +410,7 @@ bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
 }
 
 /**
- * Make an autocorrection for adding `extends T::Helpers`, when needed.
+ * Make an autocorrection for adding `extend T::Helpers`, when needed.
  */
 optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, const Type *thisType,
                                                                  const Loc &call) {
@@ -399,17 +437,22 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
     auto [classStart, classEnd] = classLoc->position(ctx);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
-    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    auto [_, thisLinePadding] = thisLineLoc.findStartOfLine(ctx);
+    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
 
-    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).lineBreaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.findStartOfLine(ctx);
+    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+    return core::AutocorrectSuggestion{
+        "Add `extend T::Helpers`",
+        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
@@ -462,20 +505,21 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->show(ctx), thisStr);
 
-                // catch the special case of `interface!` or `abstract!` and
+                // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
                 // suggest adding `extend T::Helpers`.
-                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract()) {
+                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
+                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed()) {
                     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, thisType, args.locs.call)) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
+                e.replaceWith("Wrap in `T.must`", args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
-                if (symbol.data(ctx)->isClassModule()) {
+                if (symbol.data(ctx)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
-                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassModule()) {
+                    if (objMeth.exists() && objMeth.data(ctx)->owner.data(ctx)->isClassOrModuleModule()) {
                         e.addErrorSection(
                             ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
                                                              objMeth.data(ctx)->owner.data(ctx)->name.show(ctx))));
@@ -486,14 +530,49 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        auto possible_symbol = alternative.symbol.data(ctx);
-                        if (!possible_symbol->isClass() && !possible_symbol->isMethod()) {
+                        auto possibleSymbol = alternative.symbol.data(ctx);
+                        if (!possibleSymbol->isClassOrModule() && !possibleSymbol->isMethod()) {
                             continue;
                         }
-                        auto suggestedName = possible_symbol->isClass() ? alternative.symbol.show(ctx) + ".new"
-                                                                        : alternative.symbol.show(ctx);
-                        lines.emplace_back(
-                            ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?", suggestedName));
+
+                        auto suggestedName = possibleSymbol->isClassOrModule() ? alternative.symbol.show(ctx) + ".new"
+                                                                               : alternative.symbol.show(ctx);
+
+                        bool addedAutocorrect = false;
+                        if (possibleSymbol->isClassOrModule()) {
+                            const auto replacement = possibleSymbol->name.show(ctx);
+                            const auto loc = args.locs.call;
+                            const auto toReplace = args.name.toString(ctx);
+                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
+                            // it is, this verifies that the methodLoc below exists.
+                            if (absl::StartsWith(loc.source(ctx), toReplace)) {
+                                const auto methodLoc =
+                                    Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
+                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                                              replacement);
+                                addedAutocorrect = true;
+                            }
+                        } else {
+                            const auto replacement = possibleSymbol->name.toString(ctx);
+                            const auto toReplace = args.name.toString(ctx);
+                            if (replacement != toReplace) {
+                                const auto loc = args.locs.receiver;
+                                // See comment above.
+                                if (absl::StartsWith(args.locs.call.source(ctx),
+                                                     fmt::format("{}.{}", loc.source(ctx), toReplace))) {
+                                    const auto methodLoc =
+                                        Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
+                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
+                                                  replacement);
+                                    addedAutocorrect = true;
+                                }
+                            }
+                        }
+
+                        if (!addedAutocorrect) {
+                            lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx)->loc(),
+                                                               "Did you mean: `{}`?", suggestedName));
+                        }
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }
@@ -757,7 +836,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             blockType = Types::untyped(ctx, method);
         }
 
-        component.blockReturnType = Types::getProcReturnType(ctx, blockType);
+        component.blockReturnType = Types::getProcReturnType(ctx, Types::dropNil(ctx, blockType));
         blockType = constr->isSolved() ? Types::instantiate(ctx, blockType, *constr)
                                        : Types::approximate(ctx, blockType, *constr);
         component.blockPreType = blockType;
@@ -922,16 +1001,19 @@ public:
         if (args.args.empty()) {
             return;
         }
+        const auto loc = args.locs.call;
         if (!args.args[0]->type->isFullyDefined()) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::BareTypeUsage)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(ctx));
             }
             return;
         }
         auto ret = Types::approximateSubtract(ctx, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
-            if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::InvalidCast)) {
+            if (auto e = ctx.state.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(ctx));
+                const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
+                e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(ctx));
             }
         }
         res.returnType = move(ret);
@@ -1017,7 +1099,7 @@ public:
         SymbolRef self = unwrapSymbol(thisType);
         auto singleton = self.data(ctx)->lookupSingletonClass(ctx);
         if (singleton.exists()) {
-            res.returnType = make_type<ClassType>(singleton);
+            res.returnType = singleton.data(ctx)->externalType(ctx);
         } else {
             res.returnType = Types::classClass();
         }
@@ -1100,10 +1182,47 @@ public:
         targs.reserve(attachedClass.data(ctx)->typeMembers().size());
         for (auto mem : attachedClass.data(ctx)->typeMembers()) {
             ++i;
-            if (mem.data(ctx)->isFixed()) {
-                targs.emplace_back(mem.data(ctx)->resultType);
+
+            auto memData = mem.data(ctx);
+
+            auto *memType = cast_type<LambdaParam>(memData->resultType.get());
+            ENFORCE(memType != nullptr);
+
+            if (memData->isFixed()) {
+                // Fixed args are implicitly applied, and won't consume type
+                // arguments from the list that's supplied.
+                targs.emplace_back(memType->upperBound);
             } else if (it != args.args.end()) {
-                targs.emplace_back(unwrapType(ctx, args.locs.args[it - args.args.begin()], (*it)->type));
+                auto loc = args.locs.args[it - args.args.begin()];
+                auto argType = unwrapType(ctx, loc, (*it)->type);
+                bool validBounds = true;
+
+                // Validate type parameter bounds.
+                if (!Types::isSubType(ctx, argType, memType->upperBound)) {
+                    validBounds = false;
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", argStr, memType->upperBound->show(ctx));
+                    }
+                }
+
+                if (!Types::isSubType(ctx, memType->lowerBound, argType)) {
+                    validBounds = false;
+
+                    if (auto e = ctx.state.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                        auto argStr = argType->show(ctx);
+                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(ctx));
+                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", memType->lowerBound->show(ctx), argStr);
+                    }
+                }
+
+                if (validBounds) {
+                    targs.emplace_back(argType);
+                } else {
+                    targs.emplace_back(Types::untypedUntracked());
+                }
+
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
@@ -1299,7 +1418,7 @@ private:
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(ctx, Types::nilClass(), blockType)) {
-            nonNilBlockType = Types::dropSubtypesOf(ctx, blockType, Symbols::NilClass());
+            nonNilBlockType = Types::dropNil(ctx, blockType);
             typeIsNilable = true;
 
             if (nonNilBlockType->isBottom()) {
@@ -1307,7 +1426,7 @@ private:
             }
         }
 
-        NameRef to_proc = core::Names::to_proc();
+        NameRef to_proc = core::Names::toProc();
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<Loc, 2> sendArgLocs;
         CallLocs sendLocs{callLoc, receiverLoc, sendArgLocs};
@@ -1350,7 +1469,7 @@ private:
             return;
         }
 
-        if (dispatchComp.method.data(ctx)->isClass()) {
+        if (dispatchComp.method.data(ctx)->isClassOrModule()) {
             return;
         }
 
@@ -1376,9 +1495,10 @@ private:
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
-        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType)) {
+        if (blockPreType && !Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, blockPreType,
+                                                             UntypedMode::AlwaysCompatible)) {
             ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
-            auto nonNilableBlockType = Types::dropSubtypesOf(ctx, blockPreType, Symbols::NilClass());
+            auto nonNilableBlockType = Types::dropNil(ctx, blockPreType);
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
                 Types::isSubType(ctx, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
@@ -1411,7 +1531,7 @@ private:
         {
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists() && !it->main.method.data(ctx)->isClass()) {
+                if (it->main.method.exists() && !it->main.method.data(ctx)->isClassOrModule()) {
                     const auto &methodArgs = it->main.method.data(ctx)->arguments();
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();
@@ -1420,7 +1540,8 @@ private:
                     auto bspecType = bspec.type;
                     if (bspecType) {
                         // This subtype check is here to discover the correct generic bounds.
-                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType);
+                        Types::isSubTypeUnderConstraint(ctx, *constr, passedInBlockType, bspecType,
+                                                        UntypedMode::AlwaysCompatible);
                     }
                 }
                 it = it->secondary.get();
@@ -1491,7 +1612,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[2]->type, args.locs.call, args.locs.args[2]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
@@ -1556,7 +1677,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(ctx, args.args[3]->type, args.locs.call, args.locs.args[3]);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
@@ -1565,6 +1686,86 @@ public:
                                           args.locs.call, res);
     }
 } Magic_callWithSplatAndBlock;
+
+class Magic_suggestUntypedConstantType : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 1);
+        auto ty = core::Types::widen(ctx, args.args.front()->type);
+        auto loc = args.locs.args[0];
+        if (auto e = ctx.state.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
+            e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                        "# typed: strict");
+            if (!ty->isUntyped() && loc.exists()) {
+                e.replaceWith(fmt::format("Initialize as `{}`", ty->show(ctx)), loc, "T.let({}, {})", loc.source(ctx),
+                              ty->show(ctx));
+            }
+        }
+        res.returnType = move(ty);
+    }
+} Magic_suggestUntypedConstantType;
+
+/**
+ * This is a special version of `new` that will return `T.attached_class`
+ * instead.
+ */
+class Magic_selfNew : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        // args[0] is the Class to create an instance of
+        // args[1..] are the arguments to the constructor
+
+        if (args.args.empty()) {
+            res.returnType = core::Types::untypedUntracked();
+            return;
+        }
+
+        auto selfTy = args.args[0]->type;
+        SymbolRef self = unwrapSymbol(selfTy.get());
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
+        InlinedVector<Loc, 2> sendArgLocs;
+        for (int i = 1; i < args.args.size(); ++i) {
+            sendArgStore.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr returnTy;
+        DispatchResult dispatched;
+        if (!self.data(ctx)->isSingletonClass(ctx)) {
+            // In the case that `self` is not a singleton class, we know that
+            // this was a call to `new` outside of a self context. Dispatch to
+            // an instance method named new, and see what happens.
+            DispatchArgs innerArgs{Names::new_(), sendLocs, sendArgStore, selfTy, selfTy, args.block};
+            dispatched = selfTy->dispatchCall(ctx, innerArgs);
+            returnTy = dispatched.returnType;
+        } else {
+            // Otherwise, we know that this is the proper new intrinsic, and we
+            // should be returning something of type `T.attached_class`
+            auto attachedClass = self.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+            // AttachedClass will only be missing on `T.untyped`
+            ENFORCE(attachedClass.exists());
+
+            auto instanceTy = self.data(ctx)->attachedClass(ctx).data(ctx)->externalType(ctx);
+            DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
+            dispatched = instanceTy->dispatchCall(ctx, innerArgs);
+
+            // The return type from dispatched is ignored, and we return
+            // `T.attached_class` instead.
+            returnTy = make_type<SelfTypeParam>(attachedClass);
+        }
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res.main.errors.clear();
+        res.main = move(dispatched.main);
+        res.returnType = returnTy;
+        res.main.sendTp = returnTy;
+    }
+} Magic_selfNew;
 
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
@@ -1804,12 +2005,53 @@ public:
                 depth = INT64_MAX;
             }
         } else {
-            ENFORCE(args.args.empty(), "Array#flatten passed too many args: {}", args.args.size());
+            // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
+            // don't need to do anything special here
+            return;
         }
 
         res.returnType = Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
     }
 } Array_flatten;
+
+class Array_product : public IntrinsicMethod {
+public:
+    void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(args.args.size() + 1);
+
+        if (auto *ap = cast_type<AppliedType>(thisType)) {
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            unwrappedElems.emplace_back(ap->targs.front());
+        } else if (auto *tuple = cast_type<TupleType>(thisType)) {
+            unwrappedElems.emplace_back(tuple->elementType());
+        } else {
+            // We will have only dispatched to this intrinsic when we knew the receiver.
+            // Did we register this intrinsic on the wrong symbol?
+            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType->show(ctx));
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        for (auto arg : args.args) {
+            auto argTyp = arg->type;
+            if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
+                ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
+                ENFORCE(!ap->targs.empty());
+                unwrappedElems.emplace_back(ap->targs.front());
+            } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
+                unwrappedElems.emplace_back(tuple->elementType());
+            } else {
+                // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
+                res.returnType = Types::untypedUntracked();
+                return;
+            }
+        }
+
+        res.returnType = Types::arrayOf(ctx, TupleType::build(ctx, unwrappedElems));
+    }
+} Array_product;
 
 class Array_compact : public IntrinsicMethod {
 public:
@@ -1847,7 +2089,7 @@ public:
     }
 } Kernel_proc;
 
-class enumerable_to_h : public IntrinsicMethod {
+class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -1862,7 +2104,7 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
         DispatchArgs dispatch{
-            core::Names::enumerable_to_h(), locs, innerArgs, hash, hash, nullptr,
+            core::Names::enumerableToH(), locs, innerArgs, hash, hash, nullptr,
         };
         auto dispatched = hash->dispatchCall(ctx, dispatch);
         for (auto &err : dispatched.main.errors) {
@@ -1871,7 +2113,7 @@ public:
         dispatched.main.errors.clear();
         res.returnType = move(dispatched.returnType);
     }
-} enumerable_to_h;
+} Enumerable_toH;
 
 // statically determine things like `Integer === 3` to be true
 class Module_tripleEq : public IntrinsicMethod {
@@ -1908,60 +2150,64 @@ public:
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
-    {Symbols::T(), true, Names::untyped(), &T_untyped},
-    {Symbols::T(), true, Names::must(), &T_must},
-    {Symbols::T(), true, Names::all(), &T_all},
-    {Symbols::T(), true, Names::any(), &T_any},
-    {Symbols::T(), true, Names::nilable(), &T_nilable},
-    {Symbols::T(), true, Names::revealType(), &T_revealType},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::all(), &T_all},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::any(), &T_any},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
 
-    {Symbols::T(), true, Names::proc(), &T_proc},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
 
-    {Symbols::T_Generic(), false, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::T_Array(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Hash(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Enumerable(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Enumerator(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Range(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::T_Set(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::Object(), false, Names::class_(), &Object_class},
-    {Symbols::Object(), false, Names::singletonClass(), &Object_class},
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
-    {Symbols::Class(), false, Names::new_(), &Class_new},
+    {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
 
-    {Symbols::MagicSingleton(), false, Names::buildHash(), &Magic_buildHash},
-    {Symbols::MagicSingleton(), false, Names::buildArray(), &Magic_buildArray},
-    {Symbols::MagicSingleton(), false, Names::expandSplat(), &Magic_expandSplat},
-    {Symbols::MagicSingleton(), false, Names::callWithSplat(), &Magic_callWithSplat},
-    {Symbols::MagicSingleton(), false, Names::callWithBlock(), &Magic_callWithBlock},
-    {Symbols::MagicSingleton(), false, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
 
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::void_(), &DeclBuilderForProcs_void},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::returns(), &DeclBuilderForProcs_returns},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::params(), &DeclBuilderForProcs_params},
-    {Symbols::DeclBuilderForProcsSingleton(), false, Names::bind(), &DeclBuilderForProcs_bind},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
+     &DeclBuilderForProcs_returns},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::params(), &DeclBuilderForProcs_params},
+    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::bind(), &DeclBuilderForProcs_bind},
 
-    {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
-    {Symbols::Tuple(), false, Names::first(), &Tuple_first},
-    {Symbols::Tuple(), false, Names::last(), &Tuple_last},
-    {Symbols::Tuple(), false, Names::min(), &Tuple_minMax},
-    {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
-    {Symbols::Tuple(), false, Names::to_a(), &Tuple_to_a},
-    {Symbols::Tuple(), false, Names::concat(), &Tuple_concat},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::max(), &Tuple_minMax},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
-    {Symbols::Shape(), false, Names::merge(), &Shape_merge},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
 
-    {Symbols::Array(), false, Names::flatten(), &Array_flatten},
-    {Symbols::Array(), false, Names::compact(), &Array_compact},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
 
-    {Symbols::Kernel(), false, Names::proc(), &Kernel_proc},
-    {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
 
-    {Symbols::Enumerable(), false, Names::to_h(), &enumerable_to_h},
+    {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
-    {Symbols::Module(), false, Names::tripleEq(), &Module_tripleEq},
+    {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
 };
 
 } // namespace sorbet::core

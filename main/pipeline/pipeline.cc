@@ -1,35 +1,43 @@
+#ifdef SORBET_REALMAIN_MIN
+// minimal build to speedup compilation. Remove extra features
+#else
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
+#include "namer/configatron/configatron.h"
+#include "plugin/Plugins.h"
+#include "plugin/SubprocessTextPlugin.h"
 #include <sstream>
-
+#endif
 #include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
+#include "absl/strings/match.h"
+#include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "cfg/proto/proto.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
+#include "common/formatting.h"
+#include "common/sort.h"
+#include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "dsl/dsl.h"
 #include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
-#include "namer/configatron/configatron.h"
+#include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
-#include "plugin/Plugins.h"
-#include "plugin/SubprocessTextPlugin.h"
 #include "resolver/resolver.h"
+#include "rewriter/rewriter.h"
 
 using namespace std;
 
@@ -52,19 +60,16 @@ public:
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+        if (cfg) {
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->typecheck(ctx.state, *cfg, m);
+            }
+        }
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
-        if ((print.CFGJson.enabled || print.CFGProto.enabled) && cfg->shouldExport(ctx.state)) {
-            auto proto = cfg::Proto::toProto(ctx.state, *cfg);
-            if (print.CFGJson.enabled) {
-                string buf = core::Proto::toJSON(proto);
-                print.CFGJson.print(buf);
-            } else {
-                // The proto wire format allows simply concatenating repeated message fields
-                string buf = cfg::Proto::toMulti(proto).SerializeAsString();
-                print.CFGProto.print(buf);
-            }
+        if (print.CFGRaw.enabled) {
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
         return m;
     }
@@ -102,7 +107,7 @@ void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vecto
         return;
     }
     for (auto &tree : trees) {
-        if (tree.file.data(gs).cachedParseTree) {
+        if (tree.file.data(gs).cachedParseTree || tree.file.data(gs).hasParseErrors) {
             continue;
         }
         string fileHashKey = fileKey(gs, tree.file);
@@ -139,21 +144,21 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
-    if (print.Desugared.enabled) {
-        print.Desugared.fmt("{}\n", ast->toStringWithTabs(gs, 0));
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
-    if (print.DesugaredRaw.enabled) {
-        print.DesugaredRaw.fmt("{}\n", ast->showRaw(gs));
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast->showRaw(gs));
     }
     return ast;
 }
 
-unique_ptr<ast::Expression> runDSL(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
+unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
     core::MutableContext ctx(gs, core::Symbols::root());
-    Timer timeit(gs.tracer(), "runDSL", {{"file", (string)file.data(gs).path()}});
+    Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
-    return dsl::DSL::run(ctx, move(ast));
+    return rewriter::Rewriter::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
@@ -163,13 +168,13 @@ ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
 }
 
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
-    return {make_unique<ast::EmptyTree>(), file};
+    return {ast::MK::EmptyTree(), file};
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
 
     Timer timeit(lgs.tracer(), "indexOne");
@@ -189,26 +194,26 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
-            if (!opts.skipDSLPasses) {
-                tree = runDSL(lgs, file, move(tree));
+            if (!opts.skipRewriterPasses) {
+                tree = runRewriter(lgs, file, move(tree));
             }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
             }
         }
-        if (print.DSLTree.enabled) {
-            print.DSLTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
+        if (print.RewriterTree.enabled) {
+            print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
-        if (print.DSLTreeRaw.enabled) {
-            print.DSLTreeRaw.fmt("{}\n", tree->showRaw(lgs));
+        if (print.RewriterTreeRaw.enabled) {
+            print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(lgs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return dslsInlined;
+        rewriten.tree = move(tree);
+        return rewriten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -226,7 +231,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
                                                                           core::GlobalState &gs, core::FileRef file,
                                                                           unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
-    ast::ParsedFile dslsInlined{nullptr, file};
+    ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
     Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", (string)file.data(gs).path()}});
@@ -246,23 +251,26 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyPluginFile(file);
             }
+
+#ifndef SORBET_REALMAIN_MIN
             {
                 Timer timeit(gs.tracer(), "plugins_text");
                 core::MutableContext ctx(gs, core::Symbols::root());
                 core::ErrorRegion errs(gs, file);
+
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
                 resultPluginFiles = move(pluginFiles);
             }
-
-            if (!opts.skipDSLPasses) {
-                tree = runDSL(gs, file, move(tree));
+#endif
+            if (!opts.skipRewriterPasses) {
+                tree = runRewriter(gs, file, move(tree));
             }
-            if (print.DSLTree.enabled) {
-                print.DSLTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
+            if (print.RewriterTree.enabled) {
+                print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
             }
-            if (print.DSLTreeRaw.enabled) {
-                print.DSLTreeRaw.fmt("{}\n", tree->showRaw(gs));
+            if (print.RewriterTreeRaw.enabled) {
+                print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
@@ -276,12 +284,12 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         if (print.IndexTreeRaw.enabled) {
             print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
         }
-        if (opts.stopAfterPhase == options::Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyPluginFile(file);
         }
 
-        dslsInlined.tree = move(tree);
-        return {move(dslsInlined), resultPluginFiles};
+        rewriten.tree = move(tree);
+        return {move(rewriten), resultPluginFiles};
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -294,27 +302,15 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts) {
     try {
-        int i = 0;
-        Timer timeit(gs.tracer(), "incremental_naming");
-        for (auto &tree : what) {
-            auto file = tree.file;
-            try {
-                unique_ptr<ast::Expression> ast;
-                core::MutableContext ctx(gs, core::Symbols::root());
-                gs.tracer().trace("Naming: {}", file.data(gs).path());
-                core::ErrorRegion errs(gs, file);
-                core::UnfreezeSymbolTable symbolTable(gs);
-                core::UnfreezeNameTable nameTable(gs);
-                tree = sorbet::namer::Namer::run(ctx, move(tree));
-                i++;
-            } catch (SorbetException &) {
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                }
-            }
+        core::MutableContext ctx(gs, core::Symbols::root());
+        {
+            Timer timeit(gs.tracer(), "incremental_naming");
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
+            what = sorbet::namer::Namer::run(ctx, move(what));
         }
 
-        core::MutableContext ctx(gs, core::Symbols::root());
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
@@ -352,27 +348,34 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     auto &fileData = file.data(gs);
 
     core::StrictLevel level;
-    auto fnd = opts.strictnessOverrides.find(string(fileData.path()));
-    if (fnd != opts.strictnessOverrides.end()) {
-        if (fnd->second == fileData.originalSigil) {
-            core::ErrorRegion errs(gs, file);
-            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
-                e.setHeader("Useless override of strictness level");
-            }
-        }
-        level = fnd->second;
+    string filePath = string(fileData.path());
+    // make sure all relative file paths start with ./
+    if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
+        filePath.insert(0, "./");
+    }
+
+    if (fileData.originalSigil == core::StrictLevel::None) {
+        level = core::StrictLevel::False;
     } else {
-        if (fileData.originalSigil == core::StrictLevel::None) {
-            level = core::StrictLevel::False;
-        } else {
-            level = fileData.originalSigil;
-        }
+        level = fileData.originalSigil;
     }
 
     core::StrictLevel minStrict = opts.forceMinStrict;
     core::StrictLevel maxStrict = opts.forceMaxStrict;
     if (level <= core::StrictLevel::Max && level > core::StrictLevel::Ignore) {
         level = max(min(level, maxStrict), minStrict);
+    }
+
+    auto fnd = opts.strictnessOverrides.find(filePath);
+    if (fnd != opts.strictnessOverrides.end()) {
+        if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
+            fnd->second < opts.forceMaxStrict) {
+            core::ErrorRegion errs(gs, file);
+            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
+                e.setHeader("Useless override of strictness level");
+            }
+        }
+        level = fnd->second;
     }
 
     if (gs.runningUnderAutogen) {
@@ -420,7 +423,7 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 
 void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
                                      const options::Options &opts) {
-    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::NotYetRead) {
+    if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
@@ -441,7 +444,8 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     {
         core::UnfreezeFileTable unfreezeFiles(*gs);
         auto entered = gs->enterNewFileAt(
-            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Normal), file);
+            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal),
+            file);
         ENFORCE(entered == file);
     }
     if (enable_counters) {
@@ -456,7 +460,7 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     }
 
     if (!opts.storeState.empty()) {
-        fileData.sourceType = core::File::PayloadGeneration;
+        fileData.sourceType = core::File::Type::PayloadGeneration;
     }
 
     auto level = decideStrictLevel(*gs, file, opts);
@@ -665,18 +669,18 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
 }
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
-    ast::ParsedFile result{make_unique<ast::EmptyTree>(), resolved.file};
+    ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = flatten::runOne(ctx, move(resolved));
 
-    if (opts.print.FlattenedTree.enabled) {
-        opts.print.FlattenedTree.fmt("{}\n", resolved.tree->toString(ctx));
+    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
+        opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));
     }
-    if (opts.print.FlattenedTreeRaw.enabled) {
-        opts.print.FlattenedTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
+        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
     }
 
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -691,13 +695,25 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+            opts.print.CFGRaw.fmt("  graph [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  node [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  edge [fontname = \"Courier\"];\n");
+        }
         CFGCollectorAndTyper collector(opts);
         {
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx.state, f);
+            }
         }
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
+        }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("}}\n\n");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -717,39 +733,20 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
                              bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
+#ifndef SORBET_REALMAIN_MIN
         core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
         core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
         namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
+#endif
     }
 
     {
-        ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
-
-        int i = 0;
-        for (auto &tree : what) {
-            auto file = tree.file;
-            try {
-                ast::ParsedFile ast;
-                {
-                    core::MutableContext ctx(gs, core::Symbols::root());
-                    Timer timeit(gs.tracer(), "naming", {{"file", (string)file.data(gs).path()}});
-                    core::ErrorRegion errs(gs, file);
-                    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-                    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                    tree = namer::Namer::run(ctx, move(tree));
-                }
-                gs.errorQueue->flushErrors();
-                namingProgress.reportProgress(i);
-                i++;
-            } catch (SorbetException &) {
-                Exception::failInFuzzer();
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                }
-            }
-        }
+        core::MutableContext ctx(gs, core::Symbols::root());
+        core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+        what = namer::Namer::run(ctx, move(what));
+        gs.errorQueue->flushErrors();
     }
-
     return what;
 }
 class GatherUnresolvedConstantsWalk {
@@ -790,7 +787,8 @@ private:
 
     bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
         return sym.data(ctx)->name == core::Names::staticInit() ||
-               sym.data(ctx)->name == core::Names::Constants::Root();
+               sym.data(ctx)->name == core::Names::Constants::Root() ||
+               sym.data(ctx)->name == core::Names::unresolvedAncestors();
     }
 
     void checkLoc(core::Context ctx, core::Loc loc) {
@@ -831,10 +829,13 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
+ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
         what = name(*gs, move(what), opts, skipConfigatron);
+        if (gs->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
@@ -846,7 +847,7 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         }
 
         if (opts.stopAfterPhase == options::Phase::NAMER) {
-            return what;
+            return ast::ParsedFilesOrCancelled(move(what));
         }
 
         core::MutableContext ctx(*gs, core::Symbols::root());
@@ -860,9 +861,14 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
             }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            what = resolver::Resolver::run(ctx, move(what), workers);
+            auto maybeResult = resolver::Resolver::run(ctx, move(what), workers);
+            if (!maybeResult.hasResult()) {
+                return maybeResult;
+            }
+            what = move(maybeResult.result());
         }
         if (opts.stressIncrementalResolver) {
+            auto symbolsBefore = gs->symbolsUsed();
             for (auto &f : what) {
                 // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no locations
                 // appear before file's old EOF.
@@ -880,6 +886,8 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
                 ENFORCE(reresolved.size() == 1);
                 f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
             }
+            ENFORCE(symbolsBefore == gs->symbolsUsed(),
+                    "Stressing the incremental resolver should not add any new symbols");
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -903,11 +911,11 @@ vector<ast::ParsedFile> resolve(unique_ptr<core::GlobalState> &gs, vector<ast::P
         what = printMissingConstants(*gs, opts, move(what));
     }
 
-    return what;
+    return ast::ParsedFilesOrCancelled(move(what));
 }
 
-vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                  const options::Options &opts, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                      const options::Options &opts, WorkerPool &workers) {
     vector<ast::ParsedFile> typecheck_result;
 
     {
@@ -923,6 +931,10 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
 
         core::Context ctx(*gs, core::Symbols::root());
 
+        // We want to start typeckecking big files first because it helps with better work distribution
+        fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+        });
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
@@ -938,13 +950,16 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
-                            core::FileRef file = job.file;
-                            try {
-                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
-                            } catch (SorbetException &) {
-                                Exception::failInFuzzer();
-                                ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                         file.data(ctx).path());
+                            // Only actually do the work if typechecking hasn't been canceled.
+                            if (!ctx.state.wasTypecheckingCanceled()) {
+                                core::FileRef file = job.file;
+                                try {
+                                    threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                             file.data(ctx).path());
+                                }
                             }
                         }
                     }
@@ -968,7 +983,13 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
                 }
+                if (ctx.state.wasTypecheckingCanceled()) {
+                    return ast::ParsedFilesOrCancelled();
+                }
             }
+        }
+        for (auto &extension : gs->semanticExtensions) {
+            extension->finishTypecheck(*gs);
         }
 
         if (opts.print.SymbolTable.enabled) {
@@ -977,6 +998,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.SymbolTableRaw.enabled) {
             opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
         }
+
+#ifndef SORBET_REALMAIN_MIN
         if (opts.print.SymbolTableJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
@@ -997,12 +1020,15 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
                 opts.print.SymbolTableJson.print(buf.str());
             }
         }
+#endif
         if (opts.print.SymbolTableFull.enabled) {
             opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
         }
         if (opts.print.SymbolTableFullRaw.enabled) {
             opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
         }
+
+#ifndef SORBET_REALMAIN_MIN
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
             if (opts.print.FileTableJson.outputPath.empty()) {
@@ -1016,8 +1042,8 @@ vector<ast::ParsedFile> typecheck(unique_ptr<core::GlobalState> &gs, vector<ast:
         if (opts.print.PluginGeneratedCode.enabled) {
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
-
-        return typecheck_result;
+#endif
+        return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }
 
@@ -1064,7 +1090,7 @@ public:
 
     unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
                                                                   unique_ptr<ast::UnresolvedIdent> id) {
-        if (id->kind != ast::UnresolvedIdent::Local) {
+        if (id->kind != ast::UnresolvedIdent::Kind::Local) {
             acc.constants.emplace_back(ctx.state, id->name.data(ctx));
         }
         return id;
@@ -1097,13 +1123,6 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();
-    for (auto &e : errs) {
-        if (e->what == core::errors::Parser::ParserError) {
-            core::GlobalStateHash invalid;
-            invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
-            return {move(invalid), {}};
-        }
-    }
     auto allNames = getAllNames(*lgs, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);

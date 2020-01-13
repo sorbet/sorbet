@@ -11,5 +11,3 @@ module Opus::Sensitivity::Utils
 end
 
 class Opus::Ownership; end
-
-class Opus::Enum; end

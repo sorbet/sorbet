@@ -1,0 +1,60 @@
+#ifndef SORBET_REWRITER_OPUSENUM_H
+#define SORBET_REWRITER_OPUSENUM_H
+#include "ast/ast.h"
+
+namespace sorbet::rewriter {
+
+/**
+ * This class provides the following features for T::Enum:
+ *
+ * - no need to manually annotate constants in `T.let` for use in strict mode
+ * - support for exhaustiveness checks over enum values (by pretending that
+ *   T::Enum values are actually singleton instances of synthetic classes)
+ * - allows using T::Enum values in type signatures directly.
+ *
+ * Given either:
+ *
+ *   class MyEnum < T::Enum
+ *     X = new
+ *     Y = new('y')
+ *     Z = T.let(new, Z)
+ *   end
+ *
+ *   class MyEnum < T::Enum
+ *     enums do
+ *       X = new
+ *       Y = new('y')
+ *       Z = T.let(new, Z)
+ *     end
+ *   end
+ *
+ * Outputs:
+ *
+ *   class MyEnum < T::Enum
+ *     extend T::Helpers
+ *     sealed!
+ *     abstract!
+ *
+ *     class X$1 < MyEnum; include Singleton; final!; end
+ *     X = T.let(X$1.instance, X$1)
+ *     new
+ *
+ *     class Y$1 < MyEnum; include Singleton; final!; end
+ *     Y = T.let(Y$1.instance, Y$1)
+ *     new('y')
+ *
+ *     class Z$1 < MyEnum; include Singleton; final!; end
+ *     Z = T.let(Z$1.instance, Z$1)
+ *     T.let(new, Z)
+ *   end
+ */
+class TEnum final {
+public:
+    static void run(core::MutableContext ctx, ast::ClassDef *klass);
+
+    TEnum() = delete;
+};
+
+} // namespace sorbet::rewriter
+
+#endif

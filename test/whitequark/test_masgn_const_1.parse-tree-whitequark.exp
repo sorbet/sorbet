@@ -1,0 +1,6 @@
+s(:masgn,
+  s(:mlhs,
+    s(:casgn,
+      s(:cbase), :A),
+    s(:lvasgn, :foo)),
+  s(:lvar, :foo))

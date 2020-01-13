@@ -43,7 +43,7 @@ class Sorbet::Private::RequireEverything
     excluded_paths = Set.new
     excluded_paths += excluded_rails_files if rails?
 
-    abs_paths = Dir.glob("#{Dir.pwd}/**/*.rb")
+    abs_paths = rb_file_paths
     errors = []
     abs_paths.each_with_index do |abs_path, i|
       # Executable files are likely not meant to be required.
@@ -53,7 +53,11 @@ class Sorbet::Private::RequireEverything
       # While this isn't a perfect heuristic for these things, it's pretty good.
       next if File.executable?(abs_path)
       next if excluded_paths.include?(abs_path)
-      next if /^# +typed: +ignore$/.match(File.read(abs_path).scrub)
+
+      # Skip db/schema.rb, as requiring it can wipe the database. This is left
+      # out of exclude_rails_files, as it is possible to use the packages that
+      # generate it without using the whole rails ecosystem.
+      next if /db\/schema.rb$/.match(abs_path)
 
       begin
         my_require(abs_path, i+1, abs_paths.size)
@@ -100,13 +104,42 @@ class Sorbet::Private::RequireEverything
 
   private
 
+  def self.rb_file_paths
+    srb = File.realpath("#{__dir__}/../bin/srb")
+    output = IO.popen([
+      srb,
+      "tc",
+      "-p",
+      "file-table-json",
+      "--stop-after=parser",
+      "--silence-dev-message",
+      "--no-error-count",
+    ]) {|io| io.read}
+    # This returns a hash with structure:
+    # { files:
+    #   [
+    #     {
+    #       "strict": ["Ignore"|"False"|"True"|"Strict"|"Strong"|"Stdlib"],
+    #       "path": "./path/to/file",
+    #       ...
+    #     }
+    #     ...
+    #   ]
+    # }
+    parsed = JSON.parse(output)
+    parsed['files']
+      .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
+      .map{|file| file["path"]}
+      .select{|path| File.file?(path)} # Some files have https:// paths. We ignore those here.
+      .select{|path| /.rb$/.match(path)}
+      .map{|path| File.expand_path(path)} # Requires absolute path
+  end
+
   def self.excluded_rails_files
     excluded_paths = Set.new
 
     # Exclude files that have already been loaded by rails
-    rails = Object.const_get(:Rails)
-    load_paths = rails.application.send(:_all_load_paths)
-    load_paths.each do |path|
+    self.rails_load_paths.each do |path|
       excluded_paths += Dir.glob("#{path}/**/*.rb")
     end
 
@@ -114,6 +147,20 @@ class Sorbet::Private::RequireEverything
     # can contain side-effects like monkey-patching that should
     # only be run once.
     excluded_paths += Dir.glob("#{Dir.pwd}/config/initializers/**/*.rb")
+  end
+
+  def self.rails_load_paths
+    rails = Object.const_get(:Rails)
+
+    # As per changes made to change the arity of this method:
+    # https://github.com/rails/rails/commit/b6e17b6a4b67ccc9fac5fe16741c3db720f00959
+    # This sets the `add_autoload_paths_to_load_path` parameter to `true` which will
+    # provide parity with older versions of Rails prior to the mentioned commit.
+    if Gem::Version.new(rails.version) >= Gem::Version.new('6.0.0.rc2')
+      rails.application.send(:_all_load_paths, true)
+    else
+      rails.application.send(:_all_load_paths)
+    end
   end
 
   def self.rails?

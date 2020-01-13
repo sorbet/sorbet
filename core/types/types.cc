@@ -172,10 +172,22 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
             }
         },
         [&](ClassType *c) {
+            auto cdata = c->symbol.data(ctx);
             if (c->isUntyped()) {
                 result = from;
             } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                 result = Types::bottom();
+            } else if (c->symbol.data(ctx)->isClassOrModuleClass() && klass.data(ctx)->isClassOrModuleClass() &&
+                       !klass.data(ctx)->derivesFrom(ctx, c->symbol)) {
+                // We have two classes (not modules), and if the class we're
+                // removing doesn't derive from `c`, there's nothing to do,
+                // because of ruby having single inheretance.
+                result = from;
+            } else if (cdata->isClassOrModuleSealed() &&
+                       (cdata->isClassOrModuleAbstract() || cdata->isClassOrModuleModule())) {
+                auto subclasses = cdata->sealedSubclassesToUnion(ctx);
+                ENFORCE(!Types::equiv(ctx, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
+                result = dropSubtypesOf(ctx, subclasses, klass);
             } else {
                 result = from;
             }
@@ -202,12 +214,23 @@ TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass)
 }
 
 bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
-    if (what->isUntyped()) {
-        return true;
-    }
-    auto truthyPart =
-        Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, Symbols::NilClass()), Symbols::FalseClass());
-    return !truthyPart->isBottom(); // check if truthyPart is empty
+    bool isTruthy = true;
+    typecase(
+        what.get(), [&](OrType *o) { isTruthy = canBeTruthy(ctx, o->left) || canBeTruthy(ctx, o->right); },
+        [&](AndType *a) { isTruthy = canBeTruthy(ctx, a->left) && canBeTruthy(ctx, a->right); },
+        [&](ClassType *c) {
+            auto sym = c->symbol;
+            isTruthy = sym == core::Symbols::untyped() ||
+                       (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
+        },
+        [&](AppliedType *c) {
+            auto sym = c->klass;
+            isTruthy = sym == core::Symbols::untyped() ||
+                       (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
+        },
+        [&](ProxyType *c) { isTruthy = canBeTruthy(ctx, c->underlying()); }, [&](Type *) { isTruthy = true; });
+
+    return isTruthy;
 }
 
 bool Types::canBeFalsy(Context ctx, const TypePtr &what) {
@@ -255,6 +278,10 @@ TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
     vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(ctx, tupleArgs)};
     return make_type<AppliedType>(Symbols::Hash(), targs);
+}
+
+TypePtr Types::dropNil(Context ctx, const TypePtr &from) {
+    return Types::dropSubtypesOf(ctx, from, Symbols::NilClass());
 }
 
 std::optional<int> Types::getProcArity(const AppliedType &type) {
@@ -506,11 +533,11 @@ bool LiteralType::isFullyDefined() {
 }
 
 bool ShapeType::isFullyDefined() {
-    return true; // might not be true if we support uninstantiated types inside hashes. For now, we don't
+    return absl::c_all_of(values, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
 bool TupleType::isFullyDefined() {
-    return true; // might not be true if we support uninstantiated types inside tuples. For now, we don't
+    return absl::c_all_of(elems, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
 bool AliasType::isFullyDefined() {
@@ -530,8 +557,8 @@ bool OrType::isFullyDefined() {
  * */
 InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<TypePtr> &targs,
                                                      SymbolRef asIf) {
-    ENFORCE(asIf.data(ctx)->isClass());
-    ENFORCE(what.data(ctx)->isClass());
+    ENFORCE(asIf.data(ctx)->isClassOrModule());
+    ENFORCE(what.data(ctx)->isClassOrModule());
     ENFORCE(what == asIf || what.data(ctx)->derivesFrom(ctx, asIf) || asIf.data(ctx)->derivesFrom(ctx, what),
             what.data(ctx)->name.showRaw(ctx), asIf.data(ctx)->name.showRaw(ctx));
     InlinedVector<SymbolRef, 4> currentAlignment;
@@ -539,7 +566,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass() &&
+    if (what == asIf || (asIf.data(ctx)->isClassOrModuleClass() && what.data(ctx)->isClassOrModuleClass() &&
                          asIf.data(ctx)->typeMembers().size() == what.data(ctx)->typeMembers().size())) {
         currentAlignment = what.data(ctx)->typeMembers();
     } else {
@@ -571,8 +598,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
 TypePtr Types::resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                     const vector<TypePtr> &targs) {
     SymbolRef originalOwner = fromWhat;
-    ENFORCE(fromWhat.data(ctx)->isClass());
-    ENFORCE(inWhat.data(ctx)->isClass());
+    ENFORCE(fromWhat.data(ctx)->isClassOrModule());
+    ENFORCE(inWhat.data(ctx)->isClassOrModule());
 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
@@ -602,8 +629,13 @@ TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
     return applied->targs.front();
 }
 
+bool Types::isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2) {
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2,
+                                    UntypedMode::AlwaysIncompatible);
+}
+
 bool Types::isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
 bool TypeVar::isFullyDefined() {
@@ -636,7 +668,7 @@ bool AppliedType::isFullyDefined() {
 }
 
 void AppliedType::_sanityCheck(Context ctx) {
-    ENFORCE(this->klass.data(ctx)->isClass());
+    ENFORCE(this->klass.data(ctx)->isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(ctx)->typeMembers().size() == this->targs.size() ||
@@ -654,7 +686,8 @@ bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return und.derivesFrom(gs, klass);
 }
 
-LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {
+LambdaParam::LambdaParam(const SymbolRef definition, TypePtr lowerBound, TypePtr upperBound)
+    : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
     categoryCounterInc("types.allocated", "lambdatypeparam");
 }
 
@@ -753,7 +786,8 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags) : argFlags(argFlags), fun(fun) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
+    : argFlags(argFlags), fun(fun), rubyBlockId(rubyBlockId) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -829,6 +863,70 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
     return ret;
 }
 
+TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
+    ENFORCE(type != nullptr);
+
+    TypePtr ret;
+
+    typecase(
+        type.get(), [&](ClassType *klass) { ret = type; }, [&](TypeVar *tv) { ret = type; },
+        [&](LambdaParam *tv) { ret = type; }, [&](SelfType *self) { ret = type; },
+        [&](LiteralType *lit) { ret = type; },
+        [&](AndType *andType) {
+            ret =
+                AndType::make_shared(unwrapSelfTypeParam(ctx, andType->left), unwrapSelfTypeParam(ctx, andType->right));
+        },
+        [&](OrType *orType) {
+            ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType->left), unwrapSelfTypeParam(ctx, orType->right));
+        },
+        [&](ShapeType *shape) {
+            std::vector<TypePtr> values;
+            values.reserve(shape->values.size());
+
+            for (auto &value : shape->values) {
+                values.emplace_back(unwrapSelfTypeParam(ctx, value));
+            }
+
+            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys, std::move(values));
+        },
+        [&](TupleType *tuple) {
+            std::vector<TypePtr> elems;
+            elems.reserve(tuple->elems.size());
+
+            for (auto &value : tuple->elems) {
+                elems.emplace_back(unwrapSelfTypeParam(ctx, value));
+            }
+
+            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), std::move(elems));
+        },
+        [&](MetaType *meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta->wrapped)); },
+        [&](AppliedType *appliedType) {
+            vector<TypePtr> newTargs;
+            newTargs.reserve(appliedType->targs.size());
+            for (const auto &t : appliedType->targs) {
+                newTargs.emplace_back(unwrapSelfTypeParam(ctx, t));
+            }
+            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+        },
+        [&](SelfTypeParam *param) {
+            auto sym = param->definition;
+            if (sym.data(ctx)->owner == ctx.owner) {
+                ENFORCE(cast_type<LambdaParam>(sym.data(ctx)->resultType.get()) != nullptr);
+                ret = sym.data(ctx)->resultType;
+            } else {
+                ret = type;
+            }
+        },
+        [&](Type *tp) {
+            ENFORCE(false, "Unhandled case: {}", type->toString(ctx));
+            Exception::notImplemented();
+        });
+
+    ENFORCE(ret != nullptr);
+
+    return ret;
+}
+
 core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *ty) {
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
@@ -842,14 +940,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
         if (at == nullptr) {
             return core::Symbols::noSymbol();
         }
-        // If this class is a "real" generic, leave it alone. We're not quite
-        // sure yet what it means to move between the "attached" and "singleton"
-        // levels for generic singletons. However, if the singleton has kind `*`
-        // due to all type members being fixed:, we're OK to treat the
-        // AppliedType and the Symbol as interchangeable here.
-        if (at->klass.data(ctx)->typeArity(ctx) != 0) {
-            return core::Symbols::noSymbol();
-        }
+
         singleton = at->klass;
     }
     return singleton.data(ctx)->attachedClass(ctx);

@@ -7,7 +7,7 @@ constexpr ErrorClass DynamicConstant{5001, StrictLevel::True};
 constexpr ErrorClass StubConstant{5002, StrictLevel::False};
 constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::False};
 constexpr ErrorClass InvalidTypeDeclaration{5004, StrictLevel::False};
-constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::True};
+constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::False};
 constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::True};
 // constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::True};
@@ -48,6 +48,20 @@ constexpr ErrorClass OverloadNotAllowed{5040, StrictLevel::False};
 constexpr ErrorClass SubclassingNotAllowed{5041, StrictLevel::False};
 constexpr ErrorClass NonPublicAbstract{5042, StrictLevel::True};
 constexpr ErrorClass InvalidTypeAlias{5043, StrictLevel::False};
+constexpr ErrorClass InvalidVariance{5044, StrictLevel::True};
+constexpr ErrorClass GenericClassWithoutTypeArgs{5045, StrictLevel::False};
+constexpr ErrorClass GenericClassWithoutTypeArgsStdlib{5046, StrictLevel::Strict};
+constexpr ErrorClass FinalAncestor{5047, StrictLevel::False};
+constexpr ErrorClass FinalModuleNonFinalMethod{5048, StrictLevel::False};
+constexpr ErrorClass BadParameterOrdering{5049, StrictLevel::False};
+constexpr ErrorClass SealedAncestor{5050, StrictLevel::False};
+constexpr ErrorClass UndeclaredOverride{5051, StrictLevel::True};
+constexpr ErrorClass InvalidTypeMemberBounds{5052, StrictLevel::False};
+constexpr ErrorClass ParentTypeBoundsMismatch{5053, StrictLevel::False};
+constexpr ErrorClass ImplementationDeprecated{5054, StrictLevel::False};
+constexpr ErrorClass TypeMemberCycle{5055, StrictLevel::False};
+constexpr ErrorClass ExperimentalAttachedClass{5056, StrictLevel::False};
+// constexpr ErrorClass GeneratedDeprecated{5056, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

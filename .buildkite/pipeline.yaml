@@ -6,7 +6,7 @@
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
-  - label: ":linux::cloud: linters.sh"
+  - label: ":linux: linters.sh"
     command: .buildkite/linters.sh
     <<: &elastic
       agents:
@@ -20,6 +20,7 @@ steps:
             propagate-environment: true
             environment:
               - "CODECOV_TOKEN"
+              - "SORBET_RUBYGEMS_API_KEY"
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
@@ -28,37 +29,57 @@ steps:
     branches: "master"
     agents:
       os: mac
+    # TODO(jez) We should only retry for specific error.
+    # The one we were trying to fix was `'foo.h': file not found`
+    retry:
+     automatic: true
 
-  - label: ":linux::cloud: test-static-sanitized.sh"
+  - label: ":linux: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
     <<: *elastic
 
   - wait: ~
 
 # Build Phase - Build all our artifacts
-  - label: ":linux::cloud: build-website.sh"
+  - label: ":linux: build-website.sh"
     command: .buildkite/build-website.sh
     artifact_paths: _out_/**/*
     <<: *elastic
 
 
-  - label: ":linux::cloud: build-sorbet-runtime.sh"
+  - label: ":linux: build-sorbet-runtime.sh"
     command: .buildkite/build-sorbet-runtime.sh
     artifact_paths: _out_/**/*
     <<: *elastic
 
 
-  - label: ":mac: build-static-release.sh"
+  - label: ":mac: build-static-release.sh (master only)"
     command: .buildkite/build-static-release.sh
+    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
-  - label: ":linux::cloud: build-emscripten.sh"
+    # TODO(jez) We should only retry for specific error.
+    # The one we were trying to fix was `'foo.h': file not found`
+    retry:
+     automatic: true
+
+  - label: ":linux: build-static-release.sh"
+    command: .buildkite/build-static-release.sh
+    artifact_paths: _out_/**/*
+    <<: *elastic
+
+  - label: ":linux: build-emscripten.sh"
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     <<: *elastic
-  - label: ":linux::cloud: build-static-release.sh"
-    command: .buildkite/build-static-release.sh
+  - wait: ~
+
+  - label: ":linux: build-static-release-java.sh (master only)"
+    command: .buildkite/build-static-release-java.sh
+    # this needs to be run when both linux & mac build-static-release
+    # are done. at the moment, mac is only done on master branch
+    branches: master
     artifact_paths: _out_/**/*
     <<: *elastic
   - wait: ~
@@ -73,4 +94,9 @@ steps:
 # Success Phase - Allow the PR to be merged
   - label: "All tests and builds succeeded"
     command: .buildkite/all-succeeded.sh
+
+  - label: ":linux: publish-ruby-gems.sh (non-blocking)"
+    command: .buildkite/publish-ruby-gems.sh
+    <<: *elastic
+
   - wait: ~

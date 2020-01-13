@@ -1,0 +1,4 @@
+s(:op_asgn,
+  s(:casgn,
+    s(:cbase), :A), :+,
+  s(:int, "1"))

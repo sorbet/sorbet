@@ -82,6 +82,11 @@ module Opus::Types::Test
         type = T.any(Integer, Class.new, String)
         assert_equal("T.any(Integer, String)", type.name)
       end
+
+      it "unwraps aliased types" do
+        type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
+        assert_equal("T.any(Integer, String)", type.name)
+      end
     end
 
     describe "Intersection" do
@@ -121,6 +126,12 @@ module Opus::Types::Test
           "T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2, String)",
           type.name
         )
+      end
+
+      it "unwraps aliased types" do
+        type_alias = T::Private::Types::TypeAlias.new(-> {Mixin1})
+        type = T.all(@type, type_alias)
+        assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", type.name)
       end
     end
 
@@ -341,15 +352,6 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
-      it 'fails if the type is wrong' do
-        type = T::Enumerator[Float]
-        value = [1, 2, 3].each
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerator[Float], " \
-                         "got T::Enumerator[Integer]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'can have its metatype instantiated' do
         assert_equal([1, 2, 3], T::Enumerator[Integer].new do |x|
           x << 1
@@ -508,6 +510,13 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
+      it 'does not check potentially non-finite enumerables' do
+        type = T::Enumerable[Integer]
+        value = ["bad"].cycle
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
       it 'can serialize enumerables whose each throws' do
         type = T::Enumerable[Integer]
         value = Class.new(Array) do
@@ -518,6 +527,45 @@ module Opus::Types::Test
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Enumerable[Integer], got T::Array[T.untyped]"
         assert_equal(expected_error, msg)
+      end
+    end
+
+    describe 'TypeAlias' do
+      # TODO nroman get rid of this helper after `T.type_alias` accepts a block.
+      def make_type_alias(&blk)
+        T::Private::Types::TypeAlias.new(blk)
+      end
+
+      it 'delegates name' do
+        type = make_type_alias {T.any(Integer, String)}
+        assert_equal('T.any(Integer, String)', type.name)
+      end
+
+      it 'delegates equality' do
+        assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
+        assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
+        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
+
+        refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
+      end
+
+      it 'passes a validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(1)
+        assert_nil(msg)
+      end
+
+      it 'provides errors on failed validation' do
+        type = make_type_alias {T.any(Integer, String)}
+        msg = type.error_message_for_obj(true)
+        assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
+      end
+
+      it 'defers block evaluation' do
+        crash_type = make_type_alias {raise 'crash'}
+        assert_raises(RuntimeError) do
+          crash_type.error_message_for_obj(1)
+        end
       end
     end
 
@@ -582,6 +630,75 @@ module Opus::Types::Test
       it 'fails validation with a nil value' do
         msg = @type.error_message_for_obj(nil)
         assert_equal("Expected type T.enum([:foo, :bar]), got nil", msg)
+      end
+    end
+
+    describe "TEnum" do
+      before do
+        class ::MyEnum < ::T::Enum
+          enums do
+            A = new
+            B = new
+            C = new
+          end
+        end
+      end
+
+      after do
+        ::Object.send(:remove_const, :MyEnum)
+      end
+
+      it 'allows T::Enum values when coercing' do
+        a = T::Utils.coerce(::MyEnum::A)
+        assert_instance_of(T::Types::TEnum, a)
+        assert_equal(a.val, ::MyEnum::A)
+      end
+
+      it 'allows T::Enum values in a sig params' do
+        c = Class.new do
+          extend T::Sig
+          sig {params(x: MyEnum::A).void}
+          def self.foo(x); end
+        end
+
+        c.foo(::MyEnum::A) # should not raise
+        assert_raises(TypeError) do
+          c.foo(::MyEnum::B)
+        end
+        assert_raises(TypeError) do
+          c.foo(MyEnum::C)
+        end
+      end
+
+      it 'allows T::Enum values in a sig returns' do
+        c = Class.new do
+          extend T::Sig
+          sig {returns(MyEnum::A)}
+          def self.good_return; MyEnum::A; end
+
+          sig {returns(MyEnum::B)}
+          def self.bad_return; MyEnum::C; end
+        end
+
+        assert_equal(c.good_return, MyEnum::A)
+
+        assert_raises(TypeError) do
+          c.bad_return
+        end
+      end
+
+      it 'allows T::Enum values in a union' do
+        c = Class.new do
+          extend T::Sig
+          sig {params(x: T.any(MyEnum::A, MyEnum::B)).void}
+          def self.foo(x); end
+        end
+
+        c.foo(::MyEnum::A) # should not raise
+        c.foo(::MyEnum::B) # should not raise
+        assert_raises(TypeError) do
+          c.foo(MyEnum::C)
+        end
       end
     end
 
@@ -930,6 +1047,26 @@ module Opus::Types::Test
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
           # rubocop:enable PrisonGuard/UseOpusTypesShortcut
+        end
+      end
+
+      describe 'untyped containers' do
+        it 'untyped containers are subtypes of typed containers' do
+          assert_subtype(T::Array[T.untyped], T::Array[Integer])
+          assert_subtype(T::Array[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Enumerable[Integer])
+          assert_subtype(T::Set[T.untyped], T::Set[Integer])
+          assert_subtype(T::Hash[T.untyped, T.untyped], T::Hash[Integer, String])
+          assert_subtype(T::Enumerator[T.untyped], T::Enumerator[Integer])
+        end
+
+        it 'typed containers are subtypes of untyped containers' do
+          assert_subtype(T::Array[Integer], T::Array[T.untyped])
+          assert_subtype(T::Array[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Enumerable[T.untyped])
+          assert_subtype(T::Set[Integer], T::Set[T.untyped])
+          assert_subtype(T::Hash[Integer, String], T::Hash[T.untyped, T.untyped])
+          assert_subtype(T::Enumerator[Integer], T::Enumerator[T.untyped])
         end
       end
     end

@@ -16,6 +16,11 @@ class Sorbet::Private::CreateConfig
   def self.main
     FileUtils.mkdir_p(SORBET_DIR)
 
+    if File.file?(SORBET_CONFIG_FILE)
+      puts "Reusing existing config file: #{SORBET_CONFIG_FILE}"
+      return
+    end
+
     File.open(SORBET_CONFIG_FILE, 'w') do |f|
       f.puts('--dir')
       f.puts('.')

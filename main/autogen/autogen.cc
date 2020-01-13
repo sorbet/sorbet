@@ -2,9 +2,11 @@
 #include "msgpack.hpp"
 
 #include "absl/strings/str_split.h"
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
+#include "common/formatting.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "main/autogen/autogen.h"
@@ -15,11 +17,11 @@
 using namespace std;
 namespace sorbet::autogen {
 
-Definition &DefinitionRef::data(ParsedFile &pf) {
+const Definition &DefinitionRef::data(const ParsedFile &pf) const {
     return pf.defs[_id];
 }
 
-Reference &ReferenceRef::data(ParsedFile &pf) {
+const Reference &ReferenceRef::data(const ParsedFile &pf) const {
     return pf.refs[_id];
 }
 
@@ -31,63 +33,6 @@ class AutogenWalk {
     vector<ast::Send *> ignoring;
 
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
-
-    static bool ignoreChild(ast::Expression *expr) {
-        bool result = false;
-
-        typecase(
-            expr, [&](ast::Send *send) { result = (send->fun == core::Names::keepForIde()); },
-
-            [&](ast::EmptyTree *) { result = true; },
-
-            [&](ast::InsSeq *seq) {
-                result = absl::c_all_of(seq->stats, [](auto &child) { return ignoreChild(child.get()); }) &&
-                         ignoreChild(seq->expr.get());
-            },
-
-            [&](ast::Expression *klass) { result = false; });
-        return result;
-    }
-
-    static bool definesBehavior(ast::Expression *expr) {
-        if (ignoreChild(expr)) {
-            return false;
-        }
-        bool result = true;
-
-        typecase(
-            expr,
-
-            [&](ast::ClassDef *klass) {
-                auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
-                if (id && id->name == core::Names::singleton()) {
-                    // class << self; We consider this
-                    // behavior-defining. We could opt to recurse inside
-                    // the inner class, but we consider there to be no
-                    // valid use of `class << self` solely for namespacing,
-                    // so there's no need to support that use case.
-                    result = true;
-                } else {
-                    result = false;
-                }
-            },
-
-            [&](ast::Assign *asgn) {
-                if (ast::isa_tree<ast::ConstantLit>(asgn->lhs.get())) {
-                    result = false;
-                } else {
-                    result = true;
-                }
-            },
-
-            [&](ast::InsSeq *seq) {
-                result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child.get()); }) ||
-                         definesBehavior(seq->expr.get());
-            },
-
-            [&](ast::Expression *klass) { result = true; });
-        return result;
-    }
 
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
@@ -113,7 +58,7 @@ public:
     AutogenWalk() {
         auto &def = defs.emplace_back();
         def.id = 0;
-        def.type = Definition::Module;
+        def.type = Definition::Type::Module;
         def.defines_behavior = false;
         def.is_empty = false;
         nesting.emplace_back(def.id);
@@ -128,28 +73,14 @@ public:
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        if (original->kind == ast::Class) {
-            def.type = Definition::Class;
+        if (original->kind == ast::ClassDef::Kind::Class) {
+            def.type = Definition::Type::Class;
         } else {
-            def.type = Definition::Module;
+            def.type = Definition::Type::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return ignoreChild(tree.get()); });
-        for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-            if (cnst && cnst->original != nullptr) {
-                def.defines_behavior = true;
-            }
-        }
-        for (auto &ancst : original->singletonAncestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-            if (cnst && cnst->original != nullptr) {
-                def.defines_behavior = true;
-            }
-        }
-        if (!def.defines_behavior) {
-            def.defines_behavior =
-                absl::c_any_of(original->rhs, [](auto &tree) { return definesBehavior(tree.get()); });
-        }
+        def.is_empty = absl::c_all_of(original->rhs,
+                                      [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
+        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
@@ -161,7 +92,7 @@ public:
         refs[it->second.id()].definitionLoc = original->loc;
 
         auto ait = original->ancestors.begin();
-        if (original->kind == ast::Class && !original->ancestors.empty()) {
+        if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;
@@ -187,7 +118,7 @@ public:
             if (it == refMap.end()) {
                 continue;
             }
-            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
+            if (original->kind == ast::ClassDef::Kind::Class && &ancst == &original->ancestors.front()) {
                 // superclass
                 def.parent_ref = it->second;
             }
@@ -242,7 +173,7 @@ public:
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
         auto sym = original->symbol;
-        if (!sym.data(ctx)->isClass() || sym != core::Symbols::StubModule()) {
+        if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = symbolName(ctx, sym);
         }
         ref.is_resolved_statically = true;
@@ -261,11 +192,11 @@ public:
         def.id = defs.size() - 1;
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
         if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
-            def.type = Definition::Alias;
+            def.type = Definition::Type::Alias;
             ENFORCE(refMap.count(rhs));
             def.aliased_ref = refMap[rhs];
         } else {
-            def.type = Definition::Casgn;
+            def.type = Definition::Type::Casgn;
         }
         ENFORCE(refMap.count(lhs));
         auto &ref = refs[refMap[lhs].id()];
@@ -280,11 +211,11 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde()) {
+        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
+            original->fun == core::Names::extend()) {
             ignoring.emplace_back(original.get());
         }
-        if ((original->flags & ast::Send::PRIVATE_OK) != 0 && original->fun == core::Names::require() &&
-            original->args.size() == 1) {
+        if (original->isPrivateOk() && original->fun == core::Names::require() && original->args.size() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));
@@ -319,7 +250,7 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     return pf;
 }
 
-vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) {
+vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) const {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
         return {};
@@ -330,7 +261,7 @@ vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef 
     return scope;
 }
 
-string ParsedFile::toString(core::Context ctx) {
+string ParsedFile::toString(core::Context ctx) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
 
@@ -343,16 +274,16 @@ string ParsedFile::toString(core::Context ctx) {
     for (auto &def : defs) {
         string_view type;
         switch (def.type) {
-            case Definition::Module:
+            case Definition::Type::Module:
                 type = "module"sv;
                 break;
-            case Definition::Class:
+            case Definition::Type::Class:
                 type = "class"sv;
                 break;
-            case Definition::Casgn:
+            case Definition::Type::Casgn:
                 type = "casgn"sv;
                 break;
-            case Definition::Alias:
+            case Definition::Type::Alias:
                 type = "alias"sv;
                 break;
         }
@@ -476,7 +407,7 @@ private:
         packNames(raw_full_name);
 
         // type
-        packer.pack_uint8(def.type);
+        packer.pack_uint8(static_cast<u8>(def.type));
 
         // defines_behavior
         packBool(def.defines_behavior);
@@ -577,17 +508,17 @@ public:
         for (auto sym : symbols) {
             ++i;
             string str;
-            switch (i) {
-                case Definition::Module:
+            switch ((Definition::Type)i) {
+                case Definition::Type::Module:
                     str = "module";
                     break;
-                case Definition::Class:
+                case Definition::Type::Class:
                     str = "class";
                     break;
-                case Definition::Casgn:
+                case Definition::Type::Casgn:
                     str = "casgn";
                     break;
-                case Definition::Alias:
+                case Definition::Type::Alias:
                     str = "alias";
                     break;
                 default:
@@ -670,7 +601,7 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     vector<string> out;
 
     for (auto &def : defs) {
-        if (def.type != Definition::Class) {
+        if (def.type != Definition::Type::Class) {
             continue;
         }
         vector<core::NameRef> names = showFullName(ctx, def.id);

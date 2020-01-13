@@ -1,0 +1,49 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Destructure)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Destructure<<C Destructure>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def f((x,y), z, <blk>)
+      begin
+        begin
+          <assignTemp>$3 = <destructure>$2
+          <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
+          x = <assignTemp>$4.[](0)
+          y = <assignTemp>$4.[](1)
+          <assignTemp>$3
+        end
+        begin
+          x.+(y)
+          <self>.lambda() do |<destructure>$5$1|
+            begin
+              begin
+                <assignTemp>$6$1 = <destructure>$5$1
+                <assignTemp>$7$1 = ::<Magic>.<expand-splat>(<assignTemp>$6$1, 2, 0)
+                a$1 = <assignTemp>$7$1.[](0)
+                b$1 = <assignTemp>$7$1.[](1)
+                <assignTemp>$6$1
+              end
+              <emptyTree>
+            end
+          end
+        end
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

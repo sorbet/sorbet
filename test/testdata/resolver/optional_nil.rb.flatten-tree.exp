@@ -1,0 +1,95 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < ()
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::Test)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Test<<C Test>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo(x, <blk>)
+      x
+    end
+
+    def bar(y, <blk>)
+      y
+    end
+
+    def qux(z, <blk>)
+      z
+    end
+
+    def baz(w, <blk>)
+      w
+    end
+
+    def foo<defaultArg>1(x, <blk>)
+      nil
+    end
+
+    def bar<defaultArg>1(y, <blk>)
+      nil
+    end
+
+    def qux<defaultArg>1(z, <blk>)
+      ""
+    end
+
+    def baz<defaultArg>1(w, <blk>)
+      ""
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

@@ -1,7 +1,7 @@
 # typed: true
 class S
   extend T::Sig
-  sig {generated.params(value: T.untyped, path: T.untyped).returns(NilClass)}
+  sig {params(value: T.untyped, path: T.untyped).returns(NilClass)}
   def self.has_kwarg(value, path: [])
   end
 end

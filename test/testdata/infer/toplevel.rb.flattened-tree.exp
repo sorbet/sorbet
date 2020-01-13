@@ -1,5 +1,0 @@
-class <emptyTree><<C <root>>> < ()
-  def self.<static-init><<static-init>$108>(<blk>)
-    1.+("hi")
-  end
-end

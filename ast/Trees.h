@@ -11,9 +11,9 @@
 
 //
 // This file defines the IR that most of the middle phases of Sorbet operate on
-// and manipulate It aims to be a middle ground between the parser output (very
-// verbose and fine grained) and the CFG data structure (very easy to typecheck
-// but very hard to do ad-hoc transformations on).
+// and manipulate. It aims to be a middle ground between the parser output
+// (very verbose and fine grained) and the CFG data structure (very easy to
+// typecheck but very hard to do ad-hoc transformations on).
 //
 // This IR is best learned by example. Try using the `--print` option to sorbet
 // on a handful of test/testdata files. Since there are multiple phases that
@@ -56,6 +56,23 @@ struct ParsedFile {
     core::FileRef file;
 };
 
+/**
+ * Stores a vector of `ParsedFile`s. May be empty if pass was canceled or encountered an error.
+ * TODO: Modify to store reason if we ever have multiple reasons for a pass to stop. Currently, it's only empty if the
+ * pass is canceled in LSP mode.
+ */
+class ParsedFilesOrCancelled final {
+private:
+    std::optional<std::vector<ParsedFile>> trees;
+
+public:
+    ParsedFilesOrCancelled();
+    ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees);
+
+    bool hasResult() const;
+    std::vector<ParsedFile> &result();
+};
+
 template <class To> To *cast_tree(Expression *what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
@@ -88,26 +105,28 @@ public:
 };
 // CheckSize(Declaration, 24, 8);
 
-enum ClassDefKind : u1 { Module, Class };
-
 class ClassDef final : public Declaration {
 public:
-    ClassDefKind kind;
+    enum class Kind : u1 {
+        Module,
+        Class,
+    };
+    Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
+    using RHS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT>;
 
     RHS_store rhs;
     std::unique_ptr<Expression> name;
     // For unresolved names. Once they are typeAlias to Symbols they go into the Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT> ANCESTORS_store;
+    using ANCESTORS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT>;
 
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
     ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
-             ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind);
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -124,15 +143,16 @@ public:
     std::unique_ptr<Expression> rhs;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
 
     core::NameRef name;
     u4 flags;
 
+    // TODO(jez) This uses enum instead of enum class. We should not cargo cult this in new code.
     enum Flags {
         SelfMethod = 1,
-        DSLSynthesized = 2,
+        RewriterSynthesized = 2,
     };
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
@@ -146,8 +166,16 @@ public:
         return (flags & SelfMethod) != 0;
     }
 
-    bool isDSLSynthesized() const {
-        return (flags & DSLSynthesized) != 0;
+    bool isRewriterSynthesized() const {
+        return (flags & RewriterSynthesized) != 0;
+    }
+
+    void setIsSelf(bool isSelf) {
+        if (isSelf) {
+            flags |= SelfMethod;
+        } else {
+            flags &= ~SelfMethod;
+        }
     }
 
 private:
@@ -250,7 +278,7 @@ private:
 class RescueCase final : public Expression {
 public:
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT> EXCEPTION_store;
+    using EXCEPTION_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT>;
 
     EXCEPTION_store exceptions;
 
@@ -274,7 +302,7 @@ private:
 class Rescue final : public Expression {
 public:
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT> RESCUE_CASE_store;
+    using RESCUE_CASE_store = InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT>;
 
     std::unique_ptr<Expression> body;
     RESCUE_CASE_store rescueCases;
@@ -293,21 +321,6 @@ private:
 };
 // CheckSize(Rescue, 64, 8);
 
-class Field final : public Reference {
-public:
-    core::SymbolRef symbol;
-
-    Field(core::Loc loc, core::SymbolRef symbol);
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-// CheckSize(Field, 24, 8);
-
 class Local final : public Reference {
 public:
     core::LocalVariable localVariable;
@@ -325,16 +338,16 @@ private:
 
 class UnresolvedIdent final : public Reference {
 public:
-    enum VarKind {
+    enum class Kind : u1 {
         Local,
         Instance,
         Class,
         Global,
     };
     core::NameRef name;
-    VarKind kind;
+    Kind kind;
 
-    UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name);
+    UnresolvedIdent(core::Loc loc, Kind kind, core::NameRef name);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -444,25 +457,29 @@ public:
     core::NameRef fun;
 
     static const int PRIVATE_OK = 1 << 0;
-    static const int DSL_SYNTHESIZED = 1 << 1;
-    u4 flags = 0;
+    static const int REWRITER_SYNTHESIZED = 1 << 1;
+    u4 flags;
 
     std::unique_ptr<Expression> recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
     std::unique_ptr<Block> block; // null if no block passed
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
-         std::unique_ptr<Block> block = nullptr);
+         std::unique_ptr<Block> block = nullptr, u4 flags = 0);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
-    bool isDSLSynthesized() const {
-        return (flags & DSL_SYNTHESIZED) != 0;
+    bool isRewriterSynthesized() const {
+        return (flags & REWRITER_SYNTHESIZED) != 0;
+    }
+
+    bool isPrivateOk() const {
+        return (flags & PRIVATE_OK) != 0;
     }
 
 private:
@@ -492,7 +509,7 @@ private:
 class Hash final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
+    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store keys;
     ENTRY_store values;
@@ -512,7 +529,7 @@ private:
 class Array final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
+    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store elems;
 
@@ -569,9 +586,10 @@ private:
 class ConstantLit final : public Expression {
 public:
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
-    core::SymbolRef
-        resolutionScope; // for constats that failed resolution, symbol will be set to StubModule and resolutionScope
-                         // will be set to whatever symbol we estimate the constant should have been defined in.
+    // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
+    // will be set to whatever nesting scope we estimate the constant could have been defined in.
+    using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
+    ResolutionScopes resolutionScopes;
     std::unique_ptr<UnresolvedConstantLit> original;
 
     ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
@@ -618,7 +636,7 @@ public:
 class InsSeq final : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
-    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
+    using STATS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT>;
     // Statements
     STATS_store stats;
 

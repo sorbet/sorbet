@@ -25,7 +25,9 @@ module OtherMixin
 end
 class Child < Parent
   include Mixin
-  include 3 # error: `include` must only contain constant literals
+  include 3
+#         ^ error: `include` must only contain constant literals
+# ^^^^^^^^^ error: Expected `Module` but found `NilClass` for argument `arg0`
   include Mixin do # error: `include` can not be passed a block
   end
   whatever.include OtherMixin # error: Method `whatever` does not exist on `T.class_of(Child)`

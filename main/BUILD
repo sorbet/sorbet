@@ -4,6 +4,7 @@ config_setting(
         "define": "jemalloc=true",
         "compilation_mode": "opt",
     },
+    visibility = ["//visibility:public"],
 )
 
 cc_binary(
@@ -30,6 +31,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
+        "//main/pipeline/semantic_extension:none",
         "//payload",
     ],
 )
@@ -45,7 +47,8 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "realmain",
+        "realmain-orig",
+        "//main/pipeline/semantic_extension:none",
         "//payload:text",
     ],
 )
@@ -70,6 +73,27 @@ cc_library(
         "//main/lsp",
         "//main/options",
         "//main/pipeline",
+        "//payload:interface",
+    ],
+)
+
+cc_library(
+    name = "realmain-orig",
+    srcs = [
+        "realmain.cc",
+        "realmain.h",
+    ],
+    defines = ["SORBET_REALMAIN_MIN"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ast",
+        "//core",
+        "//main/options",
+        "//main/pipeline:pipeline-orig",
         "//payload:interface",
     ],
 )

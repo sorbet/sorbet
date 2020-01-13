@@ -1,0 +1,12 @@
+DefMethod {
+  name = <U test_method_with_multiple_stmts>
+  args = NULL
+  body = Assign {
+    lhs = LVarLhs {
+      name = <U y>
+    }
+    rhs = Integer {
+      val = "1"
+    }
+  }
+}

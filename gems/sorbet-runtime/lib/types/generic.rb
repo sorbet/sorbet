@@ -13,11 +13,11 @@ module T::Generic
     self
   end
 
-  def type_member(variance=:invariant, fixed: nil)
+  def type_member(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject)
     T::Types::TypeMember.new(variance) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
   end
 
-  def type_template(variance=:invariant, fixed: nil)
+  def type_template(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject)
     T::Types::TypeTemplate.new(variance) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
   end
 end

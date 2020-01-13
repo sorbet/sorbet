@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 class Base
   extend T::Sig
 
@@ -145,4 +145,13 @@ class Bad_NoKwrest < Base_Repeated
   end
   def foo(*rest) # error: must accept **`kwrest`
   end
+end
+
+
+class NoOverride < Base
+  sig do
+      params(req: Object, opt: Object, kwreq: Object, kwopt: Object, blk: Proc)
+      .returns(Object)
+  end
+  def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end # error: Method `NoOverride#foo` overrides an overridable method `Base#foo` but is not declared with `override.`
 end

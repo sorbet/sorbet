@@ -46,12 +46,12 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     }
 
     if (inits.empty()) {
-        return nullptr;
+        return ast::MK::EmptyTree();
     }
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
+    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
 }
 
 class FlattenWalk {
@@ -72,18 +72,16 @@ public:
         classes.emplace_back();
 
         auto inits = extractClassInit(ctx, classDef);
-        if (inits == nullptr) {
-            return classDef;
-        }
 
         core::SymbolRef sym;
+        auto loc = classDef->declLoc;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.lookupStaticInitForFile(inits->loc);
+            sym = ctx.state.lookupStaticInitForFile(loc);
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
         }
@@ -95,12 +93,12 @@ public:
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
         // methods and block arguments before us.
-        auto blkLoc = core::Loc::none(inits->loc.file());
+        auto blkLoc = core::Loc::none(loc.file());
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(), std::move(args),
+        auto init = make_unique<ast::MethodDef>(loc, loc, sym, core::Names::staticInit(), std::move(args),
                                                 std::move(inits), true);
 
         classDef->rhs.emplace_back(std::move(init));
@@ -123,7 +121,7 @@ public:
         classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
-        return make_unique<ast::EmptyTree>();
+        return ast::MK::EmptyTree();
     };
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
@@ -134,7 +132,7 @@ public:
 
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        return make_unique<ast::EmptyTree>();
+        return ast::MK::EmptyTree();
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
@@ -177,7 +175,7 @@ public:
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
+            tree = ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
             return addMethods(ctx, std::move(tree));
         }
 

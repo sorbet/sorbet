@@ -1,0 +1,4 @@
+s(:class,
+  s(:const, nil, :Foo),
+  s(:send, nil, :a,
+    s(:sym, :b)), nil)

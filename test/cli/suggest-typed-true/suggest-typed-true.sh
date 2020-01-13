@@ -22,6 +22,10 @@ separator
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-true.rb 2>&1
 separator
 
+# Avoid error when repeating options
+"$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict --error-white-list=7022 suggest-typed-true.rb 2>&1
+separator
+
 "$cwd/main/sorbet" --silence-dev-message -a --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-ignore.rb 2>&1
 cat suggest-typed-ignore.rb
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-ignore.rb 2>&1

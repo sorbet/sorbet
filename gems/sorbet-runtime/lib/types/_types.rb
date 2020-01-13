@@ -65,6 +65,11 @@ module T
     T::Types::SelfType.new
   end
 
+  # Matches the instance type in a singleton-class context
+  def self.attached_class
+    T::Types::AttachedClassType.new
+  end
+
   # Matches any class that subclasses or includes the provided class
   # or module
   def self.class_of(klass)
@@ -75,11 +80,11 @@ module T
   ## END OF THE METHODS TO PASS TO `sig`.
 
 
-  # Constructs a type alias. Used to create a short name for a larger
-  # type. In Ruby this is just equivalent to assignment, but this is
-  # needed for support by the static checker. Example usage:
+  # Constructs a type alias. Used to create a short name for a larger type. In Ruby this returns a
+  # wrapper that contains a proc that is evaluated to get the underlying type. This syntax however
+  # is needed for support by the static checker. Example usage:
   #
-  #  NilableString = T.type_alias(T.nilable(String))
+  #  NilableString = T.type_alias {T.nilable(String)}
   #
   #  sig {params(arg: NilableString, default: String).returns(String)}
   #  def or_else(arg, default)
@@ -88,8 +93,14 @@ module T
   #
   # The name of the type alias is not preserved; Error messages will
   # be printed with reference to the underlying type.
-  def self.type_alias(type)
-    T::Utils.coerce(type)
+  #
+  # TODO Remove `type` parameter. This was left in to make life easier while migrating.
+  def self.type_alias(type=nil, &blk)
+    if blk
+      T::Private::Types::TypeAlias.new(blk)
+    else
+      T::Utils.coerce(type)
+    end
   end
 
   # References a type paramater which was previously defined with
@@ -184,7 +195,7 @@ module T
     begin
       raise TypeError.new("Passed `nil` into T.must")
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
-      T::Private::ErrorHandler.handle_inline_type_error(e)
+      T::Configuration.inline_type_error_handler(e)
     end
   end
 
@@ -195,29 +206,63 @@ module T
     value
   end
 
+  # A way to ask Sorbet to prove that a certain branch of control flow never
+  # happens. Commonly used to assert that a case or if statement exhausts all
+  # possible cases.
+  def self.absurd(value)
+    msg = "Control flow reached T.absurd."
+
+    case value
+    when Kernel
+      msg += " Got value: #{value}"
+    end
+
+    begin
+      raise TypeError.new(msg)
+    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      T::Configuration.inline_type_error_handler(e)
+    end
+  end
+
   ### Generic classes ###
 
   module Array
     def self.[](type)
-      T::Types::TypedArray.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedArray::Untyped.new
+      else
+        T::Types::TypedArray.new(type)
+      end
     end
   end
 
   module Hash
     def self.[](keys, values)
-      T::Types::TypedHash.new(keys: keys, values: values)
+      if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
+        T::Types::TypedHash::Untyped.new
+      else
+        T::Types::TypedHash.new(keys: keys, values: values)
+      end
     end
   end
 
   module Enumerable
     def self.[](type)
-      T::Types::TypedEnumerable.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerable::Untyped.new
+      else
+        T::Types::TypedEnumerable.new(type)
+      end
     end
   end
 
   module Enumerator
     def self.[](type)
-      T::Types::TypedEnumerator.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedEnumerator::Untyped.new
+      else
+        T::Types::TypedEnumerator.new(type)
+      end
     end
   end
 
@@ -229,11 +274,12 @@ module T
 
   module Set
     def self.[](type)
-      T::Types::TypedSet.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedSet::Untyped.new
+      else
+        T::Types::TypedSet.new(type)
+      end
     end
   end
-
-  # When mixed into a module, indicates that Sorbet may export the CFG for methods in that module
-  module CFGExport; end
 end
 # rubocop:enable PrisonGuard/UseOpusTypesShortcut

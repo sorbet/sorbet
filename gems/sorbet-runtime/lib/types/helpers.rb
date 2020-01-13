@@ -16,6 +16,14 @@ module T::Helpers
     Private::Abstract::Declare.declare_abstract(self, type: :interface)
   end
 
+  def final!
+    Private::Final.declare(self)
+  end
+
+  def sealed!
+    Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(':')&.first)
+  end
+
   # Causes a mixin to also mix in class methods from the named module.
   #
   # Nearly equivalent to

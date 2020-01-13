@@ -1,0 +1,9 @@
+# typed: strict
+# assert-fast-path: method_signature_update_static__def.rb,method_signature_update_static__usage.rb
+
+module Foobar extend T::Sig
+  sig {params(s: String).returns(String)}
+  def self.bar(s)
+    "${s}"
+  end
+end

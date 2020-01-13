@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 class Impl # error: Missing definition for abstract method
   include Interface
 end

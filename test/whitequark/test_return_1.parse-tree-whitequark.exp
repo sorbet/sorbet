@@ -1,0 +1,2 @@
+s(:return,
+  s(:lvar, :foo))

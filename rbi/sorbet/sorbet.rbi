@@ -107,6 +107,18 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def delete_if(&blk); end
+
+  sig {returns(T::Boolean)}
+  def empty?(); end
+
+  sig do
+    params(
         key: String,
     )
     .returns(String)
@@ -131,11 +143,57 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def keep_if(&blk); end
+
+  sig do
+    params(
+        name: String,
+    )
+    .returns(T.nilable(String))
+  end
+  def key(name); end
+
+  sig do
+    params(
         key: String
     )
     .returns(T::Boolean)
   end
   def key?(key); end
+
+  sig do
+    returns(T::Array[String])
+  end
+  def keys; end
+
+  sig {returns(Integer)}
+  def length(); end
+
+  sig {void}
+  def rehash(); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T::Hash[String, String])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def reject(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T.nilable(Sorbet::Private::Static::ENVClass))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def reject!(&blk); end
 
   sig do
     params(
@@ -152,6 +210,8 @@ class Sorbet::Private::Static::ENVClass
   end
   def update(key, &blk); end
 end
+# [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
+# for environment variables.
 ::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
 
 # The magic type that sig {void} returns
@@ -170,4 +230,15 @@ class Sorbet::Private::Static::ReturnTypeInference
     # this method only exists to define the type parameter.
     # it's used in infer for return type inference.
     end
+end
+
+# Type alias for file-like objects. Many, but not all, file-like
+# types in the Ruby stdlib are descendants of IO. These include
+# pipes and sockets. These descendants are intentionally omitted
+# here.
+::Sorbet::Private::Static::IOLike = T.type_alias do
+  T.any(
+    IO,
+    StringIO
+  )
 end

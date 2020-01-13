@@ -63,7 +63,7 @@ class Index extends React.Component {
                 },
                 {
                   title: `Chat with us`,
-                  content: `We have a [Slack community](https://join.slack.com/t/sorbet-ruby/shared_invite/enQtNjU5MzA2NzU0OTYxLWNiZjcyZmM4MDE5YjIxZjAyMmE0NWYwYzU3MDNmNzNhNWY4YTNhOWE5YWU3NGQ4Y2Y4MDc5ZjAzNjI3NjcwYTE) for general discussions. Topics include discussion of Sorbet internals, learning how others use Sorbet, and showing off projects built with Sorbet.`,
+                  content: `We have a [Slack community](/slack) for general discussions. Topics include discussion of Sorbet internals, learning how others use Sorbet, and showing off projects built with Sorbet.`,
                 },
                 {
                   title: `Report issues`,
@@ -96,6 +96,21 @@ class Index extends React.Component {
                   title: 'State of Sorbet: A type checker for Ruby',
                   link: '/docs/talks/ruby-kaigi-2019',
                   venue: 'RubyKaigi 2019',
+                },
+                {
+                  title: 'Gradual typing of Ruby at Scale',
+                  link: '/docs/talks/curry-on-2019',
+                  venue: 'Curry On! 2019',
+                },
+                {
+                  title: 'Fast typechecking for Ruby',
+                  link: '/docs/talks/jvm-ls-2019',
+                  venue: 'JVM Language Summit 2019',
+                },
+                {
+                  title: 'Sorbet: A type checker for Ruby 3 you can use today!',
+                  link: '/docs/talks/ruby-conf-2019',
+                  venue: 'RubyConf 2019',
                 },
               ]}
             />
@@ -131,6 +146,16 @@ class Index extends React.Component {
                   link: 'https://github.com/jaredbeck/sorbet-progress',
                   description:
                     'Measure your progress as you adopt Sorbet, stay motivated!',
+                },
+                {
+                  title: 'Parlour',
+                  link: 'https://github.com/AaronC81/parlour',
+                  description: 'A versatile RBI generator and plugin system',
+                },
+                {
+                  title: 'rubocop-sorbet',
+                  link: 'https://github.com/Shopify/rubocop-sorbet',
+                  description: 'A collection of Rubocop rules for Sorbet.',
                 },
               ]}
             />
