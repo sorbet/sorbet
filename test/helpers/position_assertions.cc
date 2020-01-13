@@ -14,6 +14,9 @@
 using namespace std;
 
 namespace sorbet::test {
+
+namespace {
+
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
 const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+): (.*)$");
@@ -61,6 +64,11 @@ bool rangeIsSubset(const Range &a, const Range &b) {
     return b.start->character >= a.start->character && b.end->character <= a.end->character;
 }
 
+/**
+ * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
+ * foo.bar
+ *     ^^^ error: bar not defined
+ */
 string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
     int numLeadingSpaces = range.start->character;
     if (numLeadingSpaces < 0) {
@@ -172,6 +180,8 @@ void assertLocationsMatch(const LSPConfiguration &config,
         actualLocationsIt++;
     }
 }
+
+} // namespace
 
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
