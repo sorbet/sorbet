@@ -89,9 +89,9 @@ struct ParsedFile {
     std::vector<Reference> refs;
     std::vector<core::NameRef> requires;
 
-    std::string toString(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs) const;
     std::string toMsgpack(core::Context ctx, int version);
-    std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef id) const;
+    std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 

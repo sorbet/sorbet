@@ -124,7 +124,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 
     for (auto &bb : this->basicBlocks) {
-        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block {}", bb->toString(ctx));
+        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block {}", bb->toString(ctx.state));
 
         if (bb.get() == deadBlock()) {
             continue;
@@ -142,9 +142,9 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 }
 
-string CFG::toString(core::Context ctx) const {
+string CFG::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
-    string symbolName = this->symbol.data(ctx)->showFullName(ctx);
+    string symbolName = this->symbol.data(gs)->showFullName(gs);
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"
@@ -153,7 +153,7 @@ string CFG::toString(core::Context ctx) const {
                    "    \"bb{}_1\" [shape = parallelogram];\n\n",
                    symbolName, symbolName, symbolName, symbolName);
     for (auto &basicBlock : this->basicBlocks) {
-        auto text = basicBlock->toString(ctx);
+        auto text = basicBlock->toString(gs);
         auto lines = absl::StrSplit(text, "\n");
 
         fmt::format_to(
@@ -208,21 +208,21 @@ string CFG::showRaw(core::Context ctx) const {
     return to_string(buf);
 }
 
-string BasicBlock::toString(core::Context ctx) const {
+string BasicBlock::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(
         buf, "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
         fmt::map_join(
-            this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
+            this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.toString(gs); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(buf, "{} = {}\n", exp.bind.toString(ctx), exp.value->toString(ctx));
+        fmt::format_to(buf, "{} = {}\n", exp.bind.toString(gs), exp.value->toString(gs));
     }
     if (this->bexit.cond.variable.exists()) {
-        fmt::format_to(buf, "{}", this->bexit.cond.toString(ctx));
+        fmt::format_to(buf, "{}", this->bexit.cond.toString(gs));
     } else {
         fmt::format_to(buf, "<unconditional>");
     }

@@ -2,6 +2,7 @@
 #include "common/FileOps.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "core/GlobalState.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -59,7 +60,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 
         // Add child class to the set identified by its parent
         string childName = fmt::format(
-            "{}", fmt::map_join(pf.showFullName(ctx, defn),
+            "{}", fmt::map_join(pf.showFullName(ctx.state, defn),
                                 "::", [&ctx](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); }));
 
         out[parentName].insert(make_pair(childName, defn.data(pf).type));

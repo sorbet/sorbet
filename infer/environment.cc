@@ -168,15 +168,15 @@ void KnowledgeFact::sanityCheck() const {
     }
 }
 
-string KnowledgeFact::toString(core::Context ctx) const {
+string KnowledgeFact::toString(const core::GlobalState &gs) const {
     vector<string> buf1, buf2;
 
     for (auto &el : yesTypeTests) {
-        buf1.emplace_back(fmt::format("    {} to be {}\n", el.first.showRaw(ctx), el.second->toStringWithTabs(ctx, 0)));
+        buf1.emplace_back(fmt::format("    {} to be {}\n", el.first.showRaw(gs), el.second->toStringWithTabs(gs, 0)));
     }
     for (auto &el : noTypeTests) {
         buf2.emplace_back(
-            fmt::format("    {} NOT to be {}\n", el.first.showRaw(ctx), el.second->toStringWithTabs(ctx, 0)));
+            fmt::format("    {} NOT to be {}\n", el.first.showRaw(gs), el.second->toStringWithTabs(gs, 0)));
     }
     fast_sort(buf1);
     fast_sort(buf2);
@@ -200,13 +200,13 @@ KnowledgeFact &KnowledgeRef::mutate() {
     return *knowledge.get();
 }
 
-string TestedKnowledge::toString(core::Context ctx) const {
+string TestedKnowledge::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being truthy entails:\n{}", truthy->toString(ctx));
+        fmt::format_to(buf, "  Being truthy entails:\n{}", truthy->toString(gs));
     }
     if (!falsy->noTypeTests.empty() || !falsy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being falsy entails:\n{}", falsy->toString(ctx));
+        fmt::format_to(buf, "  Being falsy entails:\n{}", falsy->toString(gs));
     }
     return to_string(buf);
 }
@@ -223,7 +223,7 @@ void TestedKnowledge::sanityCheck() const {
     ENFORCE(TestedKnowledge::empty.truthy->yesTypeTests.empty());
 }
 
-string Environment::toString(core::Context ctx) const {
+string Environment::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     if (isDead) {
         fmt::format_to(buf, "dead={:d}\n", isDead);
@@ -242,8 +242,8 @@ string Environment::toString(core::Context ctx) const {
         if (var._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(ctx), state.typeAndOrigins.type->toStringWithTabs(ctx, 0),
-                       state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(ctx));
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs), state.typeAndOrigins.type->toStringWithTabs(gs, 0),
+                       state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(gs));
     }
     return to_string(buf);
 }
