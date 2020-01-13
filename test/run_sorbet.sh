@@ -45,5 +45,8 @@ command=( "${command[@]}" \
 )
 
 "${command[@]}"
+exit_code=$?
 
 popd > /dev/null
+
+exit $exit_code

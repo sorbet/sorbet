@@ -59,5 +59,8 @@ command=("${command[@]}" \
 # Use force_compile to make patch_require.rb fail if the compiled extension
 # isn't found.
 llvmir="$llvmir" force_compile=1 "${command[@]}"
+exit_code=$?
 
 popd > /dev/null
+
+exit $exit_code
