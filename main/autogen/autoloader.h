@@ -37,7 +37,7 @@ struct AutoloaderConfig {
 };
 
 struct NamedDefinition {
-    static NamedDefinition fromDef(core::Context, ParsedFile &, DefinitionRef);
+    static NamedDefinition fromDef(const core::Context, ParsedFile &, DefinitionRef);
     static bool preferredTo(core::Context, const NamedDefinition &lhs, const NamedDefinition &rhs);
 
     Definition def;

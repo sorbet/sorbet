@@ -61,7 +61,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
-NamedDefinition NamedDefinition::fromDef(core::Context ctx, ParsedFile &parsedFile, DefinitionRef def) {
+NamedDefinition NamedDefinition::fromDef(const core::Context ctx, ParsedFile &parsedFile, DefinitionRef def) {
     vector<core::NameRef> parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
         auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);

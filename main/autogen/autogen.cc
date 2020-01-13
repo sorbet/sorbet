@@ -250,20 +250,20 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     return pf;
 }
 
-vector<core::NameRef> ParsedFile::showFullName(core::Context ctx, DefinitionRef id) const {
+vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, DefinitionRef id) const {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
         return {};
     }
     auto &ref = def.defining_ref.data(*this);
-    auto scope = showFullName(ctx, ref.scope);
+    auto scope = showFullName(gs, ref.scope);
     scope.insert(scope.end(), ref.name.begin(), ref.name.end());
     return scope;
 }
 
 string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
-    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+    auto nameToString = [&](const auto &nm) -> string { return nm.data(gs)->show(gs); };
 
     fmt::format_to(out,
                    "# ParsedFile: {}\n"
@@ -312,11 +312,11 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
     for (auto &ref : refs) {
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
-            auto fullScopeName = showFullName(ctx, scope);
+            auto fullScopeName = showFullName(gs, scope);
             nestingStrings.emplace_back(fmt::format("[{}]", fmt::map_join(fullScopeName, " ", nameToString)));
         }
 
-        auto refFullName = showFullName(ctx, ref.scope);
+        auto refFullName = showFullName(gs, ref.scope);
         fmt::format_to(out,
                        "[ref id={}]\n"
                        " scope=[{}]\n"
@@ -328,11 +328,11 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
                        ref.id.id(), fmt::map_join(refFullName, " ", nameToString),
                        fmt::map_join(ref.name, " ", nameToString), fmt::join(nestingStrings, " "),
-                       fmt::map_join(ref.resolved, " ", nameToString), ref.loc.filePosToString(ctx),
+                       fmt::map_join(ref.resolved, " ", nameToString), ref.loc.filePosToString(gs),
                        (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {
-            auto parentOfFullName = showFullName(ctx, ref.parent_of);
+            auto parentOfFullName = showFullName(gs, ref.parent_of);
             fmt::format_to(out, " parent_of=[{}]\n", fmt::map_join(parentOfFullName, " ", nameToString));
         }
     }

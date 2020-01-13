@@ -66,7 +66,7 @@ public:
             }
         }
         if (print.CFG.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx.state));
         }
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
