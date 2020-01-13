@@ -232,7 +232,7 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
     DIR *dir;
     struct dirent *entry;
 
-    if ((dir = opendir(string(path).c_str())) == nullptr) {
+    if ((dir = opendir(realpath(string(path).c_str(), NULL))) == nullptr) {
         switch (errno) {
             case ENOTDIR:
                 throw sorbet::FileNotDirException();
@@ -252,6 +252,25 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
             }
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
                              relativeIgnorePatterns);
+        } else if (entry->d_type == DT_LNK) {
+            struct stat sb;
+            stat(fullPath.c_str(), &sb);
+            if (S_ISDIR(sb.st_mode)){
+                if (!recursive || strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                    continue;
+                }
+                appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
+                                relativeIgnorePatterns);
+            } else {
+               auto dotLocation = fullPath.rfind('.');
+                // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
+                if (dotLocation != string::npos) {
+                    auto ext = fullPath.substr(dotLocation);
+                    if (extensions.find(ext) != extensions.end()) {
+                        result.emplace_back(fullPath);
+                    }
+                }
+            }
         } else {
             auto dotLocation = fullPath.rfind('.');
             // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
