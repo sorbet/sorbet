@@ -238,21 +238,21 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(!this->resolutionScope.empty());
+    ENFORCE(!this->resolutionScopes.empty());
     vector<core::NameRef> namesFailedToResolve;
     auto nested = this;
     {
-        while (!nested->resolutionScope.front().exists()) {
+        while (!nested->resolutionScopes.front().exists()) {
             namesFailedToResolve.emplace_back(nested->original->cnst);
             ENFORCE(ast::cast_tree<ast::ConstantLit>(nested->original->scope.get()));
             nested = ast::cast_tree<ast::ConstantLit>(nested->original->scope.get());
             ENFORCE(nested->symbol == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScope.empty());
+            ENFORCE(!nested->resolutionScopes.empty());
         }
         namesFailedToResolve.emplace_back(nested->original->cnst);
         absl::c_reverse(namesFailedToResolve);
     }
-    auto prefix = nested->resolutionScope.front();
+    auto prefix = nested->resolutionScopes.front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
@@ -597,10 +597,10 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.dataAllowingNone(gs)->showFullName(gs) << '\n';
-    if (!resolutionScope.empty()) {
+    if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);
-        buf << "resolutionScope = "
-            << fmt::format("[{}]", fmt::map_join(this->resolutionScope.begin(), this->resolutionScope.end(), ", ",
+        buf << "resolutionScopes = "
+            << fmt::format("[{}]", fmt::map_join(this->resolutionScopes.begin(), this->resolutionScopes.end(), ", ",
                                                  [&](auto sym) { return sym.data(gs)->showFullName(gs); }))
             << '\n';
     }

@@ -5,8 +5,7 @@ class Parent1
 end
 class Child1 < Parent1
   XX # error: Unable to resolve
-  # ^ completion: (nothing)
-  # TODO(jez) Should be XXX
+  # ^ completion: XXX
 end
 
 class Parent2
@@ -17,8 +16,7 @@ end
 class Child2 < Parent2
   class ChildInner2 < ParentInner2
     YY # error: Unable to resolve
-    # ^ completion: (nothing)
-    # TODO(jez) Should be YYY
+    # ^ completion: YYY
   end
 end
 
@@ -29,6 +27,8 @@ class OuterChild3 < OuterParent3
   class Inner
     ZZ # error: Unable to resolve
     # ^ completion: (nothing)
-    # TODO(jez) This is correct, by accident
+
+    OuterParent3::ZZ # error: Unable to resolve constant
+    #               ^ completion: ZZZ
   end
 end

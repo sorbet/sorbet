@@ -88,17 +88,14 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
             }
 
-            core::SymbolRef scope;
+            core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                ENFORCE(!lit->resolutionScope.empty());
-                // TODO(jez) The whole point is that we don't want front() here.
-                // TODO(jez) If front() is noSymbol, it means they're trying to complete A::B| when A doesn't exist.
-                scope = lit->resolutionScope.front();
+                scopes = lit->resolutionScopes;
             } else {
-                scope = symbol.data(ctx)->owner;
+                scopes = {symbol.data(ctx)->owner};
             }
 
-            auto resp = core::lsp::ConstantResponse(symbol, lit->loc, scope, lit->original->cnst, tp);
+            auto resp = core::lsp::ConstantResponse(symbol, lit->loc, scopes, lit->original->cnst, tp);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());
