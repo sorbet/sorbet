@@ -62,7 +62,7 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (cfg) {
             for (auto &extension : ctx.state.semanticExtensions) {
-                extension->typecheck(ctx.state, *cfg, m);
+                extension->typecheck(ctx, *cfg, m);
             }
         }
         if (print.CFG.enabled) {
@@ -706,7 +706,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
-                extension->finishTypecheckFile(ctx.state, f);
+                extension->finishTypecheckFile(ctx, f);
             }
         }
         if (opts.print.CFG.enabled) {
@@ -1051,25 +1051,25 @@ class AllNamesCollector {
 public:
     core::UsageHash acc;
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        acc.sends.emplace_back(ctx.state, original->fun.data(ctx));
+        acc.sends.emplace_back(ctx, original->fun.data(ctx));
         return original;
     }
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        acc.constants.emplace_back(ctx.state, original->name.data(ctx));
+        acc.constants.emplace_back(ctx, original->name.data(ctx));
         return original;
     }
 
     void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
         while (expr) {
-            acc.constants.emplace_back(ctx.state, expr->cnst.data(ctx));
+            acc.constants.emplace_back(ctx, expr->cnst.data(ctx));
             // Handle references to 'Foo' in 'Foo::Bar'.
             expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope.get());
         }
     }
 
     unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        acc.constants.emplace_back(ctx.state, original->symbol.data(ctx)->name.data(ctx));
+        acc.constants.emplace_back(ctx, original->symbol.data(ctx)->name.data(ctx));
         original->name->showRaw(ctx);
 
         handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get()));
@@ -1091,7 +1091,7 @@ public:
     unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
                                                                   unique_ptr<ast::UnresolvedIdent> id) {
         if (id->kind != ast::UnresolvedIdent::Kind::Local) {
-            acc.constants.emplace_back(ctx.state, id->name.data(ctx));
+            acc.constants.emplace_back(ctx, id->name.data(ctx));
         }
         return id;
     }
