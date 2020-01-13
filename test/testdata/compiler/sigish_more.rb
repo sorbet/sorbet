@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 class DeclBuilder
   def params(params)

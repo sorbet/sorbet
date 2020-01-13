@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'benchmark'
 require 'pp'
 require 'optparse'

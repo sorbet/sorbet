@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 1000.times { Thread.new { sleep } }
 i = 0
 while i<100_000 # benchmark loop 3

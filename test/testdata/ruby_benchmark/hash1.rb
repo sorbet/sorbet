@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 value = 0.01
 h = {}
 n = 50_000

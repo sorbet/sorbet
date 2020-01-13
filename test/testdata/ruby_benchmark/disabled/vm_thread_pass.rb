@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 # Plenty Thtread.pass
 # A performance may depend on GVL implementation.
 

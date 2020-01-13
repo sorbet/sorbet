@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 require 'uri'
 
 100_000.times{

@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'benchmark_driver/struct'
 require 'benchmark_driver/metric'
 require 'benchmark_driver/default_job'

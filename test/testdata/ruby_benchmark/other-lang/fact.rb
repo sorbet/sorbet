@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 def fact(n)
   if n < 2
     1

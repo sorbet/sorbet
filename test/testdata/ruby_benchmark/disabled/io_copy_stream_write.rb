@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # The goal of this is to use a synthetic (non-IO) reader
 # to trigger the read/write loop of IO.copy_stream,
 # bypassing in-kernel mechanisms like sendfile for zero copy,

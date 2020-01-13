@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 module A
 end
 puts A

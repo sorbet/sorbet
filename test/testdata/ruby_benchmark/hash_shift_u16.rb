@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 
 (16384..65536).each do |i|

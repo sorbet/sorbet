@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # [ruby-core:70129] [Bug #11396]
 collection_size = 200000
 sample_size = 10000

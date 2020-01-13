@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # coding: US-ASCII
 
 # AO render benchmark

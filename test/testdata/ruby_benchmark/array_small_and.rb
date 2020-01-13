@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 MIN_SIZE = ENV.fetch('SMALL_ARRAY_MIN', 0).to_i
 MAX_SIZE = ENV.fetch('SMALL_ARRAY_MAX', 16).to_i
 ITERATIONS = ENV.fetch('SMALL_ARRAY_ITERATIONS', 100).to_i

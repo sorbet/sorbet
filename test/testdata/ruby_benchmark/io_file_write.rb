@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 #
 # Seek and Write file.
 #

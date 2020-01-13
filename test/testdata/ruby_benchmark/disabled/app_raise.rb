@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 i = 0
 while i<300000
   i += 1

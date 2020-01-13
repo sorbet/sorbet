@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 puts 42
 puts 6.28
 puts "str"

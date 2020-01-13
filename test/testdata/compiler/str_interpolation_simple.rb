@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 class A
   def to_s

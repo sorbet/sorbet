@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 value = 0.01
 h = {}
 n = 4*(10**6)

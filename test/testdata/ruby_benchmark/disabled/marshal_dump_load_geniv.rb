@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 a = ''
 a.instance_eval do
   @a = :a

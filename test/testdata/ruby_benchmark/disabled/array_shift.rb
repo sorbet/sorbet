@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'benchmark'
 
 Benchmark.bm do |x|

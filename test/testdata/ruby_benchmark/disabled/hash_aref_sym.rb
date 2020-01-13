@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 syms = ('a'..'z').to_a
 begin

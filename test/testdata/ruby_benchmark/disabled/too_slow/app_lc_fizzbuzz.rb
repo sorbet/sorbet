@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 #
 # FizzBuzz program using only lambda calculus
 #

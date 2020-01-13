@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 # typed: true
+# compiled: true
 # This program is contributed by Shin Nishiyama
 
 

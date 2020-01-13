@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # create many old objects
 
 max = 30_000_000

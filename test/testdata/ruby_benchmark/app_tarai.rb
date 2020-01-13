@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 def tarai( x, y, z )
   if x <= y
   then y

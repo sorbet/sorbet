@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 h = {}
 
 1.upto(1){|i|

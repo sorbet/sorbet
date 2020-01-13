@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 # typed: true
+# compiled: true
 # -*- Ruby -*-
 # $Id: ary-ruby.code,v 1.4 2004/11/13 07:41:27 bfulgham Exp $
 # http://www.bagley.org/~doug/shootout/

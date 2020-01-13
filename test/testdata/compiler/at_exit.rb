@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 at_exit {
   foo

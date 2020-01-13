@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 require 'thread'
 
 n = 1_000_000

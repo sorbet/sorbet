@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 # n.b. this is a good test for GVL when pinned to a single CPU
 
 1000.times{

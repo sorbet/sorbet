@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # chmod file
 require 'tempfile'
 max = 200_000

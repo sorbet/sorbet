@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 def foo
   if defined?(A::B)

@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 # Measure uncontended GVL performance via read/write with 1:1 threading
 # If we switch to M:N threading, this will benchmark something else...
 r, w = IO.pipe

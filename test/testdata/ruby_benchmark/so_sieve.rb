@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 # from http://www.bagley.org/~doug/shootout/bench/sieve/sieve.ruby
 num = 500
 count = i = j = 0

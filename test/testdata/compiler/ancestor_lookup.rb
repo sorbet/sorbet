@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 module M
   def foo
     1

@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'benchmark_driver/runner/total'
 
 class BenchmarkDriver::Runner::Cstime < BenchmarkDriver::Runner::Total

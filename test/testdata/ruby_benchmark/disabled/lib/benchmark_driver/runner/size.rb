@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'benchmark_driver/runner/peak'
 
 # Actually the same as BenchmarkDriver::Runner::Memory

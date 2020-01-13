@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 
 class HasFib
   T::Sig::WithoutRuntime.sig(:final) {params(n: Integer).returns(Integer)}

@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 strs = ('a'..'z').to_a.map!(&:freeze)
 strs.each { |s| h[s] = s }

@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 require 'complex'
 
 def mandelbrot? z

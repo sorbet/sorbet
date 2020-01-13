@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 n = 2_500_000 # (ARGV.shift || 1).to_i
 
 alt = 1.0 ; s0 = s1 = s2 = s3 = s4 = s5 = s6 = s7 = s8 = 0.0

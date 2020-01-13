@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 # 1000 threads, one mutex
 
 require 'thread'

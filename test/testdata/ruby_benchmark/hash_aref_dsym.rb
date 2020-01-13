@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 syms = ('a'..'z').map { |s| s.to_sym }
 syms.each { |s| h[s] = 1 }

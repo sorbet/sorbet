@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 require 'thread'
 # many producers, many consumers
 nr = 1_000_000

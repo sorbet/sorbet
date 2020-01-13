@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 
 def tak x, y, z
   unless y < x

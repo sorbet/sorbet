@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 s = "hello"
 f = "outer"
 mut = 1

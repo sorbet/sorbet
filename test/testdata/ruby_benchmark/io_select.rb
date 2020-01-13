@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 # IO.select performance
 
 w = [ IO.pipe[1] ];

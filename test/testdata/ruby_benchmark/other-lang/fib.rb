@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 def fib n
   if n < 3
     1

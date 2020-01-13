@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}.compare_by_identity
 strs = ('a'..'z').to_a
 strs.each { |s| h[s] = s }

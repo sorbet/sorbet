@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 A = 1
 puts A
 

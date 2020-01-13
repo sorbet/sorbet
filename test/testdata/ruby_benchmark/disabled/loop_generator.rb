@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 max = 600000
 
 class Fiber; end

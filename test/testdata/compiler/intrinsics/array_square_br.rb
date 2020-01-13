@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 x = T.let([1,2,3,4], T::Array[Integer])
 

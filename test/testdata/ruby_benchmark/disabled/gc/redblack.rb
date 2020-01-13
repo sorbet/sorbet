@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # This benchmark is imported from https://github.com/jruby/rubybench/blob/master/time/bench_red_black.rb
 # License is License is Apache-2
 

@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 syms = %w[puts warn syswrite write stat bacon lettuce tomato
 some symbols in this array may already be interned  others should not be

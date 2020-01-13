@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # The Computer Language Shootout Benchmarks
 # http://shootout.alioth.debian.org
 #

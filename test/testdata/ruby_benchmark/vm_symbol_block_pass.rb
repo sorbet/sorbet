@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 class C
   1000.times {|i|
     eval("def i#{i};end")

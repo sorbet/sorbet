@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 require 'thread'
 # on producer, one consumer
 

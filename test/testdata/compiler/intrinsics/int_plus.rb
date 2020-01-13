@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 # FIXNUM, FIXNUM
 puts(1 + 1)

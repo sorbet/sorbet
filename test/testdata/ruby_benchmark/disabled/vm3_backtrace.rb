@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # get last backtrace
 
 begin

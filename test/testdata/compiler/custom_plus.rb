@@ -1,5 +1,6 @@
 # typed: true
 # compiled: true
+# compiled: true
 
 class A
   def +(b)

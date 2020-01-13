@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 #from http://www.bagley.org/~doug/shootout/bench/lists/lists.ruby
 
 NUM = 300

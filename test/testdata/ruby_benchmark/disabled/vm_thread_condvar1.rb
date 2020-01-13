@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 # two threads, two mutex, two condvar ping-pong
 require 'thread'
 m1 = Mutex.new

@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 h = {}
 
 (0xffff4000..0xffffffff).each do |i|

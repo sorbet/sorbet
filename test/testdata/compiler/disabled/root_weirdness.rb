@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 p self
 
 def on_object

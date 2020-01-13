@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 class Foo
   def foo
     yield

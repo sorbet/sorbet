@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 # typed: true
+# compiled: true
 #coding: us-ascii
 #
 # The Great Computer Language Shootout

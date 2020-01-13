@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 h = {}
 
 10000.times do |i|

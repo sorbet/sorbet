@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 T::Sig::WithoutRuntime.sig(:final) {params(x: Integer, y: Integer, z: Integer).returns(Integer)}
 def tarai( x, y, z )

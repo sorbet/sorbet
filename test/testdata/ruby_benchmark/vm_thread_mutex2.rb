@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 # two threads, one mutex
 
 require 'thread'

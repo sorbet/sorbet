@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 def has_only_star_args(*args)
   puts args.inspect

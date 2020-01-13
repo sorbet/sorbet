@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 def fooAll(arg)
   T.cast(arg, T.all(BasicObject,Kernel))

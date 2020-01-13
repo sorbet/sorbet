@@ -1,4 +1,5 @@
 # typed: strong
+# compiled: true
 # Measure small and plenty pipe read/write.
 # A performance may depend on GVL implementation.
 

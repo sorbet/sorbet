@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # typed: true
+# compiled: true
 #
 # The Computer Language Shootout
 #   http://shootout.alioth.debian.org

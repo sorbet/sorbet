@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 def foo_1
   s = Class.new do

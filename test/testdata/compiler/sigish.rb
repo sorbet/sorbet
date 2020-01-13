@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 
 module Sigish
   T::Sig::WithoutRuntime.sig {params(blk: T.proc.void).void}

@@ -1,4 +1,5 @@
 # typed: strict
+# compiled: true
 # IO.select performance. worst case of single fd.
 
 ios = []

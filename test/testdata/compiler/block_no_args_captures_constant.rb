@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 A = "hi"
 def foo
   Kernel.puts A

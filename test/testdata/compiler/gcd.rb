@@ -1,4 +1,5 @@
 # typed: true
+# compiled: true
 module GCD
   def self.gcd(a, b)
     while (a != b)
