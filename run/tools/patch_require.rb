@@ -27,8 +27,8 @@ module Kernel
         $stderr.puts "SorbetLLVM using compiled: #{cext}"
         return sorbet_old_require(cext)
       end
-      if ENV['force_compile']
-        raise "No compiled extension: #{cext}"
+      if ENV['force_compile'] && File.exist?(name) && File.read(name).include?('# compiled: true')
+        raise "Missing compiled extension: #{cext}"
       end
       # $stderr.puts "SorbetLLVM interpreting: #{name}"
     end
