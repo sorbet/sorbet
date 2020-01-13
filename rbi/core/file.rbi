@@ -678,7 +678,7 @@ class File < IO
   # description of the `mode` and `opt` parameters.
   sig do
     params(
-      filename: String,
+      filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
@@ -686,7 +686,7 @@ class File < IO
   end
   sig do
     type_parameters(:U).params(
-      filename: String,
+      filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
