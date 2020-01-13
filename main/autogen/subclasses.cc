@@ -1,8 +1,8 @@
 #include "main/autogen/subclasses.h"
 #include "common/FileOps.h"
-#include "core/GlobalState.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "core/GlobalState.h"
 
 using namespace std;
 namespace sorbet::autogen {
