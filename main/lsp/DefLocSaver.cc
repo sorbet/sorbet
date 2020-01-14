@@ -65,8 +65,8 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
         if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(id->loc))) {
             core::TypeAndOrigins tp;
-            tp.type = sym.data(ctx.state)->resultType;
-            tp.origins.emplace_back(sym.data(ctx.state)->loc());
+            tp.type = sym.data(ctx)->resultType;
+            tp.origins.emplace_back(sym.data(ctx)->loc());
             core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::FieldResponse(sym, id->loc, id->name, tp));
         }
     }

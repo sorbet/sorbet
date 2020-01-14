@@ -1010,7 +1010,6 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
     ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
 
-    // TODO(jez) Add ability to expect CompletionItemKind of each item
     string actualMessage =
         completionList->items.empty()
             ? "(nothing)"

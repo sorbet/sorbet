@@ -961,7 +961,7 @@ std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<as
             ast::ParsedFile ast;
             {
                 Timer timeit(ctx.state.tracer(), "naming", {{"file", (string)file.data(ctx).path()}});
-                core::ErrorRegion errs(ctx.state, file);
+                core::ErrorRegion errs(ctx, file);
                 tree.tree = ast::ShallowMap::apply(ctx, nameInserter, std::move(tree.tree));
             }
         } catch (SorbetException &) {

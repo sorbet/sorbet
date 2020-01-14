@@ -1594,7 +1594,7 @@ class IO < Object
   ### As far as I can tell, at least one arg is required, and it must be an array,
   ### but sometimes it's the first arg and sometimes it's the second arg, so
   ### let's just make everything untyped.
-  ### TODO(jez) Have to declare this as a rest arg, because pay-server runtime
+  ### Have to declare this as a rest arg, because pay-server runtime
   ### reflection sees it this way. Once it's out of the missing method file, we
   ### can add a better sig here.
   # Runs the specified command as a subprocess; the subprocess's standard input

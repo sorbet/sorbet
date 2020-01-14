@@ -483,10 +483,6 @@ If a location should report the empty string, use the special label `(nothing)`:
 
 #### Testing completion
 
-<!-- TODO(jez) Un-declare this under construction -->
-
-🚧 This section is under construction! 🚧
-
 LSP tests can also assert the contents of completion responses with `completion`
 assertions.
 
@@ -503,7 +499,8 @@ end
 The `^` corresponds to the position of the cursor. So in the above example, it's
 as if the cursor is like this: `foo│`. If the `^` had been directly under the
 last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
-you use `^^^` in the assertion, the test harness will use only the first caret.
+you use `^^^` in the assertion, the test harness will send a completion
+assertion at the position of the first caret.
 
 You can also write a test for a partial prefix of the completion results:
 
@@ -628,17 +625,7 @@ bazel test //test/cli:update
 ```
 
 
-## C++ conventions
-
-- [ ] TODO(jez) Write and link to "Notes on C++ Development"
-
-- Use smart pointers for storage, references for arguments.
-- No C-style allocators; use vectors instead.
-
-
-## Debugging and profiling
-
-### Debugging
+## Debugging
 
 In general,
 
@@ -655,11 +642,6 @@ Also, it’s good to get in the practice of fixing bugs by first adding an
 `ENFORCE` (assertion) that would have caught the bug before actually fixing the
 bug. It’s far easier to fix bugs when there’s a nice error message stating what
 invariant you’ve violated. `ENFORCE`s are free in the release build.
-
-### Profiling
-
-- [ ] TODO(jez) Write about how to profile Sorbet
-
 
 ## Writing docs
 

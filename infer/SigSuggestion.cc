@@ -33,7 +33,7 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
 
     if (classLoc == classLocs.end()) {
         // Couldn't a loc for the enclosing class in this file, give up.
-        // TODO(jez) We might be able to expand this heuristic to be "found a file that we can write to"
+        // An alternative heuristic here might be "found a file that we can write to"
         return nullopt;
     }
 
