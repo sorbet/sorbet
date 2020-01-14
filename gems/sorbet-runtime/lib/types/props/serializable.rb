@@ -335,7 +335,7 @@ module T::Props::Serializable::DecoratorMethods
   private_constant :EMPTY_EXTRA_PROPS
 
   def extra_props(instance)
-    get(instance, '_extra_props') || EMPTY_EXTRA_PROPS
+    instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
   end
 
   # @override T::Props::PrettyPrintable
@@ -383,6 +383,6 @@ module T::Props::Serializable::ClassMethods
     if !(extra_props = decorator.extra_props(result)).empty?
       raise "Unknown properties for #{name}: #{extra_props.keys.inspect}"
     end
-    self.decorator.from_hash(hash, true)
+    result
   end
 end
