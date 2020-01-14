@@ -35,6 +35,6 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <S <C <U G>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=30:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
-    method <C <U Object>><U make_a_class> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=3:17}
+    method <C <U Object>><U make_a_class> : private (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
 
