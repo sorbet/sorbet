@@ -371,6 +371,16 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     return loc;
 }
 
+llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.module->getFunction("sorbet_readKWRestArgs"), {maybeHash});
+}
+
+llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.module->getFunction("sorbet_assertNoExtraKWArg"), {maybeHash});
+}
+
 llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,
                                    llvm::Value *argCountRaw, llvm::Value *argArrayRaw) {
     auto &builder = builderCast(build);

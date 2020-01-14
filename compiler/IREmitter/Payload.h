@@ -36,6 +36,9 @@ public:
                                  const core::TypePtr &type);
     static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
                                           std::unique_ptr<ast::MethodDef> &md);
+
+    static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
+    static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::SymbolRef sym,

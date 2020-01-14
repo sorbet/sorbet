@@ -55,17 +55,29 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         auto minPositionalArgCount = 0;
         auto isBlock = funcId != 0;
         auto hasRestArgs = false;
+        auto hasKWArgs = false;
+        auto hasKWRestArgs = false;
         llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
         llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
+        llvm::Value *hashArgs;
 
         core::LocalVariable blkArgName;
         core::LocalVariable restArgName;
+        core::LocalVariable kwRestArgName;
         {
             auto argId = -1;
             auto args = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
             ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
             for (auto &argFlags : args) {
                 argId += 1;
+                if (argFlags.isKeyword) {
+                    hasKWArgs = true;
+                    if (argFlags.isRepeated) {
+                        kwRestArgName = blockMap.rubyBlockArgs[funcId][argId];
+                        hasKWRestArgs = true;
+                    }
+                    continue;
+                }
                 if (argFlags.isRepeated) {
                     restArgName = blockMap.rubyBlockArgs[funcId][argId];
                     hasRestArgs = true;
@@ -83,6 +95,54 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 minPositionalArgCount += 1;
             }
         }
+
+        hashArgs = Payload::rubyUnder(cs, builder);
+
+        if (hasKWArgs) {
+            // if last argument is a hash, it's not part of positional arguments - it's going to
+            // fullfill all kw arguments instead
+            auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
+            auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
+            auto afterHash = llvm::BasicBlock::Create(cs, "afterKWHash", func);
+            // checkForArgSize
+            auto argSizeForHashCheck = builder.CreateICmpUGE(
+                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "hashAttemptReadGuard");
+            builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
+
+            auto sizeTestFailedEnd = builder.GetInsertBlock();
+            builder.SetInsertPoint(hasEnoughArgs);
+            llvm::Value *argsWithoutHashCount =
+                builder.CreateSub(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
+
+            llvm::Value *indices[] = {argsWithoutHashCount};
+
+            auto maybeHashValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "KWArgHash");
+
+            // checkIfLastArgIsHash
+            auto isHashValue =
+                Payload::typeTest(cs, builder, maybeHashValue, core::make_type<core::ClassType>(core::Symbols::Hash()));
+
+            builder.CreateCondBr(isHashValue, hasPassedHash, afterHash);
+
+            auto hashTypeFailedTestEnd = builder.GetInsertBlock();
+            builder.SetInsertPoint(hasPassedHash);
+            // yes, this is an empty block. It's used only for Phi node
+            auto hasPassedHashEnd = builder.GetInsertBlock();
+            builder.CreateBr(afterHash);
+            builder.SetInsertPoint(afterHash);
+            auto hashArgsPhi = builder.CreatePHI(builder.getInt64Ty(), 3, "hashArgsPhi");
+            auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
+            argcPhi->addIncoming(argCountRaw, sizeTestFailedEnd);
+            argcPhi->addIncoming(argCountRaw, hashTypeFailedTestEnd);
+            hashArgsPhi->addIncoming(hashArgs, sizeTestFailedEnd);
+            hashArgsPhi->addIncoming(hashArgs, hashTypeFailedTestEnd);
+            argcPhi->addIncoming(argsWithoutHashCount, hasPassedHashEnd);
+            hashArgsPhi->addIncoming(maybeHashValue, hasPassedHashEnd);
+
+            argCountRaw = argcPhi;
+            hashArgs = hashArgsPhi;
+        }
+
         if (isBlock) {
             if (minPositionalArgCount != 1) {
                 // blocks can expand their first argument in arg array
@@ -275,6 +335,14 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 Payload::varSet(cs, restArgName,
                                 Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
                                 builder, blockMap, aliases, funcId);
+            }
+            if (hasKWArgs) {
+                if (hasKWRestArgs) {
+                    Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, blockMap,
+                                    aliases, funcId);
+                } else {
+                    Payload::assertNoExtraKWArg(cs, builder, hashArgs);
+                }
             }
         }
         {
