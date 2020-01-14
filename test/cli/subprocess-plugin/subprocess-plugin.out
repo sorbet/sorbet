@@ -683,13 +683,13 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     method ::<Class:<Class:Nope>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi5.rb:4
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi5.rb start=??? end=???}
   class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
-    method ::Object#bar_gen (<blk>) @ test/cli/subprocess-plugin/multi1.rb:9
+    method ::Object#bar_gen : private (<blk>) @ test/cli/subprocess-plugin/multi1.rb:9
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
-    method ::Object#baz_gen (<blk>) @ test/cli/subprocess-plugin/multi1.rb:12
+    method ::Object#baz_gen : private (<blk>) @ test/cli/subprocess-plugin/multi1.rb:12
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
-    method ::Object#foo_gen (<blk>) @ test/cli/subprocess-plugin/multi1.rb:6
+    method ::Object#foo_gen : private (<blk>) @ test/cli/subprocess-plugin/multi1.rb:6
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
-    method ::Object#gen (_arg, <blk>) @ test/cli/subprocess-plugin/multi1.rb:3
+    method ::Object#gen : private (_arg, <blk>) @ test/cli/subprocess-plugin/multi1.rb:3
       argument _arg<> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=3:9 end=3:13}
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
   class ::Something < ::Object () @ (test/cli/subprocess-plugin/multi3.rb:3, test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|2.rbi:1)
