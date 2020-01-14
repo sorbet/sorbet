@@ -19,7 +19,7 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task
         [&preemptTask = this->preemptTask, &task, &success](TypecheckEpochManager::TypecheckingStatus status) -> void {
             // The code should only ever set one preempt function.
             auto existingTask = atomic_load(&preemptTask);
-            ENFORCE(existingTask != nullptr);
+            ENFORCE(existingTask == nullptr);
             if (!status.slowPathRunning || status.slowPathWasCanceled || existingTask != nullptr) {
                 // No slow path running, typechecking was canceled so we can't preempt the canceled slow path, or a task
                 // is already scheduled. The latter should _never_ occur, as the scheduled task should _block_ the
