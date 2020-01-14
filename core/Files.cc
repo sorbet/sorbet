@@ -169,7 +169,7 @@ vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
-    if (ptr) {
+    if (ptr != nullptr) {
         return *ptr;
     } else {
         auto my = make_shared<vector<int>>(findLineBreaks(this->source_));

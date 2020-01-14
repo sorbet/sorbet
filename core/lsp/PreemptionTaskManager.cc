@@ -19,8 +19,8 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task
         [&preemptTask = this->preemptTask, &task, &success](TypecheckEpochManager::TypecheckingStatus status) -> void {
             // The code should only ever set one preempt function.
             auto existingTask = atomic_load(&preemptTask);
-            ENFORCE(!existingTask);
-            if (!status.slowPathRunning || status.slowPathWasCanceled || existingTask) {
+            ENFORCE(existingTask != nullptr);
+            if (!status.slowPathRunning || status.slowPathWasCanceled || existingTask != nullptr) {
                 // No slow path running, typechecking was canceled so we can't preempt the canceled slow path, or a task
                 // is already scheduled. The latter should _never_ occur, as the scheduled task should _block_ the
                 // thread that scheduled it.
@@ -36,7 +36,7 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask() {
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
     auto preemptTask = atomic_load(&this->preemptTask);
-    if (preemptTask) {
+    if (preemptTask != nullptr) {
         // Capture with write lock before running task. Ensures that all worker threads park before we proceed.
         absl::MutexLock lock(&typecheckMutex);
         // Invariant: Typechecking _cannot_ be canceled before or during a preemption task.
