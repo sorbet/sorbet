@@ -193,18 +193,22 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         }
         string prefix = "";
         string suffix = "";
-        if (argSym.flags.isKeyword) {
-            if (argSym.flags.isRepeated) {
+        if (argSym.flags.isRepeated) {
+            if (argSym.flags.isKeyword) {
                 prefix = "**"; // variadic keyword args
-            } else if (argSym.flags.isDefault) {
+            } else {
+                prefix = "*"; // rest args
+            }
+        } else if (argSym.flags.isKeyword) {
+            if (argSym.flags.isDefault) {
                 suffix = ": …"; // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
             }
-        } else if (argSym.flags.isRepeated) {
-            prefix = "*";
         } else if (argSym.flags.isBlock) {
             prefix = "&";
+        } else if (argSym.flags.isDefault) {
+            suffix = "=…";
         }
         prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
     }
