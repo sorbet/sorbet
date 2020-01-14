@@ -2,7 +2,7 @@
   <img alt="Sorbet logo" width="200" src="docs/logo/sorbet-logo-purple-sparkles.svg">
 </p>
 
-# Sorbet
+# Sorbet1
 
 This repository contains Sorbet, a static typechecker for a subset of Ruby. It
 is still in early stages, but is mature enough to run on the majority of Ruby
