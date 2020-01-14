@@ -48,9 +48,10 @@ public:
     bool wasTypecheckingCanceled() const;
     // Retrieve the status of typechecking.
     TypecheckingStatus getStatus() const;
-    // Run only from preprocess thread.
     // Tries to cancel a running slow path on this GlobalState or its descendent. Returns true if it succeeded, false if
     // the slow path was unable to be canceled.
+    // Run only from preprocess thread.
+    // TODO(jvilk): This responsibility will move to message processing thread.
     bool tryCancelSlowPath(u4 newEpoch);
     // Run only from the typechecking thread.
     // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
