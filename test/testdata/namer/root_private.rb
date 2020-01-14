@@ -14,4 +14,4 @@ class A
 end
 
 A.new.foo_method_ # error: does not exist
-#                ^ completion: foo_method_inner_public, foo_method_root
+#                ^ completion: foo_method_inner_public
