@@ -109,7 +109,6 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
 
     vector<string> flags;
     const core::SymbolData &sym = method.data(gs);
-    string accessFlagString = "";
     string sigCall = "sig";
     if (sym->isMethod()) {
         if (sym->isFinalMethod()) {
@@ -123,12 +122,6 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         }
         if (sym->isOverride()) {
             flags.emplace_back("override");
-        }
-        if (sym->isPrivate()) {
-            accessFlagString = "private ";
-        }
-        if (sym->isProtected()) {
-            accessFlagString = "protected ";
         }
         for (auto &argSym : method.data(gs)->arguments()) {
             // Don't display synthetic arguments (like blk).
@@ -149,8 +142,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
 
-    auto oneline =
-        fmt::format("{}{} {{{}{}{}}}", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    auto oneline = fmt::format("{} {{{}{}{}}}", sigCall, flagString, paramsString, methodReturnType);
     if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
         return oneline;
     }
@@ -161,7 +153,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
     }
-    return fmt::format("{}{} do\n  {}{}{}\nend", accessFlagString, sigCall, flagString, paramsString, methodReturnType);
+    return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
 }
 
 string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
@@ -171,6 +163,13 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         return "";
     }
     auto methodData = method.data(gs);
+
+    string visibility = "";
+    if (methodData->isPrivate()) {
+        visibility = "private ";
+    } else if (methodData->isProtected()) {
+        visibility = "protected ";
+    }
 
     auto methodNameRef = methodData->name;
     ENFORCE(methodNameRef.exists());
@@ -222,13 +221,13 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         argListSuffix = ")";
     }
 
-    auto result = fmt::format("def {}{}{}{}{}; end", methodNamePrefix, methodName, argListPrefix,
+    auto result = fmt::format("{}def {}{}{}{}{}; end", visibility, methodNamePrefix, methodName, argListPrefix,
                               fmt::join(prettyArgs, argListSeparator), argListSuffix);
     if (prettyArgs.size() > 0 && result.length() >= MAX_PRETTY_WIDTH) {
         argListPrefix = "(\n  ";
         argListSeparator = ",\n  ";
         argListSuffix = "\n)";
-        result = fmt::format("def {}{}{}{}{}\nend", methodNamePrefix, methodName, argListPrefix,
+        result = fmt::format("{}def {}{}{}{}{}\nend", visibility, methodNamePrefix, methodName, argListPrefix,
                              fmt::join(prettyArgs, argListSeparator), argListSuffix);
     }
     return result;
