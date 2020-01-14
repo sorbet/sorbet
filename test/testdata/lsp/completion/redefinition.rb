@@ -12,7 +12,8 @@ end
 
 def test
   a = A.new
-  # TODO(jez) Assert that we get the right redefinition based on the sig.
+  # This doesn't test that we got the *right* overload, just that we aren't
+  # sending back two suggestions with the same name, which is ~good enough.
   a.some_ # error: does not exist
 #        ^ completion: some_method
 end

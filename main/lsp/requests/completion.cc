@@ -47,7 +47,6 @@ const RubyKeyword rubyKeywords[] = {
     {"class", "Creates or opens a class.", "class ${1:ClassName}\n  $0\nend", "New class"},
     {"def", "Defines a method.", "def ${1:method_name}($2)\n  $0\nend", "New method"},
     {"defined?", "Returns a string describing its argument.", "defined?(${1:Constant})$0"},
-    // TODO(jez) Even better would be to auto-insert a block for methods that we know must take a block
     {"do", "Starts a block.", "do\n  $0\nend"},
     {"else", "The unhandled condition in case, if and unless expressions."},
     {"elsif", "An alternate condition for an if expression.", "elsif ${1:expr}$0"},
@@ -451,7 +450,6 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
         item->insertText = replacementText;
     }
     item->insertTextFormat = InsertTextFormat::PlainText;
-    // TODO(jez) Show the type of the local under the documentation field?
 
     return item;
 }
