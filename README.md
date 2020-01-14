@@ -483,10 +483,6 @@ If a location should report the empty string, use the special label `(nothing)`:
 
 #### Testing completion
 
-<!-- TODO(jez) Un-declare this under construction -->
-
-🚧 This section is under construction! 🚧
-
 LSP tests can also assert the contents of completion responses with `completion`
 assertions.
 
@@ -503,7 +499,8 @@ end
 The `^` corresponds to the position of the cursor. So in the above example, it's
 as if the cursor is like this: `foo│`. If the `^` had been directly under the
 last `o`, it would have been like this: `fo|o`. Only the first `^` is used. If
-you use `^^^` in the assertion, the test harness will use only the first caret.
+you use `^^^` in the assertion, the test harness will send a completion
+assertion at the position of the first caret.
 
 You can also write a test for a partial prefix of the completion results:
 
