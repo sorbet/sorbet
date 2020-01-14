@@ -1,5 +1,4 @@
-# typed: true
-# compiled: true
+# compiled: false
 
 class A
 end

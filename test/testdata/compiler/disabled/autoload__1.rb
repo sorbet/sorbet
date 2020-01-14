@@ -1,5 +1,6 @@
 # typed: true
 # compiled: true
 
-autoload(:A, T.must(__dir__) + '/autoload__2')
-puts A
+dir = File.expand_path(__dir__)
+autoload(:A, dir + '/autoload__2')
+puts Object.const_get('A')
