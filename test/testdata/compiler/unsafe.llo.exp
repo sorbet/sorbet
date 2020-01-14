@@ -188,7 +188,7 @@ entryInitializers:
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #7
   %1 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"str_test/testdata/compiler/unsafe.rb", i64 0, i64 0), i64 32) #7
   %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"str_test/testdata/compiler/unsafe.rb", i64 0, i64 0), i64 32) #7
-  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 0) #7
+  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 1) #7
   %4 = tail call i8* @ruby_xmalloc2(i64 1, i64 8) #7
   %5 = tail call i8* @ruby_xmalloc2(i64 1, i64 4) #7
   %6 = bitcast i8* %5 to i32*

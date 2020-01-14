@@ -671,7 +671,7 @@ sorbet_allocateRubyStackFrames.exit:
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 3) #17
   %1 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"str_test/testdata/compiler/block_no_args_captures_constant.rb", i64 0, i64 0), i64 57) #17
   %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"str_test/testdata/compiler/block_no_args_captures_constant.rb", i64 0, i64 0), i64 57) #17
-  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 0) #17
+  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 1) #17
   %4 = tail call i8* @ruby_xmalloc2(i64 6, i64 8) #17
   %5 = tail call i8* @ruby_xmalloc2(i64 6, i64 4) #17
   %6 = bitcast i8* %5 to i32*
@@ -758,7 +758,7 @@ sorbet_allocateRubyStackFrames.exit:
   %0 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #17
   %1 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"str_test/testdata/compiler/block_no_args_captures_constant.rb", i64 0, i64 0), i64 57) #17
   %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"str_test/testdata/compiler/block_no_args_captures_constant.rb", i64 0, i64 0), i64 57) #17
-  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 0) #17
+  %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 1) #17
   %4 = tail call i8* @ruby_xmalloc2(i64 9, i64 8) #17
   %5 = tail call i8* @ruby_xmalloc2(i64 9, i64 4) #17
   %6 = bitcast i8* %5 to i32*
