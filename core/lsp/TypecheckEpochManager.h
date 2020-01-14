@@ -40,9 +40,9 @@ private:
 public:
     static void assertConsistentThread(std::optional<std::thread::id> &expectedThreadId, std::string_view method,
                                        std::string_view threadName);
-
-    // Run only from the typechecking thread.
     // Indicates an intent to begin committing a specific epoch.
+    // Run only from the message processing thread.
+    // TODO(jvilk): This responsibility will move to the typechecking thread.
     void startCommitEpoch(u4 fromEpoch, u4 toEpoch);
     // Returns 'true' if the currently running typecheck run has been canceled.
     bool wasTypecheckingCanceled() const;

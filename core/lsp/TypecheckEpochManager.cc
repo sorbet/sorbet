@@ -14,8 +14,6 @@ void TypecheckEpochManager::assertConsistentThread(optional<thread::id> &expecte
 }
 
 void TypecheckEpochManager::startCommitEpoch(u4 fromEpoch, u4 toEpoch) {
-    assertConsistentThread(typecheckingThreadId, "TypecheckCancellor::startCommitEpoch", "typechecking");
-
     absl::MutexLock lock(&epochMutex);
     ENFORCE(fromEpoch != toEpoch);
     ENFORCE(toEpoch != currentlyProcessingLSPEpoch.load());
