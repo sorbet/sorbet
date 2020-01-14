@@ -77,6 +77,10 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
 }
 
+llvm::Value *Payload::testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
+    return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsUndef"), {val}, "isUndef");
+}
+
 llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_testIsTruthy"), {val}, "cond");
 }
@@ -379,6 +383,12 @@ llvm::Value *Payload::readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &buil
 llvm::Value *Payload::assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash) {
     auto &builder = builderCast(build);
     return builder.CreateCall(cs.module->getFunction("sorbet_assertNoExtraKWArg"), {maybeHash});
+}
+
+llvm::Value *Payload::getKWArg(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *maybeHash,
+                               llvm::Value *rubySym) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.module->getFunction("sorbet_getKWArg"), {maybeHash, rubySym});
 }
 
 llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build, int maxPositionalArgCount,

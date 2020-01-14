@@ -64,11 +64,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         core::LocalVariable blkArgName;
         core::LocalVariable restArgName;
         core::LocalVariable kwRestArgName;
+
+        auto argsFlags = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
         {
             auto argId = -1;
-            auto args = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
-            ENFORCE(args.size() == blockMap.rubyBlockArgs[funcId].size());
-            for (auto &argFlags : args) {
+            ENFORCE(argsFlags.size() == blockMap.rubyBlockArgs[funcId].size());
+            for (auto &argFlags : argsFlags) {
                 argId += 1;
                 if (argFlags.isKeyword) {
                     hasKWArgs = true;
@@ -96,7 +97,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             }
         }
 
-        hashArgs = Payload::rubyUnder(cs, builder);
+        hashArgs = Payload::rubyUndef(cs, builder);
 
         if (hasKWArgs) {
             // if last argument is a hash, it's not part of positional arguments - it's going to
@@ -337,6 +338,33 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                 builder, blockMap, aliases, funcId);
             }
             if (hasKWArgs) {
+                for (int argId = maxPositionalArgCount; argId <= argsFlags.size(); argId++) {
+                    if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
+                        auto name = blockMap.rubyBlockArgs[funcId][argId];
+                        auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
+                        auto rawRubySym = builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+
+                        auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
+                        auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
+
+                        auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
+                        auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
+                        auto isUndefEnd = builder.GetInsertBlock();
+                        builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
+                        builder.SetInsertPoint(kwArgDefault);
+                        // insert default computation
+                        auto defaultValue = Payload::rubyNil(cs, builder);
+                        auto kwArgDefaultEnd = builder.GetInsertBlock();
+                        builder.CreateBr(kwArgContinue);
+                        builder.SetInsertPoint(kwArgContinue);
+
+                        auto kwArgValue = builder.CreatePHI(builder.getInt64Ty(), 2, "kwArgValue");
+                        kwArgValue->addIncoming(passedValue, isUndefEnd);
+                        kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
+
+                        Payload::varSet(cs, name, kwArgValue, builder, blockMap, aliases, funcId);
+                    }
+                }
                 if (hasKWRestArgs) {
                     Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, blockMap,
                                     aliases, funcId);
@@ -345,6 +373,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 }
             }
         }
+
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
             builder.CreateStore(Payload::setRubyStackFrame(cs, builder, md), blockMap.lineNumberPtrsByFunction[funcId]);

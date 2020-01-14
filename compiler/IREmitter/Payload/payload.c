@@ -51,7 +51,7 @@ VALUE sorbet_rubyFalse() __attribute__((always_inline)) {
 
 // use this undefined value when you have a variable that should _never_ escape to ruby.
 VALUE sorbet_rubyUndef() __attribute__((always_inline)) {
-    return RUBY_undef;
+    return RUBY_Qundef;
 }
 
 VALUE sorbet_rubyNil() __attribute__((always_inline)) {
@@ -524,6 +524,11 @@ void sorbet_raiseArity(int argc, int min, int max) __attribute__((__noreturn__))
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
+void sorbet_raiseExtraKeywords(VALUE hash) __attribute__((__noreturn__)) {
+    VALUE err_mess = rb_sprintf("unknown keywords: %" PRIsVALUE, rb_hash_keys(hash));
+    rb_exc_raise(rb_exc_new3(rb_eArgError, err_mess));
+}
+
 void sorbet_checkStack() {
     // This is actually pretty slow. We should probably use guard pages instead.
     ruby_stack_check();
@@ -656,6 +661,35 @@ const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
 void sorbet_setLineNumber(int offset, VALUE **storeLocation) {
     // use pos+1 because PC should point at the next instruction
     (*storeLocation) = ((VALUE *)0x0) + offset + 1;
+}
+
+VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
+    if (maybeHash == RUBY_Qundef) {
+        return RUBY_Qundef;
+    }
+
+    // TODO: ruby seems to do something smarter here:
+    //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
+    //
+    return rb_hash_delete_entry(maybeHash, key);
+}
+
+VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
+    if (maybeHash == RUBY_Qundef) {
+        return RUBY_Qundef;
+    }
+    if (RHASH_EMPTY_P(maybeHash)) {
+        return RUBY_Qundef;
+    }
+
+    sorbet_raiseExtraKeywords(maybeHash);
+}
+
+VALUE sorbet_readKWRestArgs(VALUE maybeHash) {
+    if (maybeHash == RUBY_Qundef) {
+        return rb_hash_new();
+    }
+    return maybeHash;
 }
 
 VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *argArray) {

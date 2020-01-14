@@ -29,6 +29,7 @@ public:
     static llvm::Value *longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num);
     static llvm::Value *doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num);
     static llvm::Value *cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str);
+    static llvm::Value *testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
     static llvm::Value *getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &builder);
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
@@ -39,6 +40,8 @@ public:
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
+    static llvm::Value *getKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash,
+                                 llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::SymbolRef sym,
