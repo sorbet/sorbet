@@ -291,9 +291,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
             }
         }
+        auto optionalMethodIndex = 0;
         {
             // build fillFromDefaultBlocks
-            auto optionalMethodIndex = 0;
             for (auto i = 0; i < numOptionalArgs; i++) {
                 auto &block = fillFromDefaultBlocks[i];
                 builder.SetInsertPoint(block);
@@ -338,7 +338,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                 builder, blockMap, aliases, funcId);
             }
             if (hasKWArgs) {
-                for (int argId = maxPositionalArgCount; argId <= argsFlags.size(); argId++) {
+                for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
                     if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
                         auto name = blockMap.rubyBlockArgs[funcId][argId];
                         auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
@@ -352,8 +352,30 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                         auto isUndefEnd = builder.GetInsertBlock();
                         builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
                         builder.SetInsertPoint(kwArgDefault);
-                        // insert default computation
-                        auto defaultValue = Payload::rubyNil(cs, builder);
+                        llvm::Value *defaultValue;
+                        if ((md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                             md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
+                            !argsFlags[argId].isDefault) {
+                            // This method is already a default method so don't fill in
+                            // another other defaults for it or else it is turtles all the
+                            // way down
+
+                            defaultValue = Payload::rubyNil(cs, builder);
+                        } else {
+                            fmt::print("{}\n", optionalMethodIndex);
+                            optionalMethodIndex++;
+                            auto argMethodName =
+                                cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
+                            ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                                                to_string(optionalMethodIndex) + " does not exist");
+                            auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                            ENFORCE(argMethod.exists());
+                            auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
+                            defaultValue = builder.CreateCall(
+                                fillDefaultFunc,
+                                {argCountRaw, argArrayRaw, func->arg_begin() + 2 /* this is wrong for block*/});
+                            // insert default computation
+                        }
                         auto kwArgDefaultEnd = builder.GetInsertBlock();
                         builder.CreateBr(kwArgContinue);
                         builder.SetInsertPoint(kwArgContinue);
