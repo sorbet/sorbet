@@ -456,6 +456,7 @@ public:
             } else {
                 return original;
             }
+
             switch (original->fun._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
@@ -646,8 +647,16 @@ public:
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
-        // all methods at definition time are public, but their visibility may be changed later
-        method->symbol.data(ctx)->setPublic();
+
+        auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
+        if (implicitlyPrivate) {
+            // Methods defined at the top level default to private (on Object)
+            method->symbol.data(ctx)->setPrivate();
+        } else {
+            // All other methods default to public (their visibility might be changed later)
+            method->symbol.data(ctx)->setPublic();
+        }
+
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
         // method->args.clear();
         return method;

@@ -177,7 +177,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
       argument args<repeated> @ Loc {file=test/testdata/rewriter/prop.rb start=3:20 end=3:24}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
-    method <C <U Object>><U main> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=84:1 end=84:9}
+    method <C <U Object>><U main> : private (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=84:1 end=84:9}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U PropHelpers>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/prop.rb start=65:1 end=65:18}
     method <C <U PropHelpers>><U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=67:3 end=67:15}
