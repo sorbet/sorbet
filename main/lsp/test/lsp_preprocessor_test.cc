@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 // has to go first as it violates our requirements
 
+#include "core/lsp/PreemptionTaskManager.h"
+#include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/TimeTravelingGlobalState.h"
 #include "main/lsp/lsp.h"
@@ -110,13 +112,13 @@ LSPFileUpdates makeUpdates(u4 &version, vector<pair<string, string>> files) {
 class CountingTask final : public core::lsp::Task {
 public:
     int runCount = 0;
-    core::GlobalState &gs;
+    shared_ptr<core::lsp::PreemptionTaskManager> preemptManager;
 
-    CountingTask(core::GlobalState &gs) : gs(gs) {}
+    CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager) : preemptManager(move(preemptManager)) {}
 
     void run() override {
         // The task should run with typecheck mutex held with a write lock.
-        gs.typecheckMutex->AssertHeld();
+        preemptManager->assertTypecheckMutexHeld();
         runCount++;
     }
 };
@@ -489,7 +491,7 @@ u4 emulateProcessEditAtHeadOfQueue(QueueState &state, core::GlobalState &gs) {
     // Emulate typechecking thread: begin 'processing' this edit.
     const auto updates = getUpdates(state, 0).value();
     auto epoch = updates->versionEnd;
-    gs.startCommitEpoch(updates->versionStart - 1, epoch);
+    gs.epochManager->startCommitEpoch(updates->versionStart - 1, epoch);
     state.pendingRequests.clear();
     return epoch;
 }
@@ -508,13 +510,13 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenFastPathEditComesIn) { // NO
     // Introduce a fix to syntax error. Should course-correct to a fast path.
     string fooV3 = "# typed: true\ndef foo; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should cancel.
-    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+    EXPECT_FALSE(gs->epochManager->tryCommitEpoch(epoch, true, nullopt, []() -> void {}));
 
     // GS should no longer register a cancellation, since the epoch didn't commit.
-    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+    EXPECT_FALSE(gs->epochManager->wasTypecheckingCanceled());
 }
 
 TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NOLINT
@@ -531,10 +533,10 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathWhenSlowPathEditComesIn) { // NO
     // Introduce another slow path here: new method
     string fooV3 = "# typed: true\ndef foo; end\ndef bar;end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should return false because it has been canceled.
-    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+    EXPECT_FALSE(gs->epochManager->tryCommitEpoch(epoch, true, nullopt, []() -> void {}));
 
     // Ensure that new update has a new global state defined.
     auto maybeUpdates = getUpdates(state, 0);
@@ -557,10 +559,10 @@ TEST(SlowPathCancelation, DoesNotCancelRunningSlowPathWhenFastPathEditComesIn) {
     // Edit the body of the new method which should take the fast path.
     string fooV3 = "# typed: true\ndef foo; end\ndef bar; 1 + 1; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
-    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+    EXPECT_FALSE(gs->epochManager->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck. Should return true because typechecking hasn't been canceled.
-    EXPECT_TRUE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+    EXPECT_TRUE(gs->epochManager->tryCommitEpoch(epoch, true, nullopt, []() -> void {}));
 }
 
 TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled) { // NOLINT
@@ -580,14 +582,14 @@ TEST(SlowPathCancelation, CancelsRunningSlowPathAfterBlockingRequestGetsCanceled
     // Fixes parse error, but blocked by hover.
     string fooV3 = "# typed: true\ndef foo; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
-    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+    EXPECT_FALSE(gs->epochManager->wasTypecheckingCanceled());
 
     // Cancel hover, which should cause the slow path to be canceled.
     preprocessor.preprocessAndEnqueue(state, makeCancel(5), mtx);
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     // Processor thread: Try to typecheck, but get denied because canceled.
-    EXPECT_FALSE(gs->tryCommitEpoch(epoch, true, []() -> void {}));
+    EXPECT_FALSE(gs->epochManager->tryCommitEpoch(epoch, true, nullopt, []() -> void {}));
 }
 
 // Ensure that the preprocessor prunes TTGS properly during the event of a version rollover.
@@ -605,7 +607,7 @@ TEST(SlowPathCancelation, PruneDuringVersionRollover) { // NOLINT
 
     // Emulate typechecker thread: 'process' changes
     emulateProcessEditAtHeadOfQueue(state, *gs);
-    ASSERT_TRUE(gs->tryCommitEpoch(0xFFFFFFFF - 2, true, []() -> void {}));
+    ASSERT_TRUE(gs->epochManager->tryCommitEpoch(0xFFFFFFFF - 2, true, nullopt, []() -> void {}));
 
     // These two get bundled together:
     // Edit 0xFFFFFFFF-1 introduces syntax error into foo
@@ -622,7 +624,7 @@ TEST(SlowPathCancelation, PruneDuringVersionRollover) { // NOLINT
     string fooV3 = "# typed: true\ndef foo; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV3, 3), mtx);
 
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     // Without proper rollover, it'll forget about change to `barV2` because 0 < 0xFFFFFFFF.
     const auto maybeUpdates = getUpdates(state, 0);
@@ -673,7 +675,7 @@ TEST(SlowPathCancelation, DoesNotIncludeOldEditsInCombinedEdit) { // NOLINT
     string fooV4 = "# typed: true\ndef foo; 1; end";
     preprocessor.preprocessAndEnqueue(state, makeChange("foo.rb", fooV4, 4), mtx);
 
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     auto updates = getUpdates(state, 0).value();
 
@@ -686,38 +688,34 @@ TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
     auto gs = makeGS();
     // Note: needs to be > 0 otherwise an enforce triggers.
     gs->lspTypecheckCount++;
+    auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // No preemption task registered.
-    EXPECT_FALSE(gs->tryRunPreemptionTask());
+    EXPECT_FALSE(preemptManager->tryRunScheduledPreemptionTask());
 
-    auto task = make_shared<CountingTask>(*gs);
+    auto task = make_shared<CountingTask>(preemptManager);
     // Should fail because a slow path is not running, so there's nothing to preempt.
-    EXPECT_FALSE(gs->tryPreempt(task));
+    EXPECT_FALSE(preemptManager->trySchedulePreemptionTask(task));
     // No slow path running, so we cannot cancel it.
-    EXPECT_FALSE(gs->tryCancelSlowPath(3));
+    EXPECT_FALSE(gs->epochManager->tryCancelSlowPath(3));
 
     // Signify to GlobalState that a slow path is beginning.
-    gs->startCommitEpoch(1, 2);
-    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+    gs->epochManager->startCommitEpoch(1, 2);
+    EXPECT_FALSE(gs->epochManager->wasTypecheckingCanceled());
 
     // Preempting should work now.
-    EXPECT_TRUE(gs->tryPreempt(task));
-
-    // We should be able to cancel a slow path even if a preemption task is scheduled.
-    EXPECT_TRUE(gs->tryCancelSlowPath(3));
-
-    // However, GlobalState shouldn't trigger cancelation until the preemption task runs.
-    EXPECT_FALSE(gs->wasTypecheckingCanceled());
+    EXPECT_TRUE(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    EXPECT_TRUE(gs->tryRunPreemptionTask());
+    EXPECT_TRUE(preemptManager->tryRunScheduledPreemptionTask());
     EXPECT_EQ(1, task->runCount);
 
-    // GlobalState should now allow cancelation to proceed.
-    EXPECT_TRUE(gs->wasTypecheckingCanceled());
+    // We can cancel the slow path.
+    EXPECT_TRUE(gs->epochManager->tryCancelSlowPath(3));
+    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
 
     // We should not be able to schedule further tasks after cancelation.
-    EXPECT_FALSE(gs->tryPreempt(task));
+    EXPECT_FALSE(preemptManager->trySchedulePreemptionTask(task));
 }
 
 } // namespace sorbet::realmain::lsp::test

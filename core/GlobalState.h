@@ -24,7 +24,8 @@ struct GlobalStateHash;
 
 namespace lsp {
 class Task;
-}
+class TypecheckEpochManager;
+} // namespace lsp
 
 namespace serialize {
 class Serializer;
@@ -49,13 +50,8 @@ class GlobalState final {
     friend struct NameRefDebugCheck;
 
 public:
-    GlobalState(std::shared_ptr<ErrorQueue> errorQueue,
-                std::shared_ptr<absl::Mutex> epochMutex = std::make_shared<absl::Mutex>(),
-                std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch = std::make_shared<std::atomic<u4>>(0),
-                std::shared_ptr<std::atomic<u4>> lspEpochInvalidator = std::make_shared<std::atomic<u4>>(0),
-                std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch = std::make_shared<std::atomic<u4>>(0),
-                std::shared_ptr<std::shared_ptr<lsp::Task>> preemptTask =
-                    std::make_shared<std::shared_ptr<lsp::Task>>(nullptr));
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
 
     void initEmpty();
     void installIntrinsics();
@@ -200,28 +196,8 @@ public:
     // Indicates the number of times LSP has run the type checker with this global state.
     // Used to ensure GlobalState is in the correct state to process requests.
     unsigned int lspTypecheckCount = 0;
-    // [LSP] Run only from the typechecking thread.
-    // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
-    bool tryCommitEpoch(u4 epoch, bool isCancelable, std::function<void()> typecheck);
-    // [LSP] Run only from the typechecking thread.
-    // Indicates an intent to begin committing a specific epoch.
-    void startCommitEpoch(u4 fromEpoch, u4 toEpoch);
-    // [LSP] Returns 'true' if the currently running typecheck run has been canceled.
-    bool wasTypecheckingCanceled() const;
-    // [LSP] If a slow path is running on this GlobalState or its descendent, returns a pair of the committed
-    // epoch and the processing epoch. Otherwise, returns nullopt.
-    std::optional<std::pair<u4, u4>> getRunningSlowPath() const;
-    // [LSP] Run only from preprocess thread.
-    // Tries to cancel a running slow path on this GlobalState or its descendent. Returns true if it succeeded, false if
-    // the slow path was unable to be canceled.
-    bool tryCancelSlowPath(u4 newEpoch) const;
-    // [LSP] Run only from message processing thread.
-    // Attempts to preempt a running slow path to run the provided task. If it returns true, the task is guaranteed
-    // to run.
-    bool tryPreempt(std::shared_ptr<lsp::Task> task);
-    // [LSP] Run from the typechecker thread during a slow path. Attempts to run the preeemption task, if one is
-    // registered. Returns true if it ran a preemption task.
-    bool tryRunPreemptionTask();
+    // [LSP] Manages typechecking epochs and cancelation.
+    std::shared_ptr<lsp::TypecheckEpochManager> epochManager;
 
     void trace(std::string_view msg) const;
 
@@ -240,12 +216,6 @@ public:
     bool hasAnyDslPlugin() const;
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
-    // In LSP mode: Used to pre-empt typechecking (post-resolver).
-    // - Worker threads grab as a reader lock, and routinely gives up and re-acquire the lock to allow other requests to
-    // pre-empt.
-    // - Typechecking coordinator thread grabs as a writer lock when there's a preemption function, which halts all
-    // worker threads.
-    const std::unique_ptr<absl::Mutex> typecheckMutex;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
@@ -268,24 +238,6 @@ private:
     UnorderedSet<int> onlyErrorClasses;
     UnorderedMap<NameRef, std::string> dslPlugins;
     bool wasModified_ = false;
-
-    // In LSP mode: Used to linearize operations involving lastCommittedLSPEpoch.
-    const std::shared_ptr<absl::Mutex> epochMutex;
-    // In LSP mode: Contains the current edit version (epoch) that the processing thread is typechecking or has
-    // typechecked last. Is bumped by the typechecking thread.
-    const std::shared_ptr<std::atomic<u4>> currentlyProcessingLSPEpoch;
-    // In LSP mode: should always be `>= currentlyProcessingLSPEpoch`(modulo overflows).
-    // If value in `lspEpochInvalidator` is different from `currentlyProcessingLSPEpoch`, then LSP wants the current
-    // request to be cancelled. Is bumped by the preprocessor thread (which determines cancellations).
-    const std::shared_ptr<std::atomic<u4>> lspEpochInvalidator;
-    // In LSP mode: should always be >= currentlyProcessingLSPEpoch. Is bumped by the typechecking thread.
-    // Contains the versionEnd of the last committed slow path.
-    // If lastCommittedLSPEpoch != currentlyProcessingLSPEpoch, then GlobalState is currently running a slow path
-    // containing edits (lastCommittedLSPEpoch, currentlyProcessingLSPEpoch].
-    const std::shared_ptr<std::atomic<u4>> lastCommittedLSPEpoch;
-    // Task to run when pre-empting typechecking. Outer shared_ptr is shared amongst all GlobalState instances that
-    // share a common lineage, whereas contents of inner shared_ptr is atomically replaced during preemption.
-    const std::shared_ptr<std::shared_ptr<lsp::Task>> preemptTask;
 
     bool freezeSymbolTable();
     bool freezeNameTable();
