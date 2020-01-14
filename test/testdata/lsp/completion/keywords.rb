@@ -1,13 +1,20 @@
 # typed: true
 
-# TODO(jez) These show up as IdentResponse's; currently unhandled
-# __ENCODING__
-# __LINE__
-# __FILE__
-
-# TODO(jez) These show up as ConstantResponse's; currently unhandled
-# BEGIN
-# END
+# Most partially typed keywords show up as SendResponse internally, so we tap
+# into method name completion to service keywords. There are some, though, that
+# don't come back as a SendResponse:
+#
+#   IdentResponse:
+#     __ENCODING__
+#     __LINE__
+#     __FILE__
+#   ConstantResponse:
+#     BEGIN
+#     END
+#
+# Rather than also tap into ident / const responses to service keyword
+# completion for those keywords, we just drop them on the floor (which is fine,
+# because these keywords are comparably rare).
 
 # `alias_method` is not a keyword
 alia # error: does not exist

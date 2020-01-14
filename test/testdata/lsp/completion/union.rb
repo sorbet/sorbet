@@ -32,9 +32,9 @@ def test
 # ^^^^^^^^^^^^^^^^ error: Method `foo_only` does not exist on `A` component of `T.nilable(A)`
 # ^^^^^^^^^^^^^^^^ error: Method `foo_only` does not exist on `NilClass` component of `T.nilable(A)`
 
-  # TODO(jez) This is a weird case. There are two methods named `some_method`.
-  # We've decided to show all methods with the same name, but the arity on each
-  # component is different, so it'll be impossible to call even though we
+  # This is a weird case. There are two methods named `some_method`.
+  # It currently shows all methods with the same name, but the arity on each
+  # component is different so it'll be impossible to call even though we
   # suggest it.
   nullary_or_unary = T.let(Nullary.new, T.any(Nullary, Unary))
   nullary_or_unary.some_

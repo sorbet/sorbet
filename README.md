@@ -625,17 +625,7 @@ bazel test //test/cli:update
 ```
 
 
-## C++ conventions
-
-- [ ] TODO(jez) Write and link to "Notes on C++ Development"
-
-- Use smart pointers for storage, references for arguments.
-- No C-style allocators; use vectors instead.
-
-
-## Debugging and profiling
-
-### Debugging
+## Debugging
 
 In general,
 
@@ -652,11 +642,6 @@ Also, it’s good to get in the practice of fixing bugs by first adding an
 `ENFORCE` (assertion) that would have caught the bug before actually fixing the
 bug. It’s far easier to fix bugs when there’s a nice error message stating what
 invariant you’ve violated. `ENFORCE`s are free in the release build.
-
-### Profiling
-
-- [ ] TODO(jez) Write about how to profile Sorbet
-
 
 ## Writing docs
 

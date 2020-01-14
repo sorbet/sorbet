@@ -55,7 +55,6 @@ gem 'sorbet-runtime'
 \`\`\`
 `;
 
-// TODO(jez) No inline style
 const Button = (props) => (
   <a
     className="button"
