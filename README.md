@@ -48,3 +48,6 @@ Now when you run it there are some useful functions for debugging:
 # Differences from Sorbet development.
  - All code in sorbet_llvm should be exception safe.
    - the most common way to make some code non-exception safe is to use pointer juggling with `unique_ptr.release`. Don't use it in sorbet_llvm
+
+# Reading exp file diffs
+  With many changes in exp files being optimization changes, running `git diff --word-diff` gives better way to show the diff.
