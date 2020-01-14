@@ -34,6 +34,10 @@ llvm::Value *Payload::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &buil
     return builderCast(builder).CreateLoad(builderCast(builder).CreateStructGEP(target, 0), "rawRubyValue");
 }
 
+llvm::Value *Payload::rubyUndef(CompilerState &cs, llvm::IRBuilderBase &builder) {
+    return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyUndef"), {}, "undefValueRaw");
+}
+
 llvm::Value *Payload::rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyNil"), {}, "nilValueRaw");
 }

@@ -49,6 +49,11 @@ VALUE sorbet_rubyFalse() __attribute__((always_inline)) {
     return RUBY_Qfalse;
 }
 
+// use this undefined value when you have a variable that should _never_ escape to ruby.
+VALUE sorbet_rubyUndef() __attribute__((always_inline)) {
+    return RUBY_undef;
+}
+
 VALUE sorbet_rubyNil() __attribute__((always_inline)) {
     return RUBY_Qnil;
 }

@@ -20,6 +20,7 @@ public:
                             llvm::Value *rawData);
     static llvm::Value *unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *storeTarget);
 
+    static llvm::Value *rubyUndef(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder);
