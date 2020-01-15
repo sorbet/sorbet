@@ -398,8 +398,11 @@ module T::Configuration
   #   should be allowed. Useful to whitelist benign violations, like shim files
   #   generated for an autoloader.
   def self.sealed_violation_whitelist=(sealed_violation_whitelist)
+    if @sealed_violation_whitelist != nil
+      raise ArgumentError.new("Cannot overwrite sealed_violation_whitelist after setting it")
+    end
+
     case sealed_violation_whitelist
-    when NilClass then nil
     when Array
       sealed_violation_whitelist.each do |x|
         case x

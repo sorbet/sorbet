@@ -12,7 +12,7 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   end
   after do
     Opus::Types::Test.send(:remove_const, :SealedModuleSandbox)
-    T::Configuration.sealed_violation_whitelist = nil
+    T::Configuration.instance_variable_set(:@sealed_violation_whitelist, nil)
   end
 
   it "allows declaring a class as sealed" do
