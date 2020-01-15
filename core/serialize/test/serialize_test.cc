@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-// has to go first as it violates are requirements
+// has to go first as it violates our requirements
 #include "core/serialize/pickler.h"
 #include "core/serialize/serialize.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
