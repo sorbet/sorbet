@@ -1,3 +1,4 @@
+#include "main/lsp/requests/hover.h"
 #include "absl/strings/ascii.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -9,7 +10,7 @@ namespace sorbet::realmain::lsp {
 string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
                         const core::DispatchResult &dispatchResult,
                         const unique_ptr<core::TypeConstraint> &constraint) {
-    string contents = "";
+    string contents;
     auto start = &dispatchResult;
     ;
     while (start != nullptr) {
@@ -27,13 +28,15 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
     return contents;
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                             const TextDocumentPositionParams &params) const {
+HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentHover);
+    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentHover);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -58,7 +61,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentHover(LSPTypecheckerDeleg
             }
         }
 
-        auto clientHoverMarkupKind = config->getClientConfig().clientHoverMarkupKind;
+        auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             auto start = sendResp->dispatchResult.get();

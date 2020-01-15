@@ -1,3 +1,4 @@
+#include "main/lsp/requests/document_symbol.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
@@ -43,7 +44,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
         return nullptr;
     }
 
-    string prefix = "";
+    string prefix;
     if (sym->owner.exists() && sym->owner.data(gs)->isClassOrModule() &&
         sym->owner.data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
@@ -68,11 +69,13 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     return result;
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDocumentSymbol(LSPTypecheckerDelegate &typechecker,
-                                                                      const MessageId &id,
-                                                                      const DocumentSymbolParams &params) const {
+DocumentSymbolTask::DocumentSymbolTask(const LSPConfiguration &config, MessageId id,
+                                       std::unique_ptr<DocumentSymbolParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
-    if (!config->opts.lspDocumentSymbolEnabled) {
+    if (!config.opts.lspDocumentSymbolEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Document Symbol` LSP feature is experimental and disabled by default.");
@@ -82,8 +85,8 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDocumentSymbol(LSPTypeche
     const core::GlobalState &gs = typechecker.state();
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentSymbol");
     vector<unique_ptr<DocumentSymbol>> result;
-    string_view uri = params.textDocument->uri;
-    auto fref = config->uri2FileRef(gs, uri);
+    string_view uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
     for (u4 idx = 1; idx < gs.symbolsUsed(); idx++) {
         core::SymbolRef ref(gs, idx);
         if (!hideSymbol(gs, ref) &&

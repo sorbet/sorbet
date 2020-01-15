@@ -12,6 +12,7 @@ cc_library(
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
+        "LSPTask.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",
         "LocalVarFinder.h",
@@ -25,7 +26,7 @@ cc_library(
         "lsp_messages_gen_helpers.h",
         "watchman/WatchmanProcess.h",
         "wrapper.h",
-    ],
+    ] + glob(["requests/*.h"]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,

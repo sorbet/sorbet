@@ -5,6 +5,7 @@
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::realmain::lsp {
+class LSPTask;
 /**
  * Handles typechecking and other queries. Can either operate in single-threaded mode (in which lambdas passed to
  * syncRun/asyncRun run-to-completion immediately) or dedicated-thread mode (in which lambdas are enqueued to execute on
@@ -52,7 +53,7 @@ public:
      * then the given task is allowed to use the full threadpool at the cost of not being able to preempt slow paths.
      * TODO(jvilk): Make single-threaded tasks scheduled this way preempt the slow path.
      */
-    void syncRun(std::function<void(LSPTypecheckerDelegate &)> &&lambda, bool multithreaded = false);
+    void syncRun(std::unique_ptr<LSPTask> task, bool multithreaded = false);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes
