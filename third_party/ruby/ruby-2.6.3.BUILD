@@ -67,7 +67,6 @@ genrule(
         --enable-load-relative \
         --without-gmp \
         --disable-jit-support \
-        --with-arch=x86_64 \
         > /dev/null
     find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
     cp config.status $(location config.status)
