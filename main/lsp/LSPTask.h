@@ -5,6 +5,10 @@
 #include "main/lsp/LSPTypecheckerCoordinator.h"
 
 namespace sorbet::realmain::lsp {
+/**
+ * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
+ * Contains miscellaneous helper methods that are useful in multiple tasks.
+ */
 class LSPTask {
 protected:
     const LSPConfiguration &config;
@@ -33,20 +37,24 @@ protected:
 
 public:
     virtual ~LSPTask() = default;
-    virtual void run(LSPTypecheckerDelegate &delegate) = 0;
+
+    // Runs the task. Is only ever invoked from the typechecker thread.
+    virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
 };
 
-// A specialized version of LSPTask for LSP requests (which must be responded to).
+/**
+ * A specialized version of LSPTask for LSP requests (which must be responded to).
+ */
 class LSPRequestTask : public LSPTask {
 protected:
     const MessageId id;
 
     LSPRequestTask(const LSPConfiguration &config, MessageId id);
 
-    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &delegate) = 0;
+    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) = 0;
 
 public:
-    void run(LSPTypecheckerDelegate &delegate) override;
+    void run(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

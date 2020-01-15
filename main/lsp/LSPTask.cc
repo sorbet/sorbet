@@ -9,8 +9,8 @@ LSPTask::LSPTask(const LSPConfiguration &config) : config(config) {}
 
 LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id) : LSPTask(config), id(move(id)) {}
 
-void LSPRequestTask::run(LSPTypecheckerDelegate &tcd) {
-    auto response = runRequest(tcd);
+void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
+    auto response = runRequest(typechecker);
     ENFORCE(response != nullptr);
     config.output->write(move(response));
 }

@@ -7,6 +7,16 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 
 namespace {
+/**
+ * Adapter class from LSPTask to Task. Handles passing a `LSPTypecheckerDelegate` to the `LSPTask`.
+ * Why use `Task` internally instead of `LSPTask`? There are four different contexts involved in scheduling a unit of
+ * work on the typechecking thread:
+ * - request_dispatch.cc: Creates the LSPTask, but has no access to a `LSPTypecheckerDelegate` (intentionally).
+ * - Method on LSPTypecheckerCoordinator: Has enough context to create the `LSPTypecheckerDelegate`.
+ * - Typechecker thread: Does not have enough context to create the `LSPTypecheckerDelegate`. Also, I'd like to reserve
+ * the right to run other types of tasks on this thread when appropriate.
+ * - core/lsp/PreemptionTaskManager: Knows nothing about any of this and just wants to run a method with no args.
+ */
 class TypecheckerTask final : public core::lsp::Task {
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
@@ -34,7 +44,11 @@ public:
     }
 };
 
-// Special internal tasks
+// Special internal tasks that directly operate on `LSPTypechecker`. These are the only tasks that are allowed to
+// directly access `LSPTypechecker` (because they do special things). Thus, only `LSPTypecheckerCoordinator` is
+// allowed/able to create them.
+// TODO(jvilk): These implement `LSPTask` for the convenient `blockUntilComplete` method. Should we move that method
+// to `Task` directly?
 
 class InitializeTask : public LSPTask {
     LSPTypechecker &typechecker;
@@ -115,7 +129,7 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task, bool multithre
 }
 
 void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedParams> params) {
-    // TODO: Make async when we land preemptible slow path.
+    // TODO: Split into a sync and async task when we land preemptible slow path, where the typecheck is async.
     syncRun(make_unique<InitializeTask>(*config, typechecker, workers, move(params->updates)));
 }
 
