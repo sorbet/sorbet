@@ -22,7 +22,7 @@ RUBY_VERSION = "2.6.3"
 
 RUBY_CORE_VERSION = "2.6.0"
 
-ARCH_LINUX = "x86_64-unknown-linux"
+ARCH_LINUX = "x86_64-linux"
 
 ARCH_DARWIN = "x86_64-darwin18"
 
@@ -431,10 +431,7 @@ cc_binary(
     srcs = [
         "main.c",
     ],
-    linkstatic = select({
-        ":linux": False,
-        ":darwin": True,
-    }),
+    linkstatic = 1,
     deps = [
         ":libruby",
     ],
