@@ -159,7 +159,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             typecheckerCoord.syncRun(make_unique<SignatureHelpTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
-            typecheckerCoord.syncRun(make_unique<ReferencesTask>(*config, id, move(params)));
+            typecheckerCoord.syncRun(make_unique<ReferencesTask>(*config, id, move(params)), /* multithreaded */ true);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
             typecheckerCoord.syncRun(make_unique<SorbetReadFileTask>(*config, id, move(params)));
