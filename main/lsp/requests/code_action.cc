@@ -1,3 +1,4 @@
+#include "main/lsp/requests/code_action.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -5,12 +6,13 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const CodeActionParams &params) const {
+CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
-    if (!config->opts.lspQuickFixEnabled) {
+    if (!config.opts.lspQuickFixEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
         return response;
@@ -21,7 +23,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
 
     const core::GlobalState &gs = typechecker.state();
-    core::FileRef file = config->uri2FileRef(gs, params.textDocument->uri);
+    core::FileRef file = config.uri2FileRef(gs, params->textDocument->uri);
     if (!file.exists()) {
         // File is an invalid URI. Perhaps the user opened a file that is not within the VS Code workspace?
         // Don't send an error, as it's not the user's fault and isn't actionable. Instead, send an empty list of code
@@ -32,7 +34,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker
 
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = typechecker.retypecheck({file});
-    auto loc = params.range->toLoc(gs, file);
+    auto loc = params->range->toLoc(gs, file);
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -49,7 +51,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCodeAction(LSPTypechecker
                 for (auto &edit : autocorrect.edits) {
                     auto range = Range::fromLoc(gs, edit.loc);
                     if (range != nullptr) {
-                        editsByFile[config->fileRef2Uri(gs, edit.loc.file())].emplace_back(
+                        editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
                             make_unique<TextEdit>(std::move(range), edit.replacement));
                     }
                 }

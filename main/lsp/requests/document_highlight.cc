@@ -1,4 +1,4 @@
-
+#include "main/lsp/requests/document_highlight.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -6,23 +6,6 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-
-vector<unique_ptr<DocumentHighlight>>
-LSPLoop::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string_view const uri, core::SymbolRef symbol,
-                                     vector<unique_ptr<DocumentHighlight>> highlights) const {
-    if (symbol.exists()) {
-        auto fref = config->uri2FileRef(typechecker.state(), uri);
-        if (fref.exists()) {
-            auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
-            auto locations = extractLocations(typechecker.state(), run2.responses);
-            for (auto const &location : locations) {
-                auto highlight = make_unique<DocumentHighlight>(move(location->range));
-                highlights.push_back(move(highlight));
-            }
-        }
-    }
-    return highlights;
-}
 
 vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<unique_ptr<Location>> const locations) {
     vector<unique_ptr<DocumentHighlight>> highlights;
@@ -33,11 +16,13 @@ vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<uniqu
     return highlights;
 }
 
-unique_ptr<ResponseMessage>
-LSPLoop::handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                             const TextDocumentPositionParams &params) const {
+DocumentHighlightTask::DocumentHighlightTask(const LSPConfiguration &config, MessageId id,
+                                             unique_ptr<TextDocumentPositionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);
-    if (!config->opts.lspDocumentHighlightEnabled) {
+    if (!config.opts.lspDocumentHighlightEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest, "The `Highlight` LSP feature is experimental and disabled by default.");
         return response;
@@ -45,8 +30,8 @@ LSPLoop::handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentHighlight");
     const core::GlobalState &gs = typechecker.state();
-    auto uri = params.textDocument->uri;
-    auto result = queryByLoc(typechecker, params.textDocument->uri, *params.position,
+    auto uri = params->textDocument->uri;
+    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,
                              LSPMethod::TextDocumentDocumentHighlight, false);
     if (result.error) {
         // An error happened while setting up the query.
@@ -57,7 +42,7 @@ LSPLoop::handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker
         response->result = variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>(JSONNullObject());
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
-            auto file = config->uri2FileRef(gs, uri);
+            auto file = config.uri2FileRef(gs, uri);
             if (!file.exists()) {
                 return response;
             }

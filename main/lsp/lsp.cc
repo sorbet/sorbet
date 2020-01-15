@@ -6,6 +6,7 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "main/lsp/LSPTask.h"
 
 using namespace std;
 
@@ -15,60 +16,6 @@ LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &worke
                  const std::shared_ptr<LSPConfiguration> &config)
     : config(config), preprocessor(move(initialGS), config, workers), typecheckerCoord(config, workers),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
-
-LSPQueryResult LSPLoop::queryByLoc(LSPTypecheckerDelegate &typechecker, string_view uri, const Position &pos,
-                                   const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
-    Timer timeit(config->logger, "setupLSPQueryByLoc");
-    const core::GlobalState &gs = typechecker.state();
-    auto fref = config->uri2FileRef(gs, uri);
-    if (!fref.exists()) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPQueryResult{{}, move(error)};
-    }
-
-    if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
-        config->logger->info("Ignoring request on untyped file `{}`", uri);
-        // Act as if the query returned no results.
-        return LSPQueryResult{{}};
-    }
-
-    auto loc = config->lspPos2Loc(fref, pos, gs);
-    return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
-}
-
-LSPQueryResult LSPLoop::queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym,
-                                             vector<core::FileRef> frefs) const {
-    Timer timeit(config->logger, "setupLSPQueryBySymbolInFiles");
-    ENFORCE(sym.exists());
-    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
-}
-
-LSPQueryResult LSPLoop::queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef sym) const {
-    Timer timeit(config->logger, "setupLSPQueryBySymbol");
-    ENFORCE(sym.exists());
-    vector<core::FileRef> frefs;
-    const core::GlobalState &gs = typechecker.state();
-    const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
-    // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    int i = -1;
-    for (auto &hash : typechecker.getFileHashes()) {
-        i++;
-        const auto &usedSends = hash.usages.sends;
-        const auto &usedConstants = hash.usages.constants;
-        auto ref = core::FileRef(i);
-
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid &&
-            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
-            frefs.emplace_back(ref);
-        }
-    }
-
-    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
-}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
@@ -93,9 +40,22 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     }
 }
 
+namespace {
+class TypecheckCountTask : public LSPTask {
+    int &count;
+
+public:
+    TypecheckCountTask(const LSPConfiguration &config, int &count) : LSPTask(config), count(count) {}
+
+    void run(LSPTypecheckerDelegate &tc) override {
+        count = tc.state().lspTypecheckCount;
+    }
+};
+} // namespace
+
 int LSPLoop::getTypecheckCount() {
     int count = 0;
-    typecheckerCoord.syncRun([&count](const auto &tc) -> void { count = tc.state().lspTypecheckCount; });
+    typecheckerCoord.syncRun(make_unique<TypecheckCountTask>(*config, count));
     return count;
 }
 

@@ -1,3 +1,4 @@
+#include "main/lsp/requests/signature_help.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
@@ -47,10 +48,13 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     sigs.push_back(move(sig));
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                             const TextDocumentPositionParams &params) const {
+SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId id,
+                                     std::unique_ptr<TextDocumentPositionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
-    if (!config->opts.lspSignatureHelpEnabled) {
+    if (!config.opts.lspSignatureHelpEnabled) {
         response->error =
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                        "The `Signature Help` LSP feature is experimental and disabled by default.");
@@ -61,7 +65,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypecheckerDeleg
 
     const core::GlobalState &gs = typechecker.state();
     auto result =
-        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentSignatureHelp);
+        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -75,15 +79,15 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextSignatureHelp(LSPTypecheckerDeleg
             if (auto sendResp = resp->isSend()) {
                 auto sendLocIndex = sendResp->termLoc.beginPos();
 
-                auto fref = config->uri2FileRef(gs, params.textDocument->uri);
+                auto fref = config.uri2FileRef(gs, params->textDocument->uri);
                 if (!fref.exists()) {
                     response->error =
                         make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   fmt::format("Unknown file: `{}`", params.textDocument->uri));
+                                                   fmt::format("Unknown file: `{}`", params->textDocument->uri));
                     return response;
                 }
                 auto src = fref.data(gs).source();
-                auto loc = config->lspPos2Loc(fref, *params.position, gs);
+                auto loc = config.lspPos2Loc(fref, *params->position, gs);
                 string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =

@@ -1,10 +1,27 @@
 #include "common/Timer.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/lsp.h"
+#include "main/lsp/requests/requests.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+namespace {
+class SorbetFenceTask final : public LSPTask {
+    int id;
+
+public:
+    SorbetFenceTask(const LSPConfiguration &config, int id) : LSPTask(config), id(id) {}
+    void run(LSPTypecheckerDelegate &tc) override {
+        // Send the same fence back to acknowledge the fence.
+        // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
+        // client-chosen IDs when using fences internally.
+        auto response = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, id);
+        config.output->write(move(response));
+    }
+};
+} // namespace
 
 void LSPLoop::processRequest(const string &json) {
     vector<unique_ptr<LSPMessage>> messages;
@@ -64,14 +81,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             }
         } else if (method == LSPMethod::SorbetFence) {
             // Ensure all prior messages have finished processing before sending response.
-            typecheckerCoord.syncRun([&](auto &tc) -> void {
-                // Send the same fence back to acknowledge the fence.
-                // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
-                // client-chosen IDs when using fences internally.
-                auto response =
-                    make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, move(msg.asNotification().params));
-                config->output->write(move(response));
-            });
+            typecheckerCoord.syncRun(make_unique<SorbetFenceTask>(*config, get<int>(msg.asNotification().params)));
         }
     } else if (msg.isRequest()) {
         Timer timeit(logger, "request", {{"method", convertLSPMethodToString(method)}});
@@ -122,62 +132,37 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             config->output->write(move(response));
         } else if (method == LSPMethod::TextDocumentDocumentHighlight) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            typecheckerCoord.syncRun([&](auto &typechecker) -> void {
-                config->output->write(handleTextDocumentDocumentHighlight(typechecker, id, *params));
-            });
+            typecheckerCoord.syncRun(make_unique<DocumentHighlightTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentDocumentSymbol) {
             auto &params = get<unique_ptr<DocumentSymbolParams>>(rawParams);
-            typecheckerCoord.syncRun([&](auto &typechecker) -> void {
-                config->output->write(handleTextDocumentDocumentSymbol(typechecker, id, *params));
-            });
+            typecheckerCoord.syncRun(make_unique<DocumentSymbolTask>(*config, id, move(params)));
         } else if (method == LSPMethod::WorkspaceSymbol) {
             auto &params = get<unique_ptr<WorkspaceSymbolParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleWorkspaceSymbols(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<WorkspaceSymbolsTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentDefinition) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentDefinition(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<DefinitionTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentTypeDefinition) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentTypeDefinition(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<TypeDefinitionTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentHover) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentHover(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<HoverTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentCompletion) {
             auto &params = get<unique_ptr<CompletionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentCompletion(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<CompletionTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentCodeAction) {
             auto &params = get<unique_ptr<CodeActionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentCodeAction(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<CodeActionTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentSignatureHelp) {
             auto &params = get<unique_ptr<TextDocumentPositionParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextSignatureHelp(tc, id, *params)); });
+            typecheckerCoord.syncRun(make_unique<SignatureHelpTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
-            typecheckerCoord.syncRun(
-                [&](auto &tc) -> void { config->output->write(handleTextDocumentReferences(tc, id, *params)); },
-                /* multithreaded */ true);
+            typecheckerCoord.syncRun(make_unique<ReferencesTask>(*config, id, move(params)), /* multithreaded */ true);
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
-            typecheckerCoord.syncRun([&](auto &tc) -> void {
-                auto response = make_unique<ResponseMessage>("2.0", id, method);
-                auto fref = config->uri2FileRef(tc.state(), params->uri);
-                if (fref.exists()) {
-                    response->result =
-                        make_unique<TextDocumentItem>(params->uri, "ruby", 0, string(fref.data(tc.state()).source()));
-                } else {
-                    response->error = make_unique<ResponseError>(
-                        (int)LSPErrorCodes::InvalidParams, fmt::format("Did not find file at uri {} in {}", params->uri,
-                                                                       convertLSPMethodToString(method)));
-                }
-                config->output->write(move(response));
-            });
+            typecheckerCoord.syncRun(make_unique<SorbetReadFileTask>(*config, id, move(params)));
         } else if (method == LSPMethod::Shutdown) {
             prodCategoryCounterInc("lsp.messages.processed", "shutdown");
             auto response = make_unique<ResponseMessage>("2.0", id, method);

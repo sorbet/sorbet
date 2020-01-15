@@ -1,3 +1,4 @@
+#include "main/lsp/requests/type_definition.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
@@ -35,13 +36,15 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
 }
 } // namespace
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentTypeDefinition(LSPTypecheckerDelegate &typechecker,
-                                                                      const MessageId &id,
-                                                                      const TextDocumentPositionParams &params) const {
+TypeDefinitionTask::TypeDefinitionTask(const LSPConfiguration &config, MessageId id,
+                                       std::unique_ptr<TextDocumentPositionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.typeDefinition");
     const core::GlobalState &gs = typechecker.state();
-    auto result = queryByLoc(typechecker, params.textDocument->uri, *params.position,
+    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,
                              LSPMethod::TextDocumentTypeDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
@@ -51,7 +54,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentTypeDefinition(LSPTypeche
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
+                config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
             // Only support go-to-type-definition on constants and fields in untyped files.
