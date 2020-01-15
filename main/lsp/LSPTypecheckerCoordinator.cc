@@ -8,21 +8,29 @@ using namespace std;
 
 namespace {
 class TypecheckerTask final : public core::lsp::Task {
-    unique_ptr<LSPTask> task;
-    unique_ptr<LSPTypecheckerDelegate> delegate;
+    const unique_ptr<LSPTask> task;
+    const unique_ptr<LSPTypecheckerDelegate> delegate;
+    const bool hasDedicatedThread;
     absl::Notification complete;
+    CounterState counters;
 
 public:
-    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate)
-        : task(move(task)), delegate(move(delegate)) {}
+    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate, bool hasDedicatedThread)
+        : task(move(task)), delegate(move(delegate)), hasDedicatedThread(hasDedicatedThread) {}
 
     void run() override {
         task->run(*delegate);
+        if (hasDedicatedThread) {
+            counters = getAndClearThreadCounters();
+        }
         complete.Notify();
     }
 
     void blockUntilComplete() {
         complete.WaitForNotification();
+        if (hasDedicatedThread) {
+            counterConsume(move(counters));
+        }
     }
 };
 
@@ -100,14 +108,10 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
 
 void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task, bool multithreaded) {
     absl::Notification notification;
-    CounterState typecheckerCounters;
-    auto wrappedTask =
-        make_shared<TypecheckerTask>(move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker));
+    auto wrappedTask = make_shared<TypecheckerTask>(
+        move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
     asyncRunInternal(wrappedTask);
     wrappedTask->blockUntilComplete();
-    if (hasDedicatedThread) {
-        counterConsume(move(typecheckerCounters));
-    }
 }
 
 void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedParams> params) {
