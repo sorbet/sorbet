@@ -64,6 +64,10 @@ TEST(LSPFileUpdatesTest, MergeOlderCancellationExpected) {
     oldUpdates.cancellationExpected = false;
     newUpdates.mergeOlder(oldUpdates);
     EXPECT_TRUE(newUpdates.cancellationExpected);
+
+    newUpdates.cancellationExpected = false;
+    newUpdates.mergeOlder(oldUpdates);
+    EXPECT_FALSE(newUpdates.cancellationExpected);
 }
 
 TEST(LSPFileUpdatesTest, MergeOlderHasNewFiles) {
@@ -79,6 +83,10 @@ TEST(LSPFileUpdatesTest, MergeOlderHasNewFiles) {
     oldUpdates.hasNewFiles = false;
     newUpdates.mergeOlder(oldUpdates);
     EXPECT_TRUE(newUpdates.hasNewFiles);
+
+    newUpdates.hasNewFiles = false;
+    newUpdates.mergeOlder(oldUpdates);
+    EXPECT_FALSE(newUpdates.hasNewFiles);
 }
 
 TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
