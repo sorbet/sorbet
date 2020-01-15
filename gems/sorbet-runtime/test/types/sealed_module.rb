@@ -12,6 +12,7 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   end
   after do
     Opus::Types::Test.send(:remove_const, :SealedModuleSandbox)
+    T::Configuration.instance_variable_set(:@sealed_violation_whitelist, nil)
   end
 
   it "allows declaring a class as sealed" do
@@ -155,5 +156,10 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
       require_relative './fixtures/sealed_module/sealed_abstract__3.rb'
     end
     assert_match(/was declared sealed and can only be inherited in/, err.message)
+  end
+
+  it "allows whitelisting certain sealed violations" do
+    require_relative './fixtures/sealed_module/whitelist_violation__1.rb'
+    require_relative './fixtures/sealed_module/whitelist_violation__2.rb'
   end
 end

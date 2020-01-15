@@ -393,6 +393,33 @@ module T::Configuration
     @legacy_t_enum_migration_mode || false
   end
 
+  # @param [Array] sealed_violation_whitelist An array of Regexp to validate
+  #   whether inheriting /including a sealed module outside the defining module
+  #   should be allowed. Useful to whitelist benign violations, like shim files
+  #   generated for an autoloader.
+  def self.sealed_violation_whitelist=(sealed_violation_whitelist)
+    if @sealed_violation_whitelist != nil
+      raise ArgumentError.new("Cannot overwrite sealed_violation_whitelist after setting it")
+    end
+
+    case sealed_violation_whitelist
+    when Array
+      sealed_violation_whitelist.each do |x|
+        case x
+        when Regexp then nil
+        else raise TypeError.new("sealed_violation_whitelist accepts an Array of Regexp")
+        end
+      end
+    else
+      raise TypeError.new("sealed_violation_whitelist= accepts an Array of Regexp")
+    end
+
+    @sealed_violation_whitelist = sealed_violation_whitelist
+  end
+  def self.sealed_violation_whitelist
+    @sealed_violation_whitelist
+  end
+
   private_class_method def self.validate_lambda_given!(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
