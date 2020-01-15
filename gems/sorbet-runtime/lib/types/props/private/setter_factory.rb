@@ -65,7 +65,7 @@ module T::Props
           type: T.any(T::Types::Base, Module),
           val: T.untyped,
         )
-        .returns(SetterProc)
+        .void
       end
       private_class_method def self.raise_pretty_error(klass, prop, type, val)
         base_message = "Can't set #{klass.name}.#{prop} to #{val.inspect} (instance of #{val.class}) - need a #{type}"
