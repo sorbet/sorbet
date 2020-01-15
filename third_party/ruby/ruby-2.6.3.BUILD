@@ -6,9 +6,6 @@
 # * probes.h
 # * enc/encinit.c
 
-# Templated files
-# * verconf.h is just a templated version of what ruby produces
-
 config_setting(
     name = "darwin",
     values = {"host_cpu": "darwin"},
@@ -64,11 +61,17 @@ genrule(
         "include/ruby/config.h",
         "config.status",
     ],
-    cmd = """
-CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) --enable-load-relative --without-gmp --disable-jit-support > /dev/null
-find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
-cp config.status $(location config.status)
-""",
+    cmd =
+    """
+    CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) \
+        --enable-load-relative \
+        --without-gmp \
+        --disable-jit-support \
+        --with-arch=x86_64 \
+        > /dev/null
+    find .ext -name config.h -type f -exec cp {} $(location include/ruby/config.h) \;
+    cp config.status $(location config.status)
+    """,
     toolchains = [
         "@bazel_tools//tools/cpp:cc_flags",
         "@bazel_tools//tools/cpp:current_cc_toolchain",
@@ -132,7 +135,7 @@ RUBY_COPTS = [
     "-Wno-constant-logical-operand",
     "-Wno-parentheses",
     "-D_REENTRANT",
-    "-DNO_INITIAL_LOAD_PATH",
+    "-DLOAD_RELATIVE",
     "-Wno-macro-redefined",  # they redefine NDEBUG
 
     # TODO: is this really necessary?
@@ -302,17 +305,8 @@ cc_binary(
 
 # full ruby ####################################################################
 
-RBCONFIG_LINUX = "/".join([
-    LIB_PREFIX,
-    ARCH_LINUX,
-    "rbconfig.rb",
-])
-
-RBCONFIG_DARWIN = "/".join([
-    LIB_PREFIX,
-    ARCH_DARWIN,
-    "rbconfig.rb",
-])
+RBCONFIG_LINUX = "{}/{}/rbconfig.rb".format(LIB_PREFIX, ARCH_LINUX)
+RBCONFIG_DARWIN = "{}/{}/rbconfig.rb".format(LIB_PREFIX, ARCH_DARWIN)
 
 RBCONFIG = select({
     ":linux": [RBCONFIG_LINUX],
@@ -385,41 +379,51 @@ genrule(
         "gem_prelude.rb",
     ],
     outs = ["prelude.c"],
-    cmd = """
-$(location bin/miniruby) \
-    -I $$(dirname $(location lib/erb.rb)) \
-    -I $$(dirname $(location tool/vpath.rb)) \
-    -I $$(dirname $(location prelude.rb)) \
-    $(location tool/generic_erb.rb) \
-    -o $@ \
-    $(location template/prelude.c.tmpl) \
-    $(location prelude.rb) \
-    $(location gem_prelude.rb)
-""",
+    cmd =
+    """
+    cp $(location prelude.rb) $(location gem_prelude.rb) .
+    "$(location bin/miniruby)" \
+        -I $$(dirname "$(location lib/erb.rb)") \
+        -I $$(dirname "$(location tool/vpath.rb)") \
+        -I $$(dirname "$(location prelude.rb)") \
+        "$(location tool/generic_erb.rb)" \
+        -o "$@" \
+        "$(location template/prelude.c.tmpl)" \
+        prelude.rb \
+        gem_prelude.rb
+    """,
 )
 
 genrule(
-    name = "verconf",
-    srcs = ["bin/miniruby"],
+    name = "generate-rbconfig.rb",
+    srcs = RBCONFIG,
+    outs = ["rbconfig.rb"],
+    cmd = "cp $< $@",
+)
+
+genrule(
+    name = "generate-verconf.h",
+    srcs = [
+        "bin/miniruby",
+        "tool/generic_erb.rb",
+        "tool/vpath.rb",
+        "tool/colorize.rb",
+        "template/verconf.h.tmpl",
+        ":miniruby_lib",
+        "lib/erb.rb",
+        "rbconfig.rb",
+    ],
     outs = ["verconf.h"],
-    cmd = """
-prefix="/ruby.runfiles/ruby_2_6_3"
-cat > $(location verconf.h) <<EOF
-#define RUBY_BASE_NAME                  "ruby"
-#define RUBY_VERSION_NAME               RUBY_BASE_NAME"-"RUBY_LIB_VERSION
-#define RUBY_LIB_VERSION_STYLE          3    /* full */
-#define RUBY_EXEC_PREFIX                "$$prefix"
-#define RUBY_LIB_PREFIX                 RUBY_EXEC_PREFIX"/lib/ruby"
-#define RUBY_ARCH_PREFIX_FOR(arch)      RUBY_LIB_PREFIX"/"arch
-#define RUBY_SITEARCH_PREFIX_FOR(arch)  RUBY_LIB_PREFIX"/"arch
-#define RUBY_LIB                        RUBY_LIB_PREFIX"/"RUBY_LIB_VERSION
-#define RUBY_ARCH_LIB_FOR(arch)         RUBY_LIB"/"arch
-#define RUBY_SITE_LIB                   RUBY_LIB_PREFIX"/site_ruby"
-#define RUBY_SITE_ARCH_LIB_FOR(arch)    RUBY_SITE_LIB2"/"arch
-#define RUBY_VENDOR_LIB                 RUBY_LIB_PREFIX"/vendor_ruby"
-#define RUBY_VENDOR_ARCH_LIB_FOR(arch)  RUBY_VENDOR_LIB2"/"arch
-EOF
-""",
+    cmd =
+    """
+    base="$$PWD"
+    cd "$(RULEDIR)"
+    bin/miniruby \
+            -I "$$base/$$(dirname "$(location lib/erb.rb)")" \
+            "$$base/$(location tool/generic_erb.rb)" \
+            -o verconf.h \
+            "$$base/$(location template/verconf.h.tmpl)"
+    """,
 )
 
 cc_binary(
@@ -1208,6 +1212,50 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# binary distribution for rbenv ################################################
+
+genrule(
+    name = "package-ruby-dist",
+    srcs = [
+        "bin/ruby",
+        "bin/bundle",
+        "bin/bundler",
+        ":ruby_lib",
+    ],
+    outs = ["ruby.tar.gz"],
+    cmd =
+    """
+    out=$$(mktemp -d)
+
+    mkdir "$$out/bin"
+
+    cp $(location bin/ruby) "$$out/bin"
+    cp $(location bin/bundle) "$$out/bin"
+    cp $(location bin/bundler) "$$out/bin"
+
+    (
+        cd $(RULEDIR)
+
+        # build the directories for lib first
+        find lib -type d | while read dir; do
+            mkdir -p "$$out/$$dir"
+        done
+
+        # then copy all of the sources in
+        find lib -type l -o -type f | while read file; do
+            install -c "$$file" "$$out/$$file"
+        done
+    )
+
+    base=$$PWD
+    (
+        cd $$out
+        tar -czf "$$base/$@" bin lib
+    )
+    rm -rf "$$out"
+    """,
+)
+
 # wrapper script ###############################################################
 
 genrule(
@@ -1220,20 +1268,7 @@ cat >> $(location ruby.sh) <<EOF
 set -euo pipefail
 
 base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
-
-# was this script invoked via 'bazel run"?
-if [ -d "\$$base_dir/ruby.runfiles" ]; then
-  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_6_3"
-fi
-
-RUBYLIB="\$${RUBYLIB:-}\$${RUBYLIB:+:}\$${base_dir}/lib/ruby/2.6.0/""" + ARCH + """"
-RUBYLIB="\$${RUBYLIB}:\$${base_dir}/lib/ruby/2.6.0"
-export RUBYLIB
-
-# TODO: Something is re-discovering the stdlib outside of the path provided by
-# RUBYLIB, and when the original is a symlink it causes stdlib files to be
-# loaded multiple times.
-exec "\$$base_dir/bin/ruby" -W0 "\$$@"
+exec "\$$base_dir/bin/ruby" "\$$@"
 EOF
     """,
 )
