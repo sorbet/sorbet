@@ -62,7 +62,7 @@ genrule(
         "config.status",
     ],
     cmd =
-    """
+        """
     CC=$(CC) CFLAGS=$(CC_FLAGS) CPPFLAGS=$(CC_FLAGS) $(location configure) \
         --enable-load-relative \
         --without-gmp \
@@ -306,6 +306,7 @@ cc_binary(
 # full ruby ####################################################################
 
 RBCONFIG_LINUX = "{}/{}/rbconfig.rb".format(LIB_PREFIX, ARCH_LINUX)
+
 RBCONFIG_DARWIN = "{}/{}/rbconfig.rb".format(LIB_PREFIX, ARCH_DARWIN)
 
 RBCONFIG = select({
@@ -380,7 +381,7 @@ genrule(
     ],
     outs = ["prelude.c"],
     cmd =
-    """
+        """
     cp $(location prelude.rb) $(location gem_prelude.rb) .
     "$(location bin/miniruby)" \
         -I $$(dirname "$(location lib/erb.rb)") \
@@ -415,7 +416,7 @@ genrule(
     ],
     outs = ["verconf.h"],
     cmd =
-    """
+        """
     base="$$PWD"
     cd "$(RULEDIR)"
     bin/miniruby \
@@ -1224,7 +1225,7 @@ genrule(
     ],
     outs = ["ruby.tar.gz"],
     cmd =
-    """
+        """
     out=$$(mktemp -d)
 
     mkdir "$$out/bin"
