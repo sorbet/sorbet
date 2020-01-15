@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-// has to go first as it violates are requirements
+// has to go first as it violates our requirements
 
 #include "ast/ast.h"
 #include "core/NameHash.h"

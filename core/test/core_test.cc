@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-// has to go first as it violates are requirements
+// has to go first as it violates our requirements
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"

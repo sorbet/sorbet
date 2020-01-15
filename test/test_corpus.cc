@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>
-// has to go first as it violates are requirements
+// has to go first as it violates our requirements
 
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
