@@ -1,6 +1,7 @@
 #include "main/lsp/LSPPreprocessor.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/lsp.h"
@@ -136,14 +137,15 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
 
     // Check if we should cancel the slow path.
     const auto &gs = ttgs.getGlobalState();
-    const auto runningSlowPath = gs.getRunningSlowPath();
+    auto &epochManager = *gs.epochManager;
+    const auto typecheckStatus = epochManager.getStatus();
     // Only try to cancel if the typechecking thread is running the slow path.
-    if (runningSlowPath.has_value()) {
-        const auto &[committed, end] = runningSlowPath.value();
+    if (typecheckStatus.slowPathRunning) {
+        const u4 committed = typecheckStatus.lastCommittedEpoch;
         earliestActiveEditVersion = ttgs.minVersion(committed, earliestActiveEditVersion);
 
         // Avoid canceling if the currently-running slow path has already been canceled.
-        if (!gs.wasTypecheckingCanceled()) {
+        if (!epochManager.wasTypecheckingCanceled()) {
             for (auto &msg : pendingRequests) {
                 if (msg->isNotification() && msg->method() == LSPMethod::SorbetWorkspaceEdit) {
                     Timer timeit(logger, "tryCancelSlowPath");
@@ -152,7 +154,7 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
                     // Cancel if combined updates end up taking the fast path, or if the new updates will just take the
                     // slow path a second time when the current slow path finishes.
                     if ((combinedUpdates.canTakeFastPath || !params->updates.canTakeFastPath) &&
-                        gs.tryCancelSlowPath(params->updates.versionEnd)) {
+                        epochManager.tryCancelSlowPath(params->updates.versionEnd)) {
                         if (combinedUpdates.canTakeFastPath) {
                             logger->debug(
                                 "[Preprocessor] Canceling typechecking, as edits {} thru {} can take fast path.",

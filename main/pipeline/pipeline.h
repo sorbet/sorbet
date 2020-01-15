@@ -8,6 +8,10 @@
 #include "core/NameHash.h"
 #include "main/options/options.h"
 
+namespace sorbet::core::lsp {
+class PreemptionTaskManager;
+}
+
 namespace sorbet::realmain::pipeline {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          std::unique_ptr<KeyValueStore> &kvstore);
@@ -31,8 +35,11 @@ std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vect
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                   const options::Options &opts, bool skipConfigatron = false);
 
-ast::ParsedFilesOrCancelled typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers);
+// Note: `cancelable` and `preemption task manager` are only applicable to LSP.
+ast::ParsedFilesOrCancelled
+typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+          WorkerPool &workers, bool cancelable = false,
+          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 

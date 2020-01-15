@@ -2,6 +2,7 @@
 #include "absl/synchronization/notification.h"
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
+#include "core/lsp/TypecheckEpochManager.h"
 #include "lsp.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -99,7 +100,7 @@ void LSPLoop::maybeStartCommitSlowPathEdit(const LSPMessage &msg) const {
         const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
         if (!params->updates.canTakeFastPath && params->updates.updatedGS.has_value()) {
             auto &gs = params->updates.updatedGS.value();
-            gs->startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
+            gs->epochManager->startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
         }
     }
 }
