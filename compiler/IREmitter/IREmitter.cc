@@ -470,7 +470,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         Payload::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
-                        ENFORCE(bb->rubyBlockId == 0, "returns through multiple stacks not implemented");
+                        if (bb->rubyBlockId != 0) {
+                            cs.failCompilation(bind.loc, "returns through multiple stacks not implemented");
+                        }
                         isTerminated = true;
                         auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
                         Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
