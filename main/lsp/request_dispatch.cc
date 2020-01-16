@@ -89,7 +89,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
         // asRequest() should guarantee the presence of an ID.
         ENFORCE(msg.id());
         auto id = *msg.id();
-        if (msg.canceled) {
+        if (msg.isCanceled()) {
             auto response = make_unique<ResponseMessage>("2.0", id, method);
             prodCounterInc("lsp.messages.canceled");
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
