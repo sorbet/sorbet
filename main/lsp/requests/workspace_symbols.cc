@@ -1,3 +1,4 @@
+#include "main/lsp/requests/workspace_symbols.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ShowOperation.h"
@@ -268,14 +269,17 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     return results;
 } // namespace sorbet::realmain::lsp
 
-unique_ptr<ResponseMessage> LSPLoop::handleWorkspaceSymbols(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                            const WorkspaceSymbolParams &params) const {
+WorkspaceSymbolsTask::WorkspaceSymbolsTask(const LSPConfiguration &config, MessageId id,
+                                           unique_ptr<WorkspaceSymbolParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<ResponseMessage> WorkspaceSymbolsTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
-    ShowOperation op(*config, "References", "Workspace symbol search...");
+    ShowOperation op(config, "References", "Workspace symbol search...");
     prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
-    SymbolMatcher matcher(*config, typechecker.state());
-    response->result = matcher.doQuery(params.query);
+    SymbolMatcher matcher(config, typechecker.state());
+    response->result = matcher.doQuery(params->query);
     return response;
 }
 } // namespace sorbet::realmain::lsp

@@ -10,18 +10,6 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
-// Compares the two errors. Returns -1 if `a` comes before `b`, 1 if `b` comes before `a`, and 0 if they are equivalent.
-// Compares filenames, then ranges, and then compares messages in the event of a tie.
-int errorComparison(std::string_view aFilename, const Range &a, std::string_view aMessage, std::string_view bFilename,
-                    const Range &b, std::string_view bMessage);
-
-/**
- * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
- * foo.bar
- *     ^^^ error: bar not defined
- */
-std::string prettyPrintRangeComment(std::string_view sourceLine, const Range &range, std::string_view comment);
-
 class ErrorAssertion;
 
 /**

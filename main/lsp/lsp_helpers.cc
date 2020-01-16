@@ -10,30 +10,6 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<unique_ptr<Location>>
-LSPLoop::extractLocations(const core::GlobalState &gs,
-                          const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                          vector<unique_ptr<Location>> locations) const {
-    for (auto &q : queryResponses) {
-        core::Loc loc = q->getLoc();
-        if (loc.exists() && loc.file().exists()) {
-            auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
-            // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
-                addLocIfExists(gs, locations, loc);
-            }
-        }
-    }
-    // Dedupe locations
-    fast_sort(locations,
-              [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
-    locations.resize(std::distance(locations.begin(),
-                                   std::unique(locations.begin(), locations.end(),
-                                               [](const unique_ptr<Location> &a,
-                                                  const unique_ptr<Location> &b) -> bool { return a->cmp(*b) == 0; })));
-    return locations;
-}
-
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
@@ -193,18 +169,22 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         }
         string prefix = "";
         string suffix = "";
-        if (argSym.flags.isKeyword) {
-            if (argSym.flags.isRepeated) {
+        if (argSym.flags.isRepeated) {
+            if (argSym.flags.isKeyword) {
                 prefix = "**"; // variadic keyword args
-            } else if (argSym.flags.isDefault) {
+            } else {
+                prefix = "*"; // rest args
+            }
+        } else if (argSym.flags.isKeyword) {
+            if (argSym.flags.isDefault) {
                 suffix = ": …"; // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
             }
-        } else if (argSym.flags.isRepeated) {
-            prefix = "*";
         } else if (argSym.flags.isBlock) {
             prefix = "&";
+        } else if (argSym.flags.isDefault) {
+            suffix = "=…";
         }
         prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
     }

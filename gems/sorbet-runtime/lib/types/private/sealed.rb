@@ -54,6 +54,11 @@ module T::Private::Sealed
     end
 
     if !this_file.start_with?(decl_file)
+      whitelist = T::Configuration.sealed_violation_whitelist
+      if whitelist != nil && whitelist.any? {|pattern| decl_file =~ pattern}
+        return
+      end
+
       raise "#{parent} was declared sealed and can only be #{verb} in #{decl_file}, not #{this_file}"
     end
   end

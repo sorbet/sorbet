@@ -14,6 +14,9 @@
 using namespace std;
 
 namespace sorbet::test {
+
+namespace {
+
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
 const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+): (.*)$");
@@ -61,6 +64,11 @@ bool rangeIsSubset(const Range &a, const Range &b) {
     return b.start->character >= a.start->character && b.end->character <= a.end->character;
 }
 
+/**
+ * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
+ * foo.bar
+ *     ^^^ error: bar not defined
+ */
 string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
     int numLeadingSpaces = range.start->character;
     if (numLeadingSpaces < 0) {
@@ -172,6 +180,23 @@ void assertLocationsMatch(const LSPConfiguration &config,
         actualLocationsIt++;
     }
 }
+
+string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
+    auto beginLine = static_cast<u4>(range.start->line + 1);
+    auto beginCol = static_cast<u4>(range.start->character + 1);
+    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+
+    auto endLine = static_cast<u4>(range.end->line + 1);
+    auto endCol = static_cast<u4>(range.end->character + 1);
+    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+
+    string actualEditedFileContents = string(source);
+    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
+
+    return actualEditedFileContents;
+}
+
+} // namespace
 
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
@@ -1104,18 +1129,7 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
 
     ASSERT_NE(completionItem->textEdit, nullopt);
     auto &textEdit = completionItem->textEdit.value();
-
-    // TODO(jez) Share this code with CodeAction (String -> TextEdit -> ())
-    auto beginLine = static_cast<u4>(textEdit->range->start->line + 1);
-    auto beginCol = static_cast<u4>(textEdit->range->start->character + 1);
-    auto beginOffset = core::Loc::pos2Offset(*file, {beginLine, beginCol}).value();
-
-    auto endLine = static_cast<u4>(textEdit->range->end->line + 1);
-    auto endCol = static_cast<u4>(textEdit->range->end->character + 1);
-    auto endOffset = core::Loc::pos2Offset(*file, {endLine, endCol}).value();
-
-    string actualEditedFileContents = string(file->source());
-    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, textEdit->newText);
+    auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText);
 
     EXPECT_EQ(expectedEditedFileContents, actualEditedFileContents) << fmt::format(
         "The expected (rbedited) file contents for this completion did not match the actual file contents post-edit",
@@ -1186,16 +1200,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         // Now, apply the edits in the reverse order so that the indices don't change.
         reverse(c->edits.begin(), c->edits.end());
         for (auto &e : c->edits) {
-            core::Loc::Detail reqPos;
-            reqPos.line = e->range->start->line + 1;
-            reqPos.column = e->range->start->character + 1;
-            auto startOffset = core::Loc::pos2Offset(*file, reqPos).value();
-
-            reqPos.line = e->range->end->line + 1;
-            reqPos.column = e->range->end->character + 1;
-            auto endOffset = core::Loc::pos2Offset(*file, reqPos).value();
-
-            actualEditedFileContents.replace(startOffset, endOffset - startOffset, e->newText);
+            actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText);
         }
         EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
             "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",

@@ -5,6 +5,8 @@
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/Unfreeze.h"
+#include "core/lsp/PreemptionTaskManager.h"
+#include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
@@ -184,9 +186,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     // Replace error queue with one that is owned by this thread.
     finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer);
     finalGS->errorQueue->ignoreFlushes = true;
+    auto &epochManager = *finalGS->epochManager;
+    // TODO: Replace with an actual preemption task manager when we ship preemptible slow path.
+    optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = finalGS->tryCommitEpoch(updates.versionEnd, cancelable, [&]() -> void {
+    const bool committed = epochManager.tryCommitEpoch(updates.versionEnd, cancelable, preemptManager, [&]() -> void {
         UnorderedSet<int> updatedFiles;
         vector<ast::ParsedFile> indexedCopies;
 
@@ -212,7 +217,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
             }
         }
-        if (finalGS->wasTypecheckingCanceled()) {
+        if (epochManager.wasTypecheckingCanceled()) {
             return;
         }
 
@@ -237,13 +242,13 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         // [Test only] Wait for a cancellation if one is expected.
         if (updates.cancellationExpected) {
-            while (!gs->wasTypecheckingCanceled()) {
+            while (!epochManager.wasTypecheckingCanceled()) {
                 Timer::timedSleep(1ms, *logger, "slow_path.expected_cancellation.sleep");
             }
             return;
         }
 
-        pipeline::typecheck(finalGS, move(resolved), config->opts, workers);
+        pipeline::typecheck(finalGS, move(resolved), config->opts, workers, cancelable, preemptManager);
     });
 
     // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the

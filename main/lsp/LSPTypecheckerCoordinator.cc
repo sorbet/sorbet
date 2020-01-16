@@ -1,4 +1,5 @@
 #include "main/lsp/LSPTypecheckerCoordinator.h"
+#include "main/lsp/LSPTask.h"
 
 #include "absl/synchronization/notification.h"
 
@@ -6,17 +7,104 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 
 namespace {
-// TODO(jvilk): Switch LSPTypecheckerCoordinator interface to use a type of task rather than lambdas.
-class LambdaTask : public core::lsp::Task {
-private:
-    const function<void()> lambda;
+/**
+ * Adapter class from LSPTask to Task. Handles passing a `LSPTypecheckerDelegate` to the `LSPTask`.
+ * Why use `Task` internally instead of `LSPTask`? There are four different contexts involved in scheduling a unit of
+ * work on the typechecking thread:
+ * - request_dispatch.cc: Creates the LSPTask, but has no access to a `LSPTypecheckerDelegate` (intentionally).
+ * - Method on LSPTypecheckerCoordinator: Has enough context to create the `LSPTypecheckerDelegate`.
+ * - Typechecker thread: Does not have enough context to create the `LSPTypecheckerDelegate`. Also, I'd like to reserve
+ * the right to run other types of tasks on this thread when appropriate.
+ * - core/lsp/PreemptionTaskManager: Knows nothing about any of this and just wants to run a method with no args.
+ */
+class TypecheckerTask final : public core::lsp::Task {
+    const unique_ptr<LSPTask> task;
+    const unique_ptr<LSPTypecheckerDelegate> delegate;
+    const bool hasDedicatedThread;
+    absl::Notification complete;
+    CounterState counters;
 
 public:
-    LambdaTask(function<void()> &&lambda) : lambda(move(lambda)) {}
+    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate, bool hasDedicatedThread)
+        : task(move(task)), delegate(move(delegate)), hasDedicatedThread(hasDedicatedThread) {}
+
     void run() override {
-        lambda();
+        task->run(*delegate);
+        if (hasDedicatedThread) {
+            counters = getAndClearThreadCounters();
+        }
+        complete.Notify();
+    }
+
+    void blockUntilComplete() {
+        complete.WaitForNotification();
+        if (hasDedicatedThread) {
+            counterConsume(move(counters));
+        }
     }
 };
+
+// Special internal tasks that directly operate on `LSPTypechecker`. These are the only tasks that are allowed to
+// directly access `LSPTypechecker` (because they do special things). Thus, only `LSPTypecheckerCoordinator` is
+// allowed/able to create them.
+// TODO(jvilk): These implement `LSPTask` for the convenient `blockUntilComplete` method. Should we move that method
+// to `Task` directly?
+
+class InitializeTask : public LSPTask {
+    LSPTypechecker &typechecker;
+    WorkerPool &workers;
+    LSPFileUpdates updates;
+
+public:
+    InitializeTask(const LSPConfiguration &config, LSPTypechecker &typechecker, WorkerPool &workers,
+                   LSPFileUpdates updates)
+        : LSPTask(config), typechecker(typechecker), workers(workers), updates(move(updates)){};
+
+    void run(LSPTypecheckerDelegate &_) override {
+        typechecker.initialize(move(updates), workers);
+    }
+};
+
+class SlowPathTypecheckTask : public LSPTask {
+    LSPTypechecker &typechecker;
+    WorkerPool &workers;
+    LSPFileUpdates updates;
+
+public:
+    SlowPathTypecheckTask(const LSPConfiguration &config, LSPTypechecker &typechecker, WorkerPool &workers,
+                          LSPFileUpdates updates)
+        : LSPTask(config), typechecker(typechecker), workers(workers), updates(move(updates)){};
+
+    void run(LSPTypecheckerDelegate &_) override {
+        const u4 end = updates.versionEnd;
+        const u4 start = updates.versionStart;
+        // Versions are sequential and wrap around. Use them to figure out how many edits are contained
+        // within this update.
+        const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
+        // Only report stats if the edit was committed.
+        if (!typechecker.typecheck(move(updates), workers)) {
+            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
+            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
+        }
+    }
+};
+
+class ShutdownTask : public LSPTask {
+    LSPTypechecker &typechecker;
+    bool &shouldTerminate;
+    unique_ptr<core::GlobalState> &gs;
+
+public:
+    ShutdownTask(const LSPConfiguration &config, LSPTypechecker &typechecker, bool &shouldTerminate,
+                 unique_ptr<core::GlobalState> &gs)
+        : LSPTask(config), typechecker(typechecker), shouldTerminate(shouldTerminate), gs(gs) {}
+
+    void run(LSPTypecheckerDelegate &_) override {
+        shouldTerminate = true;
+        gs = typechecker.destroy();
+    }
+};
+
 }; // namespace
 
 LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
@@ -32,59 +120,28 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
     }
 }
 
-void LSPTypecheckerCoordinator::syncRun(function<void(LSPTypecheckerDelegate &)> &&lambda, bool multithreaded) {
+void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task, bool multithreaded) {
     absl::Notification notification;
-    CounterState typecheckerCounters;
-    // If typechecker is running on a dedicated thread, then we need to merge its metrics w/ coordinator thread's so we
-    // report them.
-    // Note: Capturing notification by reference is safe here, we we wait for the notification to happen prior to
-    // returning.
-    asyncRunInternal(make_shared<LambdaTask>(
-        [&typechecker = this->typechecker, &workers = multithreaded ? workers : *emptyWorkers, lambda, &notification,
-         &typecheckerCounters, hasDedicatedThread = this->hasDedicatedThread]() -> void {
-            LSPTypecheckerDelegate d(workers, typechecker);
-            lambda(d);
-            if (hasDedicatedThread) {
-                typecheckerCounters = getAndClearThreadCounters();
-            }
-            notification.Notify();
-        }));
-    notification.WaitForNotification();
-    if (hasDedicatedThread) {
-        counterConsume(move(typecheckerCounters));
-    }
+    auto wrappedTask = make_shared<TypecheckerTask>(
+        move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
+    asyncRunInternal(wrappedTask);
+    wrappedTask->blockUntilComplete();
 }
 
 void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedParams> params) {
-    // TODO: Make async when we land preemptible slow path.
-    syncRun([&typechecker = this->typechecker, &workers = workers, &params = params](auto &tcd) -> void {
-        auto &updates = params->updates;
-        typechecker.initialize(move(updates), workers);
-    });
+    // TODO: Split into a sync and async task when we land preemptible slow path, where the typecheck is async.
+    syncRun(make_unique<InitializeTask>(*config, typechecker, workers, move(params->updates)));
 }
 
 void LSPTypecheckerCoordinator::typecheckOnSlowPath(LSPFileUpdates updates) {
     // TODO: Make async when we land preemptible slow path.
-    syncRun([&typechecker = this->typechecker, &workers = workers, &updates = updates](auto &tcd) -> void {
-        const u4 end = updates.versionEnd;
-        const u4 start = updates.versionStart;
-        // Versions are sequential and wrap around. Use them to figure out how many edits are contained
-        // within this update.
-        const u4 merged = min(end - start, 0xFFFFFFFF - start + end);
-        // Only report stats if the edit was committed.
-        if (!typechecker.typecheck(move(updates), workers)) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
-            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", merged);
-        }
-    });
+    syncRun(make_unique<SlowPathTypecheckTask>(*config, typechecker, workers, move(updates)));
 }
 
 unique_ptr<core::GlobalState> LSPTypecheckerCoordinator::shutdown() {
     unique_ptr<core::GlobalState> gs;
-    syncRun([&](auto &tcd) -> void {
-        shouldTerminate = true;
-        gs = typechecker.destroy();
-    });
+    // shouldTerminate and gs are captured by reference.
+    syncRun(make_unique<ShutdownTask>(*config, typechecker, shouldTerminate, gs));
     return gs;
 }
 

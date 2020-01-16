@@ -561,6 +561,17 @@ A.foo_1${0}
 As you can see, the fancy `${...}` (tabstop placeholders) show up verbatim in
 the output if they were sent in the completion response.
 
+It's not currently possible to test these parts of a completion response:
+
+- completion kind
+- documentation
+- detail
+
+For these, your best bet is to test manually in VS Code / your preferred editor
+and verify that you're seeing your changes. For documentation specifically,
+nearly all the code paths are shared with hover, so you can alternatively write
+a hover test.
+
 
 #### Testing incremental typechecking
 

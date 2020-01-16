@@ -1,3 +1,4 @@
+#include "main/lsp/requests/references.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ShowOperation.h"
@@ -7,25 +8,17 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<unique_ptr<Location>> LSPLoop::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                                                            vector<unique_ptr<Location>> locations) const {
-    if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, symbol);
-        locations = extractLocations(typechecker.state(), run2.responses, move(locations));
-    }
-    return locations;
-}
+ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const ReferenceParams &params) const {
+unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
-    ShowOperation op(*config, "References", "Finding all references...");
+    ShowOperation op(config, "References", "Finding all references...");
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.references");
 
     const core::GlobalState &gs = typechecker.state();
     auto result =
-        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentReferences, false);
+        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentReferences, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -36,7 +29,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentReferences(LSPTypechecker
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
+                config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.

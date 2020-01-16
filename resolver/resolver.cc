@@ -8,6 +8,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
@@ -2101,28 +2102,29 @@ public:
 
 ast::ParsedFilesOrCancelled Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees,
                                           WorkerPool &workers) {
+    const auto &epochManager = *ctx.state.epochManager;
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees), workers);
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     finalizeAncestors(ctx);
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     trees = resolveMixesInClassMethods(ctx, std::move(trees));
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     finalizeSymbols(ctx);
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     trees = ResolveTypeMembersWalk::run(ctx, std::move(trees));
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     trees = resolveSigs(ctx, std::move(trees));
-    if (ctx.state.wasTypecheckingCanceled()) {
+    if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
     sanityCheck(ctx, trees);

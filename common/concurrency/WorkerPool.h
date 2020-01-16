@@ -9,7 +9,9 @@ class WorkerPool {
 public:
     inline static constexpr std::chrono::milliseconds BLOCK_INTERVAL() {
         using namespace std::chrono_literals;
-        return 250ms;
+        // NOTE: This value materially impacts IDE responsiveness during typechecking; the typechecking thread wakes up
+        // at this interval and checks if it should do other work.
+        return 20ms;
     }
     using Task = std::function<void()>;
     static std::unique_ptr<WorkerPool> create(int size, spd::logger &logger);

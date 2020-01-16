@@ -1,3 +1,4 @@
+#include "main/lsp/requests/completion.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
@@ -25,7 +26,7 @@ struct RubyKeyword {
 
     RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt,
                 optional<string> detail = nullopt)
-        : keyword(keyword), documentation(documentation), snippet(snippet), detail(detail){};
+        : keyword(move(keyword)), documentation(move(documentation)), snippet(move(snippet)), detail(move(detail)){};
 };
 
 // Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
@@ -647,15 +648,17 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
 
 } // namespace
 
-unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
-                                                               core::SymbolRef maybeAlias, core::TypePtr receiverType,
-                                                               const core::TypeConstraint *constraint,
-                                                               const core::Loc queryLoc, string_view prefix,
-                                                               size_t sortIdx) const {
+CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
+
+unique_ptr<CompletionItem>
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::SymbolRef maybeAlias,
+                                           core::TypePtr receiverType, const core::TypeConstraint *constraint,
+                                           core::Loc queryLoc, string_view prefix, size_t sortIdx) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     ENFORCE(maybeAlias.data(gs)->isMethod());
-    auto clientConfig = config->getClientConfig();
+    auto clientConfig = config.getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
 
@@ -711,10 +714,10 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItemForMethod(LSPTypecheckerDel
     return item;
 }
 
-void LSPLoop::findSimilarConstants(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
-                                   const core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
+void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
+                                          core::Loc queryLoc, vector<unique_ptr<CompletionItem>> &items) const {
     auto prefix = resp.name.data(gs)->shortName(gs);
-    config->logger->debug("Looking for constant similar to {}", prefix);
+    config.logger->debug("Looking for constant similar to {}", prefix);
     ENFORCE(!resp.scopes.empty());
 
     if (resp.scopes.size() == 1 && !resp.scopes[0].exists()) {
@@ -728,7 +731,7 @@ void LSPLoop::findSimilarConstants(const core::GlobalState &gs, const core::lsp:
         // We should probably at least sort by whether the prefix of the suggested constant matches.
         for (auto [_name, sym] : scope.data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
             }
         }
     }
@@ -751,29 +754,27 @@ void LSPLoop::findSimilarConstants(const core::GlobalState &gs, const core::lsp:
 
         for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
             if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, *config, sym, queryLoc, prefix, items.size()));
+                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
             }
         }
     }
 }
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const CompletionParams &params) const {
+unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
 
     const auto &gs = typechecker.state();
-    auto uri = params.textDocument->uri;
-    auto fref = config->uri2FileRef(gs, uri);
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
         response->result = std::move(emptyResult);
         return response;
     }
-    auto pos = *params.position;
-    auto queryLoc = config->lspPos2Loc(fref, pos, gs);
+    auto pos = *params->position;
+    auto queryLoc = config.lspPos2Loc(fref, pos, gs);
     if (!queryLoc.exists()) {
         response->result = std::move(emptyResult);
         return response;
@@ -797,7 +798,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
     if (auto sendResp = resp->isSend()) {
         auto prefix = sendResp->callerSideName.data(gs)->shortName(gs);
-        config->logger->debug("Looking for method similar to {}", prefix);
+        config.logger->debug("Looking for method similar to {}", prefix);
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
         auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
@@ -860,20 +861,16 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentCompletion(LSPTypechecker
 
         // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"
         for (auto &similarKeyword : similarKeywords) {
-            items.push_back(getCompletionItemForKeyword(gs, *config, similarKeyword, queryLoc, prefix, items.size()));
+            items.push_back(getCompletionItemForKeyword(gs, config, similarKeyword, queryLoc, prefix, items.size()));
         }
         for (auto &similarLocal : similarLocals) {
-            items.push_back(getCompletionItemForLocal(gs, *config, similarLocal, queryLoc, prefix, items.size()));
+            items.push_back(getCompletionItemForLocal(gs, config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
             items.push_back(getCompletionItemForMethod(typechecker, similarMethod.method, similarMethod.receiverType,
                                                        similarMethod.constr.get(), queryLoc, prefix, items.size()));
         }
     } else if (auto constantResp = resp->isConstant()) {
-        if (!config->opts.lspAutocompleteEnabled) {
-            response->result = std::move(emptyResult);
-            return response;
-        }
         findSimilarConstants(gs, *constantResp, queryLoc, items);
     }
 

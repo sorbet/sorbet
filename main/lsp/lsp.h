@@ -21,22 +21,6 @@ namespace sorbet::realmain::lsp {
 class LSPInput;
 class LSPConfiguration;
 
-enum class LSPErrorCodes {
-    // Defined by JSON RPC
-    ParseError = -32700,
-    InvalidRequest = -32600,
-    MethodNotFound = -32601,
-    InvalidParams = -32602, // todo
-    InternalError = -32603,
-    ServerErrorStart = -32099,
-    ServerErrorEnd = -32000,
-    ServerNotInitialized = -32002,
-    UnknownErrorCode = -32001,
-
-    // Defined by the LSP
-    RequestCancelled = -32800,
-};
-
 class LSPLoop {
     friend class LSPWrapper;
 
@@ -52,59 +36,6 @@ class LSPLoop {
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
-
-    void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
-    std::vector<std::unique_ptr<Location>>
-    extractLocations(const core::GlobalState &gs,
-                     const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                     std::vector<std::unique_ptr<Location>> locations = {}) const;
-
-    LSPQueryResult queryByLoc(LSPTypecheckerDelegate &typechecker, std::string_view uri, const Position &pos,
-                              const LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                                        std::vector<core::FileRef> frefs) const;
-    LSPQueryResult queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) const;
-
-    std::unique_ptr<ResponseMessage>
-    handleTextDocumentDocumentHighlight(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                        const TextDocumentPositionParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentHover(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                             const TextDocumentPositionParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentDocumentSymbol(LSPTypecheckerDelegate &typechecker,
-                                                                      const MessageId &id,
-                                                                      const DocumentSymbolParams &params) const;
-    std::unique_ptr<ResponseMessage> handleWorkspaceSymbols(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                            const WorkspaceSymbolParams &params) const;
-    std::vector<std::unique_ptr<Location>>
-    getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                          std::vector<std::unique_ptr<Location>> locations = {}) const;
-    std::vector<std::unique_ptr<DocumentHighlight>>
-    getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, std::string_view uri, core::SymbolRef symbol,
-                                std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentReferences(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const ReferenceParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentDefinition(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const TextDocumentPositionParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentTypeDefinition(LSPTypecheckerDelegate &typechecker,
-                                                                      const MessageId &id,
-                                                                      const TextDocumentPositionParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentCompletion(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const CompletionParams &params) const;
-    std::unique_ptr<ResponseMessage> handleTextDocumentCodeAction(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const CodeActionParams &params) const;
-    std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
-                                                               core::SymbolRef what, core::TypePtr receiverType,
-                                                               const core::TypeConstraint *constraint,
-                                                               const core::Loc queryLoc, std::string_view prefix,
-                                                               size_t sortIdx) const;
-    void findSimilarConstants(const core::GlobalState &gs, const core::lsp::ConstantResponse &resp,
-                              const core::Loc queryLoc, std::vector<std::unique_ptr<CompletionItem>> &items) const;
-    std::unique_ptr<ResponseMessage> handleTextSignatureHelp(LSPTypecheckerDelegate &typechecker, const MessageId &id,
-                                                             const TextDocumentPositionParams &params) const;
 
     void processRequestInternal(LSPMessage &msg);
 
@@ -148,7 +79,7 @@ std::string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef met
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr);
-SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
+SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

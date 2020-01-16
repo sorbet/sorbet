@@ -1,24 +1,20 @@
+#include "main/lsp/requests/definition.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {
-    auto location = config->loc2Location(gs, loc);
-    if (location != nullptr) {
-        locs.push_back(std::move(location));
-    }
-}
+DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
+                               unique_ptr<TextDocumentPositionParams> params)
+    : LSPRequestTask(config, move(id)), params(move(params)) {}
 
-unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypecheckerDelegate &typechecker,
-                                                                  const MessageId &id,
-                                                                  const TextDocumentPositionParams &params) const {
+unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.definition");
     const core::GlobalState &gs = typechecker.state();
     auto result =
-        queryByLoc(typechecker, params.textDocument->uri, *params.position, LSPMethod::TextDocumentDefinition, false);
+        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -27,7 +23,7 @@ unique_ptr<ResponseMessage> LSPLoop::handleTextDocumentDefinition(LSPTypechecker
         vector<unique_ptr<Location>> result;
         if (!queryResponses.empty()) {
             const bool fileIsTyped =
-                config->uri2FileRef(gs, params.textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
+                config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);
 
             // Only support go-to-definition on constants and fields in untyped files.

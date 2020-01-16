@@ -59,6 +59,12 @@ module OuterModule
     end
 
     sig {params(fname: String, lname: String).returns(String)}
+    def positional_args_with_defaults(fname='Jane', lname='Doe')
+      # ^ hover: def positional_args_with_defaults(fname=…, lname=…); end
+      "#{fname}:#{lname}"
+    end
+
+    sig {params(fname: String, lname: String).returns(String)}
     def keyword_args_no_defaults(fname:, lname:)
       "#{fname}:#{lname}"
     end

@@ -202,7 +202,7 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<as
         }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::NonItInTestEach)) {
+    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", "test_each");
     }
 
@@ -236,8 +236,14 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         return nullptr;
     }
 
-    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr &&
-        send->block->args.size() == 1) {
+    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr) {
+        if (send->block->args.size() != 1) {
+            if (auto e = ctx.state.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
+                e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", "test_each", 1,
+                            send->block->args.size());
+            }
+            return nullptr;
+        }
         // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
         // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->args.front());
