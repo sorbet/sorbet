@@ -128,6 +128,8 @@ sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <li><code>if</code> expressions / <code>case</code> expressions</li>
 <li><code>is_a?</code> / <code>kind_of?</code> (check if an object is an instance of a specific class)</li>
 <li><code>nil?</code></li>
+<li><code>blank?</code> / <code>present?</code> (these assume a Rails-compatible monkey patch on both
+<code>NilClass</code> and <code>Object</code>)</li>
 <li><code>Class#===</code> (this is how <code>case</code> on a class object works)</li>
 <li><code>Class#&lt;</code> (like <code>is_a?</code>, but for class objects instead of instances of</li>
 <li>Negated conditions (including both <code>!</code> and <code>unless</code>)</li>
