@@ -202,7 +202,7 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<as
         }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::NonItInTestEach)) {
+    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", "test_each");
     }
 
