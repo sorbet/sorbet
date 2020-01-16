@@ -48,7 +48,76 @@ CounterState mergeCounters(CounterState counters) {
 void tagNewRequest(const std::shared_ptr<spd::logger> &logger, LSPMessage &msg) {
     Timer timeit(logger, "tagNewRequest");
     msg.startTracers.push_back(timeit.getFlowEdge());
+    // TODO(jvilk): This should actually be named latency...
     msg.timer = make_unique<Timer>(logger, "processing_time");
+
+    // Measure the latency of specific operations we care about separately.
+    // Done in a verbose way because timer names need to be char[] strings.
+    if (!msg.isResponse()) {
+        // Unless grouped, the methods below are in alphabetical order.
+        switch (msg.method()) {
+            case LSPMethod::$CancelRequest:
+            case LSPMethod::Exit:
+            case LSPMethod::PAUSE:
+            case LSPMethod::RESUME:
+            case LSPMethod::Shutdown:
+            case LSPMethod::SorbetError:
+            case LSPMethod::SorbetFence:
+            case LSPMethod::SorbetShowOperation:
+            case LSPMethod::SorbetTypecheckRunInfo:
+            case LSPMethod::TextDocumentPublishDiagnostics:
+            case LSPMethod::WindowShowMessage:
+                // Not a request we care about. Bucket it in case it gets large.
+                msg.methodTimer = make_unique<Timer>(logger, "latency.other");
+                break;
+            case LSPMethod::Initialize:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.initialize");
+                break;
+            case LSPMethod::Initialized:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.initialized");
+                break;
+            case LSPMethod::SorbetReadFile:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.sorbetreadfile");
+                break;
+            case LSPMethod::SorbetWatchmanFileChange:
+            case LSPMethod::SorbetWorkspaceEdit:
+            case LSPMethod::TextDocumentDidChange:
+            case LSPMethod::TextDocumentDidClose:
+            case LSPMethod::TextDocumentDidOpen:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.fileedit");
+                break;
+            case LSPMethod::TextDocumentCodeAction:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.codeaction");
+                break;
+            case LSPMethod::TextDocumentCompletion:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.completion");
+                break;
+            case LSPMethod::TextDocumentDefinition:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.definition");
+                break;
+            case LSPMethod::TextDocumentDocumentHighlight:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.documenthighlight");
+                break;
+            case LSPMethod::TextDocumentDocumentSymbol:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.documentsymbol");
+                break;
+            case LSPMethod::TextDocumentHover:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.hover");
+                break;
+            case LSPMethod::TextDocumentReferences:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.references");
+                break;
+            case LSPMethod::TextDocumentSignatureHelp:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.signaturehelp");
+                break;
+            case LSPMethod::TextDocumentTypeDefinition:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.typedefinition");
+                break;
+            case LSPMethod::WorkspaceSymbol:
+                msg.methodTimer = make_unique<Timer>(logger, "latency.workspacesymbol");
+                break;
+        }
+    }
 }
 
 unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,

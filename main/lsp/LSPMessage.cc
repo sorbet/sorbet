@@ -113,6 +113,23 @@ LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSON
 
 LSPMessage::LSPMessage(const std::string &json) : LSPMessage::LSPMessage(fromJSON(json)) {}
 
+bool LSPMessage::isCanceled() const {
+    return canceled;
+}
+
+void LSPMessage::cancel() {
+    if (!canceled) {
+        canceled = true;
+        // Protect against nullptrs.
+        if (timer) {
+            timer->cancel();
+        }
+        if (methodTimer) {
+            methodTimer->cancel();
+        }
+    }
+}
+
 optional<MessageId> LSPMessage::id() const {
     if (isRequest()) {
         return asRequest().id;
