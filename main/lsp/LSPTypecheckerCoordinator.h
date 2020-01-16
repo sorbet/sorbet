@@ -49,11 +49,12 @@ public:
     void typecheckOnSlowPath(LSPFileUpdates updates);
 
     /**
-     * Schedules a task on the typechecker thread, and blocks until `lambda` completes. If "multithreaded" is "true",
-     * then the given task is allowed to use the full threadpool at the cost of not being able to preempt slow paths.
+     * Schedules a task on the typechecker thread, and blocks until `lambda` completes. If the task has
+     * `enableMultithreaded` set to "true", then the given task is allowed to use the full threadpool at the cost of not
+     * being able to preempt slow path typechecking.
      * TODO(jvilk): Make single-threaded tasks scheduled this way preempt the slow path.
      */
-    void syncRun(std::unique_ptr<LSPTask> task, bool multithreaded = false);
+    void syncRun(std::unique_ptr<LSPTask> task);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes

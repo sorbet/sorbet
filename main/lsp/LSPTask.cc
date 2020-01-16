@@ -5,9 +5,11 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 
-LSPTask::LSPTask(const LSPConfiguration &config) : config(config) {}
+LSPTask::LSPTask(const LSPConfiguration &config, bool enableMultithreading)
+    : config(config), enableMultithreading(enableMultithreading) {}
 
-LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id) : LSPTask(config), id(move(id)) {}
+LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, bool enableMultithreading)
+    : LSPTask(config, enableMultithreading), id(move(id)) {}
 
 void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
     auto response = runRequest(typechecker);
