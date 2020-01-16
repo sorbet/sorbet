@@ -12,7 +12,7 @@ class SorbetFenceTask final : public LSPTask {
     int id;
 
 public:
-    SorbetFenceTask(const LSPConfiguration &config, int id) : LSPTask(config), id(id) {}
+    SorbetFenceTask(const LSPConfiguration &config, int id) : LSPTask(config, true), id(id) {}
     void run(LSPTypecheckerDelegate &tc) override {
         // Send the same fence back to acknowledge the fence.
         // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
