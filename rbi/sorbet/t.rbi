@@ -127,6 +127,8 @@ module T::Configuration
   def self.log_info_handler=(value); end
   def self.scalar_types; end
   def self.scalar_types=(values); end
+  def self.sealed_violation_whitelist; end
+  def self.sealed_violation_whitelist=(sealed_violation_whitelist); end
   def self.sig_builder_error_handler(error, location); end
   def self.sig_builder_error_handler=(value); end
   def self.sig_validation_error_handler(error, opts); end
