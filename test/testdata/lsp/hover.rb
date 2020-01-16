@@ -58,7 +58,8 @@ class BigFoo; extend T::Sig
 
   sig {params(num: Integer).returns(String)}
   private def quux(num)
-            # ^ hover: private sig {params(num: Integer).returns(String)}
+    #         ^ hover: sig {params(num: Integer).returns(String)}
+    #         ^ hover: private def quux(num); end
     if num < 10
       s = 1
     else
@@ -69,7 +70,8 @@ class BigFoo; extend T::Sig
 
   sig {void}
   protected def protected_fun; end;
-              # ^ hover: protected sig {void}
+  #             ^ hover: sig {void}
+  #             ^ hover: protected def protected_fun; end
 
   sig { returns([Integer, String]) }
   def self.anotherFunc()
