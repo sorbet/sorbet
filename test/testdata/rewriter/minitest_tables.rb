@@ -61,4 +61,14 @@ class MyTest
       T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[T.untyped, T.untyped])`
     end
   end
+
+  test_each [1, 2, 3] do |k, v| # error: Wrong number of parameters for `test_each` block
+    it "does not handle more than one argument" do
+    end
+  end
+
+  test_each [1, 2, 3] do # error: Wrong number of parameters for `test_each` block
+    it "does not handle more than one argument" do
+    end
+  end
 end
