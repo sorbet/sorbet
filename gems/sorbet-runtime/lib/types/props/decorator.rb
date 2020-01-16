@@ -129,7 +129,7 @@ class T::Props::Decorator
     params(
       instance: DecoratedInstance,
       prop: T.any(String, Symbol),
-      rules: T.nilable(Rules)
+      rules: Rules
     )
     .returns(T.untyped)
     .checked(:never)
@@ -151,7 +151,7 @@ class T::Props::Decorator
     params(
       instance: DecoratedInstance,
       prop: T.any(String, Symbol),
-      rules: T.nilable(Rules)
+      rules: Rules
     )
     .returns(T.untyped)
     .checked(:never)
