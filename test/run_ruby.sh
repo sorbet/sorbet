@@ -18,32 +18,33 @@ if [ -z "$rb" ]; then
   exit 1
 fi
 
-ruby="./bazel-bin/external/ruby_2_6_3/ruby.runfiles/ruby_2_6_3"
-ruby_bin="${ruby}/bin"
-ruby_lib="${ruby}/lib/ruby/2.6.0"
-
-# work-around for not being able to declare an empty array in bash-3.x
-if [ -z "$DEBUG" ]; then
-  command=( "${ruby_bin}/ruby" )
-else
-  command=("lldb" "--" "${ruby_bin}/ruby")
-fi
+ruby="./bazel-bin/external/sorbet_ruby/ruby"
 
 if [ -n "$DEBUG" ]; then
-  bazel build @ruby_2_6_3//:ruby --config dbg --config static-libs 2>/dev/null
+  bazel build @sorbet_ruby//:ruby --config dbg --config static-libs 2>/dev/null
+  command=("lldb" "--" "${ruby}")
 else
-  bazel build @ruby_2_6_3//:ruby -c opt 2>/dev/null
+  bazel build @sorbet_ruby//:ruby -c opt 2>/dev/null
+  command=( "${ruby}" )
 fi
 
+# Use a temp directory for LLVMIR so we don't accidentally pick up changes from
+# the environment
+llvmir=$(mktemp -d)
+cleanup() {
+    rm -r "$llvmir"
+}
+trap cleanup EXIT
+
 command=("${command[@]}" \
-  -W0 \
-  -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
-  -I "run/tools" -rpreamble.rb \
+  "--disable=gems" \
+  "--disable=did_you_mean" \
+  -I "run/tools" -rpreamble.rb -rpatch_require.rb \
   -e "require './$rb'" \
   "$@" \
   )
 
-"${command[@]}"
+llvmir="$llvmir" "${command[@]}"
 exit_code=$?
 
 popd > /dev/null

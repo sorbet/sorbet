@@ -394,7 +394,7 @@ if __FILE__ == $0
 
   topdir = File.dirname($0) + '/../../..'
 
-  ruby = topdir + '/bazel-bin/external/ruby_2_6_3/bin/ruby'
+  ruby = topdir + '/bazel-bin/external/sorbet_ruby/toolchain/bin/ruby'
 
   ruby_source = Dir.home + '/Downloads/ruby-2.6.3'
 

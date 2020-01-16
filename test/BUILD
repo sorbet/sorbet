@@ -31,7 +31,7 @@ sh_binary(
     srcs = ["generate_out_file.sh"],
     data = [
         "//run:runtimeoverrides",
-        "@ruby_2_6_3//:ruby",
+        "@sorbet_ruby//:ruby",
     ],
     deps = [
         ":logging",

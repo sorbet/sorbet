@@ -59,8 +59,8 @@ cc_library(
     linkstatic = 1,  # we are doing this only for llvm ir
     visibility = ["//visibility:public"],
     deps = [
-        "@ruby_2_6_3//:ruby_headers",
-        "@ruby_2_6_3//:ruby_private_headers",
+        "@sorbet_ruby//:headers",
+        "@sorbet_ruby//:headers-internal",
     ],
 )
 

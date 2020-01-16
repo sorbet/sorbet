@@ -90,8 +90,10 @@ set +e
 # NOTE: the llvmir environment variable must have a leading `./`, otherwise the
 # require will trigger path search.
 force_compile=1 llvmir="${target}" $ruby \
-  -I "${root}/run/tools" \
-  -rpatch_require.rb -rpreamble.rb "$runfile" \
+  --disable=gems \
+  --disable=did_you_mean \
+  -I "${root}/run/tools" -rpatch_require.rb -rpreamble.rb \
+  "$runfile" \
   1> "$stdout" 2> "$stderr"
 code=$?
 set -e

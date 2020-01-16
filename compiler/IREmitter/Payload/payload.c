@@ -7,7 +7,7 @@
 
 // These are public Ruby headers. Feel free to add more from the include/ruby
 // directory
-#include "include/ruby/encoding.h" // for rb_encoding
+#include "ruby/encoding.h" // for rb_encoding
 
 // These are special "public" headers which don't live in include/ruby for some
 // reason

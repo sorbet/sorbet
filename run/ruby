@@ -9,13 +9,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [ -f "$base/external/ruby_2_6_3/ruby" ]; then
-    ruby="$base/external/ruby_2_6_3/ruby"
+if [ -f "$base/external/sorbet_ruby/ruby" ]; then
+    ruby="$base/external/sorbet_ruby/ruby"
 else
-    ruby="$base/bazel-bin/external/ruby_2_6_3/ruby"
+    ruby="$base/bazel-bin/external/sorbet_ruby/ruby"
     if [ ! -f "$ruby" ]; then
         cd "$base"
-        bazel build @ruby_2_6_3//:ruby --config=dbg 2> /dev/null
+        bazel build @sorbet_ruby//:ruby --config=dbg 2> /dev/null
         cd - > /dev/null
     fi
 fi

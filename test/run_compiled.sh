@@ -31,26 +31,19 @@ export llvmir
 # ensure that the extension is built
 "test/run_sorbet.sh" "$rb"
 
-ruby="./bazel-bin/external/ruby_2_6_3/ruby.runfiles/ruby_2_6_3"
-ruby_bin="${ruby}/bin"
-ruby_lib="${ruby}/lib/ruby/2.6.0"
-
-# work-around for not being able to declare an empty array in bash-3.x
-if [ -z "$DEBUG" ]; then
-  command=( "${ruby_bin}/ruby" )
-else
-  command=("lldb" "--" "${ruby_bin}/ruby")
-fi
+ruby="./bazel-bin/external/sorbet_ruby/ruby"
 
 if [ -n "$DEBUG" ]; then
-  bazel build @ruby_2_6_3//:ruby --config dbg --config static-libs 2>/dev/null
+  bazel build @sorbet_ruby//:ruby --config dbg --config static-libs 2>/dev/null
+  command=("lldb" "--" "${ruby}")
 else
-  bazel build @ruby_2_6_3//:ruby -c opt 2>/dev/null
+  bazel build @sorbet_ruby//:ruby -c opt 2>/dev/null
+  command=( "${ruby}" )
 fi
 
 command=("${command[@]}" \
-  -W0 \
-  -I "${ruby_lib}" -I "${ruby_lib}/x86_64-darwin18" \
+  "--disable=gems" \
+  "--disable=did_you_mean" \
   -I "run/tools" -rpreamble.rb -rpatch_require.rb \
   -e "require './$rb'" \
   "$@" \

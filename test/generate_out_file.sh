@@ -43,7 +43,7 @@ rb=${4}
 rbrunfile=$(mktemp)
 
 # Find ruby
-ruby="$(rlocation ruby_2_6_3/ruby)"
+ruby="$(rlocation sorbet_ruby/ruby)"
 
 # Determine the location of run/tools
 run_tools=$(dirname "$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)")
@@ -74,8 +74,9 @@ trap cleanup EXIT
 set +e
 # NOTE: we run with patch_require incluced so that the stack trace looks similar
 # to what we'll see in the compiled version
-llvmir="$llvmir" $ruby \
-  --disable=gems --disable=did_you_mean \
+llvmir="$llvmir" "$ruby" \
+  --disable=gems \
+  --disable=did_you_mean \
   -I "$run_tools" -rpreamble.rb -rpatch_require.rb \
   "$rbrunfile" > "$rbout" 2> "$rberr"
 echo "$?" > "$rbexit"

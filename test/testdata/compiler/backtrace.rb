@@ -7,7 +7,7 @@ end
 def bar
   bt = Thread.current.backtrace.join("\n")
   bt = bt.gsub(/^.*com_stripe_sorbet_llvm\//, '')
-  bt = bt.gsub(/^.*ruby_2_6_3\//, '')
+  bt = bt.gsub(/^.*sorbet_ruby\//, '')
   bt = bt.gsub(/^.*tmp\..*:/, ':')
 
   # for now (maybe?) the monkeypatching has different backtraces
