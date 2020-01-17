@@ -136,13 +136,13 @@ class T::Props::Decorator
       instance: DecoratedInstance,
       prop: Symbol,
       val: T.untyped,
-      rules: T.nilable(Rules)
+      rules: Rules
     )
     .void
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules[:setter_proc])
+    instance.instance_exec(val, &rules.fetch(:setter_proc))
   end
   alias_method :set, :prop_set
 
@@ -456,11 +456,11 @@ class T::Props::Decorator
       if !rules[:immutable]
         if method(:prop_set).owner != T::Props::Decorator
           @class.send(:define_method, "#{name}=") do |val|
-            self.class.decorator.prop_set(self, name, val, rules)
+            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
         else
           # Fast path (~4x faster as of Ruby 2.6)
-          @class.send(:define_method, "#{name}=", &rules[:setter_proc])
+          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
       end
 
@@ -806,9 +806,9 @@ class T::Props::Decorator
 
         unless rules[:immutable]
           if child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-              child.instance_method("#{name}=").source_location.first == __FILE__
+              child.instance_method("#{name}=").source_location&.first == __FILE__
             child.send(:define_method, "#{name}=") do |val|
-              self.class.decorator.prop_set(self, name, val, rules)
+              T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
             end
           end
         end

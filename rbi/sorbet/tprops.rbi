@@ -61,11 +61,11 @@ class T::Props::Decorator
   def prop_get(instance, prop, rules = {}); end
   def prop_rules(prop); end
   def prop_set(instance, prop, value, rules = {}); end
+  alias_method :set, :prop_set
   def prop_validate_definition!(name, cls, rules, type); end
   def props; end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
-  def set(instance, prop, value, rules = {}); end
   def valid_rule_key?(key); end
   def validate_prop_value(prop, val); end
   extend T::Sig
