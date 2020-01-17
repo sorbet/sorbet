@@ -10,11 +10,11 @@ public:
     using Entry = std::pair<std::string, Definition::Type>;
     using Entries = UnorderedSet<Entry>;
     struct SubclassInfo {
-        bool isClass = false;
+        ClassKind classKind = ClassKind::Module;
         Entries entries;
 
         SubclassInfo() = default;
-        SubclassInfo(bool isClass, Entries entries) : isClass(isClass), entries(entries){};
+        SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(entries){};
     };
     using Map = UnorderedMap<std::string, SubclassInfo>;
 

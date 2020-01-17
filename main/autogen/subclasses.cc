@@ -64,7 +64,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
                                 "::", [&ctx](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); }));
 
         out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
-        out[parentName].isClass = ref.is_subclassing;
+        out[parentName].classKind = ref.parentKind;
     }
 
     return out;
@@ -89,7 +89,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
         }
     }
 
-    return SubclassInfo(fnd->second.isClass, out);
+    return SubclassInfo(fnd->second.classKind, out);
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
@@ -110,7 +110,7 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         }
         const Subclasses::SubclassInfo &children = fnd->second;
 
-        auto type = children.isClass ? "class" : "module";
+        auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         vector<string> serializedChildren;

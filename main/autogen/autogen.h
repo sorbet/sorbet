@@ -16,6 +16,8 @@ struct AutoloaderConfig;
 struct NamedDefinition;
 class DefTree;
 
+enum class ClassKind { Class, Module };
+
 struct DefinitionRef {
     u4 _id;
 
@@ -75,7 +77,8 @@ struct Reference {
     core::Loc definitionLoc;
     bool is_resolved_statically;
     bool is_defining_ref;
-    bool is_subclassing;
+
+    ClassKind parentKind = ClassKind::Module;
 
     DefinitionRef parent_of;
 };

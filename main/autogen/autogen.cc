@@ -182,7 +182,7 @@ public:
         // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
         // we're looking at the first `class Child < Parent` relationship, so we change `is_subclassing` to true.
         if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
-            ref.is_subclassing = true;
+            ref.parentKind = ClassKind::Class;
         }
         refMap[original.get()] = ref.id;
         return original;
