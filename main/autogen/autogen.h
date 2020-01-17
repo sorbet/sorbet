@@ -75,6 +75,7 @@ struct Reference {
     core::Loc definitionLoc;
     bool is_resolved_statically;
     bool is_defining_ref;
+    bool is_subclassing;
 
     DefinitionRef parent_of;
 };

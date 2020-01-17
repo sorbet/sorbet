@@ -178,6 +178,12 @@ public:
         }
         ref.is_resolved_statically = true;
         ref.is_defining_ref = false;
+        // if we're already in the scope of the class (which will be the newest-created one) then we're looking at the
+        // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
+        // we're looking at the first `class Child < Parent` relationship, so we change `is_subclassing` to true.
+        if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
+            ref.is_subclassing = true;
+        }
         refMap[original.get()] = ref.id;
         return original;
     }

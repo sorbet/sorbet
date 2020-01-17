@@ -9,7 +9,14 @@ class Subclasses final {
 public:
     using Entry = std::pair<std::string, Definition::Type>;
     using Entries = UnorderedSet<Entry>;
-    using Map = UnorderedMap<std::string, Entries>;
+    struct SubclassInfo {
+        bool isClass = false;
+        Entries entries;
+
+        SubclassInfo() = default;
+        SubclassInfo(bool isClass, Entries entries) : isClass(isClass), entries(entries){};
+    };
+    using Map = UnorderedMap<std::string, SubclassInfo>;
 
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
@@ -20,7 +27,7 @@ private:
     static void patchChildMap(Subclasses::Map &childMap);
     static bool isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
                               const std::vector<std::string> &relativeIgnorePatterns);
-    static std::optional<Entries> descendantsOf(const Subclasses::Map &childMap, const std::string &parents);
+    static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const std::string &parents);
     static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                          const std::vector<std::string> &parentNames);
 };

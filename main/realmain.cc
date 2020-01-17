@@ -297,7 +297,8 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
 
             for (const auto &[parentName, children] : *el.second.subclasses) {
                 if (!parentName.empty()) {
-                    childMap[parentName].insert(children.begin(), children.end());
+                    childMap[parentName].entries.insert(children.entries.begin(), children.entries.end());
+                    childMap[parentName].isClass = children.isClass;
                 }
             }
         }
