@@ -1,7 +1,7 @@
 --- autogen-subclasses ---
-Opus::Mixin
+module Opus::Mixin
  Opus::Mixed
  Opus::MixedDescendant
-Opus::Parent
+class Opus::Parent
  Opus::Child
  Opus::DupChild
