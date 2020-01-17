@@ -36,6 +36,20 @@ class LSPLoop {
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
+    /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state! We clone
+     * this global state every time we need to perform a slow path typechecking operation. */
+    std::unique_ptr<core::GlobalState> initialGS;
+    /** Contains file hashes for the files stored in `initialGS`. Used to determine if an edit can be typechecked
+     * incrementally. */
+    std::vector<core::FileHash> globalStateHashes;
+    /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
+    LSPFileUpdates pendingTypecheckUpdates;
+    /** Contains globalStateHashes evicted with `pendingTypecheckUpdates`. Used in slow path cancelation logic. */
+    UnorderedMap<int, core::FileHash> pendingTypecheckEvictedStateHashes;
+
+    std::unique_ptr<KeyValueStore> kvstore; // always null for now.
+    /** A WorkerPool with 0 workers. */
+    std::unique_ptr<WorkerPool> emptyWorkers;
 
     void processRequestInternal(LSPMessage &msg);
 
@@ -43,9 +57,10 @@ class LSPLoop {
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
-    /** Helper method: If message is an edit taking the slow path, and slow path cancelation is enabled, signal to
-     * GlobalState that we will be starting a commit of the edits. */
-    void maybeStartCommitSlowPathEdit(const LSPMessage &msg) const;
+
+    /** Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
+     * and file hashes. Also handles canceling the running slow path. */
+    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,

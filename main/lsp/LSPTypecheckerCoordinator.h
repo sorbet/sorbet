@@ -38,9 +38,9 @@ public:
 
     /**
      * Initializes typechecker and runs typechecking for the first time.
-     * TODO(jvilk): Make the typechecking portion of initialization non-blocking when we implement preemption.
+     * TODO(jvilk): Make non-blocking when we implement preemption.
      */
-    void initialize(std::unique_ptr<InitializedParams> params);
+    void initialize(LSPFileUpdates initializeUpdate);
 
     /**
      * Typechecks the given updates on the slow path.

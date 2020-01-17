@@ -203,7 +203,7 @@ string DidChangeTextDocumentParams::getSource(string_view oldFileContents) const
 }
 
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
-    versionStart = older.versionStart;
+    editCount += older.editCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
     cancellationExpected = cancellationExpected || older.cancellationExpected;
 
@@ -234,8 +234,8 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
 
 LSPFileUpdates LSPFileUpdates::copy() const {
     LSPFileUpdates copy;
-    copy.versionStart = versionStart;
-    copy.versionEnd = versionEnd;
+    copy.epoch = epoch;
+    copy.editCount = editCount;
     copy.canTakeFastPath = canTakeFastPath;
     copy.hasNewFiles = hasNewFiles;
     copy.updatedFiles = updatedFiles;
@@ -245,6 +245,28 @@ LSPFileUpdates LSPFileUpdates::copy() const {
         copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
     }
     return copy;
+}
+
+void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
+    // 'newerParams' has newer updates, so merge its contents into this object.
+    epoch = newerParams.epoch;
+
+    UnorderedSet<std::string_view> encounteredFiles;
+    auto newUpdates = move(newerParams.updates);
+
+    for (auto &f : newUpdates) {
+        encounteredFiles.insert(f->path());
+    }
+
+    for (auto &f : updates) {
+        if (!encounteredFiles.contains(f->path())) {
+            encounteredFiles.insert(f->path());
+            newUpdates.push_back(move(f));
+        }
+    }
+    updates = move(newUpdates);
+    mergeCount += newerParams.mergeCount + 1;
+    sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
 }
 
 } // namespace sorbet::realmain::lsp

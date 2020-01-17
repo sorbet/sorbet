@@ -43,6 +43,8 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
 
 void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
+    ENFORCE(!this->initialized);
+    this->initialized = true;
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
     // Initialize to all zeroes.
@@ -55,6 +57,7 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
+    ENFORCE(this->initialized);
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     const bool isFastPath = updates.canTakeFastPath;
@@ -73,6 +76,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
 
 TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
+    ENFORCE(this->initialized);
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
@@ -191,7 +195,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = epochManager.tryCommitEpoch(updates.versionEnd, cancelable, preemptManager, [&]() -> void {
+    const bool committed = epochManager.tryCommitEpoch(updates.epoch, cancelable, preemptManager, [&]() -> void {
         UnorderedSet<int> updatedFiles;
         vector<ast::ParsedFile> indexedCopies;
 
@@ -271,7 +275,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     ENFORCE(!run.canceled);
     const auto &filesTypechecked = run.filesTypechecked;
-    const u4 epoch = run.updates.versionEnd;
+    const u4 epoch = run.updates.epoch;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
@@ -397,8 +401,7 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     auto &logger = config->logger;
 
     if (run.canceled) {
-        logger->debug("[Typechecker] Typecheck run for edits {} thru {} was canceled.", run.updates.versionStart,
-                      run.updates.versionEnd);
+        logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", run.updates.epoch);
         return;
     }
 
@@ -491,8 +494,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
     LSPFileUpdates noop;
     noop.canTakeFastPath = true;
     // Epoch isn't important for this update.
-    noop.versionStart = 0;
-    noop.versionEnd = 0;
+    noop.epoch = 0;
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
@@ -547,6 +549,62 @@ void LSPTypechecker::changeThread() {
     typecheckerThreadId = newId;
 }
 
+vector<core::FileHash> LSPTypechecker::computeFileHashes(const LSPConfiguration &config,
+                                                         const vector<shared_ptr<core::File>> &files,
+                                                         WorkerPool &workers) {
+    Timer timeit(config.logger, "computeFileHashes");
+    vector<core::FileHash> res(files.size());
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
+    for (int i = 0; i < files.size(); i++) {
+        auto copy = i;
+        fileq->push(move(copy), 1);
+    }
+
+    auto &logger = *config.logger;
+    logger.debug("Computing state hashes for {} files", files.size());
+
+    res.resize(files.size());
+
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
+    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+        vector<pair<int, core::FileHash>> threadResult;
+        int processedByThread = 0;
+        int job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    if (!files[job]) {
+                        threadResult.emplace_back(job, core::FileHash{});
+                        continue;
+                    }
+                    auto hash = pipeline::computeFileHash(files[job], logger);
+                    threadResult.emplace_back(job, move(hash));
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        vector<pair<int, core::FileHash>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    res[a.first] = move(a.second);
+                }
+            }
+        }
+    }
+    return res;
+}
+
 TypecheckRun::TypecheckRun(vector<unique_ptr<core::Error>> errors, vector<core::FileRef> filesTypechecked,
                            LSPFileUpdates updates, bool tookFastPath,
                            std::optional<std::unique_ptr<core::GlobalState>> newGS)
@@ -560,7 +618,7 @@ TypecheckRun TypecheckRun::makeCanceled() {
 }
 
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
-    : workers(workers), typechecker(typechecker) {}
+    : typechecker(typechecker), workers(workers) {}
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates) {
     if (!updates.canTakeFastPath) {

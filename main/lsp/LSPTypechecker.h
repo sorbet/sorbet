@@ -63,6 +63,8 @@ class LSPTypechecker final {
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
 
     std::shared_ptr<const LSPConfiguration> config;
+    /** Used for assertions. Indicates if `initialize` has been run. */
+    bool initialized = false;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
@@ -87,6 +89,14 @@ class LSPTypechecker final {
     LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 
 public:
+    /**
+     * Computes state hashes for the given set of files. Does not require any typechecker state, so it is a static
+     * method.
+     */
+    static std::vector<core::FileHash> computeFileHashes(const LSPConfiguration &config,
+                                                         const std::vector<std::shared_ptr<core::File>> &files,
+                                                         WorkerPool &workers);
+
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config);
     ~LSPTypechecker() = default;
 
@@ -148,10 +158,13 @@ public:
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
  */
 class LSPTypecheckerDelegate {
-    WorkerPool &workers;
     LSPTypechecker &typechecker;
 
 public:
+    /** The WorkerPool on which work will be performed. If the task is multithreaded, the pool will contain multiple
+     * worker threads. */
+    WorkerPool &workers;
+
     /**
      * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
      */

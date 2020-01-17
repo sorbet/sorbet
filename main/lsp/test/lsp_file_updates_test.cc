@@ -38,17 +38,17 @@ void addFile(LSPFileUpdates &updates, core::FileRef fref, std::string path, std:
 
 TEST(LSPFileUpdatesTest, MergeOlderVersions) {
     LSPFileUpdates oldUpdates;
-    oldUpdates.versionStart = 4;
-    oldUpdates.versionEnd = 10;
+    oldUpdates.editCount = 6;
+    oldUpdates.epoch = 10;
 
     LSPFileUpdates newUpdates;
-    newUpdates.versionStart = 10;
-    newUpdates.versionEnd = 14;
+    newUpdates.editCount = 4;
+    newUpdates.epoch = 14;
 
     newUpdates.mergeOlder(oldUpdates);
 
-    EXPECT_EQ(4, newUpdates.versionStart);
-    EXPECT_EQ(14, newUpdates.versionEnd);
+    EXPECT_EQ(10, newUpdates.editCount);
+    EXPECT_EQ(14, newUpdates.epoch);
 }
 
 TEST(LSPFileUpdatesTest, MergeOlderCancellationExpected) {
@@ -91,14 +91,14 @@ TEST(LSPFileUpdatesTest, MergeOlderHasNewFiles) {
 
 TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
     LSPFileUpdates oldUpdates;
-    oldUpdates.versionStart = 4;
-    oldUpdates.versionEnd = 10;
+    oldUpdates.editCount = 6;
+    oldUpdates.epoch = 10;
     addFile(oldUpdates, core::FileRef(1), "foo.rb", "foo");
     addFile(oldUpdates, core::FileRef(2), "bar.rb", "oldcontents");
 
     LSPFileUpdates newUpdates;
-    newUpdates.versionStart = 10;
-    newUpdates.versionEnd = 14;
+    newUpdates.editCount = 4;
+    newUpdates.epoch = 14;
     addFile(newUpdates, core::FileRef(2), "bar.rb", "newcontents");
     addFile(newUpdates, core::FileRef(3), "baz.rb", " ");
 
@@ -141,8 +141,8 @@ TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
 
 TEST(LSPFileUpdatesTest, Copy) {
     LSPFileUpdates updates;
-    updates.versionStart = 0;
-    updates.versionEnd = 10;
+    updates.editCount = 10;
+    updates.epoch = 10;
     updates.cancellationExpected = true;
     updates.canTakeFastPath = true;
     updates.hasNewFiles = true;
@@ -151,8 +151,8 @@ TEST(LSPFileUpdatesTest, Copy) {
     addFile(updates, core::FileRef(2), "bar.rb", "bar");
 
     LSPFileUpdates copy = updates.copy();
-    EXPECT_EQ(0, copy.versionStart);
-    EXPECT_EQ(10, copy.versionEnd);
+    EXPECT_EQ(10, copy.epoch);
+    EXPECT_EQ(10, copy.editCount);
     EXPECT_TRUE(copy.cancellationExpected);
     EXPECT_TRUE(copy.canTakeFastPath);
     EXPECT_TRUE(copy.hasNewFiles);

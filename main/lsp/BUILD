@@ -24,7 +24,6 @@ cc_library(
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
-        "TimeTravelingGlobalState.h",
         "json_types.h",
         "lsp.h",
         "lsp_messages_gen.h",
