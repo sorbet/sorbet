@@ -45,7 +45,7 @@ class TypecheckCountTask : public LSPTask {
     int &count;
 
 public:
-    TypecheckCountTask(const LSPConfiguration &config, int &count) : LSPTask(config), count(count) {}
+    TypecheckCountTask(const LSPConfiguration &config, int &count) : LSPTask(config, true), count(count) {}
 
     void run(LSPTypecheckerDelegate &tc) override {
         count = tc.state().lspTypecheckCount;

@@ -40,6 +40,7 @@ public:
 
 private:
     RawLSPMessage msg;
+    bool canceled = false;
 
 public:
     /**
@@ -60,9 +61,14 @@ public:
     /** Used to calculate latency of message processing. If this message represents multiple edits, it contains the
      * oldest timer.*/
     std::unique_ptr<Timer> timer;
+    /** A more specific timer for the given method. Used to track latency for specific types of requests. */
+    std::unique_ptr<Timer> methodTimer;
 
     /** If `true`, then this LSPMessage contains a canceled LSP request. */
-    bool canceled = false;
+    bool isCanceled() const;
+
+    /** Cancels this message. */
+    void cancel();
 
     /**
      * Returns an ID if the message has one. Otherwise, returns nullopt.
