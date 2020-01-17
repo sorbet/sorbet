@@ -109,87 +109,15 @@ class T::Props::Decorator
     instance.instance_variable_get(rules ? rules[:accessor_key] : '@' + prop.to_s) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
   end
 
-  # For performance, don't use named params here.
-  # Passing in rules here is purely a performance optimization.
-  #
-  # checked(:never) - O(prop accesses)
-  sig do
-    params(
-      instance: DecoratedInstance,
-      prop: Symbol,
-      value: T.untyped,
-      rules: T.nilable(Rules)
-    )
-    .void
-    .checked(:never)
-  end
-  def set(instance, prop, value, rules=props[prop.to_sym])
-    # For backwards compatibility, fall back to reconstructing the accessor key
-    # (though it would probably make more sense to raise in that case).
-    instance.instance_variable_set(rules ? rules[:accessor_key] : '@' + prop.to_s, value) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
-  end
-
   # Use this to validate that a value will validate for a given prop. Useful for knowing whether a value can be set on a model without setting it.
   #
   # checked(:never) - potentially O(prop accesses) depending on usage pattern
   sig {params(prop: Symbol, val: T.untyped).void.checked(:never)}
   def validate_prop_value(prop, val)
-    # This implements a 'public api' on document so that we don't allow callers to pass in rules
-    # Rules seem like an implementation detail so it seems good to now allow people to specify them manually.
-    check_prop_type(prop, val)
-  end
-
-  # Passing in rules here is purely a performance optimization.
-  #
-  # checked(:never) - O(prop accesses)
-  sig {params(prop: Symbol, val: T.untyped, rules: Rules).void.checked(:never)}
-  private def check_prop_type(prop, val, rules=prop_rules(prop))
-    type_object = rules.fetch(:type_object)
-    type = rules.fetch(:type)
-
-    # TODO: ideally we'd add `&& rules[:optional] != :existing` to this check
-    # (it makes sense to treat those props required in this context), but we'd need
-    # to be sure that doesn't break any existing code first.
-    if val.nil?
-      if !T::Props::Utils.need_nil_write_check?(rules) || (rules.key?(:default) && rules[:default].nil?)
-        return
-      end
-
-      if rules[:raise_on_nil_write]
-        raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
-        "(instance of #{val.class}) - need a #{type}")
-      end
-    end
-
-    # T::Props::CustomType is not a real object based class so that we can not run real type check call.
-    # T::Props::CustomType.valid?() is only a helper function call.
-    valid =
-      if type.is_a?(T::Props::CustomType) && T::Props::Utils.optional_prop?(rules)
-        type.valid?(val)
-      else
-        type_object.valid?(val)
-      end
-
-    if !valid
-      raise T::Props::InvalidValueError.new("Can't set #{@class.name}.#{prop} to #{val.inspect} " \
-        "(instance of #{val.class}) - need a #{type_object}")
-    end
-  rescue T::Props::InvalidValueError => err
-    caller_loc = T.must(caller_locations(8, 1))[0]
-
-    pretty_message = "Parameter '#{prop}': #{err.message}\n" \
-      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
-
-    T::Configuration.call_validation_error_handler(
-      nil,
-      message: err.message,
-      pretty_message: pretty_message,
-      kind: 'Parameter',
-      name: prop,
-      type: type,
-      value: val,
-      location: caller_loc,
-    )
+    # We call `setter_proc` here without binding to an instance, so it'll run
+    # `instance_variable_set` if validation passes, but nothing will care.
+    # We only care about the validation.
+    prop_rules(prop).fetch(:setter_proc).call(val)
   end
 
   # For performance, don't use named params here.
@@ -197,6 +125,9 @@ class T::Props::Decorator
   # Unlike the other methods that take rules, this one calls prop_rules for
   # the default, which raises if the prop doesn't exist (this maintains
   # preexisting behavior).
+  #
+  # Note this path is NOT used by generated setters on instances,
+  # which are defined using `setter_proc` directly.
   #
   # checked(:never) - O(prop accesses)
   sig do
@@ -210,9 +141,9 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    check_prop_type(prop, val, T.must(rules))
-    set(instance, prop, val, rules)
+    instance.instance_exec(val, &rules[:setter_proc])
   end
+  alias_method :set, :prop_set
 
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
@@ -499,7 +430,10 @@ class T::Props::Decorator
       rules[:serializable_subtype] = hash_key_custom_type
     end
 
+    rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+
     add_prop_definition(name, rules)
+
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).
     define_getter_and_setter(name, rules) unless rules[:without_accessors]
@@ -518,8 +452,13 @@ class T::Props::Decorator
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
       if !rules[:immutable]
-        @class.send(:define_method, "#{name}=") do |x|
-          self.class.decorator.prop_set(self, name, x, rules)
+        if method(:prop_set).owner != T::Props::Decorator
+          @class.send(:define_method, "#{name}=") do |val|
+            self.class.decorator.prop_set(self, name, val, rules)
+          end
+        else
+          # Fast path (~4x faster as of Ruby 2.6)
+          @class.send(:define_method, "#{name}=", &rules[:setter_proc])
         end
       end
 
@@ -858,6 +797,15 @@ class T::Props::Decorator
             child.instance_method(name).source_location.first == __FILE__
           child.send(:define_method, name) do
             self.class.decorator.prop_get(self, name, rules)
+          end
+        end
+
+        unless rules[:immutable]
+          if child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
+              child.instance_method("#{name}=").source_location.first == __FILE__
+            child.send(:define_method, "#{name}=") do |val|
+              self.class.decorator.prop_set(self, name, val, rules)
+            end
           end
         end
       end

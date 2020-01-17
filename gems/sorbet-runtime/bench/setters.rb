@@ -17,6 +17,20 @@ module SorbetBenchmarks
       prop :nilable, T.nilable(Integer), default: 0
     end
 
+    class OverrideStruct < T::Struct
+      class SetHookDecorator < T::Props::Decorator
+        def prop_set(instance, prop, val, rules=prop_rules())
+          super
+        end
+      end
+
+      def self.decorator_class
+        SetHookDecorator
+      end
+
+      prop :prop, Integer
+    end
+
     # Note we manually unroll loops 10x since loop overhead may be non-negligible here
     def self.run
       poro = ExamplePoro.new
@@ -86,6 +100,29 @@ module SorbetBenchmarks
         end
       end
       puts "T::Struct setter, nilable type (μs/iter):"
+      puts result
+
+      struct = OverrideStruct.new(prop: 0)
+
+      10_000.times do
+        struct.prop = 0
+      end
+
+      result = Benchmark.measure do
+        100_000.times do
+          struct.prop = 0
+          struct.prop = 1
+          struct.prop = 2
+          struct.prop = 3
+          struct.prop = 4
+          struct.prop = 5
+          struct.prop = 6
+          struct.prop = 7
+          struct.prop = 8
+          struct.prop = 9
+        end
+      end
+      puts "T::Struct setter, given prop_set override (μs/iter):"
       puts result
     end
   end
