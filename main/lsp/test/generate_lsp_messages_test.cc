@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "common/common.h"
+#include "common/sort.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 
@@ -304,4 +305,55 @@ TEST(GenerateLSPMessagesTest, AcceptsNullOnOptionalFields) {
     parseTest<ConfigurationItem>("{\"scopeUri\": null}", [](auto &item) -> void { ASSERT_FALSE(item->scopeUri); });
 }
 
+TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMerge) {
+    SorbetWorkspaceEditParams oldEdit;
+    oldEdit.mergeCount = 10;
+    oldEdit.sorbetCancellationExpected = true;
+    oldEdit.epoch = 4;
+    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, 4)};
+
+    SorbetWorkspaceEditParams newEdit;
+    newEdit.mergeCount = 2;
+    newEdit.sorbetCancellationExpected = false;
+    newEdit.epoch = 5;
+    newEdit.updates = {make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, 5)};
+
+    // Merge merges the new edit into the old edit.
+    oldEdit.merge(newEdit);
+
+    EXPECT_EQ(13, oldEdit.mergeCount);
+    EXPECT_TRUE(oldEdit.sorbetCancellationExpected);
+    EXPECT_EQ(5, oldEdit.epoch);
+    ASSERT_EQ(2, oldEdit.updates.size());
+
+    fast_sort(oldEdit.updates, [](auto &a, auto &b) -> bool { return a->path().compare(b->path()) < 0; });
+
+    ASSERT_EQ("bar.rb", oldEdit.updates.at(0)->path());
+    ASSERT_EQ("foo.rb", oldEdit.updates.at(1)->path());
+}
+
+TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMergeTakesNewerEdit) {
+    SorbetWorkspaceEditParams oldEdit;
+    oldEdit.mergeCount = 10;
+    oldEdit.sorbetCancellationExpected = false;
+    oldEdit.epoch = 4;
+    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, 4)};
+
+    SorbetWorkspaceEditParams newEdit;
+    newEdit.mergeCount = 0;
+    newEdit.sorbetCancellationExpected = true;
+    newEdit.epoch = 5;
+    newEdit.updates = {make_shared<core::File>("foo.rb", "bar", core::File::Type::Normal, 5)};
+
+    // Merge merges the new edit into the old edit.
+    oldEdit.merge(newEdit);
+
+    EXPECT_EQ(11, oldEdit.mergeCount);
+    EXPECT_TRUE(oldEdit.sorbetCancellationExpected);
+    EXPECT_EQ(5, oldEdit.epoch);
+    ASSERT_EQ(1, oldEdit.updates.size());
+
+    ASSERT_EQ("foo.rb", oldEdit.updates.at(0)->path());
+    ASSERT_EQ("bar", oldEdit.updates.at(0)->source());
+}
 } // namespace sorbet::realmain::lsp::test

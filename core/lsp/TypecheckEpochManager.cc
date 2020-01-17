@@ -13,22 +13,16 @@ void TypecheckEpochManager::assertConsistentThread(optional<thread::id> &expecte
     }
 }
 
-void TypecheckEpochManager::startCommitEpoch(u4 fromEpoch, u4 toEpoch) {
+void TypecheckEpochManager::startCommitEpoch(u4 epoch) {
+    assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::startCommitEpoch", "typechecking");
     absl::MutexLock lock(&epochMutex);
-    ENFORCE(fromEpoch != toEpoch);
-    ENFORCE(toEpoch != currentlyProcessingLSPEpoch.load());
-    ENFORCE(toEpoch != lastCommittedLSPEpoch.load());
+    ENFORCE(epoch != currentlyProcessingLSPEpoch.load());
+    ENFORCE(epoch != lastCommittedLSPEpoch.load());
     // epoch should be a version 'ahead' of currentlyProcessingLSPEpoch. The distance between the two is the number of
     // fast path edits that have come in since the last slow path. Since epochs overflow, there's nothing that I can
     // easily assert here to ensure that we are not moving backward in time.
-    currentlyProcessingLSPEpoch.store(toEpoch);
-    lspEpochInvalidator.store(toEpoch);
-    // lastCommittedLSPEpoch currently contains the epoch of the last slow path we processed. Since then, we may have
-    // committed several fast paths. So, update it to the epoch of the last fast path committed.
-    // We do it this way rather than keep it up-to-date after every fast path to reduce footguns, especially in testing.
-    // With this design, when starting a commit epoch, you have to specify the (from, to] range, and it is compiler
-    // enforced.
-    lastCommittedLSPEpoch.store(fromEpoch);
+    currentlyProcessingLSPEpoch.store(epoch);
+    lspEpochInvalidator.store(epoch);
 }
 
 bool TypecheckEpochManager::wasTypecheckingCanceled() const {
@@ -43,7 +37,7 @@ TypecheckEpochManager::TypecheckingStatus TypecheckEpochManager::getStatusIntern
     const u4 invalidator = lspEpochInvalidator.load();
     const bool slowPathRunning = processing != committed;
     const bool slowPathIsCanceled = processing != invalidator;
-    return TypecheckingStatus{slowPathRunning, slowPathIsCanceled, committed, processing};
+    return TypecheckingStatus{slowPathRunning, slowPathIsCanceled, processing};
 }
 
 TypecheckEpochManager::TypecheckingStatus TypecheckEpochManager::getStatus() const {
@@ -52,7 +46,8 @@ TypecheckEpochManager::TypecheckingStatus TypecheckEpochManager::getStatus() con
 }
 
 bool TypecheckEpochManager::tryCancelSlowPath(u4 newEpoch) {
-    assertConsistentThread(preprocessThreadId, "TypecheckEpochManager::tryCancelSlowPath", "preprocessThread");
+    assertConsistentThread(messageProcessingThreadId, "TypecheckEpochManager::tryCancelSlowPath",
+                           "messageProcessingThread");
     absl::MutexLock lock(&epochMutex);
     const u4 processing = currentlyProcessingLSPEpoch.load();
     ENFORCE(newEpoch != processing); // This would prevent a cancelation from happening.

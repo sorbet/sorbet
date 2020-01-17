@@ -1244,11 +1244,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    classTypes);
 
     // Empty object.
-    auto InitializedParams = makeObject("InitializedParams", {}, classTypes,
-                                        {
-                                            "// Contains initialization state from preprocessing step.",
-                                            "LSPFileUpdates updates;",
-                                        });
+    auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
 
     /* Sorbet LSP extensions */
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
@@ -1276,12 +1272,19 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditParams =
-        makeObject("SorbetWorkspaceEditParams", {}, classTypes,
-                   {
-                       "// Contains distilled file updates combined from one or more file update notifications.",
-                       "LSPFileUpdates updates;",
-                   });
+    auto SorbetWorkspaceEditParams = makeObject(
+        "SorbetWorkspaceEditParams", {}, classTypes,
+        {
+            "u4 epoch = 0;",
+            "// Contains the number of individual edit messages merged into this edit.",
+            "u2 mergeCount = 0;",
+            "// Used in multithreaded tests to wait for a cancellation to occur when processing this request.",
+            "bool sorbetCancellationExpected = false;"
+            "// File updates contained in this edit.",
+            "std::vector<std::shared_ptr<core::File>> updates;",
+            "// Merge newerParams into this object, which mutates `epoch` and `updates`",
+            "void merge(SorbetWorkspaceEditParams &newerParams);",
+        });
 
     auto SorbetTypecheckRunStatus =
         makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);

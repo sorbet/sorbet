@@ -126,7 +126,6 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
         // Propagate the termination flag across the two queues.
         NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
         NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
-        ttgs.switchToNewThread();
         owner = this_thread::get_id();
         while (true) {
             unique_ptr<LSPMessage> msg;
@@ -162,20 +161,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue,
     });
 }
 
-void LSPLoop::maybeStartCommitSlowPathEdit(const LSPMessage &msg) const {
-    if (msg.isNotification() && msg.method() == LSPMethod::SorbetWorkspaceEdit) {
-        // While we're holding the queue lock (and preventing new messages from entering), start a
-        // commit for an epoch if this message will trigger a cancelable slow path.
-        const auto &params = get<unique_ptr<SorbetWorkspaceEditParams>>(msg.asNotification().params);
-        if (!params->updates.canTakeFastPath && params->updates.updatedGS.has_value()) {
-            auto &gs = params->updates.updatedGS.value();
-            gs->epochManager->startCommitEpoch(params->updates.versionStart - 1, params->updates.versionEnd);
-        }
-    }
-}
-
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
     // Naming convention: thread that executes this function is called typechecking thread
+
+    // ErrorQueue asserts that the thread that created it is the one that uses it, but runLSP might be run on a
+    // different thread than the one that created `LSPLoop`. Thus, create a new one.
+    initialGS->errorQueue = make_shared<core::ErrorQueue>(initialGS->errorQueue->logger, initialGS->errorQueue->tracer);
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).
@@ -299,7 +290,6 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 processingQueue.pendingRequests.pop_front();
                 hasMoreMessages = !processingQueue.pendingRequests.empty();
                 exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
-                maybeStartCommitSlowPathEdit(*msg);
             }
             prodCounterInc("lsp.messages.received");
             processRequestInternal(*msg);

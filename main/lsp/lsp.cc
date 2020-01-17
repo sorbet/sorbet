@@ -14,8 +14,9 @@ namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
                  const std::shared_ptr<LSPConfiguration> &config)
-    : config(config), preprocessor(move(initialGS), config, workers), typecheckerCoord(config, workers),
-      lastMetricUpdateTime(chrono::steady_clock::now()) {}
+    : config(config), preprocessor(config), typecheckerCoord(config, workers),
+      lastMetricUpdateTime(chrono::steady_clock::now()), initialGS(move(initialGS)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
