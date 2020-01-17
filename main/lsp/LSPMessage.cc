@@ -120,7 +120,7 @@ bool LSPMessage::isCanceled() const {
 void LSPMessage::cancel() {
     if (!canceled) {
         canceled = true;
-        // Protect against nullptrs.
+        // Timers are optional, and may not be specified (e.g., they will be nullptr). Guard against that possibility.
         if (timer) {
             timer->cancel();
         }
