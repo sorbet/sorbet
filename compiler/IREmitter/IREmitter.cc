@@ -362,7 +362,6 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
                             defaultValue = Payload::rubyNil(cs, builder);
                         } else {
-                            fmt::print("{}\n", optionalMethodIndex);
                             optionalMethodIndex++;
                             auto argMethodName =
                                 cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
