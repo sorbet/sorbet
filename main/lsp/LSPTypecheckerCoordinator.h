@@ -43,13 +43,12 @@ public:
     void initialize(LSPFileUpdates initializeUpdate);
 
     /**
-     * Typechecks the given updates on the slow path.
-     * TODO(jvilk): Make this method non-blocking when we implement preemption.
+     * Typechecks the given updates on the slow path. Blocks until the typechecking actually begins.
      */
     void typecheckOnSlowPath(LSPFileUpdates updates);
 
     /**
-     * Schedules a task on the typechecker thread, and blocks until `lambda` completes. If the task has
+     * Schedules a task on the typechecker thread, and blocks until `task` completes. If the task has
      * `enableMultithreaded` set to "true", then the given task is allowed to use the full threadpool at the cost of not
      * being able to preempt slow path typechecking.
      * TODO(jvilk): Make single-threaded tasks scheduled this way preempt the slow path.
