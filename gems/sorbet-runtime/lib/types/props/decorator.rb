@@ -529,7 +529,7 @@ class T::Props::Decorator
         end
       else
         # Fast path (~30x faster as of Ruby 2.6)
-        @class.attr_reader(name)
+        @class.send(:attr_reader, name)
       end
     end
   end
