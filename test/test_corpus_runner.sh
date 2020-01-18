@@ -15,7 +15,6 @@ rbout=${1/--expected_output=/}
 # shellcheck disable=SC2034
 rberr=${2/--expected_err=/}
 rbexit=${3/--expected_exit_code=/}
-rbcode=$(< "$rbexit")
 build_archive=${4/--build_archive=/}
 ruby=${5/--ruby=/}
 shift 5
@@ -29,52 +28,58 @@ rb=( "$@" )
 root="$PWD"
 
 # The directory to unpack the build archive to
-target="$(mktemp -d tmp.XXXXXXXXXX.d)"
+target="$(mktemp -d)"
 
 # Test stdout/stderr logs
-stdout="$(mktemp tmp.XXXXXXXXXX.out)"
-stderr="$(mktemp tmp.XXXXXXXXXX.err)"
+stdout="$(mktemp)"
+stderr="$(mktemp)"
 
 # Test wrapper
-runfile="$(mktemp tmp.XXXXXXXXXX.rb)"
+runfile="$(mktemp)"
 
 # Main #########################################################################
 
-echo ""
-attn "Troubleshooting? Use these helpers interactively at the shell:"
-info "├─ test/run_ruby.sh ${rb[0]}"
-info "├─ test/run_sorbet.sh ${rb[0]}"
-info "└─ test/run_compiled.sh ${rb[0]}"
-info ""
-attn "Or these to attach a debugger:"
-info "├─ test/run_ruby.sh -d ${rb[0]}"
-info "├─ test/run_sorbet.sh -d ${rb[0]}"
-info "└─ test/run_compiled.sh -d ${rb[0]}"
+info "--- Running ---"
+info "* Ruby interpreted"
+attn "    test/run_ruby.sh ${rb[0]}"
 
-echo ""
-info "Testing ruby..."
-if ! $ruby -e 'puts (require "set")' > /dev/null; then
-  fatal "└─ Ruby is not functioning:  bazel-bin/$ruby"
-else
-  success "└─ path:        bazel-bin/$ruby"
-fi
+info "* Sorbet compiler"
+attn "    test/run_sorbet.sh ${rb[0]}"
 
-echo ""
-info "Pre-computed output of running interpreted:"
-info "├─ stdout:      bazel-out/k8-opt/bin/$rbout"
-info "├─ stderr:      bazel-out/k8-opt/bin/$rberr"
-info "└─ exit code:   $rbcode"
+info "* Compiled code"
+attn "    test/run_compiled.sh ${rb[0]}"
 
-echo    ""
-info    "Unpacking compiled artifact..."
-info    "├─ from:        bazel-out/k8-opt/bin/${build_archive}"
-tar -xf "${build_archive}" -C "${target}"
-success "└─ to:          ${target}"
+info "--- Debugging ---"
+info "* Ruby interpreted"
+attn "    test/run_ruby.sh -d ${rb[0]}"
+
+info "* Sorbet compiler"
+attn "    test/run_sorbet.sh -d ${rb[0]}"
+
+info "* Compiled code"
+attn "    test/run_compiled.sh -d ${rb[0]}"
+
+
+info "--- Test Config ---"
+info "* Source: ${rb[*]}"
+info "* Oracle: bazel-genfiles/${rbout}"
+info "* Exit:   bazel-genfiles/${rbexit}"
+info "* Build:  bazel-genfiles/${build_archive}"
+info "* Ruby:   bazel-bin/${ruby}"
+info "* Target: ${target}"
+info "* Runfile:${runfile}"
+info "* Stderr: ${stderr}"
+info "* Stdout: ${stderr}"
+
+info "--- Testing ruby ---"
+$ruby -e 'puts (require "set")' > /dev/null || fatal "No functioning ruby"
+
+info "--- Unpacking Build ---"
+tar -xvf "${build_archive}" -C "${target}"
 
 # NOTE: running the test could be split out into its own genrule, the test just
 # needs to validate that the output matches.
-echo ""
-info "Running compiled version with preamble..."
+info "--- Running Compiled Test ---"
 
 # NOTE: using a temp file here, as that will cause ruby to not print the name of
 # the main file in a stack trace.
@@ -86,33 +91,30 @@ set +e
 force_compile=1 llvmir="${target}" $ruby \
   -I "${root}/run/tools" \
   -rpatch_require.rb -rpreamble.rb "$runfile" \
-  1> "$stdout" 2> "$stderr"
+  2> "$stderr" | tee "$stdout"
 code=$?
 set -e
 
-info    "├─ stdout:      $stdout"
-info    "├─ stderr:      $stderr"
-success "└─ exit code:   $code"
-
-echo ""
-info "Checking return codes match..."
+info "--- Checking Return Code ---"
+rbcode=$(cat "$rbexit")
 if [[ "$code" != "$rbcode" ]]; then
-  error "├─ return codes don't match."
-  error "├─ Ruby:     ${rbcode}"
-  error "└─ Compiled: ${code}"
-  exit 1
-else
-  success "└─ codes match."
+  info "* Stdout"
+  cat "$stdout"
+  info "* Stderr"
+  cat "$stderr"
+
+  error "Return codes don't match"
+  error "  * Ruby:     ${rbcode}"
+  fatal "  * Compiled: ${code}"
 fi
 
-echo ""
-info "Checking stdouts match..."
+info "--- Checking Stdout ---"
 if ! diff -au "$rbout" "$stdout" > stdout.diff; then
-  error "└─ stdouts don't match. Diff:"
+  error "* Stdout diff"
   cat stdout.diff
-  exit 1
-else
-  success "└─ stdouts match."
+  info  "* Stderr"
+  cat  "$stderr"
+  fatal
 fi
 
 # info "--- Checking Stderr ---"
@@ -124,10 +126,7 @@ fi
 #   fatal
 # fi
 
-echo ""
-info "Cleaning up temp files..."
+info "Cleaning up temp files"
 rm -r "$target" "$stdout" "$stderr" "$runfile"
 
-echo ""
-success "Test passed."
-echo ""
+success "Test passed"
