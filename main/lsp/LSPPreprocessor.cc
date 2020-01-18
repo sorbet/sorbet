@@ -41,8 +41,9 @@ LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, u4 initial
     : config(move(config)), owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
 string_view LSPPreprocessor::getFileContents(string_view path) const {
-    auto it = fileContents.find(path);
-    if (it == fileContents.end()) {
+    auto it = openFiles.find(path);
+    if (it == openFiles.end()) {
+        ENFORCE(false, "Editor sent a change request without a matching open request.");
         return string_view();
     }
     return it->second->source();
@@ -93,10 +94,6 @@ void LSPPreprocessor::mergeFileChanges(absl::Mutex &mtx, QueueState &state) {
 
 unique_ptr<LSPMessage> LSPPreprocessor::makeAndCommitWorkspaceEdit(unique_ptr<SorbetWorkspaceEditParams> params,
                                                                    unique_ptr<LSPMessage> oldMsg) {
-    for (auto &u : params->updates) {
-        fileContents[u->path()] = u;
-    }
-
     auto newMsg =
         make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWorkspaceEdit, move(params)));
     newMsg->timer = move(oldMsg->timer);
@@ -186,7 +183,6 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
             auto &params = get<unique_ptr<DidOpenTextDocumentParams>>(msg->asNotification().params);
             // Ignore files not in workspace.
             if (config->isUriInWorkspace(params->textDocument->uri)) {
-                openFiles.insert(config->remoteName2Local(params->textDocument->uri));
                 auto newParams = canonicalizeEdits(nextVersion++, move(params));
                 msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
                 shouldEnqueue = shouldMerge = true;
@@ -196,7 +192,6 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
         case LSPMethod::TextDocumentDidClose: {
             auto &params = get<unique_ptr<DidCloseTextDocumentParams>>(msg->asNotification().params);
             if (config->isUriInWorkspace(params->textDocument->uri)) {
-                openFiles.erase(config->remoteName2Local(params->textDocument->uri));
                 auto newParams = canonicalizeEdits(nextVersion++, move(params));
                 msg = makeAndCommitWorkspaceEdit(move(newParams), move(msg));
                 shouldEnqueue = shouldMerge = true;
@@ -244,7 +239,7 @@ void LSPPreprocessor::preprocessAndEnqueue(QueueState &state, unique_ptr<LSPMess
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams> changeParams) const {
+LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams> changeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     edit->sorbetCancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
@@ -253,36 +248,40 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams>
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
-            edit->updates.push_back(
-                make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal, v));
+            auto file = make_shared<core::File>(move(localPath), move(fileContents), core::File::Type::Normal, v);
+            edit->updates.push_back(file);
+            openFiles[localPath] = move(file);
         }
     }
     return edit;
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> openParams) const {
+LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> openParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     string_view uri = openParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
-            edit->updates.push_back(make_shared<core::File>(move(localPath), move(openParams->textDocument->text),
-                                                            core::File::Type::Normal, v));
+            auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text),
+                                                core::File::Type::Normal, v);
+            edit->updates.push_back(file);
+            openFiles[localPath] = move(file);
         }
     }
     return edit;
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> closeParams) const {
+LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> closeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     string_view uri = closeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
+            openFiles.erase(localPath);
             // Use contents of file on disk.
             edit->updates.push_back(make_shared<core::File>(move(localPath), readFile(localPath, *config->opts.fs),
                                                             core::File::Type::Normal, v));

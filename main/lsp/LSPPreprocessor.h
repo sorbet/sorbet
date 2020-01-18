@@ -32,12 +32,8 @@ class LSPPreprocessor final {
     /** ID of the thread that owns the preprocessor and is allowed to invoke methods on it. */
     std::thread::id owner;
 
-    // The current set of open files as of the latest edit preprocessed. Used to canonicalize file edits into a
-    // standard format.
-    UnorderedSet<std::string> openFiles;
-
-    // A map from file path to file contents. Contains the latest file edits.
-    UnorderedMap<std::string, std::shared_ptr<core::File>> fileContents;
+    // A map from file path to file contents for open files.
+    UnorderedMap<std::string, std::shared_ptr<core::File>> openFiles;
 
     // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
     u4 nextVersion = 1;
@@ -58,11 +54,11 @@ class LSPPreprocessor final {
     /* The following methods convert edits into SorbetWorkspaceEditParams. */
 
     std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<DidChangeTextDocumentParams> changeParams) const;
+    canonicalizeEdits(u4 v, std::unique_ptr<DidChangeTextDocumentParams> changeParams);
+    std::unique_ptr<SorbetWorkspaceEditParams> canonicalizeEdits(u4 v,
+                                                                 std::unique_ptr<DidOpenTextDocumentParams> openParams);
     std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<DidOpenTextDocumentParams> openParams) const;
-    std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(u4 v, std::unique_ptr<DidCloseTextDocumentParams> closeParams) const;
+    canonicalizeEdits(u4 v, std::unique_ptr<DidCloseTextDocumentParams> closeParams);
     std::unique_ptr<SorbetWorkspaceEditParams>
     canonicalizeEdits(u4 v, std::unique_ptr<WatchmanQueryResponse> queryResponse) const;
 
