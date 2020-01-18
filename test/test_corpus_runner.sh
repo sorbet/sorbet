@@ -117,14 +117,31 @@ if ! diff -au "$rbout" "$stdout" > stdout.diff; then
   fatal
 fi
 
-# info "--- Checking Stderr ---"
-# if ! diff -au stderr.log "$rberr" > stderr.diff; then
-#   error "* Stderr diff"
-#   cat stderr.diff
-#   info  "* Stderr"
-#   cat  stderr.log
-#   fatal
-# fi
+filter_stderr() {
+  sed -e '/^SorbetLLVM using compiled/d' | \
+  sed -e '/run\/tools\/patch_require.rb:/d' | \
+    sed -e '/rubygems\/core_ext\/kernel_require.rb:/d' | \
+    sed -e 's+/[^ ]*execroot/com_stripe_sorbet_llvm/++' | \
+    sed -e 's+/[^ ]*/tmp\.[[:alnum:]]*+/.../tmp.XXXXXXXXXX+'
+}
+
+info "--- Checking Stderr ---"
+
+if grep -q '^# skip_stderr_check$' "$rbmain"; then
+  attn "Skipping stderr check"
+else
+  stderr_filtered=$(mktemp)
+  rberr_filtered=$(mktemp)
+  filter_stderr < "$rberr" > "$rberr_filtered"
+  filter_stderr < "$stderr" > "$stderr_filtered"
+  if ! diff -au "$rberr_filtered" "$stderr_filtered" > stderr.diff; then
+    error "* Stderr diff"
+    cat stderr.diff
+    info  "* Stderr"
+    cat  "$stderr"
+    fatal
+  fi
+fi
 
 info "Cleaning up temp files"
 rm -r "$target" "$stdout" "$stderr" "$runfile"

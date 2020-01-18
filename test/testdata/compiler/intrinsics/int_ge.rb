@@ -1,5 +1,6 @@
 # typed: true
 # compiled: true
+# skip_stderr_check
 
 T::Sig::WithoutRuntime.sig{params(x: Integer, y: T.untyped).returns(T::Boolean)}
 def test(x, y)
