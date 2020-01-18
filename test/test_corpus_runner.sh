@@ -29,14 +29,14 @@ rb=( "$@" )
 root="$PWD"
 
 # The directory to unpack the build archive to
-target="$(mktemp -d --suffix=.d)"
+target="$(mktemp -d tmp.XXXXXXXXXX.d)"
 
 # Test stdout/stderr logs
-stdout="$(mktemp --suffix=.out)"
-stderr="$(mktemp --suffix=.err)"
+stdout="$(mktemp tmp.XXXXXXXXXX.out)"
+stderr="$(mktemp tmp.XXXXXXXXXX.err)"
 
 # Test wrapper
-runfile="$(mktemp --suffix=.rb)"
+runfile="$(mktemp tmp.XXXXXXXXXX.rb)"
 
 # Main #########################################################################
 
