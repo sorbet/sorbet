@@ -627,7 +627,7 @@ class Pathname < Object
     )
     .returns(T.untyped)
   end
-  def each_child(with_directory, &blk); end
+  def each_child(with_directory = true, &blk); end
 
   # Iterates over the entries (files and subdirectories) in the directory,
   # yielding a [`Pathname`](https://docs.ruby-lang.org/en/2.6.0/Pathname.html)
@@ -1040,7 +1040,7 @@ class Pathname < Object
     params(
         p1: String,
     )
-    .returns(String)
+    .returns(Pathname)
   end
   def realdirpath(p1=T.unsafe(nil)); end
 
@@ -1053,7 +1053,7 @@ class Pathname < Object
     params(
         p1: String,
     )
-    .returns(String)
+    .returns(Pathname)
   end
   def realpath(p1=T.unsafe(nil)); end
 
@@ -1185,11 +1185,19 @@ class Pathname < Object
   # ```
   sig do
     params(
-        args: String,
+        arg0: T.any(Regexp, String),
+        arg1: T.any(String, T::Hash[T.untyped, T.untyped]),
     )
     .returns(Pathname)
   end
-  def sub(*args); end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(Pathname)
+  end
+  def sub(arg0, arg1=T.unsafe(nil), &blk); end
 
   # Return a pathname with `repl` added as a suffix to the basename.
   #

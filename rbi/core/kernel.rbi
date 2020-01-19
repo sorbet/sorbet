@@ -223,7 +223,7 @@ module Kernel
   sig do
     params(
         arg0: String,
-        arg1: Binding,
+        arg1: T.nilable(Binding),
         filename: String,
         lineno: Integer,
     )
