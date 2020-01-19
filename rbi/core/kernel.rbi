@@ -223,9 +223,9 @@ module Kernel
   sig do
     params(
         arg0: String,
-        arg1: Binding,
-        filename: String,
-        lineno: Integer,
+        arg1: T.nilable(Binding),
+        filename: T.nilable(String),
+        lineno: T.nilable(Integer),
     )
     .returns(T.untyped)
   end
