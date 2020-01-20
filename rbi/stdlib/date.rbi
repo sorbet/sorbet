@@ -340,7 +340,7 @@ class Date
   # DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                           #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def +(arg0); end
 
   # Returns the value as a string for inspection.
@@ -368,7 +368,7 @@ class Date
   # DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                          #=> (1/2)
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def -(arg0); end
 
   # Returns the day of the month (1-31).
