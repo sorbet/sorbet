@@ -8,6 +8,8 @@ namespace sorbet::realmain::lsp {
 /**
  * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
  * Contains miscellaneous helper methods that are useful in multiple tasks.
+ *
+ * NOTE: If `enableMultithreading` is set to `true`, then this task cannot preempt slow path typechecking.
  */
 class LSPTask {
 protected:
@@ -33,9 +35,11 @@ protected:
                                         std::vector<core::FileRef> frefs) const;
     LSPQueryResult queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) const;
 
-    LSPTask(const LSPConfiguration &config);
+    LSPTask(const LSPConfiguration &config, bool enableMultithreading);
 
 public:
+    const bool enableMultithreading;
+
     virtual ~LSPTask() = default;
 
     // Runs the task. Is only ever invoked from the typechecker thread.
@@ -49,7 +53,7 @@ class LSPRequestTask : public LSPTask {
 protected:
     const MessageId id;
 
-    LSPRequestTask(const LSPConfiguration &config, MessageId id);
+    LSPRequestTask(const LSPConfiguration &config, MessageId id, bool enableMultithreading = false);
 
     virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) = 0;
 

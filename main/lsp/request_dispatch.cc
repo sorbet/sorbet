@@ -12,7 +12,7 @@ class SorbetFenceTask final : public LSPTask {
     int id;
 
 public:
-    SorbetFenceTask(const LSPConfiguration &config, int id) : LSPTask(config), id(id) {}
+    SorbetFenceTask(const LSPConfiguration &config, int id) : LSPTask(config, true), id(id) {}
     void run(LSPTypecheckerDelegate &tc) override {
         // Send the same fence back to acknowledge the fence.
         // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
@@ -89,7 +89,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
         // asRequest() should guarantee the presence of an ID.
         ENFORCE(msg.id());
         auto id = *msg.id();
-        if (msg.canceled) {
+        if (msg.isCanceled()) {
             auto response = make_unique<ResponseMessage>("2.0", id, method);
             prodCounterInc("lsp.messages.canceled");
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
@@ -159,7 +159,7 @@ void LSPLoop::processRequestInternal(LSPMessage &msg) {
             typecheckerCoord.syncRun(make_unique<SignatureHelpTask>(*config, id, move(params)));
         } else if (method == LSPMethod::TextDocumentReferences) {
             auto &params = get<unique_ptr<ReferenceParams>>(rawParams);
-            typecheckerCoord.syncRun(make_unique<ReferencesTask>(*config, id, move(params)), /* multithreaded */ true);
+            typecheckerCoord.syncRun(make_unique<ReferencesTask>(*config, id, move(params)));
         } else if (method == LSPMethod::SorbetReadFile) {
             auto &params = get<unique_ptr<TextDocumentIdentifier>>(rawParams);
             typecheckerCoord.syncRun(make_unique<SorbetReadFileTask>(*config, id, move(params)));

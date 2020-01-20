@@ -20,17 +20,17 @@ namespace {
 class TypecheckerTask final : public core::lsp::Task {
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
-    const bool hasDedicatedThread;
+    const bool collectCounters;
     absl::Notification complete;
     CounterState counters;
 
 public:
-    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate, bool hasDedicatedThread)
-        : task(move(task)), delegate(move(delegate)), hasDedicatedThread(hasDedicatedThread) {}
+    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate, bool collectCounters)
+        : task(move(task)), delegate(move(delegate)), collectCounters(collectCounters) {}
 
     void run() override {
         task->run(*delegate);
-        if (hasDedicatedThread) {
+        if (collectCounters) {
             counters = getAndClearThreadCounters();
         }
         complete.Notify();
@@ -38,7 +38,7 @@ public:
 
     void blockUntilComplete() {
         complete.WaitForNotification();
-        if (hasDedicatedThread) {
+        if (collectCounters) {
             counterConsume(move(counters));
         }
     }
@@ -58,7 +58,7 @@ class InitializeTask : public LSPTask {
 public:
     InitializeTask(const LSPConfiguration &config, LSPTypechecker &typechecker, WorkerPool &workers,
                    LSPFileUpdates updates)
-        : LSPTask(config), typechecker(typechecker), workers(workers), updates(move(updates)){};
+        : LSPTask(config, true), typechecker(typechecker), workers(workers), updates(move(updates)){};
 
     void run(LSPTypecheckerDelegate &_) override {
         typechecker.initialize(move(updates), workers);
@@ -73,7 +73,7 @@ class SlowPathTypecheckTask : public LSPTask {
 public:
     SlowPathTypecheckTask(const LSPConfiguration &config, LSPTypechecker &typechecker, WorkerPool &workers,
                           LSPFileUpdates updates)
-        : LSPTask(config), typechecker(typechecker), workers(workers), updates(move(updates)){};
+        : LSPTask(config, true), typechecker(typechecker), workers(workers), updates(move(updates)){};
 
     void run(LSPTypecheckerDelegate &_) override {
         const u4 end = updates.versionEnd;
@@ -97,7 +97,7 @@ class ShutdownTask : public LSPTask {
 public:
     ShutdownTask(const LSPConfiguration &config, LSPTypechecker &typechecker, bool &shouldTerminate,
                  unique_ptr<core::GlobalState> &gs)
-        : LSPTask(config), typechecker(typechecker), shouldTerminate(shouldTerminate), gs(gs) {}
+        : LSPTask(config, true), typechecker(typechecker), shouldTerminate(shouldTerminate), gs(gs) {}
 
     void run(LSPTypecheckerDelegate &_) override {
         shouldTerminate = true;
@@ -120,7 +120,8 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
     }
 }
 
-void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task, bool multithreaded) {
+void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
+    // TODO(jvilk): Give single-threaded tasks a single-threaded workerpool once we land preemption.
     absl::Notification notification;
     auto wrappedTask = make_shared<TypecheckerTask>(
         move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
