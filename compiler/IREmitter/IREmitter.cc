@@ -29,6 +29,7 @@ namespace sorbet::compiler {
 // use the `demo` module for experiments
 namespace {
 
+
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const BasicBlockMap &blockMap) {
     if (blockId != 0) {
@@ -449,7 +450,23 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
                             }
                         } else {
-                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                            // It's currently impossible in Sorbet to declare a global field with a T.let
+                            // (they will all be Magic_undeclaredFieldStub)
+                            auto name = i->what.data(cs)->name;
+                            auto shortName = name.data(cs)->shortName(cs);
+                            ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
+
+                            if (i->what.data(cs)->isField()) {
+                                aliases[bind.bind.variable] = Alias::forInstanceField(name);
+                            } else if (i->what.data(cs)->isStaticField()) {
+                                if (shortName.size() > 2 && shortName[0] == '@' && shortName[1] == '@') {
+                                    aliases[bind.bind.variable] = Alias::forClassField(name);
+                                } else {
+                                    aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                                }
+                            } else {
+                                aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                            }
                         }
                     },
                     [&](cfg::SolveConstraint *i) {

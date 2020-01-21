@@ -157,6 +157,7 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 } // namespace
 
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
+    ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
     auto &builder = builderCast(build);
     sym = removeRoot(sym);
     auto str = showClassName(cs, sym);
