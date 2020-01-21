@@ -29,7 +29,6 @@ namespace sorbet::compiler {
 // use the `demo` module for experiments
 namespace {
 
-
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const BasicBlockMap &blockMap) {
     if (blockId != 0) {
@@ -636,29 +635,32 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
 
-    int argId = -1;
-    for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
-        argId += 1;
-        auto local = blockMap.rubyBlockArgs[0][argId];
-        auto var = Payload::varGet(cs, local, builder, blockMap, aliases, 0);
-        auto &expectedType = argInfo.type;
-        if (!expectedType) {
-            continue;
+    if (!(md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+          md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg)) {
+        int argId = -1;
+        for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
+            argId += 1;
+            auto local = blockMap.rubyBlockArgs[0][argId];
+            auto var = Payload::varGet(cs, local, builder, blockMap, aliases, 0);
+            auto &expectedType = argInfo.type;
+            if (!expectedType) {
+                continue;
+            }
+            auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
+            auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+            auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+            auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
+            builder.CreateCondBr(expected, successBlock, failBlock);
+            builder.SetInsertPoint(failBlock);
+            // this will throw exception
+            builder.CreateCall(
+                cs.module->getFunction("sorbet_cast_failure"),
+                {var, Payload::toCString(cs, "sig", builder), Payload::toCString(cs, expectedType->show(cs), builder)});
+            builder.CreateUnreachable();
+            builder.SetInsertPoint(successBlock);
         }
-        auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
-        auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
-
-        auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
-
-        auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
-        builder.CreateCondBr(expected, successBlock, failBlock);
-        builder.SetInsertPoint(failBlock);
-        // this will throw exception
-        builder.CreateCall(
-            cs.module->getFunction("sorbet_cast_failure"),
-            {var, Payload::toCString(cs, "sig", builder), Payload::toCString(cs, expectedType->show(cs), builder)});
-        builder.CreateUnreachable();
-        builder.SetInsertPoint(successBlock);
     }
 
     builder.CreateBr(blockMap.userEntryBlockByFunction[0]);
