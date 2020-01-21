@@ -74,11 +74,6 @@ class File < IO
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  # most File methods take a Pathname, or a String that represents a file path
-  TFilePath = T.type_alias { T.any(String, Pathname) }
-  # some File methods also take an IO
-  TFilePathOrIO = T.type_alias { T.any(TFilePath, IO) }
-
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless *dir\_string* is
   # given, in which case it will be used as the starting point. If the given
@@ -90,8 +85,8 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
-        dir: TFilePath,
+        file: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -108,7 +103,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(Time)
   end
@@ -128,7 +123,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
         suffix: String,
     )
     .returns(String)
@@ -137,20 +132,20 @@ class File < IO
 
   sig do
     params(
-        arg0: TFilePath,
+        arg0: T.any(String, Pathname),
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: TFilePath,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: TFilePath,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
         arg2: Integer,
     )
@@ -171,7 +166,7 @@ class File < IO
   # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(Time)
   end
@@ -183,7 +178,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -195,7 +190,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -250,7 +245,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(Time)
   end
@@ -265,7 +260,7 @@ class File < IO
   # See also `Dir::rmdir`.
   sig do
     params(
-        files: TFilePath,
+        files: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -282,7 +277,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -298,7 +293,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -308,7 +303,7 @@ class File < IO
   # group id of this process. See eaccess(3).
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -318,7 +313,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -332,7 +327,7 @@ class File < IO
   # "file exists" means that stat() or fstat() system call is successful.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -367,8 +362,8 @@ class File < IO
   # the parent, the root of the project and appends `lib/mygem.rb`.
   sig do
     params(
-        file: TFilePath,
-        dir: TFilePath,
+        file: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -394,7 +389,7 @@ class File < IO
   # ```
   sig do
     params(
-        path: TFilePath,
+        path: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -408,7 +403,7 @@ class File < IO
   # and use the file referenced by the link.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -516,7 +511,7 @@ class File < IO
   sig do
     params(
         pattern: String,
-        path: TFilePath,
+        path: T.any(String, Pathname),
         flags: Integer,
     )
     .returns(T::Boolean)
@@ -534,7 +529,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -547,7 +542,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -571,8 +566,8 @@ class File < IO
   # ```
   sig do
     params(
-        file_1: TFilePathOrIO,
-        file_2: TFilePathOrIO,
+        file_1: T.any(String, Pathname, IO),
+        file_2: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -585,7 +580,7 @@ class File < IO
   # ```
   sig do
     params(
-        arg0: TFilePath,
+        arg0: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -626,8 +621,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: TFilePath,
-        new: TFilePath,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -644,7 +639,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(File::Stat)
   end
@@ -661,7 +656,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(Time)
   end
@@ -683,7 +678,7 @@ class File < IO
   # description of the `mode` and `opt` parameters.
   sig do
     params(
-      filename: TFilePath,
+      filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
@@ -691,7 +686,7 @@ class File < IO
   end
   sig do
     type_parameters(:U).params(
-      filename: TFilePath,
+      filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
@@ -707,7 +702,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -721,7 +716,7 @@ class File < IO
   # ```
   sig do
     params(
-        path: TFilePath,
+        path: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -733,7 +728,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -743,7 +738,7 @@ class File < IO
   # id of this process. See eaccess(3).
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -753,7 +748,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -783,8 +778,8 @@ class File < IO
   # The last component of the real pathname can be nonexistent.
   sig do
     params(
-        pathname: TFilePath,
-        dir: TFilePath,
+        pathname: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -799,8 +794,8 @@ class File < IO
   # All components of the pathname must exist when this method is called.
   sig do
     params(
-        pathname: TFilePath,
-        dir: TFilePath,
+        pathname: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -814,8 +809,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: TFilePath,
-        new: TFilePath,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -827,7 +822,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -851,7 +846,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(Integer)
   end
@@ -864,7 +859,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T.nilable(Integer))
   end
@@ -876,7 +871,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -890,7 +885,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns([String, String])
   end
@@ -903,7 +898,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(File::Stat)
   end
@@ -915,7 +910,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: TFilePathOrIO,
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -930,8 +925,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: TFilePath,
-        new: TFilePath,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -940,7 +935,7 @@ class File < IO
   # Returns `true` if the named file is a symbolic link.
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -958,7 +953,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
         arg0: Integer,
     )
     .returns(Integer)
@@ -1185,7 +1180,7 @@ class File < IO
 
   sig do
     params(
-        file: TFilePath,
+        file: T.any(String, Pathname),
         mode: String,
         perm: String,
         opt: Integer,
