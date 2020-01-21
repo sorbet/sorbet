@@ -225,7 +225,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_raises(ArgumentError) do
         NilFieldStruct.new
       end
-      assert_raises(ArgumentError) do
+      assert_raises(TypeError) do
         NilFieldStruct.new(foo: nil, bar: nil)
       end
     end

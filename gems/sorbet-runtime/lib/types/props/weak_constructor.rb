@@ -22,6 +22,11 @@ end
 module T::Props::WeakConstructor::DecoratorMethods
   extend T::Sig
 
+  # Set values for all props that have no defaults. Ignore any not present.
+  #
+  # @return [Integer] A count of props that we successfully initialized (which
+  # we'll use to check for any unrecognized input.)
+  #
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_without_defaults(instance, hash)
@@ -35,6 +40,12 @@ module T::Props::WeakConstructor::DecoratorMethods
     end || 0
   end
 
+  # Set values for all props that have defaults. Use the default if and only if
+  # the prop key isn't in the input.
+  #
+  # @return [Integer] A count of props that we successfully initialized (which
+  # we'll use to check for any unrecognized input.)
+  #
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_with_defaults(instance, hash)
