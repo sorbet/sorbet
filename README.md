@@ -185,23 +185,23 @@ In tools/bazel.rc you can find out what all these options (and others) mean.
 
 **(Mac) `Xcode version must be specified to use an Apple CROSSTOOL`**
 
-This error typically occurs after an XCode upgrade.
+This error typically occurs after an Xcode upgrade.
 
-Developer tools must be installed, the XCode license must be accepted, and
-your active XCode command line tools directory must point to an installed
-version of XCode.
+Developer tools must be installed, the Xcode license must be accepted, and
+your active Xcode command line tools directory must point to an installed
+version of Xcode.
 
 The following commands should do the trick:
 
 ```shell
 # Install command line tools
 xcode-select --install
-# Ensure that the system finds command line tools in an active XCode directory
+# Ensure that the system finds command line tools in an active Xcode directory
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-# Accept the XCode license.
+# Accept the Xcode license.
 sudo xcodebuild -license
 # Clear bazel's cache, which may contain files generated from a previous
-# version of XCode command line tools.
+# version of Xcode command line tools.
 bazel clean --expunge
 ```
 
