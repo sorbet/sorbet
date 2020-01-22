@@ -5,6 +5,14 @@ module T::Private
   module MixesInClassMethods
     def included(other)
       mod = Abstract::Data.get(self, :class_methods_mixin)
+
+      Kernel.puts "┌─── MixesInClassMethods ────"
+      Kernel.puts "│ self:  #{self}"
+      Kernel.puts "│"
+      Kernel.puts "│ other.extend(mod)"
+      Kernel.puts "│ #{other}.extend(#{mod})"
+      Kernel.puts "└────────────────────────────"
+
       other.extend(mod)
       super
     end

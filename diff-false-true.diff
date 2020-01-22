@@ -1,0 +1,30 @@
+--- false.out	2020-01-22 14:22:47.000000000 -0800
++++ true.out	2020-01-22 14:21:54.000000000 -0800
+@@ -68,10 +68,10 @@
+ │ self:  GrandParent
+ │
+ │ other.extend(mod)
+-│ Parent.extend(GrandParent::CMs)
++│ Parent.extend(GrandParent::ClassMethods)
+ └────────────────────────────
+ ┌─── self.extend(other) ─────
+-│ Parent.extend(GrandParent::CMs)
++│ Parent.extend(GrandParent::ClassMethods)
+ │
+ │ /Users/jez/stripe/sorbet/gems/sorbet-runtime/lib/types/private/mixins/mixins.rb:16:in `included'
+ │ include-true.rb:13:in `include'
+@@ -88,7 +88,7 @@
+ │ include-true.rb:16:in `<main>'
+ └────────────────────────────
+ ┌─── self.extend(other) ─────
+-│ Child.extend(T::Props::Plugin::ClassMethods)
++│ Child.extend(GrandParent::ClassMethods)
+ │
+ │ /Users/jez/stripe/sorbet/gems/sorbet-runtime/lib/types/props/decorator.rb:829:in `apply_class_methods'
+ │ /Users/jez/stripe/sorbet/gems/sorbet-runtime/lib/types/props/decorator.rb:818:in `plugin'
+@@ -100,4 +100,4 @@
+ │ include-true.rb:16:in `<main>'
+ └────────────────────────────
+ true
+-false
++true
