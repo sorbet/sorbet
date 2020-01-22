@@ -7,6 +7,7 @@ module T
   def self.all(left, right); end
   def self.must(arg, msg=nil); arg; end
   def self.let(arg, type); arg; end
+  def self.untyped(); end
 end
 module T::Sig
   def sig(arg=nil, &blk); end
