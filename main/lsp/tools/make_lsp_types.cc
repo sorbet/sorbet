@@ -821,6 +821,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("contentChanges", makeArray(TextDocumentContentChangeEvent)),
                        // Used in tests only.
                        makeField("sorbetCancellationExpected", makeOptional(JSONBool)),
+                       makeField("sorbetPreemptionsExpected", makeOptional(JSONInt)),
                    },
                    classTypes, {"std::string getSource(std::string_view oldFileContents) const;"});
 
@@ -1272,19 +1273,21 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditParams = makeObject(
-        "SorbetWorkspaceEditParams", {}, classTypes,
-        {
-            "u4 epoch = 0;",
-            "// Contains the number of individual edit messages merged into this edit.",
-            "u2 mergeCount = 0;",
-            "// Used in multithreaded tests to wait for a cancellation to occur when processing this request.",
-            "bool sorbetCancellationExpected = false;"
-            "// File updates contained in this edit.",
-            "std::vector<std::shared_ptr<core::File>> updates;",
-            "// Merge newerParams into this object, which mutates `epoch` and `updates`",
-            "void merge(SorbetWorkspaceEditParams &newerParams);",
-        });
+    auto SorbetWorkspaceEditParams =
+        makeObject("SorbetWorkspaceEditParams", {}, classTypes,
+                   {
+                       "u4 epoch = 0;",
+                       "// Contains the number of individual edit messages merged into this edit.",
+                       "u2 mergeCount = 0;",
+                       "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
+                       "bool sorbetCancellationExpected = false;"
+                       "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
+                       "int sorbetPreemptionsExpected = 0;",
+                       "// File updates contained in this edit.",
+                       "std::vector<std::shared_ptr<core::File>> updates;",
+                       "// Merge newerParams into this object, which mutates `epoch` and `updates`",
+                       "void merge(SorbetWorkspaceEditParams &newerParams);",
+                   });
 
     auto SorbetTypecheckRunStatus =
         makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);

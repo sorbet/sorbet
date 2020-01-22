@@ -9,6 +9,10 @@
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
 
+namespace sorbet::core::lsp {
+class PreemptionTaskManager;
+}
+
 namespace sorbet::realmain::lsp {
 
 struct LSPQueryResult {
@@ -27,23 +31,44 @@ public:
     LSPFileUpdates updates;
     // Specifies if the typecheck run took the fast or slow path.
     bool tookFastPath = false;
-    // Specifies if the typecheck run was canceled.
-    bool canceled = false;
     // If update took the slow path, contains a new global state that should be used moving forward.
     std::optional<std::unique_ptr<core::GlobalState>> newGS;
 
     TypecheckRun(std::vector<std::unique_ptr<core::Error>> errors = {},
                  std::vector<core::FileRef> filesTypechecked = {}, LSPFileUpdates updates = {},
                  bool tookFastPath = false, std::optional<std::unique_ptr<core::GlobalState>> newGS = std::nullopt);
-
-    // Make a canceled TypecheckRun.
-    static TypecheckRun makeCanceled();
 };
 
 /**
  * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
+    /**
+     * Contains the LSPTypechecker state that is needed to cancel a running slow path operation and any subsequent fast
+     * path operations that have preempted it.
+     */
+    class UndoState final {
+    public:
+        // Stores the pre-slow-path global state.
+        std::unique_ptr<core::GlobalState> gs;
+        // Stores index trees containing data stored in `gs` that have been evicted during the slow path operation.
+        UnorderedMap<int, ast::ParsedFile> evictedIndexed;
+        // Stores file hashes that have been evicted during the slow path operation.
+        UnorderedMap<int, core::FileHash> evictedFileHashes;
+        // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
+        UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
+        // Stores the list of files that had errors before the slow path began.
+        std::vector<core::FileRef> evictedFilesThatHaveErrors;
+
+        UndoState(std::unique_ptr<core::GlobalState> oldGS, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
+                  std::vector<core::FileRef> evictedFilesThatHaveErrors);
+
+        /**
+         * Records that the given items were evicted from LSPTypechecker following a typecheck run.
+         */
+        void recordEvictedState(ast::ParsedFile evictedIndexTree, core::FileHash evictedStateHash);
+    };
+
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
     /** GlobalState used for typechecking. Mutable because typechecking routines, even when not changing the GlobalState
@@ -61,26 +86,45 @@ class LSPTypechecker final {
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
+    /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
+     * LSPTypechecker to its pre-slow-path state. */
+    std::optional<UndoState> cancellationUndoState;
 
     std::shared_ptr<const LSPConfiguration> config;
+    /** Used to preempt running slow paths. */
+    std::shared_ptr<core::lsp::PreemptionTaskManager> preemptManager;
     /** Used for assertions. Indicates if `initialize` has been run. */
     bool initialized = false;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
+    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable,
+                     std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptManager = std::nullopt);
 
     /** Runs incremental typechecking on the provided updates. */
     TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
     /**
      * Sends diagnostics from a typecheck run to the client.
+     * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
+     * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
      */
-    void pushDiagnostics(TypecheckRun run);
+    void pushDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
+                         std::vector<std::unique_ptr<core::Error>> errors);
+
+    /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
+    void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
 
     /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPTypechecker and sending
      * diagnostics to the editor. */
     void commitTypecheckRun(TypecheckRun run);
+
+    /**
+     * Undoes the given slow path changes on LSPTypechecker, and clears the client's error list for any files that were
+     * newly introduced with the canceled update. Returns a list of files that need to be retypechecked to update their
+     * error lists.
+     */
+    std::vector<core::FileRef> restore(UndoState &undoState);
 
     /**
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
@@ -97,7 +141,8 @@ public:
                                                          const std::vector<std::shared_ptr<core::File>> &files,
                                                          WorkerPool &workers);
 
-    LSPTypechecker(std::shared_ptr<const LSPConfiguration> config);
+    LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
+                   std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager);
     ~LSPTypechecker() = default;
 
     /**

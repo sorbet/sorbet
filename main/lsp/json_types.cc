@@ -206,6 +206,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     editCount += older.editCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
     cancellationExpected = cancellationExpected || older.cancellationExpected;
+    preemptionsExpected += older.preemptionsExpected;
 
     ENFORCE(updatedFiles.size() == updatedFileHashes.size());
     ENFORCE(updatedFiles.size() == updatedFileIndexes.size());
@@ -241,6 +242,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.updatedFiles = updatedFiles;
     copy.updatedFileHashes = updatedFileHashes;
     copy.cancellationExpected = cancellationExpected;
+    copy.preemptionsExpected = preemptionsExpected;
     for (auto &ast : updatedFileIndexes) {
         copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
     }
@@ -267,6 +269,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     updates = move(newUpdates);
     mergeCount += newerParams.mergeCount + 1;
     sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
+    sorbetPreemptionsExpected += newerParams.sorbetPreemptionsExpected;
 }
 
 } // namespace sorbet::realmain::lsp

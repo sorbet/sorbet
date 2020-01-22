@@ -2,6 +2,7 @@
 // has to go first as it violates our requirements
 
 #include "common/sort.h"
+#include "core/Error.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPOutput.h"
@@ -94,12 +95,18 @@ class CountingTask final : public core::lsp::Task {
 public:
     int runCount = 0;
     shared_ptr<core::lsp::PreemptionTaskManager> preemptManager;
+    core::GlobalState &gs;
 
-    CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager) : preemptManager(move(preemptManager)) {}
+    CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
+        : preemptManager(move(preemptManager)), gs(gs) {}
 
     void run() override {
         // The task should run with typecheck mutex held with a write lock.
         preemptManager->assertTypecheckMutexHeld();
+        // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
+        // This should never drain error queue items from the preempted task.
+        gs.errorQueue->drainWithQueryResponses();
+        EXPECT_TRUE(gs.errorQueue->ignoreFlushes);
         runCount++;
     }
 };
@@ -292,10 +299,15 @@ TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
     gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
-    // No preemption task registered.
-    EXPECT_FALSE(preemptManager->tryRunScheduledPreemptionTask());
+    // Put an error in the queue.
+    gs->errorQueue->pushError(
+        *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
-    auto task = make_shared<CountingTask>(preemptManager);
+    // No preemption task registered.
+    EXPECT_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs));
+
+    auto task = make_shared<CountingTask>(preemptManager, *gs);
     // Should fail because a slow path is not running, so there's nothing to preempt.
     EXPECT_FALSE(preemptManager->trySchedulePreemptionTask(task));
     // No slow path running, so we cannot cancel it.
@@ -309,8 +321,13 @@ TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
     EXPECT_TRUE(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    EXPECT_TRUE(preemptManager->tryRunScheduledPreemptionTask());
+    EXPECT_TRUE(preemptManager->tryRunScheduledPreemptionTask(*gs));
     EXPECT_EQ(1, task->runCount);
+
+    // Our error should still be there.
+    auto errors = gs->errorQueue->drainAllErrors();
+    ASSERT_EQ(1, errors.size());
+    EXPECT_EQ("MyError", errors[0]->header);
 
     // We can cancel the slow path.
     EXPECT_TRUE(gs->epochManager->tryCancelSlowPath(3));

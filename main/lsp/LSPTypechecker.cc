@@ -38,18 +38,79 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 }
 } // namespace
 
-LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config)
-    : typecheckerThreadId(this_thread::get_id()), config(move(config)) {}
+LSPTypechecker::UndoState::UndoState(unique_ptr<core::GlobalState> oldGS,
+                                     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
+                                     vector<core::FileRef> evictedFilesThatHaveErrors)
+    : gs(move(oldGS)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
+      evictedFilesThatHaveErrors(move(evictedFilesThatHaveErrors)) {}
+
+void LSPTypechecker::UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree, core::FileHash evictedFileHash) {
+    const auto id = evictedIndexTree.file.id();
+    // The first time a file gets evicted, it's an index tree from the old global state.
+    // Subsequent times it is evicting old index trees from the new global state, and we don't care.
+    // Also, ignore updates to new files (id >= size of file table)
+    if (id < gs->getFiles().size() && !evictedIndexed.contains(id)) {
+        evictedIndexed[id] = move(evictedIndexTree);
+        // file hashes should be kept in-sync with indexed.
+        ENFORCE(!evictedFileHashes.contains(id));
+        evictedFileHashes[id] = move(evictedFileHash);
+    }
+}
+
+LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
+                               shared_ptr<core::lsp::PreemptionTaskManager> preemptManager)
+    : typecheckerThreadId(this_thread::get_id()), config(move(config)), preemptManager(move(preemptManager)) {}
+
+vector<core::FileRef> LSPTypechecker::restore(UndoState &undoState) {
+    // Replace evicted index trees and file hashes.
+    for (auto &entry : undoState.evictedIndexed) {
+        indexed[entry.first] = move(entry.second);
+        ENFORCE(undoState.evictedFileHashes.contains(entry.first));
+        globalStateHashes[entry.first] = move(undoState.evictedFileHashes[entry.first]);
+    }
+    indexedFinalGS = std::move(undoState.evictedIndexedFinalGS);
+
+    // Restore `filesThatHaveErrors` to its previous state both here, and on the client.
+    // We send empty error lists for files that newly have errors from the canceled slow path.
+    // If those new files still have errors, they will show up in the next typecheck operation.
+    // We specifically do this because the old GS might not have the new files introduced in the canceled slow path,
+    // and we expect `gs` to always contain all of the files that previously had errors.
+    // TODO: Update with the reverse when we switch to tombstoning files.
+    vector<string> newPathsThatHaveErrors = frefsToPaths(*gs, filesThatHaveErrors);
+    vector<string> oldPathsThatHaveErrors = frefsToPaths(*undoState.gs, undoState.evictedFilesThatHaveErrors);
+    fast_sort(newPathsThatHaveErrors);
+    fast_sort(oldPathsThatHaveErrors);
+    vector<string> clearErrorsFor;
+    std::set_difference(newPathsThatHaveErrors.begin(), newPathsThatHaveErrors.end(), oldPathsThatHaveErrors.begin(),
+                        oldPathsThatHaveErrors.end(), std::inserter(clearErrorsFor, clearErrorsFor.begin()));
+    config->logger->debug("[Typechecker] Restoring empty error list for {} files", clearErrorsFor.size());
+    for (auto &file : clearErrorsFor) {
+        vector<unique_ptr<Diagnostic>> diagnostics;
+        auto params = make_unique<PublishDiagnosticsParams>(config->localName2Remote(file), move(diagnostics));
+        config->output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
+    }
+    filesThatHaveErrors = undoState.evictedFilesThatHaveErrors;
+
+    // Finally, restore the old global state.
+    gs = move(undoState.gs);
+    // Inform caller that we need to retypecheck all files that used to have errors.
+    // TODO(jvilk): Can probably filter using diagnostic epoch to avoid extra work.
+    return undoState.evictedFilesThatHaveErrors;
+}
 
 void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
+    // We should always initialize with epoch 0.
+    ENFORCE(updates.epoch == 0);
     this->initialized = true;
     globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
     // Initialize to all zeroes.
     diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
     // Initialization typecheck is not cancelable.
+    // TODO(jvilk): Make it preemptible.
     auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
     ENFORCE(committed);
     ENFORCE(globalStateHashes.size() == indexed.size());
@@ -58,6 +119,21 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
+    if (updates.canceledSlowPath) {
+        // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
+        // that slow path. This should always be the case, but let's not crash release builds.
+        ENFORCE(cancellationUndoState.has_value());
+        if (cancellationUndoState.has_value()) {
+            // This is the typecheck that caused us to cancel the previous slow path. Un-commit all typechecker changes.
+            auto oldFilesWithErrors = restore(cancellationUndoState.value());
+            cancellationUndoState = nullopt;
+            // Retypecheck all of the files that previously had errors.
+            updates.mergeOlder(getNoopUpdate(oldFilesWithErrors));
+        } else {
+            config->logger->debug("[Typechecker] Error: UndoState is missing for update that canceled slow path!");
+        }
+    }
+
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     const bool isFastPath = updates.canTakeFastPath;
@@ -67,7 +143,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
         filesTypechecked = run.filesTypechecked;
         commitTypecheckRun(move(run));
     } else {
-        committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+        committed =
+            runSlowPath(move(updates), workers, /* cancelable */ true, /* supports preemption */ preemptManager);
     }
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
@@ -82,6 +159,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
     ENFORCE(!updates.cancellationExpected);
+    ENFORCE(updates.preemptionsExpected == 0);
     // This path only works for fast path updates.
     ENFORCE(updates.canTakeFastPath);
 
@@ -143,6 +221,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
         unique_ptr<KeyValueStore> kvstore; // nullptr
         // TODO: Thread through kvstore.
         ENFORCE(this->kvstore == nullptr);
+        // TODO(jvilk): We don't need to re-index files that didn't change.
         auto t = pipeline::indexOne(config->opts, *gs, f, kvstore);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
@@ -171,12 +250,13 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable,
+                                 optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptManager) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
     auto &logger = config->logger;
-    ShowOperation slowPathOp(*config, "SlowPath", "Typechecking...");
+    unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, "SlowPathBlocking", "Typechecking...");
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
@@ -191,11 +271,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer);
     finalGS->errorQueue->ignoreFlushes = true;
     auto &epochManager = *finalGS->epochManager;
-    // TODO: Replace with an actual preemption task manager when we ship preemptible slow path.
-    optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptManager;
+    const u4 epoch = updates.epoch;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = epochManager.tryCommitEpoch(updates.epoch, cancelable, preemptManager, [&]() -> void {
+    const bool committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
         UnorderedSet<int> updatedFiles;
         vector<ast::ParsedFile> indexedCopies;
 
@@ -214,6 +293,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             }
         }
 
+        // Before making preemption or cancelation possible, pre-commit the changes from this slow path so that
+        // preempted queries can use them and the code after this lambda can assume that this step happened.
+        updates.updatedGS = move(finalGS);
+        commitFileUpdates(updates, cancelable);
+        // We use `gs` rather than the moved `finalGS` from this point forward.
+
         // Copy the indexes of unchanged files.
         for (const auto &tree : indexed) {
             // Note: indexed entries for payload files don't have any contents.
@@ -225,12 +310,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
-        ENFORCE(finalGS->lspQuery.isEmpty());
-        if (finalGS->sleepInSlowPath) {
+        ENFORCE(gs->lspQuery.isEmpty());
+        if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
-        auto maybeResolved =
-            pipeline::resolve(finalGS, move(indexedCopies), config->opts, workers, config->skipConfigatron);
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, config->skipConfigatron);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -240,8 +324,26 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             ENFORCE(tree.file.exists());
             affectedFiles.push_back(tree.file);
         }
-        if (finalGS->sleepInSlowPath) {
+        if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
+        }
+
+        // Inform the fast path that this global state is OK for typechecking as resolution has completed.
+        gs->lspTypecheckCount++;
+        if (preemptManager.has_value()) {
+            // Inform users that Sorbet should be responsive now.
+            // Explicitly end previous operation before beginning next operation.
+            slowPathOp = nullptr;
+            slowPathOp = make_unique<ShowOperation>(*config, "SlowPathNonBlocking", "Typechecking in background");
+        }
+
+        // [Test only] Wait for a preemption if one is expected.
+        while (updates.preemptionsExpected > 0) {
+            ENFORCE(preemptManager.has_value());
+            while (!preemptManager.value()->tryRunScheduledPreemptionTask(*gs)) {
+                Timer::timedSleep(1ms, *logger, "slow_path.expected_preemption.sleep");
+            }
+            updates.preemptionsExpected--;
         }
 
         // [Test only] Wait for a cancellation if one is expected.
@@ -252,30 +354,35 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
-        pipeline::typecheck(finalGS, move(resolved), config->opts, workers, cancelable, preemptManager);
+        pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptManager);
     });
 
     // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the
     // aborted typechecking run.
-    auto out = finalGS->errorQueue->drainWithQueryResponses();
-    finalGS->lspTypecheckCount++;
-    finalGS->lspQuery = core::lsp::Query::noQuery();
+    // Note 2: `gs` now holds the value of `finalGS`.
+    auto out = gs->errorQueue->drainWithQueryResponses();
+    gs->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {
         prodCategoryCounterInc("lsp.updates", "slowpath");
-        commitTypecheckRun(TypecheckRun(move(out.first), move(affectedFiles), move(updates), false, move(finalGS)));
+        // No need to keep around cancelation state!
+        cancellationUndoState = nullopt;
+        // Send diagnostics to client (we already committed file updates earlier).
+        pushDiagnostics(updates.epoch, move(affectedFiles), move(out.first));
+        logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
+        // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
+        // this slow path.
         ENFORCE(cancelable);
-        commitTypecheckRun(TypecheckRun::makeCanceled());
+        logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
     return committed;
 }
 
-void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
-    ENFORCE(!run.canceled);
-    const auto &filesTypechecked = run.filesTypechecked;
-    const u4 epoch = run.updates.epoch;
+void LSPTypechecker::pushDiagnostics(u4 epoch, vector<core::FileRef> filesTypechecked,
+                                     vector<std::unique_ptr<core::Error>> errors) {
+    config->logger->debug("[Typechecker] Sending diagnostics for epoch {}", epoch);
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
@@ -289,7 +396,7 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
         }
     }
 
-    for (auto &e : run.errors) {
+    for (auto &e : errors) {
         if (e->isSilenced) {
             continue;
         }
@@ -298,12 +405,12 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     }
 
     for (auto &accumulated : errorsAccumulated) {
-        // TODO(jvilk): When we land preemption, this code will ignore errors from files that have been typechecked on
-        // newer versions (e.g. because they preempted the slow path) N.B.: See overflow comment above.
-        // Assert that we don't have a weird epoch bug here. We should only have errors for files we typechecked.
-        // Note: We can get errors on files that don't exist, and those don't have epochs associated with them.
-        ENFORCE(!accumulated.first.exists() || diagnosticEpochs[accumulated.first.id()] == epoch);
-        errorFilesInNewRun.push_back(accumulated.first);
+        // Ignore errors from files that have been typechecked on newer versions (e.g. because they preempted the slow
+        // path). We also ignore errors from files that don't exist (which does, in fact, happen).
+        // TODO(jvilk): See overflow comment above.
+        if (accumulated.first.exists() && diagnosticEpochs[accumulated.first.id()] <= epoch) {
+            errorFilesInNewRun.push_back(accumulated.first);
+        }
     }
 
     vector<core::FileRef> filesToUpdateErrorListFor = errorFilesInNewRun;
@@ -312,16 +419,19 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
     filesTypecheckedAsSet.insert(filesTypechecked.begin(), filesTypechecked.end());
 
     for (auto f : this->filesThatHaveErrors) {
-        if (filesTypecheckedAsSet.find(f) != filesTypecheckedAsSet.end()) {
-            // we've retypechecked this file. We can override the fact it has an error
-            // thus, we will update the error list for this file on client
+        // TODO(jvilk): Overflow warning applies here, too.
+        if (filesTypecheckedAsSet.find(f) != filesTypecheckedAsSet.end() && diagnosticEpochs[f.id()] <= epoch) {
+            // We've retypechecked this file, it hasn't been typechecked with newer edits, and it might not have errors.
+            // Ensure that we update the error list for this file on client.
             filesToUpdateErrorListFor.push_back(f);
         } else {
-            // we're not typecking this file, we need to remember that it had error
+            // We either did not retypecheck this file, _or_ it has since been typechecked with newer edits.
+            // We need to remember that it had errors from previous typecheck runs.
             errorFilesInNewRun.push_back(f);
         }
     }
 
+    // The previous loop may have introduced dupes; remove them.
     fast_sort(filesToUpdateErrorListFor);
     filesToUpdateErrorListFor.erase(unique(filesToUpdateErrorListFor.begin(), filesToUpdateErrorListFor.end()),
                                     filesToUpdateErrorListFor.end());
@@ -336,80 +446,68 @@ void LSPTypechecker::pushDiagnostics(TypecheckRun run) {
             continue;
         }
         ENFORCE(diagnosticEpochs[file.id()] <= epoch);
-        string uri;
-        { // uri
-            if (file.data(*gs).sourceType == core::File::Type::Payload) {
-                uri = string(file.data(*gs).path());
-            } else {
-                uri = config->fileRef2Uri(*gs, file);
-            }
-        }
-
+        ENFORCE(file.data(*gs).epoch <= epoch);
+        const string uri = config->fileRef2Uri(*gs, file);
         vector<unique_ptr<Diagnostic>> diagnostics;
-        {
-            // diagnostics
-            if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
-                for (auto &e : errorsAccumulated[file]) {
-                    auto range = Range::fromLoc(*gs, e->loc);
-                    if (range == nullptr) {
-                        continue;
-                    }
-                    auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
-                    diagnostic->code = e->what.code;
-                    diagnostic->severity = DiagnosticSeverity::Error;
-
-                    typecase(e.get(), [&](core::Error *ce) {
-                        vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-                        for (auto &section : ce->sections) {
-                            string sectionHeader = section.header;
-
-                            for (auto &errorLine : section.messages) {
-                                string message;
-                                if (errorLine.formattedMessage.length() > 0) {
-                                    message = errorLine.formattedMessage;
-                                } else {
-                                    message = sectionHeader;
-                                }
-                                auto location = config->loc2Location(*gs, errorLine.loc);
-                                if (location == nullptr) {
-                                    continue;
-                                }
-                                relatedInformation.push_back(
-                                    make_unique<DiagnosticRelatedInformation>(std::move(location), message));
-                            }
-                        }
-                        // Add link to error documentation.
-                        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                            make_unique<Location>(
-                                absl::StrCat(config->opts.errorUrlBase, e->what.code),
-                                make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                            "Click for more information on this error."));
-                        diagnostic->relatedInformation = move(relatedInformation);
-                    });
-                    diagnostics.push_back(move(diagnostic));
+        // diagnostics
+        if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
+            for (auto &e : errorsAccumulated[file]) {
+                auto range = Range::fromLoc(*gs, e->loc);
+                if (range == nullptr) {
+                    continue;
                 }
-            }
+                auto diagnostic = make_unique<Diagnostic>(std::move(range), e->header);
+                diagnostic->code = e->what.code;
+                diagnostic->severity = DiagnosticSeverity::Error;
 
-            config->output->write(make_unique<LSPMessage>(
-                make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics,
-                                                 make_unique<PublishDiagnosticsParams>(uri, move(diagnostics)))));
+                typecase(e.get(), [&](core::Error *ce) {
+                    vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
+                    for (auto &section : ce->sections) {
+                        string sectionHeader = section.header;
+
+                        for (auto &errorLine : section.messages) {
+                            string message;
+                            if (errorLine.formattedMessage.length() > 0) {
+                                message = errorLine.formattedMessage;
+                            } else {
+                                message = sectionHeader;
+                            }
+                            auto location = config->loc2Location(*gs, errorLine.loc);
+                            if (location == nullptr) {
+                                continue;
+                            }
+                            relatedInformation.push_back(
+                                make_unique<DiagnosticRelatedInformation>(std::move(location), message));
+                        }
+                    }
+                    // Add link to error documentation.
+                    relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+                        make_unique<Location>(
+                            absl::StrCat(config->opts.errorUrlBase, e->what.code),
+                            make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+                        "Click for more information on this error."));
+                    diagnostic->relatedInformation = move(relatedInformation);
+                });
+                diagnostics.push_back(move(diagnostic));
+            }
         }
+
+        auto params = make_unique<PublishDiagnosticsParams>(uri, move(diagnostics));
+        config->output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
     }
 }
 
-void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
-    auto &logger = config->logger;
-
-    if (run.canceled) {
-        logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", run.updates.epoch);
-        return;
+void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
+    // The fast path cannot be canceled.
+    ENFORCE(!(updates.canTakeFastPath && couldBeCanceled));
+    if (couldBeCanceled) {
+        ENFORCE(updates.updatedGS.has_value());
+        cancellationUndoState = make_optional<UndoState>(move(gs), std::move(indexedFinalGS), filesThatHaveErrors);
     }
 
-    Timer timeit(logger, "commitTypecheckRun");
-    auto &updates = run.updates;
-
     // Clear out state associated with old finalGS.
-    if (!run.tookFastPath) {
+    if (!updates.canTakeFastPath) {
         indexedFinalGS.clear();
     }
 
@@ -423,7 +521,12 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
             globalStateHashes.resize(id + 1);
-            diagnosticEpochs.resize(id + 1);
+            // No diagnostics sent yet; initialize new IDs to 0.
+            diagnosticEpochs.resize(id + 1, 0);
+        }
+        if (cancellationUndoState.has_value()) {
+            // Move the evicted values before they get replaced.
+            cancellationUndoState->recordEvictedState(move(indexed[id]), move(globalStateHashes[id]));
         }
         indexed[id] = move(ast);
         globalStateHashes[id] = move(updates.updatedFileHashes[i]);
@@ -433,11 +536,18 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
         indexedFinalGS[ast.file.id()] = move(ast);
     }
 
-    if (run.newGS.has_value()) {
-        gs = move(run.newGS.value());
+    if (updates.updatedGS.has_value()) {
+        ENFORCE(!updates.canTakeFastPath);
+        gs = move(updates.updatedGS.value());
+    } else {
+        ENFORCE(updates.canTakeFastPath);
     }
+}
 
-    return pushDiagnostics(move(run));
+void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
+    Timer timeit(config->logger, "commitTypecheckRun");
+    commitFileUpdates(run.updates, false);
+    pushDiagnostics(run.updates.epoch, move(run.filesTypechecked), move(run.errors));
 }
 
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
@@ -610,12 +720,6 @@ TypecheckRun::TypecheckRun(vector<unique_ptr<core::Error>> errors, vector<core::
                            std::optional<std::unique_ptr<core::GlobalState>> newGS)
     : errors(move(errors)), filesTypechecked(move(filesTypechecked)), updates(move(updates)),
       tookFastPath(tookFastPath), newGS(move(newGS)) {}
-
-TypecheckRun TypecheckRun::makeCanceled() {
-    TypecheckRun run;
-    run.canceled = true;
-    return run;
-}
 
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), workers(workers) {}
