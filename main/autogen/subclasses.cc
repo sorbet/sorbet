@@ -63,7 +63,8 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
             "{}", fmt::map_join(pf.showFullName(ctx, defn),
                                 "::", [&ctx](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); }));
 
-        out[parentName].insert(make_pair(childName, defn.data(pf).type));
+        out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
+        out[parentName].classKind = ref.parentKind;
     }
 
     return out;
@@ -71,30 +72,31 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 
 // Generate all descendants of a parent class
 // Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
-optional<Subclasses::Entries> Subclasses::descendantsOf(const Subclasses::Map &childMap, const string &parentName) {
+optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::Map &childMap,
+                                                             const string &parentName) {
     auto fnd = childMap.find(parentName);
     if (fnd == childMap.end()) {
         return nullopt;
     }
-    const Subclasses::Entries children = fnd->second;
+    const Subclasses::Entries children = fnd->second.entries;
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
     for (const auto &[name, _type] : children) {
         auto descendants = Subclasses::descendantsOf(childMap, name);
         if (descendants) {
-            out.insert(descendants->begin(), descendants->end());
+            out.insert(descendants->entries.begin(), descendants->entries.end());
         }
     }
 
-    return out;
+    return SubclassInfo(fnd->second.classKind, out);
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
 void Subclasses::patchChildMap(Subclasses::Map &childMap) {
-    childMap["Opus::SafeMachine"].insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].begin(),
-                                         childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].end());
+    childMap["Opus::SafeMachine"].entries.insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].entries.begin(),
+                                                 childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].entries.end());
 }
 
 vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
@@ -106,12 +108,13 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         if (fnd == descendantsMap.end()) {
             continue;
         }
-        const Subclasses::Entries children = fnd->second;
+        const Subclasses::SubclassInfo &children = fnd->second;
 
-        descendantsMapSerialized.emplace_back(parentName);
+        auto type = children.classKind == ClassKind::Class ? "class" : "module";
+        descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         vector<string> serializedChildren;
-        for (const auto &[name, type] : children) {
+        for (const auto &[name, type] : children.entries) {
             // Ignore Modules
             if (type != autogen::Definition::Type::Class) {
                 continue;
