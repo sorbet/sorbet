@@ -1106,10 +1106,11 @@ class String < Object
   sig do
     params(
         str: String,
+        encoding: T.nilable(Encoding),
     )
     .void
   end
-  def initialize(str=T.unsafe(nil)); end
+  def initialize(str=T.unsafe(nil), encoding: nil); end
 
   # Inserts *other\_str* before the character at the given *index*, modifying
   # *str*. Negative indices count from the end of the string, and insert *after*
