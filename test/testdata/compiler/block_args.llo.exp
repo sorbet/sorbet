@@ -192,6 +192,8 @@ declare i64 @rb_data_typed_object_wrap(i64, i8*, %struct.rb_data_type_struct*) l
 
 declare %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct*, i64, i64, i64, %struct.rb_iseq_struct*, i32) local_unnamed_addr #2
 
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
+
 declare i8* @ruby_xmalloc2(i64, i64) local_unnamed_addr #2
 
 declare void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct*) local_unnamed_addr #2
@@ -297,28 +299,30 @@ entryInitializers:
   %1 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([37 x i8], [37 x i8]* @"str_test/testdata/compiler/block_args.rb", i64 0, i64 0), i64 36) #11
   %2 = tail call i64 @rb_str_new(i8* getelementptr inbounds ([37 x i8], [37 x i8]* @"str_test/testdata/compiler/block_args.rb", i64 0, i64 0), i64 36) #11
   %3 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 1) #11
-  %4 = tail call i8* @ruby_xmalloc2(i64 1, i64 8) #11
-  %5 = tail call i8* @ruby_xmalloc2(i64 1, i64 4) #11
-  %6 = bitcast i8* %5 to i32*
-  store i32 0, i32* %6, align 4, !tbaa !0
-  %7 = bitcast i8* %4 to i32*
-  store i32 3, i32* %7, align 4, !tbaa !27
-  %8 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
-  %9 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %8, align 8, !tbaa !29
-  %10 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 5, i32 0
-  %11 = bitcast %struct.rb_code_position_struct** %10 to i8**
-  store i8* %4, i8** %11, align 8, !tbaa !31
-  %12 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 5, i32 1
-  %13 = bitcast i32** %12 to i8**
-  store i8* %5, i8** %13, align 8, !tbaa !40
-  %14 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 1
-  store i32 1, i32* %14, align 4, !tbaa !41
-  %15 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %9, i64 0, i32 5, i32 2
-  store i32 1, i32* %15, align 8, !tbaa !42
+  %4 = ptrtoint %struct.rb_iseq_struct* %3 to i64
+  tail call void @rb_gc_register_mark_object(i64 %4) #11
+  %5 = tail call i8* @ruby_xmalloc2(i64 1, i64 8) #11
+  %6 = tail call i8* @ruby_xmalloc2(i64 1, i64 4) #11
+  %7 = bitcast i8* %6 to i32*
+  store i32 0, i32* %7, align 4, !tbaa !0
+  %8 = bitcast i8* %5 to i32*
+  store i32 3, i32* %8, align 4, !tbaa !27
+  %9 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %3, i64 0, i32 2
+  %10 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %9, align 8, !tbaa !29
+  %11 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %10, i64 0, i32 5, i32 0
+  %12 = bitcast %struct.rb_code_position_struct** %11 to i8**
+  store i8* %5, i8** %12, align 8, !tbaa !31
+  %13 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %10, i64 0, i32 5, i32 1
+  %14 = bitcast i32** %13 to i8**
+  store i8* %6, i8** %14, align 8, !tbaa !40
+  %15 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %10, i64 0, i32 1
+  store i32 1, i32* %15, align 4, !tbaa !41
+  %16 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %10, i64 0, i32 5, i32 2
+  store i32 1, i32* %16, align 8, !tbaa !42
   tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %3) #11
-  %16 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %8, align 8, !tbaa !29
-  %17 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %16, i64 0, i32 2
-  store i64* null, i64** %17, align 8, !tbaa !43
+  %17 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %9, align 8, !tbaa !29
+  %18 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %17, i64 0, i32 2
+  store i64* null, i64** %18, align 8, !tbaa !43
   store %struct.rb_iseq_struct* %3, %struct.rb_iseq_struct** bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to %struct.rb_iseq_struct**), align 8
   ret void
 }
