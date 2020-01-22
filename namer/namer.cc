@@ -252,9 +252,15 @@ public:
                 }
             } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx)->isClassOrModuleModule()) {
-                if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx)->show(ctx),
                                 klass->symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
+
+                    for (auto loc : klass->symbol.data(ctx)->locs()) {
+                        if (loc != klass->declLoc) {
+                            e.addErrorLine(loc, "Previous definition");
+                        }
+                    }
                 }
             } else {
                 klass->symbol.data(ctx)->setIsModule(isModule);
