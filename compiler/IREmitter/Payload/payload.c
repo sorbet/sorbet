@@ -626,7 +626,10 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
+    // ... but actually this line allocates and will not be retained by anyone else,
+    // so we pin this object right here. TODO: This leaks memory
     rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, 0, ISEQ_TYPE_METHOD);
+    rb_gc_register_mark_object((VALUE)iseq);
 
     // Even if start and end are on the same line, we still want one insns_info made
     int insn_num = endline - startline + 1;
