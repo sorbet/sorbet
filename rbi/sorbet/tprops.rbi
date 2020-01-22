@@ -42,48 +42,32 @@ end
 
 class T::Props::Decorator
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
-  DecoratedClass = T.type_alias {T.untyped} # T.class_of(T::Props), but that produces circular reference errors in some circumstances
   DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
   PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 end
 
 class T::Props::Decorator
-  def add_prop_definition(*args, &blk); end
-  def all_props(*args, &blk); end
-  def array_subdoc_type(*args, &blk); end
-  def convert_type_to_class(*args, &blk); end
+  def add_prop_definition(prop, rules); end
+  def all_props; end
   def decorated_class; end
-  def define_foreign_method(*args, &blk); end
-  def define_getter_and_setter(*args, &blk); end
-  def foreign_prop_get(*args, &blk); end
-  def get(*args, &blk); end
-  def handle_foreign_hint_only_option(*args, &blk); end
-  def handle_foreign_option(*args, &blk); end
-  def handle_redaction_option(*args, &blk); end
-  def hash_key_custom_type(*args, &blk); end
-  def hash_value_subdoc_type(*args, &blk); end
+  def foreign_prop_get(instance, prop, foreign_class, rules = {}, opts = {}); end
+  def get(instance, prop, rules = {}); end
   def initialize(klass); end
   def is_nilable?(*args, &blk); end
   def model_inherited(child); end
-  def mutate_prop_backdoor!(*args, &blk); end
   def plugin(mod); end
-  def prop_defined(*args, &blk); end
-  def prop_get(*args, &blk); end
-  def prop_rules(*args, &blk); end
-  def prop_set(*args, &blk); end
-  def prop_validate_definition!(*args, &blk); end
+  def prop_defined(name, cls, rules = {}); end
+  def prop_get(instance, prop, rules = {}); end
+  def prop_rules(prop); end
+  def prop_set(instance, prop, value, rules = {}); end
+  alias_method :set, :prop_set
+  def prop_validate_definition!(name, cls, rules, type); end
   def props; end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
-  def set(*args, &blk); end
-  def shallow_clone_ok(*args, &blk); end
-  def smart_coerce(*args, &blk); end
   def valid_rule_key?(key); end
-  def validate_foreign_option(*args, &blk); end
-  def validate_not_missing_sensitivity(*args, &blk); end
-  def validate_prop_name(name); end
-  def validate_prop_value(*args, &blk); end
+  def validate_prop_value(prop, val); end
   extend T::Sig
 end
 

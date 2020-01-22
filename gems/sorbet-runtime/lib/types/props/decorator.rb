@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: strict
 
 # NB: This is not actually a decorator. It's just named that way for consistency
 # with DocumentDecorator and ModelDecorator (which both seem to have been written
@@ -11,26 +11,27 @@ class T::Props::Decorator
   extend T::Sig
 
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
-  DecoratedClass = T.type_alias {T.untyped} # T.class_of(T::Props), but that produces circular reference errors in some circumstances
-  DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
+  DecoratedInstance = T.type_alias {Object} # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
   PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 
   class NoRulesError < StandardError; end
 
-  sig {params(klass: DecoratedClass).void.checked(:never)}
+  EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules])
+  private_constant :EMPTY_PROPS
+
+  sig {params(klass: T.untyped).void}
   def initialize(klass)
-    @class = klass
-    klass.plugins.each do |mod|
-      Private.apply_decorator_methods(mod, self)
+    @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
+    @class.plugins.each do |mod|
+      T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
+    @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules])
   end
 
   # checked(:never) - O(prop accesses)
   sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
-  def props
-    @props ||= {}.freeze
-  end
+  attr_reader :props
 
   # Try to avoid using this; post-definition mutation of prop rules is
   # surprising and hard to reason about.
@@ -62,7 +63,7 @@ class T::Props::Decorator
     @props = @props.merge(prop => rules.freeze).freeze
   end
 
-  VALID_RULE_KEYS = %i{
+  VALID_RULE_KEYS = T.let(%i{
     enum
     foreign
     foreign_hint_only
@@ -76,16 +77,16 @@ class T::Props::Decorator
     extra
     optional
     _tnilable
-  }.map {|k| [k, true]}.to_h.freeze
+  }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
   def valid_rule_key?(key)
-    VALID_RULE_KEYS[key]
+    !!VALID_RULE_KEYS[key]
   end
 
   # checked(:never) - O(prop accesses)
-  sig {returns(DecoratedClass).checked(:never)}
+  sig {returns(T.all(Module, T::Props::ClassMethods)).checked(:never)}
   def decorated_class; @class; end
 
   # Accessors
@@ -135,13 +136,13 @@ class T::Props::Decorator
       instance: DecoratedInstance,
       prop: Symbol,
       val: T.untyped,
-      rules: T.nilable(Rules)
+      rules: Rules
     )
     .void
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules[:setter_proc])
+    instance.instance_exec(val, &rules.fetch(:setter_proc))
   end
   alias_method :set, :prop_set
 
@@ -184,18 +185,18 @@ class T::Props::Decorator
       prop: Symbol,
       foreign_class: Module,
       rules: Rules,
-      opts: Hash
+      opts: T::Hash[Symbol, T.untyped],
     )
     .returns(T.untyped)
     .checked(:never)
   end
   def foreign_prop_get(instance, prop, foreign_class, rules=props[prop.to_sym], opts={})
     return if !(value = prop_get(instance, prop, rules))
-    foreign_class.load(value, {}, opts)
+    T.unsafe(foreign_class).load(value, {}, opts)
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = Object.instance_methods.to_set.freeze
+  BANNED_METHOD_NAMES = T.let(Object.instance_methods.to_set.freeze, T::Set[Symbol])
 
   # checked(:never) - Rules hash is expensive to check
   sig do
@@ -245,6 +246,7 @@ class T::Props::Decorator
     nil
   end
 
+  sig {params(name: Symbol).void}
   private def validate_prop_name(name)
     if name !~ /\A[A-Za-z_][A-Za-z0-9_-]*\z/
       raise ArgumentError.new("Invalid prop name in #{@class.name}: #{name}")
@@ -371,7 +373,7 @@ class T::Props::Decorator
     # are ultimately included does.
     #
     if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::PIIable)
-      if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !@class.contains_pii?
+      if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
         raise ArgumentError.new(
           'Cannot include a pii prop in a class that declares `contains_no_pii`'
         )
@@ -454,17 +456,17 @@ class T::Props::Decorator
       if !rules[:immutable]
         if method(:prop_set).owner != T::Props::Decorator
           @class.send(:define_method, "#{name}=") do |val|
-            self.class.decorator.prop_set(self, name, val, rules)
+            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
         else
           # Fast path (~4x faster as of Ruby 2.6)
-          @class.send(:define_method, "#{name}=", &rules[:setter_proc])
+          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
         @class.send(:define_method, name) do
-          self.class.decorator.prop_get(self, name, rules)
+          T.unsafe(self.class).decorator.prop_get(self, name, rules)
         end
       else
         # Fast path (~30x faster as of Ruby 2.6)
@@ -536,10 +538,10 @@ class T::Props::Decorator
   end
 
   # From T::Props::Utils.deep_clone_object, plus String
-  TYPES_NOT_NEEDING_CLONE = [TrueClass, FalseClass, NilClass, Symbol, String, Numeric]
+  TYPES_NOT_NEEDING_CLONE = T.let([TrueClass, FalseClass, NilClass, Symbol, String, Numeric], T::Array[Module])
 
   # checked(:never) - Typechecks internally
-  sig {params(type: PropType).returns(T::Boolean).checked(:never)}
+  sig {params(type: PropType).returns(T.nilable(T::Boolean)).checked(:never)}
   private def shallow_clone_ok(type)
     inner_type =
       if type.is_a?(T::Types::TypedArray)
@@ -581,7 +583,7 @@ class T::Props::Decorator
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig {params(prop_name: Symbol, rules: Hash).void.checked(:never)}
+  sig {params(prop_name: Symbol, rules: Rules).void.checked(:never)}
   private def validate_not_missing_sensitivity(prop_name, rules)
     if rules[:sensitivity].nil?
       if rules[:redaction]
@@ -686,6 +688,7 @@ class T::Props::Decorator
     # *haven't* allowed additional options in the past and want to
     # default to keeping this interface narrow.
     @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
+      foreign = T.let(foreign, T.untyped)
       if foreign.is_a?(Proc)
         resolved_foreign = foreign.call
         if !resolved_foreign.respond_to?(:load)
@@ -704,7 +707,7 @@ class T::Props::Decorator
         opts = {allow_direct_mutation: allow_direct_mutation}
       end
 
-      self.class.decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
+      T.unsafe(self.class).decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
     end
 
     force_fk_method = "#{fk_method}!"
@@ -716,7 +719,7 @@ class T::Props::Decorator
           storytime: {method: force_fk_method, class: self.class}
         )
       end
-      T.must(loaded_foreign)
+      loaded_foreign
     end
 
     @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|
@@ -765,16 +768,17 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  sig {params(child: DecoratedClass).void.checked(:never)}
+  sig {params(child: Module).void.checked(:never)}
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
-    child.plugins.concat(decorated_class.plugins)
+    child = T.cast(child, T.all(Module, T::Props::ClassMethods))
 
+    child.plugins.concat(decorated_class.plugins)
     decorated_class.plugins.each do |mod|
       # NB: apply_class_methods must not be an instance method on the decorator itself,
       # otherwise we'd have to call child.decorator here, which would create the decorator
       # before any `decorator_class` override has a chance to take effect (see the comment below).
-      Private.apply_class_methods(mod, child)
+      T::Props::Plugin::Private.apply_class_methods(mod, child)
     end
 
     props.each do |name, rules|
@@ -794,17 +798,17 @@ class T::Props::Decorator
       #
       unless rules[:without_accessors]
         if child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-            child.instance_method(name).source_location.first == __FILE__
+            child.instance_method(name).source_location&.first == __FILE__
           child.send(:define_method, name) do
-            self.class.decorator.prop_get(self, name, rules)
+            T.unsafe(self.class).decorator.prop_get(self, name, rules)
           end
         end
 
         unless rules[:immutable]
           if child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-              child.instance_method("#{name}=").source_location.first == __FILE__
+              child.instance_method("#{name}=").source_location&.first == __FILE__
             child.send(:define_method, "#{name}=") do |val|
-              self.class.decorator.prop_set(self, name, val, rules)
+              T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
             end
           end
         end
@@ -815,27 +819,7 @@ class T::Props::Decorator
   sig {params(mod: Module).void.checked(:never)}
   def plugin(mod)
     decorated_class.plugins << mod
-    Private.apply_class_methods(mod, decorated_class)
-    Private.apply_decorator_methods(mod, self)
-  end
-
-  module Private
-    # These need to be non-instance methods so we can use them without prematurely creating the
-    # child decorator in `model_inherited` (see comments there for details).
-    def self.apply_class_methods(plugin, target)
-      if plugin.const_defined?('ClassMethods')
-        # FIXME: This will break preloading, selective test execution, etc if `mod::ClassMethods`
-        # is ever defined in a separate file from `mod`.
-        target.extend(plugin::ClassMethods) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-      end
-    end
-
-    def self.apply_decorator_methods(plugin, target)
-      if plugin.const_defined?('DecoratorMethods')
-        # FIXME: This will break preloading, selective test execution, etc if `mod::DecoratorMethods`
-        # is ever defined in a separate file from `mod`.
-        target.extend(plugin::DecoratorMethods) # rubocop:disable PrisonGuard/NoDynamicConstAccess
-      end
-    end
+    T::Props::Plugin::Private.apply_class_methods(mod, decorated_class)
+    T::Props::Plugin::Private.apply_decorator_methods(mod, self)
   end
 end

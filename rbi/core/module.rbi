@@ -873,7 +873,7 @@ class Module < Object
   # ```
   sig do
     params(
-        arg0: Symbol,
+        arg0: T.any(Symbol, String),
     )
     .returns(UnboundMethod)
   end
