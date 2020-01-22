@@ -38,8 +38,7 @@ TEST_P(ProtocolTest, AddFile) {
 TEST_P(ProtocolTest, AddFileJoiningRequests) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
-    requests.push_back(
-        changeFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n", 2));
+    requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
     requests.push_back(
         changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
     assertDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
