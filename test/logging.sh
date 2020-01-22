@@ -6,7 +6,7 @@ yellow=$'\x1b[0;33m'
 cyan=$'\x1b[0;36m'
 cnone=$'\x1b[0m'
 
-# Detects whether we can add colors or not
+# Unconditionally adds colors (regardless of whether output is a tty)
 in_color() {
   local color="$1"
   shift

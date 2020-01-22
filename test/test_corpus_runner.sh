@@ -65,11 +65,17 @@ info "├─ stdout:      bazel-out/k8-opt/bin/$rbout"
 info "├─ stderr:      bazel-out/k8-opt/bin/$rberr"
 info "└─ exit code:   $rbcode"
 
+indent_and_nest() {
+  sed -e 's/^/       │/'
+}
+
 echo    ""
-info    "Unpacking compiled artifact..."
+info    "Unpacking compiled artifact (.so/.bundle, .ll, .llo)..."
 info    "├─ from:        bazel-out/k8-opt/bin/${build_archive}"
 tar -xf "${build_archive}" -C "${target}"
-success "└─ to:          ${target}"
+info    "├─ contents:"
+find "$target" -type f | indent_and_nest
+success "└─ done."
 
 # NOTE: running the test could be split out into its own genrule, the test just
 # needs to validate that the output matches.
@@ -86,7 +92,7 @@ set +e
 force_compile=1 llvmir="${target}" $ruby \
   -I "${root}/run/tools" \
   -rpatch_require.rb -rpreamble.rb "$runfile" \
-  2> "$stderr" | tee "$stdout"
+  1> "$stdout" 2> "$stderr"
 code=$?
 set -e
 
@@ -107,10 +113,6 @@ else
   success "└─ codes match."
 fi
 
-indent_and_nest() {
-  sed -e 's/^/       │/'
-}
-
 echo ""
 info "Checking stdouts match..."
 if ! diff -au "$rbout" "$stdout" > stdout.diff; then
@@ -127,7 +129,7 @@ echo ""
 info "Checking stderrs match..."
 
 shorten_bazel() {
-  sed -e "s+bazel/_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
+  sed -e "s+_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
 }
 
 filter_stderr() {
@@ -155,15 +157,18 @@ else
   fi
 fi
 
-echo ""
-info "Cleaning up temp files..."
-rm -r "$target" "$stdout" "$stderr" "$runfile"
-
-echo ""
 if [ -z "$should_fail" ]; then
+  echo ""
   success "Test passed."
+  info    "├─ stdout (interpretted):"
+  < "$rbout" indent_and_nest
+  info    "├─ stderr (interpretted):"
+  < "$rberr" shorten_bazel | indent_and_nest
+  success "└─ 🎉"
+
   echo ""
 else
+  echo ""
   error "Test failed."
   echo ""
   exit 1
