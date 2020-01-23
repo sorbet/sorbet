@@ -400,12 +400,6 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
         {llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), argCountRaw, argArrayRaw});
 }
 
-llvm::Value *Payload::loadSelf(CompilerState &cs, llvm::IRBuilderBase &build) {
-    auto &builder = builderCast(build);
-    auto ret = builder.CreateCall(cs.module->getFunction("sorbet_loadSelf"), {});
-    return ret;
-}
-
 namespace {
 llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const BasicBlockMap &blockMap) {
     auto sym = blockMap.forMethod.data(cs)->owner;

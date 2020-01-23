@@ -500,8 +500,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         builder.CreateRet(var);
                     },
                     [&](cfg::LoadSelf *i) {
-                        auto var = Payload::loadSelf(cs, builder);
-                        Payload::varSet(cs, bind.bind.variable, var, builder, blockMap, aliases, bb->rubyBlockId);
+                        // it's done in function setup, no need to do anything here
                     },
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {

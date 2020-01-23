@@ -46,8 +46,6 @@ public:
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::SymbolRef sym,
                                    core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr);
-    static llvm::Value *loadSelf(CompilerState &cs, llvm::IRBuilderBase &builder);
-
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
                                const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                int rubyBlockId);

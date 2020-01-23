@@ -285,14 +285,6 @@ void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute_
 }
 
 // ****
-// ****                       Self
-// ****
-
-VALUE sorbet_loadSelf() {
-    return GET_EC()->cfp->self;
-}
-
-// ****
 // ****                       Constants, Classes and Modules
 // ****
 
