@@ -1847,6 +1847,8 @@ class Array < Object
     )
     .returns(T.any(T.nilable(Elem), T::Array[Elem]))
   end
+  sig { returns(Elem) }
+  sig { params(random: Random::Formatter).returns(Elem) }
   def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
 
   # Returns a new array containing all elements of `ary` for which the given
