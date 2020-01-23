@@ -8,4 +8,4 @@ end
 
 # puts self.class
 Foo.new.foo {puts self.class}
-Foo.new.instance_exec {puts self.class}
+Foo.new.instance_exec {puts self.class} # we don't support calling blocks that change self
