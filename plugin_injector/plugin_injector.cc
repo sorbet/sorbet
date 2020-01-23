@@ -152,12 +152,18 @@ public:
 
         ENFORCE(threadState->file.exists());
         ENFORCE(f == threadState->file);
+
+        ENFORCE(threadState->combinedModule == nullptr);
+        threadState->file = core::FileRef();
+
+        compiler::CompilerState cs(gs, lctx, module.get());
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
+            if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
+              cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");
+            }
             string fileName = objectFileName(gs, f);
             sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
         }
-        ENFORCE(threadState->combinedModule == nullptr);
-        threadState->file = core::FileRef();
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}
