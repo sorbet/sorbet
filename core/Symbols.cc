@@ -112,20 +112,41 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
     return resultType;
 }
 
-bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
-    if (isClassOrModuleLinearizationComputed() && !sym.data(gs)->isClassOrModuleClass()) {
-        for (SymbolRef a : mixins()) {
-            if (a == sym) {
-                return true;
-            }
-        }
-    } else {
-        for (SymbolRef a : mixins()) {
-            if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
-                return true;
-            }
+namespace {
+bool derivesFromModule(const core::Symbol *what, const GlobalState &gs, SymbolRef sym) {
+    for (SymbolRef a : what->mixins()) {
+        if (a == sym) {
+            return true;
         }
     }
+    if (what->superClass().exists()) {
+        return sym == what->superClass() || derivesFromModule(what->superClass().data(gs).operator->(), gs, sym);
+    }
+    return false;
+}
+
+bool derivesFromClass(const core::Symbol *what, const GlobalState &gs, SymbolRef sym) {
+    if (what->superClass().exists()) {
+        return sym == what->superClass() || derivesFromClass(what->superClass().data(gs).operator->(), gs, sym);
+    }
+    return false;
+}
+} // namespace
+
+bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
+    if (isClassOrModuleLinearizationComputed()) {
+        if (sym.data(gs)->isClassOrModuleClass()) {
+            return derivesFromClass(this, gs, sym);
+        }
+        return derivesFromModule(this, gs, sym);
+    }
+
+    for (SymbolRef a : mixins()) {
+        if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
+            return true;
+        }
+    }
+
     if (this->superClass().exists()) {
         return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
