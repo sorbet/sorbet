@@ -12,8 +12,8 @@ sh_library(
 )
 
 sh_binary(
-    name = "run_one_bazel",
-    srcs = ["run_one_bazel.sh"],
+    name = "run_one",
+    srcs = ["run_one.sh"],
     data = [
         "sorbet-typed.rev",
         "//main:sorbet",
