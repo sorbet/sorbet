@@ -746,7 +746,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                               Payload::getRubyConstant(cs, owner, builder),
+                               Payload::rubyTopSelf(cs, builder),
                            },
                            staticInitName);
     }

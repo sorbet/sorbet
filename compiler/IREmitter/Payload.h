@@ -24,6 +24,7 @@ public:
     static llvm::Value *rubyNil(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder);
     static llvm::Value *rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static llvm::Value *rubyTopSelf(CompilerState &cs, llvm::IRBuilderBase &builder);
     static void raiseArity(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *currentArgCount, int minArgs,
                            int maxArgs);
     static llvm::Value *longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, long num);

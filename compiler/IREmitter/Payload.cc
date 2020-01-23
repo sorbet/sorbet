@@ -46,6 +46,10 @@ llvm::Value *Payload::rubyFalse(CompilerState &cs, llvm::IRBuilderBase &builder)
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyFalse"), {}, "falseValueRaw");
 }
 
+llvm::Value *Payload::rubyTopSelf(CompilerState &cs, llvm::IRBuilderBase &builder) {
+    return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTopSelf"), {}, "topSelf");
+}
+
 llvm::Value *Payload::rubyTrue(CompilerState &cs, llvm::IRBuilderBase &builder) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_rubyTrue"), {}, "trueValueRaw");
 }
@@ -206,6 +210,7 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
     {core::Symbols::String(), "sorbet_isa_String"},
     {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
     {core::Symbols::Proc(), "sorbet_isa_Proc"},
+    {core::Symbols::rootSingleton(), "sorbet_isa_RootSingleton"},
 };
 }
 

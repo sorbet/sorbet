@@ -58,6 +58,10 @@ VALUE sorbet_rubyNil() __attribute__((always_inline)) {
     return RUBY_Qnil;
 }
 
+VALUE sorbet_rubyTopSelf() __attribute__((always_inline)) __attribute__((pure)) {
+    return GET_VM()->top_self;
+}
+
 // ****
 // ****                       Conversions between Ruby values and C values
 // ****
@@ -754,6 +758,10 @@ _Bool sorbet_isa_Method(VALUE obj) __attribute__((const))  {
 
 _Bool sorbet_isa_Proc(VALUE obj) __attribute__((const)) {
     return rb_obj_is_proc(obj) == Qtrue;
+}
+
+_Bool sorbet_isa_RootSingleton(VALUE obj) __attribute__((const)) {
+    return obj == sorbet_rubyTopSelf();
 }
 
 VALUE rb_obj_is_kind_of(VALUE, VALUE) __attribute__((const));
