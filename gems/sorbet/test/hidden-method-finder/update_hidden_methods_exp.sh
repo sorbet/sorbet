@@ -7,7 +7,7 @@ base_dir="$(pwd)"
 cd ../../../..
 # we are now at the repo root
 
-versions=("ruby_2_4_3" "ruby_2_6_3")
+versions=("ruby_2_4" "ruby_2_6")
 
 if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@" ; then
     for test_dir in bazel-genfiles/gems/sorbet/test/hidden-method-finder/*; do

@@ -12,8 +12,8 @@ sh_binary(
         "//main:sorbet",
         "@gems//bundler",
         "@gems//bundler:bundle",
-        "@ruby_2_4_3//:ruby",
-        "@ruby_2_6_3//:ruby",
+        "@ruby_2_4//:ruby",
+        "@ruby_2_6//:ruby",
     ],
     tags = ["manual"],
     deps = [
@@ -23,7 +23,7 @@ sh_binary(
 )
 
 hidden_methods_tests(
-    ruby = "ruby_2_4_3",
+    ruby = "ruby_2_4",
     tests = [
         "simple",
         "thorough",
@@ -31,7 +31,7 @@ hidden_methods_tests(
 )
 
 hidden_methods_tests(
-    ruby = "ruby_2_6_3",
+    ruby = "ruby_2_6",
     tests = [
         "simple",
         "thorough",
@@ -42,7 +42,7 @@ test_suite(
     name = "hidden-method-finder",
     tags = ["manual"],
     tests = [
-        ":hidden-methods-ruby_2_4_3",
-        ":hidden-methods-ruby_2_6_3",
+        ":hidden-methods-ruby_2_4",
+        ":hidden-methods-ruby_2_6",
     ],
 )
