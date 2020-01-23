@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 uniq_data = (1..10_000).to_a

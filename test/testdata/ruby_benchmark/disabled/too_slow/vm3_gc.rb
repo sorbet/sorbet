@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strong
 # compiled: true
 5000.times do

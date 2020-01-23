@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strong
 # compiled: true
 # Measure uncontended GVL performance via read/write with 1:1 threading

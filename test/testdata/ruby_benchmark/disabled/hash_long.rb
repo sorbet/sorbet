@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 k1 = "Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong Ping Pong";

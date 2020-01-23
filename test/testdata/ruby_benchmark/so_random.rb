@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 # from http://www.bagley.org/~doug/shootout/bench/random/random.ruby

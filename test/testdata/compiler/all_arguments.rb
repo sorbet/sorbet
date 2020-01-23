@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 def take_arguments(a, b=1, *c, d:, e:2, **f, &g)

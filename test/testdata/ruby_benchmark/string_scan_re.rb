@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strong
 # compiled: true
 str = Array.new(1_000, 'abc').join(',')

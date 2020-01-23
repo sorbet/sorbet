@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 def foo(&blk)
   blk.call(1, 2)

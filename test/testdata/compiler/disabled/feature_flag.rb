@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 # compiled: true

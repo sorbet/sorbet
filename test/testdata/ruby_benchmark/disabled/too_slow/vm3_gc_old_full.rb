@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strong
 # compiled: true
 old_object = Array.new(1_000_000){''}

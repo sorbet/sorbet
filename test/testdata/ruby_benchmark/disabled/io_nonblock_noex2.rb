@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 nr = 1_000_000

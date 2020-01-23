@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strict
 # compiled: true
 def fact(n)

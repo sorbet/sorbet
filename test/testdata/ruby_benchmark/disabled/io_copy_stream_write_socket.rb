@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 # The goal of this is to use a synthetic (non-IO) reader

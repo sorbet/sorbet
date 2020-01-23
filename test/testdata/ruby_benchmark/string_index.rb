@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: strong
 # compiled: true
 str1 = "あ" * 1024 + "い" # not single byte optimizable

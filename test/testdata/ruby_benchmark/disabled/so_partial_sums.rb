@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 n = 2_500_000 # (ARGV.shift || 1).to_i

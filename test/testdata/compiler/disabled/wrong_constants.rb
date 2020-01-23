@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 # currently will fail in ruby and succeed in compiled mode.

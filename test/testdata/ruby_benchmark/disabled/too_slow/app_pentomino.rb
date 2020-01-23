@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #!/usr/local/bin/ruby
 # typed: true
 # compiled: true

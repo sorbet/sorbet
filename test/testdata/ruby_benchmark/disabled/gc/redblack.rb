@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 # This benchmark is imported from https://github.com/jruby/rubybench/blob/master/time/bench_red_black.rb

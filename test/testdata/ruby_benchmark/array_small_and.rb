@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # typed: true
 # compiled: true
 MIN_SIZE = ENV.fetch('SMALL_ARRAY_MIN', 0).to_i
