@@ -73,12 +73,59 @@ llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &
                                            {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
 }
 
-llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view str) {
-    llvm::StringRef userStr(str.data(), str.length());
-    auto rawCString = Payload::toCString(cs, str, builder);
-    return builderCast(builder).CreateCall(
-        cs.module->getFunction("sorbet_cPtrToRubyString"),
-        {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))}, "rawRubyStr");
+llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
+                                       bool frozen) {
+    auto &builder = builderCast(build);
+    if (!frozen) {
+        auto rawCString = Payload::toCString(cs, str, builder);
+        return builder.CreateCall(cs.module->getFunction("sorbet_cPtrToRubyString"),
+                                  {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))},
+                                  "rawRubyStr");
+    }
+    // this is a frozen string. We'll allocate it at load time and share it.
+    string rawName = "rubyStrFrozen_" + (string)str;
+    auto tp = llvm::Type::getInt64Ty(cs);
+    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+    llvm::Constant *indices[] = {zero};
+
+    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        llvm::IRBuilder<> globalInitBuilder(cs);
+        auto ret =
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        ret->setAlignment(llvm::MaybeAlign(8));
+        // create constructor
+        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
+
+        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
+        globalInitBuilder.SetInsertPoint(bb);
+        auto rawCString = Payload::toCString(cs, str, globalInitBuilder);
+        auto rawStr =
+            globalInitBuilder.CreateCall(cs.module->getFunction("sorbet_cPtrToRubyStringFrozen"),
+                                         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
+        globalInitBuilder.CreateStore(rawStr,
+                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateRetVoid();
+        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+
+        return ret;
+    }));
+
+    ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
+            "you're calling this function from something low-level that passed a IRBuilder that points outside of "
+            "function currently being generated");
+    auto oldInsertPoint = builder.saveIP();
+    builder.SetInsertPoint(cs.functionEntryInitializers);
+    auto name = llvm::StringRef(str.data(), str.length());
+    auto global = builder.CreateLoad(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+        {"rubyStr_", name});
+    builder.restoreIP(oldInsertPoint);
+
+    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
+    return global;
 }
 
 llvm::Value *Payload::testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
@@ -306,15 +353,15 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
     auto loc = md->loc;
     auto sym = md->symbol;
     auto funcName =
-        IREmitterHelpers::isStaticInit(cs, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
+        IREmitterHelpers::isStaticInit(cs1, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
-    auto funcNameValue = Payload::cPtrToRubyString(cs, builder, funcName);
+    auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
     auto recv = Payload::getRubyConstant(cs1, sym.data(cs)->owner, builder);
     auto filename = loc.file().data(cs).path();
-    auto filenameValue = Payload::cPtrToRubyString(cs, builder, filename);
+    auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
     // TODO make this a real absoluate path
     auto realpath = fmt::format("{}", filename);
-    auto realpathValue = Payload::cPtrToRubyString(cs, builder, realpath);
+    auto realpathValue = Payload::cPtrToRubyString(cs1, builder, realpath, true);
     auto pos = loc.position(cs);
     auto ret = builder.CreateCall(cs.module->getFunction("sorbet_allocateRubyStackFrames"),
                                   {recv, funcNameValue, funcNameId, filenameValue, realpathValue,

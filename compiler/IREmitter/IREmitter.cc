@@ -546,7 +546,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str);
+                                auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str, true);
                                 Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, blockMap, aliases,
                                                 bb->rubyBlockId);
                                 break;
