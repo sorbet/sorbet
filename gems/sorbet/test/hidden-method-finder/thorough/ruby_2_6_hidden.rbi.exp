@@ -3871,6 +3871,100 @@ class Delegator
   def self.public_api(); end
 end
 
+class DidYouMean::ClassNameChecker
+  def class_name(); end
+
+  def class_names(); end
+
+  def corrections(); end
+
+  def initialize(exception); end
+
+  def scopes(); end
+end
+
+module DidYouMean::Correctable
+  def corrections(); end
+
+  def original_message(); end
+
+  def spell_checker(); end
+
+  def to_s(); end
+end
+
+module DidYouMean::Jaro
+  def self.distance(str1, str2); end
+end
+
+module DidYouMean::JaroWinkler
+  def self.distance(str1, str2); end
+end
+
+class DidYouMean::KeyErrorChecker
+  def corrections(); end
+
+  def initialize(key_error); end
+end
+
+class DidYouMean::KeyErrorChecker
+end
+
+module DidYouMean::Levenshtein
+  def self.distance(str1, str2); end
+
+  def self.min3(a, b, c); end
+end
+
+class DidYouMean::MethodNameChecker
+  def corrections(); end
+
+  def initialize(exception); end
+
+  def method_name(); end
+
+  def method_names(); end
+
+  def receiver(); end
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
+end
+
+class DidYouMean::NullChecker
+  def corrections(); end
+
+  def initialize(*_); end
+end
+
+class DidYouMean::PlainFormatter
+  def message_for(corrections); end
+end
+
+class DidYouMean::PlainFormatter
+end
+
+class DidYouMean::VariableNameChecker
+  def corrections(); end
+
+  def cvar_names(); end
+
+  def initialize(exception); end
+
+  def ivar_names(); end
+
+  def lvar_names(); end
+
+  def method_names(); end
+
+  def name(); end
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
+end
+
+module DidYouMean
+  def self.formatter(); end
+
+  def self.formatter=(formatter); end
+end
+
 class Dir
   def children(); end
 
@@ -4037,6 +4131,72 @@ Errno::EDOOFUS = Errno::NOERROR
 Errno::EIPSEC = Errno::NOERROR
 
 Errno::ENOTCAPABLE = Errno::NOERROR
+
+class Etc::Group
+  def gid(); end
+
+  def gid=(_); end
+
+  def mem(); end
+
+  def mem=(_); end
+
+  def name(); end
+
+  def name=(_); end
+
+  def passwd(); end
+
+  def passwd=(_); end
+end
+
+class Etc::Group
+  extend ::Enumerable
+  def self.[](*_); end
+
+  def self.each(&blk); end
+
+  def self.members(); end
+end
+
+class Etc::Passwd
+  def change(); end
+
+  def change=(_); end
+
+  def dir=(_); end
+
+  def expire(); end
+
+  def expire=(_); end
+
+  def gecos(); end
+
+  def gecos=(_); end
+
+  def gid=(_); end
+
+  def name=(_); end
+
+  def passwd=(_); end
+
+  def shell=(_); end
+
+  def uclass(); end
+
+  def uclass=(_); end
+
+  def uid=(_); end
+end
+
+class Etc::Passwd
+  extend ::Enumerable
+  def self.[](*_); end
+
+  def self.each(&blk); end
+
+  def self.members(); end
+end
 
 class Exception
   def full_message(*_); end
@@ -8086,6 +8246,8 @@ class IO
 
   def nread(); end
 
+  def pathconf(_); end
+
   def pread(*_); end
 
   def pwrite(_, _1); end
@@ -8266,6 +8428,7 @@ module Kernel
 end
 
 class KeyError
+  include ::DidYouMean::Correctable
   def key(); end
 
   def receiver(); end
@@ -8323,6 +8486,8 @@ module MonitorMixin
   def synchronize(); end
 
   def try_mon_enter(); end
+  EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
+  EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
 end
 
 class MonitorMixin::ConditionVariable
@@ -8344,6 +8509,7 @@ module MonitorMixin
 end
 
 class NameError
+  include ::DidYouMean::Correctable
   def name(); end
 
   def receiver(); end
@@ -8635,6 +8801,20 @@ module SingleForwardable
   def delegate(hash); end
 
   def single_delegate(hash); end
+end
+
+class Socket
+  IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
+  IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
+end
+
+module Socket::Constants
+  IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
+  IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
 end
 
 class Sorbet::Private::ConstantLookupCache
@@ -8948,6 +9128,10 @@ class Struct
 
   def values_at(*_); end
 end
+
+Struct::Group = Etc::Group
+
+Struct::Passwd = Etc::Passwd
 
 Struct::Tms = Process::Tms
 
