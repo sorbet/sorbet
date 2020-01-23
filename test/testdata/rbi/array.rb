@@ -40,4 +40,4 @@ T::Array[Float].new.sum.nan? # error: Method `nan?` does not exist on `Integer` 
 T.assert_type!([1, 2].sample, Integer)
 T.assert_type!([1, 2].sample(random: Random.new), Integer)
 T.assert_type!([1, 2].sample(2), T::Array[Integer])
-T.assert_type!([1, 2].sample(2), random: Random.new, T::Array[Integer])
+T.assert_type!([1, 2].sample(2, random: Random.new), T::Array[Integer])
