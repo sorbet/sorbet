@@ -2,6 +2,7 @@
 #!/usr/bin/ruby
 # typed: strong
 # compiled: true
+# skip_stderr_check
 # -*- Ruby -*-
 # $Id: strcat-ruby.code,v 1.4 2004/11/13 07:43:28 bfulgham Exp $
 # http://www.bagley.org/~doug/shootout/
