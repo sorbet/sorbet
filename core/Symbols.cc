@@ -113,7 +113,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
-    if (isClassOrModuleLinearizationComputed()) {
+    if (isClassOrModuleLinearizationComputed() && !sym.data(gs)->isClassOrModuleClass()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
                 return true;
