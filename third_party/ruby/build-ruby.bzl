@@ -144,7 +144,7 @@ def _build_ruby_impl(ctx):
     # Outputs
     binaries = [
         ctx.actions.declare_file("toolchain/bin/{}".format(binary))
-        for binary in ["ruby", "bundle", "bundler", "erb", "gem", "irb", "rake", "rdoc", "ri"]
+        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri"]
     ]
 
     libdir = ctx.actions.declare_directory("toolchain/lib")
@@ -253,7 +253,7 @@ def _ruby_binary_impl(ctx):
             break
 
     if binary == None:
-        fail("Binary {} is missing from the ruby build")
+        fail("Binary '{}' is missing from the ruby build".format(ctx.label.name))
 
     ctx.actions.write(
         output = wrapper,

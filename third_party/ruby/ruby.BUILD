@@ -45,18 +45,6 @@ ruby_binary(
 )
 
 ruby_binary(
-    name = "bundle",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_binary(
-    name = "bundler",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_binary(
     name = "gem",
     ruby = ":ruby-dist",
     visibility = ["//visibility:public"],
