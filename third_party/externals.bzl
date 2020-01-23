@@ -39,8 +39,8 @@ def sorbet_llvm_externals():
 
     http_archive(
         name = "sorbet_ruby",
-        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.3.tar.gz",
-        sha256 = "577fd3795f22b8d91c1d4e6733637b0394d4082db659fccf224c774a2b1c82fb",
-        strip_prefix = "ruby-2.6.3",
+        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz",
+        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
+        strip_prefix = "ruby-2.6.5",
         build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD",
     )
