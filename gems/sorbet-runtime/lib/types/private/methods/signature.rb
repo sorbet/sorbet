@@ -51,8 +51,14 @@ class T::Private::Methods::Signature
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
 
-    param_names = parameters.map {|_, name| name}
     declared_param_names = raw_arg_types.keys
+    # If sig params are declared but there is a single parameter with a missing name
+    # **and** the method ends with a "=", assume it is a writer method generated
+    # by attr_writer or attr_accessor
+    writer_method = declared_param_names != [nil] && parameters == [[:req]] && method_name[-1] == "="
+    # For writer methods, map the single parameter to the method name without the "=" at the end
+    parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
+    param_names = parameters.map {|_, name| name}
     missing_names = param_names - declared_param_names
     extra_names = declared_param_names - param_names
     if !missing_names.empty?
