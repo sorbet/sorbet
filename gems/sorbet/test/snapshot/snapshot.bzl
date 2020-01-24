@@ -47,7 +47,7 @@ def _snapshot_test(test_path, ruby):
         name = "actual_{}/{}".format(ruby, test_path),
         message = "Running {} ({})".format(test_path, ruby),
         tools = [
-            ":run_one_bazel",
+            ":run_one",
         ],
         srcs = [
             "//main:sorbet",
@@ -72,7 +72,7 @@ def _snapshot_test(test_path, ruby):
         # failure.
         cmd =
             """
-        $(location :run_one_bazel) {} $(location {}) {} &> genrule.log \
+        $(location :run_one) {} $(location {}) {} &> genrule.log \
                 || (cat genrule.log && exit 1)
         """.format(ruby, actual, test_path),
     )
@@ -81,7 +81,7 @@ def _snapshot_test(test_path, ruby):
 
     native.sh_test(
         name = test_name,
-        srcs = ["check_one_bazel.sh"],
+        srcs = ["check_one.sh"],
         data = [actual] + native.glob([
             "{}/src/**/*".format(test_path),
             "{}/expected/**/*".format(test_path),
@@ -112,7 +112,7 @@ def _snapshot_test(test_path, ruby):
             name = update_name,
             data = [actual] + expected,
             deps = [":logging", ":validate_utils"],
-            srcs = ["update_one_bazel.sh"],
+            srcs = ["update_one.sh"],
             args = [
                 "$(location {})".format(actual),
                 test_path,

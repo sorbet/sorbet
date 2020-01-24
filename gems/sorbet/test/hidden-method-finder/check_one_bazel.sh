@@ -15,7 +15,7 @@ pushd "$repo_root/gems/sorbet/test/hidden-method-finder/$test_name"
 # ----- Artifact validation -----
 
 info "├─ checking for total hidden methods match"
-if ! diff "./${ruby_version}_hidden.rbi.exp" "${repo_root}/${hidden_path}"; then
+if ! diff -u "./${ruby_version}_hidden.rbi.exp" "${repo_root}/${hidden_path}"; then
   error "├─ expected hidden.rbi did not match actual hidden.rbi"
   error "└─ see output above."
   exit 1

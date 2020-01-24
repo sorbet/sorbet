@@ -3813,6 +3813,18 @@ module Bundler
   def self.with_original_env(); end
 end
 
+class C1
+  def m_three(); end
+end
+
+class C2
+  def self.m_four(); end
+end
+
+class C3
+  X = ::T.let(nil, ::T.untyped)
+end
+
 class Class
   def json_creatable?(); end
 end
@@ -3857,6 +3869,100 @@ class Delegator
   def self.delegating_block(mid); end
 
   def self.public_api(); end
+end
+
+class DidYouMean::ClassNameChecker
+  def class_name(); end
+
+  def class_names(); end
+
+  def corrections(); end
+
+  def initialize(exception); end
+
+  def scopes(); end
+end
+
+module DidYouMean::Correctable
+  def corrections(); end
+
+  def original_message(); end
+
+  def spell_checker(); end
+
+  def to_s(); end
+end
+
+module DidYouMean::Jaro
+  def self.distance(str1, str2); end
+end
+
+module DidYouMean::JaroWinkler
+  def self.distance(str1, str2); end
+end
+
+class DidYouMean::KeyErrorChecker
+  def corrections(); end
+
+  def initialize(key_error); end
+end
+
+class DidYouMean::KeyErrorChecker
+end
+
+module DidYouMean::Levenshtein
+  def self.distance(str1, str2); end
+
+  def self.min3(a, b, c); end
+end
+
+class DidYouMean::MethodNameChecker
+  def corrections(); end
+
+  def initialize(exception); end
+
+  def method_name(); end
+
+  def method_names(); end
+
+  def receiver(); end
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
+end
+
+class DidYouMean::NullChecker
+  def corrections(); end
+
+  def initialize(*_); end
+end
+
+class DidYouMean::PlainFormatter
+  def message_for(corrections); end
+end
+
+class DidYouMean::PlainFormatter
+end
+
+class DidYouMean::VariableNameChecker
+  def corrections(); end
+
+  def cvar_names(); end
+
+  def initialize(exception); end
+
+  def ivar_names(); end
+
+  def lvar_names(); end
+
+  def method_names(); end
+
+  def name(); end
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
+end
+
+module DidYouMean
+  def self.formatter(); end
+
+  def self.formatter=(formatter); end
 end
 
 class Dir
@@ -4026,6 +4132,60 @@ Errno::EIPSEC = Errno::NOERROR
 
 Errno::ENOTCAPABLE = Errno::NOERROR
 
+class Etc::Group
+  def gid(); end
+
+  def gid=(_); end
+
+  def mem(); end
+
+  def mem=(_); end
+
+  def name(); end
+
+  def name=(_); end
+
+  def passwd(); end
+
+  def passwd=(_); end
+end
+
+class Etc::Group
+  extend ::Enumerable
+  def self.[](*_); end
+
+  def self.each(&blk); end
+
+  def self.members(); end
+end
+
+class Etc::Passwd
+  def dir=(_); end
+
+  def gecos(); end
+
+  def gecos=(_); end
+
+  def gid=(_); end
+
+  def name=(_); end
+
+  def passwd=(_); end
+
+  def shell=(_); end
+
+  def uid=(_); end
+end
+
+class Etc::Passwd
+  extend ::Enumerable
+  def self.[](*_); end
+
+  def self.each(&blk); end
+
+  def self.members(); end
+end
+
 class Exception
   def full_message(*_); end
 end
@@ -4119,12 +4279,6 @@ end
 
 class Float
   include ::JSON::Ext::Generator::GeneratorMethods::Float
-end
-
-class Foo
-  def bar(); end
-
-  def baz(); end
 end
 
 module Forwardable
@@ -6869,85 +7023,17 @@ end
 class Gem::RuntimeRequirementNotMetError
 end
 
-module Gem::Security
-  DIGEST_NAME = ::T.let(nil, ::T.untyped)
-  EXTENSIONS = ::T.let(nil, ::T.untyped)
-  KEY_ALGORITHM = ::T.let(nil, ::T.untyped)
-  KEY_LENGTH = ::T.let(nil, ::T.untyped)
-  ONE_DAY = ::T.let(nil, ::T.untyped)
-  ONE_YEAR = ::T.let(nil, ::T.untyped)
-end
-
-class Gem::Security::DIGEST_ALGORITHM
-end
-
-class Gem::Security::DIGEST_ALGORITHM
-end
-
-class Gem::Security::Exception
-end
-
-class Gem::Security::Exception
-end
-
 class Gem::Security::Signer
   include ::Gem::UserInteraction
   include ::Gem::DefaultUserInteraction
   include ::Gem::Text
-  def cert_chain(); end
-
-  def cert_chain=(cert_chain); end
-
-  def digest_algorithm(); end
-
-  def digest_name(); end
-
-  def extract_name(cert); end
-
-  def initialize(key, cert_chain, passphrase=T.unsafe(nil), options=T.unsafe(nil)); end
-
-  def key(); end
-
-  def key=(key); end
-
-  def load_cert_chain(); end
-
   def options(); end
 
-  def re_sign_key(expiration_length: T.unsafe(nil)); end
-
-  def sign(data); end
   DEFAULT_OPTIONS = ::T.let(nil, ::T.untyped)
 end
 
 class Gem::Security::Signer
   def self.re_sign_cert(expired_cert, expired_cert_path, private_key); end
-end
-
-module Gem::Security
-  def self.alt_name_or_x509_entry(certificate, x509_entry); end
-
-  def self.create_cert(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.create_cert_email(email, key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
-
-  def self.create_cert_self_signed(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.create_key(length=T.unsafe(nil), algorithm=T.unsafe(nil)); end
-
-  def self.email_to_name(email_address); end
-
-  def self.re_sign(expired_certificate, private_key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
-
-  def self.reset(); end
-
-  def self.sign(certificate, signing_key, signing_cert, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.trust_dir(); end
-
-  def self.trusted_certificates(&block); end
-
-  def self.write(pemmable, path, permissions=T.unsafe(nil), passphrase=T.unsafe(nil), cipher=T.unsafe(nil)); end
 end
 
 class Gem::SilentUI
@@ -7709,9 +7795,6 @@ module Gem::Text
   def truncate_text(text, description, max_length=T.unsafe(nil)); end
 end
 
-module Gem::Text
-end
-
 class Gem::UninstallError
   def spec(); end
 
@@ -7774,9 +7857,6 @@ module Gem::UserInteraction
   def terminate_interaction(exit_code=T.unsafe(nil)); end
 
   def verbose(msg=T.unsafe(nil)); end
-end
-
-module Gem::UserInteraction
 end
 
 module Gem::Util
@@ -8080,6 +8160,8 @@ class IO
 
   def nread(); end
 
+  def pathconf(_); end
+
   def pread(*_); end
 
   def pwrite(_, _1); end
@@ -8260,6 +8342,7 @@ module Kernel
 end
 
 class KeyError
+  include ::DidYouMean::Correctable
   def key(); end
 
   def receiver(); end
@@ -8317,6 +8400,8 @@ module MonitorMixin
   def synchronize(); end
 
   def try_mon_enter(); end
+  EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
+  EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
 end
 
 class MonitorMixin::ConditionVariable
@@ -8338,6 +8423,7 @@ module MonitorMixin
 end
 
 class NameError
+  include ::DidYouMean::Correctable
   def name(); end
 
   def receiver(); end
@@ -8629,6 +8715,18 @@ module SingleForwardable
   def delegate(hash); end
 
   def single_delegate(hash); end
+end
+
+class Socket
+  IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
+  IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
+end
+
+module Socket::Constants
+  IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
+  IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
+  IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
 end
 
 class Sorbet::Private::ConstantLookupCache
@@ -8942,6 +9040,10 @@ class Struct
 
   def values_at(*_); end
 end
+
+Struct::Group = Etc::Group
+
+Struct::Passwd = Etc::Passwd
 
 Struct::Tms = Process::Tms
 
