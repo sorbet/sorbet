@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   def foo<<C <todo sym>>>(&<blk>)
     begin
       ::Regexp.new("abc", 0)

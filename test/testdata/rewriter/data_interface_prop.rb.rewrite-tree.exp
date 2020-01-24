@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)

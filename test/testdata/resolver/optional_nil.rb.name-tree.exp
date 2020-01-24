@@ -1,5 +1,5 @@
 begin
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       class ::Test<<C Test>> < (::<todo sym>)
         <self>.extend(<emptyTree>::<C T>::<C Sig>)

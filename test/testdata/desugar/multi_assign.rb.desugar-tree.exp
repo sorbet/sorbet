@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   begin
     <assignTemp>$2 = <self>.some_array()
     <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 3, 0)

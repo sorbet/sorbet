@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Inexact><<C <todo sym>>> < (<emptyTree>::<C T>::<C InexactStruct>)
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C Integer>)

@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C HasMeth><<C <todo sym>>> < (::<todo sym>)
     def meth<<C <todo sym>>>(&<blk>)
       "meth"

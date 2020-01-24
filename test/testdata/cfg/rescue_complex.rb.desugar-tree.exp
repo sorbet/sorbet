@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
     def meth<<C <todo sym>>>(&<blk>)
       0

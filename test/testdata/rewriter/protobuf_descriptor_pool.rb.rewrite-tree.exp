@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C ProtocMsgClass><<C <todo sym>>> < ()
     <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 

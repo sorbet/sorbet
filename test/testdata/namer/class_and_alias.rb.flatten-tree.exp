@@ -1,6 +1,6 @@
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         ::A = 91
