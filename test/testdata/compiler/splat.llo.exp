@@ -1,13 +1,14 @@
 ; ModuleID = 'payload'
 source_filename = "llvm-link"
-target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 
-%struct.rb_data_type_struct = type { i8*, %struct.anon.19, %struct.rb_data_type_struct*, i8*, i64 }
-%struct.anon.19 = type { void (i8*)*, void (i8*)*, i64 (i8*)*, [2 x i8*] }
-%struct.rb_vm_struct = type { i64, %struct.rb_global_vm_lock_struct, %struct.rb_thread_struct*, %struct.rb_thread_struct*, i8*, i64, %struct._opaque_pthread_mutex_t, %union.anon.12, %union.anon.12, %union.anon.12, %union.anon.12, i64, i32, i8, i32, i64, [5 x i64], i64, i64, i64, i64, i64, i64, i64, %struct.st_table*, %struct.st_table*, %struct.anon.17, %struct.rb_hook_list_struct, %struct.st_table*, %struct.rb_postponed_job_struct*, i32, i32, %union.anon.12, %struct._opaque_pthread_mutex_t, i64, i64, i64, i64, i64, i32, i64, %struct.rb_objspace*, %struct.rb_at_exit_list*, i64*, %struct.st_table*, %struct.anon.18, [28 x i16] }
-%struct.rb_global_vm_lock_struct = type { %struct.rb_thread_struct*, %struct._opaque_pthread_mutex_t, %union.anon.12, %struct.rb_thread_struct*, i32, %struct._opaque_pthread_cond_t, %struct._opaque_pthread_cond_t, i32, i32 }
-%struct._opaque_pthread_cond_t = type { i64, [40 x i8] }
-%struct.rb_thread_struct = type { %struct.list_node, i64, %struct.rb_vm_struct*, %struct.rb_execution_context_struct*, i64, %struct.rb_calling_info*, i64, i64, %struct._opaque_pthread_t*, i8, i8, i32, %struct.native_thread_data_struct, i8*, i64, i64, i64, i64, %struct._opaque_pthread_mutex_t, %struct.rb_unblock_callback, i64, %struct.rb_mutex_struct*, %struct.rb_thread_list_struct*, %union.anon.14, i32, i64, %struct.rb_fiber_struct*, [38 x i32], i64 }
+%struct.rb_data_type_struct = type { i8*, %struct.anon.20, %struct.rb_data_type_struct*, i8*, i64 }
+%struct.anon.20 = type { void (i8*)*, void (i8*)*, i64 (i8*)*, [2 x i8*] }
+%struct.rb_vm_struct = type { i64, %struct.rb_global_vm_lock_struct, %struct.rb_thread_struct*, %struct.rb_thread_struct*, i8*, i64, %union.pthread_mutex_t, %union.anon.12, %union.anon.12, %union.anon.12, %union.anon.12, i64, i32, i8, i32, i64, [5 x i64], i64, i64, i64, i64, i64, i64, i64, %struct.st_table*, %struct.st_table*, %struct.anon.18, %struct.rb_hook_list_struct, %struct.st_table*, %struct.rb_postponed_job_struct*, i32, i32, %union.anon.12, %union.pthread_mutex_t, i64, i64, i64, i64, i64, i32, i64, %struct.rb_objspace*, %struct.rb_at_exit_list*, i64*, %struct.st_table*, %struct.anon.19, [28 x i16] }
+%struct.rb_global_vm_lock_struct = type { %struct.rb_thread_struct*, %union.pthread_mutex_t, %union.anon.12, %struct.rb_thread_struct*, i32, %union.pthread_cond_t, %union.pthread_cond_t, i32, i32 }
+%union.pthread_cond_t = type { %struct.anon.14 }
+%struct.anon.14 = type { i32, i32, i64, i64, i64, i8*, i32, i32 }
+%struct.rb_thread_struct = type { %struct.list_node, i64, %struct.rb_vm_struct*, %struct.rb_execution_context_struct*, i64, %struct.rb_calling_info*, i64, i64, i64, i8, i8, i32, %struct.native_thread_data_struct, i8*, i64, i64, i64, i64, %union.pthread_mutex_t, %struct.rb_unblock_callback, i64, %struct.rb_mutex_struct*, %struct.rb_thread_list_struct*, %union.anon.15, i32, i64, %struct.rb_fiber_struct*, [1 x %struct.__jmp_buf_tag], i64 }
 %struct.list_node = type { %struct.list_node*, %struct.list_node* }
 %struct.rb_execution_context_struct = type { i64*, i64, %struct.rb_control_frame_struct*, %struct.rb_vm_tag*, %struct.rb_vm_protect_tag*, i32, i32, %struct.rb_fiber_struct*, %struct.rb_thread_struct*, %struct.st_table*, i64, i64, i64*, i64, %struct.rb_ensure_list*, %struct.rb_trace_arg_struct*, i64, i64, i8, i8, i64, %struct.anon.11 }
 %struct.rb_control_frame_struct = type { i64*, i64*, %struct.rb_iseq_struct*, i64, i64*, i8*, i64* }
@@ -37,46 +38,48 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %struct.rb_mjit_unit = type opaque
 %union.anon.8 = type { %struct.anon.9 }
 %struct.anon.9 = type { i64, i32 }
-%struct.rb_vm_tag = type { i64, i64, [38 x i32], %struct.rb_vm_tag*, i32 }
+%struct.rb_vm_tag = type { i64, i64, [1 x %struct.__jmp_buf_tag], %struct.rb_vm_tag*, i32 }
 %struct.rb_vm_protect_tag = type { %struct.rb_vm_protect_tag* }
 %struct.rb_ensure_list = type { %struct.rb_ensure_list*, %struct.rb_ensure_entry }
 %struct.rb_ensure_entry = type { i64, i64 (...)*, i64 }
 %struct.rb_trace_arg_struct = type { i32, %struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, i64, i64, i64, i64, i64, i32, i32, i64 }
-%struct.anon.11 = type { i64*, i64*, i64, [37 x i32] }
+%struct.anon.11 = type { i64*, i64*, i64, [1 x %struct.__jmp_buf_tag] }
 %struct.rb_calling_info = type { i64, i64, i32 }
-%struct._opaque_pthread_t = type { i64, %struct.__darwin_pthread_handler_rec*, [8176 x i8] }
-%struct.__darwin_pthread_handler_rec = type { void (i8*)*, i8*, %struct.__darwin_pthread_handler_rec* }
-%struct.native_thread_data_struct = type { %union.anon.12, %struct.anon.13 }
-%struct.anon.13 = type { %struct._opaque_pthread_cond_t, %struct._opaque_pthread_cond_t }
+%struct.native_thread_data_struct = type { %union.anon.12, %union.anon.13 }
+%union.anon.13 = type { %union.pthread_cond_t }
 %struct.rb_unblock_callback = type { void (i8*)*, i8* }
 %struct.rb_mutex_struct = type opaque
 %struct.rb_thread_list_struct = type { %struct.rb_thread_list_struct*, %struct.rb_thread_struct* }
-%union.anon.14 = type { %struct.RBasic }
+%union.anon.15 = type { %struct.RBasic }
 %struct.RBasic = type { i64, i64 }
 %struct.rb_fiber_struct = type opaque
-%struct.anon.17 = type { [32 x i64], [32 x i8] }
+%struct.__jmp_buf_tag = type { [8 x i64], i32, %struct.__sigset_t }
+%struct.__sigset_t = type { [16 x i64] }
+%struct.anon.18 = type { [65 x i64], [65 x i8] }
 %struct.rb_hook_list_struct = type { %struct.rb_event_hook_struct*, i32, i32, i32 }
 %struct.rb_event_hook_struct = type opaque
 %struct.rb_postponed_job_struct = type opaque
 %union.anon.12 = type { %struct.list_node }
-%struct._opaque_pthread_mutex_t = type { i64, [56 x i8] }
+%union.pthread_mutex_t = type { %struct.__pthread_mutex_s }
+%struct.__pthread_mutex_s = type { i32, i32, i32, i32, i32, i16, i16, %struct.__pthread_internal_list }
+%struct.__pthread_internal_list = type { %struct.__pthread_internal_list*, %struct.__pthread_internal_list* }
 %struct.rb_objspace = type opaque
 %struct.rb_at_exit_list = type { void (%struct.rb_vm_struct*)*, %struct.rb_at_exit_list* }
 %struct.st_table = type { i8, i8, i8, i32, %struct.st_hash_type*, i64, i64*, i64, i64, %struct.st_table_entry* }
 %struct.st_hash_type = type { i32 (...)*, i64 (...)* }
 %struct.st_table_entry = type opaque
-%struct.anon.18 = type { i64, i64, i64, i64 }
+%struct.anon.19 = type { i64, i64, i64, i64 }
 %struct.RString = type { %struct.RBasic, %union.anon }
 %union.anon = type { %struct.anon }
 %struct.anon = type { i64, i8*, %union.anon.0 }
 %struct.rb_ast_body_struct = type { %struct.RNode*, i64, i32 }
-%struct.RNode = type { i64, %union.anon.20, %union.anon.20, %union.anon.20, %struct.rb_code_location_struct, i32 }
-%union.anon.20 = type { %struct.RNode* }
-%struct.RArray = type { %struct.RBasic, %union.anon.26 }
-%union.anon.26 = type { %struct.anon.27 }
-%struct.anon.27 = type { i64, %union.anon.0, i64* }
+%struct.RNode = type { i64, %union.anon.21, %union.anon.21, %union.anon.21, %struct.rb_code_location_struct, i32 }
+%union.anon.21 = type { %struct.RNode* }
+%struct.RArray = type { %struct.RBasic, %union.anon.27 }
+%union.anon.27 = type { %struct.anon.28 }
+%struct.anon.28 = type { i64, %union.anon.0, i64* }
 
-@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.10, i32 0, i32 0), %struct.anon.19 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
+@closureInfo = local_unnamed_addr constant %struct.rb_data_type_struct { i8* getelementptr inbounds ([16 x i8], [16 x i8]* @.str.10, i32 0, i32 0), %struct.anon.20 { void (i8*)* @sorbet_Closure_mark, void (i8*)* inttoptr (i64 -1 to void (i8*)*), i64 (i8*)* @sorbet_Closure_size, [2 x i8*] zeroinitializer }, %struct.rb_data_type_struct* null, i8* null, i64 1 }, align 8
 @.str.10 = private unnamed_addr constant [16 x i8] c"CompiledClosure\00", align 1
 @.str = private unnamed_addr constant [5 x i8] c"%li\0B\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
@@ -370,7 +373,7 @@ entry:
   %15 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %14, i64 0, i32 17
   %16 = load i64, i64* %15, align 8, !tbaa !35
   %17 = icmp eq i64 %16, %2
-  br i1 %17, label %typeTestSuccess.i, label %typeTestFail.i, !prof !46, !misexpect !47
+  br i1 %17, label %typeTestSuccess.i, label %typeTestFail.i, !prof !44, !misexpect !45
 
 typeTestSuccess.i:                                ; preds = %entry
   %callArgsAddr.i = getelementptr inbounds [7 x i64], [7 x i64]* %callArgs.i, i64 0, i64 0
@@ -389,7 +392,7 @@ typeTestSuccess.i:                                ; preds = %entry
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %21, align 8
   %22 = inttoptr i64 %20 to %struct.RBasic*
   %23 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %22, i64 0, i32 0
-  %24 = load i64, i64* %23, align 8, !tbaa !4, !noalias !48
+  %24 = load i64, i64* %23, align 8, !tbaa !4, !noalias !46
   %25 = and i64 %24, 8192
   %26 = icmp eq i64 %25, 0
   br i1 %26, label %30, label %27
@@ -402,7 +405,7 @@ typeTestSuccess.i:                                ; preds = %entry
 30:                                               ; preds = %typeTestSuccess.i
   %31 = inttoptr i64 %20 to %struct.RArray*
   %32 = getelementptr inbounds %struct.RArray, %struct.RArray* %31, i64 0, i32 1, i32 0, i32 0
-  %33 = load i64, i64* %32, align 8, !tbaa !7, !noalias !48
+  %33 = load i64, i64* %32, align 8, !tbaa !7, !noalias !46
   br label %rb_array_len.exit.i.i
 
 rb_array_len.exit.i.i:                            ; preds = %30, %27
@@ -413,12 +416,12 @@ rb_array_len.exit.i.i:                            ; preds = %30, %27
   br i1 %37, label %38, label %sorbet_splatIntrinsic.exit.i
 
 38:                                               ; preds = %rb_array_len.exit.i.i
-  %39 = call i64 @rb_ary_dup(i64 %20) #9, !noalias !48
+  %39 = call i64 @rb_ary_dup(i64 %20) #9, !noalias !46
   br label %40
 
 40:                                               ; preds = %40, %38
   %41 = phi i32 [ 0, %38 ], [ %43, %40 ]
-  %42 = call i64 @rb_ary_push(i64 %39, i64 8) #9, !noalias !48
+  %42 = call i64 @rb_ary_push(i64 %39, i64 8) #9, !noalias !46
   %43 = add nuw nsw i32 %41, 1
   %44 = icmp eq i32 %43, %36
   br i1 %44, label %sorbet_splatIntrinsic.exit.i, label %40
@@ -430,7 +433,7 @@ sorbet_splatIntrinsic.exit.i:                     ; preds = %40, %rb_array_len.e
   %48 = and i64 %45, -9
   %49 = icmp eq i64 %48, 0
   %50 = or i1 %47, %49
-  br i1 %50, label %sorbet_isa_Array.exit.thread.i, label %sorbet_isa_Array.exit.i, !prof !51
+  br i1 %50, label %sorbet_isa_Array.exit.thread.i, label %sorbet_isa_Array.exit.i, !prof !49
 
 sorbet_isa_Array.exit.thread.i:                   ; preds = %sorbet_splatIntrinsic.exit.i
   store i64 1, i64* %callArgsAddr.i, align 16
@@ -443,7 +446,7 @@ sorbet_isa_Array.exit.i:                          ; preds = %sorbet_splatIntrins
   %54 = and i64 %53, 31
   %55 = icmp eq i64 %54, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %55, label %"fastSymCallIntrinsic_[]154.i", label %"slowSymCallIntrinsic_[]153.i", !prof !46, !misexpect !47
+  br i1 %55, label %"fastSymCallIntrinsic_[]154.i", label %"slowSymCallIntrinsic_[]153.i", !prof !44, !misexpect !45
 
 typeTestFail.i:                                   ; preds = %entry
   tail call fastcc void @sorbet_cast_failure(i64 %2) #9
@@ -468,7 +471,7 @@ typeTestFail.i:                                   ; preds = %entry
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %21, align 8
   %60 = inttoptr i64 %59 to %struct.RBasic*
   %61 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %60, i64 0, i32 0
-  %62 = load i64, i64* %61, align 8, !tbaa !4, !noalias !52
+  %62 = load i64, i64* %61, align 8, !tbaa !4, !noalias !50
   %63 = and i64 %62, 8192
   %64 = icmp eq i64 %63, 0
   br i1 %64, label %68, label %65
@@ -481,7 +484,7 @@ typeTestFail.i:                                   ; preds = %entry
 68:                                               ; preds = %"afterSymCallIntrinsic_[]152.i"
   %69 = inttoptr i64 %59 to %struct.RArray*
   %70 = getelementptr inbounds %struct.RArray, %struct.RArray* %69, i64 0, i32 1, i32 0, i32 0
-  %71 = load i64, i64* %70, align 8, !tbaa !7, !noalias !52
+  %71 = load i64, i64* %70, align 8, !tbaa !7, !noalias !50
   br label %rb_array_len.exit.i4.i
 
 rb_array_len.exit.i4.i:                           ; preds = %68, %65
@@ -492,12 +495,12 @@ rb_array_len.exit.i4.i:                           ; preds = %68, %65
   br i1 %75, label %76, label %sorbet_splatIntrinsic.exit5.i
 
 76:                                               ; preds = %rb_array_len.exit.i4.i
-  %77 = call i64 @rb_ary_dup(i64 %59) #9, !noalias !52
+  %77 = call i64 @rb_ary_dup(i64 %59) #9, !noalias !50
   br label %78
 
 78:                                               ; preds = %78, %76
   %79 = phi i32 [ 0, %76 ], [ %81, %78 ]
-  %80 = call i64 @rb_ary_push(i64 %77, i64 8) #9, !noalias !52
+  %80 = call i64 @rb_ary_push(i64 %77, i64 8) #9, !noalias !50
   %81 = add nuw nsw i32 %79, 1
   %82 = icmp eq i32 %81, %74
   br i1 %82, label %sorbet_splatIntrinsic.exit5.i, label %78
@@ -509,7 +512,7 @@ sorbet_splatIntrinsic.exit5.i:                    ; preds = %78, %rb_array_len.e
   %86 = and i64 %83, -9
   %87 = icmp eq i64 %86, 0
   %88 = or i1 %85, %87
-  br i1 %88, label %sorbet_isa_Array.exit6.thread.i, label %sorbet_isa_Array.exit6.i, !prof !51
+  br i1 %88, label %sorbet_isa_Array.exit6.thread.i, label %sorbet_isa_Array.exit6.i, !prof !49
 
 sorbet_isa_Array.exit6.thread.i:                  ; preds = %sorbet_splatIntrinsic.exit5.i
   store i64 1, i64* %callArgsAddr.i, align 16
@@ -522,7 +525,7 @@ sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrins
   %92 = and i64 %91, 31
   %93 = icmp eq i64 %92, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %93, label %"fastSymCallIntrinsic_[]229.i", label %"slowSymCallIntrinsic_[]228.i", !prof !46, !misexpect !47
+  br i1 %93, label %"fastSymCallIntrinsic_[]229.i", label %"slowSymCallIntrinsic_[]228.i", !prof !44, !misexpect !45
 
 "slowSymCallIntrinsic_[]153.i":                   ; preds = %sorbet_isa_Array.exit.i, %sorbet_isa_Array.exit.thread.i
   %94 = call i64 @rb_funcallv(i64 %45, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i) #9
@@ -557,7 +560,7 @@ sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrins
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %21, align 8
   %103 = inttoptr i64 %102 to %struct.RBasic*
   %104 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %103, i64 0, i32 0
-  %105 = load i64, i64* %104, align 8, !tbaa !4, !noalias !55
+  %105 = load i64, i64* %104, align 8, !tbaa !4, !noalias !53
   %106 = and i64 %105, 8192
   %107 = icmp eq i64 %106, 0
   br i1 %107, label %111, label %108
@@ -570,7 +573,7 @@ sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrins
 111:                                              ; preds = %"afterSymCallIntrinsic_[]227.i"
   %112 = inttoptr i64 %102 to %struct.RArray*
   %113 = getelementptr inbounds %struct.RArray, %struct.RArray* %112, i64 0, i32 1, i32 0, i32 0
-  %114 = load i64, i64* %113, align 8, !tbaa !7, !noalias !55
+  %114 = load i64, i64* %113, align 8, !tbaa !7, !noalias !53
   br label %rb_array_len.exit.i2.i
 
 rb_array_len.exit.i2.i:                           ; preds = %111, %108
@@ -581,12 +584,12 @@ rb_array_len.exit.i2.i:                           ; preds = %111, %108
   br i1 %118, label %119, label %sorbet_splatIntrinsic.exit3.i
 
 119:                                              ; preds = %rb_array_len.exit.i2.i
-  %120 = call i64 @rb_ary_dup(i64 %102) #9, !noalias !55
+  %120 = call i64 @rb_ary_dup(i64 %102) #9, !noalias !53
   br label %121
 
 121:                                              ; preds = %121, %119
   %122 = phi i32 [ 0, %119 ], [ %124, %121 ]
-  %123 = call i64 @rb_ary_push(i64 %120, i64 8) #9, !noalias !55
+  %123 = call i64 @rb_ary_push(i64 %120, i64 8) #9, !noalias !53
   %124 = add nuw nsw i32 %122, 1
   %125 = icmp eq i32 %124, %117
   br i1 %125, label %sorbet_splatIntrinsic.exit3.i, label %121
@@ -598,7 +601,7 @@ sorbet_splatIntrinsic.exit3.i:                    ; preds = %121, %rb_array_len.
   %129 = and i64 %126, -9
   %130 = icmp eq i64 %129, 0
   %131 = or i1 %128, %130
-  br i1 %131, label %sorbet_isa_Array.exit1.thread.i, label %sorbet_isa_Array.exit1.i, !prof !51
+  br i1 %131, label %sorbet_isa_Array.exit1.thread.i, label %sorbet_isa_Array.exit1.i, !prof !49
 
 sorbet_isa_Array.exit1.thread.i:                  ; preds = %sorbet_splatIntrinsic.exit3.i
   store i64 1, i64* %callArgsAddr.i, align 16
@@ -611,7 +614,7 @@ sorbet_isa_Array.exit1.i:                         ; preds = %sorbet_splatIntrins
   %135 = and i64 %134, 31
   %136 = icmp eq i64 %135, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %136, label %"fastSymCallIntrinsic_[]299.i", label %"slowSymCallIntrinsic_[]298.i", !prof !46, !misexpect !47
+  br i1 %136, label %"fastSymCallIntrinsic_[]299.i", label %"slowSymCallIntrinsic_[]298.i", !prof !44, !misexpect !45
 
 "slowSymCallIntrinsic_[]228.i":                   ; preds = %sorbet_isa_Array.exit6.i, %sorbet_isa_Array.exit6.thread.i
   %137 = call i64 @rb_funcallv(i64 %83, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i) #9
@@ -707,26 +710,24 @@ attributes #10 = { noreturn nounwind }
 !32 = !{!23, !1, i64 4}
 !33 = !{!23, !1, i64 136}
 !34 = !{!23, !11, i64 8}
-!35 = !{!36, !6, i64 448}
-!36 = !{!"rb_vm_struct", !6, i64 0, !37, i64 8, !11, i64 216, !11, i64 224, !11, i64 232, !42, i64 240, !38, i64 248, !39, i64 312, !39, i64 328, !39, i64 344, !39, i64 360, !6, i64 376, !1, i64 384, !1, i64 388, !1, i64 388, !1, i64 388, !1, i64 388, !1, i64 392, !6, i64 400, !2, i64 408, !6, i64 448, !6, i64 456, !6, i64 464, !6, i64 472, !6, i64 480, !6, i64 488, !6, i64 496, !11, i64 504, !11, i64 512, !43, i64 520, !44, i64 808, !11, i64 832, !11, i64 840, !1, i64 848, !1, i64 852, !39, i64 856, !38, i64 872, !6, i64 936, !6, i64 944, !6, i64 952, !6, i64 960, !6, i64 968, !1, i64 976, !6, i64 984, !11, i64 992, !11, i64 1000, !11, i64 1008, !11, i64 1016, !45, i64 1024, !2, i64 1056}
-!37 = !{!"rb_global_vm_lock_struct", !11, i64 0, !38, i64 8, !39, i64 72, !11, i64 88, !1, i64 96, !41, i64 104, !41, i64 152, !1, i64 200, !1, i64 204}
-!38 = !{!"_opaque_pthread_mutex_t", !6, i64 0, !2, i64 8}
-!39 = !{!"list_head", !40, i64 0}
-!40 = !{!"list_node", !11, i64 0, !11, i64 8}
-!41 = !{!"_opaque_pthread_cond_t", !6, i64 0, !2, i64 8}
-!42 = !{!"long long", !2, i64 0}
-!43 = !{!"", !2, i64 0, !2, i64 256}
-!44 = !{!"rb_hook_list_struct", !11, i64 0, !1, i64 8, !1, i64 12, !1, i64 16}
-!45 = !{!"", !6, i64 0, !6, i64 8, !6, i64 16, !6, i64 24}
-!46 = !{!"branch_weights", i32 2000, i32 1}
-!47 = !{!"misexpect", i64 0, i64 2000, i64 1}
-!48 = !{!49}
-!49 = distinct !{!49, !50, !"sorbet_splatIntrinsic: argument 0"}
-!50 = distinct !{!50, !"sorbet_splatIntrinsic"}
-!51 = !{!"branch_weights", i32 1073205, i32 2146410443}
-!52 = !{!53}
-!53 = distinct !{!53, !54, !"sorbet_splatIntrinsic: argument 0"}
-!54 = distinct !{!54, !"sorbet_splatIntrinsic"}
-!55 = !{!56}
-!56 = distinct !{!56, !57, !"sorbet_splatIntrinsic: argument 0"}
-!57 = distinct !{!57, !"sorbet_splatIntrinsic"}
+!35 = !{!36, !6, i64 400}
+!36 = !{!"rb_vm_struct", !6, i64 0, !37, i64 8, !11, i64 192, !11, i64 200, !11, i64 208, !40, i64 216, !2, i64 224, !38, i64 264, !38, i64 280, !38, i64 296, !38, i64 312, !6, i64 328, !1, i64 336, !1, i64 340, !1, i64 340, !1, i64 340, !1, i64 340, !1, i64 344, !6, i64 352, !2, i64 360, !6, i64 400, !6, i64 408, !6, i64 416, !6, i64 424, !6, i64 432, !6, i64 440, !6, i64 448, !11, i64 456, !11, i64 464, !41, i64 472, !42, i64 1064, !11, i64 1088, !11, i64 1096, !1, i64 1104, !1, i64 1108, !38, i64 1112, !2, i64 1128, !6, i64 1168, !6, i64 1176, !6, i64 1184, !6, i64 1192, !6, i64 1200, !1, i64 1208, !6, i64 1216, !11, i64 1224, !11, i64 1232, !11, i64 1240, !11, i64 1248, !43, i64 1256, !2, i64 1288}
+!37 = !{!"rb_global_vm_lock_struct", !11, i64 0, !2, i64 8, !38, i64 48, !11, i64 64, !1, i64 72, !2, i64 80, !2, i64 128, !1, i64 176, !1, i64 180}
+!38 = !{!"list_head", !39, i64 0}
+!39 = !{!"list_node", !11, i64 0, !11, i64 8}
+!40 = !{!"long long", !2, i64 0}
+!41 = !{!"", !2, i64 0, !2, i64 520}
+!42 = !{!"rb_hook_list_struct", !11, i64 0, !1, i64 8, !1, i64 12, !1, i64 16}
+!43 = !{!"", !6, i64 0, !6, i64 8, !6, i64 16, !6, i64 24}
+!44 = !{!"branch_weights", i32 2000, i32 1}
+!45 = !{!"misexpect", i64 0, i64 2000, i64 1}
+!46 = !{!47}
+!47 = distinct !{!47, !48, !"sorbet_splatIntrinsic: argument 0"}
+!48 = distinct !{!48, !"sorbet_splatIntrinsic"}
+!49 = !{!"branch_weights", i32 1073205, i32 2146410443}
+!50 = !{!51}
+!51 = distinct !{!51, !52, !"sorbet_splatIntrinsic: argument 0"}
+!52 = distinct !{!52, !"sorbet_splatIntrinsic"}
+!53 = !{!54}
+!54 = distinct !{!54, !55, !"sorbet_splatIntrinsic: argument 0"}
+!55 = distinct !{!55, !"sorbet_splatIntrinsic"}
