@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Record><<C <todo sym>>> < (::<todo sym>)
     def self.flatfile<<C <todo sym>>>(&<blk>)
       <emptyTree>

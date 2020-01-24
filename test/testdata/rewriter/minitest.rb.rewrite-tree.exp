@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
     def outside_method<<C <todo sym>>>(&<blk>)
       <emptyTree>

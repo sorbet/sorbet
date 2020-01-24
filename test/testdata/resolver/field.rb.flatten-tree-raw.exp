@@ -4,7 +4,10 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
         EmptyTree
 

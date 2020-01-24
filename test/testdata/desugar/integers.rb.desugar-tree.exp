@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   def test_large_int<<C <todo sym>>>(&<blk>)
     [0, 0, 0, 9223372036854775807, -9223372036854775808, 0, 51966, 0, 1]
   end

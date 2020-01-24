@@ -18,25 +18,25 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/cache-ke
     method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
     <emptyTree>
   end
 end
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
     <emptyTree>
   end
 end
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
 end
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
 end
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
 end
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
 end
