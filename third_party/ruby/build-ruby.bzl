@@ -134,8 +134,13 @@ def _build_ruby_impl(ctx):
     # -Werror breaks configure, so we strip out all flags with a leading -W
     flags = []
     for flag in ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts:
-        if not flag.startswith("-W"):
-            flags.append(flag)
+        if flag.startswith("-W"):
+            continue
+
+        if flag.startswith("-fsanitize"):
+            continue
+
+        flags.append(flag)
 
     # Outputs
     binaries = [
