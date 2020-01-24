@@ -96,6 +96,15 @@ rm -rf "$build_dir"
 
 RubyInfo = provider()
 
+def _is_sanitizer_flag(flag):
+    return flag.startswith("-fsanitize") or \
+           flag.startswith("-fno-sanitize") or \
+           flag == "-DHAS_SANITIZER" or \
+           flag == "-DADDRESS_SANITIZER" or \
+           flag.endswith("asan_cxx-x86_64.a") or \
+           flag.endswith("ubsan_standalone_cxx-x86_64.a") or \
+           flag.endswith("ubsan_standalone-x86_64.a")
+
 def _build_ruby_impl(ctx):
     # Discover the path to the source by finding ruby.c
     src_dir = None
@@ -132,10 +141,23 @@ def _build_ruby_impl(ctx):
     )
 
     # -Werror breaks configure, so we strip out all flags with a leading -W
+    # ruby doesn't work with asan or ubsan
     flags = []
     for flag in ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts:
-        if not flag.startswith("-W"):
-            flags.append(flag)
+        if flag.startswith("-W") or \
+           flag == "-DHAS_SANITIZER" or \
+           flag == "-DADDRESS_SANITIZER" or \
+           _is_sanitizer_flag(flag):
+            continue
+
+        flags.append(flag)
+
+    ldflags = []
+    for flag in ctx.fragments.cpp.linkopts:
+        if _is_sanitizer_flag(flag):
+            continue
+
+        ldflags.append(flag)
 
     # Outputs
     binaries = [
@@ -159,7 +181,7 @@ def _build_ruby_impl(ctx):
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
             copts = " ".join(cmdline + flags),
-            linkopts = " ".join(ctx.fragments.cpp.linkopts),
+            linkopts = " ".join(ldflags),
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,

@@ -37,8 +37,13 @@ setup_validate_env() {
 
   pushd "$test_dir" || fatal "Unable to change to test_dir"
 
+  actual="$(mktemp -d)"
+
   info "├─ Extracting test artifacts"
-  tar -xvf "$(basename "${archive_path}")"
+  attn "├─ $actual"
+  tar -xvf "$(basename "${archive_path}")" -C "$actual"
+
+  export actual
 }
 
 # Leave the test directory that was setup by setup_validate_env, and print a
@@ -46,7 +51,7 @@ setup_validate_env() {
 cleanup_validation() {
 
   # Cleanup the extracted run results
-  rm -rf actual
+  rm -rf "$actual"
 
   popd || fatal "Unable to leave test_dir"
   success "└─ test passed."

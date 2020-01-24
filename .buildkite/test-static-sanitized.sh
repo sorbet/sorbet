@@ -28,11 +28,11 @@ echo will run with $CONFIG_OPTS
 
 err=0
 
-# NOTE: running ruby/gem/srb testing without the sanitized flags
-./bazel test @ruby_2_6//... @ruby_2_4//... @gems//... //gems/sorbet/test/snapshot \
-  //gems/sorbet/test/hidden-method-finder --config=buildfarm-ruby || err=$?
-
-./bazel test //... $CONFIG_OPTS --test_summary=terse || err=$?
+./bazel test \
+  @gems//... \
+  //gems/sorbet/test/snapshot \
+  //gems/sorbet/test/hidden-method-finder \
+  //... $CONFIG_OPTS --test_summary=terse || err=$?
 
 echo "--- uploading test results"
 
