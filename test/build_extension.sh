@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# --- begin runfiles.bash initialization ---
+# --- begin runfiles.bash initialization --- {{{
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
 if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
   if [[ -f "$0.runfiles_manifest" ]]; then
@@ -24,7 +24,7 @@ else
   echo >&2 "ERROR: cannot find @bazel_tools//tools/bash/runfiles:runfiles.bash"
   exit 1
 fi
-# --- end runfiles.bash initialization ---
+# --- end runfiles.bash initialization --- }}}
 
 # Find logging with rlocation, as this script is run from a genrule
 # shellcheck disable=SC1090
@@ -49,57 +49,65 @@ root="$PWD"
 # Temporary directory for llvm output
 target="$(mktemp -d)"
 
-stdout=$(mktemp)
-stderr=$(mktemp)
+output=$(mktemp)
 
 # Main #########################################################################
 
-info "--- Build Config ---"
-info "* Archive: ${output_archive}"
-info "* Source:  ${ruby_source[*]}"
-info "* Sorbet:  ${sorbet}"
-info "* Target:  ${target}"
-info "* Stdout:  ${stdout}"
-info "* Stderr:  ${stderr}"
+indent_and_nest() {
+  sed -e 's/^/       │/'
+}
 
-info "--- Building Extension ---"
-if ! $sorbet --silence-dev-message --no-error-count --llvm-ir-folder="$target" \
-  "${ruby_source[@]}" 2> "$stderr" > "$stdout" ; then
+echo
+info "Input(s):"
+i=1
+for file in "${ruby_source[@]}"; do
+  if [ "$i" -ne "${#ruby_source[@]}" ]; then
+    info "├─ $file"
+  else
+    info "└─ $file"
+  fi
+  (( i++ ))
+done
 
-  info "--- Stdout ---"
-  cat "$stdout"
-
-  info "--- Stderr ---"
-  cat "$stderr"
-
-  fatal "* Failed to build extension!"
+echo
+info "Using Sorbet to generate llvm-ir-folder..."
+llvm_ir_folder_flag="--llvm-ir-folder=$target"
+info "├─ Using $llvm_ir_folder_flag"
+if ! $sorbet --silence-dev-message --no-error-count "$llvm_ir_folder_flag" \
+  "${ruby_source[@]}" > "$output" 2>&1; then
+  info "├─ console output:"
+  < "$output" indent_and_nest
+  fatal $'└─ sorbet command failed. See above.\n'
+else
+  success "└─ done."
 fi
 
+echo
+info "Ensuring non-empty LLVM IR output..."
 if [ -z "$(ls -A "$target")" ]; then
-
-  if ! grep '# typed:' "${ruby_source[*]}" > /dev/null; then
-      fatal "You forgot to put '# typed: true' in your file"
+  if ! grep -q '# typed:' "${ruby_source[@]}"; then
+    attn "├─ No '# typed: ...' sigil(s) in input files"
   fi
 
-  if ! grep '# compiled:' "${ruby_source[*]}" > /dev/null; then
-      fatal "You forgot to put '# compiled: true' in your file"
+  if ! grep -q '# compiled:' "${ruby_source[@]}"; then
+    attn "├─ No '# compiled: ...' sigil(s) in input files"
   fi
 
-  info "--- Stdout ---"
-  cat "$stdout"
+  info   "├─ console output:"
+  < "$output" indent_and_nest
 
-  info "--- Stderr ---"
-  cat "$stderr"
-
-  fatal "No output produced by sorbet"
+  fatal $'└─ empty LLVM IR output. See above.\n'
+else
+  success "└─ done."
 fi
 
-info "--- Building Archive ---"
-pushd "$target" > /dev/null
-tar -czvf "$root/$output_archive" ./*
-popd > /dev/null
+echo
+info "Building tar archive..."
+(
+  cd "$target"
+  tar -czf "$root/$output_archive" ./*
+)
+success "└─ done."
+echo
 
-info "--- Cleaning up ---"
-rm -r "$target"
-
-success "* Built ${ruby_source[*]}"
+# vim:fdm=marker
