@@ -16,7 +16,7 @@ setup_validate_env "$@"
 
 info "Checking output log"
 if [ "$is_partial" = "" ] || [ -f "expected/out.log" ]; then
-  if ! diff -u "expected/out.log" "actual/out.log"; then
+  if ! diff -u "expected/out.log" "$actual/out.log"; then
     error "├─ expected out.log did not match actual out.log"
     error "└─ see output above."
     exit 1
@@ -26,7 +26,7 @@ fi
 # ----- Check err.log -----
 
 if [ "$is_partial" = "" ] || [ -f "expected/err.log" ]; then
-  if ! diff -u "expected/err.log" "actual/err.log"; then
+  if ! diff -u "expected/err.log" "$actual/err.log"; then
     error "├─ expected err.log did not match actual err.log"
     error "└─ see output above."
     exit 1
@@ -37,7 +37,7 @@ fi
 
 diff_total() {
   info "├─ checking for total match"
-  if ! diff -ur "expected/sorbet" "actual/sorbet"; then
+  if ! diff -ur "expected/sorbet" "$actual/sorbet"; then
     error "├─ expected sorbet/ folder did not match actual sorbet/ folder"
     error "└─ see output above."
     exit 1
@@ -48,8 +48,8 @@ diff_partial() {
   info "├─ checking for partial match"
 
   set +e
-  diff -ur "expected/sorbet" "actual/sorbet" | \
-    grep -vF "Only in actual" > "partial-diff.log"
+  diff -ur "expected/sorbet" "$actual/sorbet" | \
+    grep -vF "Only in $actual" > "partial-diff.log"
   set -e
 
   # File exists and is non-empty

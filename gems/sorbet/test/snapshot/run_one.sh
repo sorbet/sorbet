@@ -18,13 +18,19 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 set -euo pipefail
 shopt -s dotglob
 
-# ----- Option parsing -----
-
 # This script is always invoked by bazel at the repository root
 repo_root="$PWD"
 
 # Fix up runfiles dir so that it's stable when we change directories
-export RUNFILES_DIR="$repo_root/$RUNFILES_DIR"
+if [ -n "${RUNFILES_DIR:-}" ]; then
+  export RUNFILES_DIR="$repo_root/$RUNFILES_DIR"
+fi
+
+if [ -n "${RUNFILES_MANIFEST_FILE:-}" ]; then
+  export RUNFILES_MANIFEST_FILE="$repo_root/$RUNFILES_MANIFEST_FILE"
+fi
+
+# ----- Option parsing -----
 
 # these positional arguments are supplied in snapshot.bzl
 ruby_package=$1
@@ -42,13 +48,23 @@ source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/logging.sh)"
 
 # ----- Environment setup and validation -----
 
-HOME=$test_dir
+sandbox="$test_dir/$ruby_package"
+
+if [ -d "$sandbox" ]; then
+  warn "├─ Cleaning up old test sandbox"
+  rm -rf "$sandbox"
+fi
+
+mkdir "$sandbox"
+
+HOME="$sandbox"
 export HOME
 
-BUNDLE_PATH="$test_dir/bundler"
+BUNDLE_PATH="$sandbox/bundler"
+mkdir "$BUNDLE_PATH"
 export BUNDLE_PATH
 
-XDG_CACHE_HOME="${test_dir}/cache"
+XDG_CACHE_HOME="$sandbox/cache"
 export XDG_CACHE_HOME
 
 if [[ "${test_name}" =~ partial/* ]]; then
@@ -76,12 +92,14 @@ info "├─ ruby --version: $(ruby --version)"
 
 # Add bundler to the path
 BUNDLER_LOC="$(dirname "$(rlocation gems/bundler/bundle)")"
-GEMS_LOC="$(dirname "$BUNDLER_LOC")/gems"
 PATH="$BUNDLER_LOC:$PATH"
 export PATH
 
 info "├─ bundle:           $(command -v bundle)"
 info "├─ bundle --version: $(bundle --version)"
+
+# This is a bit fragile, but it's not clear how to find gems/gems otherwise.
+GEMS_LOC="$(dirname "$(rlocation gems/gems/cantor-1.2.1.gem)")"
 
 # Use the sorbet executable built by bazel
 SRB_SORBET_EXE="$(rlocation com_stripe_ruby_typer/main/sorbet)"
@@ -108,14 +126,12 @@ fi
 
 # NOTE: this builds a replica of the `src` tree in the `actual` directory, and
 # then uses that as a workspace.
-actual="${test_dir}/actual"
-cp -r "${test_dir}/src" "$actual"
+actual="$sandbox/actual"
+cp -r "${test_dir}/src/" "$actual"
 
-cleanup() {
-  rm -rf "$actual"
-}
-
-trap cleanup EXIT
+if [ -d "${test_dir}/gems" ]; then
+  cp -r "${test_dir}/gems" "$sandbox"
+fi
 
 # ----- Run the test -----
 
@@ -125,9 +141,7 @@ trap cleanup EXIT
   # Setup the vendor/cache directory to include all gems required for any test
   info "├─ Setting up vendor/cache"
 
-  # NOTE: using "mkdir -p" just in case this is run outside of the sandbox
-  # (like when --spawn_strategy=standalone is passed)
-  mkdir -p vendor
+  mkdir vendor
   ln -sf "$GEMS_LOC" "vendor/cache"
 
   ruby_loc=$(bundle exec which ruby)
@@ -143,8 +157,8 @@ trap cleanup EXIT
   # Configuring output to vendor/bundle
   # Passing --local to never consult rubygems.org
   # Passing --no-prune to not delete unused gems in vendor/cache
-  info "├─ Installing dependencies to vendor/bundle"
-  bundle install --local --no-prune
+  info "├─ Installing dependencies to BUNDLE_PATH"
+  bundle install --verbose --local --no-prune
 
   info "├─ Checking installation"
   bundle check
@@ -154,6 +168,7 @@ trap cleanup EXIT
   # because the pry output is hiding in the *.log files)
   #
   # note: redirects stderr before the pipe
+  info "├─ Running srb init"
   if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "err.log" > "out.log"; then
     error "├─ srb init failed."
     error "├─ stdout (out.log):"
@@ -184,15 +199,13 @@ trap cleanup EXIT
     -e "s,${HOME},<home>,g" \
     "out.log"
 
-)
-
-(
-  cd "$test_dir"
-
   info "├─ archiving results"
 
   # archive the test
-  tar -cz -f "$output_archive" actual/{sorbet,err.log,out.log}
+  tar -cz -f "$output_archive" sorbet err.log out.log
 )
+
+# cleanup
+rm -rf "$sandbox"
 
 success "└─ done"

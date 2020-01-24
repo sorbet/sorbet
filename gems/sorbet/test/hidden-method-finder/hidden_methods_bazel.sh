@@ -24,7 +24,13 @@ shopt -s dotglob
 repo_root="$PWD"
 
 # Fix up runfiles dir so that it's stable when we change directories
-export RUNFILES_DIR="$repo_root/$RUNFILES_DIR"
+if [ -n "${RUNFILES_DIR:-}" ]; then
+  export RUNFILES_DIR="$repo_root/$RUNFILES_DIR"
+fi
+
+if [ -n "${RUNFILES_MANIFEST_FILE:-}" ]; then
+  export RUNFILES_MANIFEST_FILE="$repo_root/$RUNFILES_MANIFEST_FILE"
+fi
 
 # these positional arguments are supplied in snapshot.bzl
 ruby_package=$1
@@ -43,9 +49,6 @@ source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/hidden-method-finder/
 
 HOME=$test_dir
 export HOME
-
-XDG_CACHE_HOME="${test_dir}/cache"
-export XDG_CACHE_HOME
 
 info "├─ test_name:      ${test_name}"
 info "├─ output_file:    ${output_file}"
@@ -72,15 +75,12 @@ info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 
 # NOTE: this builds a replica of the `src` tree in the `actual` directory, and
 # then uses that as a workspace.
-actual="${test_dir}/actual"
+actual="${test_dir}/${ruby_package}"
 cp -r "${test_dir}/src" "$actual"
 cp "${test_dir}/../shims.rb.source" "${actual}/shims.rb"
 
-cleanup() {
-  rm -rf "$actual"
-}
-
-trap cleanup EXIT
+XDG_CACHE_HOME="${actual}/cache"
+export XDG_CACHE_HOME
 
 
 # ----- Run the test -----
@@ -102,15 +102,13 @@ trap cleanup EXIT
     error "└─ (end stderr)"
     exit 1
   fi
-)
-
-(
-  cd "$test_dir"
 
   info "├─ exporting results to $output_file"
 
   # export the results
-  mv "${actual}/sorbet/rbi/hidden-definitions/hidden.rbi" "$output_file"
+  mv "sorbet/rbi/hidden-definitions/hidden.rbi" "$output_file"
 )
+
+rm -rf "$actual"
 
 success "└─ done"
