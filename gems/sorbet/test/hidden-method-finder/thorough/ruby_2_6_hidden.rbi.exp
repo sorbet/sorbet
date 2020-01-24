@@ -4160,15 +4160,7 @@ class Etc::Group
 end
 
 class Etc::Passwd
-  def change(); end
-
-  def change=(_); end
-
   def dir=(_); end
-
-  def expire(); end
-
-  def expire=(_); end
 
   def gecos(); end
 
@@ -4181,10 +4173,6 @@ class Etc::Passwd
   def passwd=(_); end
 
   def shell=(_); end
-
-  def uclass(); end
-
-  def uclass=(_); end
 
   def uid=(_); end
 end
@@ -7035,85 +7023,17 @@ end
 class Gem::RuntimeRequirementNotMetError
 end
 
-module Gem::Security
-  DIGEST_NAME = ::T.let(nil, ::T.untyped)
-  EXTENSIONS = ::T.let(nil, ::T.untyped)
-  KEY_ALGORITHM = ::T.let(nil, ::T.untyped)
-  KEY_LENGTH = ::T.let(nil, ::T.untyped)
-  ONE_DAY = ::T.let(nil, ::T.untyped)
-  ONE_YEAR = ::T.let(nil, ::T.untyped)
-end
-
-class Gem::Security::DIGEST_ALGORITHM
-end
-
-class Gem::Security::DIGEST_ALGORITHM
-end
-
-class Gem::Security::Exception
-end
-
-class Gem::Security::Exception
-end
-
 class Gem::Security::Signer
   include ::Gem::UserInteraction
   include ::Gem::DefaultUserInteraction
   include ::Gem::Text
-  def cert_chain(); end
-
-  def cert_chain=(cert_chain); end
-
-  def digest_algorithm(); end
-
-  def digest_name(); end
-
-  def extract_name(cert); end
-
-  def initialize(key, cert_chain, passphrase=T.unsafe(nil), options=T.unsafe(nil)); end
-
-  def key(); end
-
-  def key=(key); end
-
-  def load_cert_chain(); end
-
   def options(); end
 
-  def re_sign_key(expiration_length: T.unsafe(nil)); end
-
-  def sign(data); end
   DEFAULT_OPTIONS = ::T.let(nil, ::T.untyped)
 end
 
 class Gem::Security::Signer
   def self.re_sign_cert(expired_cert, expired_cert_path, private_key); end
-end
-
-module Gem::Security
-  def self.alt_name_or_x509_entry(certificate, x509_entry); end
-
-  def self.create_cert(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.create_cert_email(email, key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
-
-  def self.create_cert_self_signed(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.create_key(length=T.unsafe(nil), algorithm=T.unsafe(nil)); end
-
-  def self.email_to_name(email_address); end
-
-  def self.re_sign(expired_certificate, private_key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
-
-  def self.reset(); end
-
-  def self.sign(certificate, signing_key, signing_cert, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
-
-  def self.trust_dir(); end
-
-  def self.trusted_certificates(&block); end
-
-  def self.write(pemmable, path, permissions=T.unsafe(nil), passphrase=T.unsafe(nil), cipher=T.unsafe(nil)); end
 end
 
 class Gem::SilentUI
@@ -7875,9 +7795,6 @@ module Gem::Text
   def truncate_text(text, description, max_length=T.unsafe(nil)); end
 end
 
-module Gem::Text
-end
-
 class Gem::UninstallError
   def spec(); end
 
@@ -7940,9 +7857,6 @@ module Gem::UserInteraction
   def terminate_interaction(exit_code=T.unsafe(nil)); end
 
   def verbose(msg=T.unsafe(nil)); end
-end
-
-module Gem::UserInteraction
 end
 
 module Gem::Util
@@ -8807,14 +8721,12 @@ class Socket
   IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
   IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
   IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
-  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
 end
 
 module Socket::Constants
   IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
   IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
   IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
-  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
 end
 
 class Sorbet::Private::ConstantLookupCache

@@ -324,15 +324,7 @@ class Etc::Group
 end
 
 class Etc::Passwd
-  def change(); end
-
-  def change=(_); end
-
   def dir=(_); end
-
-  def expire(); end
-
-  def expire=(_); end
 
   def gecos(); end
 
@@ -345,10 +337,6 @@ class Etc::Passwd
   def passwd=(_); end
 
   def shell=(_); end
-
-  def uclass(); end
-
-  def uclass=(_); end
 
   def uid=(_); end
 end
@@ -2956,9 +2944,6 @@ module Gem::Text
   def truncate_text(text, description, max_length=T.unsafe(nil)); end
 end
 
-module Gem::Text
-end
-
 Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError
 
 class Gem::UnsatisfiableDependencyError
@@ -2996,9 +2981,6 @@ module Gem::UserInteraction
   def terminate_interaction(exit_code=T.unsafe(nil)); end
 
   def verbose(msg=T.unsafe(nil)); end
-end
-
-module Gem::UserInteraction
 end
 
 class Gem::Version
@@ -3637,14 +3619,12 @@ class Socket
   IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
   IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
   IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
-  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
 end
 
 module Socket::Constants
   IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
   IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
   IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
-  IPV6_USE_MIN_MTU = ::T.let(nil, ::T.untyped)
 end
 
 class Sorbet::Private::ConstantLookupCache
