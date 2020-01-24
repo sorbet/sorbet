@@ -39,7 +39,7 @@ for ext in "llo"; do
     if [ ! -f "${actual[0]}" ]; then
       fatal "No LLVMIR found at" "${actual[@]}"
     fi
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ "$OSTYPE" != "darwin"* ]]; then
       diff_out="${diff_dir}/${ext}.diff"
       if diff -u "$exp" <(grep -v '^target triple =' < "${actual[@]}") > "$diff_out"; then
         success "* $(basename "$exp")"
