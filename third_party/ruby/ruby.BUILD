@@ -11,6 +11,14 @@ filegroup(
 build_ruby(
     name = "ruby-dist",
     src = ":source",
+    ssl = select({
+        "@com_stripe_ruby_typer//tools/config:darwin": "@system_ssl_darwin//:ssl",
+        "@com_stripe_ruby_typer//tools/config:linux": "@system_ssl_linux//:ssl",
+    }),
+    crypto = select({
+        "@com_stripe_ruby_typer//tools/config:darwin": "@system_ssl_darwin//:crypto",
+        "@com_stripe_ruby_typer//tools/config:linux": "@system_ssl_linux//:crypto",
+    }),
     visibility = ["//visibility:private"],
 )
 

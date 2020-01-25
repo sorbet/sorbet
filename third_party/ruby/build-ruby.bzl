@@ -41,6 +41,12 @@ set -euo pipefail
 base="$PWD"
 out_dir="$base/{toolchain}"
 
+ssl_inc="$base/$(dirname {ssl_incdir})"
+ssl_lib="$base/{ssl_libdir}"
+crypto_lib="$base/{crypto_libdir}"
+
+ls $ssl_lib
+
 build_dir="$(mktemp -d)"
 
 # Copy everything to a separate directory to get rid of symlinks:
@@ -61,9 +67,9 @@ run_cmd() {{
 
 run_cmd ./configure \
         CC="{cc}" \
-        CFLAGS="{copts}" \
-        CPPFLAGS="{copts}" \
-        LDFLAGS="{linkopts}" \
+        CFLAGS="-isystem $ssl_inc {copts}" \
+        CPPFLAGS="-isystem $ssl_inc {copts}" \
+        LDFLAGS="-L$ssl_lib -L$crypto_lib {linkopts}" \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -116,6 +122,9 @@ def _build_ruby_impl(ctx):
     if src_dir == None:
         fail("Unable to locate 'ruby.c' in src")
 
+    ssl = ctx.attr.ssl[CcInfo]
+    crypto = ctx.attr.crypto[CcInfo]
+
     # Setup toolchains
     cc_toolchain = find_cpp_toolchain(ctx)
 
@@ -139,6 +148,15 @@ def _build_ruby_impl(ctx):
             feature_configuration = feature_configuration,
         ),
     )
+
+    ssl_libs = ssl.linking_context.libraries_to_link.to_list()
+    ssl_lib = ssl_libs[0].dynamic_library
+
+    ssl_hdrs = ssl.compilation_context.headers.to_list()
+    ssl_incdir = ssl_hdrs[0].dirname
+
+    crypto_libs = crypto.linking_context.libraries_to_link.to_list()
+    crypto_lib = crypto_libs[0].dynamic_library
 
     # -Werror breaks configure, so we strip out all flags with a leading -W
     # ruby doesn't work with asan or ubsan
@@ -176,7 +194,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = ctx.files.src,
+        inputs = [ssl_lib, crypto_lib] + ssl_hdrs + ctx.files.src,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -185,6 +203,9 @@ def _build_ruby_impl(ctx):
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
+            ssl_incdir = ssl_incdir,
+            ssl_libdir = ssl_lib.dirname,
+            crypto_libdir = crypto_lib.dirname,
         )),
     )
 
@@ -205,6 +226,8 @@ build_ruby = rule(
     implementation = _build_ruby_impl,
     attrs = {
         "src": attr.label(),
+        "ssl": attr.label(),
+        "crypto": attr.label(),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),

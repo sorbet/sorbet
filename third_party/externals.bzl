@@ -270,3 +270,15 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "zlib-1.2.11",
         build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
     )
+
+    native.new_local_repository(
+        name = "system_ssl_darwin",
+        path = "/usr/local/opt/openssl",
+        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
+    )
+
+    native.new_local_repository(
+        name = "system_ssl_linux",
+        path = "/usr",
+        build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
+    )
