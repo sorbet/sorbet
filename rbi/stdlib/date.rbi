@@ -368,7 +368,8 @@ class Date
   # DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                          #=> (1/2)
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: Date).returns(Rational)}
+  sig {params(arg0: Numeric).returns(Date)}
   def -(arg0); end
 
   # Returns the day of the month (1-31).
