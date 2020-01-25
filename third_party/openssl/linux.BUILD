@@ -1,4 +1,3 @@
-
 cc_import(
     name = "ssl",
     hdrs = glob(["include/openssl/**/*.h"]),
