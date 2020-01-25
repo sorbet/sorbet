@@ -187,7 +187,7 @@ module FileUtils
   sig do
     params(
       list: T.any(String, Pathname),
-      mode: T.nilable(T::Hash[Symbol, T::Boolean]),
+      mode: T.nilable(Integer),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
@@ -199,7 +199,7 @@ module FileUtils
   sig do
     params(
       list: T.any(String, Pathname),
-      mode: T.nilable(T::Hash[Symbol, T::Boolean]),
+      mode: T.nilable(Integer),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
@@ -211,7 +211,7 @@ module FileUtils
   sig do
     params(
       list: T.any(String, Pathname),
-      mode: T.nilable(T::Hash[Symbol, T::Boolean]),
+      mode: T.nilable(Integer),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
