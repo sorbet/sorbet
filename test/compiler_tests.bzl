@@ -146,7 +146,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                     build_archive,
                     sources_name,
                     exps_name,
-		    ":llvm-diff",
+                    ":llvm-diff",
                 ],
                 size = "small",
                 tags = tags + extra_tags,
