@@ -60,7 +60,7 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
         return false;
     }
 
-    auto fileType = llvm::CGFT_ObjectFile;
+    auto fileType = llvm::LLVMTargetMachine::CGFT_ObjectFile;
 
     if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, !debug_mode)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
@@ -153,7 +153,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createGlobalDCEPass());
     pm.add(llvm::createGlobalsAAWrapperPass());
     pm.add(llvm::createFloat2IntPass());
-    pm.add(llvm::createLowerConstantIntrinsicsPass());
+    // pm.add(llvm::createLowerConstantIntrinsicsPass()); // llvm 10-prerelease
     pm.add(llvm::createLoopRotatePass(-1));
     pm.add(llvm::createLoopDistributePass());
 

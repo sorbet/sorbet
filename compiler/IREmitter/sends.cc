@@ -107,9 +107,9 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
                     auto bb2 = llvm::BasicBlock::Create(cs, "fwd", llvmFunc);
                     funcBuilder.SetInsertPoint(bb2);
 
-                    auto selfVar = llvmFunc->getArg(2);
-                    auto argsCount = llvmFunc->getArg(0);
-                    auto argsArray = llvmFunc->getArg(1);
+                    auto selfVar = llvmFunc->arg_begin() + 2;
+                    auto argsCount = llvmFunc->arg_begin();
+                    auto argsArray = llvmFunc->arg_begin() + 1;
                     auto cs2 = cs;
                     cs2.functionEntryInitializers = bb1;
                     auto rubyId = Payload::idIntern(cs2, funcBuilder, i->fun.data(cs)->shortName(cs));

@@ -93,7 +93,7 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
+        ret->setAlignment(8);
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
@@ -148,7 +148,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
+        ret->setAlignment(8);
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
@@ -233,7 +233,7 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
                 new llvm::GlobalVariable(*cs.module, builder.getInt8PtrTy(), true,
                                          llvm::GlobalVariable::InternalLinkage, addrGlobalInitializer, globalName);
             addrGlobal->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-            addrGlobal->setAlignment(llvm::MaybeAlign(8));
+            addrGlobal->setAlignment(8);
 
             return addrGlobal;
         }));
@@ -388,7 +388,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullv, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
+        ret->setAlignment(8);
         // create constructor
         auto constr = allocateRubyStackFramesImpl(cs, md, ret);
         llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
