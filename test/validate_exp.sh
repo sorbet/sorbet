@@ -20,6 +20,7 @@ rb=( "$@" )
 
 root=$PWD
 
+llvm_diff_path=$root/external/llvm_toolchain/bin/llvm-diff
 # The directory to unpack the build archive to
 target="$(mktemp -d)"
 
@@ -41,7 +42,7 @@ for ext in "llo"; do
     fi
     if [[ "$OSTYPE" != "darwin"* ]]; then
       diff_out="${diff_dir}/${ext}.diff"
-      if diff -u "$exp" <(grep -v '^target triple =' < "${actual[@]}") > "$diff_out"; then
+      if $llvm_diff_path "$exp" "${actual[@]}" > "$diff_out"; then
         success "* $(basename "$exp")"
       else
         cat "$diff_out"

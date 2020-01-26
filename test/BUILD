@@ -7,6 +7,10 @@ test_suite(
 
 load(":compiler_tests.bzl", "compiler_tests")
 
+load("@com_stripe_ruby_typer//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
+
+clang_tool("llvm-diff") # depended on by compiler_tests
+
 compiler_tests(
     "test_corpus",
     glob([
