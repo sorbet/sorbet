@@ -477,9 +477,6 @@ public:
                 default:
                     return original;
             }
-            if (ast::isa_tree<ast::MethodDef>(original->args[0].get())) {
-                return std::move(original->args[0]);
-            }
         }
         return original;
     }
