@@ -1,0 +1,196 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
+    def foo<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)  end
+
+  class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    def outside_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.type_parameters(:"U").params({:"arg" => <emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C T>.type_parameter(:"U")), :"blk" => <emptyTree>::<C T>.proc().params({:"arg0" => <emptyTree>::<C T>.type_parameter(:"U")}).void()}).void()
+    end
+
+    def self.test_each<<C <todo sym>>>(arg, &blk)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.type_parameters(:"K", :"V").params({:"arg" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.type_parameter(:"K"), <emptyTree>::<C T>.type_parameter(:"V")), :"blk" => <emptyTree>::<C T>.proc().params({:"arg0" => <emptyTree>::<C T>.type_parameter(:"K"), :"arg1" => <emptyTree>::<C T>.type_parameter(:"V")}).void()}).void()
+    end
+
+    def self.test_each_hash<<C <todo sym>>>(arg, &blk)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.params({:"name" => <emptyTree>::<C String>, :"blk" => <emptyTree>::<C T>.proc().void()}).void()
+    end
+
+    def self.it<<C <todo sym>>>(name, &blk)
+      <emptyTree>
+    end
+
+    <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |value|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'works with instance methods'><<C <todo sym>>>(&<blk>)
+          [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()].each() do |value|
+            begin
+              <self>.puts(value.foo())
+              <self>.outside_method()
+              <emptyTree>::<C T>.reveal_type(value)
+            end
+          end
+        end
+      end
+    end
+
+    <emptyTree>::<C CONST_LIST> = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
+
+    <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'succeeds with a constant list'><<C <todo sym>>>(&<blk>)
+          <emptyTree>::<C CONST_LIST>.each() do |value|
+            begin
+              <self>.puts(value.foo())
+              <emptyTree>::<C T>.reveal_type(value)
+            end
+          end
+        end
+      end
+    end
+
+    <emptyTree>::<C ANOTHER_CONST_LIST> = <emptyTree>::<C T>.let([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
+
+    <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST>) do |value|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'succeeds with a typed constant list'><<C <todo sym>>>(&<blk>)
+          <emptyTree>::<C ANOTHER_CONST_LIST>.each() do |value|
+            begin
+              <self>.puts(value.foo())
+              <emptyTree>::<C T>.reveal_type(value)
+            end
+          end
+        end
+      end
+    end
+
+    local = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
+
+    <self>.test_each(local) do |value|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'succeed with a local variable but cannot type it'><<C <todo sym>>>(&<blk>)
+          ::T.unsafe(nil).each() do |value|
+            begin
+              <self>.puts(value.foo())
+              <emptyTree>::<C T>.reveal_type(value)
+            end
+          end
+        end
+      end
+    end
+
+    <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |x|
+      y = x
+    end
+
+    <self>.test_each_hash({}) do |k, v|
+      y = k.+(v)
+    end
+
+    <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
+      begin
+        x = value.foo()
+        begin
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params({}).void()
+          end
+          def <it 'fails with non-it statements'><<C <todo sym>>>(&<blk>)
+            <emptyTree>::<C CONST_LIST>.each() do |value|
+              <self>.puts(x)
+            end
+          end
+        end
+      end
+    end
+
+    <self>.test_each(["foo", 5, {:"x" => false}]) do |v|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'handles lists with several types'><<C <todo sym>>>(&<blk>)
+          ["foo", 5, {:"x" => false}].each() do |v|
+            <emptyTree>::<C T>.reveal_type(v)
+          end
+        end
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do |k, v|
+      <self>.it("does not handle more than one argument") do ||
+        <emptyTree>
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do ||
+      <self>.it("does not handle more than one argument") do ||
+        <emptyTree>
+      end
+    end
+
+    <self>.test_each_hash({:"foo" => 1, :"bar" => 2, :"baz" => 3}) do |k, v|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'handles lists with several types'><<C <todo sym>>>(&<blk>)
+          {:"foo" => 1, :"bar" => 2, :"baz" => 3}.each() do |k, v|
+            begin
+              <emptyTree>::<C T>.reveal_type(k)
+              <emptyTree>::<C T>.reveal_type(v)
+            end
+          end
+        end
+      end
+    end
+
+    <self>.test_each_hash([1, 2, 3]) do |k, v|
+      begin
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.params({}).void()
+        end
+        def <it 'fails to typecheck with non-hash arguments to `test_each-hash`'><<C <todo sym>>>(&<blk>)
+          [1, 2, 3].each() do |k, v|
+            <self>.puts(k, v)
+          end
+        end
+      end
+    end
+
+    <self>.test_each_hash({:"foo" => 1, :"bar" => 2}) do |x|
+      <self>.it("does not handle more than one argument") do ||
+        <emptyTree>
+      end
+    end
+  end
+end
