@@ -1,0 +1,65 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::A)
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    :"private"
+
+    :"private_class_method"
+
+    :"inner_static"
+
+    :"inner_instance"
+
+    :"<static-init>"
+
+    def self.private(arg0, <blk>)
+      <emptyTree>
+    end
+
+    def self.private_class_method(arg0, <blk>)
+      <emptyTree>
+    end
+
+    def self.inner_static(<blk>)
+      <emptyTree>
+    end
+
+    def inner_instance(<blk>)
+      <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <self>.private_class_method(:"outer_static")
+        <self>.private(:"outer_instance")
+        <emptyTree>
+      end
+    end
+
+    def self.outer_static(<blk>)
+      <self>.private_class_method(:"inner_static")
+    end
+
+    def outer_instance(<blk>)
+      <self>.class().private(:"inner_instance")
+    end
+  end
+  <emptyTree>
+end
