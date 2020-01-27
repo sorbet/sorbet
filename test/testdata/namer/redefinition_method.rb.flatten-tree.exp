@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,13 +12,13 @@ begin
     end
   end
   class ::Main<<C Main>> < (::<todo sym>)
-    <emptyTree>
+    :"foo"
 
-    <emptyTree>
+    :"foo"
 
-    <emptyTree>
+    :"foo"
 
-    <emptyTree>
+    :"<static-init>"
 
     def foo<foo$1>(a, <blk>)
       a

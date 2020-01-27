@@ -1,9 +1,9 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
+    :"foo"
 
-    <emptyTree>
+    :"<static-init>"
 
     def foo(<blk>)
       <emptyTree>

@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,23 +12,23 @@ begin
     end
   end
   class ::Examples<<C Examples>> < (::<todo sym>)
-    <emptyTree>
+    :"i_like_ifs"
 
-    <emptyTree>
+    :"i_like_exps"
 
-    <emptyTree>
+    :"return_in_one_branch1"
 
-    <emptyTree>
+    :"return_in_one_branch2"
 
-    <emptyTree>
+    :"variables"
 
-    <emptyTree>
+    :"variables_and_loop"
 
-    <emptyTree>
+    :"variables_loop_if"
 
-    <emptyTree>
+    :"take_arguments"
 
-    <emptyTree>
+    :"<static-init>"
 
     def i_like_ifs(<blk>)
       if true

@@ -9,6 +9,8 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"<static-init>" }
+
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -55,13 +57,13 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        EmptyTree
+        Literal{ value = :"take_arguments" }
 
-        EmptyTree
+        Literal{ value = :"take_arguments<defaultArg>1" }
 
-        EmptyTree
+        Literal{ value = :"take_arguments<defaultArg>2" }
 
-        EmptyTree
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = 0

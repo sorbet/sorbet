@@ -1,23 +1,23 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
+    :"baz1"
 
-    <emptyTree>
+    :"baz2"
 
-    <emptyTree>
+    :"baz3"
 
-    <emptyTree>
+    :"baz4"
 
-    <emptyTree>
+    :"baz5"
 
-    <emptyTree>
+    :"baz6"
 
-    <emptyTree>
+    :"baz7"
 
-    <emptyTree>
+    :"baz8"
 
-    <emptyTree>
+    :"<static-init>"
 
     def baz1(<blk>)
       begin

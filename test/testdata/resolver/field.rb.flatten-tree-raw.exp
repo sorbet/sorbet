@@ -9,9 +9,9 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        EmptyTree
+        Literal{ value = :"foo" }
 
-        EmptyTree
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = 0

@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,13 +12,13 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    <emptyTree>
+    :"take_arguments"
 
-    <emptyTree>
+    :"take_arguments<defaultArg>1"
 
-    <emptyTree>
+    :"take_arguments<defaultArg>2"
 
-    <emptyTree>
+    :"<static-init>"
 
     def take_arguments(a, b, c, d, e, f, g)
       begin

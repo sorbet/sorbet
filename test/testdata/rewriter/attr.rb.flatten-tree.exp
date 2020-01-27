@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,23 +12,23 @@ begin
     end
   end
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
-    <emptyTree>
+    :"initialize"
 
-    <emptyTree>
+    :"v1"
 
-    <emptyTree>
+    :"v1="
 
-    <emptyTree>
+    :"v2"
 
-    <emptyTree>
+    :"v2="
 
-    <emptyTree>
+    :"v3"
 
-    <emptyTree>
+    :"v4="
 
-    <emptyTree>
+    :"v5="
 
-    <emptyTree>
+    :"<static-init>"
 
     def initialize(<blk>)
       begin

@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -31,11 +33,11 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    <emptyTree>
+    :"initialize"
 
-    <emptyTree>
+    :"hi"
 
-    <emptyTree>
+    :"<static-init>"
 
     def initialize(<blk>)
       begin
@@ -65,6 +67,8 @@ begin
     end
   end
   module ::Mixin<<C Mixin>> < ()
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         @@mixin_cvar = begin
@@ -77,9 +81,9 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    <emptyTree>
+    :"child_method"
 
-    <emptyTree>
+    :"<static-init>"
 
     def child_method(<blk>)
       begin
@@ -101,6 +105,8 @@ begin
     end
   end
   class ::Child1<<C Child1>> < (::Alias)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       @@class_var
     end

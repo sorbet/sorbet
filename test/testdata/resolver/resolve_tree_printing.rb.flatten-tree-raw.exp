@@ -9,6 +9,8 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
+        Literal{ value = :"<static-init>" }
+
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -55,23 +57,23 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        EmptyTree
+        Literal{ value = :"has_while" }
 
-        EmptyTree
+        Literal{ value = :"has_constant_with_resolution_scope" }
 
-        EmptyTree
+        Literal{ value = :"has_global_field" }
 
-        EmptyTree
+        Literal{ value = :"has_class_field" }
 
-        EmptyTree
+        Literal{ value = :"has_next" }
 
-        EmptyTree
+        Literal{ value = :"has_break" }
 
-        EmptyTree
+        Literal{ value = :"has_return" }
 
-        EmptyTree
+        Literal{ value = :"has_cast" }
 
-        EmptyTree
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = 0

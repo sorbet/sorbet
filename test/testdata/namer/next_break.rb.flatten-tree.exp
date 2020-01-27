@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,9 +12,9 @@ begin
     end
   end
   class ::Test<<C Test>> < (::<todo sym>)
-    <emptyTree>
+    :"test_next_break"
 
-    <emptyTree>
+    :"<static-init>"
 
     def test_next_break(<blk>)
       <self>.each() do ||

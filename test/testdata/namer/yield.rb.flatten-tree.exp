@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -14,17 +16,17 @@ begin
     end
   end
   class ::Main<<C Main>> < (::<todo sym>)
-    <emptyTree>
+    :"yielder"
 
-    <emptyTree>
+    :"blockpass"
 
-    <emptyTree>
+    :"mixed"
 
-    <emptyTree>
+    :"blockyield"
 
-    <emptyTree>
+    :"main"
 
-    <emptyTree>
+    :"<static-init>"
 
     def yielder(<blk>)
       begin

@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,9 +12,9 @@ begin
     end
   end
   class ::TestSig<<C TestSig>> < (::<todo sym>)
-    <emptyTree>
+    :"test_resolve"
 
-    <emptyTree>
+    :"<static-init>"
 
     def test_resolve(<blk>)
       <emptyTree>
@@ -29,6 +31,8 @@ end
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -42,6 +46,8 @@ begin
     end
   end
   class ::T1<<C T1>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       <emptyTree>
     end
