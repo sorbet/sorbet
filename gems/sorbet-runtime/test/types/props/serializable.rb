@@ -512,4 +512,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal({}, NoPropsStruct.from_hash({}).serialize)
     end
   end
+
+  class CustomSerializedForm < T::Struct
+    prop :prop, String, name: 'something_custom'
+  end
+
+  describe 'custom serialized form' do
+    it 'round trips' do
+      hash = CustomSerializedForm.new(prop: 'foo').serialize
+      assert_equal({'something_custom' => 'foo'}, hash)
+      assert_equal('foo', CustomSerializedForm.from_hash(hash).prop)
+    end
+  end
 end
