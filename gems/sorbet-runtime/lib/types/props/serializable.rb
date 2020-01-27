@@ -112,8 +112,11 @@ module T::Props::Serializable
   #
   # @param hash [Hash<String, Object>] The hash to take property
   #  values from.
+  # @param strict [T::Boolean] (false) If true, raise an exception if
+  #  the hash contains keys that do not correspond to any known
+  #  props on this instance.
   # @return [void]
-  def deserialize(hash)
+  def deserialize(hash, strict=false)
     decorator = self.class.decorator
 
     matching_props = 0
@@ -205,7 +208,13 @@ module T::Props::Serializable
     # We compute extra_props this way specifically for performance
     if matching_props < hash.size
       pbsf = decorator.prop_by_serialized_forms
-      @_extra_props = hash.reject {|k, _| pbsf.key?(k)}
+      h = hash.reject {|k, _| pbsf.key?(k)}
+
+      if strict
+        raise "Unknown properties for #{self.class.name}: #{h.keys.inspect}"
+      else
+        @_extra_props = h
+      end
     end
   end
 
@@ -280,11 +289,11 @@ module T::Props::Serializable::DecoratorMethods
   def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
   def prop_by_serialized_forms; @class.prop_by_serialized_forms; end
 
-  def from_hash(hash)
+  def from_hash(hash, strict=false)
     raise ArgumentError.new("#{hash.inspect} provided to from_hash") if !(hash && hash.is_a?(Hash))
 
     i = @class.allocate
-    i.deserialize(hash)
+    i.deserialize(hash, strict)
 
     i
   end
@@ -335,7 +344,7 @@ module T::Props::Serializable::DecoratorMethods
   private_constant :EMPTY_EXTRA_PROPS
 
   def extra_props(instance)
-    instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
+    get(instance, '_extra_props') || EMPTY_EXTRA_PROPS
   end
 
   # @override T::Props::PrettyPrintable
@@ -359,30 +368,18 @@ end
 module T::Props::Serializable::ClassMethods
   def prop_by_serialized_forms; @prop_by_serialized_forms ||= {}; end
 
-  # @!method self.from_hash(hash)
+  # @!method self.from_hash(hash, strict)
   #
   # Allocate a new instance and call {#deserialize} to load a new
   # object from a hash.
   # @return [Serializable]
-  def from_hash(hash)
-    self.decorator.from_hash(hash)
+  def from_hash(hash, strict=false)
+    self.decorator.from_hash(hash, strict)
   end
 
-  # Equivalent to {.from_hash}, but raises an exception if there
-  # are any unrecognized properties in the input.
-  #
-  # NB: This does not check for unrecognized properties in subtypes
-  # (ie, if we have a field which itself has a T::Props::Serializable
-  # type, and the input for that field has extra properties, no
-  # error will be raised.)
-  #
+  # Equivalent to {.from_hash} with `strict` set to true.
   # @return [Serializable]
   def from_hash!(hash)
-    decorator = self.decorator
-    result = decorator.from_hash(hash)
-    if !(extra_props = decorator.extra_props(result)).empty?
-      raise "Unknown properties for #{name}: #{extra_props.keys.inspect}"
-    end
-    result
+    self.decorator.from_hash(hash, true)
   end
 end

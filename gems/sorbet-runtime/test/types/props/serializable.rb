@@ -114,25 +114,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
-  describe 'extra_props' do
-    it 'are set by from_hash' do
-      m = MySerializable.from_hash({'not_a_prop' => 1})
-      assert_equal({'not_a_prop' => 1}, m.class.decorator.extra_props(m))
-    end
-
-    it 'round trip to serialize' do
-      m = MySerializable.from_hash({'not_a_prop' => 1})
-      assert_equal({'not_a_prop' => 1}, m.serialize)
-    end
-
-    it 'produce error with from_hash!' do
-      e = assert_raises(RuntimeError) do
-        MySerializable.from_hash!({'not_a_prop' => 1})
-      end
-      assert_match(/Unknown properties.*not_a_prop/, e.message)
-    end
-  end
-
   describe 'hash props' do
     it 'does not share structure on serialize' do
       m = MySerializable.new

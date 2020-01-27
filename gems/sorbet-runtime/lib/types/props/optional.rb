@@ -34,6 +34,13 @@ module T::Props::Optional::DecoratorMethods
 
   def prop_optional?(prop); prop_rules(prop)[:fully_optional]; end
 
+  def mutate_prop_backdoor!(prop, key, value)
+    rules = props.fetch(prop)
+    rules = rules.merge(key => value)
+    compute_derived_rules(rules)
+    @props = props.merge(prop => rules.freeze).freeze
+  end
+
   def compute_derived_rules(rules)
     rules[:fully_optional] = !T::Props::Utils.need_nil_write_check?(rules)
     rules[:need_nil_read_check] = T::Props::Utils.need_nil_read_check?(rules)

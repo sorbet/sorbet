@@ -33,6 +33,15 @@ class T::Props::Decorator
   sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
   attr_reader :props
 
+  # Try to avoid using this; post-definition mutation of prop rules is
+  # surprising and hard to reason about.
+  sig {params(prop: Symbol, key: Symbol, value: T.untyped).void}
+  def mutate_prop_backdoor!(prop, key, value)
+    @props = props.merge(
+      prop => props.fetch(prop).merge(key => value).freeze
+    ).freeze
+  end
+
   sig {returns(T::Array[Symbol])}
   def all_props; props.keys; end
 
