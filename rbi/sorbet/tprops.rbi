@@ -53,7 +53,6 @@ class T::Props::Decorator
   def decorated_class; end
   def foreign_prop_get(instance, prop, foreign_class, rules = {}, opts = {}); end
   def initialize(klass); end
-  def is_nilable?(*args, &blk); end
   def model_inherited(child); end
   def plugin(mod); end
   def prop_defined(name, cls, rules = {}); end
