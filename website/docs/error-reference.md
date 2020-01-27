@@ -485,6 +485,39 @@ end
 
 Use of `implementation` has been replaced by `override`.
 
+## 5057
+
+Static methods (like `self.foo`) can never be mixed into another class or
+module. Both `include` and `extend` only mix that module's _instance_ methods
+onto the target class or module. Classes can inherit static methods from their
+superclass, but only classes (not modules) can be superclasses.
+
+Thus, a static, abstract method on a module is impossible to implement, and thus
+is a no-op.
+
+```ruby
+module MyMixin
+  sig {abstract.void}
+  def foo; end
+
+  sig {abstract.void}
+  def self.bar; end # error: Static methods in a module cannot be abstract
+end
+```
+
+Some alternatives:
+
+- Use `mixes_in_class_methods`, which declares to Sorbet that when a module is
+  included, some other module should be extended into the target class.
+  [Full documentation here](abstract.md). This is the preferred option.
+
+- Separate the interface into two modules. Include one and extend the other in
+  all the places where
+
+- Change the abstract module to an abstract class, and update all downstream
+  references to inherit from this class instead of including the original
+  module.
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class

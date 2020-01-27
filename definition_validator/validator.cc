@@ -274,7 +274,8 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     if (method.data(ctx)->isAbstract() && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
         if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadAbstractMethod)) {
+            if (auto e =
+                    ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
                 e.setHeader("Static methods in a module cannot be abstract");
             }
         }
