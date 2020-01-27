@@ -28,7 +28,10 @@ echo will run with $CONFIG_OPTS
 
 err=0
 
+mkdir -p _out_
+
 ./bazel test \
+  --experimental_generate_json_trace_profile --profile=_out_/profile.json \
   @gems//... \
   //gems/sorbet/test/snapshot \
   //gems/sorbet/test/hidden-method-finder \

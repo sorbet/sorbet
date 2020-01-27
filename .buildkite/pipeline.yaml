@@ -27,6 +27,7 @@ steps:
   - label: ":mac: test-static-sanitized.sh (master only)"
     command: .buildkite/test-static-sanitized.sh
     branches: "master"
+    artifact_paths: _out_/profile.json
     agents:
       os: mac
     # TODO(jez) We should only retry for specific error.
@@ -36,6 +37,7 @@ steps:
 
   - label: ":linux: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
+    artifact_paths: _out_/profile.json
     <<: *elastic
 
   - wait: ~
