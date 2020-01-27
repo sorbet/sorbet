@@ -39,16 +39,6 @@ snapshot_tests(
             "total/*",
         ],
         exclude = [
-            # These tests can't currently run under bazel,
-            # and can't be written another way.
-
-            # Requires openssl, which doesn't work in bazel.
-            # Can't be rewritten because it's testing gem_loader.
-            "partial/webmock",
-
-            # Requires native extensions. Tests gem_loader for codecov.
-            "partial/codecov",
-
             # Requires native extensions.
             # Can't be rewritten, because it's essentially an integration test
             # that a certain private Rails API gives us back absolute vs
@@ -72,16 +62,6 @@ snapshot_tests(
             "total/*",
         ],
         exclude = [
-            # These tests can't currently run under bazel,
-            # and can't be written another way.
-
-            # Requires openssl, which doesn't work in bazel.
-            # Can't be rewritten because it's testing gem_loader.
-            "partial/webmock",
-
-            # Requires native extensions. Tests gem_loader for codecov.
-            "partial/codecov",
-
             # Requires native extensions.
             # Can't be rewritten, because it's essentially an integration test
             # that a certain private Rails API gives us back absolute vs
