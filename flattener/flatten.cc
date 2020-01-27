@@ -118,7 +118,7 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
+        classDef->rhs = addMethodsFromRHS(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
         return ast::MK::EmptyTree();
@@ -160,7 +160,7 @@ public:
         return tree;
     }
 
-    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addMethodsFromTree(core::Context ctx, unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -176,7 +176,7 @@ public:
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
             tree = ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
-            return addMethods(ctx, std::move(tree));
+            return addMethodsFromTree(ctx, std::move(tree));
         }
 
         for (auto &method : popCurMethodDefs()) {
@@ -194,7 +194,7 @@ private:
         return ret;
     }
 
-    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
+    ast::ClassDef::RHS_store addMethodsFromRHS(core::Context ctx, ast::ClassDef::RHS_store rhs) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
             (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
@@ -253,7 +253,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     FlattenWalk flatten;
     tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-    tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
+    tree.tree = flatten.addMethodsFromTree(ctx, std::move(tree.tree));
 
     return tree;
 }
