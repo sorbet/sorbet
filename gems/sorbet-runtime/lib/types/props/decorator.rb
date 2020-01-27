@@ -240,7 +240,7 @@ class T::Props::Decorator
   # Used to validate both prop names and serialized forms
   sig {params(name: T.any(Symbol, String)).void}
   private def validate_prop_name(name)
-    if name !~ /\A[A-Za-z_][A-Za-z0-9_-]*\z/
+    if !name.match?(/\A[A-Za-z_][A-Za-z0-9_-]*\z/)
       raise ArgumentError.new("Invalid prop name in #{@class.name}: #{name}")
     end
   end
