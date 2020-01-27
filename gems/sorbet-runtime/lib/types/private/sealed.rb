@@ -55,7 +55,7 @@ module T::Private::Sealed
 
     if !this_file.start_with?(decl_file)
       whitelist = T::Configuration.sealed_violation_whitelist
-      if whitelist != nil && whitelist.any? {|pattern| decl_file =~ pattern}
+      if whitelist != nil && whitelist.any? {|pattern| this_file =~ pattern}
         return
       end
 

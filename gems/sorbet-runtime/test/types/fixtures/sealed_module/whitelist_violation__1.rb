@@ -1,5 +1,5 @@
 module Opus::Types::Test::SealedModuleSandbox
-  T::Configuration.sealed_violation_whitelist = [/whitelist_violation__1\.rb/]
+  T::Configuration.sealed_violation_whitelist = [/whitelist_violation__2\.rb/]
 
   class SealedParent
     extend T::Helpers
