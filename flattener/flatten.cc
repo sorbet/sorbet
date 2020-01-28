@@ -14,9 +14,6 @@ namespace sorbet::flatten {
 // return true if the expression in question is either a method definition, a class definition, or an assignment to a
 // constant; false otherwise.
 bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
-    if (ast::isa_tree<ast::MethodDef>(what.get())) {
-        return true;
-    }
     if (ast::isa_tree<ast::ClassDef>(what.get())) {
         return true;
     }
