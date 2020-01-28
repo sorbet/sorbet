@@ -7,7 +7,7 @@ namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
-    1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
+    2L * 1024 * 1024 * 1024; // 2G. This is both maximum fs db size and max virtual memory usage.
 
 static void throw_mdb_error(string_view what, int err) {
     fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
