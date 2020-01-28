@@ -85,8 +85,8 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname),
-        dir: T.any(String, Pathname),
+        file: String,
+        dir: String,
     )
     .returns(String)
   end
@@ -103,7 +103,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(Time)
   end
@@ -132,20 +132,20 @@ class File < IO
 
   sig do
     params(
-        arg0: T.any(String, Pathname),
+        arg0: String,
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: T.any(String, Pathname),
+        arg0: String,
         arg1: Integer,
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: T.any(String, Pathname),
+        arg0: String,
         arg1: Integer,
         arg2: Integer,
     )
@@ -166,7 +166,7 @@ class File < IO
   # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(Time)
   end
@@ -178,7 +178,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -190,7 +190,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -245,7 +245,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(Time)
   end
@@ -277,7 +277,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -303,7 +303,7 @@ class File < IO
   # group id of this process. See eaccess(3).
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -313,7 +313,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -327,7 +327,7 @@ class File < IO
   # "file exists" means that stat() or fstat() system call is successful.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(T::Boolean)
   end
@@ -362,8 +362,8 @@ class File < IO
   # the parent, the root of the project and appends `lib/mygem.rb`.
   sig do
     params(
-        file: T.any(String, Pathname),
-        dir: T.any(String, Pathname),
+        file: BasicObject,
+        dir: BasicObject,
     )
     .returns(String)
   end
@@ -403,7 +403,7 @@ class File < IO
   # and use the file referenced by the link.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -529,7 +529,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(String)
   end
@@ -542,7 +542,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -566,8 +566,8 @@ class File < IO
   # ```
   sig do
     params(
-        file_1: T.any(String, Pathname, IO),
-        file_2: T.any(String, Pathname, IO),
+        file_1: T.any(String, IO),
+        file_2: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -580,7 +580,7 @@ class File < IO
   # ```
   sig do
     params(
-        arg0: T.any(String, Pathname),
+        arg0: BasicObject,
     )
     .returns(String)
   end
@@ -621,8 +621,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: T.any(String, Pathname),
-        new: T.any(String, Pathname),
+        old: String,
+        new: String,
     )
     .returns(Integer)
   end
@@ -639,7 +639,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(File::Stat)
   end
@@ -656,7 +656,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(Time)
   end
@@ -702,7 +702,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -716,7 +716,7 @@ class File < IO
   # ```
   sig do
     params(
-        path: T.any(String, Pathname),
+        path: String,
     )
     .returns(String)
   end
@@ -728,7 +728,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -738,7 +738,7 @@ class File < IO
   # id of this process. See eaccess(3).
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -748,7 +748,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -778,8 +778,8 @@ class File < IO
   # The last component of the real pathname can be nonexistent.
   sig do
     params(
-        pathname: T.any(String, Pathname),
-        dir: T.any(String, Pathname),
+        pathname: String,
+        dir: String,
     )
     .returns(String)
   end
@@ -794,8 +794,8 @@ class File < IO
   # All components of the pathname must exist when this method is called.
   sig do
     params(
-        pathname: T.any(String, Pathname),
-        dir: T.any(String, Pathname),
+        pathname: String,
+        dir: String,
     )
     .returns(String)
   end
@@ -809,8 +809,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: T.any(String, Pathname),
-        new: T.any(String, Pathname),
+        old: String,
+        new: String,
     )
     .returns(Integer)
   end
@@ -822,7 +822,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -846,7 +846,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(Integer)
   end
@@ -859,7 +859,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T.nilable(Integer))
   end
@@ -871,7 +871,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: T.any(String, IO),
     )
     .returns(T::Boolean)
   end
@@ -898,7 +898,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: BasicObject,
     )
     .returns(File::Stat)
   end
@@ -910,7 +910,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, Pathname, IO),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -925,8 +925,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: T.any(String, Pathname),
-        new: T.any(String, Pathname),
+        old: String,
+        new: String,
     )
     .returns(Integer)
   end
@@ -935,7 +935,7 @@ class File < IO
   # Returns `true` if the named file is a symbolic link.
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
     )
     .returns(T::Boolean)
   end
@@ -953,7 +953,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
         arg0: Integer,
     )
     .returns(Integer)
@@ -1180,7 +1180,7 @@ class File < IO
 
   sig do
     params(
-        file: T.any(String, Pathname),
+        file: String,
         mode: String,
         perm: String,
         opt: Integer,
