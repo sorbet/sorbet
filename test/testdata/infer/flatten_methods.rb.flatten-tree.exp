@@ -21,9 +21,20 @@ begin
   class ::Parent<<C Parent>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"x" => ::Integer}).void()
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"x" => ::Integer}).void()
+        end
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def self.takes_integer_static(x, <blk>)
       <emptyTree>
@@ -32,39 +43,16 @@ begin
     def takes_integer_instance(x, <blk>)
       <emptyTree>
     end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"x" => ::Integer}).void()
-        end
-        <self>.sig() do ||
-          <self>.params({:"x" => ::Integer}).void()
-        end
-        <emptyTree>
-      end
-    end
   end
   class ::Child<<C Child>> < (::Parent)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.inner_static(<blk>)
-      <emptyTree>
-    end
-
-    def inner_instance(<blk>)
-      <emptyTree>
-    end
-
     def self.<static-init>(<blk>)
       begin
         <self>.takes_integer_static(<emptyTree>)
         <self>.takes_integer_static(<emptyTree>)
+        <emptyTree>
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -75,6 +63,14 @@ begin
 
     def outer_instance(<blk>)
       <self>.takes_integer_instance(:"inner_instance")
+    end
+
+    def self.inner_static(<blk>)
+      <emptyTree>
+    end
+
+    def inner_instance(<blk>)
+      <emptyTree>
     end
   end
   <emptyTree>

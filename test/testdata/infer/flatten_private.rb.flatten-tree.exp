@@ -12,17 +12,24 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def self.private(arg0, <blk>)
       <emptyTree>
@@ -46,19 +53,6 @@ begin
 
     def inner_instance(<blk>)
       <emptyTree>
-    end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"arg0" => ::Integer}).void()
-        end
-        <self>.sig() do ||
-          <self>.params({:"arg0" => ::Integer}).void()
-        end
-        <emptyTree>
-      end
     end
   end
   <emptyTree>
