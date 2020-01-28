@@ -116,10 +116,11 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         vector<string> serializedChildren;
         for (const auto &[name, type] : children.entries) {
             // Ignore Modules
-            if (type != autogen::Definition::Type::Class) {
-                continue;
+            if (type == autogen::Definition::Type::Class) {
+                serializedChildren.emplace_back(fmt::format(" class {}", name));
+            } else {
+                serializedChildren.emplace_back(fmt::format(" module {}", name));
             }
-            serializedChildren.emplace_back(fmt::format(" {}", name));
         }
 
         fast_sort(serializedChildren);

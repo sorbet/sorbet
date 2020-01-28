@@ -2,4 +2,4 @@
 
 --- autogen-subclasses-ignore-relative ---
 class Opus::Parent
- Opus::Child
+ class Opus::Child
