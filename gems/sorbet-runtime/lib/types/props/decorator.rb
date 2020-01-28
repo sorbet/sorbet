@@ -91,25 +91,6 @@ class T::Props::Decorator
 
   # Accessors
 
-  # For performance, don't use named params here.
-  # Passing in rules here is purely a performance optimization.
-  #
-  # checked(:never) - O(prop accesses)
-  sig do
-    params(
-      instance: DecoratedInstance,
-      prop: T.any(String, Symbol),
-      rules: T.nilable(Rules)
-    )
-    .returns(T.untyped)
-    .checked(:never)
-  end
-  def get(instance, prop, rules=props[prop.to_sym])
-    # For backwards compatibility, fall back to reconstructing the accessor key
-    # (though it would probably make more sense to raise in that case).
-    instance.instance_variable_get(rules ? rules[:accessor_key] : '@' + prop.to_s) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
-  end
-
   # Use this to validate that a value will validate for a given prop. Useful for knowing whether a value can be set on a model without setting it.
   #
   # checked(:never) - potentially O(prop accesses) depending on usage pattern
@@ -157,26 +138,37 @@ class T::Props::Decorator
     params(
       instance: DecoratedInstance,
       prop: T.any(String, Symbol),
-      rules: T.nilable(Rules)
+      rules: Rules
     )
     .returns(T.untyped)
     .checked(:never)
   end
-  def prop_get(instance, prop, rules=props[prop.to_sym])
-    val = get(instance, prop, rules)
-
+  def prop_get(instance, prop, rules=prop_rules(prop))
+    val = instance.instance_variable_get(rules[:accessor_key])
     if !val.nil?
       val
     else
-      raise NoRulesError.new if !rules
-      d = rules[:ifunset]
-      if d
+      if (d = rules[:ifunset])
         T::Props::Utils.deep_clone_object(d)
       else
         nil
       end
     end
   end
+
+  sig do
+    params(
+      instance: DecoratedInstance,
+      prop: T.any(String, Symbol),
+      rules: Rules
+    )
+    .returns(T.untyped)
+    .checked(:never)
+  end
+  def prop_get_if_set(instance, prop, rules=prop_rules(prop))
+    instance.instance_variable_get(rules[:accessor_key])
+  end
+  alias_method :get, :prop_get_if_set # Alias for backwards compatibility
 
   # checked(:never) - O(prop accesses)
   sig do
