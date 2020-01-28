@@ -191,7 +191,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IR
 
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
                                                        const BasicBlockMap &blockMap,
-                                                       UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                       const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                        int rubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
