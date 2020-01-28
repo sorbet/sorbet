@@ -120,7 +120,7 @@ bool derivesFromModule(const core::Symbol *what, const GlobalState &gs, SymbolRe
         }
     }
     if (what->superClass().exists()) {
-        return sym == what->superClass() || derivesFromModule(what->superClass().data(gs).operator->(), gs, sym);
+        return derivesFromModule(what->superClass().data(gs).operator->(), gs, sym);
     }
     return false;
 }
