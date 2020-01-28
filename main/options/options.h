@@ -170,6 +170,8 @@ struct Options {
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
 
+    // Contains the allowed extensions Sorbet can parse.
+    UnorderedSet<std::string> allowedExtensions;
     // Contains the file names passed in to Sorbet.
     std::vector<std::string> rawInputFileNames;
     // Contains the directory names passed in to Sorbet.
