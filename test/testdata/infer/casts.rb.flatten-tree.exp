@@ -12,9 +12,13 @@ begin
   class ::TestCasts<<C TestCasts>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def untyped(<blk>)
       <emptyTree>
@@ -58,10 +62,6 @@ begin
         s.+("hi")
         s.+(3)
       end
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

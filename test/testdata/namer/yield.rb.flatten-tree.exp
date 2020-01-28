@@ -16,15 +16,16 @@ begin
   class ::Main<<C Main>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def yielder(<blk>)
       begin
@@ -66,10 +67,6 @@ begin
         ::<Magic>.<call-with-block>(<self>, :"mixed", l)
         ::<Magic>.<call-with-block>(<self>, :"blockyield", l)
       end
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

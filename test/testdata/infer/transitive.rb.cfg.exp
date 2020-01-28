@@ -17,24 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::A#foo" {
-    label = "::A#foo";
-    color = blue;
-    "bb::A#foo_0" [shape = invhouse];
-    "bb::A#foo_1" [shape = parallelogram];
-
-    "bb::A#foo_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: A = cast(<self>: NilClass, A);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
-    "bb::A#foo_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
-}
-
 subgraph "cluster_::<Class:A>#<static-init>" {
     label = "::<Class:A>#<static-init>";
     color = blue;
@@ -70,22 +52,22 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_5" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
 }
 
-subgraph "cluster_::Bar#baz" {
-    label = "::Bar#baz";
+subgraph "cluster_::A#foo" {
+    label = "::A#foo";
     color = blue;
-    "bb::Bar#baz_0" [shape = invhouse];
-    "bb::Bar#baz_1" [shape = parallelogram];
+    "bb::A#foo_0" [shape = invhouse];
+    "bb::A#foo_1" [shape = parallelogram];
 
-    "bb::Bar#baz_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\l<returnMethodTemp>$2: Integer = <self>: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+    "bb::A#foo_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: A = cast(<self>: NilClass, A);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
-    "bb::Bar#baz_1" [
+    "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
+    "bb::A#foo_1" [
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
-    "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
+    "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:Bar>#<static-init>" {
@@ -121,6 +103,24 @@ subgraph "cluster_::<Class:Bar>#<static-init>" {
     ];
 
     "bb::<Class:Bar>#<static-init>_5" -> "bb::<Class:Bar>#<static-init>_2" [style="bold"];
+}
+
+subgraph "cluster_::Bar#baz" {
+    label = "::Bar#baz";
+    color = blue;
+    "bb::Bar#baz_0" [shape = invhouse];
+    "bb::Bar#baz_1" [shape = parallelogram];
+
+    "bb::Bar#baz_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\l<returnMethodTemp>$2: Integer = <self>: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+    ];
+
+    "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
+    "bb::Bar#baz_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
 }
 
 }

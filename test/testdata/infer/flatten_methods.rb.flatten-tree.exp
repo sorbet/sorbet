@@ -1,0 +1,77 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Child)
+          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
+  end
+  class ::Parent<<C Parent>> < (::<todo sym>)
+    <emptyTree>
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"x" => ::Integer}).void()
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"x" => ::Integer}).void()
+        end
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+
+    def self.takes_integer_static(x, <blk>)
+      <emptyTree>
+    end
+
+    def takes_integer_instance(x, <blk>)
+      <emptyTree>
+    end
+  end
+  class ::Child<<C Child>> < (::Parent)
+    <emptyTree>
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.takes_integer_static(<emptyTree>)
+        <self>.takes_integer_static(<emptyTree>)
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+
+    def self.outer_static(<blk>)
+      <self>.takes_integer_static(:"inner_static")
+    end
+
+    def outer_instance(<blk>)
+      <self>.takes_integer_instance(:"inner_instance")
+    end
+
+    def self.inner_static(<blk>)
+      <emptyTree>
+    end
+
+    def inner_instance(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

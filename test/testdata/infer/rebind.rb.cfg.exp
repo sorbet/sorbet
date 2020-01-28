@@ -17,24 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::C#only_on_C" {
-    label = "::C#only_on_C";
-    color = blue;
-    "bb::C#only_on_C_0" [shape = invhouse];
-    "bb::C#only_on_C_1" [shape = parallelogram];
-
-    "bb::C#only_on_C_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: C = cast(<self>: NilClass, C);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::C#only_on_C_0" -> "bb::C#only_on_C_1" [style="bold"];
-    "bb::C#only_on_C_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::C#only_on_C_1" -> "bb::C#only_on_C_1" [style="bold"];
-}
-
 subgraph "cluster_::<Class:C>#<static-init>" {
     label = "::<Class:C>#<static-init>";
     color = blue;
@@ -53,22 +35,22 @@ subgraph "cluster_::<Class:C>#<static-init>" {
     "bb::<Class:C>#<static-init>_1" -> "bb::<Class:C>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::B#only_on_B" {
-    label = "::B#only_on_B";
+subgraph "cluster_::C#only_on_C" {
+    label = "::C#only_on_C";
     color = blue;
-    "bb::B#only_on_B_0" [shape = invhouse];
-    "bb::B#only_on_B_1" [shape = parallelogram];
+    "bb::C#only_on_C_0" [shape = invhouse];
+    "bb::C#only_on_C_1" [shape = parallelogram];
 
-    "bb::B#only_on_B_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: B = cast(<self>: NilClass, B);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    "bb::C#only_on_C_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: C = cast(<self>: NilClass, C);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb::B#only_on_B_0" -> "bb::B#only_on_B_1" [style="bold"];
-    "bb::B#only_on_B_1" [
+    "bb::C#only_on_C_0" -> "bb::C#only_on_C_1" [style="bold"];
+    "bb::C#only_on_C_1" [
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
-    "bb::B#only_on_B_1" -> "bb::B#only_on_B_1" [style="bold"];
+    "bb::C#only_on_C_1" -> "bb::C#only_on_C_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:B>#<static-init>" {
@@ -106,22 +88,22 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     "bb::<Class:B>#<static-init>_5" -> "bb::<Class:B>#<static-init>_2" [style="bold"];
 }
 
-subgraph "cluster_::<Class:A>#mySig" {
-    label = "::<Class:A>#mySig";
+subgraph "cluster_::B#only_on_B" {
+    label = "::B#only_on_B";
     color = blue;
-    "bb::<Class:A>#mySig_0" [shape = invhouse];
-    "bb::<Class:A>#mySig_1" [shape = parallelogram];
+    "bb::B#only_on_B_0" [shape = invhouse];
+    "bb::B#only_on_B_1" [shape = parallelogram];
 
-    "bb::<Class:A>#mySig_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    "bb::B#only_on_B_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: B = cast(<self>: NilClass, B);\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
-    "bb::<Class:A>#mySig_0" -> "bb::<Class:A>#mySig_1" [style="bold"];
-    "bb::<Class:A>#mySig_1" [
+    "bb::B#only_on_B_0" -> "bb::B#only_on_B_1" [style="bold"];
+    "bb::B#only_on_B_1" [
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
-    "bb::<Class:A>#mySig_1" -> "bb::<Class:A>#mySig_1" [style="bold"];
+    "bb::B#only_on_B_1" -> "bb::B#only_on_B_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:A>#<static-init>" {
@@ -157,6 +139,42 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     ];
 
     "bb::<Class:A>#<static-init>_5" -> "bb::<Class:A>#<static-init>_2" [style="bold"];
+}
+
+subgraph "cluster_::<Class:A>#mySig" {
+    label = "::<Class:A>#mySig";
+    color = blue;
+    "bb::<Class:A>#mySig_0" [shape = invhouse];
+    "bb::<Class:A>#mySig_1" [shape = parallelogram];
+
+    "bb::<Class:A>#mySig_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#mySig_0" -> "bb::<Class:A>#mySig_1" [style="bold"];
+    "bb::<Class:A>#mySig_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#mySig_1" -> "bb::<Class:A>#mySig_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Use>#<static-init>" {
+    label = "::<Class:Use>#<static-init>";
+    color = blue;
+    "bb::<Class:Use>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Use>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Use>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Use) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Use>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Use>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$6: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(Use) = <self>: T.class_of(Use).extend(<statTemp>$5: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Use>#<static-init>_0" -> "bb::<Class:Use>#<static-init>_1" [style="bold"];
+    "bb::<Class:Use>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Use>#<static-init>_1" -> "bb::<Class:Use>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::Use#only_on_Use" {
@@ -262,24 +280,6 @@ subgraph "cluster_::Use#jumpBetweenClasses" {
     ];
 
     "bb::Use#jumpBetweenClasses_9" -> "bb::Use#jumpBetweenClasses_6" [style="bold"];
-}
-
-subgraph "cluster_::<Class:Use>#<static-init>" {
-    label = "::<Class:Use>#<static-init>";
-    color = blue;
-    "bb::<Class:Use>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:Use>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:Use>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Use) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Use>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Use>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$5: T.class_of(T) = alias <C T>\l<returnMethodTemp>$2: T.class_of(Use) = <self>: T.class_of(Use).extend(<statTemp>$4: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(Use)\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Use>#<static-init>_0" -> "bb::<Class:Use>#<static-init>_1" [style="bold"];
-    "bb::<Class:Use>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Use>#<static-init>_1" -> "bb::<Class:Use>#<static-init>_1" [style="bold"];
 }
 
 }

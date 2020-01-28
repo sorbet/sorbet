@@ -57,11 +57,21 @@ InsSeq{
       rhs = [
         EmptyTree
 
-        EmptyTree
-
-        EmptyTree
-
-        EmptyTree
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<U <static-init>>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = InsSeq{
+            stats = [
+              EmptyTree
+              EmptyTree
+              EmptyTree
+            ],
+            expr = EmptyTree
+          }
+        }
 
         MethodDef{
           flags = 0
@@ -246,15 +256,6 @@ InsSeq{
               localVariable = <U g>
             }]
           rhs = Literal{ value = 2 }
-        }
-
-        MethodDef{
-          flags = self
-          name = <U <static-init>><<U <static-init>>>
-          args = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = EmptyTree
         }
       ]
     }

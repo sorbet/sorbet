@@ -3,21 +3,19 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def baz1(<blk>)
       begin
@@ -78,10 +76,6 @@ begin
       while true
         b = 1
       end
-    end
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

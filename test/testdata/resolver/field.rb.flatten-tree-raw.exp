@@ -11,7 +11,14 @@ InsSeq{
       rhs = [
         EmptyTree
 
-        EmptyTree
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
+        }
 
         MethodDef{
           flags = 0
@@ -30,15 +37,6 @@ InsSeq{
               localVariable = <U a>
             }
           }
-        }
-
-        MethodDef{
-          flags = self
-          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          args = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = EmptyTree
         }
       ]
     }

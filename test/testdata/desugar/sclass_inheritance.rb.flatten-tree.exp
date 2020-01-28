@@ -3,16 +3,6 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    def main(<blk>)
-      begin
-        <self>.puts(::A.newer())
-        <self>.puts(::B.newer())
-        <self>.puts(::C.newerer())
-      end
-    end
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -36,8 +26,17 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
+        <emptyTree>
         <self>.main()
         <emptyTree>
+      end
+    end
+
+    def main(<blk>)
+      begin
+        <self>.puts(::A.newer())
+        <self>.puts(::B.newer())
+        <self>.puts(::C.newerer())
       end
     end
   end
@@ -58,27 +57,31 @@ begin
   class <singleton class><<Class:A>> < (::MM)
     <emptyTree>
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.include(::MM)
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def newer(<blk>)
       ::<Magic>.<self-new>(<self>)
-    end
-
-    def self.<static-init>(<blk>)
-      <self>.include(::MM)
     end
   end
   class ::B<<C B>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::MM)
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def self.newer(<blk>)
       ::<Magic>.<self-new>(<self>)
-    end
-
-    def self.<static-init>(<blk>)
-      <self>.extend(::MM)
     end
   end
   class ::C<<C C>> < (::A)
@@ -92,14 +95,12 @@ begin
   class <singleton class><<Class:C>> < ()
     <emptyTree>
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
 
     def newerer(<blk>)
       <self>.newer()
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

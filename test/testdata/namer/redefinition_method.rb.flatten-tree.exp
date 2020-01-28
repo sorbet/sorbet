@@ -12,11 +12,18 @@ begin
   class ::Main<<C Main>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"a" => ::Integer}).returns(::Integer)
+        end
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def foo<foo$1>(a, <blk>)
       a
@@ -28,16 +35,6 @@ begin
 
     def foo(a, b, c, <blk>)
       <emptyTree>
-    end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"a" => ::Integer}).returns(::Integer)
-        end
-        <emptyTree>
-      end
     end
   end
   <emptyTree>

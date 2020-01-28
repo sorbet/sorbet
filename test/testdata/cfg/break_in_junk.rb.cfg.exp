@@ -1,22 +1,4 @@
 digraph "break_in_junk.rb" {
-subgraph "cluster_::Object#foo" {
-    label = "::Object#foo";
-    color = blue;
-    "bb::Object#foo_0" [shape = invhouse];
-    "bb::Object#foo_1" [shape = parallelogram];
-
-    "bb::Object#foo_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnTemp>$3: Integer(5) = 5\l<block-break-assign>$4: Integer(5) = <returnTemp>$3\l<unconditional>\l"
-    ];
-
-    "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
-    ];
-
-    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-}
-
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
@@ -33,6 +15,24 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
+    color = blue;
+    "bb::Object#foo_0" [shape = invhouse];
+    "bb::Object#foo_1" [shape = parallelogram];
+
+    "bb::Object#foo_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnTemp>$3: Integer(5) = 5\l<block-break-assign>$4: Integer(5) = <returnTemp>$3\l<unconditional>\l"
+    ];
+
+    "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
+
+    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
 }
 
 }

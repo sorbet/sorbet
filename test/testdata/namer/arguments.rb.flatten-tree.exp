@@ -12,11 +12,14 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def take_arguments(a, b, c, d, e, f, g)
       begin
@@ -34,10 +37,6 @@ begin
 
     def take_arguments<defaultArg>2(a, b, c, d, e, f, g)
       2
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

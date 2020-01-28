@@ -27,17 +27,17 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def foo(<blk>)
       begin
@@ -66,10 +66,6 @@ begin
     end
 
     def self.sfoos(<blk>)
-      <emptyTree>
-    end
-
-    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
