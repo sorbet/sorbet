@@ -94,24 +94,6 @@ suggest-sig.rb:32: This function does not have a `sig` https://srb.help/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^
 
-suggest-sig.rb:34: This function does not have a `sig` https://srb.help/7017
-    34 |private def root_private; end
-                ^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    suggest-sig.rb:34: Inserted `sig {returns(NilClass)}
-`
-    34 |private def root_private; end
-        ^
-
-suggest-sig.rb:36: This function does not have a `sig` https://srb.help/7017
-    36 |protected def root_protected; end
-                  ^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    suggest-sig.rb:36: Inserted `sig {returns(NilClass)}
-`
-    36 |protected def root_protected; end
-        ^
-
 suggest-sig.rb:46: This function does not have a `sig` https://srb.help/7017
     46 |def foo(a)
         ^^^^^^^^^^
@@ -229,6 +211,24 @@ suggest-sig.rb:135: Method `generated` does not exist on `T::Private::Methods::D
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L128: Did you mean: `Class#inherited`?
      128 |  def inherited(arg0); end
             ^^^^^^^^^^^^^^^^^^^
+
+suggest-sig.rb:34: This function does not have a `sig` https://srb.help/7017
+    34 |private def root_private; end
+                ^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:34: Inserted `sig {returns(NilClass)}
+`
+    34 |private def root_private; end
+        ^
+
+suggest-sig.rb:36: This function does not have a `sig` https://srb.help/7017
+    36 |protected def root_protected; end
+                  ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig.rb:36: Inserted `sig {returns(NilClass)}
+`
+    36 |protected def root_protected; end
+        ^
 
 suggest-sig.rb:41: This function does not have a `sig` https://srb.help/7017
     41 |  private def a_private; end
