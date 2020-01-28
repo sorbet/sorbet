@@ -2,7 +2,6 @@
 #define SORBET_KEYVALUESTORE_H
 #include "absl/synchronization/mutex.h"
 #include "common/common.h"
-#include "lmdb.h"
 #include <thread>
 namespace sorbet {
 
@@ -12,13 +11,11 @@ namespace sorbet {
  * Creating KeyValueStore grabs a lock and allows to have consistent view over database.
  */
 class KeyValueStore {
-    MDB_env *env;
-    MDB_dbi dbi;
-    MDB_txn *txn;
     const std::string path;
     const std::string flavor;
     const std::thread::id writerId;
-    UnorderedMap<std::thread::id, MDB_txn *> readers;
+    struct DBState;
+    std::unique_ptr<DBState> dbState;
     absl::Mutex readers_mtx;
     bool commited = false;
 

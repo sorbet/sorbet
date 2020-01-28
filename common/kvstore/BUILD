@@ -1,14 +1,9 @@
 cc_library(
     name = "kvstore",
-    srcs = glob(
-        [
-            "*.cc",
-            "*.h",
-        ],
-
-        # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-        exclude = ["flycheck_*"],
-    ),
+    srcs = select({
+        "//tools/config:webasm": ["KeyValueStore-emscripten.cc"],
+        "//conditions:default": ["KeyValueStore.cc"],
+    }),
     hdrs = [
         "KeyValueStore.h",
     ],
@@ -25,6 +20,8 @@ cc_library(
         "//common",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
-        "@lmdb",
-    ],
+    ] + select({
+        "//tools/config:webasm": [],
+        "//conditions:default": ["@lmdb"],
+    }),
 )
