@@ -213,6 +213,14 @@ unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs,
     return make_unique<Location>(uri, std::move(range));
 }
 
+vector<string> LSPConfiguration::frefsToPaths(const core::GlobalState &gs, const vector<core::FileRef> &refs) const {
+    vector<string> paths;
+    paths.resize(refs.size());
+    std::transform(refs.begin(), refs.end(), paths.begin(),
+                   [&gs](const auto &ref) -> string { return string(ref.data(gs).path()); });
+    return paths;
+}
+
 bool LSPConfiguration::isFileIgnored(string_view filePath) const {
     return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
 }

@@ -83,7 +83,7 @@ class SlowPathTypecheckTask : public core::lsp::Task {
     LSPFileUpdates updates;
     WorkerPool &workers;
     absl::Notification startedNotification;
-    unique_ptr<Timer> timeUntilRun;
+    unique_ptr<Timer> latencyCancelSlowPath;
 
 public:
     SlowPathTypecheckTask(const LSPConfiguration &config, LSPTypechecker &typechecker, LSPFileUpdates updates,
@@ -91,13 +91,13 @@ public:
         : typechecker(typechecker), updates(move(updates)), workers(workers) {
         if (updates.canceledSlowPath) {
             // Measure the time it takes to cancel slow path and run this task
-            timeUntilRun = make_unique<Timer>(*config.logger, "latency.cancel_slow_path");
+            latencyCancelSlowPath = make_unique<Timer>(*config.logger, "latency.cancel_slow_path");
         }
     };
 
     void run() override {
         // Trigger destructor of Timer, which reports metric.
-        timeUntilRun = nullptr;
+        latencyCancelSlowPath = nullptr;
         // Inform the epoch manager that we're going to perform a cancelable typecheck, then notify the
         // message processing thread that it's safe to move on.
         typechecker.state().epochManager->startCommitEpoch(updates.epoch);

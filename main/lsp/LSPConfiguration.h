@@ -99,6 +99,7 @@ public:
     const LSPClientConfiguration &getClientConfig() const;
     core::FileRef uri2FileRef(const core::GlobalState &gs, std::string_view uri) const;
     std::string fileRef2Uri(const core::GlobalState &gs, const core::FileRef) const;
+    std::vector<std::string> frefsToPaths(const core::GlobalState &gs, const std::vector<core::FileRef> &refs) const;
     std::string remoteName2Local(std::string_view uri) const;
     std::string localName2Remote(std::string_view filePath) const;
     core::Loc lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) const;

@@ -17,6 +17,7 @@ cc_library(
         "LSPTask.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",
+        "UndoState.h",
     ],
     hdrs = [
         "LSPConfiguration.h",

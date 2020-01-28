@@ -42,7 +42,10 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs)
         absl::MutexLock lock(&typecheckMutex);
         // Invariant: Typechecking _cannot_ be canceled before or during a preemption task.
         ENFORCE(!epochManager->wasTypecheckingCanceled());
-        // Save old error queue and replace so new operation starts fresh
+        // The error queue is where typechecking puts all typechecking errors. For a given edit, Sorbet LSP runs
+        // typechecking and then drains the error queue. If we failed to temporarily swap it out during preemption, the
+        // preempted task will see all of the errors that have accumulated thus far on the slow path. Thus, we save the
+        // old error queue and replace so new operation starts fresh
         auto previousErrorQueue = move(gs.errorQueue);
         gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer);
         gs.errorQueue->ignoreFlushes = true;

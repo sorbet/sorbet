@@ -46,6 +46,9 @@ public:
     void flushErrors(bool all = false);
     void flushErrorCount();
     void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
+
+    /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
+    bool queueIsEmptyApprox() const;
 };
 
 } // namespace core
