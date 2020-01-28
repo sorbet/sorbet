@@ -175,8 +175,9 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
-unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<ast::Expression> stmt,
-                                         unique_ptr<ast::Expression> &arg, unique_ptr<ast::Expression> &iteratee) {
+unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef eachName,
+                                         unique_ptr<ast::Expression> stmt, ast::MethodDef::ARGS_store &args,
+                                         unique_ptr<ast::Expression> &iteratee) {
     // this statement must be a send
     if (auto send = ast::cast_tree<ast::Send>(stmt.get())) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
@@ -192,7 +193,11 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<as
             body = ast::TreeMap::apply(ctx, constantMover, move(body));
 
             // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
-            auto blk = ast::MK::Block1(send->loc, move(body), arg->deepCopy());
+            ast::MethodDef::ARGS_store new_args;
+            for (auto &arg : args) {
+                new_args.emplace_back(arg->deepCopy());
+            }
+            auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee->deepCopy(), core::Names::each(), move(blk));
             // put that into a method def named the appropriate thing
             auto method = addSigVoid(
@@ -203,25 +208,25 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, unique_ptr<as
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", "test_each");
+        e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
     }
 
     return stmt;
 }
 
 // this just walks the body of a `test_each` and tries to transform every statement
-unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, unique_ptr<ast::Expression> body,
-                                                unique_ptr<ast::Expression> &arg,
+unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName,
+                                                unique_ptr<ast::Expression> body, ast::MethodDef::ARGS_store &args,
                                                 unique_ptr<ast::Expression> &iteratee) {
     auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
     if (bodySeq) {
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, std::move(exp), arg, iteratee);
+            exp = runUnderEach(ctx, eachName, std::move(exp), args, iteratee);
         }
 
-        bodySeq->expr = runUnderEach(ctx, std::move(bodySeq->expr), arg, iteratee);
+        bodySeq->expr = runUnderEach(ctx, eachName, std::move(bodySeq->expr), args, iteratee);
     } else {
-        body = runUnderEach(ctx, std::move(body), arg, iteratee);
+        body = runUnderEach(ctx, eachName, std::move(body), args, iteratee);
     }
 
     return body;
@@ -236,11 +241,13 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         return nullptr;
     }
 
-    if (send->fun == core::Names::testEach() && send->args.size() == 1 && send->block != nullptr) {
-        if (send->block->args.size() != 1) {
+    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->args.size() == 1 &&
+        send->block != nullptr) {
+        if ((send->fun == core::Names::testEach() && send->block->args.size() != 1) ||
+            (send->fun == core::Names::testEachHash() && send->block->args.size() != 2)) {
             if (auto e = ctx.state.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
-                e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", "test_each", 1,
-                            send->block->args.size());
+                e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
+                            1, send->block->args.size());
             }
             return nullptr;
         }
@@ -250,11 +257,11 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         // and then reconstruct the send but with a modified body
         ast::Send::ARGS_store args;
         args.emplace_back(move(send->args.front()));
-        return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
-            ast::MK::Block(send->block->loc,
-                           prepareTestEachBody(ctx, std::move(send->block->body), send->block->args.front(), iteratee),
-                           std::move(send->block->args)));
+        return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
+                             ast::MK::Block(send->block->loc,
+                                            prepareTestEachBody(ctx, send->fun, std::move(send->block->body),
+                                                                send->block->args, iteratee),
+                                            std::move(send->block->args)));
     }
 
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
