@@ -52,13 +52,13 @@ class T::Props::Decorator
   def all_props; end
   def decorated_class; end
   def foreign_prop_get(instance, prop, foreign_class, rules = {}, opts = {}); end
-  def get(instance, prop, rules = {}); end
   def initialize(klass); end
-  def is_nilable?(*args, &blk); end
   def model_inherited(child); end
   def plugin(mod); end
   def prop_defined(name, cls, rules = {}); end
   def prop_get(instance, prop, rules = {}); end
+  def prop_get_if_set(instance, prop, rules = {}); end
+  alias_method :get, :prop_get_if_set
   def prop_rules(prop); end
   def prop_set(instance, prop, value, rules = {}); end
   alias_method :set, :prop_set

@@ -344,7 +344,7 @@ module T::Props::Serializable::DecoratorMethods
   private_constant :EMPTY_EXTRA_PROPS
 
   def extra_props(instance)
-    get(instance, '_extra_props') || EMPTY_EXTRA_PROPS
+    instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
   end
 
   # @override T::Props::PrettyPrintable

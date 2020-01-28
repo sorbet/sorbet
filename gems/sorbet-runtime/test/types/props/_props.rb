@@ -140,6 +140,26 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'ifunset' do
+    before do
+      @doc = SubProps.new
+    end
+
+    it 'is used by getter' do
+      assert_equal(42, @doc.prop2)
+    end
+
+    it 'is used by decorator#prop_get' do
+      assert_equal(42, @doc.class.decorator.prop_get(@doc, :prop2))
+    end
+
+    # This distinction seems subtle and, given that it has no relationship
+    # to the method names, pretty confusing. But code relies on it.
+    it 'is not used by decorator#get' do
+      assert_nil(@doc.class.decorator.get(@doc, :prop2))
+    end
+  end
+
   class TestRedactedProps
     include T::Props
 
