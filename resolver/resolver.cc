@@ -483,12 +483,21 @@ private:
 
         bool ancestorPresent = true;
         if (job.isSuperclass) {
+            if (resolved == core::Symbols::StubModule()) {
+                resolved = core::Symbols::StubSuperClass();
+            }
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolved) {
+                if (resolved.data(ctx)->isClassOrModuleModule()) {
+                    if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::SuperClassModule)) {
+                        e.setHeader("Modules can't be superclasses");
+                    }
+                    resolved = core::Symbols::StubSuperClass();
+                }
                 job.klass.data(ctx)->setSuperClass(resolved);
             } else {
                 if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {

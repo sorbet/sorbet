@@ -32,6 +32,8 @@ module Sorbet::Private::Static
   def self.enumerable_to_h(*arg0); end
 end
 
+class Sorbet::Private::Static::StubSuperClass < BasicObject
+end
 module Sorbet::Private::Static::StubModule
 end
 

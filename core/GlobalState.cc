@@ -508,13 +508,14 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
     // Some of these are Modules
-    Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
     Symbols::StubMixin().data(*this)->setIsModule(true);
+    Symbols::StubModule().data(*this)->setIsModule(true);
 
     // Some of these are Classes
     Symbols::StubSuperClass().data(*this)->setIsModule(false);
-    Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
+    Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::BasicObject());
+    Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass().data(*this)->setIsModule(false);
 
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
