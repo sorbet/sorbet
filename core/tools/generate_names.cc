@@ -310,6 +310,7 @@ NameDef names[] = {
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
     {"keepForTypechecking", "keep_for_typechecking"},
+    {"keepMethodDef", "keep_method_def"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
 
     {"isA_p", "is_a?"},

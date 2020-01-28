@@ -18,6 +18,22 @@ module Sorbet::Private::Static
   def self.keep_for_typechecking(expr)
   end
 
+  sig do
+    type_parameters(:U)
+      .params(fun: T.all(T.type_parameter(:U), Symbol))
+      .returns(T.type_parameter(:U))
+  end
+  def self.keep_method_def(fun)
+  end
+
+  sig do
+    type_parameters(:U)
+      .params(fun: T.all(T.type_parameter(:U), Symbol))
+      .returns(T.type_parameter(:U))
+  end
+  def self.keep_class_method_def(fun)
+  end
+
   # Used to implement Enumerable#to_h, which forwards here in C++.
   #
   # Implemented this way because we don't have a way to destructure
