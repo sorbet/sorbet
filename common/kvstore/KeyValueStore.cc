@@ -60,7 +60,7 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
 
 void KeyValueStore::write(string_view key, const vector<u1> &value) {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
     MDB_val kv;
     MDB_val dv;
@@ -72,7 +72,7 @@ void KeyValueStore::write(string_view key, const vector<u1> &value) {
     int rc;
     rc = mdb_put(txn, dbi, &kv, &dv, 0);
     if (rc != 0) {
-        throw invalid_argument("failed write into database");
+        throw_mdb_error("failed write into database"sv, rc);
     }
 }
 
@@ -114,7 +114,7 @@ u1 *KeyValueStore::read(string_view key) {
 
 void KeyValueStore::clear() {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
     int rc = mdb_drop(txn, dbi, 0);
     if (rc != 0) {
@@ -151,7 +151,7 @@ void KeyValueStore::writeString(string_view key, string_view value) {
 
 void KeyValueStore::refreshMainTransaction() {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
     auto rc = mdb_txn_begin(env, nullptr, 0, &txn);
     if (rc != 0) {
