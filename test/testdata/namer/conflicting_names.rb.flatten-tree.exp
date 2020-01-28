@@ -12,18 +12,20 @@ begin
   module ::A<<C A>> < ()
     <emptyTree>
 
-    <emptyTree>
-
-    def Foo(<blk>)
-      <emptyTree>
-    end
-
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
+          <emptyTree>
+        end
         <emptyTree>
       end
+    end
+
+    def Foo(<blk>)
+      <emptyTree>
     end
   end
   class ::A::Foo<<C Foo>> < (::<todo sym>)

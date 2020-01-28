@@ -16,18 +16,17 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    def meth(<blk>)
-      [$a, $b, $c]
-    end
-
     def self.<static-init>(<blk>)
       begin
         $b = 2
         $a
         <emptyTree>
+        <emptyTree>
       end
+    end
+
+    def meth(<blk>)
+      [$a, $b, $c]
     end
   end
   <emptyTree>

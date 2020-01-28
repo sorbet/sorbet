@@ -12,21 +12,44 @@ begin
   class ::Test<<C Test>> < (::<todo sym>)
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"x" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"y" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"z" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <self>.sig() do ||
+          <self>.params({:"w" => ::String}).returns(::String)
+        end
+        <emptyTree>
+        <emptyTree>
+      end
+    end
 
     def foo(x, <blk>)
       x
@@ -58,37 +81,6 @@ begin
 
     def baz<defaultArg>1(w, <blk>)
       ""
-    end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"x" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"y" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"z" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"w" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"x" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"y" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"z" => ::String}).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params({:"w" => ::String}).returns(::String)
-        end
-        <emptyTree>
-      end
     end
   end
   <emptyTree>
