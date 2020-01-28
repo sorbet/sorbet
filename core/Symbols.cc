@@ -120,6 +120,9 @@ bool derivesFromModule(const core::Symbol *what, const GlobalState &gs, SymbolRe
         }
     }
     if (what->superClass().exists()) {
+        // normally, we disallow converting SymbolData to Symbol*, but with these functions being performanc
+        // sensitive, we use break glass dirrect call of `operator->`. Please don't cargo cult this, as it elides
+        // safety checks that are the reason why SymbolData exists
         return derivesFromModule(what->superClass().data(gs).operator->(), gs, sym);
     }
     return false;
@@ -127,6 +130,7 @@ bool derivesFromModule(const core::Symbol *what, const GlobalState &gs, SymbolRe
 
 bool derivesFromClass(const core::Symbol *what, const GlobalState &gs, SymbolRef sym) {
     if (what->superClass().exists()) {
+        // see comment in derrivesFromModule
         return sym == what->superClass() || derivesFromClass(what->superClass().data(gs).operator->(), gs, sym);
     }
     return false;
