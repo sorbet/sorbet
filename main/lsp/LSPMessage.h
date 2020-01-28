@@ -1,11 +1,8 @@
 #ifndef RUBY_TYPER_LSP_LSPMESSAGE_H
 #define RUBY_TYPER_LSP_LSPMESSAGE_H
 
-#include "common/Counters.h"
 #include "common/Timer.h"
 #include "main/lsp/json_types.h"
-#include "rapidjson/document.h"
-#include <chrono>
 #include <variant>
 
 namespace sorbet::realmain::lsp {
@@ -28,6 +25,8 @@ public:
     int asInt() const;
     bool isString() const;
     std::string asString() const;
+    bool isNull() const;
+    bool equals(const MessageId &id) const;
 };
 
 /**
@@ -40,7 +39,6 @@ public:
 
 private:
     RawLSPMessage msg;
-    bool canceled = false;
 
 public:
     /**
@@ -55,30 +53,15 @@ public:
     LSPMessage(rapidjson::Document &d);
     LSPMessage(const std::string &json);
 
-    /** A tracer for following LSP message in time traces. May contain multiple tracers if other messages were merged
-     * into this one.*/
-    std::vector<FlowId> startTracers;
-    /** Used to calculate latency of message processing. If this message represents multiple edits, it contains the
-     * oldest timer.*/
-    std::unique_ptr<Timer> timer;
-    /** A more specific timer for the given method. Used to track latency for specific types of requests. */
-    std::unique_ptr<Timer> methodTimer;
-
-    /** If `true`, then this LSPMessage contains a canceled LSP request. */
-    bool isCanceled() const;
-
-    /** Cancels this message. */
-    void cancel();
+    /**
+     * Tracks the latency of this specific message.
+     */
+    std::unique_ptr<Timer> latencyTimer;
 
     /**
      * Returns an ID if the message has one. Otherwise, returns nullopt.
      */
     std::optional<MessageId> id() const;
-
-    /**
-     * If `true`, this message can be delayed in favor of processing newer requests sooner (like file updates).
-     */
-    bool isDelayable() const;
 
     /**
      * Returns true if this is a request message.

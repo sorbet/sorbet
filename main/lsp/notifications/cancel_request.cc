@@ -1,0 +1,21 @@
+#include "main/lsp/notifications/cancel_request.h"
+#include "main/lsp/LSPPreprocessor.h"
+
+using namespace std;
+namespace sorbet::realmain::lsp {
+
+CancelRequestTask::CancelRequestTask(const LSPConfiguration &config, unique_ptr<CancelParams> params)
+    : LSPTask(config, LSPMethod::$CancelRequest), params(move(params)) {}
+
+LSPTask::Phase CancelRequestTask::finalPhase() const {
+    return LSPTask::Phase::PREPROCESS;
+}
+
+void CancelRequestTask::preprocess(LSPPreprocessor &preprocessor) {
+    prodCategoryCounterInc("lsp.messages.processed", "cancelRequest");
+    preprocessor.cancelRequest(*params);
+}
+
+void CancelRequestTask::run(LSPTypecheckerDelegate &tc) {}
+
+} // namespace sorbet::realmain::lsp

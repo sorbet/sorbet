@@ -1,8 +1,11 @@
 #include "main/lsp/LSPTypecheckerCoordinator.h"
 #include "absl/synchronization/notification.h"
 #include "core/lsp/PreemptionTaskManager.h"
+#include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPTask.h"
+#include "main/lsp/notifications/initialized.h"
+#include "main/lsp/notifications/sorbet_workspace_edit.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -22,6 +25,7 @@ class TypecheckerTask final : public core::lsp::Task {
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
     const bool collectCounters;
+    absl::Notification started;
     absl::Notification complete;
     CounterState counters;
     unique_ptr<Timer> timeUntilRun;
@@ -44,6 +48,7 @@ public:
     void run() override {
         // Destruct timer, if specified. Causes metric to be reported.
         timeUntilRun = nullptr;
+        started.Notify();
         task->run(*delegate);
         if (collectCounters) {
             counters = getAndClearThreadCounters();
@@ -59,58 +64,22 @@ public:
     }
 };
 
-// Special internal tasks that directly operate on `LSPTypechecker`. These are the only tasks that are allowed to
-// directly access `LSPTypechecker` (because they do special things). Thus, only `LSPTypecheckerCoordinator` is
-// allowed/able to create them.
-// TODO(jvilk): These implement `LSPTask` for the convenient `blockUntilComplete` method. Should we move that method
-// to `Task` directly?
-
-class InitializeTask : public LSPTask {
+class DangerousTypecheckerTask : public core::lsp::Task {
+    unique_ptr<LSPDangerousTypecheckerTask> task;
     LSPTypechecker &typechecker;
-    LSPFileUpdates updates;
-
-public:
-    InitializeTask(const LSPConfiguration &config, LSPTypechecker &typechecker, LSPFileUpdates updates)
-        : LSPTask(config, true), typechecker(typechecker), updates(move(updates)){};
-
-    void run(LSPTypecheckerDelegate &tcd) override {
-        typechecker.initialize(move(updates), tcd.workers);
-    }
-};
-
-class SlowPathTypecheckTask : public core::lsp::Task {
-    LSPTypechecker &typechecker;
-    LSPFileUpdates updates;
     WorkerPool &workers;
-    absl::Notification startedNotification;
-    unique_ptr<Timer> latencyCancelSlowPath;
 
 public:
-    SlowPathTypecheckTask(const LSPConfiguration &config, LSPTypechecker &typechecker, LSPFileUpdates updates,
-                          WorkerPool &workers)
-        : typechecker(typechecker), updates(move(updates)), workers(workers) {
-        if (updates.canceledSlowPath) {
-            // Measure the time it takes to cancel slow path and run this task
-            latencyCancelSlowPath = make_unique<Timer>(*config.logger, "latency.cancel_slow_path");
-        }
-    };
+    DangerousTypecheckerTask(unique_ptr<LSPDangerousTypecheckerTask> task, LSPTypechecker &typechecker,
+                             WorkerPool &workers)
+        : task(move(task)), typechecker(typechecker), workers(workers){};
 
     void run() override {
-        // Trigger destructor of Timer, which reports metric.
-        latencyCancelSlowPath = nullptr;
-        // Inform the epoch manager that we're going to perform a cancelable typecheck, then notify the
-        // message processing thread that it's safe to move on.
-        typechecker.state().epochManager->startCommitEpoch(updates.epoch);
-        startedNotification.Notify();
-        // Only report stats if the edit was committed.
-        if (!typechecker.typecheck(move(updates), workers)) {
-            prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
-            prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", updates.editCount - 1);
-        }
+        task->runSpecial(typechecker, workers);
     }
 
-    void waitUntilStarted() {
-        startedNotification.WaitForNotification();
+    void blockUntilReady() {
+        task->schedulerWaitUntilReady();
     }
 };
 
@@ -122,7 +91,11 @@ class ShutdownTask : public LSPTask {
 public:
     ShutdownTask(const LSPConfiguration &config, LSPTypechecker &typechecker, bool &shouldTerminate,
                  unique_ptr<core::GlobalState> &gs)
-        : LSPTask(config, true), typechecker(typechecker), shouldTerminate(shouldTerminate), gs(gs) {}
+        : LSPTask(config, LSPMethod::Exit), typechecker(typechecker), shouldTerminate(shouldTerminate), gs(gs) {}
+
+    bool canPreempt(const LSPIndexer &indexer) const override {
+        return false;
+    }
 
     void run(LSPTypecheckerDelegate &_) override {
         shouldTerminate = true;
@@ -148,38 +121,43 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
 }
 
 void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
-    // All single-threaded tasks can preempt.
-    const bool canPreempt = !task->enableMultithreading;
-    absl::Notification notification;
     auto wrappedTask = make_shared<TypecheckerTask>(
-        move(task), make_unique<LSPTypecheckerDelegate>(canPreempt ? *emptyWorkers : workers, typechecker),
-        hasDedicatedThread);
+        move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
 
-    // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
-    wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
-    if (canPreempt && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
-        // Preempted; task is guaranteed to run by interrupting the slow path.
-    } else {
-        // Did not preempt, so don't collect a latency metric.
-        wrappedTask->cancelTimeLatencyUntilRun();
-        asyncRunInternal(wrappedTask);
-    }
-
+    asyncRunInternal(wrappedTask);
     wrappedTask->blockUntilComplete();
 }
 
-void LSPTypecheckerCoordinator::initialize(LSPFileUpdates initialUpdate) {
-    // TODO: Make an async task when we land preemptible slow path, where the typecheck is async.
-    syncRun(make_unique<InitializeTask>(*config, typechecker, move(initialUpdate)));
+shared_ptr<core::lsp::Task>
+LSPTypecheckerCoordinator::trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask) {
+    auto wrappedTask = make_shared<TypecheckerTask>(
+        move(preemptTask), make_unique<LSPTypecheckerDelegate>(*emptyWorkers, typechecker), hasDedicatedThread);
+    // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
+    wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
+    if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
+        // Preempted; task is guaranteed to run by interrupting the slow path.
+        return wrappedTask;
+    } else {
+        // Did not preempt, so don't collect a latency metric.
+        wrappedTask->cancelTimeLatencyUntilRun();
+        return nullptr;
+    }
 }
 
-void LSPTypecheckerCoordinator::typecheckOnSlowPath(LSPFileUpdates updates) {
-    // Since this is async, _don't_ collect stats from the typechecker thread. The next sync task will collect them.
-    auto t = make_shared<SlowPathTypecheckTask>(*config, typechecker, move(updates), workers);
-    asyncRunInternal(t);
-    // Wait until the slow path has started and has informed the epoch manager that it can be canceled.
-    // (Otherwise, message processing thread will think there's no slow path to cancel.)
-    t->waitUntilStarted();
+bool LSPTypecheckerCoordinator::tryCancelPreemption(shared_ptr<core::lsp::Task> &preemptTask) {
+    return preemptionTaskManager->tryCancelScheduledPreemptionTask(preemptTask);
+}
+
+void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedTask> initializedTask) {
+    auto dangerousTask = make_shared<DangerousTypecheckerTask>(move(initializedTask), typechecker, workers);
+    asyncRunInternal(dangerousTask);
+    dangerousTask->blockUntilReady();
+}
+
+void LSPTypecheckerCoordinator::typecheckOnSlowPath(unique_ptr<SorbetWorkspaceEditTask> editTask) {
+    auto dangerousTask = make_shared<DangerousTypecheckerTask>(move(editTask), typechecker, workers);
+    asyncRunInternal(dangerousTask);
+    dangerousTask->blockUntilReady();
 }
 
 unique_ptr<core::GlobalState> LSPTypecheckerCoordinator::shutdown() {

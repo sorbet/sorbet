@@ -71,7 +71,11 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 
 DocumentSymbolTask::DocumentSymbolTask(const LSPConfiguration &config, MessageId id,
                                        std::unique_ptr<DocumentSymbolParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentDocumentSymbol), params(move(params)) {}
+
+bool DocumentSymbolTask::isDelayable() const {
+    return true;
+}
 
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);

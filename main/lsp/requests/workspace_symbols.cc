@@ -271,7 +271,11 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
 
 WorkspaceSymbolsTask::WorkspaceSymbolsTask(const LSPConfiguration &config, MessageId id,
                                            unique_ptr<WorkspaceSymbolParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::WorkspaceSymbol), params(move(params)) {}
+
+bool WorkspaceSymbolsTask::isDelayable() const {
+    return true;
+}
 
 unique_ptr<ResponseMessage> WorkspaceSymbolsTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");

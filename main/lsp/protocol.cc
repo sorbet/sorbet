@@ -6,6 +6,7 @@
 #include "lsp.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPPreprocessor.h"
+#include "main/lsp/LSPTask.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
 #include "main/options/options.h" // For EarlyReturnWithCode.
 #include <iostream>
@@ -14,6 +15,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+namespace {
 class NotifyOnDestruction {
     absl::Mutex &mutex;
     bool &flag;
@@ -45,142 +47,63 @@ CounterState mergeCounters(CounterState counters) {
     return getAndClearThreadCounters();
 }
 
-void tagNewRequest(const std::shared_ptr<spd::logger> &logger, LSPMessage &msg) {
-    Timer timeit(logger, "tagNewRequest");
-    msg.startTracers.push_back(timeit.getFlowEdge());
+void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
     // TODO(jvilk): This should actually be named latency...
-    msg.timer = make_unique<Timer>(logger, "processing_time");
-
-    // Measure the latency of specific operations we care about separately.
-    // Done in a verbose way because timer names need to be char[] strings.
-    if (!msg.isResponse()) {
-        // Unless grouped, the methods below are in alphabetical order.
-        switch (msg.method()) {
-            case LSPMethod::$CancelRequest:
-            case LSPMethod::Exit:
-            case LSPMethod::PAUSE:
-            case LSPMethod::RESUME:
-            case LSPMethod::Shutdown:
-            case LSPMethod::SorbetError:
-            case LSPMethod::SorbetFence:
-            case LSPMethod::SorbetShowOperation:
-            case LSPMethod::SorbetTypecheckRunInfo:
-            case LSPMethod::TextDocumentPublishDiagnostics:
-            case LSPMethod::WindowShowMessage:
-                // Not a request we care about. Bucket it in case it gets large.
-                msg.methodTimer = make_unique<Timer>(logger, "latency.other");
-                break;
-            case LSPMethod::Initialize:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.initialize");
-                break;
-            case LSPMethod::Initialized:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.initialized");
-                break;
-            case LSPMethod::SorbetReadFile:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.sorbetreadfile");
-                break;
-            case LSPMethod::SorbetWatchmanFileChange:
-            case LSPMethod::SorbetWorkspaceEdit:
-            case LSPMethod::TextDocumentDidChange:
-            case LSPMethod::TextDocumentDidClose:
-            case LSPMethod::TextDocumentDidOpen:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.fileedit");
-                break;
-            case LSPMethod::TextDocumentCodeAction:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.codeaction");
-                break;
-            case LSPMethod::TextDocumentCompletion:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.completion");
-                break;
-            case LSPMethod::TextDocumentDefinition:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.definition");
-                break;
-            case LSPMethod::TextDocumentDocumentHighlight:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.documenthighlight");
-                break;
-            case LSPMethod::TextDocumentDocumentSymbol:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.documentsymbol");
-                break;
-            case LSPMethod::TextDocumentHover:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.hover");
-                break;
-            case LSPMethod::TextDocumentReferences:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.references");
-                break;
-            case LSPMethod::TextDocumentSignatureHelp:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.signaturehelp");
-                break;
-            case LSPMethod::TextDocumentTypeDefinition:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.typedefinition");
-                break;
-            case LSPMethod::WorkspaceSymbol:
-                msg.methodTimer = make_unique<Timer>(logger, "latency.workspacesymbol");
-                break;
-        }
-    }
+    msg.latencyTimer = make_unique<Timer>(logger, "processing_time");
 }
+} // namespace
 
-unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
-                                                      QueueState &processingQueue, absl::Mutex &processingMtx) {
-    return runInAThread("lspPreprocess", [this, &incomingQueue, &incomingMtx, &processingQueue, &processingMtx] {
+unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex) {
+    return runInAThread("lspPreprocess", [this, &messageQueue, &messageQueueMutex] {
         // Propagate the termination flag across the two queues.
-        NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
-        NotifyOnDestruction notifyProcessing(processingMtx, processingQueue.terminate);
+        NotifyOnDestruction notifyIncoming(messageQueueMutex, messageQueue.terminate);
+        NotifyOnDestruction notifyProcessing(*taskQueueMutex, ABSL_TS_UNCHECKED_READ(taskQueue)->terminate);
         owner = this_thread::get_id();
         while (true) {
             unique_ptr<LSPMessage> msg;
             {
-                absl::MutexLock lck(&incomingMtx);
-                incomingMtx.Await(absl::Condition(
-                    +[](QueueState *incomingQueue) -> bool {
-                        return incomingQueue->terminate || !incomingQueue->pendingRequests.empty();
+                absl::MutexLock lck(&messageQueueMutex);
+                messageQueueMutex.Await(absl::Condition(
+                    +[](MessageQueueState *messageQueue) -> bool {
+                        return messageQueue->terminate || !messageQueue->pendingRequests.empty();
                     },
-                    &incomingQueue));
+                    &messageQueue));
                 // Only terminate once incoming queue is drained.
-                if (incomingQueue.terminate && incomingQueue.pendingRequests.empty()) {
+                if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
                     config->logger->debug("Preprocessor terminating");
                     return;
                 }
-                msg = move(incomingQueue.pendingRequests.front());
-                incomingQueue.pendingRequests.pop_front();
+                msg = move(messageQueue.pendingRequests.front());
+                messageQueue.pendingRequests.pop_front();
                 // Combine counters with this thread's counters.
-                if (!incomingQueue.counters.hasNullCounters()) {
-                    counterConsume(move(incomingQueue.counters));
+                if (!messageQueue.counters.hasNullCounters()) {
+                    counterConsume(move(messageQueue.counters));
                 }
             }
 
-            preprocessAndEnqueue(processingQueue, move(msg), processingMtx);
+            preprocessAndEnqueue(move(msg));
 
             {
-                absl::MutexLock lck(&processingMtx);
+                absl::MutexLock lck(taskQueueMutex.get());
                 // Merge the counters from all of the worker threads with those stored in
                 // processingQueue.
-                processingQueue.counters = mergeCounters(move(processingQueue.counters));
+                taskQueue->counters = mergeCounters(move(taskQueue->counters));
             }
         }
     });
 }
 
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
-    // Naming convention: thread that executes this function is called typechecking thread
+    // Naming convention: thread that executes this function is called processing thread
 
-    // ErrorQueue asserts that the thread that created it is the one that uses it, but runLSP might be run on a
-    // different thread than the one that created `LSPLoop`. Thus, create a new one.
-    initialGS->errorQueue = make_shared<core::ErrorQueue>(initialGS->errorQueue->logger, initialGS->errorQueue->tracer);
-    initialGS->errorQueue->ignoreFlushes = true;
-
-    // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
+    // Message queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).
-    absl::Mutex incomingMtx;
-    QueueState incomingQueue;
+    absl::Mutex messageQueueMutex;
+    MessageQueueState messageQueue;
 
     // Notifies threads once LSP is initialized. Used to prevent Watchman thread from enqueueing messages that mutate
     // file state until after initialization.
     absl::Notification initializedNotification;
-
-    // Processing queue contains preprocessed messages that are ready to be processed (e.g., edits are merged).
-    absl::Mutex processingMtx;
-    QueueState processingQueue;
 
     auto typecheckThread = typecheckerCoord.startTypecheckerThread();
 
@@ -197,7 +120,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         // The lambda below intentionally does not capture `this`.
         watchmanProcess = make_unique<watchman::WatchmanProcess>(
             logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-            [&incomingQueue, &incomingMtx, logger = logger,
+            [&messageQueueMutex, &messageQueue, logger = logger,
              &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
                 auto notifMsg =
                     make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
@@ -205,95 +128,146 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 // Don't start enqueueing requests until LSP is initialized.
                 initializedNotification.WaitForNotification();
                 {
-                    absl::MutexLock lck(&incomingMtx);
-                    tagNewRequest(logger, *msg);
-                    incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
-                    incomingQueue.pendingRequests.push_back(move(msg));
+                    absl::MutexLock lck(&messageQueueMutex);
+                    tagNewRequest(*logger, *msg);
+                    messageQueue.counters = mergeCounters(move(messageQueue.counters));
+                    messageQueue.pendingRequests.push_back(move(msg));
                 }
             },
-            [&incomingQueue, &incomingMtx, logger = logger](int watchmanExitCode) {
+            [&messageQueue, &messageQueueMutex, logger = logger](int watchmanExitCode) {
                 {
-                    absl::MutexLock lck(&incomingMtx);
-                    if (!incomingQueue.terminate) {
-                        incomingQueue.terminate = true;
-                        incomingQueue.errorCode = watchmanExitCode;
+                    absl::MutexLock lck(&messageQueueMutex);
+                    if (!messageQueue.terminate) {
+                        messageQueue.terminate = true;
+                        messageQueue.errorCode = watchmanExitCode;
                     }
                     logger->debug("Watchman terminating");
                 }
             });
     }
 
-    auto readerThread = runInAThread("lspReader", [&incomingQueue, &incomingMtx, logger = logger, input = move(input)] {
-        // Thread that executes this lambda is called reader thread.
-        // This thread _intentionally_ does not capture `this`.
-        NotifyOnDestruction notify(incomingMtx, incomingQueue.terminate);
-        auto timeit = make_unique<Timer>(logger, "getNewRequest");
-        while (true) {
-            auto readResult = input->read();
-            if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
-                // Exit loop if there is an error reading from input.
-                break;
-            }
-            {
-                absl::MutexLock lck(&incomingMtx); // guards guardedState.
-                auto &msg = readResult.message;
-                if (msg) {
-                    tagNewRequest(logger, *msg);
-                    incomingQueue.counters = mergeCounters(move(incomingQueue.counters));
-                    incomingQueue.pendingRequests.push_back(move(msg));
-                    // Reset span now that we've found a request.
-                    timeit = make_unique<Timer>(logger, "getNewRequest");
-                }
-                // Check if it's time to exit.
-                if (incomingQueue.terminate) {
-                    // Another thread exited.
+    auto readerThread =
+        runInAThread("lspReader", [&messageQueue, &messageQueueMutex, logger = logger, input = move(input)] {
+            // Thread that executes this lambda is called reader thread.
+            // This thread _intentionally_ does not capture `this`.
+            NotifyOnDestruction notify(messageQueueMutex, messageQueue.terminate);
+            auto timeit = make_unique<Timer>(logger, "getNewRequest");
+            while (true) {
+                auto readResult = input->read();
+                if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
+                    // Exit loop if there is an error reading from input.
                     break;
                 }
+                {
+                    absl::MutexLock lck(&messageQueueMutex); // guards guardedState.
+                    auto &msg = readResult.message;
+                    if (msg) {
+                        tagNewRequest(*logger, *msg);
+                        messageQueue.counters = mergeCounters(move(messageQueue.counters));
+                        messageQueue.pendingRequests.push_back(move(msg));
+                        // Reset span now that we've found a request.
+                        timeit = make_unique<Timer>(logger, "getNewRequest");
+                    }
+                    // Check if it's time to exit.
+                    if (messageQueue.terminate) {
+                        // Another thread exited.
+                        break;
+                    }
+                }
             }
-        }
-        logger->debug("Reader thread terminating");
-    });
+            logger->debug("Reader thread terminating");
+        });
 
     // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
-    auto preprocessingThread = preprocessor.runPreprocessor(incomingQueue, incomingMtx, processingQueue, processingMtx);
+    auto preprocessingThread = preprocessor.runPreprocessor(messageQueue, messageQueueMutex);
 
     mainThreadId = this_thread::get_id();
     {
         // Ensure Watchman thread gets unstuck when thread exits prior to initialization.
         NotifyNotificationOnDestruction notify(initializedNotification);
         // Ensure preprocessor, reader, and watchman threads get unstuck when thread exits.
-        NotifyOnDestruction notifyIncoming(incomingMtx, incomingQueue.terminate);
-        bool exitProcessed = false;
+        NotifyOnDestruction notifyIncoming(messageQueueMutex, messageQueue.terminate);
         while (true) {
-            unique_ptr<LSPMessage> msg;
-            bool hasMoreMessages;
+            unique_ptr<LSPTask> task;
             {
-                absl::MutexLock lck(&processingMtx);
+                absl::MutexLock lck(taskQueueMutex.get());
                 Timer timeit(logger, "idle");
-                processingMtx.Await(absl::Condition(
-                    +[](QueueState *processingQueue) -> bool {
-                        return processingQueue->terminate ||
-                               (!processingQueue->paused && !processingQueue->pendingRequests.empty());
+                taskQueueMutex->Await(absl::Condition(
+                    +[](TaskQueueState *taskQueue) -> bool {
+                        return taskQueue->terminate || (!taskQueue->paused && !taskQueue->pendingTasks.empty());
                     },
-                    &processingQueue));
-                ENFORCE(!processingQueue.paused);
-                if (processingQueue.terminate) {
-                    if (processingQueue.errorCode != 0) {
-                        // Abnormal termination.
+                    taskQueue.get()));
+                ENFORCE(!taskQueue->paused);
+                if (taskQueue->terminate) {
+                    if (taskQueue->errorCode != 0) {
+                        // Abnormal termination. Exit immediately.
                         typecheckerCoord.shutdown();
-                        throw options::EarlyReturnWithCode(processingQueue.errorCode);
-                    } else if (exitProcessed || processingQueue.pendingRequests.empty()) {
-                        // Normal termination. Wait until all pending requests finish or we process an exit.
+                        throw options::EarlyReturnWithCode(taskQueue->errorCode);
+                    } else if (taskQueue->pendingTasks.empty()) {
+                        // Normal termination. Wait until all pending requests finish.
                         break;
                     }
                 }
-                msg = move(processingQueue.pendingRequests.front());
-                processingQueue.pendingRequests.pop_front();
-                hasMoreMessages = !processingQueue.pendingRequests.empty();
-                exitProcessed = msg->isNotification() && msg->method() == LSPMethod::Exit;
+
+                // Before giving up the lock, check if the typechecker is running a slow path and if the task at the
+                // head of the queue can preempt. If it is, we may be able to schedule a preemption.
+                // Don't bother scheduling tasks to preempt that only need the indexer.
+                // N.B.: We check `canPreempt` last as it is mildly expensive for edits (it hashes the files)
+                auto &frontTask = taskQueue->pendingTasks.front();
+                if (frontTask->finalPhase() == LSPTask::Phase::RUN && epochManager->getStatus().slowPathRunning &&
+                    frontTask->canPreempt(indexer)) {
+                    absl::Notification finished;
+                    string_view methodStr = convertLSPMethodToString(frontTask->method);
+                    auto preemptTask =
+                        make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueueMutex, *taskQueue, indexer);
+                    auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
+
+                    if (scheduleToken != nullptr) {
+                        logger->debug("[Processing] Preempting slow path for task {}", methodStr);
+                        // Preemption scheduling success!
+                        // In this if statement **only**, `taskQueueMutex` protects all accesses to LSPIndexer. This is
+                        // needed to linearize the indexing of edits, which may happen in the typechecking thread if a
+                        // fast path edit preempts, with the `canPreempt` checks of edits in this thread.
+                        auto headOfQueueCanPreempt = [&indexer = this->indexer,
+                                                      &taskQueue = this->taskQueue]() -> bool {
+                            // Await always holds taskQueueMutex when calling this function, but absl doesn't know that.
+                            return ABSL_TS_UNCHECKED_READ(taskQueue)->pendingTasks.empty() ||
+                                   !ABSL_TS_UNCHECKED_READ(taskQueue)->pendingTasks.front()->canPreempt(indexer);
+                        };
+                        // Wait until the head of the queue turns into a non-preemptible task to resume processing the
+                        // queue.
+                        taskQueueMutex->Await(absl::Condition(&headOfQueueCanPreempt));
+
+                        // The queue is now empty or has a task that cannot preempt. There are two possibilities here:
+                        // 1) The scheduled work is now irrelevant because the task that was scheduled is now gone
+                        // (e.g., the request was canceled or, in the case of an edit, merged w/ a slow path edit)
+                        // 2) The scheduled work has already started (and may have finished).
+                        // Pessimistically assume 1) and try to cancel the scheduled preemption.
+                        if (!typecheckerCoord.tryCancelPreemption(scheduleToken)) {
+                            // Cancelation failed: 2) must be the case. Unlock the queue and wait until task finishes to
+                            // avoid races.
+                            taskQueueMutex->Unlock();
+                            finished.WaitForNotification();
+                            taskQueueMutex->Lock();
+                            logger->debug("[Processing] Preemption for task {} complete", methodStr);
+                        } else {
+                            logger->debug("[Processing] Canceled scheduled preemption for task {}", methodStr);
+                        }
+
+                        // At this point, we are guaranteed that the scheduled task has run or has been canceled.
+                        continue;
+                    }
+                    // If preemption scheduling failed, then the slow path probably finished just now. Continue as
+                    // normal.
+                }
+
+                task = move(taskQueue->pendingTasks.front());
+                taskQueue->pendingTasks.pop_front();
             }
             prodCounterInc("lsp.messages.received");
-            processRequestInternal(*msg);
+
+            logger->debug("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
+            runTask(move(task));
 
             if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();
@@ -303,9 +277,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             if (shouldSendCountersToStatsd(currentTime)) {
                 {
                     // Merge counters from worker threads.
-                    absl::MutexLock counterLck(&processingMtx);
-                    if (!processingQueue.counters.hasNullCounters()) {
-                        counterConsume(move(processingQueue.counters));
+                    absl::MutexLock counterLck(taskQueueMutex.get());
+                    if (!taskQueue->counters.hasNullCounters()) {
+                        counterConsume(move(taskQueue->counters));
                     }
                 }
                 sendCountersToStatsd(currentTime);

@@ -1,20 +1,29 @@
 #ifndef RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 #define RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 
-#include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include <deque>
 
 namespace sorbet::realmain::lsp {
 
-/** Used to store the state of LSP's internal request queue.  */
-struct QueueState {
+class LSPTask;
+
+struct MessageQueueState {
     std::deque<std::unique_ptr<LSPMessage>> pendingRequests;
+    bool terminate = false;
+    int errorCode = 0;
+    // Counters collected from other threads.
+    CounterState counters;
+};
+
+/** Used to store the state of LSP's internal request queue.  */
+struct TaskQueueState {
+    std::deque<std::unique_ptr<LSPTask>> pendingTasks;
     bool terminate = false;
     bool paused = false;
     int errorCode = 0;
-    // Counters collected from worker threads.
+    // Counters collected from preprocessor thread
     CounterState counters;
 };
 
@@ -28,7 +37,9 @@ struct QueueState {
  * - Determines if a running slow path should be canceled, and undertakes canceling if so.
  */
 class LSPPreprocessor final {
-    std::shared_ptr<LSPConfiguration> config;
+    const std::shared_ptr<LSPConfiguration> config;
+    const std::shared_ptr<absl::Mutex> taskQueueMutex;
+    const std::shared_ptr<TaskQueueState> taskQueue GUARDED_BY(taskQueueMutex);
     /** ID of the thread that owns the preprocessor and is allowed to invoke methods on it. */
     std::thread::id owner;
 
@@ -46,10 +57,7 @@ class LSPPreprocessor final {
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges(absl::Mutex &mtx, QueueState &state);
-
-    std::unique_ptr<LSPMessage> makeAndCommitWorkspaceEdit(std::unique_ptr<SorbetWorkspaceEditParams> params,
-                                                           std::unique_ptr<LSPMessage> oldMsg);
+    void mergeFileChanges() EXCLUSIVE_LOCKS_REQUIRED(taskQueueMutex);
 
     /* The following methods convert edits into SorbetWorkspaceEditParams. */
 
@@ -70,8 +78,11 @@ class LSPPreprocessor final {
 
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
 
+    std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
+
 public:
-    LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, u4 initialVersion = 0);
+    LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<absl::Mutex> taskQueueMutex,
+                    std::shared_ptr<TaskQueueState> taskQueue, u4 initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
@@ -85,10 +96,31 @@ public:
      *
      * It grabs the mutex before reading/writing `state`.
      */
-    void preprocessAndEnqueue(QueueState &state, std::unique_ptr<LSPMessage> msg, absl::Mutex &stateMtx);
+    void preprocessAndEnqueue(std::unique_ptr<LSPMessage> msg);
 
-    std::unique_ptr<Joinable> runPreprocessor(QueueState &incomingQueue, absl::Mutex &incomingMtx,
-                                              QueueState &processingQueue, absl::Mutex &processingMtx);
+    /**
+     * [Test method] Pauses preprocessing in multithreaded mode. Makes it possible to deterministically preprocess a set
+     * of updates without racing with other threads.
+     */
+    void pause();
+
+    /**
+     * [Test method] Resumes preprocessing in multithreaded mode.
+     */
+    void resume();
+
+    /**
+     * Cancels the request with the given ID if it has not started executing, and sends a response to the client
+     * acknowledging the cancellation. Returns true if a task was canceled.
+     */
+    bool cancelRequest(const CancelParams &params);
+
+    /**
+     * Suspend preprocessing indefinitely. Is called before the language server shuts down.
+     */
+    void exit(int exitCode);
+
+    std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
 };
 
 } // namespace sorbet::realmain::lsp

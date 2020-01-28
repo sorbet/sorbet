@@ -50,7 +50,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
 
 SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId id,
                                      std::unique_ptr<TextDocumentPositionParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentSignatureHelp), params(move(params)) {}
 
 unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);

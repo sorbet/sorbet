@@ -10,6 +10,8 @@ class WorkspaceSymbolsTask final : public LSPRequestTask {
 public:
     WorkspaceSymbolsTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<WorkspaceSymbolParams> params);
 
+    bool isDelayable() const override;
+
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 

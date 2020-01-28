@@ -1,15 +1,18 @@
 #ifndef RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 #define RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 
-#include "core/lsp/Task.h"
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
-}
+class Task;
+} // namespace sorbet::core::lsp
 
 namespace sorbet::realmain::lsp {
 class LSPTask;
+class LSPQueuePreemptionTask;
+class InitializedTask;
+class SorbetWorkspaceEditTask;
 /**
  * Handles typechecking and other queries. Can either operate in single-threaded mode (in which lambdas passed to
  * syncRun/asyncRun run-to-completion immediately) or dedicated-thread mode (in which lambdas are enqueued to execute on
@@ -48,20 +51,33 @@ public:
      * Initializes typechecker and runs typechecking for the first time.
      * TODO(jvilk): Make non-blocking when we implement preemption.
      */
-    void initialize(LSPFileUpdates initializeUpdate);
+    void initialize(std::unique_ptr<InitializedTask> initializedTask);
 
     /**
-     * Typechecks the given updates on the slow path. Blocks until the typechecking actually begins.
+     * Runs the given typecheck task asynchronously on the slow path.
      */
-    void typecheckOnSlowPath(LSPFileUpdates updates);
+    void typecheckOnSlowPath(std::unique_ptr<SorbetWorkspaceEditTask> typecheckTask);
 
     /**
-     * Schedules a task on the typechecker thread, and blocks until `task` completes. If the task has
-     * `enableMultithreaded` set to "true", then the given task is allowed to use the full threadpool at the cost of not
-     * being able to preempt slow path typechecking.
-     * TODO(jvilk): Make single-threaded tasks scheduled this way preempt the slow path.
+     * Schedules a task to run on the typechecker thread. Blocks until it completes.
      */
     void syncRun(std::unique_ptr<LSPTask> task);
+
+    /**
+     * Attempts to schedule a task to preempt the slow path. Returns the scheduled task if it succeeds, or nullptr
+     * otherwise. The scheduled task should only be used in `tryCancelPreemption` to cancel the scheduled preemption
+     * task.
+     *
+     * Does not block. It is the responsibility of the caller to properly block. Should only be used in one place
+     * in `protocol.cc`.
+     */
+    std::shared_ptr<core::lsp::Task> trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask);
+
+    /**
+     * Attempts to cancel the scheduled preeemption task. Returns true if it succeeds, or false if the task has or will
+     * run.
+     */
+    bool tryCancelPreemption(std::shared_ptr<core::lsp::Task> &preemptTask);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes

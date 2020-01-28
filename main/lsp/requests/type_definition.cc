@@ -38,7 +38,7 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
 
 TypeDefinitionTask::TypeDefinitionTask(const LSPConfiguration &config, MessageId id,
                                        std::unique_ptr<TextDocumentPositionParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentTypeDefinition), params(move(params)) {}
 
 unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);

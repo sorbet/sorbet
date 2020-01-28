@@ -649,7 +649,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::SymbolRef maybeAlias,
