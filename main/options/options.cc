@@ -305,6 +305,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // Advanced options
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
+    options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
@@ -596,8 +597,8 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
     // Expand directory into list of files.
     vector<string> containedFiles;
     try {
-        containedFiles = opts.fs->listFilesInDir(fileNormalized, {".rb", ".rbi"}, true, opts.absoluteIgnorePatterns,
-                                                 opts.relativeIgnorePatterns);
+        containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, true,
+                                                 opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
     } catch (sorbet::FileNotFoundException) {
         logger->error("Directory `{}` not found", dir);
         throw EarlyReturnWithCode(1);
@@ -621,6 +622,14 @@ void readOptions(Options &opts,
         cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
         if (raw["simulate-crash"].as<bool>()) {
             Exception::raise("simulated crash");
+        }
+
+        if (raw.count("allowed-extension") > 0) {
+            auto exts = raw["allowed-extension"].as<vector<string>>();
+            opts.allowedExtensions.insert(exts.begin(), exts.end());
+        } else {
+            opts.allowedExtensions.emplace(".rb");
+            opts.allowedExtensions.emplace(".rbi");
         }
 
         if (raw.count("ignore") > 0) {
