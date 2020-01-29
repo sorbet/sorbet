@@ -369,7 +369,7 @@ class Date
   #                          #=> (1/2)
   # ```
   sig {params(arg0: Numeric).returns(T.self_type)}
-  sig {params(arg0: T.self_type).returns(Rational)}
+  sig {params(arg0: Date).returns(Rational)}
   def -(arg0); end
 
   # Returns the day of the month (1-31).
