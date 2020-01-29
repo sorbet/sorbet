@@ -12,7 +12,7 @@ module Opus::Utils; end
 module Opus::Utils::DeepFreeze
   extend T::Sig
 
-  sig {params(n: Integer).returns(T::Array[T.untyped])}
+  sig {params(n: Integer).returns(T.untyped)}
   def self.generate_deep(n)
     o = T.let(nil, T.untyped)
     n.times do

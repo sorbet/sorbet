@@ -24,9 +24,10 @@ class A
 
   sig {params(a: Integer).void}
   def foo(a)
+    puts a
     a
   end
 end
 
-puts A.new.foo(1)
+A.new.foo(1)
 
