@@ -25,8 +25,8 @@ begin
           <self>.params({:"arg0" => ::Integer}).void()
         end
         :"private_class_method"
-        :"outer_static"
-        :"outer_instance"
+        <self>.private_class_method(:"outer_static")
+        <self>.private(:"outer_instance")
         :"inner_static"
         :"inner_instance"
         <emptyTree>
