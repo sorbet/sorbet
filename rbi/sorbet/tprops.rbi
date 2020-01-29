@@ -102,7 +102,6 @@ module T::Props::Optional::DecoratorMethods
   def compute_derived_rules(rules); end
   def get_default(rules, instance_class); end
   def has_default?(rules); end
-  def mutate_prop_backdoor!(prop, key, value); end
   def prop_optional?(prop); end
   def prop_validate_definition!(name, cls, rules, type); end
   def valid_rule_key?(key); end
