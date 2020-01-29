@@ -38,3 +38,6 @@ demo/foobar.bundle
 demo/foobar.ll
 demo/foobar.o
 demo/mkmf.log
+
+# Used by tools/scripts/run_benchmarks.sh
+/tmp
