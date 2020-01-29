@@ -103,6 +103,7 @@ NameDef names[] = {
     {"final_", "final"},
     {"returns"},
     {"void_", "void"},
+    {"VOID", "VOID", true},
     {"checked"},
     {"onFailure", "on_failure"},
 
@@ -187,6 +188,7 @@ NameDef names[] = {
     {"ODM", "ODM", true},
     {"Mutator", "Mutator", true},
     {"Private", "Private", true},
+    {"Types", "Types", true},
     {"HashMutator", "HashMutator", true},
     {"ArrayMutator", "ArrayMutator", true},
     {"DocumentMutator", "DocumentMutator", true},

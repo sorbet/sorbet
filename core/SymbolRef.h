@@ -397,6 +397,22 @@ public:
         return SymbolRef(nullptr, 83);
     }
 
+    static SymbolRef T_Private() {
+        return SymbolRef(nullptr, 84);
+    }
+
+    static SymbolRef T_Private_Types() {
+        return SymbolRef(nullptr, 85);
+    }
+
+    static SymbolRef T_Private_Types_Void() {
+        return SymbolRef(nullptr, 86);
+    }
+
+    static SymbolRef T_Private_Types_Void_VOID() {
+        return SymbolRef(nullptr, 87);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 3 - 3);
