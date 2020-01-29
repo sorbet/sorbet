@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,6 +12,8 @@ begin
     end
   end
   class ::C<<C C>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       ::C::L = begin
         ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))

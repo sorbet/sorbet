@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
