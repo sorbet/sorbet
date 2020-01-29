@@ -195,7 +195,6 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
                                                        int rubyBlockId) {
     auto &builder = builderCast(build);
     auto str = i->fun.data(cs)->shortName(cs);
-    auto rawId = Payload::idIntern(cs, builder, str);
 
     // fill in args
     {
@@ -220,6 +219,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
     llvm::Value *rawCall;
     if (i->link != nullptr) {
         // this send has a block!
+        auto rawId = Payload::idIntern(cs, builder, str);
         rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
                                      {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
                                       builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices),
@@ -233,9 +233,29 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
                                       builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
                                      "rawSendResult");
     } else {
-        rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
-                                     {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+        auto slowFunctionName = "call_via_vm_" + (string)str;
+        auto function = cs.module->getFunction(slowFunctionName);
+        if (function == nullptr) {
+            function = llvm::Function::Create(cs.getRubyFFIType(), llvm::Function::InternalLinkage, slowFunctionName,
+                                              *cs.module);
+            function->addFnAttr(llvm::Attribute::AttrKind::NoInline); // we'd like to see it in backtraces
+            auto cs1 = cs;
+            llvm::IRBuilder<> funBuilder(cs1);
+            auto early = llvm::BasicBlock::Create(cs, "functionEntryInitializers", function);
+            auto bb = llvm::BasicBlock::Create(cs, "call", function);
+            cs1.functionEntryInitializers = early;
+            funBuilder.SetInsertPoint(bb);
+            auto rawId = Payload::idIntern(cs1, funBuilder, str);
+            auto realCall = funBuilder.CreateCall(
+                cs.module->getFunction("sorbet_callFunc"),
+                {function->arg_begin() + 2, rawId, function->arg_begin(), function->arg_begin() + 1}, "rawSendResult");
+            funBuilder.CreateRet(realCall);
+            funBuilder.SetInsertPoint(early);
+            funBuilder.CreateBr(bb);
+        }
+        rawCall = builder.CreateCall(function,
+                                     {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), var},
                                      "rawSendResult");
     }
     return rawCall;
