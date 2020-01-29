@@ -8,6 +8,7 @@ module T
   def self.must(arg, msg=nil); arg; end
   def self.let(arg, type); arg; end
   def self.untyped(); end
+  def self.class_of(klass); end
 end
 module T::Sig
   def sig(arg=nil, &blk); end
