@@ -9,7 +9,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        EmptyTree
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -17,7 +17,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = EmptyTree
+          rhs = Literal{ value = :"foo" }
         }
 
         MethodDef{

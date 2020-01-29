@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,7 +12,7 @@ begin
     end
   end
   class ::Test<<C Test>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -18,35 +20,35 @@ begin
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"foo"
         <self>.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"bar"
         <self>.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"qux"
         <self>.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"baz"
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"foo<defaultArg>1"
         <self>.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"bar<defaultArg>1"
         <self>.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"qux<defaultArg>1"
         <self>.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        <emptyTree>
+        :"baz<defaultArg>1"
         <emptyTree>
       end
     end

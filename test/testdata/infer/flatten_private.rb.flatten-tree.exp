@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,7 +12,7 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -18,15 +20,15 @@ begin
         <self>.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
-        <emptyTree>
+        :"private"
         <self>.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
+        :"private_class_method"
+        :"outer_static"
+        :"outer_instance"
+        :"inner_static"
+        :"inner_instance"
         <emptyTree>
       end
     end

@@ -1,10 +1,10 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
+      :"foo"
     end
 
     def foo(<blk>)

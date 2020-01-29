@@ -1,11 +1,11 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       <self>.foobar() do ||
-        <emptyTree>
+        :"a_method"
       end
     end
 

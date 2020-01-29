@@ -1,6 +1,8 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -19,7 +21,7 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -27,11 +29,11 @@ begin
         <self>.sig() do ||
           <self>.params({:"x" => ::Integer}).void()
         end
-        <emptyTree>
+        :"takes_integer_static"
         <self>.sig() do ||
           <self>.params({:"x" => ::Integer}).void()
         end
-        <emptyTree>
+        :"takes_integer_instance"
         <emptyTree>
       end
     end
@@ -45,14 +47,14 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent)
-    <emptyTree>
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
-        <self>.takes_integer_static(<emptyTree>)
-        <self>.takes_integer_static(<emptyTree>)
-        <emptyTree>
-        <emptyTree>
+        <self>.takes_integer_static(:"outer_static")
+        <self>.takes_integer_static(:"outer_instance")
+        :"inner_static"
+        :"inner_instance"
         <emptyTree>
       end
     end

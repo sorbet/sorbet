@@ -128,9 +128,11 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
+        auto loc = methodDef->declLoc;
+        auto name = methodDef->name;
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        return ast::MK::EmptyTree();
+        return ast::MK::Symbol(loc, name);
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
