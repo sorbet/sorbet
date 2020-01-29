@@ -236,7 +236,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
         auto slowFunctionName = "call_via_vm_" + (string)str;
         auto function = cs.module->getFunction(slowFunctionName);
         if (function == nullptr) {
-            function = llvm::Function::Create(cs.getRubyFFIType(), llvm::Function::InternalLinkage, slowFunctionName,
+            function = llvm::Function::Create(cs.getRubyFFIType(), llvm::Function::LinkOnceAnyLinkage, slowFunctionName,
                                               *cs.module);
             function->addFnAttr(llvm::Attribute::AttrKind::NoInline); // we'd like to see it in backtraces
             auto cs1 = cs;
