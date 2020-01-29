@@ -74,6 +74,63 @@ public:
     };
 };
 
+class Module_tripleEq : public SymbolBasedIntrinsicMethod {
+protected:
+public:
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                  int rubyBlockId) const override {
+        auto ctx = core::Context(cs, core::Symbols::root());
+        auto representedClass = core::Types::getRepresentedClass(ctx, send->recv.type.get());
+        if (!representedClass.exists()) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId);
+        }
+        auto recvType = representedClass.data(cs)->externalType(cs);
+        auto &arg0 = send->args[0];
+
+        auto &builder = builderCast(build);
+
+        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
+        auto representedClassValue = Payload::getRubyConstant(cs, representedClass, builder);
+        auto classEq = builder.CreateICmpEQ(recvValue, representedClassValue, "Module_tripleEq_shortCircuit");
+
+        auto fastStart = llvm::BasicBlock::Create(cs, "Module_tripleEq_fast", builder.GetInsertBlock()->getParent());
+        auto slowStart = llvm::BasicBlock::Create(cs, "Module_tripleEq_slow", builder.GetInsertBlock()->getParent());
+        auto cont = llvm::BasicBlock::Create(cs, "Module_tripleEq_cont", builder.GetInsertBlock()->getParent());
+
+        auto expected = Payload::setExpectedBool(cs, builder, classEq, true);
+        builder.CreateCondBr(expected, fastStart, slowStart);
+
+        builder.SetInsertPoint(fastStart);
+        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, blockMap, aliases, rubyBlockId);
+        auto typeTest = Payload::typeTest(cs, builder, arg0Value, recvType);
+        auto fastPath = Payload::boolToRuby(cs, builder, typeTest);
+        auto fastEnd = builder.GetInsertBlock();
+        builder.CreateBr(cont);
+
+        builder.SetInsertPoint(slowStart);
+        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId);
+        auto slowEnd = builder.GetInsertBlock();
+        builder.CreateBr(cont);
+
+        builder.SetInsertPoint(cont);
+        auto incomingEdges = 2;
+        auto phi = builder.CreatePHI(builder.getInt64Ty(), incomingEdges, "Module_tripleEq_result");
+        phi->addIncoming(fastPath, fastEnd);
+        phi->addIncoming(slowPath, slowEnd);
+
+        return phi;
+    };
+
+    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+        return {core::Symbols::Module()};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::tripleEq()};
+    };
+} Module_tripleEq;
+
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod)
@@ -123,6 +180,8 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
 }; // namespace
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
     static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
+
+    ret.emplace_back(&Module_tripleEq);
 
     return ret;
 }
