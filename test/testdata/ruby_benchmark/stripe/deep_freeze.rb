@@ -56,8 +56,16 @@ module Opus::Utils
         o = todo.pop
 
         case o
-        when NilClass, TrueClass, FalseClass, Symbol, Numeric, String
-          # short-circuit very common, simple types
+        when NilClass, TrueClass, FalseClass
+          # don't need to be frozen
+          nil
+        # Short circuit on common classes.
+        # Dispatch on one class, so that the compiler has more static information per function call
+        when Symbol
+          o.freeze
+        when Numeric
+          o.freeze
+        when String
           o.freeze
         else
           # Skip if we've already seen this object
@@ -106,11 +114,11 @@ module Opus::Utils::DeepFreeze
   end
 
   GENERATORS = {
-    nil: [5e3, -> {nil}],
-    string: [5e3, -> {"foo".dup}],
-    array: [1e2, -> {Array.new(100) {"foo".dup}}],
-    recursive: [2, -> {Opus::Utils::DeepFreeze.generate_deep(1)}],
-    deep: [2, -> {Opus::Utils::DeepFreeze.generate_deep(30)}],
+    nil: [5e5, -> {nil}],
+    string: [5e5, -> {"foo".dup}],
+    array: [1e4, -> {Array.new(100) {"foo".dup}}],
+    recursive: [200, -> {Opus::Utils::DeepFreeze.generate_deep(1)}],
+    deep: [200, -> {Opus::Utils::DeepFreeze.generate_deep(30)}],
   }
 
   def self.main
