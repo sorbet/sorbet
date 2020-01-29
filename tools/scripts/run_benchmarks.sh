@@ -40,6 +40,7 @@ popd &>/dev/null
 
 echo -e "source\tinterpreted\tcompiled"
 for this_src in "${rb_src[@]}"; do
+    rm tmp/bench/*
     cp "$this_src" tmp/bench/target.rb
     pushd tmp/bench &>/dev/null
     echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
@@ -56,8 +57,6 @@ for this_src in "${rb_src[@]}"; do
     seconds_compiled=$(cut -d "m" -f2 < compiled_runtime | cut -d "s" -f 1)
     compiled_time=$(echo "scale=3;(${minutes_compiled} * 60 + ${seconds_compiled})/10"| bc)
     echo -e "$compiled_time"
-
-    rm ./*
     popd &>/dev/null
 done
 
