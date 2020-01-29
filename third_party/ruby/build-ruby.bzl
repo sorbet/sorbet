@@ -65,6 +65,8 @@ run_cmd() {{
     fi
 }}
 
+export PATH="$(dirname {cc}):$PATH"
+
 # NOTE: OUTFLAG is what's used in ruby to determine how to name the output of
 # the compiler. We're piggybacking on that to also disable
 # '-fvisibility=hidden'.
