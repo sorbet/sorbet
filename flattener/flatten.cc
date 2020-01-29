@@ -128,7 +128,7 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
-        auto loc = methodDef->loc;
+        auto loc = methodDef->declLoc;
         auto name = methodDef->name;
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
