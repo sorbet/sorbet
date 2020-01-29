@@ -630,7 +630,8 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
         builder.CreateRet(var);
         return;
     }
-    if (expectedType->derivesFrom(cs, core::Symbols::void_())) {
+    auto ct = core::cast_type<core::ClassType>(expectedType.get());
+    if (ct != nullptr && ct->symbol == core::Symbols::void_()) {
         auto void_ = Payload::getRubyConstant(cs, core::Symbols::T_Private_Types_Void_VOID(), builder);
         builder.CreateRet(void_);
         return;
