@@ -302,6 +302,16 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
     ENFORCE(id == Symbols::Enumerator_Lazy());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
+    ENFORCE(id == Symbols::T_Private());
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
+    ENFORCE(id == Symbols::T_Private_Types());
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::T_Private_Types_Void());
+    id = enterStaticFieldSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    ENFORCE(id == Symbols::T_Private_Types_Void_VOID());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
