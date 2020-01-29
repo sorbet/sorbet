@@ -625,6 +625,26 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.postProcessBlock);
     auto var = Payload::varGet(cs, returnValue(cs), builder, blockMap, aliases, 0);
+    auto expectedType = cfg.symbol.data(cs)->resultType;
+    if (!expectedType) {
+        builder.CreateRet(var);
+        return;
+    }
+    auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
+    auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+    auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+    auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
+    builder.CreateCondBr(expected, successBlock, failBlock);
+    builder.SetInsertPoint(failBlock);
+    // this will throw exception
+    builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
+                       {var, Payload::toCString(cs, "Return value", builder),
+                        Payload::toCString(cs, expectedType->show(cs), builder)});
+    builder.CreateUnreachable();
+    builder.SetInsertPoint(successBlock);
+
     builder.CreateRet(var);
 }
 
