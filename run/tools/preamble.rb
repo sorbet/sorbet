@@ -1,12 +1,12 @@
 # typed: __STDLIB_INTERNAL
 
 module T
-  def self.cast(value, *opts, **kwopts); value; end;
+  def self.cast(value, type, checked: true); value; end;
   def self.unsafe(value); value; end
-  def self.any(left, right); end
-  def self.all(left, right); end
-  def self.must(arg, msg=nil); arg; end
-  def self.let(arg, type); arg; end
+  def self.any(type_a, type_b, *types); end
+  def self.all(type_a, type_b, *types); end
+  def self.must(arg); arg; end
+  def self.let(value, type, checked: true); value; end
   def self.untyped(); end
   def self.class_of(klass); end
 end
@@ -26,7 +26,7 @@ module T::Hash
 end
 
 
-module Sorbet; end
+class Sorbet; end
 module Sorbet::Private; end
 module Sorbet::Private::Static
 end
