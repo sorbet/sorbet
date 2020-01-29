@@ -1015,14 +1015,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %stackFrame_func_A.foo19 = load i64, i64* bitcast (i8** @stackFramePrecomputed_func_A.foo to i64*), align 8
+  %stackFrame_func_A.foo21 = load i64, i64* bitcast (i8** @stackFramePrecomputed_func_A.foo to i64*), align 8
   %rawArg_n = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %stackFrame_func_A.foo19, i64* %5, align 8, !tbaa !16
+  store i64 %stackFrame_func_A.foo21, i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -1061,18 +1061,18 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs
   %22 = load i64, i64* @rb_cModule, align 8, !tbaa !9
   %23 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %22) #6
   %24 = icmp eq i64 %23, 0
-  br i1 %24, label %codeRepl20, label %sorbet_isa_class_of.exit, !prof !50
+  br i1 %24, label %codeRepl22, label %sorbet_isa_class_of.exit, !prof !50
 
 sorbet_isa_class_of.exit:                         ; preds = %21
   %25 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %17) #6
   %26 = icmp eq i64 %25, 0
-  br i1 %26, label %codeRepl20, label %typeTestSuccess10, !prof !51
+  br i1 %26, label %codeRepl22, label %typeTestSuccess10, !prof !51
 
 typeTestSuccess10:                                ; preds = %sorbet_isa_class_of.exit, %16
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
   ret i64 %rawArg_n
 
-codeRepl20:                                       ; preds = %21, %sorbet_isa_class_of.exit
+codeRepl22:                                       ; preds = %21, %sorbet_isa_class_of.exit
   tail call fastcc void @func_A.foo.cold.2(i64 %selfRaw) #22
   unreachable
 }
