@@ -306,12 +306,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @"call_via_vm_<"(i64*, i64) unnamed_addr #8 {
+; Function Attrs: noinline ssp
+define linkonce i64 @"call_via_vm_<"(i32, i64*, i64) local_unnamed_addr #8 {
 functionEntryInitializers:
   %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %"rubyId_<", i32 1, i64* %0) #11
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_<", i32 %0, i64* %1) #11
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -322,12 +322,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @"call_via_vm_+"(i64*, i64) unnamed_addr #8 {
+; Function Attrs: noinline ssp
+define linkonce i64 @"call_via_vm_+"(i32, i64*, i64) local_unnamed_addr #8 {
 functionEntryInitializers:
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %"rubyId_+", i32 1, i64* %0) #11
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_+", i32 %0, i64* %1) #11
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -404,7 +404,7 @@ typeTestFail.i:                                   ; preds = %entry
   br i1 %21, label %"func_<root>.<static-init>$111.exit", label %"afterSymCallIntrinsic_+78.i"
 
 "slowSymCallIntrinsic_<.i":                       ; preds = %BB2.i
-  %rawSendResult46.i = call fastcc i64 @"call_via_vm_<"(i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
+  %rawSendResult46.i = call i64 @"call_via_vm_<"(i32 1, i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
   br label %"afterSymCallIntrinsic_<.i"
 
 sorbet_rb_int_lt.exit.i:                          ; preds = %BB2.i
@@ -525,7 +525,7 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %90, %84
   br i1 %19, label %"fastSymCallIntrinsic_+107.i", label %"slowSymCallIntrinsic_+106.i"
 
 "slowSymCallIntrinsic_+106.i":                    ; preds = %sorbet_stringInterpolate.exit.i
-  %rawSendResult115.i = call fastcc i64 @"call_via_vm_+"(i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
+  %rawSendResult115.i = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
   br label %BB2.i.backedge
 
 "fastSymCallIntrinsic_+107.i":                    ; preds = %sorbet_stringInterpolate.exit.i
@@ -593,7 +593,7 @@ attributes #4 = { cold minsize noreturn nounwind optsize ssp uwtable }
 attributes #5 = { nofree norecurse nounwind ssp uwtable }
 attributes #6 = { nounwind readnone speculatable }
 attributes #7 = { nounwind ssp }
-attributes #8 = { noinline nounwind ssp }
+attributes #8 = { noinline ssp }
 attributes #9 = { nounwind sspreq }
 attributes #10 = { argmemonly nounwind }
 attributes #11 = { nounwind }

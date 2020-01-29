@@ -830,7 +830,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %22 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !45
   %guardUpdated = icmp eq i64 %21, %22
   tail call void @llvm.assume(i1 %guardUpdated)
-  call fastcc void @call_via_vm_all(i64* nonnull %callArgsAddr, i64 %20) #18
+  %rawSendResult = call i64 @call_via_vm_all(i32 2, i64* nonnull %callArgsAddr, i64 %20) #18
   %23 = call i64 @rb_obj_is_kind_of(i64 %rawArg_arg, i64 %15) #6
   %24 = icmp eq i64 %23, 20
   br i1 %24, label %typeTestSuccess24, label %codeRepl, !prof !44
@@ -910,7 +910,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %22 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !45
   %guardUpdated = icmp eq i64 %21, %22
   tail call void @llvm.assume(i1 %guardUpdated)
-  call fastcc void @call_via_vm_any(i64* nonnull %callArgsAddr, i64 %20) #18
+  %rawSendResult = call i64 @call_via_vm_any(i32 2, i64* nonnull %callArgsAddr, i64 %20) #18
   %23 = and i64 %rawArg_arg, 1
   %24 = icmp ne i64 %23, 0
   %25 = and i64 %rawArg_arg, 3
@@ -1009,7 +1009,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %22 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !45
   %guardUpdated = icmp eq i64 %21, %22
   tail call void @llvm.assume(i1 %guardUpdated)
-  call fastcc void @call_via_vm_any(i64* nonnull %callArgsAddr, i64 %20) #18
+  %rawSendResult = call i64 @call_via_vm_any(i32 2, i64* nonnull %callArgsAddr, i64 %20) #18
   %23 = and i64 %rawArg_arg, 3
   %24 = icmp eq i64 %23, 2
   br i1 %24, label %typeTestSuccess24, label %25
@@ -1178,7 +1178,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %21 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !45
   %guardUpdated = icmp eq i64 %20, %21
   tail call void @llvm.assume(i1 %guardUpdated)
-  call fastcc void @"call_via_vm_[]"(i64* nonnull %callArgsAddr, i64 %19) #18
+  %rawSendResult = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr, i64 %19) #18
   %22 = and i64 %rawArg_arg, 7
   %23 = icmp ne i64 %22, 0
   %24 = and i64 %rawArg_arg, -9
@@ -1206,20 +1206,20 @@ codeRepl:                                         ; preds = %sorbet_isa_Array.ex
   unreachable
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_fooInt(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_fooInt(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_fooInt = load i64, i64* @rubyIdPrecomputed_fooInt, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_fooInt, i32 1, i64* %0) #18
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_fooInt, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc void @call_via_vm_puts(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_puts(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_puts, i32 1, i64* %0) #18
-  ret void
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_puts, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -1230,36 +1230,36 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_fooAny1(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_fooAny1(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_fooAny1 = load i64, i64* @rubyIdPrecomputed_fooAny1, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_fooAny1, i32 1, i64* %0) #18
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_fooAny1, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_fooAny2(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_fooAny2(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_fooAny2 = load i64, i64* @rubyIdPrecomputed_fooAny2, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_fooAny2, i32 1, i64* %0) #18
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_fooAny2, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_fooAll(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_fooAll(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_fooAll = load i64, i64* @rubyIdPrecomputed_fooAll, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_fooAll, i32 1, i64* %0) #18
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_fooAll, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_fooArray(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_fooArray(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_fooArray = load i64, i64* @rubyIdPrecomputed_fooArray, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_fooArray, i32 1, i64* %0) #18
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_fooArray, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind sspreq
@@ -1319,31 +1319,31 @@ codeRepl:                                         ; preds = %entry
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooArray" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 168 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult133.i = call fastcc i64 @call_via_vm_fooInt(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult133.i = call i64 @call_via_vm_fooInt(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64 %rawSendResult133.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_puts(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult137.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 176 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult142.i = call fastcc i64 @call_via_vm_fooAny1(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult142.i = call i64 @call_via_vm_fooAny1(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64 %rawSendResult142.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_puts(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult146.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 184 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult151.i = call fastcc i64 @call_via_vm_fooAny2(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult151.i = call i64 @call_via_vm_fooAny2(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64 %rawSendResult151.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_puts(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult155.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 192 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult160.i = call fastcc i64 @call_via_vm_fooAll(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult160.i = call i64 @call_via_vm_fooAll(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64 %rawSendResult160.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_puts(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult164.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 200 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
   %19 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #18
   store i64 %19, i64* %callArgsAddr.i, align 8
-  %rawSendResult173.i = call fastcc i64 @call_via_vm_fooArray(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult173.i = call i64 @call_via_vm_fooArray(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64 %rawSendResult173.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_puts(i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult177.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }
@@ -1403,12 +1403,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc void @call_via_vm_all(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_all(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_all = load i64, i64* @rubyIdPrecomputed_all, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_all, i32 2, i64* %0) #18
-  ret void
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_all, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -1474,12 +1474,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc void @call_via_vm_any(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_any(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %rubyId_any = load i64, i64* @rubyIdPrecomputed_any, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_any, i32 2, i64* %0) #18
-  ret void
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_any, i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -1663,12 +1663,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc void @"call_via_vm_[]"(i64*, i64) unnamed_addr #13 {
+; Function Attrs: noinline ssp
+define linkonce i64 @"call_via_vm_[]"(i32, i64*, i64) local_unnamed_addr #13 {
 functionEntryInitializers:
   %"rubyId_[]" = load i64, i64* @"rubyIdPrecomputed_[]", align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %"rubyId_[]", i32 1, i64* %0) #18
-  ret void
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_[]", i32 %0, i64* %1) #18
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -1768,7 +1768,7 @@ attributes #9 = { nofree norecurse nounwind ssp uwtable }
 attributes #10 = { nounwind readnone speculatable }
 attributes #11 = { nounwind ssp }
 attributes #12 = { nounwind sspreq uwtable }
-attributes #13 = { noinline nounwind ssp }
+attributes #13 = { noinline ssp }
 attributes #14 = { nounwind sspreq }
 attributes #15 = { argmemonly nounwind }
 attributes #16 = { cold minsize noreturn nounwind sspreq uwtable }

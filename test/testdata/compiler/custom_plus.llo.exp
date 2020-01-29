@@ -671,12 +671,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_new(i64*, i64) unnamed_addr #11 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_new(i32, i64*, i64) local_unnamed_addr #11 {
 functionEntryInitializers:
   %rubyId_new = load i64, i64* @rubyIdPrecomputed_new, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_new, i32 0, i64* %0) #17
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_new, i32 %0, i64* %1) #17
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -733,16 +733,16 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 3, i64* %callArgsAddr, align 8
-  %rawSendResult = call fastcc i64 @"call_via_vm_+"(i64* nonnull %callArgsAddr, i64 %rawArg_a) #17
+  %rawSendResult = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %rawArg_a) #17
   store i64 %rawArg_a, i64* %callArgsAddr, align 8
-  %rawSendResult21 = call fastcc i64 @"call_via_vm_=="(i64* nonnull %callArgsAddr, i64 %rawSendResult) #17
+  %rawSendResult21 = call i64 @"call_via_vm_=="(i32 1, i64* nonnull %callArgsAddr, i64 %rawSendResult) #17
   %14 = and i64 %rawSendResult21, -9
   %15 = icmp eq i64 %14, 0
   %.sink = select i1 %15, i64* inttoptr (i64 40 to i64*), i64* inttoptr (i64 24 to i64*)
   %rubyStr_ok.sink = select i1 %15, i64 %rubyStr_fail, i64 %rubyStr_ok
   store i64* %.sink, i64** %10, align 8, !tbaa !11
   store i64 %rubyStr_ok.sink, i64* %callArgsAddr, align 8
-  %rawSendResult30 = call fastcc i64 @call_via_vm_puts(i64* nonnull %callArgsAddr, i64 %selfRaw) #17
+  %rawSendResult30 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
   store i64* inttoptr (i64 8 to i64*), i64** %10, align 8, !tbaa !11
   ret i64 %rawSendResult30
 
@@ -751,12 +751,12 @@ codeRepl:                                         ; preds = %fillRequiredArgs
   unreachable
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc void @call_via_vm_delegate(i64*, i64) unnamed_addr #11 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_delegate(i32, i64*, i64) local_unnamed_addr #11 {
 functionEntryInitializers:
   %rubyId_delegate = load i64, i64* @rubyIdPrecomputed_delegate, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_delegate, i32 1, i64* %0) #17
-  ret void
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_delegate, i32 %0, i64* %1) #17
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind sspreq
@@ -831,14 +831,14 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i.i = tail call i64 @rb_id2sym(i64 %"rubyId_+.i.i") #17
   tail call void @rb_define_method(i64 %24, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#+" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 56 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult40.i = call fastcc i64 @call_via_vm_new(i64* nonnull %callArgsAddr.i, i64 %24) #17
+  %rawSendResult40.i = call i64 @call_via_vm_new(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
   store i64* inttoptr (i64 72 to i64*), i64** %13, align 8, !tbaa !11
   store i64 %18, i64* %callArgsAddr.i, align 8
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_delegate.i) #17
   call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_delegate, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#delegate" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 136 to i64*), i64** %13, align 8, !tbaa !11
   store i64 %rawSendResult40.i, i64* %callArgsAddr.i, align 8
-  call fastcc void @call_via_vm_delegate(i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult53.i = call i64 @call_via_vm_delegate(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }
@@ -922,12 +922,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @"call_via_vm_+"(i64*, i64) unnamed_addr #11 {
+; Function Attrs: noinline ssp
+define linkonce i64 @"call_via_vm_+"(i32, i64*, i64) local_unnamed_addr #11 {
 functionEntryInitializers:
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %"rubyId_+", i32 1, i64* %0) #17
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_+", i32 %0, i64* %1) #17
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -938,12 +938,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @"call_via_vm_=="(i64*, i64) unnamed_addr #11 {
+; Function Attrs: noinline ssp
+define linkonce i64 @"call_via_vm_=="(i32, i64*, i64) local_unnamed_addr #11 {
 functionEntryInitializers:
   %"rubyId_==" = load i64, i64* @"rubyIdPrecomputed_==", align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %"rubyId_==", i32 1, i64* %0) #17
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_==", i32 %0, i64* %1) #17
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -963,12 +963,12 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline nounwind ssp
-define internal fastcc i64 @call_via_vm_puts(i64*, i64) unnamed_addr #11 {
+; Function Attrs: noinline ssp
+define linkonce i64 @call_via_vm_puts(i32, i64*, i64) local_unnamed_addr #11 {
 functionEntryInitializers:
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
-  %2 = tail call i64 @rb_funcallv(i64 %1, i64 %rubyId_puts, i32 1, i64* %0) #17
-  ret i64 %2
+  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %rubyId_puts, i32 %0, i64* %1) #17
+  ret i64 %3
 }
 
 ; Function Attrs: nounwind ssp
@@ -1180,7 +1180,7 @@ attributes #7 = { cold minsize noreturn nounwind optsize ssp uwtable }
 attributes #8 = { noreturn nounwind ssp uwtable }
 attributes #9 = { nofree norecurse nounwind ssp uwtable }
 attributes #10 = { nounwind ssp }
-attributes #11 = { noinline nounwind ssp }
+attributes #11 = { noinline ssp }
 attributes #12 = { nounwind sspreq uwtable }
 attributes #13 = { nounwind sspreq }
 attributes #14 = { argmemonly nounwind }
