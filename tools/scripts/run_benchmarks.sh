@@ -15,6 +15,8 @@ cd ../..
 rm -rf tmp/bench
 mkdir -p tmp/bench
 
+# TODO(jez) Careful! These must use the same configuration!
+# (Alternatively: be sure to compile the right one right before it's used.)
 bazel build //main:sorbet -c opt
 bazel run @sorbet_ruby//:ruby -c opt -- --version
 
