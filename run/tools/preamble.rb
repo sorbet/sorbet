@@ -36,3 +36,14 @@ def pry
   require 'pry-byebug'
   binding.pry
 end
+
+module T; end
+module T::Helpers; end
+module T::Types; end
+module T::Private; end
+module T::Private::Abstract; end
+module T::Private::Types; end
+class T::Types::Base; end
+class T::Private::Types::Void < T::Types::Base
+  VOID = Module.new.freeze
+end

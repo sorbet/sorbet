@@ -626,8 +626,13 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
     builder.SetInsertPoint(blockMap.postProcessBlock);
     auto var = Payload::varGet(cs, returnValue(cs), builder, blockMap, aliases, 0);
     auto expectedType = cfg.symbol.data(cs)->resultType;
-    if (!expectedType) {
+    if (expectedType == nullptr) {
         builder.CreateRet(var);
+        return;
+    }
+    if (expectedType->derivesFrom(cs, core::Symbols::void_())) {
+        auto void_ = Payload::getRubyConstant(cs, core::Symbols::T_Private_Types_Void_VOID(), builder);
+        builder.CreateRet(void_);
         return;
     }
     auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
