@@ -923,9 +923,6 @@ class Date
   def to_datetime(); end
 
   sig {params(arg0: T.untyped).returns(T.untyped)}
-  def self.new(*arg0); end
-
-  sig {params(arg0: T.untyped).returns(T.untyped)}
   def self._load(arg0); end
 
   # Creates a date object denoting the present day.
