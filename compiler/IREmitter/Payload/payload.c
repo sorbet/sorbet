@@ -1091,26 +1091,25 @@ VALUE sorbet_selfNew(VALUE recv, int argc, VALUE *argv) {
 }
 
 VALUE sorbet_int_bool_true(VALUE recv, int argc, const VALUE *const restrict argv) {
-        return Qtrue;
+    return Qtrue;
 }
 
 VALUE sorbet_int_bool_false(VALUE recv, int argc, const VALUE *const restrict argv) {
-        return Qfalse;
+    return Qfalse;
 }
 
 VALUE sorbet_int_bool_and(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     if (argv[0] != Qnil && argv[0] != Qfalse) {
-      return Qtrue;
+        return Qtrue;
     }
     return Qfalse;
-
 }
 
 VALUE sorbet_int_bool_nand(VALUE recv, int argc, const VALUE *const restrict argv) {
     sorbet_ensure_arity(argc, 1);
     if (argv[0] != Qnil && argv[0] != Qfalse) {
-      return Qfalse;
+        return Qfalse;
     }
     return Qtrue;
 }
