@@ -277,14 +277,6 @@ constr:
   ret void
 }
 
-; Function Attrs: noinline ssp
-define linkonce i64 @"call_via_vm_!"(i32, i64*, i64) local_unnamed_addr #7 {
-functionEntryInitializers:
-  %"rubyId_!" = load i64, i64* @"rubyIdPrecomputed_!", align 8
-  %3 = tail call i64 @rb_funcallv(i64 %2, i64 %"rubyId_!", i32 %0, i64* %1) #10
-  ret i64 %3
-}
-
 ; Function Attrs: nounwind ssp
 define internal void @"Constr_rubyIdPrecomputed_!"() #6 {
 constr:
@@ -344,10 +336,8 @@ typeTestFail.i:                                   ; preds = %entry
 
 "func_<root>.<static-init>$111.exit":             ; preds = %entry
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 11, i64* %callArgsAddr.i, align 8
-  %rawSendResult30.i = call i64 @"call_via_vm_!"(i32 0, i64* nonnull %callArgsAddr.i, i64 0) #10
-  store i64 %rawSendResult30.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult35.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  store i64 20, i64* %callArgsAddr.i, align 8
+  %rawSendResult34.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }
