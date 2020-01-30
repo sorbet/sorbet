@@ -4,6 +4,7 @@ cc_library(
     hdrs = [
         "blockingconcurrentqueue.h",
         "concurrentqueue.h",
+        "lightweightsemaphore.h",
     ],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
