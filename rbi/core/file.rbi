@@ -85,8 +85,8 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
-        dir: String,
+        file: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -132,20 +132,20 @@ class File < IO
 
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
     )
     .returns(String)
   end
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Integer,
         arg2: Integer,
     )
@@ -178,7 +178,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -190,7 +190,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -277,7 +277,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -303,7 +303,7 @@ class File < IO
   # group id of this process. See eaccess(3).
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -313,7 +313,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -403,7 +403,7 @@ class File < IO
   # and use the file referenced by the link.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -529,7 +529,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -542,7 +542,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -566,8 +566,8 @@ class File < IO
   # ```
   sig do
     params(
-        file_1: T.any(String, IO),
-        file_2: T.any(String, IO),
+        file_1: T.any(String, Pathname, IO),
+        file_2: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -621,8 +621,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: String,
-        new: String,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -639,7 +639,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(File::Stat)
   end
@@ -702,7 +702,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -716,7 +716,7 @@ class File < IO
   # ```
   sig do
     params(
-        path: String,
+        path: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -728,7 +728,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -778,8 +778,8 @@ class File < IO
   # The last component of the real pathname can be nonexistent.
   sig do
     params(
-        pathname: String,
-        dir: String,
+        pathname: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -794,8 +794,8 @@ class File < IO
   # All components of the pathname must exist when this method is called.
   sig do
     params(
-        pathname: String,
-        dir: String,
+        pathname: T.any(String, Pathname),
+        dir: T.any(String, Pathname),
     )
     .returns(String)
   end
@@ -809,8 +809,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: String,
-        new: String,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -822,7 +822,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -846,7 +846,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(Integer)
   end
@@ -859,7 +859,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T.nilable(Integer))
   end
@@ -871,7 +871,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T::Boolean)
   end
@@ -910,7 +910,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -925,8 +925,8 @@ class File < IO
   # ```
   sig do
     params(
-        old: String,
-        new: String,
+        old: T.any(String, Pathname),
+        new: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -935,7 +935,7 @@ class File < IO
   # Returns `true` if the named file is a symbolic link.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -953,7 +953,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
         arg0: Integer,
     )
     .returns(Integer)
@@ -1006,7 +1006,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T.nilable(Integer))
   end
@@ -1026,7 +1026,7 @@ class File < IO
   # ```
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T.nilable(Integer))
   end
@@ -1058,7 +1058,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: T.any(String, IO),
+        file: T.any(String, Pathname, IO),
     )
     .returns(T.nilable(Integer))
   end
