@@ -391,28 +391,28 @@ BB2.i:                                            ; preds = %BB2.i.backedge, %BB
   %18 = and i64 %i.sroa.0.0.i, 1
   %19 = icmp ne i64 %18, 0
   store i64 4000001, i64* %callArgsAddr.i, align 8
-  br i1 %19, label %sorbet_rb_int_lt.exit.i, label %"slowSymCallIntrinsic_<.i", !prof !44
+  br i1 %19, label %sorbet_rb_int_lt.exit.i, label %"slowSymCallIntrinsic_Integer_<.i", !prof !44
 
 typeTestFail.i:                                   ; preds = %entry
   tail call fastcc void @sorbet_cast_failure(i64 %2) #11
   unreachable
 
-"afterSymCallIntrinsic_<.i":                      ; preds = %sorbet_rb_int_lt.exit.i, %"slowSymCallIntrinsic_<.i"
-  %"symIntrinsicRawPhi_<.i" = phi i64 [ %23, %sorbet_rb_int_lt.exit.i ], [ %rawSendResult46.i, %"slowSymCallIntrinsic_<.i" ]
-  %20 = and i64 %"symIntrinsicRawPhi_<.i", -9
+"afterSymCallIntrinsic_Integer_<.i":              ; preds = %sorbet_rb_int_lt.exit.i, %"slowSymCallIntrinsic_Integer_<.i"
+  %"symIntrinsicRawPhi_Integer_<.i" = phi i64 [ %23, %sorbet_rb_int_lt.exit.i ], [ %rawSendResult46.i, %"slowSymCallIntrinsic_Integer_<.i" ]
+  %20 = and i64 %"symIntrinsicRawPhi_Integer_<.i", -9
   %21 = icmp eq i64 %20, 0
-  br i1 %21, label %"func_<root>.<static-init>$111.exit", label %"afterSymCallIntrinsic_+78.i"
+  br i1 %21, label %"func_<root>.<static-init>$111.exit", label %"afterSymCallIntrinsic_Integer_+78.i"
 
-"slowSymCallIntrinsic_<.i":                       ; preds = %BB2.i
+"slowSymCallIntrinsic_Integer_<.i":               ; preds = %BB2.i
   %rawSendResult46.i = call i64 @"call_via_vm_<"(i32 1, i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
-  br label %"afterSymCallIntrinsic_<.i"
+  br label %"afterSymCallIntrinsic_Integer_<.i"
 
 sorbet_rb_int_lt.exit.i:                          ; preds = %BB2.i
   %22 = icmp slt i64 %i.sroa.0.0.i, 4000000
   %23 = select i1 %22, i64 20, i64 0
-  br label %"afterSymCallIntrinsic_<.i"
+  br label %"afterSymCallIntrinsic_Integer_<.i"
 
-"afterSymCallIntrinsic_+78.i":                    ; preds = %"afterSymCallIntrinsic_<.i"
+"afterSymCallIntrinsic_Integer_+78.i":            ; preds = %"afterSymCallIntrinsic_Integer_<.i"
   store i64* inttoptr (i64 24 to i64*), i64** %13, align 8, !tbaa !10
   store i64 5, i64* %callArgsAddr.i, align 8
   store i64 %"rubyStr_ .i", i64* %callArgsAddr93.i, align 8
@@ -431,7 +431,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %BB2.i
   %32 = or i1 %29, %31
   br i1 %32, label %39, label %33
 
-33:                                               ; preds = %"afterSymCallIntrinsic_+78.i"
+33:                                               ; preds = %"afterSymCallIntrinsic_Integer_+78.i"
   %34 = inttoptr i64 %27 to %struct.RBasic*
   %35 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %34, i64 0, i32 0
   %36 = load i64, i64* %35, align 8, !tbaa !4
@@ -439,7 +439,7 @@ sorbet_rb_int_lt.exit.i:                          ; preds = %BB2.i
   %38 = icmp eq i64 %37, 5
   br i1 %38, label %43, label %39
 
-39:                                               ; preds = %33, %"afterSymCallIntrinsic_+78.i"
+39:                                               ; preds = %33, %"afterSymCallIntrinsic_Integer_+78.i"
   %40 = call i64 @rb_funcallv(i64 %27, i64 3217, i32 0, i64* null) #11
   %41 = load i64, i64* %callArgsAddr93.i, align 8, !tbaa !9
   %42 = call i64 @rb_obj_as_string_result(i64 %40, i64 %41) #11
@@ -522,18 +522,18 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %90, %84
   %94 = call i64 @rb_str_concat_literals(i32 5, i64* nonnull %callArgsAddr.i) #11
   store i64* inttoptr (i64 32 to i64*), i64** %13, align 8, !tbaa !10
   store i64 3, i64* %callArgsAddr.i, align 8
-  br i1 %19, label %"fastSymCallIntrinsic_+107.i", label %"slowSymCallIntrinsic_+106.i"
+  br i1 %19, label %"fastSymCallIntrinsic_Integer_+107.i", label %"slowSymCallIntrinsic_Integer_+106.i"
 
-"slowSymCallIntrinsic_+106.i":                    ; preds = %sorbet_stringInterpolate.exit.i
+"slowSymCallIntrinsic_Integer_+106.i":            ; preds = %sorbet_stringInterpolate.exit.i
   %rawSendResult115.i = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr.i, i64 %i.sroa.0.0.i) #11
   br label %BB2.i.backedge
 
-"fastSymCallIntrinsic_+107.i":                    ; preds = %sorbet_stringInterpolate.exit.i
+"fastSymCallIntrinsic_Integer_+107.i":            ; preds = %sorbet_stringInterpolate.exit.i
   %95 = and i64 %i.sroa.0.0.i, 1
   %96 = icmp eq i64 %95, 0
   br i1 %96, label %105, label %97, !prof !45
 
-97:                                               ; preds = %"fastSymCallIntrinsic_+107.i"
+97:                                               ; preds = %"fastSymCallIntrinsic_Integer_+107.i"
   %98 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 2) #11
   %99 = extractvalue { i64, i1 } %98, 1
   %100 = extractvalue { i64, i1 } %98, 0
@@ -545,7 +545,7 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %90, %84
   %104 = call i64 @rb_int2big(i64 %103) #11
   br label %BB2.i.backedge
 
-105:                                              ; preds = %"fastSymCallIntrinsic_+107.i"
+105:                                              ; preds = %"fastSymCallIntrinsic_Integer_+107.i"
   %106 = and i64 %i.sroa.0.0.i, 7
   %107 = icmp ne i64 %106, 0
   %108 = and i64 %i.sroa.0.0.i, -9
@@ -569,11 +569,11 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %90, %84
   %120 = call i64 @rb_num_coerce_bin(i64 %i.sroa.0.0.i, i64 3, i64 43) #11
   br label %BB2.i.backedge
 
-BB2.i.backedge:                                   ; preds = %119, %117, %101, %97, %"slowSymCallIntrinsic_+106.i"
-  %i.sroa.0.0.i.be = phi i64 [ %rawSendResult115.i, %"slowSymCallIntrinsic_+106.i" ], [ %120, %119 ], [ %118, %117 ], [ %104, %101 ], [ %100, %97 ]
+BB2.i.backedge:                                   ; preds = %119, %117, %101, %97, %"slowSymCallIntrinsic_Integer_+106.i"
+  %i.sroa.0.0.i.be = phi i64 [ %rawSendResult115.i, %"slowSymCallIntrinsic_Integer_+106.i" ], [ %120, %119 ], [ %118, %117 ], [ %104, %101 ], [ %100, %97 ]
   br label %BB2.i
 
-"func_<root>.<static-init>$111.exit":             ; preds = %"afterSymCallIntrinsic_<.i"
+"func_<root>.<static-init>$111.exit":             ; preds = %"afterSymCallIntrinsic_Integer_<.i"
   store i64* inttoptr (i64 8 to i64*), i64** %13, align 8, !tbaa !10
   call void @llvm.lifetime.end.p0i8(i64 40, i8* nonnull %3)
   ret void

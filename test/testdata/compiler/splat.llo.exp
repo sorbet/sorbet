@@ -451,7 +451,7 @@ sorbet_splatIntrinsic.exit.i:                     ; preds = %40, %rb_array_len.e
 
 sorbet_isa_Array.exit.thread.i:                   ; preds = %sorbet_splatIntrinsic.exit.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"slowSymCallIntrinsic_[]152.i"
+  br label %"slowSymCallIntrinsic_Array_[]152.i"
 
 sorbet_isa_Array.exit.i:                          ; preds = %sorbet_splatIntrinsic.exit.i
   %51 = inttoptr i64 %45 to %struct.RBasic*
@@ -460,20 +460,20 @@ sorbet_isa_Array.exit.i:                          ; preds = %sorbet_splatIntrins
   %54 = and i64 %53, 31
   %55 = icmp eq i64 %54, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %55, label %"fastSymCallIntrinsic_[]153.i", label %"slowSymCallIntrinsic_[]152.i", !prof !44
+  br i1 %55, label %"fastSymCallIntrinsic_Array_[]153.i", label %"slowSymCallIntrinsic_Array_[]152.i", !prof !44
 
 typeTestFail.i:                                   ; preds = %entry
   tail call fastcc void @sorbet_cast_failure(i64 %2) #10
   unreachable
 
-"afterSymCallIntrinsic_[]151.i":                  ; preds = %"fastSymCallIntrinsic_[]153.i", %"slowSymCallIntrinsic_[]152.i"
-  %"symIntrinsicRawPhi_[]14814.i" = phi i64 [ %94, %"fastSymCallIntrinsic_[]153.i" ], [ %rawSendResult147.i, %"slowSymCallIntrinsic_[]152.i" ]
-  %"symIntrinsicRawPhi_[]812.i" = phi i64 [ %93, %"fastSymCallIntrinsic_[]153.i" ], [ %rawSendResult134.i, %"slowSymCallIntrinsic_[]152.i" ]
-  %"symIntrinsicRawPhi_[]162.i" = phi i64 [ %95, %"fastSymCallIntrinsic_[]153.i" ], [ %rawSendResult161.i, %"slowSymCallIntrinsic_[]152.i" ]
+"afterSymCallIntrinsic_Array_[]151.i":            ; preds = %"fastSymCallIntrinsic_Array_[]153.i", %"slowSymCallIntrinsic_Array_[]152.i"
+  %"symIntrinsicRawPhi_Array_[]14814.i" = phi i64 [ %94, %"fastSymCallIntrinsic_Array_[]153.i" ], [ %rawSendResult147.i, %"slowSymCallIntrinsic_Array_[]152.i" ]
+  %"symIntrinsicRawPhi_Array_[]812.i" = phi i64 [ %93, %"fastSymCallIntrinsic_Array_[]153.i" ], [ %rawSendResult134.i, %"slowSymCallIntrinsic_Array_[]152.i" ]
+  %"symIntrinsicRawPhi_Array_[]162.i" = phi i64 [ %95, %"fastSymCallIntrinsic_Array_[]153.i" ], [ %rawSendResult161.i, %"slowSymCallIntrinsic_Array_[]152.i" ]
   store i64* inttoptr (i64 16 to i64*), i64** %13, align 8, !tbaa !10
-  store i64 %"symIntrinsicRawPhi_[]812.i", i64* %callArgsAddr.i, align 16
-  store i64 %"symIntrinsicRawPhi_[]14814.i", i64* %callArgsAddr103.i, align 8
-  store i64 %"symIntrinsicRawPhi_[]162.i", i64* %callArgsAddr105.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]812.i", i64* %callArgsAddr.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]14814.i", i64* %callArgsAddr103.i, align 8
+  store i64 %"symIntrinsicRawPhi_Array_[]162.i", i64* %callArgsAddr105.i, align 16
   %56 = call i64 @rb_ary_new_from_values(i64 3, i64* nonnull %callArgsAddr.i) #10
   store i64 %56, i64* %callArgsAddr.i, align 16
   %rawSendResult174.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
@@ -490,12 +490,12 @@ typeTestFail.i:                                   ; preds = %entry
   %63 = icmp eq i64 %62, 0
   br i1 %63, label %67, label %64
 
-64:                                               ; preds = %"afterSymCallIntrinsic_[]151.i"
+64:                                               ; preds = %"afterSymCallIntrinsic_Array_[]151.i"
   %65 = lshr i64 %61, 15
   %66 = and i64 %65, 3
   br label %rb_array_len.exit.i4.i
 
-67:                                               ; preds = %"afterSymCallIntrinsic_[]151.i"
+67:                                               ; preds = %"afterSymCallIntrinsic_Array_[]151.i"
   %68 = inttoptr i64 %58 to %struct.RArray*
   %69 = getelementptr inbounds %struct.RArray, %struct.RArray* %68, i64 0, i32 1, i32 0, i32 0
   %70 = load i64, i64* %69, align 8, !tbaa !7, !noalias !49
@@ -530,7 +530,7 @@ sorbet_splatIntrinsic.exit5.i:                    ; preds = %77, %rb_array_len.e
 
 sorbet_isa_Array.exit6.thread.i:                  ; preds = %sorbet_splatIntrinsic.exit5.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"slowSymCallIntrinsic_[]224.i"
+  br label %"slowSymCallIntrinsic_Array_[]224.i"
 
 sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrinsic.exit5.i
   %88 = inttoptr i64 %82 to %struct.RBasic*
@@ -539,32 +539,32 @@ sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrins
   %91 = and i64 %90, 31
   %92 = icmp eq i64 %91, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %92, label %"fastSymCallIntrinsic_[]225.i", label %"slowSymCallIntrinsic_[]224.i", !prof !44
+  br i1 %92, label %"fastSymCallIntrinsic_Array_[]225.i", label %"slowSymCallIntrinsic_Array_[]224.i", !prof !44
 
-"slowSymCallIntrinsic_[]152.i":                   ; preds = %sorbet_isa_Array.exit.i, %sorbet_isa_Array.exit.thread.i
+"slowSymCallIntrinsic_Array_[]152.i":             ; preds = %sorbet_isa_Array.exit.i, %sorbet_isa_Array.exit.thread.i
   %rawSendResult134.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %45) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %rawSendResult147.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %45) #10
   store i64 -1, i64* %callArgsAddr.i, align 16
   %rawSendResult161.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %45) #10
-  br label %"afterSymCallIntrinsic_[]151.i"
+  br label %"afterSymCallIntrinsic_Array_[]151.i"
 
-"fastSymCallIntrinsic_[]153.i":                   ; preds = %sorbet_isa_Array.exit.i
+"fastSymCallIntrinsic_Array_[]153.i":             ; preds = %sorbet_isa_Array.exit.i
   %93 = call i64 @rb_ary_entry(i64 %45, i64 0) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %94 = call i64 @rb_ary_entry(i64 %45, i64 -2) #10
   store i64 -1, i64* %callArgsAddr.i, align 16
   %95 = call i64 @rb_ary_entry(i64 %45, i64 -1) #10
-  br label %"afterSymCallIntrinsic_[]151.i"
+  br label %"afterSymCallIntrinsic_Array_[]151.i"
 
-"afterSymCallIntrinsic_[]223.i":                  ; preds = %"fastSymCallIntrinsic_[]225.i", %"slowSymCallIntrinsic_[]224.i"
-  %"symIntrinsicRawPhi_[]22023.i" = phi i64 [ %133, %"fastSymCallIntrinsic_[]225.i" ], [ %rawSendResult219.i, %"slowSymCallIntrinsic_[]224.i" ]
-  %"symIntrinsicRawPhi_[]2061721.i" = phi i64 [ %132, %"fastSymCallIntrinsic_[]225.i" ], [ %rawSendResult205.i, %"slowSymCallIntrinsic_[]224.i" ]
-  %"symIntrinsicRawPhi_[]234.i" = phi i64 [ %134, %"fastSymCallIntrinsic_[]225.i" ], [ %rawSendResult233.i, %"slowSymCallIntrinsic_[]224.i" ]
+"afterSymCallIntrinsic_Array_[]223.i":            ; preds = %"fastSymCallIntrinsic_Array_[]225.i", %"slowSymCallIntrinsic_Array_[]224.i"
+  %"symIntrinsicRawPhi_Array_[]22023.i" = phi i64 [ %133, %"fastSymCallIntrinsic_Array_[]225.i" ], [ %rawSendResult219.i, %"slowSymCallIntrinsic_Array_[]224.i" ]
+  %"symIntrinsicRawPhi_Array_[]2061721.i" = phi i64 [ %132, %"fastSymCallIntrinsic_Array_[]225.i" ], [ %rawSendResult205.i, %"slowSymCallIntrinsic_Array_[]224.i" ]
+  %"symIntrinsicRawPhi_Array_[]234.i" = phi i64 [ %134, %"fastSymCallIntrinsic_Array_[]225.i" ], [ %rawSendResult233.i, %"slowSymCallIntrinsic_Array_[]224.i" ]
   store i64* inttoptr (i64 40 to i64*), i64** %13, align 8, !tbaa !10
-  store i64 %"symIntrinsicRawPhi_[]2061721.i", i64* %callArgsAddr.i, align 16
-  store i64 %"symIntrinsicRawPhi_[]22023.i", i64* %callArgsAddr103.i, align 8
-  store i64 %"symIntrinsicRawPhi_[]234.i", i64* %callArgsAddr105.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]2061721.i", i64* %callArgsAddr.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]22023.i", i64* %callArgsAddr103.i, align 8
+  store i64 %"symIntrinsicRawPhi_Array_[]234.i", i64* %callArgsAddr105.i, align 16
   %96 = call i64 @rb_ary_new_from_values(i64 3, i64* nonnull %callArgsAddr.i) #10
   store i64 %96, i64* %callArgsAddr.i, align 16
   %rawSendResult246.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
@@ -579,12 +579,12 @@ sorbet_isa_Array.exit6.i:                         ; preds = %sorbet_splatIntrins
   %102 = icmp eq i64 %101, 0
   br i1 %102, label %106, label %103
 
-103:                                              ; preds = %"afterSymCallIntrinsic_[]223.i"
+103:                                              ; preds = %"afterSymCallIntrinsic_Array_[]223.i"
   %104 = lshr i64 %100, 15
   %105 = and i64 %104, 3
   br label %rb_array_len.exit.i2.i
 
-106:                                              ; preds = %"afterSymCallIntrinsic_[]223.i"
+106:                                              ; preds = %"afterSymCallIntrinsic_Array_[]223.i"
   %107 = inttoptr i64 %97 to %struct.RArray*
   %108 = getelementptr inbounds %struct.RArray, %struct.RArray* %107, i64 0, i32 1, i32 0, i32 0
   %109 = load i64, i64* %108, align 8, !tbaa !7, !noalias !52
@@ -619,7 +619,7 @@ sorbet_splatIntrinsic.exit3.i:                    ; preds = %116, %rb_array_len.
 
 sorbet_isa_Array.exit1.thread.i:                  ; preds = %sorbet_splatIntrinsic.exit3.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"slowSymCallIntrinsic_[]290.i"
+  br label %"slowSymCallIntrinsic_Array_[]290.i"
 
 sorbet_isa_Array.exit1.i:                         ; preds = %sorbet_splatIntrinsic.exit3.i
   %127 = inttoptr i64 %121 to %struct.RBasic*
@@ -628,25 +628,25 @@ sorbet_isa_Array.exit1.i:                         ; preds = %sorbet_splatIntrins
   %130 = and i64 %129, 31
   %131 = icmp eq i64 %130, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %131, label %"fastSymCallIntrinsic_[]291.i", label %"slowSymCallIntrinsic_[]290.i", !prof !44
+  br i1 %131, label %"fastSymCallIntrinsic_Array_[]291.i", label %"slowSymCallIntrinsic_Array_[]290.i", !prof !44
 
-"slowSymCallIntrinsic_[]224.i":                   ; preds = %sorbet_isa_Array.exit6.i, %sorbet_isa_Array.exit6.thread.i
+"slowSymCallIntrinsic_Array_[]224.i":             ; preds = %sorbet_isa_Array.exit6.i, %sorbet_isa_Array.exit6.thread.i
   %rawSendResult205.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %82) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %rawSendResult219.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %82) #10
   store i64 -1, i64* %callArgsAddr.i, align 16
   %rawSendResult233.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %82) #10
-  br label %"afterSymCallIntrinsic_[]223.i"
+  br label %"afterSymCallIntrinsic_Array_[]223.i"
 
-"fastSymCallIntrinsic_[]225.i":                   ; preds = %sorbet_isa_Array.exit6.i
+"fastSymCallIntrinsic_Array_[]225.i":             ; preds = %sorbet_isa_Array.exit6.i
   %132 = call i64 @rb_ary_entry(i64 %82, i64 0) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %133 = call i64 @rb_ary_entry(i64 %82, i64 -2) #10
   store i64 -1, i64* %callArgsAddr.i, align 16
   %134 = call i64 @rb_ary_entry(i64 %82, i64 -1) #10
-  br label %"afterSymCallIntrinsic_[]223.i"
+  br label %"afterSymCallIntrinsic_Array_[]223.i"
 
-"slowSymCallIntrinsic_[]290.i":                   ; preds = %sorbet_isa_Array.exit1.i, %sorbet_isa_Array.exit1.thread.i
+"slowSymCallIntrinsic_Array_[]290.i":             ; preds = %sorbet_isa_Array.exit1.i, %sorbet_isa_Array.exit1.thread.i
   %rawSendResult271.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %121) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %rawSendResult285.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %121) #10
@@ -654,7 +654,7 @@ sorbet_isa_Array.exit1.i:                         ; preds = %sorbet_splatIntrins
   %rawSendResult299.i = call i64 @"call_via_vm_[]"(i32 1, i64* nonnull %callArgsAddr.i, i64 %121) #10
   br label %"func_<root>.<static-init>$111.exit"
 
-"fastSymCallIntrinsic_[]291.i":                   ; preds = %sorbet_isa_Array.exit1.i
+"fastSymCallIntrinsic_Array_[]291.i":             ; preds = %sorbet_isa_Array.exit1.i
   %135 = call i64 @rb_ary_entry(i64 %121, i64 0) #10
   store i64 -3, i64* %callArgsAddr.i, align 16
   %136 = call i64 @rb_ary_entry(i64 %121, i64 -2) #10
@@ -662,14 +662,14 @@ sorbet_isa_Array.exit1.i:                         ; preds = %sorbet_splatIntrins
   %137 = call i64 @rb_ary_entry(i64 %121, i64 -1) #10
   br label %"func_<root>.<static-init>$111.exit"
 
-"func_<root>.<static-init>$111.exit":             ; preds = %"slowSymCallIntrinsic_[]290.i", %"fastSymCallIntrinsic_[]291.i"
-  %"symIntrinsicRawPhi_[]28632.i" = phi i64 [ %136, %"fastSymCallIntrinsic_[]291.i" ], [ %rawSendResult285.i, %"slowSymCallIntrinsic_[]290.i" ]
-  %"symIntrinsicRawPhi_[]2722630.i" = phi i64 [ %135, %"fastSymCallIntrinsic_[]291.i" ], [ %rawSendResult271.i, %"slowSymCallIntrinsic_[]290.i" ]
-  %"symIntrinsicRawPhi_[]300.i" = phi i64 [ %137, %"fastSymCallIntrinsic_[]291.i" ], [ %rawSendResult299.i, %"slowSymCallIntrinsic_[]290.i" ]
+"func_<root>.<static-init>$111.exit":             ; preds = %"slowSymCallIntrinsic_Array_[]290.i", %"fastSymCallIntrinsic_Array_[]291.i"
+  %"symIntrinsicRawPhi_Array_[]28632.i" = phi i64 [ %136, %"fastSymCallIntrinsic_Array_[]291.i" ], [ %rawSendResult285.i, %"slowSymCallIntrinsic_Array_[]290.i" ]
+  %"symIntrinsicRawPhi_Array_[]2722630.i" = phi i64 [ %135, %"fastSymCallIntrinsic_Array_[]291.i" ], [ %rawSendResult271.i, %"slowSymCallIntrinsic_Array_[]290.i" ]
+  %"symIntrinsicRawPhi_Array_[]300.i" = phi i64 [ %137, %"fastSymCallIntrinsic_Array_[]291.i" ], [ %rawSendResult299.i, %"slowSymCallIntrinsic_Array_[]290.i" ]
   store i64* inttoptr (i64 64 to i64*), i64** %13, align 8, !tbaa !10
-  store i64 %"symIntrinsicRawPhi_[]2722630.i", i64* %callArgsAddr.i, align 16
-  store i64 %"symIntrinsicRawPhi_[]28632.i", i64* %callArgsAddr103.i, align 8
-  store i64 %"symIntrinsicRawPhi_[]300.i", i64* %callArgsAddr105.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]2722630.i", i64* %callArgsAddr.i, align 16
+  store i64 %"symIntrinsicRawPhi_Array_[]28632.i", i64* %callArgsAddr103.i, align 8
+  store i64 %"symIntrinsicRawPhi_Array_[]300.i", i64* %callArgsAddr105.i, align 16
   %138 = call i64 @rb_ary_new_from_values(i64 3, i64* nonnull %callArgsAddr.i) #10
   store i64 %138, i64* %callArgsAddr.i, align 16
   %rawSendResult312.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10

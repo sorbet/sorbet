@@ -256,27 +256,27 @@ fillFromDefaultBlockDone:                         ; preds = %functionEntryInitia
   %11 = icmp eq i64 %10, 0
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %11, label %"slowSymCallIntrinsic_+", label %"fastSymCallIntrinsic_+", !prof !18
+  br i1 %11, label %"slowSymCallIntrinsic_Integer_+", label %"fastSymCallIntrinsic_Integer_+", !prof !18
 
-"afterSymCallIntrinsic_+":                        ; preds = %15, %"fastSymCallIntrinsic_+", %"slowSymCallIntrinsic_+"
-  %"symIntrinsicRawPhi_+" = phi i64 [ %rawSendResult15, %"slowSymCallIntrinsic_+" ], [ %18, %15 ], [ %14, %"fastSymCallIntrinsic_+" ]
-  ret i64 %"symIntrinsicRawPhi_+"
+"afterSymCallIntrinsic_Integer_+":                ; preds = %15, %"fastSymCallIntrinsic_Integer_+", %"slowSymCallIntrinsic_Integer_+"
+  %"symIntrinsicRawPhi_Integer_+" = phi i64 [ %rawSendResult15, %"slowSymCallIntrinsic_Integer_+" ], [ %18, %15 ], [ %14, %"fastSymCallIntrinsic_Integer_+" ]
+  ret i64 %"symIntrinsicRawPhi_Integer_+"
 
-"slowSymCallIntrinsic_+":                         ; preds = %fillFromDefaultBlockDone
+"slowSymCallIntrinsic_Integer_+":                 ; preds = %fillFromDefaultBlockDone
   %rawSendResult15 = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %x.sroa.0.0)
-  br label %"afterSymCallIntrinsic_+"
+  br label %"afterSymCallIntrinsic_Integer_+"
 
-"fastSymCallIntrinsic_+":                         ; preds = %fillFromDefaultBlockDone
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %fillFromDefaultBlockDone
   %12 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %x.sroa.0.0, i64 2) #12
   %13 = extractvalue { i64, i1 } %12, 1
   %14 = extractvalue { i64, i1 } %12, 0
-  br i1 %13, label %15, label %"afterSymCallIntrinsic_+"
+  br i1 %13, label %15, label %"afterSymCallIntrinsic_Integer_+"
 
-15:                                               ; preds = %"fastSymCallIntrinsic_+"
+15:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
   %16 = ashr i64 %14, 1
   %17 = xor i64 %16, -9223372036854775808
   %18 = tail call i64 @rb_int2big(i64 %17) #12, !noalias !19
-  br label %"afterSymCallIntrinsic_+"
+  br label %"afterSymCallIntrinsic_Integer_+"
 }
 
 ; Function Attrs: nounwind ssp

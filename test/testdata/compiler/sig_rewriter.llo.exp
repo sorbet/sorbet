@@ -717,13 +717,13 @@ entry:
   %15 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %14, i64 0, i32 17
   %16 = load i64, i64* %15, align 8, !tbaa !36
   %17 = icmp eq i64 %16, %2
-  br i1 %17, label %afterSymCallIntrinsic_unsafe.i, label %codeRepl3, !prof !45
+  br i1 %17, label %afterSymCallIntrinsic_T_unsafe.i, label %codeRepl3, !prof !45
 
 codeRepl3:                                        ; preds = %entry
   tail call fastcc void @Init_test_testdata_compiler_sig_rewriter.cold.2(i64 %2) #21
   unreachable
 
-afterSymCallIntrinsic_unsafe.i:                   ; preds = %entry
+afterSymCallIntrinsic_T_unsafe.i:                 ; preds = %entry
   %18 = load i64, i64* @rb_cObject, align 8
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 %18, i64* %callArgsAddr.i, align 8
@@ -733,11 +733,11 @@ afterSymCallIntrinsic_unsafe.i:                   ; preds = %entry
   %needTakeSlowPath = icmp eq i64 %20, %21
   br i1 %needTakeSlowPath, label %23, label %22, !prof !47
 
-22:                                               ; preds = %afterSymCallIntrinsic_unsafe.i
+22:                                               ; preds = %afterSymCallIntrinsic_T_unsafe.i
   tail call void @const_recompute_A() #18
   br label %23
 
-23:                                               ; preds = %afterSymCallIntrinsic_unsafe.i, %22
+23:                                               ; preds = %afterSymCallIntrinsic_T_unsafe.i, %22
   %24 = load i64, i64* @guarded_const_A, align 8
   %25 = load i64, i64* @guard_epoch_A, align 8
   %26 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !46
