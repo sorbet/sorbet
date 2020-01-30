@@ -2,9 +2,9 @@ cc_library(
     name = "concurrentqueue",
     srcs = [],
     hdrs = [
-        "lightweightsemaphore.h",
         "blockingconcurrentqueue.h",
         "concurrentqueue.h",
+        "lightweightsemaphore.h",
     ],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
