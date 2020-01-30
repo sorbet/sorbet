@@ -1,22 +1,7 @@
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
-    def main(<blk>)
-      begin
-        <self>.puts(::A.a())
-        <self>.puts(::B.b())
-        <self>.puts($c.c())
-        <self>.puts(::D.singleton_class().d())
-        <self>.puts(::E.e())
-        <self>.puts(::F.f=(91))
-        <self>.puts(::G.new().wrapper())
-        <self>.puts(::T.untyped.h())
-      end
-    end
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -56,17 +41,35 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::H)
           <emptyTree>
         end
+        :"main"
         <self>.main()
         <emptyTree>
       end
     end
+
+    def main(<blk>)
+      begin
+        <self>.puts(::A.a())
+        <self>.puts(::B.b())
+        <self>.puts($c.c())
+        <self>.puts(::D.singleton_class().d())
+        <self>.puts(::E.e())
+        <self>.puts(::F.f=(91))
+        <self>.puts(::G.new().wrapper())
+        <self>.puts(::T.untyped.h())
+      end
+    end
   end
   class ::A<<C A>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -75,19 +78,19 @@ begin
     end
   end
   class <singleton class><<Class:B>> < ()
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      :"b"
+    end
 
     def b(<blk>)
       "b"
     end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::D<<C D>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -96,6 +99,8 @@ begin
     end
   end
   class <singleton class><<Class:D>> < ()
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -104,26 +109,18 @@ begin
     end
   end
   class <singleton class><<Class:<Class:D>>> < ()
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      :"d"
+    end
 
     def d(<blk>)
       "d"
     end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::E<<C E>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.e(<blk>)
-      "e"
-    end
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -132,24 +129,29 @@ begin
           <emptyTree>
         end
         <self>.wrapper()
+        :"e"
         <emptyTree>
       end
     end
+
+    def self.e(<blk>)
+      "e"
+    end
   end
   class <singleton class><<Class:E>> < ()
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      :"wrapper"
+    end
 
     def wrapper(<blk>)
       :"e"
     end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::F<<C F>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -158,11 +160,19 @@ begin
     end
   end
   class <singleton class><<Class:F>> < ()
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        :"initialize"
+        <self>.extend(::T::Sig)
+        <self>.sig() do ||
+          <self>.params({:"f" => ::Integer}).returns(::Integer)
+        end
+        :"f="
+        <emptyTree>
+      end
+    end
 
     def initialize(<blk>)
       @f = begin
@@ -174,25 +184,22 @@ begin
     def f=(f, <blk>)
       @f = f
     end
+  end
+  class ::G<<C G>> < (::<todo sym>)
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"f" => ::Integer}).returns(::Integer)
+        :"wrapper"
+        :"g"
+        begin
+          <emptyTree>
+          <emptyTree>
         end
+        :"inner"
         <emptyTree>
       end
     end
-  end
-  class ::G<<C G>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
 
     def wrapper(<blk>)
       <self>.inner()
@@ -205,6 +212,16 @@ begin
     def inner(<blk>)
       ::T.reveal_type(<self>)
     end
+  end
+  class <singleton class><<Class:G>> < ()
+    :"<static-init>"
+
+    def self.<static-init>(<blk>)
+      :"inner"
+    end
+  end
+  class ::H<<C H>> < (::<todo sym>)
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -213,20 +230,9 @@ begin
       end
     end
   end
-  class <singleton class><<Class:G>> < ()
-    def self.<static-init>(<blk>)
-      :"inner"
-    end
-  end
-  class ::H<<C H>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
-    end
-  end
   class <singleton class><<Class:H>> < ()
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -236,16 +242,14 @@ begin
     end
   end
   class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      :"h"
+    end
 
     def self.h(<blk>)
       "h"
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

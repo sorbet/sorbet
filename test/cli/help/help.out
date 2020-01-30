@@ -46,6 +46,7 @@ Usage:
  advanced options:
       --dir arg                 Input directory
       --file arg                Input file
+      --allowed-extension arg   Allowed extension
       --configatron-dir path    Path to configatron yaml folders
       --configatron-file path   Path to configatron yaml files
       --web-trace-file file     Web trace file. For use with chrome

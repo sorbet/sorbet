@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Normal><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"foo" => <emptyTree>::<C Integer>}).void()

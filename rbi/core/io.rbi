@@ -1941,7 +1941,7 @@ class IO < Object
         read_array: T.nilable(T::Array[IO]),
         write_array: T.nilable(T::Array[IO]),
         error_array: T.nilable(T::Array[IO]),
-        timeout: T.nilable(Integer),
+        timeout: T.any(NilClass, Integer, Float),
     )
     .returns(T.nilable(T::Array[T::Array[IO]]))
   end

@@ -15,6 +15,27 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal(klass.new, klass.new)
   end
 
+  it 'handles attr_writer and attr_accessor generated writers' do
+    klass = Class.new do
+      extend T::Sig
+      extend T::Helpers
+      sig { params(foo: String).returns(String) }
+      attr_writer :foo
+      sig { params(bar: Integer).returns(Integer) }
+      attr_accessor :bar
+    end
+
+    assert_equal("foo", klass.new.foo = "foo")
+    err = assert_raises(TypeError) do
+      klass.new.foo = 42
+    end
+    assert_match(/Expected type String, got type Integer/, err.message)
+    assert_equal(42, klass.new.bar = 42)
+    # TODO: This should also raise a type error, but currently doesn't because
+    # the sig only affects the reader part of the attr_accessor, not the writer.
+    assert_equal("foo", klass.new.bar = "foo")
+  end
+
   it 'handles aliased methods' do
     klass = Class.new do
       extend T::Sig

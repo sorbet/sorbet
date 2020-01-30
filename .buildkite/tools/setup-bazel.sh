@@ -6,6 +6,7 @@ echo "--- Pre-setup :bazel:"
 
 if [ "${CLEAN_BUILD:-}" != "" ]; then
   echo "--- cleanup"
+  chmod -R 755 /usr/local/var/bazelcache/
   rm -rf /usr/local/var/bazelcache/*
 fi
 

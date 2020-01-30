@@ -248,30 +248,19 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
-        name = "ruby_2_4_3",
+        name = "ruby_2_4",
         url = "https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.3.tar.gz",
         sha256 = "fd0375582c92045aa7d31854e724471fb469e11a4b08ff334d39052ccaaa3a98",
         strip_prefix = "ruby-2.4.3",
-        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby-2.4.BUILD",
-        patches = [
-            "@com_stripe_ruby_typer//third_party/ruby:probes.h.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:enc.encinit.c.patch",
-        ],
-        patch_args = ["-p1"],
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
     http_archive(
-        name = "ruby_2_6_3",
-        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.3.tar.gz",
-        sha256 = "577fd3795f22b8d91c1d4e6733637b0394d4082db659fccf224c774a2b1c82fb",
-        strip_prefix = "ruby-2.6.3",
-        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby-2.6.BUILD",
-        patches = [
-            "@com_stripe_ruby_typer//third_party/ruby:probes.h.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:enc.encinit.c.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:debug_counter.h.patch",
-        ],
-        patch_args = ["-p1"],
+        name = "ruby_2_6",
+        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz",
+        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
+        strip_prefix = "ruby-2.6.5",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
     http_archive(
@@ -280,4 +269,16 @@ package(default_visibility = ["//visibility:public"])
         sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
         strip_prefix = "zlib-1.2.11",
         build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
+    )
+
+    native.new_local_repository(
+        name = "system_ssl_darwin",
+        path = "/usr/local/opt/openssl",
+        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
+    )
+
+    native.new_local_repository(
+        name = "system_ssl_linux",
+        path = "/usr",
+        build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
     )

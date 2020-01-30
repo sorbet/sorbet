@@ -1,4 +1,5 @@
 #include "common/kvstore/KeyValueStore.h"
+#include "lmdb.h"
 
 #include <utility>
 
@@ -7,7 +8,13 @@ namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
-    1L * 1024 * 1024 * 1024; // 1G. This is both maximum fs db size and max virtual memory usage.
+    2L * 1024 * 1024 * 1024; // 2G. This is both maximum fs db size and max virtual memory usage.
+struct KeyValueStore::DBState {
+    MDB_env *env;
+    MDB_dbi dbi;
+    MDB_txn *txn;
+    UnorderedMap<std::thread::id, MDB_txn *> readers;
+};
 
 static void throw_mdb_error(string_view what, int err) {
     fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
@@ -15,21 +22,21 @@ static void throw_mdb_error(string_view what, int err) {
 }
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
-    : path(move(path)), flavor(move(flavor)), writerId(this_thread::get_id()) {
+    : path(move(path)), flavor(move(flavor)), writerId(this_thread::get_id()), dbState(make_unique<DBState>()) {
     int rc;
-    rc = mdb_env_create(&env);
+    rc = mdb_env_create(&dbState->env);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_set_mapsize(env, MAX_DB_SIZE_BYTES);
+    rc = mdb_env_set_mapsize(dbState->env, MAX_DB_SIZE_BYTES);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_set_maxdbs(env, 3);
+    rc = mdb_env_set_maxdbs(dbState->env, 3);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_open(env, this->path.c_str(), 0, 0664);
+    rc = mdb_env_open(dbState->env, this->path.c_str(), 0, 0664);
     if (rc != 0) {
         goto fail;
     }
@@ -53,14 +60,14 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
         return;
     }
 
-    mdb_txn_abort(txn);
-    mdb_close(env, dbi);
-    mdb_env_close(env);
+    mdb_txn_abort(dbState->txn);
+    mdb_close(dbState->env, dbState->dbi);
+    mdb_env_close(dbState->env);
 }
 
 void KeyValueStore::write(string_view key, const vector<u1> &value) {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
     MDB_val kv;
     MDB_val dv;
@@ -70,9 +77,9 @@ void KeyValueStore::write(string_view key, const vector<u1> &value) {
     dv.mv_data = (void *)value.data();
 
     int rc;
-    rc = mdb_put(txn, dbi, &kv, &dv, 0);
+    rc = mdb_put(dbState->txn, dbState->dbi, &kv, &dv, 0);
     if (rc != 0) {
-        throw invalid_argument("failed write into database");
+        throw_mdb_error("failed write into database"sv, rc);
     }
 }
 
@@ -81,17 +88,17 @@ u1 *KeyValueStore::read(string_view key) {
     int rc = 0;
     {
         absl::ReaderMutexLock lk(&readers_mtx);
-        auto fnd = readers.find(this_thread::get_id());
-        if (fnd != readers.end()) {
+        auto fnd = dbState->readers.find(this_thread::get_id());
+        if (fnd != dbState->readers.end()) {
             txn = fnd->second;
             ENFORCE(txn != nullptr);
         }
     }
     if (txn == nullptr) {
         absl::WriterMutexLock lk(&readers_mtx);
-        auto &txn_store = readers[this_thread::get_id()];
+        auto &txn_store = dbState->readers[this_thread::get_id()];
         ENFORCE(txn_store == nullptr);
-        rc = mdb_txn_begin(env, nullptr, MDB_RDONLY, &txn_store);
+        rc = mdb_txn_begin(dbState->env, nullptr, MDB_RDONLY, &txn_store);
         txn = txn_store;
     }
     if (rc != 0) {
@@ -102,7 +109,7 @@ u1 *KeyValueStore::read(string_view key) {
     kv.mv_size = key.size();
     kv.mv_data = (void *)key.data();
     MDB_val data;
-    rc = mdb_get(txn, dbi, &kv, &data);
+    rc = mdb_get(txn, dbState->dbi, &kv, &data);
     if (rc != 0) {
         if (rc == MDB_NOTFOUND) {
             return nullptr;
@@ -114,13 +121,13 @@ u1 *KeyValueStore::read(string_view key) {
 
 void KeyValueStore::clear() {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
-    int rc = mdb_drop(txn, dbi, 0);
+    int rc = mdb_drop(dbState->txn, dbState->dbi, 0);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_txn_commit(txn);
+    rc = mdb_txn_commit(dbState->txn);
     if (rc != 0) {
         goto fail;
     }
@@ -151,13 +158,13 @@ void KeyValueStore::writeString(string_view key, string_view value) {
 
 void KeyValueStore::refreshMainTransaction() {
     if (writerId != this_thread::get_id()) {
-        throw invalid_argument("KeyValueStore can only write from thread that created it");
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
-    auto rc = mdb_txn_begin(env, nullptr, 0, &txn);
+    auto rc = mdb_txn_begin(dbState->env, nullptr, 0, &dbState->txn);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_dbi_open(txn, flavor.c_str(), MDB_CREATE, &dbi);
+    rc = mdb_dbi_open(dbState->txn, flavor.c_str(), MDB_CREATE, &dbState->dbi);
     if (rc != 0) {
         goto fail;
     }
@@ -173,17 +180,17 @@ void KeyValueStore::refreshMainTransaction() {
     // So we commit immediately to force the dbi into the shared space
     // so that readers can use it, and then re-open the transaction
     // for future writes.
-    rc = mdb_txn_commit(txn);
+    rc = mdb_txn_commit(dbState->txn);
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_txn_begin(env, nullptr, 0, &txn);
+    rc = mdb_txn_begin(dbState->env, nullptr, 0, &dbState->txn);
     if (rc != 0) {
         goto fail;
     }
     {
         absl::WriterMutexLock lk(&readers_mtx);
-        readers[writerId] = txn;
+        dbState->readers[writerId] = dbState->txn;
     }
     return;
 fail:
@@ -193,13 +200,13 @@ fail:
 bool KeyValueStore::commit(unique_ptr<KeyValueStore> k) {
     int rc;
     k->commited = true;
-    rc = mdb_txn_commit(k->txn);
+    rc = mdb_txn_commit(k->dbState->txn);
 
     if (rc != 0) {
         return false;
     }
-    mdb_close(k->env, k->dbi);
-    mdb_env_close(k->env);
+    mdb_close(k->dbState->env, k->dbState->dbi);
+    mdb_env_close(k->dbState->env);
     return true;
 }
 

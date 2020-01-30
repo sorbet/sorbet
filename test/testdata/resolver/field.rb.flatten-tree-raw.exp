@@ -4,11 +4,21 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
-        EmptyTree
+        Literal{ value = :"<static-init>" }
 
-        EmptyTree
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = Literal{ value = :"foo" }
+        }
 
         MethodDef{
           flags = 0
@@ -27,15 +37,6 @@ InsSeq{
               localVariable = <U a>
             }
           }
-        }
-
-        MethodDef{
-          flags = self
-          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          args = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = EmptyTree
         }
       ]
     }

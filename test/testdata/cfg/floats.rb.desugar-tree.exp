@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   def test_large_float<<C <todo sym>>>(&<blk>)
     begin
       a = 3.141593

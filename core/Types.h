@@ -167,7 +167,7 @@ public:
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
-    static core::SymbolRef getRepresentedClass(core::Context ctx, const core::Type *ty);
+    static core::SymbolRef getRepresentedClass(const GlobalState &gs, const core::Type *ty);
 };
 
 struct Intrinsic {

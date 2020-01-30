@@ -119,18 +119,6 @@ test:travis --ram_utilization_factor=10
 test:travis --test_strategy=standalone
 test:travis --test_output=errors
 
-# this is a variant of buildfarm that doen't specify -Os or any sanitizer flags
-build:buildfarm-ruby --define jemalloc=false
-build:buildfarm-ruby --copt=-O2
-# this includes --spawn_strategy=standalone --genrule_strategy=standalone, which
-# seems to break the snapshot tests
-# build:buildfarm-ruby --config=dbg 
-build:buildfarm-ruby --nostamp
-build:buildfarm-ruby --define release=false
-build:buildfarm-ruby --config=forcedebug
-build:buildfarm-ruby --config=reduce-intermediate-file-size-base
-test:buildfarm-ruby --test_output=errors
-
 ##
 ## Shared fragments of configuration
 ##

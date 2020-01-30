@@ -1,17 +1,7 @@
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
-    def main(<blk>)
-      begin
-        <self>.puts(::A.newer())
-        <self>.puts(::B.newer())
-        <self>.puts(::C.newerer())
-      end
-    end
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -36,17 +26,30 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
+        :"main"
         <self>.main()
         <emptyTree>
       end
     end
+
+    def main(<blk>)
+      begin
+        <self>.puts(::A.newer())
+        <self>.puts(::B.newer())
+        <self>.puts(::C.newerer())
+      end
+    end
   end
   module ::MM<<C MM>> < ()
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::A<<C A>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -56,32 +59,38 @@ begin
     end
   end
   class <singleton class><<Class:A>> < (::MM)
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.include(::MM)
+        :"newer"
+        <emptyTree>
+      end
+    end
 
     def newer(<blk>)
       ::<Magic>.<self-new>(<self>)
     end
-
-    def self.<static-init>(<blk>)
-      <self>.include(::MM)
-    end
   end
   class ::B<<C B>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        <self>.extend(::MM)
+        :"newer"
+        <emptyTree>
+      end
+    end
 
     def self.newer(<blk>)
       ::<Magic>.<self-new>(<self>)
     end
-
-    def self.<static-init>(<blk>)
-      <self>.extend(::MM)
-    end
   end
   class ::C<<C C>> < (::A)
+    :"<static-init>"
+
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -90,16 +99,14 @@ begin
     end
   end
   class <singleton class><<Class:C>> < ()
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      :"newerer"
+    end
 
     def newerer(<blk>)
       <self>.newer()
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

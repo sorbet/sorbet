@@ -1722,6 +1722,8 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
 unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_ptr<Expression> what) {
     ClassDef::RHS_store rhs;
+    ClassDef::ANCESTORS_store ancestors;
+    ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
     auto insSeq = cast_tree<InsSeq>(what.get());
     if (insSeq) {
         rhs.reserve(insSeq->stats.size() + 1);
@@ -1732,8 +1734,8 @@ unique_ptr<Expression> liftTopLevel(DesugarContext dctx, core::Loc loc, unique_p
     } else {
         rhs.emplace_back(std::move(what));
     }
-    return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), ClassDef::ANCESTORS_store(),
-                                 std::move(rhs), ClassDef::Kind::Class);
+    return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), std::move(ancestors), std::move(rhs),
+                                 ClassDef::Kind::Class);
 }
 } // namespace
 

@@ -235,16 +235,15 @@ class Sorbet::Private::Serialize
 
   def serialize_method(method, static=false, with_sig: true)
     name = method.name.to_s
-    ret = String.new
     if !valid_method_name(name)
-      ret << "# Illegal method name: #{name}"
-      return
+      return "# Illegal method name: #{name}\n"
     end
     parameters = from_method(method)
     # a hack for appeasing Sorbet in the presence of the Enumerable interface
     if name == 'each' && !parameters.any? {|(kind, _)| kind == :block}
       parameters.push([:block, "blk"])
     end
+    ret = String.new
     ret << serialize_sig(parameters) if with_sig
     args = parameters.map do |(kind, param_name)|
       to_sig(kind, param_name)

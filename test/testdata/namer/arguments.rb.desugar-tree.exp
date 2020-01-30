@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
     def take_arguments<<C <todo sym>>>(a, b = 1, *c, d:, e: = 2, *f:, &g)
       begin

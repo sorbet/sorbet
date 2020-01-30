@@ -162,15 +162,15 @@ class Date
   # An array of strings of abbreviated day names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first is
   # "Sun".
-  ABBR_DAYNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
+  ABBR_DAYNAMES = T.let(T.unsafe(nil), T::Array[String])
   # An array of strings of abbreviated month names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first
   # element is nil.
-  ABBR_MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
+  ABBR_MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.nilable(String)])
   # An array of strings of the full names of days of the week in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first is
   # "Sunday".
-  DAYNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
+  DAYNAMES = T.let(T.unsafe(nil), T::Array[String])
   # The Julian day number of the day of calendar reform for England and her
   # colonies.
   ENGLAND = T.let(T.unsafe(nil), Integer)
@@ -186,7 +186,7 @@ class Date
   # An array of strings of full month names in
   # [`English`](https://docs.ruby-lang.org/en/2.6.0/English.html). The first
   # element is nil.
-  MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.untyped])
+  MONTHNAMES = T.let(T.unsafe(nil), T::Array[T.nilable(String)])
 
   sig do
     params(
@@ -340,7 +340,7 @@ class Date
   # DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                           #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(Date)}
   def +(arg0); end
 
   # Returns the value as a string for inspection.
@@ -368,7 +368,8 @@ class Date
   # DateTime.new(2001,2,3) - DateTime.new(2001,2,2,12)
   #                          #=> (1/2)
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Numeric).returns(T.self_type)}
+  sig {params(arg0: Date).returns(Rational)}
   def -(arg0); end
 
   # Returns the day of the month (1-31).

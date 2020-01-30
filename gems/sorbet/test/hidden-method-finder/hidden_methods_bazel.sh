@@ -2,6 +2,19 @@
 
 # Runs a single hidden methods test
 
+# --- begin runfiles.bash initialization v2 ---
+# Copy-pasted from the Bazel Bash runfiles library v2.
+set -uo pipefail; f=bazel_tools/tools/bash/runfiles/runfiles.bash
+# shellcheck disable=SC1090
+source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$0.runfiles/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
+# --- end runfiles.bash initialization v2 ---
+
+# Explicitly setting this after runfiles initialization
 set -euo pipefail
 shopt -s dotglob
 
@@ -9,6 +22,15 @@ shopt -s dotglob
 
 # This script is always invoked by bazel at the repository root
 repo_root="$PWD"
+
+# Fix up runfiles dir so that it's stable when we change directories
+if [ -n "${RUNFILES_DIR:-}" ]; then
+  export RUNFILES_DIR="$repo_root/$RUNFILES_DIR"
+fi
+
+if [ -n "${RUNFILES_MANIFEST_FILE:-}" ]; then
+  export RUNFILES_MANIFEST_FILE="$repo_root/$RUNFILES_MANIFEST_FILE"
+fi
 
 # these positional arguments are supplied in snapshot.bzl
 ruby_package=$1
@@ -19,30 +41,6 @@ test_name=$3
 # sub-directories of this one.
 test_dir="${repo_root}/gems/sorbet/test/hidden-method-finder/${test_name}"
 
-# --- begin runfiles.bash initialization ---
-# Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
-if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
-  if [[ -f "$0.runfiles_manifest" ]]; then
-    export RUNFILES_MANIFEST_FILE="$0.runfiles_manifest"
-  elif [[ -f "$0.runfiles/MANIFEST" ]]; then
-    export RUNFILES_MANIFEST_FILE="$0.runfiles/MANIFEST"
-  elif [[ -f "$0.runfiles/bazel_tools/tools/bash/runfiles/runfiles.bash" ]]; then
-    export RUNFILES_DIR="$0.runfiles"
-  fi
-fi
-if [[ -f "${RUNFILES_DIR:-/dev/null}/bazel_tools/tools/bash/runfiles/runfiles.bash" ]]; then
-  # shellcheck disable=SC1090
-  source "${RUNFILES_DIR}/bazel_tools/tools/bash/runfiles/runfiles.bash"
-elif [[ -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
-  # shellcheck disable=SC1090
-  source "$(grep -m1 "^bazel_tools/tools/bash/runfiles/runfiles.bash " \
-            "$RUNFILES_MANIFEST_FILE" | cut -d ' ' -f 2-)"
-else
-  echo >&2 "ERROR: cannot find @bazel_tools//tools/bash/runfiles:runfiles.bash"
-  exit 1
-fi
-# --- end runfiles.bash initialization ---
-
 # NOTE: using rlocation here because this script gets run from a genrule
 # shellcheck disable=SC1090
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/hidden-method-finder/logging.sh)"
@@ -52,15 +50,12 @@ source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/hidden-method-finder/
 HOME=$test_dir
 export HOME
 
-XDG_CACHE_HOME="${test_dir}/cache"
-export XDG_CACHE_HOME
-
 info "├─ test_name:      ${test_name}"
 info "├─ output_file:    ${output_file}"
 
 
 # Add ruby to the path
-RUBY_WRAPPER_LOC="${repo_root}/$(rlocation "${ruby_package}/ruby")"
+RUBY_WRAPPER_LOC="$(rlocation "${ruby_package}/ruby")"
 PATH="$(dirname "$RUBY_WRAPPER_LOC"):$PATH"
 export PATH
 
@@ -68,7 +63,7 @@ info "├─ ruby:           $(command -v ruby)"
 info "├─ ruby --version: $(ruby --version)"
 
 # Use the sorbet executable built by bazel
-SRB_SORBET_EXE="${repo_root}/$(rlocation com_stripe_ruby_typer/main/sorbet)"
+SRB_SORBET_EXE="$(rlocation com_stripe_ruby_typer/main/sorbet)"
 export SRB_SORBET_EXE
 
 hidden_method_finder="${repo_root}/gems/sorbet/lib/hidden-definition-finder.rb"
@@ -80,15 +75,12 @@ info "├─ sorbet --version: $("$SRB_SORBET_EXE" --version)"
 
 # NOTE: this builds a replica of the `src` tree in the `actual` directory, and
 # then uses that as a workspace.
-actual="${test_dir}/actual"
+actual="${test_dir}/${ruby_package}"
 cp -r "${test_dir}/src" "$actual"
 cp "${test_dir}/../shims.rb.source" "${actual}/shims.rb"
 
-cleanup() {
-  rm -rf "$actual"
-}
-
-trap cleanup EXIT
+XDG_CACHE_HOME="${actual}/cache"
+export XDG_CACHE_HOME
 
 
 # ----- Run the test -----
@@ -110,15 +102,13 @@ trap cleanup EXIT
     error "└─ (end stderr)"
     exit 1
   fi
-)
-
-(
-  cd "$test_dir"
 
   info "├─ exporting results to $output_file"
 
   # export the results
-  mv "${actual}/sorbet/rbi/hidden-definitions/hidden.rbi" "$output_file"
+  mv "sorbet/rbi/hidden-definitions/hidden.rbi" "$output_file"
 )
+
+rm -rf "$actual"
 
 success "└─ done"

@@ -387,3 +387,168 @@ module Socket::Constants
    TCP_NOPUSH = nil
    SO_BPF_EXTENSIONS = nil
 end
+
+class Socket
+   IPV6_USE_MIN_MTU = nil
+end
+
+module Socket::Constants
+   IPV6_USE_MIN_MTU = nil
+end
+
+class Etc::Passwd
+  def change(); end
+  def change=(); end
+  def expire(); end
+  def expire=(); end
+  def uclass(); end
+  def uclass=(); end
+end
+
+class IO
+  def nonblock(*_); end
+  def nonblock=(nonblock); end
+  def nonblock?(); end
+end
+
+class Integer
+  def to_bn(); end
+end
+
+module Gem::Security
+  def self.alt_name_or_x509_entry(certificate, x509_entry); end
+  def self.create_cert(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
+  def self.create_cert_email(email, key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
+  def self.create_cert_self_signed(subject, key, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
+  def self.create_key(length=T.unsafe(nil), algorithm=T.unsafe(nil)); end
+  def self.email_to_name(email_address); end
+  def self.re_sign(expired_certificate, private_key, age=T.unsafe(nil), extensions=T.unsafe(nil)); end
+  def self.reset(); end
+  def self.sign(certificate, signing_key, signing_cert, age=T.unsafe(nil), extensions=T.unsafe(nil), serial=T.unsafe(nil)); end
+  def self.trust_dir(); end
+  def self.trusted_certificates(&block); end
+  def self.write(pemmable, path, permissions=T.unsafe(nil), passphrase=T.unsafe(nil), cipher=T.unsafe(nil)); end
+  AlmostNoSecurity = ::T.let(nil, ::T.untyped)
+  DIGEST_NAME = ::T.let(nil, ::T.untyped)
+  EXTENSIONS = ::T.let(nil, ::T.untyped)
+  KEY_ALGORITHM = ::T.let(nil, ::T.untyped)
+  HighSecurity = ::T.let(nil, ::T.untyped)
+  KEY_CIPHER = ::T.let(nil, ::T.untyped)
+  KEY_LENGTH = ::T.let(nil, ::T.untyped)
+  LowSecurity = ::T.let(nil, ::T.untyped)
+  MediumSecurity = ::T.let(nil, ::T.untyped)
+  NoSecurity = ::T.let(nil, ::T.untyped)
+  ONE_DAY = ::T.let(nil, ::T.untyped)
+  ONE_YEAR = ::T.let(nil, ::T.untyped)
+  Policies = ::T.let(nil, ::T.untyped)
+  SigningPolicy = ::T.let(nil, ::T.untyped)
+end
+
+class Gem::Security::DIGEST_ALGORITHM
+  def initialize(data=T.unsafe(nil)); end
+  def self.digest(data); end
+  def self.hexdigest(data); end
+end
+
+class Gem::Security::KEY_ALGORITHM
+  def d(); end
+  def dmp1(); end
+  def dmq1(); end
+  def e(); end
+  def export(*_); end
+  def self.generate(*_); end
+  def initialize(*_); end
+  def iqmp(); end
+  def n(); end
+  def p(); end
+  def params(); end
+  def private?(); end
+  def private_decrypt(*_); end
+  def private_encrypt(*_); end
+  def public?(); end
+  def public_decrypt(*_); end
+  def public_encrypt(*_); end
+  def public_key(); end
+  def q(); end
+  def set_crt_params(_, _1, _2); end
+  def set_factors(_, _1); end
+  def set_key(_, _1, _2); end
+  def sign_pss(*_); end
+  def to_der(); end
+  def to_pem(*_); end
+  def to_s(*_); end
+  def to_text(); end
+  def verify_pss(*_); end
+  NO_PADDING = nil
+  PKCS1_OAEP_PADDING = nil
+  PKCS1_PADDING = nil
+  SSLV23_PADDING = nil
+end
+
+module Gem::UserInteraction
+end
+
+module Gem::DefaultUserInteraction
+end
+
+module Gem::Text
+end
+
+class Gem::Security::Policy
+  include ::Gem::UserInteraction
+  include ::Gem::DefaultUserInteraction
+  include ::Gem::Text
+  def check_cert(signer, issuer, time); end
+  def check_chain(chain, time); end
+  def check_data(public_key, digest, signature, data); end
+  def check_key(signer, key); end
+  def check_root(chain, time); end
+  def check_trust(chain, digester, trust_dir); end
+  def initialize(name, policy=T.unsafe(nil), opt=T.unsafe(nil)); end
+  def name(); end
+  def only_signed(); end
+  def only_signed=(only_signed); end
+  def only_trusted(); end
+  def only_trusted=(only_trusted); end
+  def subject(certificate); end
+  def verify(chain, key=T.unsafe(nil), digests=T.unsafe(nil), signatures=T.unsafe(nil), full_name=T.unsafe(nil)); end
+  def verify_chain(); end
+  def verify_chain=(verify_chain); end
+  def verify_data(); end
+  def verify_data=(verify_data); end
+  def verify_root(); end
+  def verify_root=(verify_root); end
+  def verify_signatures(spec, digests, signatures); end
+  def verify_signer(); end
+  def verify_signer=(verify_signer); end
+end
+
+class Gem::Security::TrustDir
+  def cert_path(certificate); end
+  def dir(); end
+  def each_certificate(); end
+  def initialize(dir, permissions=T.unsafe(nil)); end
+  def issuer_of(certificate); end
+  def load_certificate(certificate_file); end
+  def name_path(name); end
+  def trust_cert(certificate); end
+  def verify(); end
+  DEFAULT_PERMISSIONS = nil
+end
+
+class Gem::Security::Exception
+end
+
+class Gem::Security::Signer
+  def cert_chain(); end
+  def cert_chain=(cert_chain); end
+  def digest_algorithm(); end
+  def digest_name(); end
+  def extract_name(cert); end
+  def initialize(key, cert_chain, passphrase=T.unsafe(nil)); end
+  def key(); end
+  def key=(key); end
+  def load_cert_chain(); end
+  def re_sign_key(); end
+  def sign(data); end
+end

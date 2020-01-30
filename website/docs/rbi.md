@@ -46,7 +46,7 @@ The contents of the `sorbet/` folder after initialization look like this:
 
 ```plaintext
 sorbet/
-│ # Default options to passed to sorbet on every run
+│ # Default options to be passed to sorbet on every run
 ├── config
 └── rbi/
     │ # Community-written type definition files for your gems

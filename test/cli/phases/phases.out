@@ -10,7 +10,7 @@ Integer {
 }
 --- parse-tree-json end ---
 --- desugar-tree start ---
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   1
 end
 --- desugar-tree end ---
@@ -18,14 +18,17 @@ end
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
-  ancestors = []
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+    }]
   rhs = [
     Literal{ value = 1 }
   ]
 }
 --- desugar-tree-raw end ---
 --- rewrite-tree start ---
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   1
 end
 --- rewrite-tree end ---
@@ -33,14 +36,17 @@ end
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
-  ancestors = []
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+    }]
   rhs = [
     Literal{ value = 1 }
   ]
 }
 --- rewrite-tree-raw end ---
 --- index-tree start ---
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   1
 end
 --- index-tree end ---
@@ -48,7 +54,10 @@ end
 ClassDef{
   kind = class
   name = EmptyTree<<C <U <root>>>>
-  ancestors = []
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+    }]
   rhs = [
     Literal{ value = 1 }
   ]
@@ -56,7 +65,7 @@ ClassDef{
 --- index-tree-raw end ---
 --- name-tree start ---
 begin
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
     1
   end
   <emptyTree>
@@ -68,7 +77,10 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
         Literal{ value = 1 }
       ]
@@ -79,7 +91,7 @@ InsSeq{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 begin
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
     1
   end
   <emptyTree>
@@ -91,7 +103,10 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
         Literal{ value = 1 }
       ]
@@ -103,7 +118,9 @@ InsSeq{
 --- flatten-tree start ---
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
     end
@@ -118,8 +135,13 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
+        Literal{ value = :"<static-init>" }
+
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -137,7 +159,9 @@ InsSeq{
 --- ast start ---
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
     end
@@ -152,8 +176,13 @@ InsSeq{
     ClassDef{
       kind = class
       name = EmptyTree<<C <U <root>>>>
-      ancestors = []
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+        }]
       rhs = [
+        Literal{ value = :"<static-init>" }
+
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -232,22 +261,29 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 
 --- symbol-table-raw end ---
 --- checking diff ---
-1,21d0
-1,9d0
+1,11d0
+1,26d0
+< 
+< 
 <               localVariable = <U <blk>>
 <             }]
 <           args = [Local{
 <           flags = self
 <           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+<           orig = nullptr
 <           rhs = Literal{ value = 1 }
+<           symbol = ::<todo sym>
+<         Literal{ value = :"<static-init>" }
 <         MethodDef{
 <         }
+<         }]
 <       1
 <       ]
-<       ancestors = []
+<       ancestors = [ConstantLit{
 <       kind = class
 <       name = EmptyTree<<C <U <root>>>>
 <       rhs = [
+<     :"<static-init>"
 <     ClassDef{
 <     EmptyTree
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)
@@ -256,7 +292,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 <   <emptyTree>
 <   <emptyTree>
 <   ],
-<   class <emptyTree><<C <root>>> < ()
+<   class <emptyTree><<C <root>>> < (::<todo sym>)
 <   end
 <   expr = EmptyTree
 <   stats = [

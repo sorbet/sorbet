@@ -927,8 +927,8 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     return ret;
 }
 
-core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *ty) {
-    if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
+core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const core::Type *ty) {
+    if (!ty->derivesFrom(gs, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
     core::SymbolRef singleton;
@@ -943,7 +943,7 @@ core::SymbolRef Types::getRepresentedClass(core::Context ctx, const core::Type *
 
         singleton = at->klass;
     }
-    return singleton.data(ctx)->attachedClass(ctx);
+    return singleton.data(gs)->attachedClass(gs);
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {

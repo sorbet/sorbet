@@ -1,6 +1,8 @@
 begin
   <emptyTree>
-  class <emptyTree><<C <root>>> < ()
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    :"<static-init>"
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -10,17 +12,18 @@ begin
     end
   end
   class ::OpEq<<C OpEq>> < (::<todo sym>)
-    <emptyTree>
+    :"<static-init>"
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    def self.<static-init>(<blk>)
+      begin
+        :"b"
+        :"b="
+        :"y"
+        :"z"
+        :"example"
+        <emptyTree>
+      end
+    end
 
     def b(<blk>)
       <emptyTree>
@@ -91,10 +94,6 @@ begin
           end
         end
       end
-    end
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
     end
   end
   <emptyTree>

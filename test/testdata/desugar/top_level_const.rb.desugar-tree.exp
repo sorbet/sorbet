@@ -1,3 +1,3 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   ::<root>::<C TopLevelConst>
 end

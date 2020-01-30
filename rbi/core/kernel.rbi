@@ -223,7 +223,7 @@ module Kernel
   sig do
     params(
         arg0: String,
-        arg1: Binding,
+        arg1: T.nilable(Binding),
         filename: String,
         lineno: Integer,
     )
@@ -2508,6 +2508,47 @@ module Kernel
     .returns(T.noreturn)
   end
   def throw(tag, obj=nil); end
+
+  # Specifies the handling of signals. The first parameter is a signal name (a
+  # string such as "SIGALRM", "SIGUSR1", and so on) or a signal number. The
+  # characters "SIG" may be omitted from the signal name. The command or block
+  # specifies code to be run when the signal is raised. If the command is the
+  # string "IGNORE" or "SIG\_IGN", the signal will be ignored. If the command is
+  # "DEFAULT" or "SIG\_DFL", the Ruby's default handler will be invoked. If the
+  # command is "EXIT", the script will be terminated by the signal. If the
+  # command is "SYSTEM\_DEFAULT", the operating system's default handler will be
+  # invoked. Otherwise, the given command or block will be run. The special
+  # signal name "EXIT" or signal number zero will be invoked just prior to
+  # program termination. trap returns the previous handler for the given signal.
+  #
+  # ```ruby
+  # Signal.trap(0, proc { puts "Terminating: #{$$}" })
+  # Signal.trap("CLD")  { puts "Child died" }
+  # fork && Process.wait
+  # ```
+  #
+  # produces:
+  #
+  # ```
+  # Terminating: 27461
+  # Child died
+  # Terminating: 27460
+  # ```
+  sig do
+    params(
+        signal: T.any(Integer, String, Symbol),
+        command: BasicObject,
+    )
+    .returns(T.any(String, Proc))
+  end
+  sig do
+    params(
+        signal: T.any(Integer, String, Symbol),
+        blk: T.proc.params(arg0: Integer).returns(BasicObject),
+    )
+    .returns(T.any(String, Proc))
+  end
+  def trap(signal, command=T.unsafe(nil), &blk); end
 
   # If warnings have been disabled (for example with the `-W0` flag), does
   # nothing. Otherwise, converts each of the messages to strings, appends a

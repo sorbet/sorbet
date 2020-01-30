@@ -12,16 +12,16 @@ sh_library(
 )
 
 sh_binary(
-    name = "run_one_bazel",
-    srcs = ["run_one_bazel.sh"],
+    name = "run_one",
+    srcs = ["run_one.sh"],
     data = [
         "sorbet-typed.rev",
         "//main:sorbet",
         "@gems//bundler",
         "@gems//bundler:bundle",
         "@gems//gems",
-        "@ruby_2_4_3//:ruby",
-        "@ruby_2_6_3//:ruby",
+        "@ruby_2_4//:ruby",
+        "@ruby_2_6//:ruby",
     ],
     # NOTE: ensure that this rule isn't caught in //...
     tags = ["manual"],
@@ -32,23 +32,13 @@ sh_binary(
 )
 
 snapshot_tests(
-    ruby = "ruby_2_4_3",
+    ruby = "ruby_2_4",
     tests = glob(
         [
             "partial/*",
             "total/*",
         ],
         exclude = [
-            # These tests can't currently run under bazel,
-            # and can't be written another way.
-
-            # Requires openssl, which doesn't work in bazel.
-            # Can't be rewritten because it's testing gem_loader.
-            "partial/webmock",
-
-            # Requires native extensions. Tests gem_loader for codecov.
-            "partial/codecov",
-
             # Requires native extensions.
             # Can't be rewritten, because it's essentially an integration test
             # that a certain private Rails API gives us back absolute vs
@@ -65,23 +55,13 @@ snapshot_tests(
 )
 
 snapshot_tests(
-    ruby = "ruby_2_6_3",
+    ruby = "ruby_2_6",
     tests = glob(
         [
             "partial/*",
             "total/*",
         ],
         exclude = [
-            # These tests can't currently run under bazel,
-            # and can't be written another way.
-
-            # Requires openssl, which doesn't work in bazel.
-            # Can't be rewritten because it's testing gem_loader.
-            "partial/webmock",
-
-            # Requires native extensions. Tests gem_loader for codecov.
-            "partial/codecov",
-
             # Requires native extensions.
             # Can't be rewritten, because it's essentially an integration test
             # that a certain private Rails API gives us back absolute vs
@@ -103,8 +83,8 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":snapshot-ruby_2_4_3",
-        ":snapshot-ruby_2_6_3",
+        ":snapshot-ruby_2_4",
+        ":snapshot-ruby_2_6",
     ],
 )
 
@@ -114,7 +94,7 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":update-ruby_2_4_3",
-        ":update-ruby_2_6_3",
+        ":update-ruby_2_4",
+        ":update-ruby_2_6",
     ],
 )

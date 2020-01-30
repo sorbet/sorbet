@@ -12,6 +12,7 @@ sh_binary(
     srcs = ["bundle.sh"],
     data = [":runtime_deps"],
     visibility = ["//visibility:public"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
 sh_binary(
@@ -19,4 +20,5 @@ sh_binary(
     srcs = ["bundle.sh"],
     data = [":runtime_deps"],
     visibility = ["//visibility:public"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )

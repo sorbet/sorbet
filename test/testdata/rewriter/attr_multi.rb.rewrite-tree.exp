@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 

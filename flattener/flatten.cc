@@ -11,23 +11,21 @@ using namespace std;
 
 namespace sorbet::flatten {
 
-// return true if the expression in question is either a method definition, a class definition, or an assignment to a
-// constant; false otherwise.
-bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
-    if (ast::isa_tree<ast::MethodDef>(what.get())) {
-        return true;
-    }
+bool shouldExtract(core::Context ctx, const unique_ptr<ast::Expression> &what) {
     if (ast::isa_tree<ast::ClassDef>(what.get())) {
-        return true;
+        return false;
     }
     if (ast::isa_tree<ast::EmptyTree>(what.get())) {
-        return true;
+        return false;
     }
 
     if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
-        return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+        return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
     }
-    return false;
+
+    // Importantly, we DO extract methods, because MethodDef's are conceptually expressions that return a symbol.
+    // The treemap below will extract MethodDef's nested inside <static-init> (i.e., all of them) back to the top level.
+    return true;
 }
 
 // pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
@@ -37,7 +35,7 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     ast::InsSeq::STATS_store inits;
 
     for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
-        if (isDefinition(ctx, *it)) {
+        if (!shouldExtract(ctx, *it)) {
             ++it;
             continue;
         }
@@ -118,7 +116,7 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
+        classDef->rhs = addMethodsFromRHS(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
         return ast::MK::EmptyTree();
@@ -130,9 +128,11 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
+        auto loc = methodDef->declLoc;
+        auto name = methodDef->name;
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        return ast::MK::EmptyTree();
+        return ast::MK::Symbol(loc, name);
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
@@ -160,7 +160,7 @@ public:
         return tree;
     }
 
-    unique_ptr<ast::Expression> addMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addMethodsFromTree(core::Context ctx, unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -176,7 +176,7 @@ public:
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
             tree = ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
-            return addMethods(ctx, std::move(tree));
+            return addMethodsFromTree(ctx, std::move(tree));
         }
 
         for (auto &method : popCurMethodDefs()) {
@@ -194,7 +194,7 @@ private:
         return ret;
     }
 
-    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
+    ast::ClassDef::RHS_store addMethodsFromRHS(core::Context ctx, ast::ClassDef::RHS_store rhs) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
             (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
@@ -253,7 +253,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     FlattenWalk flatten;
     tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-    tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
+    tree.tree = flatten.addMethodsFromTree(ctx, std::move(tree.tree));
 
     return tree;
 }

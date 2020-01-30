@@ -1,4 +1,4 @@
-class <emptyTree><<C <root>>> < ()
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Examples><<C <todo sym>>> < (::<todo sym>)
     def i_like_ifs<<C <todo sym>>>(&<blk>)
       if true
