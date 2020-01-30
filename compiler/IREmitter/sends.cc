@@ -118,6 +118,14 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                                      int rubyBlockId) {
     auto &builder = builderCast(build);
     auto remainingType = i->recv.type;
+    auto afterSend = llvm::BasicBlock::Create(cs, "afterSend", builder.GetInsertBlock()->getParent());
+    auto rememberStart = builder.GetInsertBlock();
+    builder.SetInsertPoint(afterSend);
+                        auto methodName = i->fun.data(cs)->shortName(cs);
+                        llvm::StringRef methodNameRef(methodName.data(), methodName.size());
+    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2,
+                                 llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
+    builder.SetInsertPoint(rememberStart);
     if (!remainingType->isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
             if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
@@ -126,44 +134,34 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                     if (i->recv.type->derivesFrom(cs, c)) {
                         auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
                         llvm::StringRef clazNameRef(clazName.data(), clazName.size());
-                        auto methodName = i->fun.data(cs)->shortName(cs);
-                        llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                         auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
                         auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
-                        auto afterSend = llvm::BasicBlock::Create(
-                            cs, llvm::Twine("afterSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
-                            builder.GetInsertBlock()->getParent());
-                        auto slowPath = llvm::BasicBlock::Create(
-                            cs, llvm::Twine("slowSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                        auto alternative = llvm::BasicBlock::Create(
+                            cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
                             builder.GetInsertBlock()->getParent());
                         auto fastPath = llvm::BasicBlock::Create(
                             cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
                             builder.GetInsertBlock()->getParent());
-                        builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
+                        builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
                         builder.SetInsertPoint(fastPath);
                         auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
                         auto fastPathEnd = builder.GetInsertBlock();
                         builder.CreateBr(afterSend);
-                        builder.SetInsertPoint(slowPath);
-                        auto slowPathRes = tryNameBasedIntrinsic(cs, build, i, blockMap, aliases, rubyBlockId);
-                        auto slowPathEnd = builder.GetInsertBlock();
-                        builder.CreateBr(afterSend);
-                        builder.SetInsertPoint(afterSend);
-                        auto phi =
-                            builder.CreatePHI(builder.getInt64Ty(), 2,
-                                              llvm::Twine("symIntrinsicRawPhi_") + clazNameRef + "_" + methodNameRef);
                         phi->addIncoming(fastPathRes, fastPathEnd);
-                        phi->addIncoming(slowPathRes, slowPathEnd);
-                        return phi;
+                        builder.SetInsertPoint(alternative);
                     }
                 }
             }
         }
     }
-
-    return tryNameBasedIntrinsic(cs, build, i, blockMap, aliases, rubyBlockId);
+    auto slowPathRes = tryNameBasedIntrinsic(cs, build, i, blockMap, aliases, rubyBlockId);
+    auto slowPathEnd = builder.GetInsertBlock();
+    builder.CreateBr(afterSend);
+    builder.SetInsertPoint(afterSend);
+    phi->addIncoming(slowPathRes, slowPathEnd);
+    return phi;
 }
 
 } // namespace
