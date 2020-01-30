@@ -509,33 +509,33 @@ BB2:                                              ; preds = %typeTestSuccess, %B
   %1 = and i64 %i.sroa.0.0, 1
   %2 = icmp ne i64 %1, 0
   store i64 21, i64* %callArgsAddr, align 8
-  br i1 %2, label %sorbet_rb_int_lt.exit, label %"slowSymCallIntrinsic_Integer_<", !prof !46
+  br i1 %2, label %sorbet_rb_int_lt.exit, label %"alternativeCallIntrinsic_Integer_<", !prof !46
 
-BB3:                                              ; preds = %"afterSymCallIntrinsic_Integer_<", %"afterSymCallIntrinsic_Integer_<.us"
+BB3:                                              ; preds = %afterSend, %afterSend.us
   store i64* inttoptr (i64 8 to i64*), i64** %15, align 8, !tbaa !38
   ret i64 8
 
-BB5:                                              ; preds = %"afterSymCallIntrinsic_Integer_<"
+BB5:                                              ; preds = %afterSend
   store i64* inttoptr (i64 32 to i64*), i64** %15, align 8, !tbaa !38
   %3 = load i64, i64* %25, align 8, !tbaa !4
   %4 = and i64 %3, 31
   %5 = icmp eq i64 %4, 5
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
-  br i1 %5, label %"fastSymCallIntrinsic_String_+", label %"slowSymCallIntrinsic_String_+", !prof !46
+  br i1 %5, label %"fastSymCallIntrinsic_String_+", label %"alternativeCallIntrinsic_String_+", !prof !46
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call fastcc void @sorbet_raiseArity(i32 %argc)
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#hello69" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#hello" to i64*), align 8
+  %"stackFrame_func_Object#hello83" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#hello" to i64*), align 8
   %rawArg_name = load i64, i64* %argArray, align 8
   %6 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !38
   %7 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %6, i64 0, i32 2
   %8 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %7, align 8, !tbaa !39
   %9 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %8, i64 0, i32 2
   %10 = bitcast %struct.rb_iseq_struct** %9 to i64*
-  store i64 %"stackFrame_func_Object#hello69", i64* %10, align 8, !tbaa !42
+  store i64 %"stackFrame_func_Object#hello83", i64* %10, align 8, !tbaa !42
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %8, i64 0, i32 4
   %12 = load i64*, i64** %11, align 8, !tbaa !44
   %13 = load i64, i64* %12, align 8, !tbaa !9
@@ -566,35 +566,35 @@ BB2.us:                                           ; preds = %typeTestSuccess, %B
   %26 = and i64 %i.sroa.0.0.us, 1
   %27 = icmp ne i64 %26, 0
   store i64 21, i64* %callArgsAddr, align 8
-  br i1 %27, label %sorbet_rb_int_lt.exit.us, label %"slowSymCallIntrinsic_Integer_<.us", !prof !46
+  br i1 %27, label %sorbet_rb_int_lt.exit.us, label %"alternativeCallIntrinsic_Integer_<.us", !prof !46
 
-"slowSymCallIntrinsic_Integer_<.us":              ; preds = %BB2.us
+"alternativeCallIntrinsic_Integer_<.us":          ; preds = %BB2.us
   %rawSendResult28.us = call i64 @"call_via_vm_<"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0.us) #9
-  br label %"afterSymCallIntrinsic_Integer_<.us"
+  br label %afterSend.us
 
 sorbet_rb_int_lt.exit.us:                         ; preds = %BB2.us
   %28 = icmp slt i64 %i.sroa.0.0.us, 20
   %29 = select i1 %28, i64 20, i64 0
-  br label %"afterSymCallIntrinsic_Integer_<.us"
+  br label %afterSend.us
 
-"afterSymCallIntrinsic_Integer_<.us":             ; preds = %sorbet_rb_int_lt.exit.us, %"slowSymCallIntrinsic_Integer_<.us"
-  %"symIntrinsicRawPhi_Integer_<.us" = phi i64 [ %29, %sorbet_rb_int_lt.exit.us ], [ %rawSendResult28.us, %"slowSymCallIntrinsic_Integer_<.us" ]
-  %30 = and i64 %"symIntrinsicRawPhi_Integer_<.us", -9
+afterSend.us:                                     ; preds = %sorbet_rb_int_lt.exit.us, %"alternativeCallIntrinsic_Integer_<.us"
+  %"symIntrinsicRawPhi_<.us" = phi i64 [ %29, %sorbet_rb_int_lt.exit.us ], [ %rawSendResult28.us, %"alternativeCallIntrinsic_Integer_<.us" ]
+  %30 = and i64 %"symIntrinsicRawPhi_<.us", -9
   %31 = icmp eq i64 %30, 0
   br i1 %31, label %BB3, label %BB5.us
 
-BB5.us:                                           ; preds = %"afterSymCallIntrinsic_Integer_<.us"
+BB5.us:                                           ; preds = %afterSend.us
   store i64* inttoptr (i64 32 to i64*), i64** %15, align 8, !tbaa !38
   store i64 %rawArg_name, i64* %callArgsAddr, align 8
-  %rawSendResult38.us = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %"rubyStr_hello ") #9
-  store i64 %rawSendResult38.us, i64* %callArgsAddr, align 8
-  %rawSendResult42.us = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #9
+  %rawSendResult39.us = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %"rubyStr_hello ") #9
+  store i64 %rawSendResult39.us, i64* %callArgsAddr, align 8
+  %rawSendResult44.us = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #9
   store i64* inttoptr (i64 40 to i64*), i64** %15, align 8, !tbaa !38
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %27, label %"fastSymCallIntrinsic_Integer_+.us", label %"slowSymCallIntrinsic_Integer_+.us"
+  br i1 %27, label %"fastSymCallIntrinsic_Integer_+.us", label %"alternativeCallIntrinsic_Integer_+55.us"
 
-"slowSymCallIntrinsic_Integer_+.us":              ; preds = %BB5.us
-  %rawSendResult53.us = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0.us) #9
+"alternativeCallIntrinsic_Integer_+55.us":        ; preds = %BB5.us
+  %rawSendResult64.us = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0.us) #9
   br label %BB2.us.backedge
 
 "fastSymCallIntrinsic_Integer_+.us":              ; preds = %BB5.us
@@ -609,50 +609,46 @@ BB5.us:                                           ; preds = %"afterSymCallIntrin
   %38 = call i64 @rb_int2big(i64 %37) #9, !noalias !48
   br label %BB2.us.backedge
 
-BB2.us.backedge:                                  ; preds = %35, %"fastSymCallIntrinsic_Integer_+.us", %"slowSymCallIntrinsic_Integer_+.us"
-  %i.sroa.0.0.us.be = phi i64 [ %rawSendResult53.us, %"slowSymCallIntrinsic_Integer_+.us" ], [ %38, %35 ], [ %34, %"fastSymCallIntrinsic_Integer_+.us" ]
+BB2.us.backedge:                                  ; preds = %35, %"fastSymCallIntrinsic_Integer_+.us", %"alternativeCallIntrinsic_Integer_+55.us"
+  %i.sroa.0.0.us.be = phi i64 [ %rawSendResult64.us, %"alternativeCallIntrinsic_Integer_+55.us" ], [ %38, %35 ], [ %34, %"fastSymCallIntrinsic_Integer_+.us" ]
   br label %BB2.us
 
 codeRepl:                                         ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#hello.cold.1"(i64 %selfRaw) #18
   unreachable
 
-"afterSymCallIntrinsic_Integer_<":                ; preds = %"slowSymCallIntrinsic_Integer_<", %sorbet_rb_int_lt.exit
-  %"symIntrinsicRawPhi_Integer_<" = phi i64 [ %42, %sorbet_rb_int_lt.exit ], [ %rawSendResult28, %"slowSymCallIntrinsic_Integer_<" ]
-  %39 = and i64 %"symIntrinsicRawPhi_Integer_<", -9
+afterSend:                                        ; preds = %"alternativeCallIntrinsic_Integer_<", %sorbet_rb_int_lt.exit
+  %"symIntrinsicRawPhi_<" = phi i64 [ %42, %sorbet_rb_int_lt.exit ], [ %rawSendResult28, %"alternativeCallIntrinsic_Integer_<" ]
+  %39 = and i64 %"symIntrinsicRawPhi_<", -9
   %40 = icmp eq i64 %39, 0
   br i1 %40, label %BB3, label %BB5
 
-"slowSymCallIntrinsic_Integer_<":                 ; preds = %BB2
+"alternativeCallIntrinsic_Integer_<":             ; preds = %BB2
   %rawSendResult28 = call i64 @"call_via_vm_<"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0) #9
-  br label %"afterSymCallIntrinsic_Integer_<"
+  br label %afterSend
 
 sorbet_rb_int_lt.exit:                            ; preds = %BB2
   %41 = icmp slt i64 %i.sroa.0.0, 20
   %42 = select i1 %41, i64 20, i64 0
-  br label %"afterSymCallIntrinsic_Integer_<"
+  br label %afterSend
 
-"afterSymCallIntrinsic_String_+":                 ; preds = %"slowSymCallIntrinsic_String_+", %"fastSymCallIntrinsic_String_+"
-  %"symIntrinsicRawPhi_String_+" = phi i64 [ %43, %"fastSymCallIntrinsic_String_+" ], [ %rawSendResult38, %"slowSymCallIntrinsic_String_+" ]
-  store i64 %"symIntrinsicRawPhi_String_+", i64* %callArgsAddr, align 8
-  %rawSendResult42 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #9
+afterSend30:                                      ; preds = %"alternativeCallIntrinsic_String_+", %"fastSymCallIntrinsic_String_+"
+  %"symIntrinsicRawPhi_+" = phi i64 [ %43, %"fastSymCallIntrinsic_String_+" ], [ %rawSendResult39, %"alternativeCallIntrinsic_String_+" ]
+  store i64 %"symIntrinsicRawPhi_+", i64* %callArgsAddr, align 8
+  %rawSendResult44 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #9
   store i64* inttoptr (i64 40 to i64*), i64** %15, align 8, !tbaa !38
   store i64 3, i64* %callArgsAddr, align 8
-  br i1 %2, label %"fastSymCallIntrinsic_Integer_+", label %"slowSymCallIntrinsic_Integer_+"
+  br i1 %2, label %"fastSymCallIntrinsic_Integer_+", label %"alternativeCallIntrinsic_Integer_+55"
 
-"slowSymCallIntrinsic_String_+":                  ; preds = %BB5
-  %rawSendResult38 = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %"rubyStr_hello ") #9
-  br label %"afterSymCallIntrinsic_String_+"
+"alternativeCallIntrinsic_String_+":              ; preds = %BB5
+  %rawSendResult39 = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %"rubyStr_hello ") #9
+  br label %afterSend30
 
 "fastSymCallIntrinsic_String_+":                  ; preds = %BB5
   %43 = call i64 @rb_str_plus(i64 %"rubyStr_hello ", i64 %rawArg_name) #9, !noalias !51
-  br label %"afterSymCallIntrinsic_String_+"
+  br label %afterSend30
 
-"slowSymCallIntrinsic_Integer_+":                 ; preds = %"afterSymCallIntrinsic_String_+"
-  %rawSendResult53 = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0) #9
-  br label %BB2.backedge
-
-"fastSymCallIntrinsic_Integer_+":                 ; preds = %"afterSymCallIntrinsic_String_+"
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %afterSend30
   %44 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #9
   %45 = extractvalue { i64, i1 } %44, 1
   %46 = extractvalue { i64, i1 } %44, 0
@@ -664,9 +660,13 @@ sorbet_rb_int_lt.exit:                            ; preds = %BB2
   %50 = call i64 @rb_int2big(i64 %49) #9, !noalias !48
   br label %BB2.backedge
 
-BB2.backedge:                                     ; preds = %47, %"fastSymCallIntrinsic_Integer_+", %"slowSymCallIntrinsic_Integer_+"
-  %i.sroa.0.0.be = phi i64 [ %rawSendResult53, %"slowSymCallIntrinsic_Integer_+" ], [ %50, %47 ], [ %46, %"fastSymCallIntrinsic_Integer_+" ]
+BB2.backedge:                                     ; preds = %47, %"fastSymCallIntrinsic_Integer_+", %"alternativeCallIntrinsic_Integer_+55"
+  %i.sroa.0.0.be = phi i64 [ %rawSendResult64, %"alternativeCallIntrinsic_Integer_+55" ], [ %50, %47 ], [ %46, %"fastSymCallIntrinsic_Integer_+" ]
   br label %BB2
+
+"alternativeCallIntrinsic_Integer_+55":           ; preds = %afterSend30
+  %rawSendResult64 = call i64 @"call_via_vm_+"(i32 1, i64* nonnull %callArgsAddr, i64 %i.sroa.0.0) #9
+  br label %BB2.backedge
 }
 
 ; Function Attrs: nounwind ssp
@@ -728,7 +728,7 @@ codeRepl:                                         ; preds = %entry
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #9
   store i64* inttoptr (i64 64 to i64*), i64** %13, align 8, !tbaa !38
   store i64 %rubyStr_sorbet.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult25.i = call i64 @call_via_vm_hello(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #9
+  %rawSendResult27.i = call i64 @call_via_vm_hello(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #9
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }

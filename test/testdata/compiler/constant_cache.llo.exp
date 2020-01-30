@@ -631,13 +631,13 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#foo40" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
+  %"stackFrame_func_Object#foo46" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !13
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_Object#foo40", i64* %4, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#foo46", i64* %4, align 8, !tbaa !16
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !18
   %7 = load i64, i64* %6, align 8, !tbaa !9
@@ -672,14 +672,14 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %rawSendResult = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
   store i64* inttoptr (i64 24 to i64*), i64** %9, align 8, !tbaa !11
   store i64 %17, i64* %callArgsAddr, align 8
-  %rawSendResult22 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
+  %rawSendResult24 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
   store i64* inttoptr (i64 32 to i64*), i64** %9, align 8, !tbaa !11
   store i64 %17, i64* %callArgsAddr, align 8
-  %rawSendResult25 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
+  %rawSendResult29 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
   store i64* inttoptr (i64 40 to i64*), i64** %9, align 8, !tbaa !11
   store i64 %17, i64* %callArgsAddr, align 8
-  %rawSendResult28 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
-  ret i64 %rawSendResult28
+  %rawSendResult34 = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw) #17
+  ret i64 %rawSendResult34
 
 codeRepl:                                         ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#foo.cold.1"(i64 %selfRaw) #21
@@ -752,7 +752,7 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #17
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 72 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult47.i = call i64 @call_via_vm_foo(i32 0, i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult51.i = call i64 @call_via_vm_foo(i32 0, i64* nonnull %callArgsAddr.i, i64 %2) #17
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }

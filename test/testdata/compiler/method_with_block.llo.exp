@@ -1083,14 +1083,14 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #16
   tail call void @rb_define_method(i64 %32, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #16
   store i64* inttoptr (i64 40 to i64*), i64** %24, align 8, !tbaa !10
-  %rawSym76.i = tail call i64 @rb_id2sym(i64 %rubyId_boo.i) #16
+  %rawSym77.i = tail call i64 @rb_id2sym(i64 %rubyId_boo.i) #16
   tail call void @rb_define_method(i64 %32, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_boo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#boo" to i64 (...)*), i32 -1) #16
   store i64* inttoptr (i64 72 to i64*), i64** %24, align 8, !tbaa !10
-  %rawSym86.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #16
+  %rawSym89.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #16
   tail call void @rb_define_method(i64 %32, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#bar" to i64 (...)*), i32 -1) #16
   store i64* inttoptr (i64 104 to i64*), i64** %24, align 8, !tbaa !10
   store i64 %32, i64* %callArgsAddr.i, align 8
-  %rawSym96.i = tail call i64 @rb_id2sym(i64 %rubyId_baz.i) #16
+  %rawSym101.i = tail call i64 @rb_id2sym(i64 %rubyId_baz.i) #16
   tail call void @rb_define_method(i64 %32, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_baz, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#baz" to i64 (...)*), i32 -1) #16
   store i64* inttoptr (i64 136 to i64*), i64** %24, align 8, !tbaa !10
   %33 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %10, align 8, !tbaa !18

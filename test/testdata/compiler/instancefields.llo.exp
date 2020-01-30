@@ -828,27 +828,27 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i.i = tail call i64 @rb_id2sym(i64 %rubyId_write.i.i) #17
   tail call void @rb_define_method(i64 %24, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#write" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 40 to i64*), i64** %36, align 8, !tbaa !11
-  %rawSym36.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i) #17
+  %rawSym37.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i) #17
   tail call void @rb_define_method(i64 %24, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#read" to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 80 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult47.i = call i64 @call_via_vm_new(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
+  %rawSendResult50.i = call i64 @call_via_vm_new(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
   store i64* inttoptr (i64 88 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult48.i = call i64 @call_via_vm_new(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
+  %rawSendResult53.i = call i64 @call_via_vm_new(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
   store i64* inttoptr (i64 96 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult50.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult47.i) #17
-  store i64 %rawSendResult50.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult54.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult56.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult50.i) #17
+  store i64 %rawSendResult56.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult61.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
   store i64* inttoptr (i64 104 to i64*), i64** %13, align 8, !tbaa !11
   store i64 %rubyStr_value.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult58.i = call i64 @call_via_vm_write(i32 1, i64* nonnull %callArgsAddr.i, i64 %rawSendResult47.i) #17
+  %rawSendResult66.i = call i64 @call_via_vm_write(i32 1, i64* nonnull %callArgsAddr.i, i64 %rawSendResult50.i) #17
   store i64* inttoptr (i64 112 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult60.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult47.i) #17
-  store i64 %rawSendResult60.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult64.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult70.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult50.i) #17
+  store i64 %rawSendResult70.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult76.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
   store i64* inttoptr (i64 120 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult66.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult48.i) #17
-  store i64 %rawSendResult66.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult70.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult80.i = call i64 @call_via_vm_read(i32 0, i64* nonnull %callArgsAddr.i, i64 %rawSendResult53.i) #17
+  store i64 %rawSendResult80.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult86.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }

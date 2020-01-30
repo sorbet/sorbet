@@ -787,14 +787,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooAll31" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAll" to i64*), align 8
+  %"stackFrame_func_Object#fooAll32" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAll" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooAll31", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooAll32", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -805,7 +805,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl32, !prof !44
+  br i1 %13, label %typeTestSuccess, label %codeRepl33, !prof !44
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
@@ -833,13 +833,13 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %rawSendResult = call i64 @call_via_vm_all(i32 2, i64* nonnull %callArgsAddr, i64 %20) #18
   %23 = call i64 @rb_obj_is_kind_of(i64 %rawArg_arg, i64 %15) #6
   %24 = icmp eq i64 %23, 20
-  br i1 %24, label %typeTestSuccess24, label %codeRepl, !prof !44
+  br i1 %24, label %typeTestSuccess25, label %codeRepl, !prof !44
 
-codeRepl32:                                       ; preds = %fillRequiredArgs
+codeRepl33:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw) #22
   unreachable
 
-typeTestSuccess24:                                ; preds = %19
+typeTestSuccess25:                                ; preds = %19
   ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %19
@@ -867,14 +867,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooAny135" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAny1" to i64*), align 8
+  %"stackFrame_func_Object#fooAny136" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAny1" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooAny135", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooAny136", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -885,7 +885,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl36, !prof !44
+  br i1 %13, label %typeTestSuccess, label %codeRepl37, !prof !44
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
@@ -916,9 +916,9 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %25 = and i64 %rawArg_arg, 3
   %26 = icmp eq i64 %25, 2
   %or.cond = or i1 %24, %26
-  br i1 %or.cond, label %typeTestSuccess24, label %27
+  br i1 %or.cond, label %typeTestSuccess25, label %27
 
-codeRepl36:                                       ; preds = %fillRequiredArgs
+codeRepl37:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #18
   unreachable
 
@@ -936,9 +936,9 @@ orContinue:                                       ; preds = %27
   %35 = load i64, i64* %34, align 8, !tbaa !4
   %36 = and i64 %35, 31
   %37 = icmp eq i64 %36, 4
-  br i1 %37, label %typeTestSuccess24, label %codeRepl, !prof !44
+  br i1 %37, label %typeTestSuccess25, label %codeRepl, !prof !44
 
-typeTestSuccess24:                                ; preds = %19, %orContinue
+typeTestSuccess25:                                ; preds = %19, %orContinue
   ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %orContinue, %27
@@ -966,14 +966,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooAny233" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAny2" to i64*), align 8
+  %"stackFrame_func_Object#fooAny234" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooAny2" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooAny233", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooAny234", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -984,7 +984,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl34, !prof !44
+  br i1 %13, label %typeTestSuccess, label %codeRepl35, !prof !44
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
@@ -1012,7 +1012,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %rawSendResult = call i64 @call_via_vm_any(i32 2, i64* nonnull %callArgsAddr, i64 %20) #18
   %23 = and i64 %rawArg_arg, 3
   %24 = icmp eq i64 %23, 2
-  br i1 %24, label %typeTestSuccess24, label %25
+  br i1 %24, label %typeTestSuccess25, label %25
 
 25:                                               ; preds = %19
   %26 = and i64 %rawArg_arg, 7
@@ -1028,18 +1028,18 @@ sorbet_isa_Float.exit:                            ; preds = %25
   %33 = load i64, i64* %32, align 8, !tbaa !4
   %34 = and i64 %33, 31
   %35 = icmp eq i64 %34, 4
-  br i1 %35, label %typeTestSuccess24, label %orContinue
+  br i1 %35, label %typeTestSuccess25, label %orContinue
 
-codeRepl34:                                       ; preds = %fillRequiredArgs
+codeRepl35:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #18
   unreachable
 
 orContinue:                                       ; preds = %25, %sorbet_isa_Float.exit
   %36 = and i64 %rawArg_arg, 1
   %37 = icmp eq i64 %36, 0
-  br i1 %37, label %codeRepl, label %typeTestSuccess24, !prof !49
+  br i1 %37, label %codeRepl, label %typeTestSuccess25, !prof !49
 
-typeTestSuccess24:                                ; preds = %orContinue, %19, %sorbet_isa_Float.exit
+typeTestSuccess25:                                ; preds = %orContinue, %19, %sorbet_isa_Float.exit
   ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %orContinue
@@ -1066,14 +1066,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooInt50" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooInt" to i64*), align 8
+  %"stackFrame_func_Object#fooInt63" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooInt" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooInt50", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooInt63", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -1084,7 +1084,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl51, !prof !44
+  br i1 %13, label %typeTestSuccess, label %codeRepl64, !prof !44
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
@@ -1092,7 +1092,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %15 = icmp eq i64 %14, 0
   br i1 %15, label %codeRepl, label %16, !prof !49
 
-codeRepl51:                                       ; preds = %fillRequiredArgs
+codeRepl64:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #18
   unreachable
 
@@ -1138,14 +1138,14 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %"stackFrame_func_Object#fooArray29" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooArray" to i64*), align 8
+  %"stackFrame_func_Object#fooArray30" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#fooArray" to i64*), align 8
   %rawArg_arg = load i64, i64* %argArray, align 8
   %1 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %2 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %1, i64 0, i32 2
   %3 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %2, align 8, !tbaa !13
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 2
   %5 = bitcast %struct.rb_iseq_struct** %4 to i64*
-  store i64 %"stackFrame_func_Object#fooArray29", i64* %5, align 8, !tbaa !16
+  store i64 %"stackFrame_func_Object#fooArray30", i64* %5, align 8, !tbaa !16
   %6 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %3, i64 0, i32 4
   %7 = load i64*, i64** %6, align 8, !tbaa !18
   %8 = load i64, i64* %7, align 8, !tbaa !9
@@ -1156,7 +1156,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %11 = load i64, i64* @rb_cObject, align 8
   %12 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %11) #6
   %13 = icmp eq i64 %12, 20
-  br i1 %13, label %typeTestSuccess, label %codeRepl30, !prof !44
+  br i1 %13, label %typeTestSuccess, label %codeRepl31, !prof !44
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   store i64* inttoptr (i64 16 to i64*), i64** %10, align 8, !tbaa !11
@@ -1192,13 +1192,13 @@ sorbet_isa_Array.exit:                            ; preds = %18
   %29 = load i64, i64* %28, align 8, !tbaa !4
   %30 = and i64 %29, 31
   %31 = icmp eq i64 %30, 7
-  br i1 %31, label %typeTestSuccess22, label %codeRepl, !prof !44
+  br i1 %31, label %typeTestSuccess23, label %codeRepl, !prof !44
 
-codeRepl30:                                       ; preds = %fillRequiredArgs
+codeRepl31:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #18
   unreachable
 
-typeTestSuccess22:                                ; preds = %sorbet_isa_Array.exit
+typeTestSuccess23:                                ; preds = %sorbet_isa_Array.exit
   ret i64 %rawArg_arg
 
 codeRepl:                                         ; preds = %sorbet_isa_Array.exit, %18
@@ -1306,44 +1306,44 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAll.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooAll, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAll" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 40 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSym98.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny1.i) #18
+  %rawSym99.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny1.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny1, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAny1" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 72 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSym108.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny2.i) #18
+  %rawSym111.i = tail call i64 @rb_id2sym(i64 %rubyId_fooAny2.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_fooAny2, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooAny2" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 104 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSym118.i = tail call i64 @rb_id2sym(i64 %rubyId_fooInt.i) #18
+  %rawSym123.i = tail call i64 @rb_id2sym(i64 %rubyId_fooInt.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooInt, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooInt" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 136 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSym128.i = tail call i64 @rb_id2sym(i64 %rubyId_fooArray.i) #18
+  %rawSym135.i = tail call i64 @rb_id2sym(i64 %rubyId_fooArray.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#fooArray" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 168 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult133.i = call i64 @call_via_vm_fooInt(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
-  store i64 %rawSendResult133.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult137.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult143.i = call i64 @call_via_vm_fooInt(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  store i64 %rawSendResult143.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult148.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 176 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult142.i = call i64 @call_via_vm_fooAny1(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
-  store i64 %rawSendResult142.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult146.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult154.i = call i64 @call_via_vm_fooAny1(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  store i64 %rawSendResult154.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult160.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 184 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult151.i = call i64 @call_via_vm_fooAny2(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
-  store i64 %rawSendResult151.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult155.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult166.i = call i64 @call_via_vm_fooAny2(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  store i64 %rawSendResult166.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult172.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 192 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
-  %rawSendResult160.i = call i64 @call_via_vm_fooAll(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
-  store i64 %rawSendResult160.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult164.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult178.i = call i64 @call_via_vm_fooAll(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  store i64 %rawSendResult178.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult184.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   store i64* inttoptr (i64 200 to i64*), i64** %13, align 8, !tbaa !11
   store i64 5, i64* %callArgsAddr.i, align 8
   %19 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #18
   store i64 %19, i64* %callArgsAddr.i, align 8
-  %rawSendResult173.i = call i64 @call_via_vm_fooArray(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
-  store i64 %rawSendResult173.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult177.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult195.i = call i64 @call_via_vm_fooArray(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  store i64 %rawSendResult195.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult201.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #18
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }

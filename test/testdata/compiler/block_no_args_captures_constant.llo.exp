@@ -782,7 +782,7 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i) #18
   tail call void @rb_define_method(i64 %18, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #18
   store i64* inttoptr (i64 72 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult22.i = call i64 @call_via_vm_foo(i32 0, i64* nonnull %callArgsAddr.i, i64 %2) #18
+  %rawSendResult24.i = call i64 @call_via_vm_foo(i32 0, i64* nonnull %callArgsAddr.i, i64 %2) #18
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %3)
   ret void
 }

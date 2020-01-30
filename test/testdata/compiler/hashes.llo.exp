@@ -356,7 +356,7 @@ typeTestFail.i:                                   ; preds = %entry
   %18 = tail call i64 @rb_hash_new() #10, !noalias !45
   call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %18) #10
   store i64 %18, i64* %callArgsAddr.i, align 8
-  %rawSendResult28.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult29.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %3)
   ret void
 }

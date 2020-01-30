@@ -381,23 +381,23 @@ typeTestFail.i:                                   ; preds = %entry
   %rawSendResult.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 16 to i64*), i64** %13, align 8, !tbaa !10
   store i64 56565211319773434, i64* %callArgsAddr.i, align 8
-  %rawSendResult39.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult41.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 24 to i64*), i64** %13, align 8, !tbaa !10
   store i64 %rubyStr_str.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult43.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult47.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 32 to i64*), i64** %13, align 8, !tbaa !10
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_sym.i) #10
   store i64 %rawSym.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult47.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult53.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 40 to i64*), i64** %13, align 8, !tbaa !10
   store i64 0, i64* %callArgsAddr.i, align 8
-  %rawSendResult51.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult59.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 48 to i64*), i64** %13, align 8, !tbaa !10
   store i64 20, i64* %callArgsAddr.i, align 8
-  %rawSendResult55.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult65.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   store i64* inttoptr (i64 56 to i64*), i64** %13, align 8, !tbaa !10
   store i64 8, i64* %callArgsAddr.i, align 8
-  %rawSendResult60.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
+  %rawSendResult72.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #10
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }

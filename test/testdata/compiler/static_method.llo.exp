@@ -700,9 +700,9 @@ codeRepl:                                         ; preds = %entry
   %rawSym.i.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i.i) #17
   tail call void @rb_define_singleton_method(i64 %24, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_Foo.bar to i64 (...)*), i32 -1) #17
   store i64* inttoptr (i64 48 to i64*), i64** %13, align 8, !tbaa !11
-  %rawSendResult31.i = call i64 @call_via_vm_bar(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
-  store i64 %rawSendResult31.i, i64* %callArgsAddr.i, align 8
-  %rawSendResult35.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
+  %rawSendResult34.i = call i64 @call_via_vm_bar(i32 0, i64* nonnull %callArgsAddr.i, i64 %24) #17
+  store i64 %rawSendResult34.i, i64* %callArgsAddr.i, align 8
+  %rawSendResult39.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2) #17
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }
