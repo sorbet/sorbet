@@ -166,7 +166,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
-    vector<const SymbolBasedIntrinsicMethod *> res;
+    vector<const SymbolBasedIntrinsicMethod *> res{&Module_tripleEq};
     for (auto &method : knownCMethodsInstance) {
         res.emplace_back(&method);
     }
@@ -181,7 +181,6 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
     static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
 
-    ret.emplace_back(&Module_tripleEq);
 
     return ret;
 }
