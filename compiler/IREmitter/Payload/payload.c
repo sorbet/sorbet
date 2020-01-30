@@ -927,6 +927,7 @@ fixnum:
     rb_ary_store(ary, offset, argv[1]);
     return argv[1];
 }
+
 VALUE sorbet_rb_hash_square_br(VALUE recv, int argc, const VALUE *const restrict argv) {
     rb_check_arity(argc, 1, 1);
     return rb_hash_aref(recv, argv[0]);
@@ -1048,6 +1049,7 @@ VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv) 
     sorbet_ensure_arity(argc, 1);
     return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
 }
+
 VALUE sorbet_rb_int_to_s(VALUE x, int argc, const VALUE *const restrict argv) {
     int base;
 
