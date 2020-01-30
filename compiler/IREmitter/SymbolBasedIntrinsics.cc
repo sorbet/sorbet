@@ -147,6 +147,14 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
+    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
+    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},
+    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and"},
+    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false"},
+    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false"},
+    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true"},
+    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand"},
+    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and"},
     {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
     {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},
     {core::Symbols::Integer(), "*", "sorbet_rb_int_mul"},
@@ -180,7 +188,6 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
 }; // namespace
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
     static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
-
 
     return ret;
 }

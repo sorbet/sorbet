@@ -1090,6 +1090,31 @@ VALUE sorbet_selfNew(VALUE recv, int argc, VALUE *argv) {
     return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
 }
 
+VALUE sorbet_int_bool_true(VALUE recv, int argc, const VALUE *const restrict argv) {
+        return Qtrue;
+}
+
+VALUE sorbet_int_bool_false(VALUE recv, int argc, const VALUE *const restrict argv) {
+        return Qfalse;
+}
+
+VALUE sorbet_int_bool_and(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    if (argv[0] != Qnil && argv[0] != Qfalse) {
+      return Qtrue;
+    }
+    return Qfalse;
+
+}
+
+VALUE sorbet_int_bool_nand(VALUE recv, int argc, const VALUE *const restrict argv) {
+    sorbet_ensure_arity(argc, 1);
+    if (argv[0] != Qnil && argv[0] != Qfalse) {
+      return Qfalse;
+    }
+    return Qtrue;
+}
+
 // ****
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.
 // ****
