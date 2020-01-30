@@ -121,17 +121,19 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
     auto afterSend = llvm::BasicBlock::Create(cs, "afterSend", builder.GetInsertBlock()->getParent());
     auto rememberStart = builder.GetInsertBlock();
     builder.SetInsertPoint(afterSend);
-                        auto methodName = i->fun.data(cs)->shortName(cs);
-                        llvm::StringRef methodNameRef(methodName.data(), methodName.size());
-    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2,
-                                 llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
+    auto methodName = i->fun.data(cs)->shortName(cs);
+    llvm::StringRef methodNameRef(methodName.data(), methodName.size());
+    auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
     builder.SetInsertPoint(rememberStart);
     if (!remainingType->isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
             if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun)) {
                 auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
                 for (auto &c : potentialClasses) {
-                    if (i->recv.type->derivesFrom(cs, c)) {
+                    auto leftType = core::Types::dropSubtypesOf(core::Context(cs, core::Symbols::root()) , remainingType, c);
+
+                    if (leftType != remainingType) {
+                        remainingType = leftType;
                         auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
                         llvm::StringRef clazNameRef(clazName.data(), clazName.size());
                         auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
@@ -144,7 +146,8 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                         auto fastPath = llvm::BasicBlock::Create(
                             cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
                             builder.GetInsertBlock()->getParent());
-                        builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
+                        builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath,
+                                             alternative);
                         builder.SetInsertPoint(fastPath);
                         auto fastPathRes = symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId);
                         auto fastPathEnd = builder.GetInsertBlock();
