@@ -2,6 +2,7 @@ cc_library(
     name = "concurrentqueue",
     srcs = [],
     hdrs = [
+        "lightweightsemaphore.h",
         "blockingconcurrentqueue.h",
         "concurrentqueue.h",
     ],

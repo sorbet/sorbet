@@ -91,9 +91,9 @@ def register_sorbet_dependencies():
     new_git_repository(
         name = "concurrentqueue",
         remote = "https://github.com/cameron314/concurrentqueue.git",
-        commit = "7e3ad876fcca2e44e17528a51865ab2420afb238",
+        commit = "79cec4c3bf1ca23ea4a03adfcd3c2c3659684dd2",
         build_file = "@com_stripe_ruby_typer//third_party:concurrentqueue.BUILD",
-        shallow_since = "1564683624 -0400",
+        shallow_since = "1580387311 -0500",
     )
 
     new_git_repository(
