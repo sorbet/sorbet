@@ -510,25 +510,12 @@ class DateTime < Date
   def localize(locale=T.unsafe(nil), options=T.unsafe(nil)); end
 
   # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
-  # object denoting the given calendar date.
-  #
-  # ```ruby
-  # DateTime.new(2001,2,3)    #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
-  # DateTime.new(2001,2,3,4,5,6,'+7')
-  #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
-  # DateTime.new(2001,-11,-26,-20,-55,-54,'+7')
-  #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
-  # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
-  def self.new(*arg0); end
-
-  # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
   # object denoting the present time.
   #
   # ```ruby
   # DateTime.now              #=> #<DateTime: 2011-06-11T21:20:44+09:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(DateTime)}
   def self.now(*arg0); end
 
   # Parses the given representation of date and time, and creates a
