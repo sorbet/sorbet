@@ -37,12 +37,27 @@ def sorbet_llvm_externals():
         strip_prefix = "zlib-1.2.11",
     )
 
-    http_archive(
-        name = "sorbet_ruby",
-        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz",
-        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
-        strip_prefix = "ruby-2.6.5",
-        build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD",
-        patches = ["@com_stripe_sorbet_llvm//third_party/ruby:export-intrinsics.patch"],
-        patch_tool = "patch",
-    )
+    for apply_patch in [True, False]:
+        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz"
+        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d"
+        strip_prefix = "ruby-2.6.5"
+        build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD"
+
+        if apply_patch:
+            http_archive(
+                name = "sorbet_ruby",
+                url = url,
+                sha256 = sha256,
+                strip_prefix = strip_prefix,
+                build_file = build_file,
+                patches = ["@com_stripe_sorbet_llvm//third_party/ruby:export-intrinsics.patch"],
+                patch_tool = "patch",
+            )
+        else:
+            http_archive(
+                name = "sorbet_ruby_unpatched",
+                url = url,
+                sha256 = sha256,
+                strip_prefix = strip_prefix,
+                build_file = build_file,
+            )

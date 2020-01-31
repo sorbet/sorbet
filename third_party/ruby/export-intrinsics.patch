@@ -258,6 +258,272 @@
 @@ -6424 +6424 @@
 -static VALUE
 +VALUE
+--- numeric.c
++++ numeric.c
+@@ -166 +166 @@
+-static VALUE int_even_p(VALUE x);
++VALUE int_even_p(VALUE x);
+@@ -170 +170 @@
+-static VALUE flo_to_i(VALUE num);
++VALUE flo_to_i(VALUE num);
+@@ -397 +397 @@
+-static VALUE
++VALUE
+@@ -479 +479 @@
+-static VALUE
++VALUE
+@@ -500 +500 @@
+-static VALUE
++VALUE
+@@ -516 +516 @@
+-static VALUE
++VALUE
+@@ -532 +532 @@
+-static VALUE
++VALUE
+@@ -549 +549 @@
+-static VALUE
++VALUE
+@@ -562 +562 @@
+-static VALUE
++VALUE
+@@ -580 +580 @@
+-static VALUE
++VALUE
+@@ -598 +598 @@
+-static VALUE
++VALUE
+@@ -616 +616 @@
+-static VALUE
++VALUE
+@@ -633 +633 @@
+-static VALUE
++VALUE
+@@ -691 +691 @@
+-static VALUE
++VALUE
+@@ -704 +704 @@
+-static VALUE
++VALUE
+@@ -720 +720 @@
+-static VALUE
++VALUE
+@@ -740 +740 @@
+-static VALUE
++VALUE
+@@ -756 +756 @@
+-static VALUE
++VALUE
+@@ -789 +789 @@
+-static VALUE
++VALUE
+@@ -804 +804 @@
+-static VALUE
++VALUE
+@@ -817 +817 @@
+-static VALUE
++VALUE
+@@ -834 +834 @@
+-static VALUE
++VALUE
+@@ -847 +847 @@
+-static VALUE
++VALUE
+@@ -870 +870 @@
+-static VALUE
++VALUE
+@@ -911 +911 @@
+-static VALUE
++VALUE
+@@ -995 +995 @@
+-static VALUE
++VALUE
+@@ -1045 +1045 @@
+-static VALUE
++VALUE
+@@ -1123 +1123 @@
+-static VALUE
++VALUE
+@@ -1155 +1155 @@
+-static VALUE
++VALUE
+@@ -1223 +1223 @@
+-static VALUE
++VALUE
+@@ -1262 +1262 @@
+-static VALUE
++VALUE
+@@ -1331 +1331 @@
+-static VALUE
++VALUE
+@@ -1350 +1350 @@
+-static VALUE
++VALUE
+@@ -1415 +1415 @@
+-static VALUE
++VALUE
+@@ -1451 +1451 @@
+-static VALUE
++VALUE
+@@ -1536 +1536 @@
+-static VALUE
++VALUE
+@@ -1573 +1573 @@
+-static VALUE
++VALUE
+@@ -1610 +1610 @@
+-static VALUE
++VALUE
+@@ -1674 +1674 @@
+-static VALUE
++VALUE
+@@ -1708 +1708 @@
+-static VALUE
++VALUE
+@@ -1726 +1726 @@
+-static VALUE
++VALUE
+@@ -1834 +1834 @@
+-static VALUE
++VALUE
+@@ -1885 +1885 @@
+-static VALUE
++VALUE
+@@ -1933 +1933 @@
+-static VALUE
++VALUE
+@@ -2002 +2002 @@
+-static VALUE
++VALUE
+@@ -2255 +2255 @@
+-static VALUE
++VALUE
+@@ -2345 +2345 @@
+-static VALUE
++VALUE
+@@ -2379 +2379 @@
+-static VALUE
++VALUE
+@@ -2395 +2395 @@
+-static VALUE
++VALUE
+@@ -2409 +2409 @@
+-static VALUE
++VALUE
+@@ -2427 +2427 @@
+-static VALUE
++VALUE
+@@ -2444 +2444 @@
+-static VALUE
++VALUE
+@@ -2461 +2461 @@
+-static VALUE
++VALUE
+@@ -2478 +2478 @@
+-static VALUE
++VALUE
+@@ -2672 +2672 @@
+-static VALUE
++VALUE
+@@ -2740 +2740 @@
+-static VALUE
++VALUE
+@@ -3185 +3185 @@
+-static VALUE
++VALUE
+@@ -3198 +3198 @@
+-static VALUE
++VALUE
+@@ -3235 +3235 @@
+-static VALUE
++VALUE
+@@ -3259 +3259 @@
+-static VALUE
++VALUE
+@@ -3273 +3273 @@
+-static VALUE
++VALUE
+@@ -3287 +3287 @@
+-static VALUE
++VALUE
+@@ -3386 +3386 @@
+-static VALUE
++VALUE
+@@ -3444 +3444 @@
+-static VALUE
++VALUE
+@@ -3540 +3540 @@
+-static VALUE
++VALUE
+@@ -3905 +3905 @@
+-static VALUE
++VALUE
+@@ -4321 +4321 @@
+-static VALUE
++VALUE
+@@ -4361 +4361 @@
+-static VALUE
++VALUE
+@@ -4394 +4394 @@
+-static VALUE
++VALUE
+@@ -4493 +4493 @@
+-static VALUE
++VALUE
+@@ -4528 +4528 @@
+-static VALUE
++VALUE
+@@ -4621 +4621 @@
+-static VALUE
++VALUE
+@@ -4678 +4678 @@
+-static VALUE
++VALUE
+@@ -4699 +4699 @@
+-static VALUE
++VALUE
+@@ -4777 +4777 @@
+-static VALUE
++VALUE
+@@ -4843 +4843 @@
+-static VALUE
++VALUE
+@@ -4899 +4899 @@
+-static VALUE
++VALUE
+@@ -4930 +4930 @@
+-static VALUE
++VALUE
+@@ -4978 +4978 @@
+-static VALUE
++VALUE
+@@ -4984 +4984 @@
+-static VALUE
++VALUE
+@@ -5024 +5024 @@
+-static VALUE
++VALUE
+@@ -5030 +5030 @@
+-static VALUE
++VALUE
+@@ -5068 +5068 @@
+-static VALUE
++VALUE
+@@ -5080 +5080 @@
+-static VALUE
++VALUE
+@@ -5137 +5137 @@
+-static VALUE
++VALUE
+@@ -5172 +5172 @@
+-static VALUE
++VALUE
+@@ -5204 +5204 @@
+-static VALUE
++VALUE
+@@ -5236 +5236 @@
+-static VALUE
++VALUE
 --- string.c
 +++ string.c
 @@ -67 +67 @@
@@ -594,271 +860,5 @@
 -static VALUE
 +VALUE
 @@ -10536 +10536 @@
--static VALUE
-+VALUE
---- numeric.c
-+++ numeric.c
-@@ -166 +166 @@
--static VALUE int_even_p(VALUE x);
-+VALUE int_even_p(VALUE x);
-@@ -170 +170 @@
--static VALUE flo_to_i(VALUE num);
-+VALUE flo_to_i(VALUE num);
-@@ -397 +397 @@
--static VALUE
-+VALUE
-@@ -479 +479 @@
--static VALUE
-+VALUE
-@@ -500 +500 @@
--static VALUE
-+VALUE
-@@ -516 +516 @@
--static VALUE
-+VALUE
-@@ -532 +532 @@
--static VALUE
-+VALUE
-@@ -549 +549 @@
--static VALUE
-+VALUE
-@@ -562 +562 @@
--static VALUE
-+VALUE
-@@ -580 +580 @@
--static VALUE
-+VALUE
-@@ -598 +598 @@
--static VALUE
-+VALUE
-@@ -616 +616 @@
--static VALUE
-+VALUE
-@@ -633 +633 @@
--static VALUE
-+VALUE
-@@ -691 +691 @@
--static VALUE
-+VALUE
-@@ -704 +704 @@
--static VALUE
-+VALUE
-@@ -720 +720 @@
--static VALUE
-+VALUE
-@@ -740 +740 @@
--static VALUE
-+VALUE
-@@ -756 +756 @@
--static VALUE
-+VALUE
-@@ -789 +789 @@
--static VALUE
-+VALUE
-@@ -804 +804 @@
--static VALUE
-+VALUE
-@@ -817 +817 @@
--static VALUE
-+VALUE
-@@ -834 +834 @@
--static VALUE
-+VALUE
-@@ -847 +847 @@
--static VALUE
-+VALUE
-@@ -870 +870 @@
--static VALUE
-+VALUE
-@@ -911 +911 @@
--static VALUE
-+VALUE
-@@ -995 +995 @@
--static VALUE
-+VALUE
-@@ -1045 +1045 @@
--static VALUE
-+VALUE
-@@ -1123 +1123 @@
--static VALUE
-+VALUE
-@@ -1155 +1155 @@
--static VALUE
-+VALUE
-@@ -1223 +1223 @@
--static VALUE
-+VALUE
-@@ -1262 +1262 @@
--static VALUE
-+VALUE
-@@ -1331 +1331 @@
--static VALUE
-+VALUE
-@@ -1350 +1350 @@
--static VALUE
-+VALUE
-@@ -1415 +1415 @@
--static VALUE
-+VALUE
-@@ -1451 +1451 @@
--static VALUE
-+VALUE
-@@ -1536 +1536 @@
--static VALUE
-+VALUE
-@@ -1573 +1573 @@
--static VALUE
-+VALUE
-@@ -1610 +1610 @@
--static VALUE
-+VALUE
-@@ -1674 +1674 @@
--static VALUE
-+VALUE
-@@ -1708 +1708 @@
--static VALUE
-+VALUE
-@@ -1726 +1726 @@
--static VALUE
-+VALUE
-@@ -1834 +1834 @@
--static VALUE
-+VALUE
-@@ -1885 +1885 @@
--static VALUE
-+VALUE
-@@ -1933 +1933 @@
--static VALUE
-+VALUE
-@@ -2002 +2002 @@
--static VALUE
-+VALUE
-@@ -2255 +2255 @@
--static VALUE
-+VALUE
-@@ -2345 +2345 @@
--static VALUE
-+VALUE
-@@ -2379 +2379 @@
--static VALUE
-+VALUE
-@@ -2395 +2395 @@
--static VALUE
-+VALUE
-@@ -2409 +2409 @@
--static VALUE
-+VALUE
-@@ -2427 +2427 @@
--static VALUE
-+VALUE
-@@ -2444 +2444 @@
--static VALUE
-+VALUE
-@@ -2461 +2461 @@
--static VALUE
-+VALUE
-@@ -2478 +2478 @@
--static VALUE
-+VALUE
-@@ -2672 +2672 @@
--static VALUE
-+VALUE
-@@ -2740 +2740 @@
--static VALUE
-+VALUE
-@@ -3185 +3185 @@
--static VALUE
-+VALUE
-@@ -3198 +3198 @@
--static VALUE
-+VALUE
-@@ -3235 +3235 @@
--static VALUE
-+VALUE
-@@ -3259 +3259 @@
--static VALUE
-+VALUE
-@@ -3273 +3273 @@
--static VALUE
-+VALUE
-@@ -3287 +3287 @@
--static VALUE
-+VALUE
-@@ -3386 +3386 @@
--static VALUE
-+VALUE
-@@ -3444 +3444 @@
--static VALUE
-+VALUE
-@@ -3540 +3540 @@
--static VALUE
-+VALUE
-@@ -3905 +3905 @@
--static VALUE
-+VALUE
-@@ -4321 +4321 @@
--static VALUE
-+VALUE
-@@ -4361 +4361 @@
--static VALUE
-+VALUE
-@@ -4394 +4394 @@
--static VALUE
-+VALUE
-@@ -4493 +4493 @@
--static VALUE
-+VALUE
-@@ -4528 +4528 @@
--static VALUE
-+VALUE
-@@ -4621 +4621 @@
--static VALUE
-+VALUE
-@@ -4678 +4678 @@
--static VALUE
-+VALUE
-@@ -4699 +4699 @@
--static VALUE
-+VALUE
-@@ -4777 +4777 @@
--static VALUE
-+VALUE
-@@ -4843 +4843 @@
--static VALUE
-+VALUE
-@@ -4899 +4899 @@
--static VALUE
-+VALUE
-@@ -4930 +4930 @@
--static VALUE
-+VALUE
-@@ -4978 +4978 @@
--static VALUE
-+VALUE
-@@ -4984 +4984 @@
--static VALUE
-+VALUE
-@@ -5024 +5024 @@
--static VALUE
-+VALUE
-@@ -5030 +5030 @@
--static VALUE
-+VALUE
-@@ -5068 +5068 @@
--static VALUE
-+VALUE
-@@ -5080 +5080 @@
--static VALUE
-+VALUE
-@@ -5137 +5137 @@
--static VALUE
-+VALUE
-@@ -5172 +5172 @@
--static VALUE
-+VALUE
-@@ -5204 +5204 @@
--static VALUE
-+VALUE
-@@ -5236 +5236 @@
 -static VALUE
 +VALUE

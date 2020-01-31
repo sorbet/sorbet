@@ -76,8 +76,9 @@ module Intrinsics
             # the line output format for nm is '<addr> <type> <name>'
             symbol = line.split(' ')[2]
 
-            # trim the leading underscore
-            exported << symbol[1..]
+            # There ends up being leading underscores in front of all the
+            # symbols we care about on macOS
+            exported << symbol.delete_prefix('_')
           end
         end
       end
@@ -91,6 +92,7 @@ module Intrinsics
 
       # change to the source dir to avoid absolute paths in the output
       Dir.chdir(ruby_source) do
+        files = []
         IO.popen(
           [
             'find', '.',
@@ -101,13 +103,18 @@ module Intrinsics
           ]) do |io|
             io.each_line do |file|
               # trim the trailing newline, and the leading './'
-              file = file.chomp[2..]
-              methods = methods_from(exported: exported, file: file)
-
-              if !methods.empty?
-                defined[file] = methods
-              end
+              files << file.chomp[2..]
             end
+        end
+
+        files.sort!
+
+        files.each do |file|
+          methods = methods_from(exported: exported, file: file)
+
+          if !methods.empty?
+            defined[file] = methods
+          end
         end
       end
 
@@ -401,9 +408,9 @@ if __FILE__ == $0
 
   topdir = File.dirname($0) + '/../../..'
 
-  ruby = topdir + '/bazel-bin/external/sorbet_ruby/toolchain/bin/ruby'
+  ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/bin/ruby'
 
-  ruby_source = Dir.home + '/Downloads/ruby-2.6.3'
+  ruby_source = topdir + '/bazel-sorbet_llvm/external/sorbet_ruby_unpatched'
 
   OptionParser.new do |opts|
 
