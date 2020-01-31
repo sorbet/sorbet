@@ -21,6 +21,10 @@ module T::Array
   def self.[](arg); end;
 end
 
+module T::Hash
+  def self.[](arg1, arg2); end;
+end
+
 
 module Sorbet; end
 module Sorbet::Private; end
