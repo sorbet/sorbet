@@ -858,6 +858,14 @@ VALUE sorbet_T_unsafe(VALUE recv, int argc, const VALUE *const restrict argv, Bl
     return argv[0];
 }
 
+VALUE sorbet_T_Hash_squarebr(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    return RUBY_Qundef;
+}
+
+VALUE sorbet_T_Array_squarebr(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    return RUBY_Qundef;
+}
+
 VALUE sorbet_rb_array_len(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 0);
     return sorbet_longToRubyValue(rb_array_len(recv));
