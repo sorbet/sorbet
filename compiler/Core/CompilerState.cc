@@ -45,6 +45,29 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::FunctionType *CompilerState::getRubyBlockFFIType() {
+    llvm::Type *args[] = {
+        llvm::Type::getInt64Ty(lctx),    // first yielded argument(first argument is both here and in argArray
+        llvm::Type::getInt64Ty(lctx),    // data
+        llvm::Type::getInt32Ty(lctx),    // arg count
+        llvm::Type::getInt64PtrTy(lctx), // argArray
+        llvm::Type::getInt64Ty(lctx),    // blockArg
+    };
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
+}
+
+llvm::FunctionType *CompilerState::getSorbetIntrinsicFFIType() {
+    llvm::Type *args[] = {
+        llvm::Type::getInt64Ty(lctx),          // self
+        llvm::Type::getInt32Ty(lctx),          // arg count
+        llvm::Type::getInt64PtrTy(lctx),       // argArray
+        getRubyBlockFFIType()->getPointerTo(), // block
+        llvm::Type::getInt64Ty(lctx)           // closure
+
+    };
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
+}
+
 void CompilerState::runCheapOptimizations(llvm::Function *func) {
     llvm::legacy::FunctionPassManager pm(module);
     llvm::PassManagerBuilder pmbuilder;

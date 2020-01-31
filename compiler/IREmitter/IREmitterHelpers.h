@@ -66,7 +66,7 @@ public:
     static llvm::Value *emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                                 const BasicBlockMap &blockMap,
                                                 const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                int rubyBlockId);
+                                                int rubyBlockId, llvm::Function *blk);
 
     static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                           std::unique_ptr<ast::MethodDef> &md,

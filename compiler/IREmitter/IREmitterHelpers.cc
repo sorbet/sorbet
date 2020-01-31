@@ -175,15 +175,7 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
 vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func) {
     vector<llvm::Function *> res;
     res.emplace_back(func);
-    llvm::Type *args[] = {
-        llvm::Type::getInt64Ty(cs),    // first yielded argument(first argument is both here and in argArray
-        llvm::Type::getInt64Ty(cs),    // data
-        llvm::Type::getInt32Ty(cs),    // arg count
-        llvm::Type::getInt64PtrTy(cs), // argArray
-        llvm::Type::getInt64Ty(cs),    // blockArg
-    };
-    auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
-
+    auto ft = cs.getRubyBlockFFIType();
     for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
         auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage,
                                          llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
@@ -242,6 +234,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
         } else {
             localClosure = fun->arg_begin() + 1;
         }
+        ENFORCE(localClosure != nullptr);
         escapedClosure.emplace_back(localClosure);
         sendArgArrays.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");

@@ -296,7 +296,7 @@ module Intrinsics
         if should_wrap? method
           header << "    {core::Symbols::#{method.klass}(), "
           header << "\"#{method.rb_name}\", "
-          header << "\"sorbet_int_#{method.c_name}\"},\n"
+          header << "\"sorbet_int_#{method.c_name}\", false},\n"
         end
       end
     end
@@ -308,6 +308,9 @@ module Intrinsics
       #define SORBET_LLVM_IMPORTED_INTRINSICS_H
 
       #include "ruby.h"
+
+      typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, VALUE *args, VALUE blockArg);
+
       EOF
 
       grouped_methods.each do |methods|
@@ -357,7 +360,7 @@ module Intrinsics
       wrapper << "VALUE sorbet_int_#{method.c_name}("
       wrapper << 'VALUE recv, '
       wrapper << 'int argc, '
-      wrapper << "VALUE * const restrict args) {\n"
+      wrapper << "VALUE * const restrict args, BlockFFIType blk, VALUE closure) {\n"
 
       case method.argc
 

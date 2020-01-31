@@ -35,13 +35,13 @@ protected:
     string cMethod;
 
 public:
-    CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod)
-        : rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
+    CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, bool handleBlocks)
+        : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         auto &builder = builderCast(build);
 
         // fill in args
@@ -60,9 +60,18 @@ public:
                                   llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
         auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+        llvm::Value *blkPtr;
+        if (blk != nullptr) {
+            blkPtr = blk;
+        } else {
+            blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
+        }
+
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blkPtr,
+
+                                   blockMap.escapedClosure[rubyBlockId]},
                                   "rawSendResult");
     };
 
@@ -75,16 +84,16 @@ public:
 };
 
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
-protected:
 public:
+    Module_tripleEq() : SymbolBasedIntrinsicMethod(false) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         auto ctx = core::Context(cs, core::Symbols::root());
         auto representedClass = core::Types::getRepresentedClass(ctx, send->recv.type.get());
         if (!representedClass.exists()) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
         }
         auto recvType = representedClass.data(cs)->externalType(cs);
         auto &arg0 = send->args[0];
@@ -110,7 +119,7 @@ public:
         builder.CreateBr(cont);
 
         builder.SetInsertPoint(slowStart);
-        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId);
+        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
         auto slowEnd = builder.GetInsertBlock();
         builder.CreateBr(cont);
 
@@ -133,8 +142,8 @@ public:
 
 class CallCMethodSingleton : public CallCMethod {
 public:
-    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod)
-        : CallCMethod(rubyClass, rubyMethod, cMethod){};
+    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, bool handleBlocks)
+        : CallCMethod(rubyClass, rubyMethod, cMethod, handleBlocks){};
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
         return {rubyClass.data(cs)->lookupSingletonClass(cs)};
@@ -142,35 +151,35 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethodsInstance{
-    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br"},
-    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq"},
-    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
-    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
-    {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
-    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
-    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},
-    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and"},
-    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false"},
-    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false"},
-    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true"},
-    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand"},
-    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and"},
-    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
-    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},
-    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul"},
-    {core::Symbols::Integer(), "/", "sorbet_rb_int_div"},
-    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
-    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},
-    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge"},
-    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le"},
-    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s"},
-    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
-    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
+    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br", false},
+    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq", false},
+    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br", false},
+    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq", false},
+    {core::Symbols::Array(), "size", "sorbet_rb_array_len", false},
+    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true", false},
+    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and", false},
+    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and", false},
+    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false", false},
+    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false", false},
+    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true", false},
+    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand", false},
+    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and", false},
+    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus", false},
+    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus", false},
+    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul", false},
+    {core::Symbols::Integer(), "/", "sorbet_rb_int_div", false},
+    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt", false},
+    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt", false},
+    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge", false},
+    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le", false},
+    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s", false},
+    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal", false},
+    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq", false},
 #include "WrappedIntrinsics.h"
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
-    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe"},
+    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", false},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {

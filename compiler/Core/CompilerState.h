@@ -21,6 +21,8 @@ public:
 
     llvm::StructType *getValueType();
     llvm::FunctionType *getRubyFFIType();
+    llvm::FunctionType *getRubyBlockFFIType();
+    llvm::FunctionType *getSorbetIntrinsicFFIType();
 
     /* run optimizations that are super cheap which are expected to be run on each function immediately as it is
      * generated */

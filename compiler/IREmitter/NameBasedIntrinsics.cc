@@ -51,10 +51,11 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
+    DoNothingIntrinsic() : NameBasedIntrinsicMethod(true){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         return Payload::rubyNil(cs, build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -64,10 +65,11 @@ public:
 
 class DefineMethodIntrinsic : public NameBasedIntrinsicMethod {
 public:
+    DefineMethodIntrinsic() : NameBasedIntrinsicMethod(false){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         bool isSelf = i->fun == Names::defineMethodSingleton(cs);
         ENFORCE(i->args.size() == 2);
@@ -115,10 +117,11 @@ std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolR
 
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
+    DefineClassIntrinsic() : NameBasedIntrinsicMethod(false){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         auto sym = typeToSym(cs, i->args[0].type);
         // this is wrong and will not work for `class <<self`
@@ -156,10 +159,11 @@ public:
 
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
+    IdentityIntrinsic() : NameBasedIntrinsicMethod(false){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         return Payload::varGet(cs, i->args[0].variable, build, blockMap, aliases, rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -169,10 +173,11 @@ public:
 
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
+    CallWithBlock() : NameBasedIntrinsicMethod(false){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
@@ -239,13 +244,14 @@ protected:
     ShouldTakeReciever takesReciever;
 
 public:
-    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever)
-        : rubyMethod(rubyMethod), cMethod(cMethod), takesReciever(takesReciever){};
+    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever, bool supportsBlocks)
+        : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
+          takesReciever(takesReciever){};
 
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                  int rubyBlockId) const override {
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
         auto &builder = builderCast(build);
 
         // fill in args
@@ -271,9 +277,17 @@ public:
             var = Payload::rubyNil(cs, builder);
         }
 
+        llvm::Value *blkPtr;
+        if (blk != nullptr) {
+            blkPtr = blk;
+        } else {
+            blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
+        }
+
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blkPtr,
+                                   blockMap.escapedClosure[rubyBlockId]},
                                   "rawSendResult");
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -282,12 +296,12 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever},
-    {"defined?", "sorbet_definedIntinsic", NoReciever},
-    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever},
-    {"<self-new>", "sorbet_selfNew", NoReciever},
+    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever, false},
+    {"defined?", "sorbet_definedIntinsic", NoReciever, false},
+    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever, false},
+    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever, false},
+    {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever, false},
+    {"<self-new>", "sorbet_selfNew", NoReciever, false},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
