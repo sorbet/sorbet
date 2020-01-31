@@ -8,13 +8,14 @@ class T::Private::Types::Void < T::Types::Base
 
   # The actual return value of `.void` methods.
   #
-  # Uses `Module.new` because in Ruby an anonymous module will inherit the name
-  # of the constant it's assigned to. This gives it a readable name someone
+  # Uses `module VOID` because this gives it a readable name when someone
   # examines it in Pry or with `#inspect` like:
   #
   #     T::Private::Types::Void::VOID
   #
-  VOID = Module.new.freeze
+  module VOID
+    freeze
+  end
 
   # @override Base
   def name
