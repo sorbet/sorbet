@@ -12,6 +12,8 @@ end
 # NB: This must stay in the same file where T::Props::Optional is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
 module T::Props::Optional::DecoratorMethods
+  extend T::Sig
+
   # TODO: clean this up. This set of options is confusing, and some of them are not universally
   # applicable (e.g., :on_load only applies when using T::Serializable).
   VALID_OPTIONAL_RULES = Set[
@@ -28,6 +30,9 @@ module T::Props::Optional::DecoratorMethods
   }.freeze
   private_constant :VALID_RULE_KEYS
 
+  DEFAULT_SETTER_RULE_KEY = :_t_props_private_apply_default
+  private_constant :DEFAULT_SETTER_RULE_KEY
+
   def valid_rule_key?(key)
     super || VALID_RULE_KEYS[key]
   end
@@ -39,8 +44,30 @@ module T::Props::Optional::DecoratorMethods
     rules[:need_nil_read_check] = T::Props::Utils.need_nil_read_check?(rules)
   end
 
+  # checked(:never) - O(runtime object construction)
+  sig {returns(T::Hash[Symbol, T::Props::Private::ApplyDefault]).checked(:never)}
+  attr_reader :props_with_defaults
+
+  # checked(:never) - O(runtime object construction)
+  sig {returns(T::Hash[Symbol, T::Props::Private::SetterFactory::SetterProc]).checked(:never)}
+  attr_reader :props_without_defaults
+
   def add_prop_definition(prop, rules)
     compute_derived_rules(rules)
+
+    default_setter = T::Props::Private::ApplyDefault.for(decorated_class, rules)
+    if default_setter
+      @props_with_defaults ||= {}
+      @props_with_defaults[prop] = default_setter
+      @props_without_defaults&.delete(prop) # Handle potential override
+
+      rules[DEFAULT_SETTER_RULE_KEY] = default_setter
+    else
+      @props_without_defaults ||= {}
+      @props_without_defaults[prop] = rules.fetch(:setter_proc)
+      @props_with_defaults&.delete(prop) # Handle potential override
+    end
+
     super
   end
 
@@ -61,21 +88,10 @@ module T::Props::Optional::DecoratorMethods
   end
 
   def has_default?(rules)
-    rules.include?(:default) || rules.include?(:factory)
+    rules.include?(DEFAULT_SETTER_RULE_KEY)
   end
 
   def get_default(rules, instance_class)
-    if rules.include?(:default)
-      default = rules[:default]
-      T::Props::Utils.deep_clone_object(default)
-    elsif rules.include?(:factory)
-      # Factory should never be nil if the key is specified, but
-      # we do this rather than 'elsif rules[:factory]' for
-      # consistency with :default.
-      factory = rules[:factory]
-      instance_class.class_exec(&factory)
-    else
-      nil
-    end
+    rules[DEFAULT_SETTER_RULE_KEY]&.default
   end
 end
