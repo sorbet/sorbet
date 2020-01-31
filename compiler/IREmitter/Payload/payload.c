@@ -858,6 +858,10 @@ VALUE sorbet_T_unsafe(VALUE recv, int argc, const VALUE *const restrict argv, Bl
     return argv[0];
 }
 
+VALUE sorbet_T_untyped(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    return RUBY_Qundef;
+}
+
 VALUE sorbet_T_Hash_squarebr(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     return RUBY_Qundef;
 }

@@ -183,6 +183,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", false},
     {core::Symbols::T_Hash(), "[]", "sorbet_T_Hash_squarebr", false},
     {core::Symbols::T_Array(), "[]", "sorbet_T_Array_squarebr", false},
+    {core::Symbols::T(), "untyped", "sorbet_T_untyped", false},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
