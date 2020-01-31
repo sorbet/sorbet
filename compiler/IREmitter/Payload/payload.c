@@ -890,6 +890,14 @@ VALUE sorbet_rb_array_square_br(VALUE recv, int argc, const VALUE *const restric
     return rb_ary_entry(ary, NUM2LONG(arg));
 }
 
+VALUE sorbet_rb_array_empty(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    if (RARRAY_LEN(recv) == 0) {
+        return Qtrue;
+    }
+    return Qfalse;
+}
+
 void rb_ary_splice(VALUE ary, long beg, long len, const VALUE *rptr, long rlen);
 
 VALUE sorbet_rb_array_square_br_eq(VALUE ary, int argc, const VALUE *const restrict argv, BlockFFIType blk,
