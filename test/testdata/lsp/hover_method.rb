@@ -64,7 +64,7 @@ class Foo
   sig {params(blk: T.proc.params(arg0: Integer, arg1: String).returns(String)).returns(String)}
   def self.blk_arg(&blk)
     yield(1, "hello")
-  # ^ hover: T.proc.params(arg0: Integer, arg1: String).returns(String)
+  # ^ hover: sig {params(arg0: Integer, arg1: String).returns(String)}
   end
 
   sig {params(a: String, x: String).returns(T::Array[String])}

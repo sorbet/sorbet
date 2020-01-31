@@ -5,6 +5,31 @@
 
 namespace sorbet::core {
 
+namespace {
+// In the case of location ties, determines which query response takes priority in the vector produced by
+// drainWithQueryResponses. Larger values means greater specificity.
+u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
+    if (q.isEdit()) {
+        // Only reported for autocomplete, and should take precedence over anything else reported
+        return 8;
+    } else if (q.isDefinition()) {
+        return 7;
+    } else if (q.isSend()) {
+        return 6;
+    } else if (q.isField()) {
+        return 5;
+    } else if (q.isIdent()) {
+        return 4;
+    } else if (q.isConstant()) {
+        return 3;
+    } else if (q.isLiteral()) {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+} // namespace
+
 using namespace std;
 
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
@@ -41,7 +66,11 @@ ErrorQueue::drainWithQueryResponses() {
         if (leftTermLoc.beginPos() != rightTermLoc.beginPos()) {
             return leftTermLoc.beginPos() < rightTermLoc.beginPos();
         }
-        return leftTermLoc.endPos() < rightTermLoc.endPos();
+        if (leftTermLoc.endPos() != rightTermLoc.endPos()) {
+            return leftTermLoc.endPos() < rightTermLoc.endPos();
+        }
+        // Locations tie! Tiebreak with the expected specificity of the response.
+        return getQueryResponseTypeSpecificity(*left) > getQueryResponseTypeSpecificity(*right);
     });
 
     return make_pair(move(out), move(outResponses));
