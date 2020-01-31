@@ -193,14 +193,12 @@ public:
         core::NameRef funName(cs, lit->value);
         auto rawId = Payload::idIntern(cs, builder, funName.data(cs)->shortName(cs));
         auto block = Payload::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
-        auto blockAsProc = builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
-                                              {
-                                                  block,
-                                                  Payload::idIntern(cs, builder, "to_proc"),
-                                                  llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                                  llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                                              });
+        auto blockAsProc =
+            IREmitterHelpers::callViaRubyVMSimple(cs, builder, block,
 
+                                                  llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+
+                                                  llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
         {
             int argId = -1;
             for (auto &arg : i->args) {

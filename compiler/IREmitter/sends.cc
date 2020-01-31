@@ -62,9 +62,9 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
                     auto argsArray = llvmFunc->arg_begin() + 1;
                     auto cs2 = cs;
                     cs2.functionEntryInitializers = bb1;
-                    auto rubyId = Payload::idIntern(cs2, funcBuilder, i->fun.data(cs)->shortName(cs));
-                    funcBuilder.CreateRet(funcBuilder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
-                                                                 {selfVar, rubyId, argsCount, argsArray}));
+                    auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, selfVar, argsArray, argsCount,
+                                                                    i->fun.data(cs)->shortName(cs));
+                    funcBuilder.CreateRet(rt);
                     funcBuilder.SetInsertPoint(bb1);
                     funcBuilder.CreateBr(bb2);
                     ENFORCE(!llvm::verifyFunction(*llvmFunc, &llvm::dbgs()));
@@ -247,47 +247,86 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
     // to get inline caching.
     // before this, perf will not be good
     auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
-    llvm::Value *rawCall;
     if (i->link != nullptr) {
         // this send has a block!
         auto rawId = Payload::idIntern(cs, builder, str);
-        rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
-                                     {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blk,
-                                      blockMap.escapedClosure[rubyBlockId]},
-                                     "rawSendResult");
+        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
+                                  {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blk,
+                                   blockMap.escapedClosure[rubyBlockId]},
+                                  "rawSendResult");
 
     } else if (i->fun == core::Names::super()) {
-        rawCall = builder.CreateCall(cs.module->getFunction("sorbet_callSuper"),
-                                     {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
-                                     "rawSendResult");
+        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"),
+                                  {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
+                                  "rawSendResult");
     } else {
-        auto slowFunctionName = "call_via_vm_" + (string)str;
-        auto function = cs.module->getFunction(slowFunctionName);
-        if (function == nullptr) {
-            function = llvm::Function::Create(cs.getRubyFFIType(), llvm::Function::LinkOnceAnyLinkage, slowFunctionName,
-                                              *cs.module);
-            function->addFnAttr(llvm::Attribute::AttrKind::NoInline); // we'd like to see it in backtraces
-            auto cs1 = cs;
-            llvm::IRBuilder<> funBuilder(cs1);
-            auto early = llvm::BasicBlock::Create(cs, "functionEntryInitializers", function);
-            auto bb = llvm::BasicBlock::Create(cs, "call", function);
-            cs1.functionEntryInitializers = early;
-            funBuilder.SetInsertPoint(bb);
-            auto rawId = Payload::idIntern(cs1, funBuilder, str);
-            auto realCall = funBuilder.CreateCall(
-                cs.module->getFunction("sorbet_callFunc"),
-                {function->arg_begin() + 2, rawId, function->arg_begin(), function->arg_begin() + 1}, "rawSendResult");
-            funBuilder.CreateRet(realCall);
-            funBuilder.SetInsertPoint(early);
-            funBuilder.CreateBr(bb);
-        }
-        rawCall = builder.CreateCall(function,
-                                     {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
-                                      builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), var},
-                                     "rawSendResult");
+        return callViaRubyVMSimple(cs, build, var,
+                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices),
+
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)), str);
     }
-    return rawCall;
 };
+
+llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *self,
+                                                   llvm::Value *argv, llvm::Value *argc, string_view name) {
+    auto &builder = builderCast(build);
+    auto str = name;
+    auto icValidatorFunc = cs.module->getFunction("sorbet_isInlineCacheValid");
+    auto inlineCacheType =
+        (llvm::StructType *)(((llvm::PointerType *)((icValidatorFunc->arg_begin() + 1)->getType()))->getElementType());
+    ENFORCE(inlineCacheType != nullptr);
+    auto methodEntryType = (llvm::StructType *)(inlineCacheType->elements()[0]);
+    auto slowFunctionName = "call_via_vm_" + (string)str;
+    auto function = cs.module->getFunction(slowFunctionName);
+    if (function == nullptr) {
+        llvm::Type *args[] = {
+            llvm::Type::getInt32Ty(cs),     // arg count
+            llvm::Type::getInt64PtrTy(cs),  // argArray
+            llvm::Type::getInt64Ty(cs),     // self
+            inlineCacheType->getPointerTo() // inlineCache
+        };
+        auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
+
+        function = llvm::Function::Create(ft, llvm::Function::LinkOnceAnyLinkage, slowFunctionName, *cs.module);
+        function->addFnAttr(llvm::Attribute::AttrKind::NoInline); // we'd like to see it in backtraces
+        auto cs1 = cs;
+        llvm::IRBuilder<> funBuilder(cs1);
+        auto early = llvm::BasicBlock::Create(cs, "functionEntryInitializers", function);
+        auto checkICBB = llvm::BasicBlock::Create(cs, "checkIC", function);
+        auto updateICBB = llvm::BasicBlock::Create(cs, "updateIC", function);
+        auto bb = llvm::BasicBlock::Create(cs, "call", function);
+        cs1.functionEntryInitializers = early;
+
+        auto recv = function->arg_begin() + 2;
+        auto cache = function->arg_begin() + 3;
+        funBuilder.SetInsertPoint(checkICBB);
+        auto rawId = Payload::idIntern(cs1, funBuilder, str);
+        auto isICGood = funBuilder.CreateCall(cs.module->getFunction("sorbet_isInlineCacheValid"), {recv, cache});
+        funBuilder.CreateCondBr(Payload::setExpectedBool(cs, funBuilder, isICGood, true), bb, updateICBB);
+
+        funBuilder.SetInsertPoint(updateICBB);
+        funBuilder.CreateCall(cs.module->getFunction("sorbet_inlineCacheInvalidated"), {recv, cache, rawId});
+        funBuilder.CreateBr(bb);
+
+        funBuilder.SetInsertPoint(bb);
+        auto realCall = funBuilder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
+                                              {recv, rawId, function->arg_begin(), function->arg_begin() + 1, cache},
+                                              "rawSendResult");
+        funBuilder.CreateRet(realCall);
+        funBuilder.SetInsertPoint(early);
+        funBuilder.CreateBr(checkICBB);
+    }
+    auto intt = llvm::Type::getInt64Ty(cs);
+    auto nullv = llvm::ConstantPointerNull::get(methodEntryType->getPointerTo());
+    auto cache =
+        new llvm::GlobalVariable(*cs.module, inlineCacheType, false, llvm::GlobalVariable::InternalLinkage,
+                                 llvm::ConstantStruct::get(inlineCacheType, nullv, llvm::ConstantInt::get(intt, 0),
+                                                           llvm::ConstantInt::get(intt, 0)),
+                                 llvm::Twine("ic_") + slowFunctionName);
+
+    return builder.CreateCall(function, {argc, argv, self, cache}, "rawSendResult");
+}
+
 } // namespace sorbet::compiler

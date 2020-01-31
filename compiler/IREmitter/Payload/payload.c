@@ -314,12 +314,6 @@ void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __a
     rb_define_const(owner, name, value);
 }
 
-RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
-
-long sorbet_getConstantEpoch() {
-    return ruby_vm_global_constant_state;
-}
-
 VALUE sorbet_getMethodBlockAsProc() {
     if (rb_block_given_p()) {
         return rb_block_proc();
@@ -456,11 +450,6 @@ VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
     // TODO: one day we should use rb_yield_values, as it saves an allocation, but
     // for now, do the easy thing
     return rb_yield_splat(array);
-}
-
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv)
-    __attribute__((always_inline)) {
-    return rb_funcallv(recv, func, argc, argv);
 }
 
 VALUE sorbet_callSuper(int argc, __attribute__((noescape)) const VALUE *const restrict argv)
@@ -1121,6 +1110,57 @@ VALUE sorbet_int_bool_nand(VALUE recv, int argc, const VALUE *const restrict arg
         return Qfalse;
     }
     return Qtrue;
+}
+
+// ****
+// ****                       Used to implement inline caches
+// ****
+
+RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
+RUBY_EXTERN rb_serial_t ruby_vm_global_method_state;
+
+rb_serial_t sorbet_getConstantEpoch() {
+    return ruby_vm_global_constant_state;
+}
+
+rb_serial_t sorbet_getMethodEpoch() {
+    return ruby_vm_global_method_state;
+}
+
+rb_serial_t sorbet_getClassSerial(VALUE obj) {
+    return RCLASS_SERIAL(rb_class_of(obj));
+}
+
+// compiler is closely aware of layout of this struct
+struct FunctionInlineCache {
+    const rb_callable_method_entry_t *me;
+
+    // used to compare for validity:
+    // https://github.com/ruby/ruby/blob/97d75639a9970ce3868ba91a57be1856a3957711/vm_method.c#L822-L823
+    rb_serial_t method_state;
+    rb_serial_t class_serial;
+};
+
+_Bool sorbet_isInlineCacheValid(VALUE recv, struct FunctionInlineCache *cache) {
+    return sorbet_getMethodEpoch() == cache->method_state && sorbet_getClassSerial(recv) == cache->class_serial;
+}
+
+void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
+    // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
+    const rb_callable_method_entry_t *me;
+    me = rb_callable_method_entry(recv, mid);
+    if (!me) {
+        // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L304-L306
+        rb_raise(rb_eRuntimeError, "unimplmented call with a missing method");
+    }
+    cache->me = me;
+    cache->method_state = sorbet_getMethodEpoch();
+    cache->class_serial = sorbet_getClassSerial(recv);
+}
+
+VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
+                      struct FunctionInlineCache *cache) __attribute__((always_inline)) {
+    return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
 }
 
 // ****
