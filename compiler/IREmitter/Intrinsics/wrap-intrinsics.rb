@@ -4,7 +4,7 @@ require 'set'
 require 'optparse'
 
 module Intrinsics
-  Method = Struct.new(:exported, :file, :klass, :rb_name, :c_name, :argc)
+  Method = Struct.new(:exported, :will_be_exported, :file, :klass, :rb_name, :c_name, :argc)
 
   Edit = Struct.new(:orig, :edited, :line)
 
@@ -181,7 +181,7 @@ module Intrinsics
               c_name = m[3].lstrip.rstrip
               argc = m[4].chomp.to_i
 
-              methods << Method.new(exported.include?(c_name), file, klass, rb_name, c_name, argc)
+              methods << Method.new(exported.include?(c_name), false, file, klass, rb_name, c_name, argc)
             end
           end
         end
@@ -262,6 +262,7 @@ module Intrinsics
           edit = generate_edit(previous, line, idx+1, method)
           if !edit.nil?
             edits << edit
+            method.will_be_exported = true
             break
           end
         end
@@ -292,7 +293,7 @@ module Intrinsics
 
 
     def self.should_wrap?(method)
-      method.exported && SORBET_CLASSES.include?(method.klass)
+      (method.exported || method.will_be_exported) && SORBET_CLASSES.include?(method.klass)
     end
 
     def self.write_header(header, grouped_methods)
