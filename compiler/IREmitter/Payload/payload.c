@@ -1148,7 +1148,7 @@ _Bool sorbet_isInlineCacheValid(VALUE recv, struct FunctionInlineCache *cache) {
 void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
     // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
     const rb_callable_method_entry_t *me;
-    me = rb_callable_method_entry(recv, mid);
+    me = rb_callable_method_entry(CLASS_OF(recv), mid);
     if (!me) {
         // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L304-L306
         rb_raise(rb_eRuntimeError, "unimplmented call with a missing method");
