@@ -12,7 +12,7 @@ module Opus; end
 module Opus::Utils
   module DeepFreeze
     # Freeze a given object, and return all sub-items that also need freezing
-    sig {params(todo: T::Array[T.untyped], obj: T.untyped).void.checked(:tests)}
+    sig(:final) {params(todo: T::Array[T.untyped], obj: T.untyped).void.checked(:tests)}
     def self.freeze_one(todo, obj)
       case obj
       when Module
@@ -42,7 +42,7 @@ module Opus::Utils
       end
     end
 
-    sig do
+    sig(:final) do
       type_parameters(:T)
       .params(obj: T.type_parameter(:T))
       .returns(T.type_parameter(:T))
@@ -80,7 +80,7 @@ module Opus::Utils
     end
 
     # Freeze the given object, and everything it contains. Returns the original object.
-    sig do
+    sig(:final) do
       type_parameters(:T)
       .params(obj: T.type_parameter(:T))
       .returns(T.type_parameter(:T))
