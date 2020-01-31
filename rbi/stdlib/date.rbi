@@ -945,7 +945,7 @@ class Date
   # Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   # Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.self_type)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.parse(*arg0); end
 
   # Creates a date object denoting the given chronological Julian day number.
@@ -958,7 +958,7 @@ class Date
   #
   # See also
   # [`::new`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-new).
-  sig {params(arg0: T.untyped).returns(T.self_type)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.jd(*arg0); end
 
   # Just returns true. It's nonsense, but is for symmetry.
