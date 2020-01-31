@@ -309,8 +309,10 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::T_Private_Types_Void());
-    id = enterStaticFieldSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
     ENFORCE(id == Symbols::T_Private_Types_Void_VOID());
+    id = id.data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::T_Private_Types_Void_VOIDSingleton());
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
