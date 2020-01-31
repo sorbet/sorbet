@@ -41,3 +41,9 @@ demo/mkmf.log
 
 # Used by tools/scripts/run_benchmarks.sh
 /tmp
+
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.c
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.formatted.c
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.h
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
+compiler/IREmitter/Intrinsics/export-intrinsics.patch

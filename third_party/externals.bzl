@@ -43,4 +43,6 @@ def sorbet_llvm_externals():
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
         strip_prefix = "ruby-2.6.5",
         build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD",
+        patches = ["@com_stripe_sorbet_llvm//third_party/ruby:export-intrinsics.patch"],
+        patch_tool = "patch",
     )

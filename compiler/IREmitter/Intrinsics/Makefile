@@ -1,19 +1,25 @@
 
-all: intrinsic-report.md ../WrappedIntrinsics.h ../Payload/PayloadIntrinsics.c
+all: intrinsics-report.md ../WrappedIntrinsics.h ../Payload/PayloadIntrinsics.c ../../../third_party/ruby/export-intrinsics.patch
 
-../WrappedIntrinsics.h: WrappedIntrinsics.h-formatted
+../WrappedIntrinsics.h: WrappedIntrinsics.formatted.h
 	cp $< $@
 
-../Payload/PayloadIntrinsics.c: PayloadIntrinsics.c-formatted
+../Payload/PayloadIntrinsics.c: PayloadIntrinsics.formatted.c
+	cp $< $@
+
+../../../third_party/ruby/export-intrinsics.patch: export-intrinsics.patch
 	cp $< $@
 
 %-formatted: %
 	bazel run @com_stripe_ruby_typer//tools:clang-format "$(PWD)/$<" > "$(PWD)/$@"
 
-intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c export-intrinsics.patch: wrap-intrinsics.rb
+../../../bazel-bin/external/sorbet_ruby/toolchain/bin/ruby:
+	bazel build @sorbet_ruby//:ruby -c opt
+
+intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c export-intrinsics.patch: wrap-intrinsics.rb ../../../bazel-bin/external/sorbet_ruby/toolchain/bin/ruby
 	./wrap-intrinsics.rb
 
 clean:
-	$(RM) WrappedIntrinsics.h WrappedIntrinsics.h-formatted
-	$(RM) PayloadIntrinsics.c PayloadIntrinsics.c-formatted
+	$(RM) WrappedIntrinsics.h WrappedIntrinsics.formatted.h
+	$(RM) PayloadIntrinsics.c PayloadIntrinsics.formatted.c
 	$(RM) export-intrinsics.patch
