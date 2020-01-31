@@ -165,6 +165,32 @@
 # Time](http://en.wikipedia.org/wiki/Standard_time#Great_Britain) and eventually
 # timezones.
 class DateTime < Date
+
+  # Creates a DateTime object denoting the given calendar date.
+  #
+  # ```ruby
+  # DateTime.new(2001,2,3)    #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
+  # DateTime.new(2001,2,3,4,5,6,'+7')
+  #                          # #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
+  # DateTime.new(2001,-11,-26,-20,-55,-54,'+7')
+  #                          # #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
+  # ```
+  sig do
+    params(
+      year: Integer,
+      month: Integer,
+      mday: Integer,
+      hour: Integer,
+      minute: Integer,
+      second: Integer,
+      offset: Integer,
+      start: Integer
+    )
+    .void
+  end
+  def initialize(year=-4712, month=1, mday=1, hour=0, minute=0, second=0, offset=0, start=Date::ITALY); end
+
+
   # Returns the minute (0-59).
   #
   # ```ruby
