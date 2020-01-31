@@ -183,8 +183,8 @@ class DateTime < Date
       hour: Integer,
       minute: Integer,
       second: Integer,
-      offset: Integer,
-      start: Integer
+      offset: T.any(Integer, String),
+      start: T.any(Integer, Float)
     )
     .void
   end
