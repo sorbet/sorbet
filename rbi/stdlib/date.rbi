@@ -193,7 +193,7 @@ class Date
       year: Integer,
       month: Integer,
       mday: Integer,
-      start: Integer,
+      start: T.any(Integer, Float),
     )
     .void
   end
@@ -252,7 +252,7 @@ class Date
   #
   # Date.new(2001,3,31) << 1 << -1   #=> #<Date: 2001-03-28 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def <<(arg0); end
 
   # Returns a date object pointing `n` months after self. The argument `n`
@@ -279,7 +279,7 @@ class Date
   #
   # Date.new(2001,1,31) >> 1 >> -1   #=> #<Date: 2001-01-28 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def >>(arg0); end
 
   # Returns true if they are the same day.
@@ -340,7 +340,7 @@ class Date
   # DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                           #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def +(arg0); end
 
   # Returns the value as a string for inspection.
@@ -370,6 +370,7 @@ class Date
   # ```
   sig {params(arg0: Numeric).returns(T.self_type)}
   sig {params(arg0: Date).returns(Rational)}
+  sig {params(arg0: DateTime).returns(Rational)}
   def -(arg0); end
 
   # Returns the day of the month (1-31).
@@ -440,7 +441,7 @@ class Date
   def pretty_date(); end
 
   # Returns a date object denoting the following day.
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def succ(); end
 
   sig {returns(T.untyped)}
@@ -827,26 +828,26 @@ class Date
 
   # This method is equivalent to
   # [`new_start`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-new_start)(Date::ITALY).
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def italy(); end
 
   # This method is equivalent to
   # [`new_start`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-new_start)(Date::ENGLAND).
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def england(); end
 
   # This method is equivalent to
   # [`new_start`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-new_start)(Date::JULIAN).
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def julian(); end
 
   # This method is equivalent to
   # [`new_start`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-new_start)(Date::GREGORIAN).
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def gregorian(); end
 
   # This method is equivalent to d + n.
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def next_day(*arg0); end
 
   # Returns the Lilian day number. This is a whole number, which is adjusted by
@@ -863,15 +864,15 @@ class Date
   # See
   # [`Date#>>`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-3E-3E)
   # for examples.
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def next_month(*arg0); end
 
   # This method is equivalent to d - n.
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def prev_day(*arg0); end
 
   # Returns a date object denoting the following day.
-  sig {returns(Date)}
+  sig {returns(T.self_type)}
   def next(); end
 
   # This method is equivalent to d << n.
@@ -879,7 +880,7 @@ class Date
   # See
   # [`Date#<<`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-3C-3C)
   # for examples.
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def prev_month(*arg0); end
 
   # This method is equivalent to d >> (n \* 12).
@@ -892,7 +893,7 @@ class Date
   #
   # See also
   # [`Date#>>`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-3E-3E).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def next_year(*arg0); end
 
   # This method is equivalent to d << (n \* 12).
@@ -905,7 +906,7 @@ class Date
   #
   # See also
   # [`Date#<<`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-3C-3C).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.self_type)}
   def prev_year(*arg0); end
 
   # Returns a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object
@@ -944,7 +945,7 @@ class Date
   # Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   # Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.parse(*arg0); end
 
   # Creates a date object denoting the given chronological Julian day number.
@@ -957,7 +958,7 @@ class Date
   #
   # See also
   # [`::new`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-new).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.jd(*arg0); end
 
   # Just returns true. It's nonsense, but is for symmetry.
@@ -1066,7 +1067,7 @@ class Date
   #
   # See also [`::jd`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-jd)
   # and [`::new`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-new).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.ordinal(*arg0); end
 
   # Creates a date object denoting the given calendar date.
@@ -1096,7 +1097,7 @@ class Date
   #
   # See also
   # [`::jd`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-jd).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.civil(*arg0); end
 
   # Creates a date object denoting the given week date.
@@ -1113,7 +1114,7 @@ class Date
   #
   # See also [`::jd`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-jd)
   # and [`::new`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-c-new).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.commercial(*arg0); end
 
   # Parses the given representation of date and time with the given template,
@@ -1146,7 +1147,7 @@ class Date
   #
   # See also strptime(3) and
   # [`strftime`](https://docs.ruby-lang.org/en/2.6.0/Date.html#method-i-strftime).
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.strptime(*arg0); end
 
   # Parses the given representation of date and time, and returns a hash of
@@ -1179,7 +1180,7 @@ class Date
   # Date.iso8601('20010203')          #=> #<Date: 2001-02-03 ...>
   # Date.iso8601('2001-W05-6')        #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.iso8601(*arg0); end
 
   # Returns a hash of parsed elements.
@@ -1192,7 +1193,7 @@ class Date
   # ```ruby
   # Date.rfc3339('2001-02-03T04:05:06+07:00') #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.rfc3339(*arg0); end
 
   # Returns a hash of parsed elements.
@@ -1206,7 +1207,7 @@ class Date
   # ```ruby
   # Date.xmlschema('2001-02-03')      #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.xmlschema(*arg0); end
 
   # Returns a hash of parsed elements.
@@ -1224,7 +1225,7 @@ class Date
   # Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                           #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.rfc2822(*arg0); end
 
   # Creates a new [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
@@ -1234,7 +1235,7 @@ class Date
   # Date.rfc2822('Sat, 3 Feb 2001 00:00:00 +0000')
   #                                           #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.rfc822(*arg0); end
 
   # Returns a hash of parsed elements.
@@ -1248,7 +1249,7 @@ class Date
   # Date.httpdate('Sat, 03 Feb 2001 00:00:00 GMT')
   #                                           #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.httpdate(*arg0); end
 
   # Returns a hash of parsed elements.
@@ -1267,7 +1268,7 @@ class Date
   # ```ruby
   # Date.jisx0301('13.02.03')                 #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
+  sig {params(arg0: T.untyped).returns(T.attached_class)}
   def self.jisx0301(*arg0); end
 end
 
