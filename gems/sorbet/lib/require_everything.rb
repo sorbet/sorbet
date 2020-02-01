@@ -59,6 +59,9 @@ class Sorbet::Private::RequireEverything
       # generate it without using the whole rails ecosystem.
       next if /db\/schema.rb$/.match(abs_path)
 
+      # Skip **/extconf.rb, as running it will emit build configuration artifacts
+      next if /\/extconf.rb$/.match(abs_path)
+
       begin
         my_require(abs_path, i+1, abs_paths.size)
       rescue LoadError, NoMethodError, SyntaxError
