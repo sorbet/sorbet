@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -33,16 +33,16 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
-        :"initialize"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"initialize")
         @@class_var = begin
           ::Sorbet::Private::Static.keep_for_typechecking(::String)
           T.let("hi", String)
         end
-        :"hi"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"hi")
         <emptyTree>
       end
     end
@@ -68,7 +68,7 @@ begin
     end
   end
   module ::Mixin<<C Mixin>> < ()
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
@@ -82,7 +82,7 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
@@ -90,7 +90,7 @@ begin
         @@class_var
         @@mixin_cvar
         @@undefined_cvar
-        :"child_method"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"child_method")
         <emptyTree>
       end
     end
@@ -105,7 +105,7 @@ begin
     end
   end
   class ::Child1<<C Child1>> < (::Alias)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       @@class_var

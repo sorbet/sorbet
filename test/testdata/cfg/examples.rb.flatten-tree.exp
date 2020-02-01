@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -12,18 +12,18 @@ begin
     end
   end
   class ::Examples<<C Examples>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
-        :"i_like_ifs"
-        :"i_like_exps"
-        :"return_in_one_branch1"
-        :"return_in_one_branch2"
-        :"variables"
-        :"variables_and_loop"
-        :"variables_loop_if"
-        :"take_arguments"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"i_like_ifs")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"i_like_exps")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"return_in_one_branch1")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"return_in_one_branch2")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"variables")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"variables_and_loop")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"variables_loop_if")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"take_arguments")
         <emptyTree>
       end
     end

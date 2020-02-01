@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -36,35 +36,35 @@ begin
     end
   end
   module ::Mixin1<<C Mixin1>> < ()
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Mixin2<<C Mixin2>> < ()
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>, ::Mixin1)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       <self>.include(::Mixin1)
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin2)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       <self>.include(::Mixin2)
     end
   end
   class ::MultipleInclude<<C MultipleInclude>> < (::<todo sym>, ::Mixin2, ::Mixin1)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       <self>.include(::Mixin1, ::Mixin2)

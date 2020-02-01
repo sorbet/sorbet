@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -27,16 +27,16 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
-        :"foo"
-        :"sfoo"
-        :"food"
-        :"foos"
-        :"sfood"
-        :"sfoos"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"foo")
+        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"sfoo")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"food")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"foos")
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"sfood")
+        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"sfoos")
         <emptyTree>
       end
     end
