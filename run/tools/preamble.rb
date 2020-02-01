@@ -72,5 +72,5 @@ module T::Private::Abstract; end
 module T::Private::Types; end
 class T::Types::Base; end
 class T::Private::Types::Void < T::Types::Base
-  VOID = Module.new.freeze
+  module VOID; freeze; end
 end
