@@ -27,6 +27,7 @@ class Sorbet::Private::TodoRBI
       err: '/dev/null',
     ) do |io|
       missing_constants = io.read.split("\n")
+      missing_constants.uniq!
 
       output = String.new
       output << HEADER
