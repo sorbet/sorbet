@@ -137,8 +137,6 @@ end
 module T::Props::Serializable
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
-  def required_prop_missing_from_deserialize(prop); end
-  def required_prop_missing_from_deserialize?(prop); end
   def serialize(strict = nil); end
   def with(changed_props); end
   def with_existing_hash(changed_props, existing_hash:); end
