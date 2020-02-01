@@ -1,4 +1,4 @@
-SORBET_VERSION = "b4100a56075d8efee3823f508ea200b7683fda6b"
+SORBET_VERSION = "2a9007becff3794d2d379530d8fedef48cf31038"
 
 # git log -n 1 --pretty=format:"%cd" --date=raw origin/master
-SORBET_SHALLOW_SINCE = "1580507099 -0800"
+SORBET_SHALLOW_SINCE = "1580516572 -0800"
