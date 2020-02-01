@@ -1551,6 +1551,13 @@ private:
                     lastSigs.emplace_back(send);
                     return;
                 }
+
+                if (send->args.size() == 1 &&
+                    (send->fun == core::Names::public_() || send->fun == core::Names::private_() ||
+                     send->fun == core::Names::privateClassMethod() || send->fun == core::Names::protected_())) {
+                    processStatement(ctx, send->args[0], lastSigs);
+                    return;
+                }
             },
 
             [&](ast::MethodDef *mdef) {
