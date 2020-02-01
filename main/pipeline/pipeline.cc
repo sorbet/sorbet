@@ -751,7 +751,6 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     }
     return what;
 }
-// UnorderedSet<string> unresolvedConstants;
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
