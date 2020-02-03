@@ -218,7 +218,7 @@ module Sorbet::Private
           location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
           location&.match(/^.*\/(j?ruby)-([\d.]+)\//) || # jvm ruby stdlib
           location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
-          location&.match(/^.*\/gems\/(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/gems\/([^\/]+)-([^-\/]+)\//i) # gem
+          location&.match(/^.*\/gems\/(?:(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/)?gems\/([^\/]+)-([^-\/]+)\//i) # gem
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {
