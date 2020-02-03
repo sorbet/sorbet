@@ -79,6 +79,7 @@ class A
   sig {returns(Integer)}
   attr_accessor :accessor
   
+  sig {void}
   def initialize
     reader = T.let(0, Integer)
     writer = T.let(0, Integer)
