@@ -1,9 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
-# because putting the `new_git_repository` calls here instead of there
-# works around https://github.com/bazelbuild/bazel/issues/1465 when
-# passing `build_file` to the `new_git_repository`.
 def register_sorbet_dependencies():
     http_archive(
         name = "com_google_googletest",
