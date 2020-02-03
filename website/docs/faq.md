@@ -78,7 +78,7 @@ class A
   # (Sorbet will use that to write the sig for the writer portion.)
   sig {returns(Integer)}
   attr_accessor :accessor
-  
+
   sig {void}
   def initialize
     reader = T.let(0, Integer)
