@@ -538,6 +538,24 @@ class Sorbet::Private::GemLoader
       my_require 'simplecov'
       my_require 'codecov'
     end,
+    'sparql' => proc do
+      my_require 'sparql'
+      [
+        SPARQL::Algebra,
+        SPARQL::Algebra::Aggregate,
+        SPARQL::Algebra::Evaluatable,
+        SPARQL::Algebra::Expression,
+        SPARQL::Algebra::Operator,
+        SPARQL::Algebra::Query,
+        SPARQL::Algebra::Update,
+        SPARQL::Client,
+        SPARQL::Grammar,
+        SPARQL::Grammar::Parser,
+        SPARQL::Grammar::Terminals,
+        SPARQL::Results,
+        SPARQL::VERSION,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
