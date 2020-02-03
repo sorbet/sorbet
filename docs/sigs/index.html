@@ -86,6 +86,7 @@ checking in our code. In this document, we’ll answer:</p>
 <h2><a class="anchor" aria-hidden="true" id="sig-annotating-method-signatures"></a><a href="#sig-annotating-method-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sig</code>: Annotating method signatures</h2>
 <p>The basic syntax looks like this:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> SomeType, <span class="hljs-symbol">y:</span> SomeOtherType).returns(MyReturnType)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x, y)</span></span>; ...; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>It’s also possible to break a <code>sig</code> up across multiple lines. Here’s the same
 signature as above, rearranged:</p>
@@ -96,15 +97,10 @@ signature as above, rearranged:</p>
   )
   .returns(MyReturnType)
 <span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x, y)</span></span>; ...; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In every signature, there is an optional <code>params</code> section, and a required
-<code>returns</code> section.</p>
-<h2><a class="anchor" aria-hidden="true" id="params-annotating-parameter-types"></a><a href="#params-annotating-parameter-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>params</code>: Annotating parameter types</h2>
-<p>In the <code>sig</code> we refer to all parameters <strong>by their name</strong>, regardless of whether
-it’s a positional, keyword, block, or rest parameter. Once we’ve annotated the
-method, Sorbet will automatically infer the types of any local variables we use
-in the method body.</p>
-<p>Here’s a longer, complete example:</p>
+<code>returns</code> section. Here’s a complete example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
@@ -112,40 +108,98 @@ in the method body.</p>
   <span class="hljs-comment"># Bring the `sig` method into scope</span>
   extend T::Sig
 
-  sig <span class="hljs-keyword">do</span>
-    params(
-      <span class="hljs-symbol">x:</span> String,      <span class="hljs-comment"># ← x is a positional param</span>
-      <span class="hljs-symbol">y:</span> String,      <span class="hljs-comment"># ← y is a keyword param</span>
-      <span class="hljs-symbol">rest:</span> String,   <span class="hljs-comment"># ← For rest args, write the type of the element</span>
-      <span class="hljs-symbol">blk:</span> T.proc.returns(NilClass),
-    )
-    .returns(Integer)
-  <span class="hljs-keyword">end</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(x, <span class="hljs-symbol">y:</span>, *rest, &amp;blk)</span></span>
-    <span class="hljs-comment"># Sorbet infers (!) the type of a:</span>
-    a = x.length + y.length
-
-    <span class="hljs-comment"># We can use `T.reveal_type` to ask Sorbet for the type of an expression:</span>
-    T.reveal_type(a) <span class="hljs-comment"># =&gt; Revealed type: `Integer`</span>
-
-    <span class="hljs-comment"># Rest args become an Array in the method body:</span>
-    T.reveal_type(rest) <span class="hljs-comment"># =&gt; Revealed type: `T::Array[String]`</span>
+  sig {params(<span class="hljs-symbol">x:</span> String).returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(x)</span></span>
+    x.length
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Main%0A%20%20%23%20Bring%20the%20%60sig%60%20method%20into%20scope%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20String).returns(Integer)%7D%0A%20%20def%20self.main(x)%0A%20%20%20%20x.length%0A%20%20end%0Aend">→
+View on sorbet.run</a></p>
+<h2><a class="anchor" aria-hidden="true" id="params-annotating-parameter-types"></a><a href="#params-annotating-parameter-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>params</code>: Annotating parameter types</h2>
+<p>In the <code>sig</code> we refer to all parameters <strong>by their name</strong>, regardless of whether
+it’s a positional, keyword, block, or rest parameter. Once we’ve annotated the
+method, Sorbet will automatically infer the types of any local variables we use
+in the method body.</p>
+<h3><a class="anchor" aria-hidden="true" id="positional-parameters"></a><a href="#positional-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Positional parameters</h3>
+<p>Here’s the syntax for required and optional <strong>positional</strong> parameters:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">x:</span> String, <span class="hljs-comment"># required positional param</span>
+    <span class="hljs-symbol">y:</span> String  <span class="hljs-comment"># optional positional param</span>
+  )
+  .returns(String)
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(x, y = <span class="hljs-string">'foo'</span>)</span></span>
+  x + y
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="keyword-parameters-kwargs"></a><a href="#keyword-parameters-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Keyword parameters (kwargs)</h3>
+<p>Here’s the syntax for required and optional <strong>keyword</strong> parameters:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">x:</span> String,            <span class="hljs-comment"># required keyword param</span>
+    <span class="hljs-symbol">y:</span> T.nilable(String)  <span class="hljs-comment"># optional keyword param</span>
+  )
+  .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-symbol">x:</span>, <span class="hljs-symbol">y:</span> <span class="hljs-literal">nil</span>)</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="rest-parameters"></a><a href="#rest-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Rest parameters</h3>
+<p>Sometimes called splats. There are two kinds of rest parameters: “all the
+arguments” (<code>*args</code>) and “all the keyword arguments” (<code>**kwargs</code>):</p>
+<p>Types for rest parameters frequently trip people up. There’s a difference
+between what’s written in the sig annotation and what type that variable has in
+the method body:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-comment"># Integer describes a single element of args</span>
+    <span class="hljs-symbol">args:</span> Integer, <span class="hljs-comment"># rest positional params</span>
+    <span class="hljs-comment"># Float describes a single value of args</span>
+    <span class="hljs-symbol">kwargs:</span> Float  <span class="hljs-comment"># rest keyword params</span>
+  )
+  .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(*args, **kwargs)</span></span>
+  <span class="hljs-comment"># Positional rest args become an Array in the method body:</span>
+  T.reveal_type(rest) <span class="hljs-comment"># =&gt; Revealed type: `T::Array[Integer]`</span>
+
+  <span class="hljs-comment"># Keyword rest args become a Hash in the method body:</span>
+  T.reveal_type(kwargs) <span class="hljs-comment"># =&gt; Revealed: type `T::Hash[Symbol, Float]`</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Notice that in the sig, <code>args</code> is declared as <code>Integer</code>, but in the method body
+Sorbet knows that <code>args</code> is actually a <code>T::Array[Integer]</code> because it can see
+from the method definition that <code>args</code> is a rest parameter.</p>
+<p>It’s similar for <code>kwargs</code>: it’s declared as <code>Float</code>, but in the method body
+Sorbet knows that it’ll be a Hash from <code>Symbol</code> keys to <code>Float</code> values.</p>
+<blockquote>
+<p><strong>Note</strong>: The choice to use this syntax for annotating rest parameters in
+Sorbet was informed by precedent in other languages (most notably Scala).</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="block-parameters"></a><a href="#block-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Block parameters</h3>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">blk:</span> T.proc.returns(NilClass)
+  )
+  .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(&amp;blk)</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>See <a href="/docs/procs">Blocks, Procs and Lambda Types</a> for more information on how to
+write type annotations for a method’s block parameter.</p>
+<h3><a class="anchor" aria-hidden="true" id="no-parameters"></a><a href="#no-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>No parameters</h3>
 <p>When a method has no parameters, omit the <code>params</code> from the <code>sig</code>:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-<span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
-  extend T::Sig
-
-  sig {returns(Integer)}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span></span>
-    <span class="hljs-number">42</span>
-  <span class="hljs-keyword">end</span>
+<pre><code class="hljs css language-ruby">sig {returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span></span>
+  <span class="hljs-number">42</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>See the next section for more information.</p>
 <h2><a class="anchor" aria-hidden="true" id="returns-void-annotating-return-types"></a><a href="#returns-void-annotating-return-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>returns</code> &amp; <code>void</code>: Annotating return types</h2>
 <p>Unlike <code>params</code>, we <em>have</em> to tell Sorbet what our method returns, even if it
 has “no useful return.” For example, consider this method:</p>
@@ -248,7 +302,7 @@ requires that type annotations already be syntactically valid Ruby (having
 Sorbet being a gradual type system). Since types must already be valid Ruby,
 it makes sense to have <code>sig</code>s be valid Ruby too.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/error-reference"><span class="arrow-prev">← </span><span>Error Reference</span></a><a class="docs-next button" href="/docs/type-annotations"><span>Type Annotations</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#sig-annotating-method-signatures"><code>sig</code>: Annotating method signatures</a></li><li><a href="#params-annotating-parameter-types"><code>params</code>: Annotating parameter types</a></li><li><a href="#returns-void-annotating-return-types"><code>returns</code> &amp; <code>void</code>: Annotating return types</a></li><li><a href="#why-do-we-need-signatures">Why do we need signatures?</a></li><li><a href="#why-are-signatures-ruby-syntax">Why are signatures Ruby syntax?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/error-reference"><span class="arrow-prev">← </span><span>Error Reference</span></a><a class="docs-next button" href="/docs/type-annotations"><span>Type Annotations</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#sig-annotating-method-signatures"><code>sig</code>: Annotating method signatures</a></li><li><a href="#params-annotating-parameter-types"><code>params</code>: Annotating parameter types</a><ul class="toc-headings"><li><a href="#positional-parameters">Positional parameters</a></li><li><a href="#keyword-parameters-kwargs">Keyword parameters (kwargs)</a></li><li><a href="#rest-parameters">Rest parameters</a></li><li><a href="#block-parameters">Block parameters</a></li><li><a href="#no-parameters">No parameters</a></li></ul></li><li><a href="#returns-void-annotating-return-types"><code>returns</code> &amp; <code>void</code>: Annotating return types</a></li><li><a href="#why-do-we-need-signatures">Why do we need signatures?</a></li><li><a href="#why-are-signatures-ruby-syntax">Why are signatures Ruby syntax?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
