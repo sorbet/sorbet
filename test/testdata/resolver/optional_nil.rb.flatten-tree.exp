@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -12,7 +12,7 @@ begin
     end
   end
   class ::Test<<C Test>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
       begin
@@ -20,35 +20,35 @@ begin
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        :"foo"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"foo")
         <self>.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        :"bar"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"bar")
         <self>.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        :"qux"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"qux")
         <self>.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        :"baz"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"baz")
         <self>.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        :"foo<defaultArg>1"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"foo<defaultArg>1")
         <self>.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        :"bar<defaultArg>1"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"bar<defaultArg>1")
         <self>.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        :"qux<defaultArg>1"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"qux<defaultArg>1")
         <self>.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        :"baz<defaultArg>1"
+        ::Sorbet::Private::Static.keep_method_def(<self>, :"baz<defaultArg>1")
         <emptyTree>
       end
     end

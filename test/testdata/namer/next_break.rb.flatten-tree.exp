@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -12,10 +12,10 @@ begin
     end
   end
   class ::Test<<C Test>> < (::<todo sym>)
-    :"<static-init>"
+    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
 
     def self.<static-init>(<blk>)
-      :"test_next_break"
+      ::Sorbet::Private::Static.keep_method_def(<self>, :"test_next_break")
     end
 
     def test_next_break(<blk>)
