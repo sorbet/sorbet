@@ -45,14 +45,7 @@ end
 In every signature, there is an optional `params` section, and a required
 `returns` section.
 
-## `params`: Annotating parameter types
-
-In the `sig` we refer to all parameters **by their name**, regardless of whether
-it's a positional, keyword, block, or rest parameter. Once we've annotated the
-method, Sorbet will automatically infer the types of any local variables we use
-in the method body.
-
-Here's a longer, complete example:
+### Example of Complete File
 
 ```ruby
 # typed: true
@@ -62,41 +55,114 @@ class Main
   # Bring the `sig` method into scope
   extend T::Sig
 
-  sig do
-    params(
-      x: String,      # ← x is a positional param
-      y: String,      # ← y is a keyword param
-      rest: String,   # ← For rest args, write the type of the element
-      blk: T.proc.returns(NilClass),
-    )
-    .returns(Integer)
-  end
-  def self.main(x, y:, *rest, &blk)
-    # Sorbet infers (!) the type of a:
-    a = x.length + y.length
-
-    # We can use `T.reveal_type` to ask Sorbet for the type of an expression:
-    T.reveal_type(a) # => Revealed type: `Integer`
-
-    # Rest args become an Array in the method body:
-    T.reveal_type(rest) # => Revealed type: `T::Array[String]`
+  sig {params(x: String).returns(Integer)}
+  def self.main(x)
+    x.length
   end
 end
 ```
 
+## `params`: Annotating parameter types
+
+In the `sig` we refer to all parameters (aka. arguments) **by their name**,
+regardless of whether it's a positional, keyword, block, or rest parameter. Once
+we've annotated the method, Sorbet will automatically infer the types of any
+local variables we use in the method body.
+
+### Positional Parameters
+
+```ruby
+sig do
+  params(
+    x: String, # required positional param
+    y: String  # optional positional param
+  )
+  .returns(String)
+end
+def self.main(x, y = 'foo')
+  x + y
+end
+```
+
+### Keyword Parameters (kwargs)
+
+```ruby
+sig do
+  params(
+    x: String,            # required keyword param
+    y: T.nilable(String)  # optional keyword param
+  )
+  .void
+end
+def self.main(x:, y: nil)
+  # ...
+end
+```
+
+### Rest Parameters
+
+Sometimes called "splat" arguments.
+
+```ruby
+sig do
+  params(
+    # Rest params will be arrays. Write the type of their elements.
+    # E.g. for arrays of String, we write String.
+    x: String, # rest positional params
+    y: String  # rest keyword params
+  )
+  .returns(String)
+end
+def self.main(*x, **y)
+  # Rest args become an Array in the method body:
+  T.reveal_type(x) # => Revealed type: `T::Array[String]`
+
+  x.map(&:to_s).concat(y.values).join(',')
+end
+main(91, 92, a: 'foo', b: 'bar') # => "91,92,foo,bar"
+```
+
+### Block Parameter
+
+```ruby
+sig do
+  params(
+    blk: T.proc.returns(NilClass)
+  )
+  .void
+end
+def self.main(&blk)
+  # ...
+end
+```
+
+### No Parameters
+
 When a method has no parameters, omit the `params` from the `sig`:
 
 ```ruby
-# typed: true
-require 'sorbet-runtime'
+sig {returns(Integer)}
+def self.main
+  42
+end
+```
 
-class Main
-  extend T::Sig
+### Local Variable Types can be inferred from Parameter Types
 
-  sig {returns(Integer)}
-  def self.main
-    42
-  end
+```ruby
+sig do
+  params(
+    x: String,
+    y: String
+  )
+  .returns(Integer)
+end
+def self.main(x, y)
+  # Sorbet infers (!) the type of a:
+  a = x.length + y.length
+
+  # We can use `T.reveal_type` to ask Sorbet for the type of an expression:
+  T.reveal_type(a) # => Revealed type: `Integer`
 end
 ```
 
