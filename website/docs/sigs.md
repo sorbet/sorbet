@@ -27,6 +27,7 @@ The basic syntax looks like this:
 
 ```ruby
 sig {params(x: SomeType, y: SomeOtherType).returns(MyReturnType)}
+def foo(x, y); ...; end
 ```
 
 It's also possible to break a `sig` up across multiple lines. Here's the same
@@ -40,19 +41,11 @@ sig do
   )
   .returns(MyReturnType)
 end
+def foo(x, y); ...; end
 ```
 
 In every signature, there is an optional `params` section, and a required
-`returns` section.
-
-## `params`: Annotating parameter types
-
-In the `sig` we refer to all parameters **by their name**, regardless of whether
-it's a positional, keyword, block, or rest parameter. Once we've annotated the
-method, Sorbet will automatically infer the types of any local variables we use
-in the method body.
-
-Here's a longer, complete example:
+`returns` section. Here's a complete example:
 
 ```ruby
 # typed: true
@@ -62,43 +55,124 @@ class Main
   # Bring the `sig` method into scope
   extend T::Sig
 
-  sig do
-    params(
-      x: String,      # ← x is a positional param
-      y: String,      # ← y is a keyword param
-      rest: String,   # ← For rest args, write the type of the element
-      blk: T.proc.returns(NilClass),
-    )
-    .returns(Integer)
-  end
-  def self.main(x, y:, *rest, &blk)
-    # Sorbet infers (!) the type of a:
-    a = x.length + y.length
-
-    # We can use `T.reveal_type` to ask Sorbet for the type of an expression:
-    T.reveal_type(a) # => Revealed type: `Integer`
-
-    # Rest args become an Array in the method body:
-    T.reveal_type(rest) # => Revealed type: `T::Array[String]`
+  sig {params(x: String).returns(Integer)}
+  def self.main(x)
+    x.length
   end
 end
 ```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Main%0A%20%20%23%20Bring%20the%20%60sig%60%20method%20into%20scope%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20String).returns(Integer)%7D%0A%20%20def%20self.main(x)%0A%20%20%20%20x.length%0A%20%20end%0Aend">→
+View on sorbet.run</a>
+
+## `params`: Annotating parameter types
+
+In the `sig` we refer to all parameters **by their name**, regardless of whether
+it's a positional, keyword, block, or rest parameter. Once we've annotated the
+method, Sorbet will automatically infer the types of any local variables we use
+in the method body.
+
+### Positional parameters
+
+Here's the syntax for required and optional **positional** parameters:
+
+```ruby
+sig do
+  params(
+    x: String, # required positional param
+    y: String  # optional positional param
+  )
+  .returns(String)
+end
+def self.main(x, y = 'foo')
+  x + y
+end
+```
+
+### Keyword parameters (kwargs)
+
+Here's the syntax for required and optional **keyword** parameters:
+
+```ruby
+sig do
+  params(
+    x: String,            # required keyword param
+    y: T.nilable(String)  # optional keyword param
+  )
+  .void
+end
+def self.main(x:, y: nil)
+  # ...
+end
+```
+
+### Rest parameters
+
+Sometimes called splats. There are two kinds of rest parameters: "all the
+arguments" (`*args`) and "all the keyword arguments" (`**kwargs`):
+
+Types for rest parameters frequently trip people up. There's a difference
+between what's written in the sig annotation and what type that variable has in
+the method body:
+
+```ruby
+sig do
+  params(
+    # Integer describes a single element of args
+    args: Integer, # rest positional params
+    # Float describes a single value of args
+    kwargs: Float  # rest keyword params
+  )
+  .void
+end
+def self.main(*args, **kwargs)
+  # Positional rest args become an Array in the method body:
+  T.reveal_type(rest) # => Revealed type: `T::Array[Integer]`
+
+  # Keyword rest args become a Hash in the method body:
+  T.reveal_type(kwargs) # => Revealed: type `T::Hash[Symbol, Float]`
+end
+```
+
+Notice that in the sig, `args` is declared as `Integer`, but in the method body
+Sorbet knows that `args` is actually a `T::Array[Integer]` because it can see
+from the method definition that `args` is a rest parameter.
+
+It's similar for `kwargs`: it's declared as `Float`, but in the method body
+Sorbet knows that it'll be a Hash from `Symbol` keys to `Float` values.
+
+> **Note**: The choice to use this syntax for annotating rest parameters in
+> Sorbet was informed by precedent in other languages (most notably Scala).
+
+### Block parameters
+
+```ruby
+sig do
+  params(
+    blk: T.proc.returns(NilClass)
+  )
+  .void
+end
+def self.main(&blk)
+  # ...
+end
+```
+
+See [Blocks, Procs and Lambda Types](procs.md) for more information on how to
+write type annotations for a method's block parameter.
+
+### No parameters
 
 When a method has no parameters, omit the `params` from the `sig`:
 
 ```ruby
-# typed: true
-require 'sorbet-runtime'
-
-class Main
-  extend T::Sig
-
-  sig {returns(Integer)}
-  def self.main
-    42
-  end
+sig {returns(Integer)}
+def self.main
+  42
 end
 ```
+
+See the next section for more information.
 
 ## `returns` & `void`: Annotating return types
 
