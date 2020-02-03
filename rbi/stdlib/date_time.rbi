@@ -177,14 +177,14 @@ class DateTime < Date
   # ```
   sig do
     params(
-      year: Integer,
-      month: Integer,
-      mday: Integer,
-      hour: Integer,
-      minute: Integer,
-      second: Integer,
-      offset: T.any(Integer, String),
-      start: T.any(Integer, Float)
+      year: Numeric,
+      month: Numeric,
+      mday: Numeric,
+      hour: Numeric,
+      minute: Numeric,
+      second: Numeric,
+      offset: T.any(Numeric, String),
+      start: Numeric
     )
     .void
   end
