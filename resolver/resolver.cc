@@ -1927,15 +1927,18 @@ public:
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
                 case core::Names::revealType()._id:
-                    // This error does not match up with our "upper error levels are super sets
+                case core::Names::absurd()._id: {
+                    // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
+                    auto doWhat = send->fun == core::Names::revealType() ? "reveal types" : "check exhaustiveness";
+                    auto fun = fmt::format("T.{}", send->fun.data(ctx)->show(ctx));
                     if (send->loc.file().data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
-                            e.setHeader("`{}` can only reveal types in `{}` files (or higher)", "T.reveal_type",
-                                        "# typed: true");
+                            e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");
                         }
                     }
                     return send;
+                }
                 default:
                     return send;
             }
