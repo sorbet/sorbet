@@ -30,7 +30,8 @@ public:
     bool trySchedulePreemptionTask(std::shared_ptr<Task> task);
     // Run only from the typechecking thread.
     // Runs the scheduled preemption task, if any.
-    bool tryRunScheduledPreemptionTask();
+    // Handles running task with a fresh errorQueue, and restoring previous errorQueue when done.
+    bool tryRunScheduledPreemptionTask(core::GlobalState &gs);
     // Run only from typechecker worker threads. Prevents preemption from occurring while the ReaderMutexLock is alive.
     std::unique_ptr<absl::ReaderMutexLock> lockPreemption() const;
     // (For testing only) Assert that typecheckMutex is held.

@@ -4,6 +4,10 @@
 #include "core/lsp/Task.h"
 #include "main/lsp/LSPTypechecker.h"
 
+namespace sorbet::core::lsp {
+class PreemptionTaskManager;
+}
+
 namespace sorbet::realmain::lsp {
 class LSPTask;
 /**
@@ -14,6 +18,8 @@ class LSPTask;
 class LSPTypecheckerCoordinator final {
     /** Contains a queue of tasks to run on the typechecking thread. */
     BlockingUnBoundedQueue<std::shared_ptr<core::lsp::Task>> tasks;
+    /** Used to preempt running slow paths. */
+    std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager;
     /** If 'true', the coordinator should terminate immediately. */
     bool shouldTerminate;
     /** LSPTypecheckerCoordinator delegates typechecking operations to LSPTypechecker. */
@@ -34,7 +40,9 @@ class LSPTypecheckerCoordinator final {
     void asyncRunInternal(std::shared_ptr<core::lsp::Task> task);
 
 public:
-    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config, WorkerPool &workers);
+    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config,
+                              std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
+                              WorkerPool &workers);
 
     /**
      * Initializes typechecker and runs typechecking for the first time.

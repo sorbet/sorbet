@@ -160,6 +160,13 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int l
                                                 make_unique<Position>(line, character))));
 }
 
+unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentHover,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                make_unique<Position>(line, character))));
+}
+
 unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
                                                                make_unique<WorkspaceSymbolParams>(string(query))));
@@ -337,7 +344,8 @@ unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int versi
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params)));
 }
 
-unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version, bool cancellationExpected) {
+unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version, bool cancellationExpected,
+                                  int preemptionsExpected) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
@@ -345,6 +353,7 @@ unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int ver
 
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
     didChangeParams->sorbetCancellationExpected = cancellationExpected;
+    didChangeParams->sorbetPreemptionsExpected = preemptionsExpected;
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));

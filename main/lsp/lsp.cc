@@ -6,6 +6,7 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "core/lsp/PreemptionTaskManager.h"
 #include "main/lsp/LSPTask.h"
 
 using namespace std;
@@ -14,7 +15,8 @@ namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
                  const std::shared_ptr<LSPConfiguration> &config)
-    : config(config), preprocessor(config), typecheckerCoord(config, workers),
+    : config(config), preprocessor(config),
+      typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers),
       lastMetricUpdateTime(chrono::steady_clock::now()), initialGS(move(initialGS)),
       emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 

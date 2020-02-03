@@ -182,4 +182,8 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
     return out;
 }
 
+bool ErrorQueue::queueIsEmptyApprox() const {
+    return this->queue.sizeEstimate() == 0;
+}
+
 } // namespace sorbet::core

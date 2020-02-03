@@ -931,7 +931,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         Timer timeit(gs->tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            (*preemptionManager)->tryRunScheduledPreemptionTask();
+            (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
@@ -955,7 +955,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob(
-                "typecheck", [ctx, &opts, &epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
+                "typecheck", [ctx, &opts, epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
                     typecheck_thread_result threadResult;
                     ast::ParsedFile job;
                     int processedByThread = 0;
@@ -965,7 +965,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                             if (result.gotItem()) {
                                 unique_ptr<absl::ReaderMutexLock> lock;
                                 if (preemptionManager) {
-                                    // Prevent this task from being preempted.
+                                    // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
+                                    // the loop.
                                     lock = (*preemptionManager)->lockPreemption();
                                 }
                                 processedByThread++;
@@ -1008,7 +1009,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     gs->errorQueue->flushErrors();
                     if (preemptionManager) {
-                        (*preemptionManager)->tryRunScheduledPreemptionTask();
+                        (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }
                 }
                 if (cancelable && epochManager->wasTypecheckingCanceled()) {

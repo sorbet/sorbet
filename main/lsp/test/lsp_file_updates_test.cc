@@ -176,4 +176,15 @@ TEST(LSPFileUpdatesTest, Copy) {
               copy.updatedFileHashes[1].definitions.hierarchyHash);
 }
 
+TEST(LSPFileUpdatesTest, MergeOlderPreemptionExpected) {
+    LSPFileUpdates oldUpdates;
+    oldUpdates.preemptionsExpected = 2;
+
+    LSPFileUpdates newUpdates;
+    newUpdates.preemptionsExpected = 5;
+
+    newUpdates.mergeOlder(oldUpdates);
+    EXPECT_EQ(7, newUpdates.preemptionsExpected);
+}
+
 } // namespace sorbet::realmain::lsp::test

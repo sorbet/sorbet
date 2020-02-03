@@ -52,13 +52,15 @@ protected:
     std::unique_ptr<LSPMessage> closeFile(std::string_view path);
 
     std::unique_ptr<LSPMessage> changeFile(std::string_view path, std::string_view newContents, int version,
-                                           bool cancellationExpected = false);
+                                           bool cancellationExpected = false, int preemptionsExpected = 0);
 
     std::unique_ptr<LSPMessage> documentSymbol(std::string_view path);
 
     std::unique_ptr<LSPMessage> workspaceSymbol(std::string_view query);
 
     std::unique_ptr<LSPMessage> getDefinition(std::string_view path, int line, int character);
+
+    std::unique_ptr<LSPMessage> hover(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> cancelRequest(int id);
 

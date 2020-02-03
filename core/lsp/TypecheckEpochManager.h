@@ -52,7 +52,7 @@ public:
     // Run only from the typechecking thread.
     // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
     // The presence of PreemptionTaskManager determines if this commit is preemptible.
-    bool tryCommitEpoch(u4 epoch, bool isCancelable,
+    bool tryCommitEpoch(core::GlobalState &gs, u4 epoch, bool isCancelable,
                         std::optional<std::shared_ptr<PreemptionTaskManager>> preemptionManager,
                         std::function<void()> typecheck);
     // Grabs the epoch lock, and calls function with the current typechecking status.

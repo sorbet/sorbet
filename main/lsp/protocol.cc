@@ -167,6 +167,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
     // ErrorQueue asserts that the thread that created it is the one that uses it, but runLSP might be run on a
     // different thread than the one that created `LSPLoop`. Thus, create a new one.
     initialGS->errorQueue = make_shared<core::ErrorQueue>(initialGS->errorQueue->logger, initialGS->errorQueue->tracer);
+    initialGS->errorQueue->ignoreFlushes = true;
 
     // Incoming queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).

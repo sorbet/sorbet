@@ -28,11 +28,19 @@ public:
 
 class FastPathTypecheckTask final : public LSPTask {
     LSPFileUpdates updates;
+    unique_ptr<Timer> latencyCancelSlowPath;
 
 public:
     FastPathTypecheckTask(const LSPConfiguration &config, LSPFileUpdates updates)
-        : LSPTask(config, false), updates(move(updates)) {}
+        : LSPTask(config, false), updates(move(updates)) {
+        if (updates.canceledSlowPath) {
+            // Measure the time it takes to cancel slow path and run this task
+            latencyCancelSlowPath = make_unique<Timer>(*config.logger, "latency.cancel_slow_path");
+        }
+    }
     void run(LSPTypecheckerDelegate &tc) override {
+        // Trigger destructor of Timer, which reports metric.
+        latencyCancelSlowPath = nullptr;
         tc.typecheckOnFastPath(move(updates));
         prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", updates.editCount - 1);
@@ -86,6 +94,7 @@ public:
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
         initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer);
+        initialGS->errorQueue->ignoreFlushes = true;
         // Enforce that this is only run once.
         ENFORCE(globalStateHashes.empty());
 
@@ -191,6 +200,7 @@ LSPFileUpdates LSPLoop::commitEdit(SorbetWorkspaceEditParams &edit) {
     update.updatedFiles = move(edit.updates);
     update.canTakeFastPath = canTakeFastPath(*initialGS, *config, globalStateHashes, update);
     update.cancellationExpected = edit.sorbetCancellationExpected;
+    update.preemptionsExpected = edit.sorbetPreemptionsExpected;
 
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
     vector<core::FileRef> frefs;
@@ -273,10 +283,18 @@ LSPFileUpdates LSPLoop::commitEdit(SorbetWorkspaceEditParams &edit) {
     if (!update.canTakeFastPath) {
         update.updatedGS = initialGS->deepCopy();
         pendingTypecheckUpdates = update.copy();
-        // Don't copy over the cancellation expected property, as it only applies to the original request.
-        pendingTypecheckUpdates.cancellationExpected = false;
         pendingTypecheckEvictedStateHashes = std::move(evictedHashes);
+    } else {
+        // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
+        auto merged = update.copy();
+        merged.mergeOlder(pendingTypecheckUpdates);
+        auto mergedEvictions = mergeEvictions(pendingTypecheckEvictedStateHashes, evictedHashes);
+        pendingTypecheckUpdates = move(merged);
+        pendingTypecheckEvictedStateHashes = std::move(mergedEvictions);
     }
+    // Don't copy over these (test-only) properties, as they only apply to the original request.
+    pendingTypecheckUpdates.cancellationExpected = false;
+    pendingTypecheckUpdates.preemptionsExpected = 0;
 
     return update;
 }

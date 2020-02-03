@@ -39,6 +39,8 @@ public:
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
+    // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
+    int preemptionsExpected = 0;
 
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
