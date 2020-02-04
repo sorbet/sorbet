@@ -52,7 +52,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DoNothingIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
@@ -66,16 +66,16 @@ public:
 class DefineMethodIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DefineMethodIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
         auto &builder = builderCast(build);
-        bool isSelf = i->fun == Names::defineMethodSingleton(cs);
-        ENFORCE(i->args.size() == 2);
-        auto ownerSym = typeToSym(cs, i->args[0].type);
+        bool isSelf = send->fun == Names::defineMethodSingleton(cs);
+        ENFORCE(send->args.size() == 2);
+        auto ownerSym = typeToSym(cs, send->args[0].type);
 
-        auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
+        auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funcNameRef(cs, lit->value);
 
@@ -118,12 +118,12 @@ std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolR
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DefineClassIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
         auto &builder = builderCast(build);
-        auto sym = typeToSym(cs, i->args[0].type);
+        auto sym = typeToSym(cs, send->args[0].type);
         // this is wrong and will not work for `class <<self`
         auto classNameCStr = Payload::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
@@ -146,7 +146,7 @@ public:
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
-        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, i->receiverLoc),
+        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
                            {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                             Payload::getRubyConstant(cs, sym, builder)});
@@ -160,11 +160,11 @@ public:
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IdentityIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
-        return Payload::varGet(cs, i->args[0].variable, build, blockMap, aliases, rubyBlockId);
+        return Payload::varGet(cs, send->args[0].variable, build, blockMap, aliases, rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -174,7 +174,7 @@ public:
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
     CallWithBlock() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
@@ -187,12 +187,12 @@ public:
         auto &builder = builderCast(build);
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
-        auto recv = Payload::varGet(cs, i->args[0].variable, builder, blockMap, aliases, rubyBlockId);
-        auto lit = core::cast_type<core::LiteralType>(i->args[1].type.get());
+        auto recv = Payload::varGet(cs, send->args[0].variable, builder, blockMap, aliases, rubyBlockId);
+        auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funName(cs, lit->value);
         auto rawId = Payload::idIntern(cs, builder, funName.data(cs)->shortName(cs));
-        auto block = Payload::varGet(cs, i->args[2].variable, builder, blockMap, aliases, rubyBlockId);
+        auto block = Payload::varGet(cs, send->args[2].variable, builder, blockMap, aliases, rubyBlockId);
         auto blockAsProc =
             IREmitterHelpers::callViaRubyVMSimple(cs, builder, block,
 
@@ -201,7 +201,7 @@ public:
                                                   llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
         {
             int argId = -1;
-            for (auto &arg : i->args) {
+            for (auto &arg : send->args) {
                 if (argId < 3) {
                     continue;
                 }
@@ -219,7 +219,7 @@ public:
 
         auto rawCall =
             builder.CreateCall(cs.module->getFunction("sorbet_callFuncProc"),
-                               {recv, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size() - 3, true)),
+                               {recv, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size() - 3, true)),
                                 builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blockAsProc},
                                "rawSendWithProcResult");
 
@@ -247,7 +247,7 @@ public:
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
           takesReciever(takesReciever){};
 
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
@@ -256,7 +256,7 @@ public:
         // fill in args
         {
             int argId = -1;
-            for (auto &arg : i->args) {
+            for (auto &arg : send->args) {
                 argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
@@ -271,7 +271,7 @@ public:
 
         llvm::Value *var;
         if (takesReciever == TakesReciever) {
-            var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+            var = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
         } else {
             var = Payload::rubyNil(cs, builder);
         }
@@ -284,7 +284,7 @@ public:
         }
 
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blkPtr,
                                    blockMap.escapedClosure[rubyBlockId]},
                                   "rawSendResult");

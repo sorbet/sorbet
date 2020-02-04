@@ -29,10 +29,10 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
 };
 
-llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i, const BasicBlockMap &blockMap,
+llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *send, const BasicBlockMap &blockMap,
                           UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId, llvm::Function *blk) {
     if (blk == nullptr) {
-        auto &recvType = i->recv.type;
+        auto &recvType = send->recv.type;
         core::SymbolRef recvClass = core::Symbols::noSymbol();
         if (auto ct = core::cast_type<core::ClassType>(recvType.get())) {
             recvClass = ct->symbol;
@@ -41,7 +41,7 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
         }
 
         if (recvClass.exists()) {
-            auto funSym = recvClass.data(cs)->findMember(cs, i->fun);
+            auto funSym = recvClass.data(cs)->findMember(cs, send->fun);
             if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
                 auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
                 if (llvmFunc == nullptr) {
@@ -63,16 +63,16 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
                     auto cs2 = cs;
                     cs2.functionEntryInitializers = bb1;
                     auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, selfVar, argsArray, argsCount,
-                                                                    i->fun.data(cs)->shortName(cs));
+                                                                    send->fun.data(cs)->shortName(cs));
                     funcBuilder.CreateRet(rt);
                     funcBuilder.SetInsertPoint(bb1);
                     funcBuilder.CreateBr(bb2);
                     ENFORCE(!llvm::verifyFunction(*llvmFunc, &llvm::dbgs()));
                 }
-                auto methodName = i->fun.data(cs)->shortName(cs);
+                auto methodName = send->fun.data(cs)->shortName(cs);
                 llvm::StringRef methodNameRef(methodName.data(), methodName.size());
                 auto &builder = builderCast(build);
-                auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+                auto recv = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
                 auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
 
@@ -85,12 +85,12 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
                 builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes =
-                    IREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, i, blockMap, aliases, rubyBlockId);
+                    IREmitterHelpers::emitMethodCallDirrect(cs, build, funSym, send, blockMap, aliases, rubyBlockId);
                 auto fastPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(slowPath);
                 auto slowPathRes =
-                    IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId, blk);
+                    IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
                 auto slowPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 builder.SetInsertPoint(afterSend);
@@ -102,36 +102,36 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
         }
     }
 
-    return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, i, blockMap, aliases, rubyBlockId, blk);
+    return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
 }
 
-llvm::Value *tryNameBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *tryNameBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *send,
                                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                                    int rubyBlockId, llvm::Function *blk) {
     for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
-        if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(cs), i->fun) &&
+        if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(cs), send->fun) &&
             ((blk == nullptr) || nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
-            return nameBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId, blk);
+            return nameBasedIntrinsic->makeCall(cs, send, build, blockMap, aliases, rubyBlockId, blk);
         }
     }
-    return tryFinalCall(cs, build, i, blockMap, aliases, rubyBlockId, blk);
+    return tryFinalCall(cs, build, send, blockMap, aliases, rubyBlockId, blk);
 }
 
-llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *send,
                                      const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                                      int rubyBlockId, llvm::Function *blk) {
     auto &builder = builderCast(build);
-    auto remainingType = i->recv.type;
+    auto remainingType = send->recv.type;
     auto afterSend = llvm::BasicBlock::Create(cs, "afterSend", builder.GetInsertBlock()->getParent());
     auto rememberStart = builder.GetInsertBlock();
     builder.SetInsertPoint(afterSend);
-    auto methodName = i->fun.data(cs)->shortName(cs);
+    auto methodName = send->fun.data(cs)->shortName(cs);
     llvm::StringRef methodNameRef(methodName.data(), methodName.size());
     auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
     builder.SetInsertPoint(rememberStart);
     if (!remainingType->isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
-            if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun) &&
+            if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), send->fun) &&
                 (blk == nullptr || symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
                 auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
                 for (auto &c : potentialClasses) {
@@ -142,7 +142,7 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                         remainingType = leftType;
                         auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
                         llvm::StringRef clazNameRef(clazName.data(), clazName.size());
-                        auto recv = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+                        auto recv = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
 
                         auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
@@ -156,7 +156,7 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                                              alternative);
                         builder.SetInsertPoint(fastPath);
                         auto fastPathRes =
-                            symbolBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId, blk);
+                            symbolBasedIntrinsic->makeCall(cs, send, build, blockMap, aliases, rubyBlockId, blk);
                         auto fastPathEnd = builder.GetInsertBlock();
                         builder.CreateBr(afterSend);
                         phi->addIncoming(fastPathRes, fastPathEnd);
@@ -166,7 +166,7 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
             }
         }
     }
-    auto slowPathRes = tryNameBasedIntrinsic(cs, build, i, blockMap, aliases, rubyBlockId, blk);
+    auto slowPathRes = tryNameBasedIntrinsic(cs, build, send, blockMap, aliases, rubyBlockId, blk);
     auto slowPathEnd = builder.GetInsertBlock();
     builder.CreateBr(afterSend);
     builder.SetInsertPoint(afterSend);
@@ -175,19 +175,19 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
 }
 
 } // namespace
-llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *send,
                                               const BasicBlockMap &blockMap,
                                               UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId) {
     llvm::Function *blk = nullptr;
-    if (i->link != nullptr) {
-        blk = blockMap.rubyBlocks2Functions[i->link->rubyBlockId];
+    if (send->link != nullptr) {
+        blk = blockMap.rubyBlocks2Functions[send->link->rubyBlockId];
     }
 
-    return trySymbolBasedIntrinsic(cs, build, i, blockMap, aliases, rubyBlockId, blk);
+    return trySymbolBasedIntrinsic(cs, build, send, blockMap, aliases, rubyBlockId, blk);
 }
 
 llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                     core::SymbolRef funSym, cfg::Send *i,
+                                                     core::SymbolRef funSym, cfg::Send *send,
                                                      const BasicBlockMap &blockMap,
                                                      UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                      int rubyBlockId) {
@@ -198,7 +198,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IR
     {
         // fill in args
         int argId = -1;
-        for (auto &arg : i->args) {
+        for (auto &arg : send->args) {
             argId += 1;
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
@@ -210,27 +210,27 @@ llvm::Value *IREmitterHelpers::emitMethodCallDirrect(CompilerState &cs, llvm::IR
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                               llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
-    auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+    auto var = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
     builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
     llvm::Value *rawCall =
         builder.CreateCall(llvmFunc,
-                           {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                           {llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
                             builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), var},
                            "directSendResult");
     return rawCall;
 }
 
-llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *i,
+llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Send *send,
                                                        const BasicBlockMap &blockMap,
                                                        const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                        int rubyBlockId, llvm::Function *blk) {
     auto &builder = builderCast(build);
-    auto str = i->fun.data(cs)->shortName(cs);
+    auto str = send->fun.data(cs)->shortName(cs);
 
     // fill in args
     {
         int argId = -1;
-        for (auto &arg : i->args) {
+        for (auto &arg : send->args) {
             argId += 1;
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
@@ -246,26 +246,26 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(CompilerState &cs, llvm::
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
-    auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
-    if (i->link != nullptr) {
+    auto var = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
+    if (send->link != nullptr) {
         // this send has a block!
         auto rawId = Payload::idIntern(cs, builder, str);
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
-                                  {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                  {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blk,
                                    blockMap.escapedClosure[rubyBlockId]},
                                   "rawSendResult");
 
-    } else if (i->fun == core::Names::super()) {
+    } else if (send->fun == core::Names::super()) {
         return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"),
-                                  {llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                  {llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices)},
                                   "rawSendResult");
     } else {
         return callViaRubyVMSimple(cs, build, var,
                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices),
 
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)), str);
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)), str);
     }
 };
 

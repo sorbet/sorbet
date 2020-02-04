@@ -12,7 +12,7 @@ struct BasicBlockMap;
 class NameBasedIntrinsicMethod {
 public:
     const Intrinsics::HandleBlock blockHandled;
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &builder,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const = 0;

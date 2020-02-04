@@ -38,7 +38,7 @@ public:
     CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, Intrinsics::HandleBlock handleBlocks)
         : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
@@ -47,7 +47,7 @@ public:
         // fill in args
         {
             int argId = -1;
-            for (auto &arg : i->args) {
+            for (auto &arg : send->args) {
                 argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
@@ -59,7 +59,7 @@ public:
         llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                                   llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
-        auto var = Payload::varGet(cs, i->recv.variable, builder, blockMap, aliases, rubyBlockId);
+        auto var = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
         llvm::Value *blkPtr;
         if (blk != nullptr) {
             blkPtr = blk;
@@ -68,7 +68,7 @@ public:
         }
 
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, i->args.size(), true)),
+                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
                                    builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blkPtr,
 
                                    blockMap.escapedClosure[rubyBlockId]},
