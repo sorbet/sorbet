@@ -187,8 +187,6 @@ declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #2
 
 declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 
-declare i64 @rb_hash_new() local_unnamed_addr #2
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #2
@@ -232,6 +230,8 @@ define i64** @sorbet_setRubyStackFrame(i8*) local_unnamed_addr #5 {
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %4, i64 0, i32 0
   ret i64** %11
 }
+
+declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #2
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
 
@@ -579,7 +579,7 @@ typeTestFail.i:                                   ; preds = %entry
   store i64 %rawSym15.i, i64* %callArgsAddr21.i, align 8
   %callArgsAddr23.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3
   store i64 5, i64* %callArgsAddr23.i, align 8
-  %18 = tail call i64 @rb_hash_new() #11, !noalias !58
+  %18 = tail call i64 @rb_hash_new_with_size(i64 2) #11, !noalias !58
   call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %18) #11
   store i64 %18, i64* %callArgsAddr.i, align 8
   %rawSendResult29.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #11

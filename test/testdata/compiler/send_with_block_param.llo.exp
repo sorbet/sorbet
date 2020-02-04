@@ -192,8 +192,6 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 
 declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #2
 
-declare i64 @rb_hash_new() local_unnamed_addr #2
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #2
@@ -239,6 +237,8 @@ define i64** @sorbet_setRubyStackFrame(i8*) local_unnamed_addr #5 {
   %11 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %4, i64 0, i32 0
   ret i64** %11
 }
+
+declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #2
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
 
@@ -684,7 +684,7 @@ typeTestFail.i:                                   ; preds = %entry
   %callArgsAddr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0
   %18 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %18, align 16
-  %19 = tail call i64 @rb_hash_new() #11, !noalias !61
+  %19 = tail call i64 @rb_hash_new_with_size(i64 1) #11, !noalias !61
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr.i, i64 %19) #11
   store i64* inttoptr (i64 24 to i64*), i64** %13, align 8, !tbaa !10
   store i64 3, i64* %callArgsAddr.i, align 16

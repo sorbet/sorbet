@@ -236,8 +236,6 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
 
 declare void @rb_ary_detransient(i64) local_unnamed_addr #0
 
-declare i64 @rb_hash_new() local_unnamed_addr #0
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #0
@@ -557,6 +555,8 @@ declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #6
 
 ; Function Attrs: nounwind readnone
 declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #6
+
+declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #0
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #0
 
@@ -1395,7 +1395,7 @@ fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.ex
   %21 = load i64, i64* @rb_cInteger, align 8
   %callArgsAddr12 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 1
   store i64 %21, i64* %callArgsAddr12, align 8
-  %22 = tail call i64 @rb_hash_new() #21, !noalias !67
+  %22 = tail call i64 @rb_hash_new_with_size(i64 1) #21, !noalias !67
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr, i64 %22) #21
   store i64 %22, i64* %callArgsAddr, align 8
   %23 = inttoptr i64 %captures to %struct.RTypedData*
