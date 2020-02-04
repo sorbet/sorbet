@@ -90,8 +90,7 @@ public:
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
-        auto ctx = core::Context(cs, core::Symbols::root());
-        auto representedClass = core::Types::getRepresentedClass(ctx, send->recv.type.get());
+        auto representedClass = core::Types::getRepresentedClass(cs, send->recv.type.get());
         if (!representedClass.exists()) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
         }
