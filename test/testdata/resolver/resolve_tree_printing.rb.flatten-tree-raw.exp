@@ -9,20 +9,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -70,20 +57,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -93,118 +67,14 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_while" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_constant_with_resolution_scope" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_global_field" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_class_field" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_next" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_break" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_return" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"has_cast" }
-                ]
-              }
+              Literal{ value = :"has_while" }
+              Literal{ value = :"has_constant_with_resolution_scope" }
+              Literal{ value = :"has_global_field" }
+              Literal{ value = :"has_class_field" }
+              Literal{ value = :"has_next" }
+              Literal{ value = :"has_break" }
+              Literal{ value = :"has_return" }
+              Literal{ value = :"has_cast" }
             ],
             expr = EmptyTree
           }

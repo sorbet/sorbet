@@ -119,7 +119,7 @@ InsSeq{
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
@@ -140,20 +140,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -173,7 +160,7 @@ InsSeq{
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
@@ -194,20 +181,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -288,32 +262,19 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 --- symbol-table-raw end ---
 --- checking diff ---
 1,11d0
-1,39d0
+1,26d0
 < 
 < 
 <               localVariable = <U <blk>>
-<               localVariable = <U <self>>
-<             Literal{ value = :"<static-init>" }
-<             Local{
-<             orig = nullptr
-<             symbol = ::Sorbet::Private::Static
-<             }
 <             }]
-<           ]
-<           args = [
 <           args = [Local{
-<           block = nullptr
 <           flags = self
-<           fun = <U keep_class_method_def>
 <           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
 <           orig = nullptr
-<           recv = ConstantLit{
 <           rhs = Literal{ value = 1 }
 <           symbol = ::<todo sym>
-<           }
+<         Literal{ value = :"<static-init>" }
 <         MethodDef{
-<         Send{
-<         }
 <         }
 <         }]
 <       1
@@ -322,7 +283,7 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 <       kind = class
 <       name = EmptyTree<<C <U <root>>>>
 <       rhs = [
-<     ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+<     :"<static-init>"
 <     ClassDef{
 <     EmptyTree
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)

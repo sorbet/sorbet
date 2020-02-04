@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -41,7 +41,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::H)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"main")
+        :"main"
         <self>.main()
         <emptyTree>
       end
@@ -61,14 +61,14 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -78,10 +78,10 @@ begin
     end
   end
   class <singleton class><<Class:B>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_method_def(<self>, :"b")
+      :"b"
     end
 
     def b(<blk>)
@@ -89,7 +89,7 @@ begin
     end
   end
   class ::D<<C D>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -99,7 +99,7 @@ begin
     end
   end
   class <singleton class><<Class:D>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -109,10 +109,10 @@ begin
     end
   end
   class <singleton class><<Class:<Class:D>>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_method_def(<self>, :"d")
+      :"d"
     end
 
     def d(<blk>)
@@ -120,7 +120,7 @@ begin
     end
   end
   class ::E<<C E>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -129,7 +129,7 @@ begin
           <emptyTree>
         end
         <self>.wrapper()
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"e")
+        :"e"
         <emptyTree>
       end
     end
@@ -139,10 +139,10 @@ begin
     end
   end
   class <singleton class><<Class:E>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_method_def(<self>, :"wrapper")
+      :"wrapper"
     end
 
     def wrapper(<blk>)
@@ -150,7 +150,7 @@ begin
     end
   end
   class ::F<<C F>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -160,16 +160,16 @@ begin
     end
   end
   class <singleton class><<Class:F>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"initialize")
+        :"initialize"
         <self>.extend(::T::Sig)
         <self>.sig() do ||
           <self>.params({:"f" => ::Integer}).returns(::Integer)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"f=")
+        :"f="
         <emptyTree>
       end
     end
@@ -186,17 +186,17 @@ begin
     end
   end
   class ::G<<C G>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"wrapper")
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"g")
+        :"wrapper"
+        :"g"
         begin
           <emptyTree>
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"inner")
+        :"inner"
         <emptyTree>
       end
     end
@@ -214,14 +214,14 @@ begin
     end
   end
   class <singleton class><<Class:G>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       :"inner"
     end
   end
   class ::H<<C H>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -231,7 +231,7 @@ begin
     end
   end
   class <singleton class><<Class:H>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -242,10 +242,10 @@ begin
     end
   end
   class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_class_method_def(<self>, :"h")
+      :"h"
     end
 
     def self.h(<blk>)

@@ -1,10 +1,10 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::Sorbet::Private::Static.keep_method_def(<self>, :"foo")
+      :"foo"
     end
 
     def foo(<blk>)

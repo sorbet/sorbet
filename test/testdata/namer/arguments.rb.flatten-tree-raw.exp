@@ -9,20 +9,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -70,20 +57,7 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_class_method_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"<static-init>" }
-          ]
-        }
+        Literal{ value = :"<static-init>" }
 
         MethodDef{
           flags = self
@@ -93,48 +67,9 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments<defaultArg>1" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_method_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments<defaultArg>2" }
-                ]
-              }
+              Literal{ value = :"take_arguments" }
+              Literal{ value = :"take_arguments<defaultArg>1" }
+              Literal{ value = :"take_arguments<defaultArg>2" }
             ],
             expr = EmptyTree
           }

@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -20,7 +20,7 @@ begin
     end
   end
   module ::A<<C A>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -31,14 +31,14 @@ begin
     end
   end
   class ::A::B<<C B>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::C<<C C>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>

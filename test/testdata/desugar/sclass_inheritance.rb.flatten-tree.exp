@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -26,7 +26,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"main")
+        :"main"
         <self>.main()
         <emptyTree>
       end
@@ -41,14 +41,14 @@ begin
     end
   end
   module ::MM<<C MM>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -59,12 +59,12 @@ begin
     end
   end
   class <singleton class><<Class:A>> < (::MM)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
         <self>.include(::MM)
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"newer")
+        :"newer"
         <emptyTree>
       end
     end
@@ -74,12 +74,12 @@ begin
     end
   end
   class ::B<<C B>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
         <self>.extend(::MM)
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"newer")
+        :"newer"
         <emptyTree>
       end
     end
@@ -89,7 +89,7 @@ begin
     end
   end
   class ::C<<C C>> < (::A)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -99,10 +99,10 @@ begin
     end
   end
   class <singleton class><<Class:C>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_method_def(<self>, :"newerer")
+      :"newerer"
     end
 
     def newerer(<blk>)
