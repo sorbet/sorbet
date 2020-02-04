@@ -3,7 +3,7 @@
 set -euo pipefail
 
 branch="${1:-master}"
-sorbet_repo="${2:-HOME/stripe/sorbet}"
+sorbet_repo="${2:-$HOME/stripe/sorbet}"
 
 git --git-dir "$sorbet_repo/.git" fetch --quiet origin "$branch"
 new_sorbet_version="$(git --git-dir="$sorbet_repo/.git" rev-parse "origin/$branch")"
