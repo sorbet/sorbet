@@ -29,8 +29,6 @@ end
 class Sorbet; end
 module Sorbet::Private; end
 module Sorbet::Private::Static
-  def self.keep_method_def(this, fun); fun; end
-  def self.keep_class_method_def(this, fun); fun; end
 end
 
 module Sorbet::Private::Static::StubModule
