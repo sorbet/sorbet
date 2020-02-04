@@ -43,6 +43,14 @@ struct Alias {
     }
 };
 
+class Intrinsics {
+public:
+    enum class HandleBlock : u1 {
+        Handled = 1,
+        Unhandled = 2,
+    };
+};
+
 class IREmitterHelpers {
 public:
     static bool isStaticInit(CompilerState &cs, core::SymbolRef sym);

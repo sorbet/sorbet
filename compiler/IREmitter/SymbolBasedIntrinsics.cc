@@ -35,7 +35,7 @@ protected:
     string cMethod;
 
 public:
-    CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, bool handleBlocks)
+    CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, Intrinsics::HandleBlock handleBlocks)
         : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
@@ -85,7 +85,7 @@ public:
 
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
-    Module_tripleEq() : SymbolBasedIntrinsicMethod(false) {}
+    Module_tripleEq() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -141,7 +141,8 @@ public:
 
 class CallCMethodSingleton : public CallCMethod {
 public:
-    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, bool handleBlocks)
+    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod,
+                         Intrinsics::HandleBlock handleBlocks)
         : CallCMethod(rubyClass, rubyMethod, cMethod, handleBlocks){};
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -150,40 +151,40 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethodsInstance{
-    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br", false},
-    {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty", false},
-    {core::Symbols::Array(), "each", "sorbet_rb_array_each", true},
-    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq", false},
-    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br", false},
-    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq", false},
-    {core::Symbols::Array(), "size", "sorbet_rb_array_len", false},
-    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true", false},
-    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and", false},
-    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and", false},
-    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false", false},
-    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false", false},
-    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true", false},
-    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand", false},
-    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and", false},
-    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus", false},
-    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus", false},
-    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul", false},
-    {core::Symbols::Integer(), "/", "sorbet_rb_int_div", false},
-    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt", false},
-    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt", false},
-    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge", false},
-    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le", false},
-    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s", false},
-    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal", false},
-    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq", false},
+    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Array(), "each", "sorbet_rb_array_each", Intrinsics::HandleBlock::Handled},
+    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Array(), "size", "sorbet_rb_array_len", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "/", "sorbet_rb_int_div", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq", Intrinsics::HandleBlock::Unhandled},
 #include "WrappedIntrinsics.h"
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
-    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", false},
-    {core::Symbols::T_Hash(), "[]", "sorbet_T_Hash_squarebr", false},
-    {core::Symbols::T_Array(), "[]", "sorbet_T_Array_squarebr", false},
-    {core::Symbols::T(), "untyped", "sorbet_T_untyped", false},
+    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::T_Hash(), "[]", "sorbet_T_Hash_squarebr", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::T_Array(), "[]", "sorbet_T_Array_squarebr", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::T(), "untyped", "sorbet_T_untyped", Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {

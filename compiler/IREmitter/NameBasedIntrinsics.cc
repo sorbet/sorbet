@@ -51,7 +51,7 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    DoNothingIntrinsic() : NameBasedIntrinsicMethod(true){};
+    DoNothingIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -65,7 +65,7 @@ public:
 
 class DefineMethodIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    DefineMethodIntrinsic() : NameBasedIntrinsicMethod(false){};
+    DefineMethodIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -117,7 +117,7 @@ std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolR
 
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    DefineClassIntrinsic() : NameBasedIntrinsicMethod(false){};
+    DefineClassIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -159,7 +159,7 @@ public:
 
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
-    IdentityIntrinsic() : NameBasedIntrinsicMethod(false){};
+    IdentityIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -173,7 +173,7 @@ public:
 
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
-    CallWithBlock() : NameBasedIntrinsicMethod(false){};
+    CallWithBlock() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -242,7 +242,8 @@ protected:
     ShouldTakeReciever takesReciever;
 
 public:
-    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever, bool supportsBlocks)
+    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever,
+                Intrinsics::HandleBlock supportsBlocks)
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
           takesReciever(takesReciever){};
 
@@ -294,12 +295,12 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever, false},
-    {"defined?", "sorbet_definedIntinsic", NoReciever, false},
-    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever, false},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever, false},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever, false},
-    {"<self-new>", "sorbet_selfNew", NoReciever, false},
+    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
+    {"defined?", "sorbet_definedIntinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
+    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
+    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
+    {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever, Intrinsics::HandleBlock::Unhandled},
+    {"<self-new>", "sorbet_selfNew", NoReciever, Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {

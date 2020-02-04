@@ -11,7 +11,7 @@ struct BasicBlockMap;
 
 class SymbolBasedIntrinsicMethod {
 public:
-    const bool blockHandled;
+    const Intrinsics::HandleBlock blockHandled;
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *i, llvm::IRBuilderBase &builder,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
@@ -19,7 +19,7 @@ public:
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 
-    SymbolBasedIntrinsicMethod(bool blockHandled) : blockHandled(blockHandled){};
+    SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock blockHandled) : blockHandled(blockHandled){};
     virtual ~SymbolBasedIntrinsicMethod() = default;
     static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics();
 };

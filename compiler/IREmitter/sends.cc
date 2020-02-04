@@ -110,7 +110,7 @@ llvm::Value *tryNameBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build
                                    int rubyBlockId, llvm::Function *blk) {
     for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
         if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(cs), i->fun) &&
-            ((blk == nullptr) || nameBasedIntrinsic->blockHandled)) {
+            ((blk == nullptr) || nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
             return nameBasedIntrinsic->makeCall(cs, i, build, blockMap, aliases, rubyBlockId, blk);
         }
     }
@@ -132,7 +132,7 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
     if (!remainingType->isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
             if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), i->fun) &&
-                (blk == nullptr || symbolBasedIntrinsic->blockHandled)) {
+                (blk == nullptr || symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
                 auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
                 for (auto &c : potentialClasses) {
                     auto leftType =
