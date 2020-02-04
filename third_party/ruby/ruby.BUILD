@@ -11,7 +11,9 @@ filegroup(
 build_ruby(
     name = "ruby-dist",
     src = ":source",
-
+    copts = [],
+    linkopts = [],
+    visibility = ["//visibility:private"],
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [
             "@system_ssl_darwin//:crypto",
@@ -22,11 +24,6 @@ build_ruby(
             "@system_ssl_linux//:ssl",
         ],
     }),
-
-    copts = [],
-    linkopts = [],
-
-    visibility = ["//visibility:private"],
 )
 
 ruby_headers(
