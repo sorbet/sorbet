@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -12,7 +12,7 @@ begin
     end
   end
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -20,29 +20,29 @@ begin
         <self>.sig() do ||
           <self>.void()
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"initialize")
+        :"initialize"
         <self>.sig() do ||
           <self>.returns(::Integer)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v1")
+        :"v1"
         <self>.sig() do ||
           <self>.params({:"v1" => ::Integer}).returns(::Integer)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v1=")
+        :"v1="
         <self>.sig() do ||
           <self>.returns(::String)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v2")
+        :"v2"
         <self>.sig() do ||
           <self>.params({:"v2" => ::String}).returns(::String)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v2=")
+        :"v2="
         <self>.sig() do ||
           <self>.returns(::String)
         end
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v3")
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v4=")
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"v5=")
+        :"v3"
+        :"v4="
+        :"v5="
         <emptyTree>
       end
     end

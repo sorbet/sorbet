@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -12,7 +12,7 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -20,15 +20,15 @@ begin
         <self>.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"private")
+        :"private"
         <self>.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"private_class_method")
-        <self>.private_class_method(::Sorbet::Private::Static.keep_class_method_def(<self>, :"outer_static"))
-        <self>.private(::Sorbet::Private::Static.keep_method_def(<self>, :"outer_instance"))
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"inner_static")
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"inner_instance")
+        :"private_class_method"
+        <self>.private_class_method(:"outer_static")
+        <self>.private(:"outer_instance")
+        :"inner_static"
+        :"inner_instance"
         <emptyTree>
       end
     end

@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
@@ -46,12 +46,12 @@ begin
     end
   end
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_method_def(<self>, :"normal_method")
-        ::Sorbet::Private::Static.keep_class_method_def(<self>, :"normal_static_method")
+        :"normal_method"
+        :"normal_static_method"
         begin
           <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
@@ -75,21 +75,21 @@ begin
     end
   end
   class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::NormalClass::InnerModule<<C InnerModule>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::ANamespace<<C ANamespace>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin
@@ -100,42 +100,42 @@ begin
     end
   end
   class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Mixin<<C Mixin>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::OtherMixin<<C OtherMixin>> < ()
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    ::Sorbet::Private::Static.keep_class_method_def(<self>, :"<static-init>")
+    :"<static-init>"
 
     def self.<static-init>(<blk>)
       begin

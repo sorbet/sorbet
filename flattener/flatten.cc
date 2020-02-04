@@ -128,17 +128,11 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
-        // Stash some stuff we need from the methodDef before it's moved and made into nullptr
         auto loc = methodDef->declLoc;
         auto name = methodDef->name;
-        auto keepName = methodDef->isSelf() ? core::Names::keepClassMethodDef() : core::Names::keepMethodDef();
-
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        // TODO(jez) Test this in VS Code
-        auto sorbetPrivateStatic = core::Symbols::Sorbet_Private_Static();
-        return ast::MK::Send2(loc, ast::MK::Constant(loc, sorbetPrivateStatic), keepName, ast::MK::Self(loc),
-                              ast::MK::Symbol(loc, name));
+        return ast::MK::Symbol(loc, name);
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
