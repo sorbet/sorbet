@@ -1,19 +1,15 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//third_party:sorbet_version.bzl", "SORBET_SHALLOW_SINCE", "SORBET_VERSION")
+load("//third_party:sorbet_version.bzl", "SORBET_SHA256", "SORBET_VERSION")
 
 # We define our externals here instead of directly in WORKSPACE
-# because putting the `new_git_repository` calls here instead of there
-# works around https://github.com/bazelbuild/bazel/issues/1465 when
-# passing `build_file` to the `new_git_repository`.
 def sorbet_llvm_externals():
     use_local = False
     if not use_local:
-        git_repository(
+        http_archive(
             name = "com_stripe_ruby_typer",
-            remote = "https://github.com/sorbet/sorbet.git",
-            commit = SORBET_VERSION,
-            shallow_since = SORBET_SHALLOW_SINCE,
+            url = "https://github.com/sorbet/sorbet/archive/{}.zip".format(SORBET_VERSION),
+            sha256 = SORBET_SHA256,
+            strip_prefix = "sorbet-{}".format(SORBET_VERSION),
         )
     else:
         native.local_repository(

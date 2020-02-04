@@ -1,4 +1,4 @@
 SORBET_VERSION = "913a95191520b919109169ba1f8f6355cbda3029"
 
-# git log -n 1 --pretty=format:"%cd" --date=raw origin/master
-SORBET_SHALLOW_SINCE = "1580776304 -0800"
+# The sha256 of https://github.com/sorbet/sorbet/archive/{SORBET_VERSION}.zip
+SORBET_SHA256 = "6566cffeda5c9e4163859cc3895f04245b0f8e728f3951448d4826c200d45864"
