@@ -35,17 +35,22 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v2 ---
 """
 
-_BUILD_RUBY = """
+_BUILD_RUBY = """#!/bin/bash
+
 set -euo pipefail
 
 base="$PWD"
 out_dir="$base/{toolchain}"
 
-ssl_inc="$base/$(dirname {ssl_incdir})"
-ssl_lib="$base/{ssl_libdir}"
-crypto_lib="$base/{crypto_libdir}"
+# Build up include path
+for path in {hdrs}; do
+  inc_path=("${{inc_path[@]:-}}" "-isystem" "$base/$path")
+done
 
-ls $ssl_lib
+# Build up the shared library path
+for path in {shared_libs}; do
+  lib_path=("${{lib_path[@]:-}}" "-L$base/$path")
+done
 
 build_dir="$(mktemp -d)"
 
@@ -72,9 +77,9 @@ export PATH="$(dirname {cc}):$PATH"
 # '-fvisibility=hidden'.
 run_cmd ./configure \
         CC="{cc}" \
-        CFLAGS="-isystem $ssl_inc {copts}" \
-        CPPFLAGS="-isystem $ssl_inc {copts}" \
-        LDFLAGS="-L$ssl_lib -L$crypto_lib {linkopts}" \
+        CFLAGS="${{inc_path[*]}} {copts}" \
+        CPPFLAGS="${{inc_path[*]}} {copts}" \
+        LDFLAGS="${{lib_path[*]}} {linkopts}" \
         OUTFLAG="-fvisibility=default -o" \
         --enable-load-relative \
         --with-destdir="$out_dir" \
@@ -128,9 +133,6 @@ def _build_ruby_impl(ctx):
     if src_dir == None:
         fail("Unable to locate 'ruby.c' in src")
 
-    ssl = ctx.attr.ssl[CcInfo]
-    crypto = ctx.attr.crypto[CcInfo]
-
     # Setup toolchains
     cc_toolchain = find_cpp_toolchain(ctx)
 
@@ -155,14 +157,26 @@ def _build_ruby_impl(ctx):
         ),
     )
 
-    ssl_libs = ssl.linking_context.libraries_to_link.to_list()
-    ssl_lib = ssl_libs[0].dynamic_library
+    # compute headers
+    dep_inputs = []
+    hdrs = {}
+    shared_libs = {}
+    for label in ctx.attr.deps:
+        cc_info = label[CcInfo]
+        if cc_info == None:
+            fail("Non CcInfo dependency given: {}".format(label))
 
-    ssl_hdrs = ssl.compilation_context.headers.to_list()
-    ssl_incdir = ssl_hdrs[0].dirname
+        for hdr in cc_info.compilation_context.headers.to_list():
+            dep_inputs.append(hdr)
+            path = hdr.dirname
+            hdrs[path] = True
 
-    crypto_libs = crypto.linking_context.libraries_to_link.to_list()
-    crypto_lib = crypto_libs[0].dynamic_library
+        for lib in cc_info.linking_context.libraries_to_link.to_list():
+            shared_libs[lib.dynamic_library.dirname] = True
+            dep_inputs.append(lib.dynamic_library)
+
+    hdrs = hdrs.keys()
+    shared_libs = shared_libs.keys()
 
     # -Werror breaks configure, so we strip out all flags with a leading -W
     # ruby doesn't work with asan or ubsan
@@ -176,12 +190,16 @@ def _build_ruby_impl(ctx):
 
         flags.append(flag)
 
+    flags.extend(ctx.attr.copts)
+
     ldflags = []
     for flag in ctx.fragments.cpp.linkopts:
         if _is_sanitizer_flag(flag):
             continue
 
         ldflags.append(flag)
+
+    ldflags.extend(ctx.attr.linkopts)
 
     # Outputs
     binaries = [
@@ -200,7 +218,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = [ssl_lib, crypto_lib] + ssl_hdrs + ctx.files.src,
+        inputs = dep_inputs + ctx.files.src,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -209,9 +227,8 @@ def _build_ruby_impl(ctx):
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
-            ssl_incdir = ssl_incdir,
-            ssl_libdir = ssl_lib.dirname,
-            crypto_libdir = crypto_lib.dirname,
+            hdrs = " ".join(hdrs),
+            shared_libs = " ".join(shared_libs),
         )),
     )
 
@@ -232,8 +249,9 @@ build_ruby = rule(
     implementation = _build_ruby_impl,
     attrs = {
         "src": attr.label(),
-        "ssl": attr.label(),
-        "crypto": attr.label(),
+        "deps": attr.label_list(),
+        "copts": attr.string_list(),
+        "linkopts": attr.string_list(),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
