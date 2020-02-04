@@ -799,7 +799,7 @@ VALUE sorbet_buildHashIntrinsic(VALUE recv, int argc, const VALUE *const restric
     // this comes from internal.h
     void rb_hash_bulk_insert(long, const VALUE *, VALUE);
 
-    VALUE ret = rb_hash_new();
+    VALUE ret = rb_hash_new_with_size(argc / 2);
     if (argc != 0) {
         rb_hash_bulk_insert(argc, argv, ret);
     }
