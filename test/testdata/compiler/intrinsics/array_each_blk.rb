@@ -2,8 +2,8 @@
 # typed: true
 # compiled: true
 
-r = [1,2,3,4,5].each do |i|
-  puts i
+result = [1, 2, 3].each do |x|
+  puts "-- #{x} --"
 end
 
-puts r.class
+p result

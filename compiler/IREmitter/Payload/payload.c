@@ -910,6 +910,28 @@ VALUE sorbet_rb_array_empty(VALUE recv, int argc, const VALUE *const restrict ar
     return Qfalse;
 }
 
+VALUE enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
+    return RARRAY_LEN(array);
+}
+
+VALUE sorbet_rb_array_each(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    sorbet_ensure_arity(argc, 0);
+    if (blk == NULL) {
+        // TODO(jez) Remove this rb_intern by threading symbol name through.
+        return rb_enumeratorize_with_size(recv, ID2SYM(rb_intern("each")), 0, NULL,
+                                          (rb_enumerator_size_func *)enumerator_size_func_array_length);
+    }
+
+    for (long idx = 0; idx < RARRAY_LEN(recv); idx++) {
+        VALUE elem = RARRAY_AREF(recv, idx);
+        VALUE blockArg = sorbet_rubyNil();
+        long blockArgc = 1;
+        (*blk)(elem, closure, blockArgc, &elem, blockArg);
+    }
+
+    return recv;
+}
+
 void rb_ary_splice(VALUE ary, long beg, long len, const VALUE *rptr, long rlen);
 
 VALUE sorbet_rb_array_square_br_eq(VALUE ary, int argc, const VALUE *const restrict argv, BlockFFIType blk,

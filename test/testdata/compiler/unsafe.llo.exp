@@ -76,6 +76,9 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_ast_body_struct = type { %struct.RNode*, i64, i32 }
 %struct.RNode = type { i64, %union.anon.21, %union.anon.21, %union.anon.21, %struct.rb_code_location_struct, i32 }
 %union.anon.21 = type { %struct.RNode* }
+%struct.RArray = type { %struct.RBasic, %union.anon.27 }
+%union.anon.27 = type { %struct.anon.28 }
+%struct.anon.28 = type { i64, %union.anon.0, i64* }
 %struct.RClass = type { %struct.RBasic, i64, %struct.rb_classext_struct*, %struct.rb_id_table* }
 %struct.rb_classext_struct = type { %struct.st_table*, %struct.st_table*, %struct.rb_id_table*, %struct.rb_id_table*, %struct.rb_subclass_entry*, %struct.rb_subclass_entry**, %struct.rb_subclass_entry**, i64, i64, i64, i64 (i64)* }
 %struct.rb_subclass_entry = type { i64, %struct.rb_subclass_entry* }
@@ -96,7 +99,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @.str.8 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
 @ruby_vm_global_method_state = external local_unnamed_addr global i64, align 8
-@.str.13 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
+@.str.14 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$111" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -119,7 +122,7 @@ define internal void @sorbet_Closure_mark(i8*) #0 {
   %4 = sext i32 %3 to i64
   %5 = getelementptr inbounds i8, i8* %0, i64 8
   %6 = bitcast i8* %5 to i64*
-  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #10
+  tail call void @rb_gc_mark_values(i64 %4, i64* nonnull %6) #11
   ret void
 }
 
@@ -137,7 +140,7 @@ declare void @rb_gc_mark_values(i64, i64*) local_unnamed_addr #2
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_pi(i64) local_unnamed_addr #0 {
-  %2 = tail call i8* @rb_id2name(i64 %0) #10
+  %2 = tail call i8* @rb_id2name(i64 %0) #11
   ret i8* %2
 }
 
@@ -145,13 +148,13 @@ declare i8* @rb_id2name(i64) local_unnamed_addr #2
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @dbg_p(i64) local_unnamed_addr #0 {
-  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #10
+  %2 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #11
   %3 = inttoptr i64 %2 to %struct.RBasic*
   %4 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %3, i64 0, i32 0
   %5 = load i64, i64* %4, align 8, !tbaa !4
   %6 = and i64 %5, 8192
   %7 = icmp eq i64 %6, 0
-  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #10
+  %8 = tail call i64 (i8*, ...) @rb_sprintf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i64 0, i64 0), i64 %0) #11
   %9 = inttoptr i64 %8 to %struct.RString*
   br i1 %7, label %10, label %13
 
@@ -174,7 +177,7 @@ declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #2
 
 ; Function Attrs: nounwind ssp uwtable
 define void @stopInDebugger() local_unnamed_addr #0 {
-  tail call void asm sideeffect "int $$3", "~{dirflag},~{fpsr},~{flags}"() #10, !srcloc !8
+  tail call void asm sideeffect "int $$3", "~{dirflag},~{fpsr},~{flags}"() #11, !srcloc !8
   ret void
 }
 
@@ -196,8 +199,8 @@ declare i64 @rb_vm_call(%struct.rb_execution_context_struct*, i64, i64, i32, i64
 ; Function Attrs: cold minsize noreturn nounwind optsize ssp uwtable
 define internal fastcc void @sorbet_cast_failure(i64) unnamed_addr #4 {
   %2 = load i64, i64* @rb_eTypeError, align 8, !tbaa !9
-  %3 = tail call i8* @rb_obj_classname(i64 %0) #10
-  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.8, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0), i8* %3, i64 %0) #11
+  %3 = tail call i8* @rb_obj_classname(i64 %0) #11
+  tail call void (i64, i8*, ...) @rb_raise(i64 %2, i8* getelementptr inbounds ([45 x i8], [45 x i8]* @.str.8, i64 0, i64 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0), i8* %3, i64 %0) #12
   unreachable
 }
 
@@ -224,16 +227,41 @@ define i64** @sorbet_setRubyStackFrame(i8*) local_unnamed_addr #5 {
   ret i64** %11
 }
 
+; Function Attrs: norecurse nounwind readonly ssp uwtable
+define i64 @enumerator_size_func_array_length(i64, i64, i64) local_unnamed_addr #6 {
+  %4 = inttoptr i64 %0 to %struct.RBasic*
+  %5 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %4, i64 0, i32 0
+  %6 = load i64, i64* %5, align 8, !tbaa !4
+  %7 = and i64 %6, 8192
+  %8 = icmp eq i64 %7, 0
+  br i1 %8, label %12, label %9
+
+9:                                                ; preds = %3
+  %10 = lshr i64 %6, 15
+  %11 = and i64 %10, 3
+  br label %rb_array_len.exit
+
+12:                                               ; preds = %3
+  %13 = inttoptr i64 %0 to %struct.RArray*
+  %14 = getelementptr inbounds %struct.RArray, %struct.RArray* %13, i64 0, i32 1, i32 0, i32 0
+  %15 = load i64, i64* %14, align 8, !tbaa !7
+  br label %rb_array_len.exit
+
+rb_array_len.exit:                                ; preds = %9, %12
+  %16 = phi i64 [ %11, %9 ], [ %15, %12 ]
+  ret i64 %16
+}
+
 ; Function Attrs: nounwind ssp
-define internal void @"Constr_stackFramePrecomputed_func_<root>.<static-init>$111"() #6 {
+define internal void @"Constr_stackFramePrecomputed_func_<root>.<static-init>$111"() #7 {
 entryInitializers:
   %"rubyStr_<top (required)>" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
   %"rubyStr_test/testdata/compiler/unsafe.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/unsafe.rb", align 8
-  %0 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %"rubyStr_<top (required)>", i64 %"rubyStr_test/testdata/compiler/unsafe.rb", i64 %"rubyStr_test/testdata/compiler/unsafe.rb", %struct.rb_iseq_struct* null, i32 1) #10
+  %0 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %"rubyStr_<top (required)>", i64 %"rubyStr_test/testdata/compiler/unsafe.rb", i64 %"rubyStr_test/testdata/compiler/unsafe.rb", %struct.rb_iseq_struct* null, i32 1) #11
   %1 = ptrtoint %struct.rb_iseq_struct* %0 to i64
-  tail call void @rb_gc_register_mark_object(i64 %1) #10
-  %2 = tail call i8* @ruby_xmalloc2(i64 1, i64 8) #10
-  %3 = tail call i8* @ruby_xmalloc2(i64 1, i64 4) #10
+  tail call void @rb_gc_register_mark_object(i64 %1) #11
+  %2 = tail call i8* @ruby_xmalloc2(i64 1, i64 8) #11
+  %3 = tail call i8* @ruby_xmalloc2(i64 1, i64 4) #11
   %4 = bitcast i8* %3 to i32*
   store i32 0, i32* %4, align 4, !tbaa !0
   %5 = bitcast i8* %2 to i32*
@@ -250,7 +278,7 @@ entryInitializers:
   store i32 1, i32* %12, align 4, !tbaa !32
   %13 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %7, i64 0, i32 5, i32 2
   store i32 1, i32* %13, align 8, !tbaa !33
-  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %0) #10
+  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %0) #11
   %14 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %6, align 8, !tbaa !20
   %15 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %14, i64 0, i32 2
   store i64* null, i64** %15, align 8, !tbaa !34
@@ -259,41 +287,41 @@ entryInitializers:
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @"Constr_rubyIdPrecomputed_<top (required)>"() #6 {
+define internal void @"Constr_rubyIdPrecomputed_<top (required)>"() #7 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #10
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #11
   store i64 %0, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   ret void
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @"Constr_rubyStrFrozen_<top (required)>"() #6 {
+define internal void @"Constr_rubyStrFrozen_<top (required)>"() #7 {
 constr:
-  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #10
-  tail call void @rb_gc_register_mark_object(i64 %0) #10
+  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #11
+  tail call void @rb_gc_register_mark_object(i64 %0) #11
   store i64 %0, i64* @"rubyStrFrozen_<top (required)>", align 8
   ret void
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @"Constr_rubyStrFrozen_test/testdata/compiler/unsafe.rb"() #6 {
+define internal void @"Constr_rubyStrFrozen_test/testdata/compiler/unsafe.rb"() #7 {
 constr:
-  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"str_test/testdata/compiler/unsafe.rb", i64 0, i64 0), i64 32) #10
-  tail call void @rb_gc_register_mark_object(i64 %0) #10
+  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"str_test/testdata/compiler/unsafe.rb", i64 0, i64 0), i64 32) #11
+  tail call void @rb_gc_register_mark_object(i64 %0) #11
   store i64 %0, i64* @"rubyStrFrozen_test/testdata/compiler/unsafe.rb", align 8
   ret void
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_unsafe() #6 {
+define internal void @Constr_rubyIdPrecomputed_unsafe() #7 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_unsafe, i64 0, i64 0), i64 6) #10
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_unsafe, i64 0, i64 0), i64 6) #11
   store i64 %0, i64* @rubyIdPrecomputed_unsafe, align 8
   ret void
 }
 
 ; Function Attrs: noinline ssp
-define linkonce i64 @call_via_vm_puts(i32, i64*, i64, %struct.FunctionInlineCache*) local_unnamed_addr #7 {
+define linkonce i64 @call_via_vm_puts(i32, i64*, i64, %struct.FunctionInlineCache*) local_unnamed_addr #8 {
 functionEntryInitializers:
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %4 = load i64, i64* @ruby_vm_global_method_state, align 8, !tbaa !35
@@ -406,13 +434,13 @@ updateIC:                                         ; preds = %functionEntryInitia
 rb_class_of.exit.i:                               ; preds = %59, %58, %57, %51, %49, %46, %42
   %62 = phi i64* [ %61, %59 ], [ @rb_cFalseClass, %58 ], [ @rb_cInteger, %42 ], [ @rb_cFloat, %46 ], [ @rb_cTrueClass, %49 ], [ @rb_cSymbol, %51 ], [ @rb_cNilClass, %57 ]
   %63 = load i64, i64* %62, align 8, !tbaa !9
-  %64 = tail call %struct.rb_callable_method_entry_struct* @rb_callable_method_entry(i64 %63, i64 %rubyId_puts) #10
+  %64 = tail call %struct.rb_callable_method_entry_struct* @rb_callable_method_entry(i64 %63, i64 %rubyId_puts) #11
   %65 = icmp eq %struct.rb_callable_method_entry_struct* %64, null
   br i1 %65, label %66, label %68
 
 66:                                               ; preds = %rb_class_of.exit.i
   %67 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
-  tail call void (i64, i8*, ...) @rb_raise(i64 %67, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.13, i64 0, i64 0)) #11
+  tail call void (i64, i8*, ...) @rb_raise(i64 %67, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.14, i64 0, i64 0)) #12
   unreachable
 
 68:                                               ; preds = %rb_class_of.exit.i
@@ -477,20 +505,20 @@ call:                                             ; preds = %sorbet_inlineCacheI
   %98 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10, !noalias !47
   %99 = getelementptr inbounds %struct.FunctionInlineCache, %struct.FunctionInlineCache* %3, i64 0, i32 0
   %100 = load %struct.rb_callable_method_entry_struct*, %struct.rb_callable_method_entry_struct** %99, align 8, !tbaa !46, !noalias !47
-  %101 = tail call i64 @rb_vm_call(%struct.rb_execution_context_struct* %98, i64 %2, i64 %rubyId_puts, i32 %0, i64* %1, %struct.rb_callable_method_entry_struct* %100) #10
+  %101 = tail call i64 @rb_vm_call(%struct.rb_execution_context_struct* %98, i64 %2, i64 %rubyId_puts, i32 %0, i64* %1, %struct.rb_callable_method_entry_struct* %100) #11
   ret i64 %101
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_puts() #6 {
+define internal void @Constr_rubyIdPrecomputed_puts() #7 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #10
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #11
   store i64 %0, i64* @rubyIdPrecomputed_puts, align 8
   ret void
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_compiler_unsafe() local_unnamed_addr #8 {
+define void @Init_test_testdata_compiler_unsafe() local_unnamed_addr #9 {
 entry:
   %callArgs.i = alloca [1 x i64], align 8
   %0 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !10
@@ -519,22 +547,22 @@ entry:
   br i1 %17, label %"func_<root>.<static-init>$111.exit", label %typeTestFail.i, !prof !45
 
 typeTestFail.i:                                   ; preds = %entry
-  tail call fastcc void @sorbet_cast_failure(i64 %2) #10
+  tail call fastcc void @sorbet_cast_failure(i64 %2) #11
   unreachable
 
 "func_<root>.<static-init>$111.exit":             ; preds = %entry
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 3, i64* %callArgsAddr.i, align 8
-  %rawSendResult19.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #10
+  %rawSendResult19.i = call i64 @call_via_vm_puts(i32 1, i64* nonnull %callArgsAddr.i, i64 %2, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #11
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #9
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #10
 
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #9
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #10
 
 attributes #0 = { nounwind ssp uwtable }
 attributes #1 = { norecurse nounwind readnone ssp uwtable }
@@ -542,12 +570,13 @@ attributes #2 = { "addedToSilenceEmptyAttrsError" }
 attributes #3 = { noreturn }
 attributes #4 = { cold minsize noreturn nounwind optsize ssp uwtable }
 attributes #5 = { nofree norecurse nounwind ssp uwtable }
-attributes #6 = { nounwind ssp }
-attributes #7 = { noinline ssp }
-attributes #8 = { nounwind sspreq }
-attributes #9 = { argmemonly nounwind }
-attributes #10 = { nounwind }
-attributes #11 = { noreturn nounwind }
+attributes #6 = { norecurse nounwind readonly ssp uwtable }
+attributes #7 = { nounwind ssp }
+attributes #8 = { noinline ssp }
+attributes #9 = { nounwind sspreq }
+attributes #10 = { argmemonly nounwind }
+attributes #11 = { nounwind }
+attributes #12 = { noreturn nounwind }
 
 !0 = !{!1, !1, i64 0}
 !1 = !{!"int", !2, i64 0}
