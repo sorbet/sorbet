@@ -273,7 +273,7 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
                                                    llvm::Value *argv, llvm::Value *argc, string_view name) {
     auto &builder = builderCast(build);
     auto str = name;
-    auto icValidatorFunc = cs.module->getFunction("sorbet_isInlineCacheValid");
+    auto icValidatorFunc = cs.module->getFunction("sorbet_inlineCacheInvalidated");
     auto inlineCacheType =
         (llvm::StructType *)(((llvm::PointerType *)((icValidatorFunc->arg_begin() + 1)->getType()))->getElementType());
     ENFORCE(inlineCacheType != nullptr);
