@@ -505,14 +505,14 @@ class Range < Object
   # definition of class Xs.
   sig do
     params(
-        n: Integer,
+        n: T.any(Integer, Float, Rational),
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T.self_type)
   end
   sig do
     params(
-        n: Integer,
+        n: T.any(Integer, Float, Rational),
     )
     .returns(T::Enumerator[Elem])
   end
