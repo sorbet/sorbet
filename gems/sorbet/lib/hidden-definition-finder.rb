@@ -327,9 +327,9 @@ class Sorbet::Private::HiddenMethodFinder
         next
       end
       next if Sorbet::Private::RealStdlib.real_is_a?(my_value, Class) || Sorbet::Private::RealStdlib.real_is_a?(my_value, Module)
-      if Sorbet::Private::RealStdlib.real_is_a?(my_value, T::Types::TypeMember)
+      if defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(my_value, T::Types::TypeMember)
         ret << my_value.variance == :invariant ? "  #{name} = type_member" : "  #{name} = type_member(#{my_value.variance})"
-      elsif Sorbet::Private::RealStdlib.real_is_a?(my_value, T::Types::TypeTemplate)
+      elsif defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(my_value, T::Types::TypeTemplate)
         ret << my_value.variance == :invariant ? "  #{name} = type_template" : "  #{name} = type_template(#{my_value.variance})"
       else
         ret << "  #{name} = ::T.let(nil, ::T.untyped)"
