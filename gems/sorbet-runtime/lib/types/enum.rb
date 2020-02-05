@@ -329,7 +329,7 @@ class T::Enum
       end
       @mapping[serialized] = instance
     end
-    @values = @mapping.values.sort.freeze
+    @values = @mapping.values.freeze
     @mapping.freeze
     @fully_initialized = true
   end

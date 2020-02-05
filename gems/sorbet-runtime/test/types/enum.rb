@@ -67,13 +67,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
-  describe 'sorting' do
-    it 'sorts according to serialized_val' do
-      assert_equal(CardSuit::CLUB, CardSuit.values.min) # 'c' is first alphabetically
-      assert_equal(CardSuit::SPADE, CardSuit.values.max)
-    end
-  end
-
   describe 'to_s' do
     it 'prints the full constant name' do
       assert_equal('#<T::Enum::Test::EnumTest::CardSuit::SPADE>', CardSuit::SPADE.to_s)
@@ -81,9 +74,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'values' do
-    it 'returns an array of enum instances' do
+    it 'returns an array of enum instances, sorted by code order' do
+      # note this is *not* alphabetical order (S before D)
       assert_equal(
-        [CardSuit::CLUB, CardSuit::DIAMOND, CardSuit::HEART, CardSuit::SPADE],
+        [CardSuit::CLUB, CardSuit::SPADE, CardSuit::DIAMOND, CardSuit::HEART],
         CardSuit.values
       )
     end
