@@ -315,7 +315,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
           end
         end
       end
-      assert_equal('Enum values must be assigned to constants: ["foo"]', ex.message)
+      assert_equal('Enum values must be assigned to constants: ["foo", nil]', ex.message)
     end
   end
 
