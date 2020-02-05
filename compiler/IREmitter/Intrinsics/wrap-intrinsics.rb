@@ -368,9 +368,10 @@ module Intrinsics
     def self.wrapper_implementation(wrapper, method)
 
       # NOTE: the sorbet calling convention differs from -1, in that we put the
-      # receiver first
+      # receiver first, and pass the ID of the fun explicitly.
       wrapper << "VALUE sorbet_int_#{method.c_name}("
       wrapper << 'VALUE recv, '
+      wrapper << 'ID fun, '
       wrapper << 'int argc, '
       wrapper << "VALUE *const restrict args, BlockFFIType blk, VALUE closure) {\n"
 

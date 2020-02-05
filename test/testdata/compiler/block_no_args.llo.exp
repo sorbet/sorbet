@@ -101,7 +101,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.8 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
 @rb_cData = external local_unnamed_addr constant i64, align 8
 @ruby_vm_global_method_state = external local_unnamed_addr global i64, align 8
-@.str.14 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
+@.str.13 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$111" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -429,7 +429,7 @@ rb_class_of.exit.i.i:                             ; preds = %76, %75, %74, %68, 
 
 83:                                               ; preds = %rb_class_of.exit.i.i
   %84 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
-  tail call void (i64, i8*, ...) @rb_raise(i64 %84, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.14, i64 0, i64 0)) #11
+  tail call void (i64, i8*, ...) @rb_raise(i64 %84, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.13, i64 0, i64 0)) #11
   unreachable
 
 85:                                               ; preds = %rb_class_of.exit.i.i

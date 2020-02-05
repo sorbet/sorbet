@@ -59,7 +59,7 @@ public:
         llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
                                   llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
 
-        auto var = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
+        auto recv = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
         llvm::Value *blkPtr;
         if (blk != nullptr) {
             blkPtr = blk;
@@ -67,11 +67,11 @@ public:
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
 
+        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
+        auto argv = builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices);
+        auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {var, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
-                                   builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices), blkPtr,
-
-                                   blockMap.escapedClosure[rubyBlockId]},
+                                  {recv, fun, argc, argv, blkPtr, blockMap.escapedClosure[rubyBlockId]},
                                   "rawSendResult");
     };
 

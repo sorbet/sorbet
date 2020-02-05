@@ -794,7 +794,7 @@ VALUE sorbet_boolToRuby(_Bool b) {
 // ****                       Name Based Intrinsics
 // ****
 
-VALUE sorbet_buildHashIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_buildHashIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                 VALUE closure) {
     // this comes from internal.h
     void rb_hash_bulk_insert(long, const VALUE *, VALUE);
@@ -806,7 +806,7 @@ VALUE sorbet_buildHashIntrinsic(VALUE recv, int argc, const VALUE *const restric
     return ret;
 }
 
-VALUE sorbet_buildArrayIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_buildArrayIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                  VALUE closure) {
     if (argc == 0) {
         return rb_ary_new();
@@ -814,7 +814,8 @@ VALUE sorbet_buildArrayIntrinsic(VALUE recv, int argc, const VALUE *const restri
     return rb_ary_new_from_values(argc, argv);
 }
 
-VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
     sorbet_ensure_arity(argc, 3);
     VALUE arr = argv[0];
     long len = sorbet_rubyArrayLen(arr);
@@ -832,7 +833,8 @@ VALUE sorbet_splatIntrinsic(VALUE recv, int argc, const VALUE *const restrict ar
 
 // This doesn't do exactly the right thing because that is done by the parser in Ruby. Ruby will return the String
 // "expression" if the RHS is an expression.
-VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_definedIntinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
     if (argc == 0) {
         return sorbet_rubyNil();
     }
@@ -853,29 +855,33 @@ VALUE sorbet_definedIntinsic(VALUE recv, int argc, const VALUE *const restrict a
 // ****
 
 // TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
-VALUE sorbet_T_unsafe(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_T_unsafe(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return argv[0];
 }
 
-VALUE sorbet_T_untyped(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_T_untyped(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
     return RUBY_Qundef;
 }
 
-VALUE sorbet_T_Hash_squarebr(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_T_Hash_squarebr(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
     return RUBY_Qundef;
 }
 
-VALUE sorbet_T_Array_squarebr(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_T_Array_squarebr(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
     return RUBY_Qundef;
 }
 
-VALUE sorbet_rb_array_len(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
     sorbet_ensure_arity(argc, 0);
     return sorbet_longToRubyValue(rb_array_len(recv));
 }
 
-VALUE sorbet_rb_array_square_br(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                 VALUE closure) {
     VALUE ary = recv;
     rb_check_arity(argc, 1, 2);
@@ -902,7 +908,8 @@ VALUE sorbet_rb_array_square_br(VALUE recv, int argc, const VALUE *const restric
     return rb_ary_entry(ary, NUM2LONG(arg));
 }
 
-VALUE sorbet_rb_array_empty(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
     rb_check_arity(argc, 0, 0);
     if (RARRAY_LEN(recv) == 0) {
         return Qtrue;
@@ -914,11 +921,12 @@ VALUE enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
     return RARRAY_LEN(array);
 }
 
-VALUE sorbet_rb_array_each(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
     sorbet_ensure_arity(argc, 0);
     if (blk == NULL) {
         // TODO(jez) Remove this rb_intern by threading symbol name through.
-        return rb_enumeratorize_with_size(recv, ID2SYM(rb_intern("each")), 0, NULL,
+        return rb_enumeratorize_with_size(recv, ID2SYM(fun), 0, NULL,
                                           (rb_enumerator_size_func *)enumerator_size_func_array_length);
     }
 
@@ -934,7 +942,7 @@ VALUE sorbet_rb_array_each(VALUE recv, int argc, const VALUE *const restrict arg
 
 void rb_ary_splice(VALUE ary, long beg, long len, const VALUE *rptr, long rlen);
 
-VALUE sorbet_rb_array_square_br_eq(VALUE ary, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_rb_array_square_br_eq(VALUE ary, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                    VALUE closure) {
     long offset, beg, len;
     VALUE rpl;
@@ -966,19 +974,20 @@ fixnum:
     return argv[1];
 }
 
-VALUE sorbet_rb_hash_square_br(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_rb_hash_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                VALUE closure) {
     rb_check_arity(argc, 1, 1);
     return rb_hash_aref(recv, argv[0]);
 }
 
-VALUE sorbet_rb_hash_square_br_eq(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                   VALUE closure) {
     rb_check_arity(argc, 2, 2);
     return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
-VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                         VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
@@ -998,7 +1007,8 @@ VALUE sorbet_rb_int_plus(VALUE recv, int argc, const VALUE *const restrict argv,
     return rb_num_coerce_bin(recv, y, '+');
 }
 
-VALUE sorbet_rb_int_minus(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     // optimized version from numeric.c
     VALUE y = argv[0];
@@ -1018,17 +1028,20 @@ VALUE sorbet_rb_int_minus(VALUE recv, int argc, const VALUE *const restrict argv
     return rb_num_coerce_bin(recv, y, '-');
 }
 
-VALUE sorbet_rb_int_mul(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_mul(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                        VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return rb_int_mul(recv, argv[0]);
 }
 
-VALUE sorbet_rb_int_div(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_div(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                        VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return rb_int_div(recv, argv[0]);
 }
 
-VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_gt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
@@ -1048,7 +1061,8 @@ VALUE sorbet_rb_int_gt(VALUE recv, int argc, const VALUE *const restrict argv, B
     return rb_num_coerce_relop(recv, y, '>');
 }
 
-VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
@@ -1068,29 +1082,33 @@ VALUE sorbet_rb_int_lt(VALUE recv, int argc, const VALUE *const restrict argv, B
     return rb_num_coerce_relop(recv, y, '<');
 }
 
-VALUE sorbet_rb_int_ge(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_ge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
     sorbet_ensure_arity(argc, 1);
-    VALUE res = sorbet_rb_int_lt(recv, argc, argv, blk, closure);
+    VALUE res = sorbet_rb_int_lt(recv, fun, argc, argv, blk, closure);
     return res == Qtrue ? Qfalse : Qtrue;
 }
 
-VALUE sorbet_rb_int_le(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_le(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
     sorbet_ensure_arity(argc, 1);
-    VALUE res = sorbet_rb_int_gt(recv, argc, argv, blk, closure);
+    VALUE res = sorbet_rb_int_gt(recv, fun, argc, argv, blk, closure);
     return res == Qtrue ? Qfalse : Qtrue;
 }
 
-VALUE sorbet_rb_int_equal(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_equal(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return rb_int_equal(recv, argv[0]);
 }
 
-VALUE sorbet_rb_int_neq(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_neq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                        VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
 }
 
-VALUE sorbet_rb_int_to_s(VALUE x, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_int_to_s(VALUE x, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
     int base;
 
     rb_check_arity(argc, 0, 1);
@@ -1113,7 +1131,7 @@ extern VALUE rb_obj_as_string_result(VALUE, VALUE);
 
 extern VALUE rb_str_concat_literals(int, const VALUE *const restrict);
 
-VALUE sorbet_stringInterpolate(VALUE recv, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
     for (int i = 0; i < argc; ++i) {
         if (!RB_TYPE_P(argv[i], T_STRING)) {
             VALUE str = rb_funcall(argv[i], idTo_s, 0);
@@ -1124,21 +1142,24 @@ VALUE sorbet_stringInterpolate(VALUE recv, int argc, VALUE *argv, BlockFFIType b
     return rb_str_concat_literals(argc, argv);
 }
 
-VALUE sorbet_selfNew(VALUE recv, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
     VALUE obj = argv[0];
     return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
 }
 
-VALUE sorbet_int_bool_true(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_int_bool_true(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
     return Qtrue;
 }
 
-VALUE sorbet_int_bool_false(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_int_bool_false(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
     return Qfalse;
 }
 
-VALUE sorbet_int_bool_and(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_int_bool_and(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     if (argv[0] != Qnil && argv[0] != Qfalse) {
         return Qtrue;
@@ -1146,7 +1167,8 @@ VALUE sorbet_int_bool_and(VALUE recv, int argc, const VALUE *const restrict argv
     return Qfalse;
 }
 
-VALUE sorbet_int_bool_nand(VALUE recv, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
     sorbet_ensure_arity(argc, 1);
     if (argv[0] != Qnil && argv[0] != Qfalse) {
         return Qfalse;
