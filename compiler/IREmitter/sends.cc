@@ -287,10 +287,8 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
                                                            llvm::ConstantInt::get(intt, 0)),
                                  llvm::Twine("ic_") + slowFunctionName);
     auto rawId = Payload::idIntern(cs, builder, str);
-    return builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
-                                              {self, rawId, argc, argv, cache},
-                                              slowFunctionName);
-
+    return builder.CreateCall(cs.module->getFunction("sorbet_callFunc"), {self, rawId, argc, argv, cache},
+                              slowFunctionName);
 }
 
 } // namespace sorbet::compiler

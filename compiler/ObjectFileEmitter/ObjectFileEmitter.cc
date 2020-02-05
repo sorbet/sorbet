@@ -20,11 +20,11 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/AggressiveInstCombine/AggressiveInstCombine.h"
 #include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/IPO/AlwaysInliner.h"
 #include "llvm/Transforms/IPO/Attributor.h"
 #include "llvm/Transforms/IPO/ForceFunctionAttrs.h"
 #include "llvm/Transforms/IPO/FunctionAttrs.h"
 #include "llvm/Transforms/IPO/InferFunctionAttrs.h"
-#include "llvm/Transforms/IPO/AlwaysInliner.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Instrumentation.h"
@@ -358,8 +358,8 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
     llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
     pm.add(llvm::createPrintModulePass(lllFile, ""));
-    pm.add(llvm::createAlwaysInlinerLegacyPass(false));     // Force inline functions early
-    pm.add(llvm::createGlobalDCEPass());     // Remove dead fns and globals. We benefit from this a lot
+    pm.add(llvm::createAlwaysInlinerLegacyPass(false)); // Force inline functions early
+    pm.add(llvm::createGlobalDCEPass());                // Remove dead fns and globals. We benefit from this a lot
     // Module passes
     addModulePasses(pm);
     // LTO passes

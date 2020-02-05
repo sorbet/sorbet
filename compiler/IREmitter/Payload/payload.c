@@ -1204,7 +1204,7 @@ void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
                       struct FunctionInlineCache *cache) {
     if (!_sorbet_isInlineCacheValid(recv, cache)) {
-      sorbet_inlineCacheInvalidated(recv, cache, func);
+        sorbet_inlineCacheInvalidated(recv, cache, func);
     }
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
 }
