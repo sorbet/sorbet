@@ -259,9 +259,9 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       )
     end
 
-    it 'does not allow `_add_instance` after enum has been defined' do
+    it 'does not allow `_register_instance` after enum has been defined' do
       ex = assert_raises(RuntimeError) do
-        CardSuit._add_instance(CardSuit::HEART)
+        CardSuit._register_instance(CardSuit::HEART)
       end
       assert_match(/can't modify frozen Array/, ex.message)
     end
@@ -311,6 +311,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         Class.new(T::Enum) do
           enums do
             new('foo')
+            new
           end
         end
       end

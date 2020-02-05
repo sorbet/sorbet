@@ -150,11 +150,6 @@ class T::Enum
   sig {returns(SerializedVal).checked(:never)}
   def serialize
     assert_bound!
-    _serialized_val
-  end
-
-  sig {returns(SerializedVal).checked(:never)}
-  def _serialized_val
     @serialized_val
   end
 
@@ -266,7 +261,7 @@ class T::Enum
     serialized_val = serialized_val.frozen? ? serialized_val : serialized_val.dup.freeze
     @serialized_val = T.let(serialized_val, T.nilable(SerializedVal))
     @const_name = T.let(nil, T.nilable(Symbol))
-    self.class._add_instance(self)
+    self.class._register_instance(self)
   end
 
   sig {returns(NilClass).checked(:never)}
@@ -306,7 +301,7 @@ class T::Enum
 
   # Maintains the order in which values are defined
   sig {params(instance: T.untyped).void}
-  def self._add_instance(instance)
+  def self._register_instance(instance)
     @values ||= []
     @values << T.cast(instance, T.attached_class)
   end
@@ -348,7 +343,7 @@ class T::Enum
 
     orphaned_instances = T.must(@values) - @mapping.values
     if !orphaned_instances.empty?
-      raise "Enum values must be assigned to constants: #{orphaned_instances.map(&:_serialized_val)}"
+      raise "Enum values must be assigned to constants: #{orphaned_instances.map {|v| v.instance_variable_get('@serialized_val')}}"
     end
 
     @fully_initialized = true
