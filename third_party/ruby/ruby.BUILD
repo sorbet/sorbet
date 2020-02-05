@@ -16,12 +16,12 @@ build_ruby(
     visibility = ["//visibility:private"],
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [
-            "@system_ssl_darwin//:crypto",
             "@system_ssl_darwin//:ssl",
+            "@system_ssl_darwin//:crypto",
         ],
         "@com_stripe_ruby_typer//tools/config:linux": [
-            "@system_ssl_linux//:crypto",
             "@system_ssl_linux//:ssl",
+            "@system_ssl_linux//:crypto",
         ],
     }),
 )

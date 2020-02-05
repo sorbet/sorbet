@@ -12,12 +12,12 @@ hermetic_tar() {
     FLAGS="${3:-}"
     # Check if our tar supports --sort (we assume --sort support implies --mtime support)
     if [[ $(tar --sort 2>&1) =~ 'requires an argument' ]]; then
-        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -C "$SRC" $FLAGS -rf "$OUT" .
+        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -L -C "$SRC" $FLAGS -rf "$OUT" .
     elif [[ $(tar --mtime 2>&1) =~ 'requires an argument' ]]; then
-        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' $FLAGS -rf "$OUT" .
+        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -L -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' $FLAGS -rf "$OUT" .
     else
         # Oh well, no hermetic tar for you
-        tar -C "$SRC" $FLAGS -rf "$OUT" .
+        tar -L -C "$SRC" $FLAGS -rf "$OUT" .
     fi
 }
 """
@@ -42,13 +42,13 @@ set -euo pipefail
 base="$PWD"
 out_dir="$base/{toolchain}"
 
-# Build up include path
+declare -a inc_path=()
 for path in {hdrs}; do
   inc_path=("${{inc_path[@]:-}}" "-isystem" "$base/$path")
 done
 
-# Build up the shared library path
-for path in {shared_libs}; do
+declare -a lib_path=()
+for path in {libs}; do
   lib_path=("${{lib_path[@]:-}}" "-L$base/$path")
 done
 
@@ -70,11 +70,6 @@ run_cmd() {{
     fi
 }}
 
-export PATH="$(dirname {cc}):$PATH"
-
-# NOTE: OUTFLAG is what's used in ruby to determine how to name the output of
-# the compiler. We're piggybacking on that to also disable
-# '-fvisibility=hidden'.
 run_cmd ./configure \
         CC="{cc}" \
         CFLAGS="${{inc_path[*]}} {copts}" \
@@ -123,15 +118,7 @@ def _is_sanitizer_flag(flag):
            flag.endswith("ubsan_standalone-x86_64.a")
 
 def _build_ruby_impl(ctx):
-    # Discover the path to the source by finding ruby.c
-    src_dir = None
-    for candidate in ctx.attr.src.files.to_list():
-        if candidate.basename == "ruby.c":
-            src_dir = candidate.dirname
-            break
-
-    if src_dir == None:
-        fail("Unable to locate 'ruby.c' in src")
+    src_dir = ctx.label.workspace_root
 
     # Setup toolchains
     cc_toolchain = find_cpp_toolchain(ctx)
@@ -157,27 +144,6 @@ def _build_ruby_impl(ctx):
         ),
     )
 
-    # compute headers
-    dep_inputs = []
-    hdrs = {}
-    shared_libs = {}
-    for label in ctx.attr.deps:
-        cc_info = label[CcInfo]
-        if cc_info == None:
-            fail("Non CcInfo dependency given: {}".format(label))
-
-        for hdr in cc_info.compilation_context.headers.to_list():
-            dep_inputs.append(hdr)
-            path = hdr.dirname
-            hdrs[path] = True
-
-        for lib in cc_info.linking_context.libraries_to_link.to_list():
-            shared_libs[lib.dynamic_library.dirname] = True
-            dep_inputs.append(lib.dynamic_library)
-
-    hdrs = hdrs.keys()
-    shared_libs = shared_libs.keys()
-
     # -Werror breaks configure, so we strip out all flags with a leading -W
     # ruby doesn't work with asan or ubsan
     flags = []
@@ -190,8 +156,6 @@ def _build_ruby_impl(ctx):
 
         flags.append(flag)
 
-    flags.extend(ctx.attr.copts)
-
     ldflags = []
     for flag in ctx.fragments.cpp.linkopts:
         if _is_sanitizer_flag(flag):
@@ -199,7 +163,29 @@ def _build_ruby_impl(ctx):
 
         ldflags.append(flag)
 
-    ldflags.extend(ctx.attr.linkopts)
+    # process deps into include and linker paths
+    hdrs = {}
+    libs = {}
+    deps = {}
+
+    for dep in ctx.attr.deps:
+        cc_info = dep[CcInfo]
+        if None == cc_info:
+            fail("Dependency {} is missing a CcInfo".format(dep))
+
+        for hdr in cc_info.compilation_context.headers.to_list():
+            deps[hdr] = True
+
+        for path in cc_info.compilation_context.system_includes.to_list():
+            hdrs[path] = True
+
+        for lib in cc_info.linking_context.libraries_to_link.to_list():
+            libs[lib.dynamic_library.dirname] = True
+            deps[lib.dynamic_library] = True
+
+    hdrs = hdrs.keys()
+    libs = libs.keys()
+    deps = deps.keys()
 
     # Outputs
     binaries = [
@@ -218,17 +204,17 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = dep_inputs + ctx.files.src,
+        inputs = deps + ctx.files.src,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
-            copts = " ".join(cmdline + flags),
-            linkopts = " ".join(ldflags),
+            copts = " ".join(cmdline + flags + ctx.attr.copts),
+            linkopts = " ".join(ldflags + ctx.attr.linkopts),
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
             hdrs = " ".join(hdrs),
-            shared_libs = " ".join(shared_libs),
+            libs = " ".join(libs),
         )),
     )
 
@@ -250,8 +236,12 @@ build_ruby = rule(
     attrs = {
         "src": attr.label(),
         "deps": attr.label_list(),
-        "copts": attr.string_list(),
-        "linkopts": attr.string_list(),
+        "copts": attr.string_list(
+            doc = "Additional copts for the ruby build",
+        ),
+        "linkopts": attr.string_list(
+            doc = "Additional linkopts for the ruby build",
+        ),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
