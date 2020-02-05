@@ -12,6 +12,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>)
+
     <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
 
     class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
@@ -20,6 +22,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>, "y")
+
     <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
 
     class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
@@ -27,6 +31,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.final!()
     end
+
+    <emptyTree>::<C T>.let(::<Magic>.<self-new>(<self>), <self>)
 
     <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
   end
@@ -53,6 +59,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>)
+
     <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.instance(), <emptyTree>::<C X$1>)
 
     class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
@@ -61,6 +69,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>, "y")
+
     <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.instance(), <emptyTree>::<C Y$1>)
 
     class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
@@ -68,6 +78,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.final!()
     end
+
+    <emptyTree>::<C T>.let(::<Magic>.<self-new>(<self>), <self>)
 
     <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
 
@@ -89,6 +101,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>)
+
     <emptyTree>::<C Before> = ::T.let(<emptyTree>::<C Before$1>.instance(), <emptyTree>::<C Before$1>)
 
     <emptyTree>::<C StaticField1> = 1
@@ -99,6 +113,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.final!()
     end
 
+    ::<Magic>.<self-new>(<self>)
+
     <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.instance(), <emptyTree>::<C Inside$1>)
 
     <emptyTree>::<C StaticField2> = 2
@@ -108,6 +124,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.final!()
     end
+
+    ::<Magic>.<self-new>(<self>)
 
     <emptyTree>::<C After> = ::T.let(<emptyTree>::<C After$1>.instance(), <emptyTree>::<C After$1>)
 
