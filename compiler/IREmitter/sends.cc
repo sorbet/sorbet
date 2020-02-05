@@ -279,45 +279,6 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
     ENFORCE(inlineCacheType != nullptr);
     auto methodEntryType = (llvm::StructType *)(inlineCacheType->elements()[0]);
     auto slowFunctionName = "call_via_vm_" + (string)str;
-    auto function = cs.module->getFunction(slowFunctionName);
-    if (function == nullptr) {
-        llvm::Type *args[] = {
-            llvm::Type::getInt32Ty(cs),     // arg count
-            llvm::Type::getInt64PtrTy(cs),  // argArray
-            llvm::Type::getInt64Ty(cs),     // self
-            inlineCacheType->getPointerTo() // inlineCache
-        };
-        auto ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), args, false /*not varargs*/);
-
-        function = llvm::Function::Create(ft, llvm::Function::LinkOnceAnyLinkage, slowFunctionName, *cs.module);
-        function->addFnAttr(llvm::Attribute::AttrKind::NoInline); // we'd like to see it in backtraces
-        auto cs1 = cs;
-        llvm::IRBuilder<> funBuilder(cs1);
-        auto early = llvm::BasicBlock::Create(cs, "functionEntryInitializers", function);
-        auto checkICBB = llvm::BasicBlock::Create(cs, "checkIC", function);
-        auto updateICBB = llvm::BasicBlock::Create(cs, "updateIC", function);
-        auto bb = llvm::BasicBlock::Create(cs, "call", function);
-        cs1.functionEntryInitializers = early;
-
-        auto recv = function->arg_begin() + 2;
-        auto cache = function->arg_begin() + 3;
-        funBuilder.SetInsertPoint(checkICBB);
-        auto rawId = Payload::idIntern(cs1, funBuilder, str);
-        auto isICGood = funBuilder.CreateCall(cs.module->getFunction("sorbet_isInlineCacheValid"), {recv, cache});
-        funBuilder.CreateCondBr(Payload::setExpectedBool(cs, funBuilder, isICGood, true), bb, updateICBB);
-
-        funBuilder.SetInsertPoint(updateICBB);
-        funBuilder.CreateCall(cs.module->getFunction("sorbet_inlineCacheInvalidated"), {recv, cache, rawId});
-        funBuilder.CreateBr(bb);
-
-        funBuilder.SetInsertPoint(bb);
-        auto realCall = funBuilder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
-                                              {recv, rawId, function->arg_begin(), function->arg_begin() + 1, cache},
-                                              "rawSendResult");
-        funBuilder.CreateRet(realCall);
-        funBuilder.SetInsertPoint(early);
-        funBuilder.CreateBr(checkICBB);
-    }
     auto intt = llvm::Type::getInt64Ty(cs);
     auto nullv = llvm::ConstantPointerNull::get(methodEntryType->getPointerTo());
     auto cache =
@@ -325,8 +286,11 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
                                  llvm::ConstantStruct::get(inlineCacheType, nullv, llvm::ConstantInt::get(intt, 0),
                                                            llvm::ConstantInt::get(intt, 0)),
                                  llvm::Twine("ic_") + slowFunctionName);
+    auto rawId = Payload::idIntern(cs, builder, str);
+    return builder.CreateCall(cs.module->getFunction("sorbet_callFunc"),
+                                              {self, rawId, argc, argv, cache},
+                                              slowFunctionName);
 
-    return builder.CreateCall(function, {argc, argv, self, cache}, "rawSendResult");
 }
 
 } // namespace sorbet::compiler
