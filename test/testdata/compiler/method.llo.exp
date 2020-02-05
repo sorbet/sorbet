@@ -354,7 +354,7 @@ middle.block:                                     ; preds = %vector.body
   %cmp.n = icmp eq i64 %n.vec, %13
   br i1 %cmp.n, label %.loopexit, label %scalar.ph.preheader
 
-.loopexit:                                        ; preds = %scalar.ph, %scalar.ph.prol.loopexit, %middle.block
+.loopexit:                                        ; preds = %scalar.ph.prol.loopexit, %scalar.ph, %middle.block
   %53 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %5, i64 0, i32 2
   %54 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %53, align 8, !tbaa !21
   %55 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %54, i64 0, i32 5, i32 0
