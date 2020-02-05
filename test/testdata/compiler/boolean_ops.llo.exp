@@ -379,7 +379,7 @@ typeTestFail.i:                                   ; preds = %entry
   %18 = load i64, i64* @ruby_vm_global_method_state, align 8, !tbaa !45, !noalias !46
   %19 = load i64, i64* @ic_call_via_vm_puts.1, align 8, !tbaa !49, !noalias !46
   %20 = icmp eq i64 %18, %19
-  br i1 %20, label %21, label %sorbet_isInlineCacheValid.exit.thread.i
+  br i1 %20, label %21, label %52
 
 21:                                               ; preds = %"func_<root>.<static-init>$111.exit"
   %22 = and i64 %2, 7
@@ -390,21 +390,21 @@ typeTestFail.i:                                   ; preds = %entry
   %25 = trunc i64 %2 to i32
   %26 = and i32 %25, 1
   %27 = icmp eq i32 %26, 0
-  br i1 %27, label %28, label %sorbet_isInlineCacheValid.exit.i
+  br i1 %27, label %28, label %sorbet_getClassSerial.exit.i
 
 28:                                               ; preds = %24
   %29 = and i32 %25, 3
   %30 = icmp eq i32 %29, 2
-  br i1 %30, label %sorbet_isInlineCacheValid.exit.i, label %31
+  br i1 %30, label %sorbet_getClassSerial.exit.i, label %31
 
 31:                                               ; preds = %28
   %32 = icmp eq i64 %2, 20
-  br i1 %32, label %sorbet_isInlineCacheValid.exit.i, label %33
+  br i1 %32, label %sorbet_getClassSerial.exit.i, label %33
 
 33:                                               ; preds = %31
   %34 = and i64 %2, 255
   %35 = icmp eq i64 %34, 12
-  br i1 %35, label %sorbet_isInlineCacheValid.exit.i, label %41
+  br i1 %35, label %sorbet_getClassSerial.exit.i, label %41
 
 36:                                               ; preds = %21
   %37 = and i64 %2, -9
@@ -413,21 +413,21 @@ typeTestFail.i:                                   ; preds = %entry
 
 39:                                               ; preds = %36
   switch i64 %2, label %41 [
-    i64 8, label %sorbet_isInlineCacheValid.exit.i
+    i64 8, label %sorbet_getClassSerial.exit.i
     i64 0, label %40
   ]
 
 40:                                               ; preds = %39
-  br label %sorbet_isInlineCacheValid.exit.i
+  br label %sorbet_getClassSerial.exit.i
 
 41:                                               ; preds = %39, %36, %33
   %42 = inttoptr i64 %2 to %struct.RBasic*
   %43 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %42, i64 0, i32 1
-  %phitmp.i.i.i = bitcast i64* %43 to %struct.RClass**
-  br label %sorbet_isInlineCacheValid.exit.i
+  %phitmp.i.i = bitcast i64* %43 to %struct.RClass**
+  br label %sorbet_getClassSerial.exit.i
 
-sorbet_isInlineCacheValid.exit.i:                 ; preds = %41, %40, %39, %33, %31, %28, %24
-  %44 = phi %struct.RClass** [ %phitmp.i.i.i, %41 ], [ bitcast (i64* @rb_cFalseClass to %struct.RClass**), %40 ], [ bitcast (i64* @rb_cInteger to %struct.RClass**), %24 ], [ bitcast (i64* @rb_cFloat to %struct.RClass**), %28 ], [ bitcast (i64* @rb_cTrueClass to %struct.RClass**), %31 ], [ bitcast (i64* @rb_cSymbol to %struct.RClass**), %33 ], [ bitcast (i64* @rb_cNilClass to %struct.RClass**), %39 ]
+sorbet_getClassSerial.exit.i:                     ; preds = %41, %40, %39, %33, %31, %28, %24
+  %44 = phi %struct.RClass** [ %phitmp.i.i, %41 ], [ bitcast (i64* @rb_cFalseClass to %struct.RClass**), %40 ], [ bitcast (i64* @rb_cInteger to %struct.RClass**), %24 ], [ bitcast (i64* @rb_cFloat to %struct.RClass**), %28 ], [ bitcast (i64* @rb_cTrueClass to %struct.RClass**), %31 ], [ bitcast (i64* @rb_cSymbol to %struct.RClass**), %33 ], [ bitcast (i64* @rb_cNilClass to %struct.RClass**), %39 ]
   %45 = load %struct.RClass*, %struct.RClass** %44, align 8, !tbaa !9
   %46 = getelementptr inbounds %struct.RClass, %struct.RClass* %45, i64 0, i32 2
   %47 = load %struct.rb_classext_struct*, %struct.rb_classext_struct** %46, align 8, !tbaa !51
@@ -435,124 +435,124 @@ sorbet_isInlineCacheValid.exit.i:                 ; preds = %41, %40, %39, %33, 
   %49 = load i64, i64* %48, align 8, !tbaa !53
   %50 = load i64, i64* @ic_call_via_vm_puts.2, align 16, !tbaa !55, !noalias !46
   %51 = icmp eq i64 %49, %50
-  br i1 %51, label %sorbet_callFunc.exit, label %sorbet_isInlineCacheValid.exit.thread.i
+  br i1 %51, label %sorbet_callFunc.exit, label %52
 
-sorbet_isInlineCacheValid.exit.thread.i:          ; preds = %sorbet_isInlineCacheValid.exit.i, %"func_<root>.<static-init>$111.exit"
-  %52 = and i64 %2, 7
-  %53 = icmp eq i64 %52, 0
-  br i1 %53, label %66, label %54
+52:                                               ; preds = %sorbet_getClassSerial.exit.i, %"func_<root>.<static-init>$111.exit"
+  %53 = and i64 %2, 7
+  %54 = icmp eq i64 %53, 0
+  br i1 %54, label %67, label %55
 
-54:                                               ; preds = %sorbet_isInlineCacheValid.exit.thread.i
-  %55 = trunc i64 %2 to i32
-  %56 = and i32 %55, 1
-  %57 = icmp eq i32 %56, 0
-  br i1 %57, label %58, label %rb_class_of.exit.i.i
+55:                                               ; preds = %52
+  %56 = trunc i64 %2 to i32
+  %57 = and i32 %56, 1
+  %58 = icmp eq i32 %57, 0
+  br i1 %58, label %59, label %rb_class_of.exit.i.i
 
-58:                                               ; preds = %54
-  %59 = and i32 %55, 3
-  %60 = icmp eq i32 %59, 2
-  br i1 %60, label %rb_class_of.exit.i.i, label %61
+59:                                               ; preds = %55
+  %60 = and i32 %56, 3
+  %61 = icmp eq i32 %60, 2
+  br i1 %61, label %rb_class_of.exit.i.i, label %62
 
-61:                                               ; preds = %58
-  %62 = icmp eq i64 %2, 20
-  br i1 %62, label %rb_class_of.exit.i.i, label %63
+62:                                               ; preds = %59
+  %63 = icmp eq i64 %2, 20
+  br i1 %63, label %rb_class_of.exit.i.i, label %64
 
-63:                                               ; preds = %61
-  %64 = and i64 %2, 255
-  %65 = icmp eq i64 %64, 12
-  br i1 %65, label %rb_class_of.exit.i.i, label %71
+64:                                               ; preds = %62
+  %65 = and i64 %2, 255
+  %66 = icmp eq i64 %65, 12
+  br i1 %66, label %rb_class_of.exit.i.i, label %72
 
-66:                                               ; preds = %sorbet_isInlineCacheValid.exit.thread.i
-  %67 = and i64 %2, -9
-  %68 = icmp eq i64 %67, 0
-  br i1 %68, label %69, label %71
+67:                                               ; preds = %52
+  %68 = and i64 %2, -9
+  %69 = icmp eq i64 %68, 0
+  br i1 %69, label %70, label %72
 
-69:                                               ; preds = %66
-  switch i64 %2, label %71 [
+70:                                               ; preds = %67
+  switch i64 %2, label %72 [
     i64 8, label %rb_class_of.exit.i.i
-    i64 0, label %70
+    i64 0, label %71
   ]
 
-70:                                               ; preds = %69
+71:                                               ; preds = %70
   br label %rb_class_of.exit.i.i
 
-71:                                               ; preds = %69, %66, %63
-  %72 = inttoptr i64 %2 to %struct.RBasic*
-  %73 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %72, i64 0, i32 1
+72:                                               ; preds = %70, %67, %64
+  %73 = inttoptr i64 %2 to %struct.RBasic*
+  %74 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %73, i64 0, i32 1
   br label %rb_class_of.exit.i.i
 
-rb_class_of.exit.i.i:                             ; preds = %71, %70, %69, %63, %61, %58, %54
-  %74 = phi i64* [ %73, %71 ], [ @rb_cFalseClass, %70 ], [ @rb_cInteger, %54 ], [ @rb_cFloat, %58 ], [ @rb_cTrueClass, %61 ], [ @rb_cSymbol, %63 ], [ @rb_cNilClass, %69 ]
-  %75 = load i64, i64* %74, align 8, !tbaa !9
-  %76 = tail call %struct.rb_callable_method_entry_struct* @rb_callable_method_entry(i64 %75, i64 %rubyId_puts.i) #10
-  %77 = icmp eq %struct.rb_callable_method_entry_struct* %76, null
-  br i1 %77, label %78, label %80
+rb_class_of.exit.i.i:                             ; preds = %72, %71, %70, %64, %62, %59, %55
+  %75 = phi i64* [ %74, %72 ], [ @rb_cFalseClass, %71 ], [ @rb_cInteger, %55 ], [ @rb_cFloat, %59 ], [ @rb_cTrueClass, %62 ], [ @rb_cSymbol, %64 ], [ @rb_cNilClass, %70 ]
+  %76 = load i64, i64* %75, align 8, !tbaa !9
+  %77 = tail call %struct.rb_callable_method_entry_struct* @rb_callable_method_entry(i64 %76, i64 %rubyId_puts.i) #10
+  %78 = icmp eq %struct.rb_callable_method_entry_struct* %77, null
+  br i1 %78, label %79, label %81
 
-78:                                               ; preds = %rb_class_of.exit.i.i
-  %79 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
-  tail call void (i64, i8*, ...) @rb_raise(i64 %79, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.14, i64 0, i64 0)) #11
+79:                                               ; preds = %rb_class_of.exit.i.i
+  %80 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
+  tail call void (i64, i8*, ...) @rb_raise(i64 %80, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.14, i64 0, i64 0)) #11
   unreachable
 
-80:                                               ; preds = %rb_class_of.exit.i.i
-  store %struct.rb_callable_method_entry_struct* %76, %struct.rb_callable_method_entry_struct** @ic_call_via_vm_puts.0, align 16, !tbaa !56, !noalias !46
-  %81 = load i64, i64* @ruby_vm_global_method_state, align 8, !tbaa !45
-  store i64 %81, i64* @ic_call_via_vm_puts.1, align 8, !tbaa !49, !noalias !46
-  br i1 %53, label %94, label %82
+81:                                               ; preds = %rb_class_of.exit.i.i
+  store %struct.rb_callable_method_entry_struct* %77, %struct.rb_callable_method_entry_struct** @ic_call_via_vm_puts.0, align 16, !tbaa !56, !noalias !46
+  %82 = load i64, i64* @ruby_vm_global_method_state, align 8, !tbaa !45
+  store i64 %82, i64* @ic_call_via_vm_puts.1, align 8, !tbaa !49, !noalias !46
+  br i1 %54, label %95, label %83
 
-82:                                               ; preds = %80
-  %83 = trunc i64 %2 to i32
-  %84 = and i32 %83, 1
-  %85 = icmp eq i32 %84, 0
-  br i1 %85, label %86, label %sorbet_inlineCacheInvalidated.exit.i
+83:                                               ; preds = %81
+  %84 = trunc i64 %2 to i32
+  %85 = and i32 %84, 1
+  %86 = icmp eq i32 %85, 0
+  br i1 %86, label %87, label %sorbet_inlineCacheInvalidated.exit.i
 
-86:                                               ; preds = %82
-  %87 = and i32 %83, 3
-  %88 = icmp eq i32 %87, 2
-  br i1 %88, label %sorbet_inlineCacheInvalidated.exit.i, label %89
+87:                                               ; preds = %83
+  %88 = and i32 %84, 3
+  %89 = icmp eq i32 %88, 2
+  br i1 %89, label %sorbet_inlineCacheInvalidated.exit.i, label %90
 
-89:                                               ; preds = %86
-  %90 = icmp eq i64 %2, 20
-  br i1 %90, label %sorbet_inlineCacheInvalidated.exit.i, label %91
+90:                                               ; preds = %87
+  %91 = icmp eq i64 %2, 20
+  br i1 %91, label %sorbet_inlineCacheInvalidated.exit.i, label %92
 
-91:                                               ; preds = %89
-  %92 = and i64 %2, 255
-  %93 = icmp eq i64 %92, 12
-  br i1 %93, label %sorbet_inlineCacheInvalidated.exit.i, label %99
+92:                                               ; preds = %90
+  %93 = and i64 %2, 255
+  %94 = icmp eq i64 %93, 12
+  br i1 %94, label %sorbet_inlineCacheInvalidated.exit.i, label %100
 
-94:                                               ; preds = %80
-  %95 = and i64 %2, -9
-  %96 = icmp eq i64 %95, 0
-  br i1 %96, label %97, label %99
+95:                                               ; preds = %81
+  %96 = and i64 %2, -9
+  %97 = icmp eq i64 %96, 0
+  br i1 %97, label %98, label %100
 
-97:                                               ; preds = %94
-  switch i64 %2, label %99 [
+98:                                               ; preds = %95
+  switch i64 %2, label %100 [
     i64 8, label %sorbet_inlineCacheInvalidated.exit.i
-    i64 0, label %98
+    i64 0, label %99
   ]
 
-98:                                               ; preds = %97
+99:                                               ; preds = %98
   br label %sorbet_inlineCacheInvalidated.exit.i
 
-99:                                               ; preds = %97, %94, %91
-  %100 = inttoptr i64 %2 to %struct.RBasic*
-  %101 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %100, i64 0, i32 1
-  %phitmp.i.i1.i = bitcast i64* %101 to %struct.RClass**
+100:                                              ; preds = %98, %95, %92
+  %101 = inttoptr i64 %2 to %struct.RBasic*
+  %102 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %101, i64 0, i32 1
+  %phitmp.i.i.i = bitcast i64* %102 to %struct.RClass**
   br label %sorbet_inlineCacheInvalidated.exit.i
 
-sorbet_inlineCacheInvalidated.exit.i:             ; preds = %99, %98, %97, %91, %89, %86, %82
-  %102 = phi %struct.RClass** [ %phitmp.i.i1.i, %99 ], [ bitcast (i64* @rb_cFalseClass to %struct.RClass**), %98 ], [ bitcast (i64* @rb_cInteger to %struct.RClass**), %82 ], [ bitcast (i64* @rb_cFloat to %struct.RClass**), %86 ], [ bitcast (i64* @rb_cTrueClass to %struct.RClass**), %89 ], [ bitcast (i64* @rb_cSymbol to %struct.RClass**), %91 ], [ bitcast (i64* @rb_cNilClass to %struct.RClass**), %97 ]
-  %103 = load %struct.RClass*, %struct.RClass** %102, align 8, !tbaa !9
-  %104 = getelementptr inbounds %struct.RClass, %struct.RClass* %103, i64 0, i32 2
-  %105 = load %struct.rb_classext_struct*, %struct.rb_classext_struct** %104, align 8, !tbaa !51
-  %106 = getelementptr inbounds %struct.rb_classext_struct, %struct.rb_classext_struct* %105, i64 0, i32 7
-  %107 = load i64, i64* %106, align 8, !tbaa !53
-  store i64 %107, i64* @ic_call_via_vm_puts.2, align 16, !tbaa !55, !noalias !46
+sorbet_inlineCacheInvalidated.exit.i:             ; preds = %100, %99, %98, %92, %90, %87, %83
+  %103 = phi %struct.RClass** [ %phitmp.i.i.i, %100 ], [ bitcast (i64* @rb_cFalseClass to %struct.RClass**), %99 ], [ bitcast (i64* @rb_cInteger to %struct.RClass**), %83 ], [ bitcast (i64* @rb_cFloat to %struct.RClass**), %87 ], [ bitcast (i64* @rb_cTrueClass to %struct.RClass**), %90 ], [ bitcast (i64* @rb_cSymbol to %struct.RClass**), %92 ], [ bitcast (i64* @rb_cNilClass to %struct.RClass**), %98 ]
+  %104 = load %struct.RClass*, %struct.RClass** %103, align 8, !tbaa !9
+  %105 = getelementptr inbounds %struct.RClass, %struct.RClass* %104, i64 0, i32 2
+  %106 = load %struct.rb_classext_struct*, %struct.rb_classext_struct** %105, align 8, !tbaa !51
+  %107 = getelementptr inbounds %struct.rb_classext_struct, %struct.rb_classext_struct* %106, i64 0, i32 7
+  %108 = load i64, i64* %107, align 8, !tbaa !53
+  store i64 %108, i64* @ic_call_via_vm_puts.2, align 16, !tbaa !55, !noalias !46
   br label %sorbet_callFunc.exit
 
-sorbet_callFunc.exit:                             ; preds = %sorbet_isInlineCacheValid.exit.i, %sorbet_inlineCacheInvalidated.exit.i
-  %108 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10, !noalias !46
-  %109 = load %struct.rb_callable_method_entry_struct*, %struct.rb_callable_method_entry_struct** @ic_call_via_vm_puts.0, align 16, !tbaa !56, !noalias !46
-  %110 = call i64 @rb_vm_call(%struct.rb_execution_context_struct* %108, i64 %2, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.rb_callable_method_entry_struct* %109) #10
+sorbet_callFunc.exit:                             ; preds = %sorbet_getClassSerial.exit.i, %sorbet_inlineCacheInvalidated.exit.i
+  %109 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10, !noalias !46
+  %110 = load %struct.rb_callable_method_entry_struct*, %struct.rb_callable_method_entry_struct** @ic_call_via_vm_puts.0, align 16, !tbaa !56, !noalias !46
+  %111 = call i64 @rb_vm_call(%struct.rb_execution_context_struct* %109, i64 %2, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.rb_callable_method_entry_struct* %110) #10
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
   ret void
 }
