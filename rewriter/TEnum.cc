@@ -141,6 +141,7 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
 
     vector<unique_ptr<ast::Expression>> result;
     result.emplace_back(std::move(classDef));
+    result.emplace_back(std::move(asgn->rhs));
     result.emplace_back(std::move(singletonAsgn));
     return result;
 }
