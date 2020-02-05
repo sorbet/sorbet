@@ -303,16 +303,16 @@ argArrayExpand:                                   ; preds = %sorbet_isa_Array.ex
   %19 = getelementptr inbounds %struct.RArray, %struct.RArray* %17, i64 0, i32 1, i32 0, i32 0
   %20 = lshr i64 %14, 15
   %21 = and i64 %20, 3
-  br label %sorbet_rubyArrayLen.exit
+  br label %rb_array_len.exit
 
 22:                                               ; preds = %13
   %23 = getelementptr inbounds %struct.RArray, %struct.RArray* %17, i64 0, i32 1, i32 0, i32 2
   %24 = load i64*, i64** %23, align 8, !tbaa !7
   %25 = getelementptr inbounds %struct.RArray, %struct.RArray* %17, i64 0, i32 1, i32 0, i32 0
   %26 = load i64, i64* %25, align 8, !tbaa !7
-  br label %sorbet_rubyArrayLen.exit
+  br label %rb_array_len.exit
 
-sorbet_rubyArrayLen.exit:                         ; preds = %18, %22
+rb_array_len.exit:                                ; preds = %18, %22
   %27 = phi i64* [ %19, %18 ], [ %24, %22 ]
   %28 = phi i64 [ %21, %18 ], [ %26, %22 ]
   %29 = trunc i64 %28 to i32
@@ -348,9 +348,9 @@ fillFromDefaultBlockDone:                         ; preds = %sorbet_isa_Array.ex
   %42 = icmp eq i64 %41, 0
   br i1 %42, label %codeRepl, label %typeTestSuccess, !prof !18
 
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %sorbet_rubyArrayLen.exit
-  %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %29, %sorbet_rubyArrayLen.exit ]
-  %argArrayPhi = phi i64* [ %argArray, %functionEntryInitializers ], [ %27, %sorbet_rubyArrayLen.exit ]
+fillRequiredArgs:                                 ; preds = %functionEntryInitializers, %rb_array_len.exit
+  %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %29, %rb_array_len.exit ]
+  %argArrayPhi = phi i64* [ %argArray, %functionEntryInitializers ], [ %27, %rb_array_len.exit ]
   %default0 = icmp eq i32 %argcPhi, 0
   br i1 %default0, label %fillFromDefaultBlockDone, label %fillFromArgBlock0, !prof !18
 

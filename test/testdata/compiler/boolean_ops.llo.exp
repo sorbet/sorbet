@@ -512,7 +512,7 @@ sorbet_inlineCacheInvalidated.exit:               ; preds = %71, %75, %78, %80, 
   br label %call
 
 call:                                             ; preds = %sorbet_inlineCacheInvalidated.exit, %sorbet_isInlineCacheValid.exit
-  %98 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10, !noalias !47
+  %98 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
   %99 = getelementptr inbounds %struct.FunctionInlineCache, %struct.FunctionInlineCache* %3, i64 0, i32 0
   %100 = load %struct.rb_callable_method_entry_struct*, %struct.rb_callable_method_entry_struct** %99, align 8, !tbaa !46, !noalias !47
   %101 = tail call i64 @rb_vm_call(%struct.rb_execution_context_struct* %98, i64 %2, i64 %rubyId_puts, i32 %0, i64* %1, %struct.rb_callable_method_entry_struct* %100) #11
