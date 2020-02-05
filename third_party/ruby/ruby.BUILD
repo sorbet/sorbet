@@ -1,6 +1,6 @@
 # vim: ft=bzl sw=4 ts=4 et
 
-load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "build_ruby", "ruby_archive", "ruby_binary", "ruby_headers")
+load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "build_ruby", "ruby_archive", "ruby_binary", "ruby_headers", "ruby_internal_headers")
 
 filegroup(
     name = "source",
@@ -11,19 +11,29 @@ filegroup(
 build_ruby(
     name = "ruby-dist",
     src = ":source",
-    crypto = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": "@system_ssl_darwin//:crypto",
-        "@com_stripe_ruby_typer//tools/config:linux": "@system_ssl_linux//:crypto",
-    }),
-    ssl = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": "@system_ssl_darwin//:ssl",
-        "@com_stripe_ruby_typer//tools/config:linux": "@system_ssl_linux//:ssl",
-    }),
+    copts = [],
+    linkopts = [],
     visibility = ["//visibility:private"],
+    deps = select({
+        "@com_stripe_ruby_typer//tools/config:darwin": [
+            "@system_ssl_darwin//:ssl",
+            "@system_ssl_darwin//:crypto",
+        ],
+        "@com_stripe_ruby_typer//tools/config:linux": [
+            "@system_ssl_linux//:ssl",
+            "@system_ssl_linux//:crypto",
+        ],
+    }),
 )
 
 ruby_headers(
     name = "headers",
+    ruby = ":ruby-dist",
+    visibility = ["//visibility:public"],
+)
+
+ruby_internal_headers(
+    name = "headers-internal",
     ruby = ":ruby-dist",
     visibility = ["//visibility:public"],
 )
