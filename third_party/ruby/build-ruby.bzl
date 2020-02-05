@@ -12,12 +12,12 @@ hermetic_tar() {
     FLAGS="${3:-}"
     # Check if our tar supports --sort (we assume --sort support implies --mtime support)
     if [[ $(tar --sort 2>&1) =~ 'requires an argument' ]]; then
-        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -C "$SRC" $FLAGS -rf "$OUT" .
+        tar --sort=name --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' -L -C "$SRC" $FLAGS -rf "$OUT" .
     elif [[ $(tar --mtime 2>&1) =~ 'requires an argument' ]]; then
-        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' $FLAGS -rf "$OUT" .
+        (cd "$SRC" && find . -print0) | LC_ALL=C sort -z | tar -L -C "$SRC" --no-recursion --null -T - --owner=0 --group=0 --numeric-owner --mtime='UTC 1970-01-01 00:00' $FLAGS -rf "$OUT" .
     else
         # Oh well, no hermetic tar for you
-        tar -C "$SRC" $FLAGS -rf "$OUT" .
+        tar -L -C "$SRC" $FLAGS -rf "$OUT" .
     fi
 }
 """
@@ -35,17 +35,22 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v2 ---
 """
 
-_BUILD_RUBY = """
+_BUILD_RUBY = """#!/bin/bash
+
 set -euo pipefail
 
 base="$PWD"
 out_dir="$base/{toolchain}"
 
-ssl_inc="$base/$(dirname {ssl_incdir})"
-ssl_lib="$base/{ssl_libdir}"
-crypto_lib="$base/{crypto_libdir}"
+declare -a inc_path=()
+for path in {hdrs}; do
+  inc_path=("${{inc_path[@]:-}}" "-isystem" "$base/$path")
+done
 
-ls $ssl_lib
+declare -a lib_path=()
+for path in {libs}; do
+  lib_path=("${{lib_path[@]:-}}" "-L$base/$path")
+done
 
 build_dir="$(mktemp -d)"
 
@@ -67,9 +72,10 @@ run_cmd() {{
 
 run_cmd ./configure \
         CC="{cc}" \
-        CFLAGS="-isystem $ssl_inc {copts}" \
-        CPPFLAGS="-isystem $ssl_inc {copts}" \
-        LDFLAGS="-L$ssl_lib -L$crypto_lib {linkopts}" \
+        CFLAGS="${{inc_path[*]}} {copts}" \
+        CPPFLAGS="${{inc_path[*]}} {copts}" \
+        LDFLAGS="${{lib_path[*]}} {linkopts}" \
+        OUTFLAG="-fvisibility=default -o" \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -112,18 +118,7 @@ def _is_sanitizer_flag(flag):
            flag.endswith("ubsan_standalone-x86_64.a")
 
 def _build_ruby_impl(ctx):
-    # Discover the path to the source by finding ruby.c
-    src_dir = None
-    for candidate in ctx.attr.src.files.to_list():
-        if candidate.basename == "ruby.c":
-            src_dir = candidate.dirname
-            break
-
-    if src_dir == None:
-        fail("Unable to locate 'ruby.c' in src")
-
-    ssl = ctx.attr.ssl[CcInfo]
-    crypto = ctx.attr.crypto[CcInfo]
+    src_dir = ctx.label.workspace_root
 
     # Setup toolchains
     cc_toolchain = find_cpp_toolchain(ctx)
@@ -149,15 +144,6 @@ def _build_ruby_impl(ctx):
         ),
     )
 
-    ssl_libs = ssl.linking_context.libraries_to_link.to_list()
-    ssl_lib = ssl_libs[0].dynamic_library
-
-    ssl_hdrs = ssl.compilation_context.headers.to_list()
-    ssl_incdir = ssl_hdrs[0].dirname
-
-    crypto_libs = crypto.linking_context.libraries_to_link.to_list()
-    crypto_lib = crypto_libs[0].dynamic_library
-
     # -Werror breaks configure, so we strip out all flags with a leading -W
     # ruby doesn't work with asan or ubsan
     flags = []
@@ -177,6 +163,30 @@ def _build_ruby_impl(ctx):
 
         ldflags.append(flag)
 
+    # process deps into include and linker paths
+    hdrs = {}
+    libs = {}
+    deps = {}
+
+    for dep in ctx.attr.deps:
+        cc_info = dep[CcInfo]
+        if None == cc_info:
+            fail("Dependency {} is missing a CcInfo".format(dep))
+
+        for hdr in cc_info.compilation_context.headers.to_list():
+            deps[hdr] = True
+
+        for path in cc_info.compilation_context.system_includes.to_list():
+            hdrs[path] = True
+
+        for lib in cc_info.linking_context.libraries_to_link.to_list():
+            libs[lib.dynamic_library.dirname] = True
+            deps[lib.dynamic_library] = True
+
+    hdrs = hdrs.keys()
+    libs = libs.keys()
+    deps = deps.keys()
+
     # Outputs
     binaries = [
         ctx.actions.declare_file("toolchain/bin/{}".format(binary))
@@ -194,18 +204,17 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = [ssl_lib, crypto_lib] + ssl_hdrs + ctx.files.src,
+        inputs = deps + ctx.files.src,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
-            copts = " ".join(cmdline + flags),
-            linkopts = " ".join(ldflags),
+            copts = " ".join(cmdline + flags + ctx.attr.copts),
+            linkopts = " ".join(ldflags + ctx.attr.linkopts),
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
-            ssl_incdir = ssl_incdir,
-            ssl_libdir = ssl_lib.dirname,
-            crypto_libdir = crypto_lib.dirname,
+            hdrs = " ".join(hdrs),
+            libs = " ".join(libs),
         )),
     )
 
@@ -226,8 +235,13 @@ build_ruby = rule(
     implementation = _build_ruby_impl,
     attrs = {
         "src": attr.label(),
-        "ssl": attr.label(),
-        "crypto": attr.label(),
+        "deps": attr.label_list(),
+        "copts": attr.string_list(
+            doc = "Additional copts for the ruby build",
+        ),
+        "linkopts": attr.string_list(
+            doc = "Additional linkopts for the ruby build",
+        ),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
@@ -360,6 +374,28 @@ def _ruby_headers_impl(ctx):
 
 ruby_headers = rule(
     implementation = _ruby_headers_impl,
+    attrs = {
+        "ruby": attr.label(),
+        "_cc_toolchain": attr.label(
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+        ),
+    },
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    provides = [DefaultInfo, CcInfo],
+    fragments = ["cpp"],
+)
+
+def _ruby_internal_headers_impl(ctx):
+    ruby_info = ctx.attr.ruby[RubyInfo]
+
+    paths = [ruby_info.internal_includes.path]
+
+    headers = depset([ruby_info.internal_includes])
+
+    return _uses_headers(ctx, paths, headers)
+
+ruby_internal_headers = rule(
+    implementation = _ruby_internal_headers_impl,
     attrs = {
         "ruby": attr.label(),
         "_cc_toolchain": attr.label(
