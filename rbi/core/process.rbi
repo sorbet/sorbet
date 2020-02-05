@@ -833,6 +833,18 @@ module Process
   sig {returns(Integer)}
   def self.setsid(); end
 
+  # spawn executes specified command and return its pid.
+  # spawn([env,] command... [,options]) → pid
+  sig do
+    params(
+      args: T.any(
+        String,
+        T::Hash[T.any(Symbol, String), T.untyped]
+      )
+    ).returns(Integer)
+  end
+  def self.spawn(*args); end
+
   # Returns a `Tms` structure (see `Process::Tms`) that contains user and system
   # CPU times for this process, and also for children processes.
   #
