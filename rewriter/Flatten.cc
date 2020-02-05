@@ -228,20 +228,20 @@ class FlattenWalk {
             return rhs;
         }
 
-        auto exprs = popCurMethodDefs();
+        auto currentMethodDefs = popCurMethodDefs();
         // this adds all the methods at the appropriate 'staticness' level
 
         int highestLevel = 0;
-        for (int i = 0; i < exprs.size(); i++) {
-            auto &expr = exprs[i];
+        for (int i = 0; i < currentMethodDefs.size(); i++) {
+            auto &expr = currentMethodDefs[i];
             if (highestLevel < expr.staticLevel) {
                 highestLevel = expr.staticLevel;
             }
             // we need to make sure that we keep sends with their attached methods, so fix that up here
             if (i > 0) {
-                auto send = ast::cast_tree<ast::Send>(exprs[i - 1].expr.get());
+                auto send = ast::cast_tree<ast::Send>(currentMethodDefs[i - 1].expr.get());
                 if (send != nullptr && send->fun == core::Names::sig()) {
-                    exprs[i - 1].staticLevel = expr.staticLevel;
+                    currentMethodDefs[i - 1].staticLevel = expr.staticLevel;
                 }
             }
         }
@@ -263,7 +263,7 @@ class FlattenWalk {
         }
 
         // move everything to its appropriate target
-        for (auto &expr : exprs) {
+        for (auto &expr : currentMethodDefs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
                 methodDef->setIsSelf(expr.staticLevel > 0);
             }
