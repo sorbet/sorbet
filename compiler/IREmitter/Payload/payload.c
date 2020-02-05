@@ -1185,7 +1185,8 @@ struct FunctionInlineCache {
 
 // annotated to be inlined as part of payload generation
 static _Bool _sorbet_isInlineCacheValid(VALUE recv, struct FunctionInlineCache *cache) __attribute__((always_inline)) {
-    return LIKELY(sorbet_getMethodEpoch() == cache->method_state) && LIKELY(sorbet_getClassSerial(recv) == cache->class_serial);
+    return LIKELY(sorbet_getMethodEpoch() == cache->method_state) &&
+           LIKELY(sorbet_getClassSerial(recv) == cache->class_serial);
 }
 
 void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
