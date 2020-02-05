@@ -13,3 +13,8 @@ cd gems/sorbet-runtime
 bundle install
 bundle exec rake test
 ```
+
+To run `sorbet` on `sorbet-runtime`:
+```
+bazel test //gems/sorbet-runtime:runtime-typechecks
+```
