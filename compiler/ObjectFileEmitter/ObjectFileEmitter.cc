@@ -166,9 +166,11 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     pm.add(llvm::createLoopUnrollPass(2, false, false));
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
-    pm.add(llvm::createLICMPass(100, 250));
-    pm.add(llvm::createAlignmentFromAssumptionsPass());
-    pm.add(llvm::createStripDeadPrototypesPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createLICMPass(100, 250));
+        pm.add(llvm::createAlignmentFromAssumptionsPass());
+        pm.add(llvm::createStripDeadPrototypesPass());
+    }
     pm.add(llvm::createGlobalDCEPass());     // Remove dead fns and globals.
     pm.add(llvm::createConstantMergePass()); // Merge dup global constants
 
@@ -178,10 +180,12 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     // after splitting hot/cold paths, inline hot paths before GVN
     pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
     // END SORBET ADDITION
-    pm.add(llvm::createLoopSinkPass());
-    pm.add(llvm::createInstSimplifyLegacyPass());
-    pm.add(llvm::createDivRemPairsPass());
-    pm.add(llvm::createCFGSimplificationPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createLoopSinkPass());
+        pm.add(llvm::createInstSimplifyLegacyPass());
+        pm.add(llvm::createDivRemPairsPass());
+        pm.add(llvm::createCFGSimplificationPass());
+    }
 }
 void addLTOPasses(llvm::legacy::PassManager &pm) {
     // this is intended to mimic llvm::PassManagerBuilder::populateLTOPassManager
@@ -190,53 +194,69 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     // pmbuilder.populateLTOPassManager(pm);
 
     // these are optimizations
-    pm.add(llvm::createGlobalDCEPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createGlobalDCEPass());
+    }
     pm.add(llvm::createTypeBasedAAWrapperPass());
     pm.add(llvm::createScopedNoAliasAAWrapperPass());
     if (unnecessaryForUs) {
         pm.add(llvm::createForceFunctionAttrsLegacyPass());
+        pm.add(llvm::createInferFunctionAttrsLegacyPass());
+        pm.add(llvm::createCallSiteSplittingPass());
+        pm.add(llvm::createPGOIndirectCallPromotionLegacyPass(true, false));
     }
-    pm.add(llvm::createInferFunctionAttrsLegacyPass());
-    pm.add(llvm::createCallSiteSplittingPass());
-    pm.add(llvm::createPGOIndirectCallPromotionLegacyPass(true, false));
     pm.add(llvm::createIPSCCPPass());
     pm.add(llvm::createCalledValuePropagationPass()); // should follow IPSCCP
-    pm.add(llvm::createAttributorLegacyPass());
-    pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
-    pm.add(llvm::createReversePostOrderFunctionAttrsPass());
-    pm.add(llvm::createGlobalSplitPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createAttributorLegacyPass());
+        pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
+        pm.add(llvm::createReversePostOrderFunctionAttrsPass());
+        pm.add(llvm::createGlobalSplitPass());
+    }
 
     if (unnecessaryForUs) {
         pm.add(llvm::createWholeProgramDevirtPass(nullptr, nullptr));
     }
     pm.add(llvm::createGlobalOptimizerPass());
     pm.add(llvm::createPromoteMemoryToRegisterPass());
-    pm.add(llvm::createConstantMergePass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createConstantMergePass());
+    }
     pm.add(llvm::createDeadArgEliminationPass());
-    // pm.add(llvm::createAggressiveInstCombinerPass()); // O3
-    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+    if (unnecessaryForUs) {
+        pm.add(llvm::createAggressiveInstCombinerPass()); // O3
+        pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
 
-    pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
-    pm.add(llvm::createPruneEHPass());
-    pm.add(llvm::createGlobalOptimizerPass());
-    pm.add(llvm::createGlobalDCEPass());
+        pm.add(llvm::createFunctionInliningPass(optLevel, sizeLevel, false));
+        pm.add(llvm::createPruneEHPass());
+        pm.add(llvm::createGlobalOptimizerPass());
+        pm.add(llvm::createGlobalDCEPass());
+    }
     pm.add(llvm::createArgumentPromotionPass());
-    pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
-    pm.add(llvm::createJumpThreadingPass());
-    pm.add(llvm::createSROAPass());
-    pm.add(llvm::createTailCallEliminationPass());
-    pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
-    pm.add(llvm::createGlobalsAAWrapperPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
+        pm.add(llvm::createJumpThreadingPass());
+        pm.add(llvm::createSROAPass());
+        pm.add(llvm::createTailCallEliminationPass());
+        pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
+        pm.add(llvm::createGlobalsAAWrapperPass());
+    }
     pm.add(llvm::createLICMPass(100, 250));
-    pm.add(llvm::createMergedLoadStoreMotionPass());
-    // pm.add(llvm::createGVNPass(false));
+    if (unnecessaryForUs) {
+        pm.add(llvm::createMergedLoadStoreMotionPass());
+        pm.add(llvm::createGVNPass(false));
+    }
     pm.add(llvm::createNewGVNPass()); // by default clang uses _old_ GVN
-    pm.add(llvm::createMemCpyOptPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createMemCpyOptPass());
+    }
     pm.add(llvm::createDeadStoreEliminationPass());
     pm.add(llvm::createIndVarSimplifyPass());
-    pm.add(llvm::createLoopDeletionPass());
-    pm.add(llvm::createSimpleLoopUnrollPass(2, false, false));
-    pm.add(llvm::createLoopVectorizePass(false, false));
+    if (unnecessaryForUs) {
+        pm.add(llvm::createLoopDeletionPass());
+        pm.add(llvm::createSimpleLoopUnrollPass(2, false, false));
+        pm.add(llvm::createLoopVectorizePass(false, false));
+    }
     pm.add(llvm::createLoopUnrollPass(2, false, false));
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     {
@@ -261,23 +281,30 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createCFGSimplificationPass());
     pm.add(llvm::createSCCPPass());
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
-    pm.add(llvm::createBitTrackingDCEPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createBitTrackingDCEPass());
+    }
     pm.add(llvm::createSLPVectorizerPass());
-    pm.add(llvm::createAlignmentFromAssumptionsPass());
+    if (unnecessaryForUs) {
+        pm.add(llvm::createAlignmentFromAssumptionsPass());
+    }
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     pm.add(llvm::createJumpThreadingPass());
 
-    // non-optimization passes
-    pm.add(llvm::createCrossDSOCFIPass());
-
+    if (unnecessaryForUs) {
+        // non-optimization passes
+        pm.add(llvm::createCrossDSOCFIPass());
+    }
     if (unnecessaryForUs) {
         pm.add(llvm::createLowerTypeTestsPass(nullptr, nullptr));
     }
 
-    // late optimization passes
-    // pm.add(llvm::createHotColdSplittingPass());
-    pm.add(llvm::createCFGSimplificationPass());
-    pm.add(llvm::createEliminateAvailableExternallyPass());
+    if (unnecessaryForUs) {
+        // late optimization passes
+        pm.add(llvm::createHotColdSplittingPass());
+        pm.add(llvm::createCFGSimplificationPass());
+        pm.add(llvm::createEliminateAvailableExternallyPass());
+    }
     pm.add(llvm::createGlobalDCEPass());
     // pm.add(llvm::createMergeFunctionsPass());
 }
