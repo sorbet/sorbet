@@ -925,7 +925,6 @@ VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const rest
                            VALUE closure) {
     sorbet_ensure_arity(argc, 0);
     if (blk == NULL) {
-        // TODO(jez) Remove this rb_intern by threading symbol name through.
         return rb_enumeratorize_with_size(recv, ID2SYM(fun), 0, NULL,
                                           (rb_enumerator_size_func *)enumerator_size_func_array_length);
     }
