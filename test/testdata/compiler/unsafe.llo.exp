@@ -369,7 +369,7 @@ typeTestFail.i:                                   ; preds = %entry
   %18 = load i64, i64* @ruby_vm_global_method_state, align 8, !tbaa !45, !noalias !46
   %19 = load i64, i64* @ic_call_via_vm_puts.1, align 8, !tbaa !49, !noalias !46
   %20 = icmp eq i64 %18, %19
-  br i1 %20, label %21, label %52
+  br i1 %20, label %21, label %52, !prof !44
 
 21:                                               ; preds = %"func_<root>.<static-init>$111.exit"
   %22 = and i64 %2, 7
@@ -425,7 +425,7 @@ sorbet_getClassSerial.exit.i:                     ; preds = %41, %40, %39, %33, 
   %49 = load i64, i64* %48, align 8, !tbaa !53
   %50 = load i64, i64* @ic_call_via_vm_puts.2, align 16, !tbaa !55, !noalias !46
   %51 = icmp eq i64 %49, %50
-  br i1 %51, label %sorbet_callFunc.exit, label %52
+  br i1 %51, label %sorbet_callFunc.exit, label %52, !prof !44
 
 52:                                               ; preds = %sorbet_getClassSerial.exit.i, %"func_<root>.<static-init>$111.exit"
   %53 = and i64 %2, 7
