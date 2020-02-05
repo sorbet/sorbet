@@ -117,6 +117,13 @@ a <a href="/docs/sigs">method signature</a> above the declaration, just like any
   <span class="hljs-comment"># (Sorbet will use that to write the sig for the writer portion.)</span>
   sig {returns(Integer)}
   <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:accessor</span>
+
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    reader = T.let(<span class="hljs-number">0</span>, Integer)
+    writer = T.let(<span class="hljs-number">0</span>, Integer)
+    accessor = T.let(<span class="hljs-number">0</span>, Integer)
+  <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Areader%0A%0A%20%20sig%20%7Bparams(writer%3A%20Integer).returns(Integer)%7D%0A%20%20attr_writer%20%3Awriter%0A%0A%20%20%23%20For%20attr_accessor%2C%20write%20the%20sig%20for%20the%20reader%20portion.%0A%20%20%23%20(Sorbet%20will%20use%20that%20to%20write%20the%20sig%20for%20the%20writer%20portion.)%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_accessor%20%3Aaccessor%0Aend">→
