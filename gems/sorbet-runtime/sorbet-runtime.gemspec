@@ -18,4 +18,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   # for reproducing race conditions in tests
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'pry-byebug'
 end
