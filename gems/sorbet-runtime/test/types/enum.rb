@@ -259,6 +259,13 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       )
     end
 
+    it 'does not allow `_add_instance` after enum has been defined' do
+      ex = assert_raises(RuntimeError) do
+        CardSuit._add_instance(CardSuit::HEART)
+      end
+      assert_match(/can't modify frozen Array/, ex.message)
+    end
+
     it 'returns the same object for #dup and #clone' do
       assert_equal(CardSuit::DIAMOND.object_id, CardSuit::DIAMOND.dup.object_id)
       assert_equal(CardSuit::DIAMOND.object_id, CardSuit::DIAMOND.clone.object_id)
@@ -297,6 +304,17 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         /Attempting to access Enum value on #<.*> before it has been initialized/,
         ex.message
       )
+    end
+
+    it 'does not allow instance without assigning to constant' do
+      ex = assert_raises(RuntimeError) do
+        Class.new(T::Enum) do
+          enums do
+            new('foo')
+          end
+        end
+      end
+      assert_equal('Enum values must be assigned to constants: ["foo"]', ex.message)
     end
   end
 
