@@ -51,7 +51,7 @@ source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/logging.sh)"
 sandbox="$test_dir/$ruby_package"
 
 if [ -d "$sandbox" ]; then
-  warn "├─ Cleaning up old test sandbox"
+  attn "├─ Cleaning up old test sandbox"
   rm -rf "$sandbox"
 fi
 
