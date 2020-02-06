@@ -20,7 +20,7 @@ cc_library(
         "//ast/desugar",
         "//ast/treemap",
         "//core",
-        "//flattener",
+        "//class_flatten",
     ],
 )
 

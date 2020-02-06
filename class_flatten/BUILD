@@ -1,5 +1,5 @@
 cc_library(
-    name = "flattener",
+    name = "class_flatten",
     srcs = glob(
         [
             "*.cc",
@@ -11,7 +11,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "flatten.h",
+        "class_flatten.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,

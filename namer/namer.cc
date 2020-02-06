@@ -11,7 +11,7 @@
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
-#include "flattener/flatten.h"
+#include "class_flatten/class_flatten.h"
 
 using namespace std;
 

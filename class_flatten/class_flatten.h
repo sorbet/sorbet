@@ -3,10 +3,10 @@
 
 #include "ast/ast.h"
 
-namespace sorbet::flatten {
+namespace sorbet::class_flatten {
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile trees);
 
-} // namespace sorbet::flatten
+} // namespace sorbet::class_flatten
 
 #endif
