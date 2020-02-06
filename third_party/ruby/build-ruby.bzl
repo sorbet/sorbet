@@ -109,7 +109,7 @@ cp "$base/{bundler}" bundler.gem
 # --local to avoid going to rubygmes for the gem
 # --env-shebang to not hardcode the path to ruby in the sandbox
 # --force because bundler is packaged with ruby starting with 2.6
-"$out_dir/bin/gem" install --local --env-shebang --force bundler.gem
+run_cmd "$out_dir/bin/gem" install --local --env-shebang --force bundler.gem
 
 popd > /dev/null
 
