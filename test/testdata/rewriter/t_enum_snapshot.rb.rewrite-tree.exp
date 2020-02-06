@@ -47,6 +47,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    def something_outside<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()
@@ -83,9 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
 
-    def something_outside<<C <todo sym>>>(&<blk>)
-      <emptyTree>
-    end
+    :"something_outside"
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)

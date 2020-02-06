@@ -1,28 +1,4 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
-    def some_method<<C <todo sym>>>(&<blk>)
-      <emptyTree>
-    end
-  end
-
-  class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
-    <self>.include(<emptyTree>::<C Interface>)
-
-    def other_method<<C <todo sym>>>(&<blk>)
-      <emptyTree>
-    end
-  end
-
-  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
-    def self.wrap_instance<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
-      <emptyTree>
-    end
-
-    def self.wrap_instance<defaultArg>1<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
-      nil
-    end
-  end
-
   def testit<<C <todo sym>>>(&<blk>)
     begin
       s = <emptyTree>::<C SomeClass>.new()
@@ -35,4 +11,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       o.wrap_instance("hi")
     end
   end
+
+  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    def some_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    :"some_method"
+  end
+
+  class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
+    def other_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    :"other_method"
+  end
+
+  class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
+    def self.wrap_instance<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
+    def self.wrap_instance<defaultArg>1<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
+      nil
+    end
+
+    :"wrap_instance"
+
+    :"wrap_instance<defaultArg>1"
+  end
+
+  :"testit"
 end

@@ -1,22 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        :"baz1"
-        :"baz2"
-        :"baz3"
-        :"baz4"
-        :"baz5"
-        :"baz6"
-        :"baz7"
-        :"baz8"
-        <emptyTree>
-      end
-    end
-
     def baz1(<blk>)
       begin
         a = "foo"
@@ -75,6 +59,20 @@ begin
     def baz8(<blk>)
       while true
         b = 1
+      end
+    end
+
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        :"baz1"
+        :"baz2"
+        :"baz3"
+        :"baz4"
+        :"baz5"
+        :"baz6"
+        :"baz7"
+        :"baz8"
+        <emptyTree>
       end
     end
   end

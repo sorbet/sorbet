@@ -19,6 +19,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.call<<C <todo sym>>>(x, &<blk>)
       ::T.untyped()
     end
+
+    :"call"
+
+    :"call"
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
@@ -39,13 +43,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.call<<C <todo sym>>>(x, &<blk>)
       ::T.untyped()
     end
+
+    :"call"
+
+    :"call"
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C OtherCommand>.call("8"), <emptyTree>::<C Integer>)
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
     <self>.sig() do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
     end
@@ -53,6 +59,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def call<<C <todo sym>>>(x, &<blk>)
       <self>.Integer(x)
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"call"
   end
 
   <emptyTree>::<C NotACommand>.call()
@@ -61,6 +71,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def call<<C <todo sym>>>(x, &<blk>)
       <self>.Integer(x)
     end
+
+    :"call"
   end
 
   <emptyTree>::<C CallNoSig>.call()

@@ -1,6 +1,4 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
   <self>.sig() do ||
     <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).void()
   end
@@ -24,4 +22,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def foo<defaultArg>2<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
     2
   end
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  :"foo"
+
+  :"foo<defaultArg>1"
+
+  :"foo<defaultArg>2"
 end

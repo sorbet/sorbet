@@ -9,8 +9,6 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Literal{ value = :"<static-init>" }
-
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -57,24 +55,6 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Literal{ value = :"<static-init>" }
-
-        MethodDef{
-          flags = self
-          name = <U <static-init>><<U <static-init>>>
-          args = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = InsSeq{
-            stats = [
-              Literal{ value = :"take_arguments" }
-              Literal{ value = :"take_arguments<defaultArg>1" }
-              Literal{ value = :"take_arguments<defaultArg>2" }
-            ],
-            expr = EmptyTree
-          }
-        }
-
         MethodDef{
           flags = 0
           name = <U take_arguments><<U take_arguments>>
@@ -258,6 +238,22 @@ InsSeq{
               localVariable = <U g>
             }]
           rhs = Literal{ value = 2 }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<U <static-init>>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = InsSeq{
+            stats = [
+              Literal{ value = :"take_arguments" }
+              Literal{ value = :"take_arguments<defaultArg>1" }
+              Literal{ value = :"take_arguments<defaultArg>2" }
+            ],
+            expr = EmptyTree
+          }
         }
       ]
     }

@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -12,7 +10,9 @@ begin
     end
   end
   module ::A<<C A>> < ()
-    :"<static-init>"
+    def Foo(<blk>)
+      <emptyTree>
+    end
 
     def self.<static-init>(<blk>)
       begin
@@ -25,14 +25,8 @@ begin
         <emptyTree>
       end
     end
-
-    def Foo(<blk>)
-      <emptyTree>
-    end
   end
   class ::A::Foo<<C Foo>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end

@@ -9,17 +9,6 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Literal{ value = :"<static-init>" }
-
-        MethodDef{
-          flags = self
-          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          args = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = Literal{ value = :"foo" }
-        }
-
         MethodDef{
           flags = 0
           name = <U foo><<U foo>>
@@ -37,6 +26,15 @@ InsSeq{
               localVariable = <U a>
             }
           }
+        }
+
+        MethodDef{
+          flags = self
+          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
+          args = [Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = Literal{ value = :"foo" }
         }
       ]
     }

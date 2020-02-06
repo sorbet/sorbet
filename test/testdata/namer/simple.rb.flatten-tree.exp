@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -46,7 +44,13 @@ begin
     end
   end
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
-    :"<static-init>"
+    def normal_method(<blk>)
+      <emptyTree>
+    end
+
+    def self.normal_static_method(<blk>)
+      <emptyTree>
+    end
 
     def self.<static-init>(<blk>)
       begin
@@ -65,32 +69,18 @@ begin
         <emptyTree>
       end
     end
-
-    def normal_method(<blk>)
-      <emptyTree>
-    end
-
-    def self.normal_static_method(<blk>)
-      <emptyTree>
-    end
   end
   class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::NormalClass::InnerModule<<C InnerModule>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::ANamespace<<C ANamespace>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
@@ -100,43 +90,31 @@ begin
     end
   end
   class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Mixin<<C Mixin>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::OtherMixin<<C OtherMixin>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         <self>.include(::Mixin)

@@ -2,8 +2,6 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       class ::Test<<C Test>> < (::<todo sym>)
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
         <self>.sig() do ||
           <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
@@ -67,6 +65,24 @@ begin
         def baz<defaultArg>1(w, <blk>)
           ""
         end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        :"foo"
+
+        :"bar"
+
+        :"qux"
+
+        :"baz"
+
+        :"foo<defaultArg>1"
+
+        :"bar<defaultArg>1"
+
+        :"qux<defaultArg>1"
+
+        :"baz<defaultArg>1"
       end
       ::Sorbet::Private::Static.keep_for_ide(::Test)
       <emptyTree>
