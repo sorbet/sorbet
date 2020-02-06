@@ -17,177 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
-    label = "::<Class:ControlFlow>#<static-init>";
-    color = blue;
-    "bb::<Class:ControlFlow>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:ControlFlow>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:ControlFlow>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(ControlFlow) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ControlFlow>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ControlFlow>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$6: T.class_of(T) = alias <C T>\l<statTemp>$3: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<statTemp>$5: T.class_of(T::Sig))\l<block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$10: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_0" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_1" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(ControlFlow), <selfRestore>$10: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_5" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_3" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$10: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void)\l<statTemp>$7: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$10\l<block-pre-call-temp>$28: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$29: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_3" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(ControlFlow), <selfRestore>$10: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$17: Symbol(:\"a\") = :\"a\"\l<statTemp>$19: T.class_of(T) = alias <C T>\l<statTemp>$20: T.class_of(Integer) = alias <C Integer>\l<statTemp>$21: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$18: <Type: T.nilable(Integer)> = <statTemp>$19: T.class_of(T).any(<statTemp>$20: T.class_of(Integer), <statTemp>$21: T.class_of(NilClass))\l<magic>$22: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$16: {a: <Type: T.nilable(Integer)>} = <magic>$22: T.class_of(<Magic>).<build-hash>(<hashTemp>$17: Symbol(:\"a\"), <hashTemp>$18: <Type: T.nilable(Integer)>)\l<statTemp>$14: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$16: {a: <Type: T.nilable(Integer)>})\l<statTemp>$23: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$13: T::Private::Methods::DeclBuilder = <statTemp>$14: T::Private::Methods::DeclBuilder.returns(<statTemp>$23: T.class_of(Integer))\l<blockReturnTemp>$24: T.noreturn = blockreturn<sig> <blockReturnTemp>$13: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_5" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_6" [
-        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(ControlFlow), <selfRestore>$29: T.class_of(ControlFlow), <block-pre-call-temp>$28: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_9" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_7" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_7" [
-        label = "block[id=7, rubyBlockId=0](<selfRestore>$29: T.class_of(ControlFlow), <block-pre-call-temp>$28: Sorbet::Private::Static::Void)\l<statTemp>$26: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$28, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$29\l<block-pre-call-temp>$44: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$45: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_7" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_9" [
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(ControlFlow), <selfRestore>$29: T.class_of(ControlFlow), <block-pre-call-temp>$28: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$36: Symbol(:\"a\") = :\"a\"\l<hashTemp>$37: T.class_of(Integer) = alias <C Integer>\l<magic>$38: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$35: {a: T.class_of(Integer)} = <magic>$38: T.class_of(<Magic>).<build-hash>(<hashTemp>$36: Symbol(:\"a\"), <hashTemp>$37: T.class_of(Integer))\l<statTemp>$33: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$35: {a: T.class_of(Integer)})\l<statTemp>$39: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$32: T::Private::Methods::DeclBuilder = <statTemp>$33: T::Private::Methods::DeclBuilder.returns(<statTemp>$39: T.class_of(Integer))\l<blockReturnTemp>$40: T.noreturn = blockreturn<sig> <blockReturnTemp>$32: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_9" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_10" [
-        label = "block[id=10, rubyBlockId=3](<self>: T.class_of(ControlFlow), <selfRestore>$45: T.class_of(ControlFlow), <block-pre-call-temp>$44: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_13" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_11" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_11" [
-        label = "block[id=11, rubyBlockId=0](<selfRestore>$45: T.class_of(ControlFlow), <block-pre-call-temp>$44: Sorbet::Private::Static::Void)\l<statTemp>$42: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$44, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$45\l<block-pre-call-temp>$63: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$64: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_11" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_13" [
-        label = "block[id=13, rubyBlockId=3](<self>: T.class_of(ControlFlow), <selfRestore>$45: T.class_of(ControlFlow), <block-pre-call-temp>$44: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$52: Symbol(:\"a\") = :\"a\"\l<statTemp>$54: T.class_of(T) = alias <C T>\l<statTemp>$55: T.class_of(Integer) = alias <C Integer>\l<statTemp>$56: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$53: <Type: T.nilable(Integer)> = <statTemp>$54: T.class_of(T).any(<statTemp>$55: T.class_of(Integer), <statTemp>$56: T.class_of(NilClass))\l<magic>$57: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$51: {a: <Type: T.nilable(Integer)>} = <magic>$57: T.class_of(<Magic>).<build-hash>(<hashTemp>$52: Symbol(:\"a\"), <hashTemp>$53: <Type: T.nilable(Integer)>)\l<statTemp>$49: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$51: {a: <Type: T.nilable(Integer)>})\l<statTemp>$58: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$48: T::Private::Methods::DeclBuilder = <statTemp>$49: T::Private::Methods::DeclBuilder.returns(<statTemp>$58: T.class_of(Integer))\l<blockReturnTemp>$59: T.noreturn = blockreturn<sig> <blockReturnTemp>$48: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_13" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_14" [
-        label = "block[id=14, rubyBlockId=4](<self>: T.class_of(ControlFlow), <selfRestore>$64: T.class_of(ControlFlow), <block-pre-call-temp>$63: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_17" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_15" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_15" [
-        label = "block[id=15, rubyBlockId=0](<selfRestore>$64: T.class_of(ControlFlow), <block-pre-call-temp>$63: Sorbet::Private::Static::Void)\l<statTemp>$61: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$63, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$64\l<block-pre-call-temp>$82: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$83: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_15" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_17" [
-        label = "block[id=17, rubyBlockId=4](<self>: T.class_of(ControlFlow), <selfRestore>$64: T.class_of(ControlFlow), <block-pre-call-temp>$63: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$71: Symbol(:\"a\") = :\"a\"\l<statTemp>$73: T.class_of(T) = alias <C T>\l<statTemp>$74: T.class_of(Integer) = alias <C Integer>\l<statTemp>$75: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$72: <Type: T.nilable(Integer)> = <statTemp>$73: T.class_of(T).any(<statTemp>$74: T.class_of(Integer), <statTemp>$75: T.class_of(NilClass))\l<magic>$76: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$70: {a: <Type: T.nilable(Integer)>} = <magic>$76: T.class_of(<Magic>).<build-hash>(<hashTemp>$71: Symbol(:\"a\"), <hashTemp>$72: <Type: T.nilable(Integer)>)\l<statTemp>$68: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$70: {a: <Type: T.nilable(Integer)>})\l<statTemp>$77: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$67: T::Private::Methods::DeclBuilder = <statTemp>$68: T::Private::Methods::DeclBuilder.returns(<statTemp>$77: T.class_of(Integer))\l<blockReturnTemp>$78: T.noreturn = blockreturn<sig> <blockReturnTemp>$67: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_17" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_18" [
-        label = "block[id=18, rubyBlockId=5](<self>: T.class_of(ControlFlow), <selfRestore>$83: T.class_of(ControlFlow), <block-pre-call-temp>$82: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_21" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_19" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_19" [
-        label = "block[id=19, rubyBlockId=0](<selfRestore>$83: T.class_of(ControlFlow), <block-pre-call-temp>$82: Sorbet::Private::Static::Void)\l<statTemp>$80: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$82, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$83\l<block-pre-call-temp>$101: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$102: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_19" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_21" [
-        label = "block[id=21, rubyBlockId=5](<self>: T.class_of(ControlFlow), <selfRestore>$83: T.class_of(ControlFlow), <block-pre-call-temp>$82: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$90: Symbol(:\"a\") = :\"a\"\l<statTemp>$92: T.class_of(T) = alias <C T>\l<statTemp>$93: T.class_of(Integer) = alias <C Integer>\l<statTemp>$94: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$91: <Type: T.nilable(Integer)> = <statTemp>$92: T.class_of(T).any(<statTemp>$93: T.class_of(Integer), <statTemp>$94: T.class_of(NilClass))\l<magic>$95: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$89: {a: <Type: T.nilable(Integer)>} = <magic>$95: T.class_of(<Magic>).<build-hash>(<hashTemp>$90: Symbol(:\"a\"), <hashTemp>$91: <Type: T.nilable(Integer)>)\l<statTemp>$87: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$89: {a: <Type: T.nilable(Integer)>})\l<statTemp>$96: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$86: T::Private::Methods::DeclBuilder = <statTemp>$87: T::Private::Methods::DeclBuilder.returns(<statTemp>$96: T.class_of(Integer))\l<blockReturnTemp>$97: T.noreturn = blockreturn<sig> <blockReturnTemp>$86: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_21" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_22" [
-        label = "block[id=22, rubyBlockId=6](<self>: T.class_of(ControlFlow), <selfRestore>$102: T.class_of(ControlFlow), <block-pre-call-temp>$101: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_25" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_23" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_23" [
-        label = "block[id=23, rubyBlockId=0](<selfRestore>$102: T.class_of(ControlFlow), <block-pre-call-temp>$101: Sorbet::Private::Static::Void)\l<statTemp>$99: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$101, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$102\l<block-pre-call-temp>$120: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$121: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_23" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_25" [
-        label = "block[id=25, rubyBlockId=6](<self>: T.class_of(ControlFlow), <selfRestore>$102: T.class_of(ControlFlow), <block-pre-call-temp>$101: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$109: Symbol(:\"a\") = :\"a\"\l<statTemp>$111: T.class_of(T) = alias <C T>\l<statTemp>$112: T.class_of(Integer) = alias <C Integer>\l<statTemp>$113: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$110: <Type: T.nilable(Integer)> = <statTemp>$111: T.class_of(T).any(<statTemp>$112: T.class_of(Integer), <statTemp>$113: T.class_of(NilClass))\l<magic>$114: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$108: {a: <Type: T.nilable(Integer)>} = <magic>$114: T.class_of(<Magic>).<build-hash>(<hashTemp>$109: Symbol(:\"a\"), <hashTemp>$110: <Type: T.nilable(Integer)>)\l<statTemp>$106: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$108: {a: <Type: T.nilable(Integer)>})\l<statTemp>$115: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$105: T::Private::Methods::DeclBuilder = <statTemp>$106: T::Private::Methods::DeclBuilder.returns(<statTemp>$115: T.class_of(Integer))\l<blockReturnTemp>$116: T.noreturn = blockreturn<sig> <blockReturnTemp>$105: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_25" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_26" [
-        label = "block[id=26, rubyBlockId=7](<self>: T.class_of(ControlFlow), <selfRestore>$121: T.class_of(ControlFlow), <block-pre-call-temp>$120: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_29" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_27" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_27" [
-        label = "block[id=27, rubyBlockId=0](<selfRestore>$121: T.class_of(ControlFlow), <block-pre-call-temp>$120: Sorbet::Private::Static::Void)\l<statTemp>$118: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$120, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$121\l<block-pre-call-temp>$139: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$140: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_27" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_29" [
-        label = "block[id=29, rubyBlockId=7](<self>: T.class_of(ControlFlow), <selfRestore>$121: T.class_of(ControlFlow), <block-pre-call-temp>$120: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$128: Symbol(:\"a\") = :\"a\"\l<statTemp>$130: T.class_of(T) = alias <C T>\l<statTemp>$131: T.class_of(Integer) = alias <C Integer>\l<statTemp>$132: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$129: <Type: T.nilable(Integer)> = <statTemp>$130: T.class_of(T).any(<statTemp>$131: T.class_of(Integer), <statTemp>$132: T.class_of(NilClass))\l<magic>$133: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$127: {a: <Type: T.nilable(Integer)>} = <magic>$133: T.class_of(<Magic>).<build-hash>(<hashTemp>$128: Symbol(:\"a\"), <hashTemp>$129: <Type: T.nilable(Integer)>)\l<statTemp>$125: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$127: {a: <Type: T.nilable(Integer)>})\l<statTemp>$134: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$124: T::Private::Methods::DeclBuilder = <statTemp>$125: T::Private::Methods::DeclBuilder.returns(<statTemp>$134: T.class_of(Integer))\l<blockReturnTemp>$135: T.noreturn = blockreturn<sig> <blockReturnTemp>$124: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_29" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_30" [
-        label = "block[id=30, rubyBlockId=8](<self>: T.class_of(ControlFlow), <selfRestore>$140: T.class_of(ControlFlow), <block-pre-call-temp>$139: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_33" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_31" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_31" [
-        label = "block[id=31, rubyBlockId=0](<selfRestore>$140: T.class_of(ControlFlow), <block-pre-call-temp>$139: Sorbet::Private::Static::Void)\l<statTemp>$137: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$139, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$140\l<block-pre-call-temp>$158: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$159: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_31" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_33" [
-        label = "block[id=33, rubyBlockId=8](<self>: T.class_of(ControlFlow), <selfRestore>$140: T.class_of(ControlFlow), <block-pre-call-temp>$139: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$147: Symbol(:\"a\") = :\"a\"\l<statTemp>$149: T.class_of(T) = alias <C T>\l<statTemp>$150: T.class_of(Integer) = alias <C Integer>\l<statTemp>$151: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$148: <Type: T.nilable(Integer)> = <statTemp>$149: T.class_of(T).any(<statTemp>$150: T.class_of(Integer), <statTemp>$151: T.class_of(NilClass))\l<magic>$152: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$146: {a: <Type: T.nilable(Integer)>} = <magic>$152: T.class_of(<Magic>).<build-hash>(<hashTemp>$147: Symbol(:\"a\"), <hashTemp>$148: <Type: T.nilable(Integer)>)\l<statTemp>$144: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$146: {a: <Type: T.nilable(Integer)>})\l<statTemp>$153: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$143: T::Private::Methods::DeclBuilder = <statTemp>$144: T::Private::Methods::DeclBuilder.returns(<statTemp>$153: T.class_of(Integer))\l<blockReturnTemp>$154: T.noreturn = blockreturn<sig> <blockReturnTemp>$143: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_33" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_34" [
-        label = "block[id=34, rubyBlockId=9](<self>: T.class_of(ControlFlow), <selfRestore>$159: T.class_of(ControlFlow), <block-pre-call-temp>$158: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_37" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
-
-    "bb::<Class:ControlFlow>#<static-init>_35" [
-        label = "block[id=35, rubyBlockId=0](<selfRestore>$159: T.class_of(ControlFlow), <block-pre-call-temp>$158: Sorbet::Private::Static::Void)\l<statTemp>$156: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$158, sig>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
-    "bb::<Class:ControlFlow>#<static-init>_37" [
-        label = "block[id=37, rubyBlockId=9](<self>: T.class_of(ControlFlow), <selfRestore>$159: T.class_of(ControlFlow), <block-pre-call-temp>$158: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$166: Symbol(:\"a\") = :\"a\"\l<statTemp>$168: T.class_of(T) = alias <C T>\l<statTemp>$169: T.class_of(Integer) = alias <C Integer>\l<statTemp>$170: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$167: <Type: T.nilable(Integer)> = <statTemp>$168: T.class_of(T).any(<statTemp>$169: T.class_of(Integer), <statTemp>$170: T.class_of(NilClass))\l<magic>$171: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$165: {a: <Type: T.nilable(Integer)>} = <magic>$171: T.class_of(<Magic>).<build-hash>(<hashTemp>$166: Symbol(:\"a\"), <hashTemp>$167: <Type: T.nilable(Integer)>)\l<statTemp>$163: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$165: {a: <Type: T.nilable(Integer)>})\l<statTemp>$172: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$162: T::Private::Methods::DeclBuilder = <statTemp>$163: T::Private::Methods::DeclBuilder.returns(<statTemp>$172: T.class_of(Integer))\l<blockReturnTemp>$173: T.noreturn = blockreturn<sig> <blockReturnTemp>$162: T::Private::Methods::DeclBuilder\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ControlFlow>#<static-init>_37" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
-}
-
 subgraph "cluster_::ControlFlow#orZero0" {
     label = "::ControlFlow#orZero0";
     color = blue;
@@ -515,6 +344,177 @@ subgraph "cluster_::ControlFlow#orZero5" {
     ];
 
     "bb::ControlFlow#orZero5_6" -> "bb::ControlFlow#orZero5_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:ControlFlow>#<static-init>" {
+    label = "::<Class:ControlFlow>#<static-init>";
+    color = blue;
+    "bb::<Class:ControlFlow>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:ControlFlow>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:ControlFlow>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(ControlFlow) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ControlFlow>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ControlFlow>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$6: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_0" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_1" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_2" [
+        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(ControlFlow), <selfRestore>$6: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_5" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_2" -> "bb::<Class:ControlFlow>#<static-init>_3" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_3" [
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$6\l<block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$24: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_3" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_5" [
+        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(ControlFlow), <selfRestore>$6: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$13: Symbol(:\"a\") = :\"a\"\l<statTemp>$15: T.class_of(T) = alias <C T>\l<statTemp>$16: T.class_of(Integer) = alias <C Integer>\l<statTemp>$17: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$14: <Type: T.nilable(Integer)> = <statTemp>$15: T.class_of(T).any(<statTemp>$16: T.class_of(Integer), <statTemp>$17: T.class_of(NilClass))\l<magic>$18: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$12: {a: <Type: T.nilable(Integer)>} = <magic>$18: T.class_of(<Magic>).<build-hash>(<hashTemp>$13: Symbol(:\"a\"), <hashTemp>$14: <Type: T.nilable(Integer)>)\l<statTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$12: {a: <Type: T.nilable(Integer)>})\l<statTemp>$19: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <statTemp>$10: T::Private::Methods::DeclBuilder.returns(<statTemp>$19: T.class_of(Integer))\l<blockReturnTemp>$20: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_5" -> "bb::<Class:ControlFlow>#<static-init>_2" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_6" [
+        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(ControlFlow), <selfRestore>$24: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_9" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_6" -> "bb::<Class:ControlFlow>#<static-init>_7" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_7" [
+        label = "block[id=7, rubyBlockId=0](<selfRestore>$24: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorbet::Private::Static::Void)\l<statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$24\l<block-pre-call-temp>$38: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$39: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_7" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_9" [
+        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(ControlFlow), <selfRestore>$24: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$31: Symbol(:\"a\") = :\"a\"\l<hashTemp>$32: T.class_of(Integer) = alias <C Integer>\l<magic>$33: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$30: {a: T.class_of(Integer)} = <magic>$33: T.class_of(<Magic>).<build-hash>(<hashTemp>$31: Symbol(:\"a\"), <hashTemp>$32: T.class_of(Integer))\l<statTemp>$28: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$30: {a: T.class_of(Integer)})\l<statTemp>$34: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$27: T::Private::Methods::DeclBuilder = <statTemp>$28: T::Private::Methods::DeclBuilder.returns(<statTemp>$34: T.class_of(Integer))\l<blockReturnTemp>$35: T.noreturn = blockreturn<sig> <blockReturnTemp>$27: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_9" -> "bb::<Class:ControlFlow>#<static-init>_6" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_10" [
+        label = "block[id=10, rubyBlockId=3](<self>: T.class_of(ControlFlow), <selfRestore>$39: T.class_of(ControlFlow), <block-pre-call-temp>$38: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_13" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_10" -> "bb::<Class:ControlFlow>#<static-init>_11" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_11" [
+        label = "block[id=11, rubyBlockId=0](<selfRestore>$39: T.class_of(ControlFlow), <block-pre-call-temp>$38: Sorbet::Private::Static::Void)\l<statTemp>$36: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$38, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$39\l<block-pre-call-temp>$56: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$57: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_11" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_13" [
+        label = "block[id=13, rubyBlockId=3](<self>: T.class_of(ControlFlow), <selfRestore>$39: T.class_of(ControlFlow), <block-pre-call-temp>$38: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$46: Symbol(:\"a\") = :\"a\"\l<statTemp>$48: T.class_of(T) = alias <C T>\l<statTemp>$49: T.class_of(Integer) = alias <C Integer>\l<statTemp>$50: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$47: <Type: T.nilable(Integer)> = <statTemp>$48: T.class_of(T).any(<statTemp>$49: T.class_of(Integer), <statTemp>$50: T.class_of(NilClass))\l<magic>$51: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$45: {a: <Type: T.nilable(Integer)>} = <magic>$51: T.class_of(<Magic>).<build-hash>(<hashTemp>$46: Symbol(:\"a\"), <hashTemp>$47: <Type: T.nilable(Integer)>)\l<statTemp>$43: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$45: {a: <Type: T.nilable(Integer)>})\l<statTemp>$52: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$42: T::Private::Methods::DeclBuilder = <statTemp>$43: T::Private::Methods::DeclBuilder.returns(<statTemp>$52: T.class_of(Integer))\l<blockReturnTemp>$53: T.noreturn = blockreturn<sig> <blockReturnTemp>$42: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_13" -> "bb::<Class:ControlFlow>#<static-init>_10" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_14" [
+        label = "block[id=14, rubyBlockId=4](<self>: T.class_of(ControlFlow), <selfRestore>$57: T.class_of(ControlFlow), <block-pre-call-temp>$56: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_17" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_14" -> "bb::<Class:ControlFlow>#<static-init>_15" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_15" [
+        label = "block[id=15, rubyBlockId=0](<selfRestore>$57: T.class_of(ControlFlow), <block-pre-call-temp>$56: Sorbet::Private::Static::Void)\l<statTemp>$54: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$56, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$57\l<block-pre-call-temp>$74: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$75: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_15" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_17" [
+        label = "block[id=17, rubyBlockId=4](<self>: T.class_of(ControlFlow), <selfRestore>$57: T.class_of(ControlFlow), <block-pre-call-temp>$56: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$64: Symbol(:\"a\") = :\"a\"\l<statTemp>$66: T.class_of(T) = alias <C T>\l<statTemp>$67: T.class_of(Integer) = alias <C Integer>\l<statTemp>$68: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$65: <Type: T.nilable(Integer)> = <statTemp>$66: T.class_of(T).any(<statTemp>$67: T.class_of(Integer), <statTemp>$68: T.class_of(NilClass))\l<magic>$69: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$63: {a: <Type: T.nilable(Integer)>} = <magic>$69: T.class_of(<Magic>).<build-hash>(<hashTemp>$64: Symbol(:\"a\"), <hashTemp>$65: <Type: T.nilable(Integer)>)\l<statTemp>$61: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$63: {a: <Type: T.nilable(Integer)>})\l<statTemp>$70: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$60: T::Private::Methods::DeclBuilder = <statTemp>$61: T::Private::Methods::DeclBuilder.returns(<statTemp>$70: T.class_of(Integer))\l<blockReturnTemp>$71: T.noreturn = blockreturn<sig> <blockReturnTemp>$60: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_17" -> "bb::<Class:ControlFlow>#<static-init>_14" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_18" [
+        label = "block[id=18, rubyBlockId=5](<self>: T.class_of(ControlFlow), <selfRestore>$75: T.class_of(ControlFlow), <block-pre-call-temp>$74: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_21" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_18" -> "bb::<Class:ControlFlow>#<static-init>_19" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_19" [
+        label = "block[id=19, rubyBlockId=0](<selfRestore>$75: T.class_of(ControlFlow), <block-pre-call-temp>$74: Sorbet::Private::Static::Void)\l<statTemp>$72: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$74, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$75\l<block-pre-call-temp>$92: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$93: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_19" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_21" [
+        label = "block[id=21, rubyBlockId=5](<self>: T.class_of(ControlFlow), <selfRestore>$75: T.class_of(ControlFlow), <block-pre-call-temp>$74: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$82: Symbol(:\"a\") = :\"a\"\l<statTemp>$84: T.class_of(T) = alias <C T>\l<statTemp>$85: T.class_of(Integer) = alias <C Integer>\l<statTemp>$86: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$83: <Type: T.nilable(Integer)> = <statTemp>$84: T.class_of(T).any(<statTemp>$85: T.class_of(Integer), <statTemp>$86: T.class_of(NilClass))\l<magic>$87: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$81: {a: <Type: T.nilable(Integer)>} = <magic>$87: T.class_of(<Magic>).<build-hash>(<hashTemp>$82: Symbol(:\"a\"), <hashTemp>$83: <Type: T.nilable(Integer)>)\l<statTemp>$79: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$81: {a: <Type: T.nilable(Integer)>})\l<statTemp>$88: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$78: T::Private::Methods::DeclBuilder = <statTemp>$79: T::Private::Methods::DeclBuilder.returns(<statTemp>$88: T.class_of(Integer))\l<blockReturnTemp>$89: T.noreturn = blockreturn<sig> <blockReturnTemp>$78: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_21" -> "bb::<Class:ControlFlow>#<static-init>_18" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_22" [
+        label = "block[id=22, rubyBlockId=6](<self>: T.class_of(ControlFlow), <selfRestore>$93: T.class_of(ControlFlow), <block-pre-call-temp>$92: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_25" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_22" -> "bb::<Class:ControlFlow>#<static-init>_23" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_23" [
+        label = "block[id=23, rubyBlockId=0](<selfRestore>$93: T.class_of(ControlFlow), <block-pre-call-temp>$92: Sorbet::Private::Static::Void)\l<statTemp>$90: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$92, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$93\l<block-pre-call-temp>$110: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$111: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_23" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_25" [
+        label = "block[id=25, rubyBlockId=6](<self>: T.class_of(ControlFlow), <selfRestore>$93: T.class_of(ControlFlow), <block-pre-call-temp>$92: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$100: Symbol(:\"a\") = :\"a\"\l<statTemp>$102: T.class_of(T) = alias <C T>\l<statTemp>$103: T.class_of(Integer) = alias <C Integer>\l<statTemp>$104: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$101: <Type: T.nilable(Integer)> = <statTemp>$102: T.class_of(T).any(<statTemp>$103: T.class_of(Integer), <statTemp>$104: T.class_of(NilClass))\l<magic>$105: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$99: {a: <Type: T.nilable(Integer)>} = <magic>$105: T.class_of(<Magic>).<build-hash>(<hashTemp>$100: Symbol(:\"a\"), <hashTemp>$101: <Type: T.nilable(Integer)>)\l<statTemp>$97: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$99: {a: <Type: T.nilable(Integer)>})\l<statTemp>$106: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$96: T::Private::Methods::DeclBuilder = <statTemp>$97: T::Private::Methods::DeclBuilder.returns(<statTemp>$106: T.class_of(Integer))\l<blockReturnTemp>$107: T.noreturn = blockreturn<sig> <blockReturnTemp>$96: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_25" -> "bb::<Class:ControlFlow>#<static-init>_22" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_26" [
+        label = "block[id=26, rubyBlockId=7](<self>: T.class_of(ControlFlow), <selfRestore>$111: T.class_of(ControlFlow), <block-pre-call-temp>$110: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_29" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_26" -> "bb::<Class:ControlFlow>#<static-init>_27" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_27" [
+        label = "block[id=27, rubyBlockId=0](<selfRestore>$111: T.class_of(ControlFlow), <block-pre-call-temp>$110: Sorbet::Private::Static::Void)\l<statTemp>$108: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$110, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$111\l<block-pre-call-temp>$128: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$129: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_27" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_29" [
+        label = "block[id=29, rubyBlockId=7](<self>: T.class_of(ControlFlow), <selfRestore>$111: T.class_of(ControlFlow), <block-pre-call-temp>$110: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$118: Symbol(:\"a\") = :\"a\"\l<statTemp>$120: T.class_of(T) = alias <C T>\l<statTemp>$121: T.class_of(Integer) = alias <C Integer>\l<statTemp>$122: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$119: <Type: T.nilable(Integer)> = <statTemp>$120: T.class_of(T).any(<statTemp>$121: T.class_of(Integer), <statTemp>$122: T.class_of(NilClass))\l<magic>$123: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$117: {a: <Type: T.nilable(Integer)>} = <magic>$123: T.class_of(<Magic>).<build-hash>(<hashTemp>$118: Symbol(:\"a\"), <hashTemp>$119: <Type: T.nilable(Integer)>)\l<statTemp>$115: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$117: {a: <Type: T.nilable(Integer)>})\l<statTemp>$124: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$114: T::Private::Methods::DeclBuilder = <statTemp>$115: T::Private::Methods::DeclBuilder.returns(<statTemp>$124: T.class_of(Integer))\l<blockReturnTemp>$125: T.noreturn = blockreturn<sig> <blockReturnTemp>$114: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_29" -> "bb::<Class:ControlFlow>#<static-init>_26" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_30" [
+        label = "block[id=30, rubyBlockId=8](<self>: T.class_of(ControlFlow), <selfRestore>$129: T.class_of(ControlFlow), <block-pre-call-temp>$128: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_33" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_30" -> "bb::<Class:ControlFlow>#<static-init>_31" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_31" [
+        label = "block[id=31, rubyBlockId=0](<selfRestore>$129: T.class_of(ControlFlow), <block-pre-call-temp>$128: Sorbet::Private::Static::Void)\l<statTemp>$126: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$128, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$129\l<block-pre-call-temp>$146: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()\l<selfRestore>$147: T.class_of(ControlFlow) = <self>\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_31" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_33" [
+        label = "block[id=33, rubyBlockId=8](<self>: T.class_of(ControlFlow), <selfRestore>$129: T.class_of(ControlFlow), <block-pre-call-temp>$128: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$136: Symbol(:\"a\") = :\"a\"\l<statTemp>$138: T.class_of(T) = alias <C T>\l<statTemp>$139: T.class_of(Integer) = alias <C Integer>\l<statTemp>$140: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$137: <Type: T.nilable(Integer)> = <statTemp>$138: T.class_of(T).any(<statTemp>$139: T.class_of(Integer), <statTemp>$140: T.class_of(NilClass))\l<magic>$141: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$135: {a: <Type: T.nilable(Integer)>} = <magic>$141: T.class_of(<Magic>).<build-hash>(<hashTemp>$136: Symbol(:\"a\"), <hashTemp>$137: <Type: T.nilable(Integer)>)\l<statTemp>$133: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$135: {a: <Type: T.nilable(Integer)>})\l<statTemp>$142: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$132: T::Private::Methods::DeclBuilder = <statTemp>$133: T::Private::Methods::DeclBuilder.returns(<statTemp>$142: T.class_of(Integer))\l<blockReturnTemp>$143: T.noreturn = blockreturn<sig> <blockReturnTemp>$132: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_33" -> "bb::<Class:ControlFlow>#<static-init>_30" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_34" [
+        label = "block[id=34, rubyBlockId=9](<self>: T.class_of(ControlFlow), <selfRestore>$147: T.class_of(ControlFlow), <block-pre-call-temp>$146: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_37" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_34" -> "bb::<Class:ControlFlow>#<static-init>_35" [style="tapered"];
+
+    "bb::<Class:ControlFlow>#<static-init>_35" [
+        label = "block[id=35, rubyBlockId=0](<selfRestore>$147: T.class_of(ControlFlow), <block-pre-call-temp>$146: Sorbet::Private::Static::Void)\l<statTemp>$144: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$146, sig>\l<self>: T.class_of(ControlFlow) = <selfRestore>$147\l<statTemp>$164: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$165: T.class_of(T) = alias <C T>\l<statTemp>$162: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<statTemp>$164: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_35" -> "bb::<Class:ControlFlow>#<static-init>_1" [style="bold"];
+    "bb::<Class:ControlFlow>#<static-init>_37" [
+        label = "block[id=37, rubyBlockId=9](<self>: T.class_of(ControlFlow), <selfRestore>$147: T.class_of(ControlFlow), <block-pre-call-temp>$146: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<hashTemp>$154: Symbol(:\"a\") = :\"a\"\l<statTemp>$156: T.class_of(T) = alias <C T>\l<statTemp>$157: T.class_of(Integer) = alias <C Integer>\l<statTemp>$158: T.class_of(NilClass) = alias <C NilClass>\l<hashTemp>$155: <Type: T.nilable(Integer)> = <statTemp>$156: T.class_of(T).any(<statTemp>$157: T.class_of(Integer), <statTemp>$158: T.class_of(NilClass))\l<magic>$159: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$153: {a: <Type: T.nilable(Integer)>} = <magic>$159: T.class_of(<Magic>).<build-hash>(<hashTemp>$154: Symbol(:\"a\"), <hashTemp>$155: <Type: T.nilable(Integer)>)\l<statTemp>$151: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<statTemp>$153: {a: <Type: T.nilable(Integer)>})\l<statTemp>$160: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$150: T::Private::Methods::DeclBuilder = <statTemp>$151: T::Private::Methods::DeclBuilder.returns(<statTemp>$160: T.class_of(Integer))\l<blockReturnTemp>$161: T.noreturn = blockreturn<sig> <blockReturnTemp>$150: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ControlFlow>#<static-init>_37" -> "bb::<Class:ControlFlow>#<static-init>_34" [style="bold"];
 }
 
 }

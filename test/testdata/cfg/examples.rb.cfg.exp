@@ -17,24 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:Examples>#<static-init>" {
-    label = "::<Class:Examples>#<static-init>";
-    color = blue;
-    "bb::<Class:Examples>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:Examples>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:Examples>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Examples) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Examples>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Examples>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Examples>#<static-init>_0" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
-    "bb::<Class:Examples>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:Examples>#<static-init>_1" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::Examples#i_like_ifs" {
     label = "::Examples#i_like_ifs";
     color = blue;
@@ -351,6 +333,24 @@ subgraph "cluster_::Examples#take_arguments" {
     ];
 
     "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:Examples>#<static-init>" {
+    label = "::<Class:Examples>#<static-init>";
+    color = blue;
+    "bb::<Class:Examples>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:Examples>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:Examples>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Examples) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Examples>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Examples>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Examples>#<static-init>_0" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
+    "bb::<Class:Examples>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:Examples>#<static-init>_1" -> "bb::<Class:Examples>#<static-init>_1" [style="bold"];
 }
 
 }
