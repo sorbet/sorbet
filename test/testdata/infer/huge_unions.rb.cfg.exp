@@ -485,24 +485,6 @@ subgraph "cluster_::<Class:C20>#<static-init>" {
     "bb::<Class:C20>#<static-init>_1" -> "bb::<Class:C20>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:A>#<static-init>" {
-    label = "::<Class:A>#<static-init>";
-    color = blue;
-    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:A>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"send_beta_invitation\") = :\"send_beta_invitation\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"send_beta_invitation\")\l<unconditional>\l"
-    ];
-
-    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-    "bb::<Class:A>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::<Class:A>#send_beta_invitation" {
     label = "::<Class:A>#send_beta_invitation";
     color = blue;
@@ -764,6 +746,24 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:A>#<static-init>" {
+    label = "::<Class:A>#<static-init>";
+    color = blue;
+    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:A>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"send_beta_invitation\") = :\"send_beta_invitation\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"send_beta_invitation\")\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
+    "bb::<Class:A>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
 }
 
 }

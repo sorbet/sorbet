@@ -17,24 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:A>#<static-init>" {
-    label = "::<Class:A>#<static-init>";
-    color = blue;
-    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:A>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"initialize\") = :\"initialize\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"initialize\")\l<unconditional>\l"
-    ];
-
-    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-    "bb::<Class:A>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::A#initialize" {
     label = "::A#initialize";
     color = blue;
@@ -110,6 +92,24 @@ subgraph "cluster_::A#initialize" {
     ];
 
     "bb::A#initialize_14" -> "bb::A#initialize_2" [style="bold"];
+}
+
+subgraph "cluster_::<Class:A>#<static-init>" {
+    label = "::<Class:A>#<static-init>";
+    color = blue;
+    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:A>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"initialize\") = :\"initialize\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"initialize\")\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
+    "bb::<Class:A>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:A>#<static-init>_1" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
 }
 
 }

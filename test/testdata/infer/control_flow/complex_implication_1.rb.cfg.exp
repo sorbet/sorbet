@@ -17,24 +17,6 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<Class:ModuleMethods>#<static-init>" {
-    label = "::<Class:ModuleMethods>#<static-init>";
-    color = blue;
-    "bb::<Class:ModuleMethods>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:ModuleMethods>#<static-init>_1" [shape = parallelogram];
-
-    "bb::<Class:ModuleMethods>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(ModuleMethods) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ModuleMethods>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ModuleMethods>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"instrumented_request\") = :\"instrumented_request\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"instrumented_request\")\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ModuleMethods>#<static-init>_0" -> "bb::<Class:ModuleMethods>#<static-init>_1" [style="bold"];
-    "bb::<Class:ModuleMethods>#<static-init>_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
-    ];
-
-    "bb::<Class:ModuleMethods>#<static-init>_1" -> "bb::<Class:ModuleMethods>#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::ModuleMethods#instrumented_request" {
     label = "::ModuleMethods#instrumented_request";
     color = blue;
@@ -154,6 +136,24 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     ];
 
     "bb::ModuleMethods#instrumented_request_25" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
+}
+
+subgraph "cluster_::<Class:ModuleMethods>#<static-init>" {
+    label = "::<Class:ModuleMethods>#<static-init>";
+    color = blue;
+    "bb::<Class:ModuleMethods>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:ModuleMethods>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:ModuleMethods>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(ModuleMethods) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U ModuleMethods>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U ModuleMethods>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"instrumented_request\") = :\"instrumented_request\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"instrumented_request\")\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ModuleMethods>#<static-init>_0" -> "bb::<Class:ModuleMethods>#<static-init>_1" [style="bold"];
+    "bb::<Class:ModuleMethods>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:ModuleMethods>#<static-init>_1" -> "bb::<Class:ModuleMethods>#<static-init>_1" [style="bold"];
 }
 
 }
