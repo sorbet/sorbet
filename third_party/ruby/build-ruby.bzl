@@ -100,6 +100,14 @@ find ccan -type f -name \*.h | while read file; do
   cp $file "$internal_incdir/$file"
 done
 
+# install bundler
+cp "$base/{bundler}" bundler.gem
+
+# --local to avoid going to rubygmes for the gem
+# --env-shebang to not hardcode the path to ruby in the sandbox
+# --force because bundler is packaged with ruby starting with 2.6
+"$out_dir/bin/gem" install --local --env-shebang --force bundler.gem
+
 popd > /dev/null
 
 rm -rf "$build_dir"
@@ -190,7 +198,7 @@ def _build_ruby_impl(ctx):
     # Outputs
     binaries = [
         ctx.actions.declare_file("toolchain/bin/{}".format(binary))
-        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri"]
+        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri", "bundle", "bundler"]
     ]
 
     libdir = ctx.actions.declare_directory("toolchain/lib")
@@ -204,7 +212,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src,
+        inputs = deps + ctx.files.src + ctx.files.bundler,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -215,6 +223,7 @@ def _build_ruby_impl(ctx):
             internal_incdir = internal_incdir.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
+            bundler = ctx.files.bundler[0].path,
         )),
     )
 
@@ -236,6 +245,10 @@ build_ruby = rule(
     attrs = {
         "src": attr.label(),
         "deps": attr.label_list(),
+        "bundler": attr.label(
+            mandatory = True,
+            doc = "The bundler gem to install",
+        ),
         "copts": attr.string_list(
             doc = "Additional copts for the ruby build",
         ),
