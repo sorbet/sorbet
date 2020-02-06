@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -240,6 +240,12 @@ package(default_visibility = ["//visibility:public"])
         sha256 = "aa06e3749687c236a311ff93a0b973582a41a9effbc0126b0e101c05f3391bdc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
         strip_prefix = "cpp-subprocess-6931e3d69fb36e6eae099585646e54ac644bf99c",
+    )
+
+    http_file(
+        name = "bundler_2_1_4",
+        urls = ["https://rubygems.org/downloads/bundler-2.1.4.gem"],
+        sha256 = "50014d21d6712079da4d6464de12bb93c278f87c9200d0b60ba99f32c25af489",
     )
 
     http_archive(

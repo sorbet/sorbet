@@ -11,6 +11,7 @@ filegroup(
 build_ruby(
     name = "ruby-dist",
     src = ":source",
+    bundler = "@bundler_2_1_4//file",
     copts = [],
     linkopts = [],
     visibility = ["//visibility:private"],
