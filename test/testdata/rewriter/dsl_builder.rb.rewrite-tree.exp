@@ -120,8 +120,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(nil)
     end
 
-    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"class_of" => <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)}).returns(::NilClass)
     end
@@ -169,9 +167,62 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def root_const<<C <todo sym>>>(&<blk>)
       ::T.unsafe(nil)
     end
+
+    :"opt_string"
+
+    :"get_opt_string"
+
+    :"opt_string"
+
+    :"opt_int_defaulted"
+
+    :"get_opt_int_defaulted"
+
+    :"opt_int_defaulted"
+
+    :"req_string"
+
+    :"get_req_string"
+
+    :"req_string"
+
+    :"implied_string"
+
+    :"get_implied_string"
+
+    :"implied_string"
+
+    :"no_getter"
+
+    :"get_no_setter"
+
+    :"no_setter"
+
+    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
+
+    :"class_of"
+
+    :"get_class_of"
+
+    :"class_of"
+
+    :"root_const"
+
+    :"get_root_const"
+
+    :"root_const"
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
+    def test_instance_methods<<C <todo sym>>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.assert_type!(<self>.opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+        <emptyTree>::<C T>.assert_type!(<self>.opt_int_defaulted(), <emptyTree>::<C Integer>)
+        <emptyTree>::<C T>.assert_type!(<self>.req_string(), <emptyTree>::<C String>)
+        <self>.no_getter()
+      end
+    end
+
     <self>.opt_string("hi")
 
     <self>.get_opt_string()
@@ -200,13 +251,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
 
-    def test_instance_methods<<C <todo sym>>>(&<blk>)
-      begin
-        <emptyTree>::<C T>.assert_type!(<self>.opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
-        <emptyTree>::<C T>.assert_type!(<self>.opt_int_defaulted(), <emptyTree>::<C Integer>)
-        <emptyTree>::<C T>.assert_type!(<self>.req_string(), <emptyTree>::<C String>)
-        <self>.no_getter()
-      end
-    end
+    :"test_instance_methods"
   end
 end

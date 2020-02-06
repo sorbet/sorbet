@@ -1,7 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C ComputingProps><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C Integer>)
     end
@@ -58,8 +56,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       "not_an_integer"
     end
 
-    ::T.let("not_a_symbol", <emptyTree>::<C Symbol>)
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
     end
@@ -79,5 +75,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.compute_num_unknown_type<<C <todo sym>>>(inputs, &<blk>)
       <emptyTree>::<C T>.untyped()
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"num_ok"
+
+    :"compute_num_ok"
+
+    :"missing"
+
+    :"num_wrong_value"
+
+    :"compute_num_wrong_value"
+
+    :"num_wrong_type"
+
+    :"compute_num_wrong_type"
+
+    ::T.let("not_a_symbol", <emptyTree>::<C Symbol>)
+
+    :"not_a_symbol"
+
+    :"num_unknown_type"
+
+    :"compute_num_unknown_type"
   end
 end

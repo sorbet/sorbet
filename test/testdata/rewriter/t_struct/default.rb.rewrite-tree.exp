@@ -31,6 +31,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def initialize<defaultArg>1<<C <todo sym>>>(foo: = <emptyTree>, &<blk>)
       3
     end
+
+    :"initialize"
+
+    :"foo"
+
+    :"foo="
+
+    :"initialize<defaultArg>1"
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new().foo())

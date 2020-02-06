@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -20,15 +18,11 @@ begin
     end
   end
   class ::Outer1<<C Outer1>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Outer2<<C Outer2>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         begin
@@ -57,15 +51,11 @@ begin
     end
   end
   class ::Outer2::C<<C C>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Outer2::Inner1<<C Inner1>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         begin
@@ -83,15 +73,11 @@ begin
     end
   end
   class ::Outer2::Inner1::A<<C A>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         ::Outer2::Inner1::A
@@ -103,8 +89,6 @@ begin
     end
   end
   class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         ::Outer2::C
@@ -114,8 +98,6 @@ begin
     end
   end
   class ::Outer2::Other<<C Other>> < (::Outer2::Inner1::Inner2)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end

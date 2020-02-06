@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -12,12 +10,6 @@ begin
     end
   end
   class ::TestLocals<<C TestLocals>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      :"method"
-    end
-
     def method(<blk>)
       begin
         a = 1
@@ -36,6 +28,10 @@ begin
           a$3.+(b$3)
         end
       end
+    end
+
+    def self.<static-init>(<blk>)
+      :"method"
     end
   end
   <emptyTree>

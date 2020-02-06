@@ -47,6 +47,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def initialize<defaultArg>1<<C <todo sym>>>(foo:, bar: = <emptyTree>, &<blk>)
       false
     end
+
+    :"initialize"
+
+    :"foo"
+
+    :"foo="
+
+    :"bar"
+
+    :"bar="
+
+    :"initialize<defaultArg>1"
   end
 
   <emptyTree>::<C SomeDefault>.new({:"foo" => 1})

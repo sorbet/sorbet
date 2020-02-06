@@ -7,6 +7,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
+
+    :"foo"
   end
 
   <emptyTree>::<C A>.new().foo()
@@ -19,6 +21,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def bar<<C <todo sym>>>(&<blk>)
       0
     end
+
+    :"bar"
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C B>.new().bar())
@@ -39,6 +43,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.qux<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
+
+    :"qux"
   end
 
   <emptyTree>::<C D>.qux()

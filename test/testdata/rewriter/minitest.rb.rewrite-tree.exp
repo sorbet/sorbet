@@ -1,140 +1,87 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def junk<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+  end
+
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
     def outside_method<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    begin
-      "works outside"
-      begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it 'works outside'><<C <todo sym>>>(&<blk>)
-          <self>.outside_method()
-        end
-      end
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
-    begin
-      <emptyTree>::<C CONST> = ::T.unsafe(nil)
-      begin
-        "allows constants inside of IT"
-        begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
-            ::Module.const_set(:"CONST", 10)
-          end
-        end
-      end
+    def <it 'works outside'><<C <todo sym>>>(&<blk>)
+      <self>.outside_method()
     end
 
-    begin
-      <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
-      begin
-        "allows let-ed constants inside of IT"
-        begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
-            ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
-          end
-        end
-      end
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
-    begin
-      <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
-      begin
-        "allows path constants inside of IT"
-        begin
-          ::T::Sig::WithoutRuntime.sig() do ||
-            <self>.params({}).void()
-          end
-          def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
-            <emptyTree>::<C C3>.new()
-          end
-        end
-      end
+    def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
+      ::Module.const_set(:"CONST", 10)
     end
 
-    begin
-      ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<C <todo sym>>>(&<blk>)
-          <emptyTree>
-        end
-      end
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
-    class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
-      begin
-        def inside_method<<C <todo sym>>>(&<blk>)
-          <emptyTree>
-        end
-        begin
-          "works inside"
-          begin
-            ::T::Sig::WithoutRuntime.sig() do ||
-              <self>.params({}).void()
-            end
-            def <it 'works inside'><<C <todo sym>>>(&<blk>)
-              begin
-                <self>.outside_method()
-                <self>.inside_method()
-              end
-            end
-          end
-        end
-      end
+    def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
+      ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C C3>.new()
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<C <todo sym>>>(&<blk>)
+      <emptyTree>
     end
 
     def instance_helper<<C <todo sym>>>(&<blk>)
       <emptyTree>
     end
 
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def initialize<<C <todo sym>>>(&<blk>)
-        begin
-          @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
-          <self>.instance_helper()
-        end
-      end
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
     end
 
-    begin
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({}).void()
-      end
-      def <after><<C <todo sym>>>(&<blk>)
-        begin
-          @foo = nil
-          <self>.instance_helper()
-        end
-      end
-    end
-
-    begin
-      "can read foo"
+    def initialize<<C <todo sym>>>(&<blk>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
-          <self>.params({}).void()
-        end
-        def <it 'can read foo'><<C <todo sym>>>(&<blk>)
-          begin
-            <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
-            <self>.instance_helper()
-          end
-        end
+        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <after><<C <todo sym>>>(&<blk>)
+      begin
+        @foo = nil
+        <self>.instance_helper()
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def <it 'can read foo'><<C <todo sym>>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+        <self>.instance_helper()
       end
     end
 
@@ -142,40 +89,118 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def self.it<<C <todo sym>>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    :"outside_method"
+
+    begin
+      "works outside"
+      :"<it \'works outside\'>"
+    end
+
+    begin
+      <emptyTree>::<C CONST> = ::T.unsafe(nil)
+      begin
+        "allows constants inside of IT"
+        :"<it \'allows constants inside of IT\'>"
+      end
+    end
+
+    begin
+      <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
+      begin
+        "allows let-ed constants inside of IT"
+        :"<it \'allows let-ed constants inside of IT\'>"
+      end
+    end
+
+    begin
+      <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
+      begin
+        "allows path constants inside of IT"
+        :"<it \'allows path constants inside of IT\'>"
+      end
+    end
+
+    begin
+      ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
+      :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>"
+    end
+
+    class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
+      def inside_method<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'works inside'><<C <todo sym>>>(&<blk>)
+        begin
+          <self>.outside_method()
+          <self>.inside_method()
+        end
+      end
+
+      begin
+        :"inside_method"
+        begin
+          "works inside"
+          :"<it \'works inside\'>"
+        end
+      end
+    end
+
+    :"instance_helper"
+
+    :"initialize"
+
+    :"<after>"
+
+    begin
+      "can read foo"
+      :"<it \'can read foo\'>"
+    end
+
+    :"random_method"
+
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'Object'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'Object'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
       begin
         begin
           <emptyTree>::<C Object>
-          begin
-            ::T::Sig::WithoutRuntime.sig() do ||
-              <self>.params({}).void()
-            end
-            def <it 'Object'><<C <todo sym>>>(&<blk>)
-              <emptyTree>
-            end
-          end
+          :"<it \'Object\'>"
         end
         begin
           <emptyTree>::<C Object>
-          begin
-            ::T::Sig::WithoutRuntime.sig() do ||
-              <self>.params({}).void()
-            end
-            def <it 'Object'><<C <todo sym>>>(&<blk>)
-              <emptyTree>
-            end
-          end
+          :"<it \'Object\'>"
         end
       end
     end
 
-    def self.it<<C <todo sym>>>(*args, &<blk>)
-      <emptyTree>
-    end
+    :"it"
 
     <self>.it("ignores methods without a block")
 
@@ -184,26 +209,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({}).void()
+      end
+
+      def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
       begin
         class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
         begin
           "contains nested describes"
-          begin
-            ::T::Sig::WithoutRuntime.sig() do ||
-              <self>.params({}).void()
-            end
-            def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
-              <emptyTree>
-            end
-          end
+          :"<it \'contains nested describes\'>"
         end
       end
     end
   end
 
-  def junk<<C <todo sym>>>(&<blk>)
-    <emptyTree>
-  end
+  :"junk"
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
