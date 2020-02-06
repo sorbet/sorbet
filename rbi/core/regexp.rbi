@@ -1118,7 +1118,16 @@ class Regexp < Object
     )
     .returns(T.nilable(MatchData))
   end
-  def match(arg0, arg1=T.unsafe(nil)); end
+  sig do
+    type_parameters(:U)
+    .params(
+        arg0: T.nilable(String),
+        arg1: Integer,
+        blk: T.proc.params(arg0: MatchData).returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+  end
+  def match(arg0, arg1=T.unsafe(nil), &blk); end
 
   # Returns a hash representing information about named captures of *rxp*.
   #
