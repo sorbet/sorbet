@@ -1,0 +1,300 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Tracking Adoption with Metrics · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;There are two primary metrics that we recommend to track adoption of Sorbet in a&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Tracking Adoption with Metrics · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&lt;p&gt;There are two primary metrics that we recommend to track adoption of Sorbet in a&lt;/p&gt;
+"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/metrics">Tracking Adopption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/metaprogramming-plugins">Metaprogramming plugins</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/metrics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 class="postHeaderTitle">Tracking Adoption with Metrics</h1></header><article><div><span><p>There are two primary metrics that we recommend to track adoption of Sorbet in a
+codebase:</p>
+<ol>
+<li><p>File-level typedness: the number of files at each
+<a href="/docs/static">strictness level</a>, like <code># typed: false</code> or <code># typed: true</code>.</p></li>
+<li><p>Callsite-level typedness: the number of method call sites where Sorbet knew
+whether the method existed or not. (Only tracked in <code># typed: true</code> files or
+higher.)</p></li>
+</ol>
+<p>Together, these two metrics provide a counter-balancing force for meaningfully
+driving adoption of Sorbet in a codebase. In this doc, we’ll cover:</p>
+<ul>
+<li>How to get Sorbet to report these metrics</li>
+<li>Why these metrics are good metrics</li>
+<li>Some suggestions for how to drive these metrics up</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="collecting-metrics-from-sorbet"></a><a href="#collecting-metrics-from-sorbet" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting metrics from Sorbet</h2>
+<p>Sorbet can collect metrics about a project while it’s typechecking, and output
+them at the end of the run. For example:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># The most basic invocation:</span>
+❯ srb tc --metrics-file=metrics.json
+
+<span class="hljs-comment"># A more complicated invocation:</span>
+❯ srb tc \
+    --metrics-file=<span class="hljs-string">"metrics.json"</span> \
+    --metrics-prefix=<span class="hljs-string">"my_project"</span> \
+    --metrics-repo=<span class="hljs-string">"my_org/my_project"</span> \
+    --metrics-branch=<span class="hljs-string">"<span class="hljs-variable">$(git rev-parse --abbrev-ref HEAD)</span>"</span> \
+    --metrics-sha=<span class="hljs-string">"<span class="hljs-variable">$(srb --version | cut -d' ' -f 3)</span>"</span>
+</code></pre>
+<p>This will instruct Sorbet to typecheck the current project, and write out
+various metrics into a file called <code>metrics.json</code> in the current folder.</p>
+<p>The output looks something like this:</p>
+<pre><code class="hljs css language-js">{
+ <span class="hljs-string">"repo"</span>: <span class="hljs-string">"my_project"</span>,
+ <span class="hljs-string">"sha"</span>: <span class="hljs-string">"0.5.5278"</span>,
+ <span class="hljs-string">"status"</span>: <span class="hljs-string">"Success"</span>,
+ <span class="hljs-string">"branch"</span>: <span class="hljs-string">"master"</span>,
+ <span class="hljs-string">"timestamp"</span>: <span class="hljs-string">"1581018717"</span>,
+ <span class="hljs-string">"uuid"</span>: <span class="hljs-string">"0x180096dcfb381440-0x18c753ca-0x4074-0x8a2f-0xd1f9c82443c24b10x41a7"</span>,
+ <span class="hljs-string">"metrics"</span>: [
+  {
+   <span class="hljs-string">"name"</span>: <span class="hljs-string">"my_project.run.utilization.user_time.us"</span>,
+   <span class="hljs-string">"value"</span>: <span class="hljs-number">37863</span>
+  },
+  <span class="hljs-comment">// ...</span>
+ ]
+}
+</code></pre>
+<p>We’ll cover which individual metrics to look at in the <code>&quot;metrics&quot;</code> array in the
+next section. In the mean time, here are some config flags that affect how
+metrics are reported:</p>
+<ul>
+<li><p><code>--metrics-file=&lt;file&gt;.json</code></p>
+<p>Instructs Sorbet to output metrics to a file. Without this flag, metrics are
+not recorded.</p></li>
+<li><p><code>--metrics-repo=&lt;repo&gt;</code></p>
+<p>Populates the <code>&quot;repo&quot;</code> field in the metrics output. Useful when using Sorbet
+on multiple repos.</p></li>
+<li><p><code>--metrics-branch=&lt;branch&gt;</code></p>
+<p>Populates the <code>&quot;branch&quot;</code> field in the metrics output. Useful for recording
+whether Sorbet was run on a <code>master</code> branch or a feature branch.</p></li>
+<li><p><code>--metrics-prefix=&lt;prefix&gt;</code></p>
+<p>Prepends the specified <code>&lt;prefix&gt;</code> in front of the name of each metric. Useful
+for enforcing various organization-specific naming conventions for metrics.</p></li>
+<li><p><code>--metrics-sha=&lt;sha&gt;</code></p>
+<p>Populates the <code>&quot;sha&quot;</code> field in the metrics output. (Stripe builds Sorbet from
+source in CI, and uses this field to track the commit SHA used when Sorbet was
+built.) Feel free to use it for whatever. In the example above, we use it to
+store the gem version of Sorbet that collected the metrics.</p></li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: This list might be out of date. Be sure to check <code>srb tc --help</code>.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="reporting-metrics-directly-to-statsd"></a><a href="#reporting-metrics-directly-to-statsd" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reporting metrics directly to statsd</h2>
+<p>In addition to outputing metrics to a file, Sorbet can also report metrics by
+connecting directly to a statsd service. This technique is more advanced, which
+means the instructions will heavily vary by organization and use case. At a high
+level:</p>
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># Basic usage:</span>
+❯ srb tc --statsd-host=<span class="hljs-string">"127.0.0.1"</span>
+
+<span class="hljs-comment"># Advanced usage:</span>
+❯ srb tc \
+    --statsd-host=<span class="hljs-string">"127.0.0.1"</span> \
+    --statsd-port=<span class="hljs-string">"9090"</span> \
+    --statsd-prefix=<span class="hljs-string">"my_project"</span>
+</code></pre>
+<p>This instructs Sorbet to typecheck the project and afterwards connect to a
+statsd instance to report metrics about the runtime. What each option means:</p>
+<ul>
+<li><p><code>--statsd-host=&lt;host&gt;</code></p>
+<p>Connect to this statsd instance and report counters after Sorbet has finished.</p></li>
+<li><p><code>--statsd-port=&lt;port&gt;</code></p>
+<p>Connect to this port. Defaults to <code>8200</code></p></li>
+<li><p><code>--statsd-prefix=&lt;prefix&gt;</code></p>
+<p>Prepends the specified <code>&lt;prefix&gt;</code> in front of the name of each metric. Useful
+for enforcing various organization-specific naming conventions for metrics.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="which-metrics-to-track"></a><a href="#which-metrics-to-track" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Which metrics to track</h2>
+<p>Sorbet reports many metrics. Here are the ones we recommend paying special
+attention to for the purpose of tracking adoption of typedness:</p>
+<h3><a class="anchor" aria-hidden="true" id="file-level-typedness"></a><a href="#file-level-typedness" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>File-level typedness</h3>
+<pre><code class="hljs css language-text">types.input.files
+</code></pre>
+<p>This metric counts the total number of files Sorbet ran over, including
+<a href="/docs/rbi">RBI files</a>.</p>
+<pre><code class="hljs css language-text">types.input.files.sigil.ignore
+types.input.files.sigil.false
+types.input.files.sigil.true
+types.input.files.sigil.strict
+types.input.files.sigil.strong
+</code></pre>
+<p>These metrics count the number of files at each <a href="/docs/static">strictness level</a>
+within a project, including RBIs. For example, if a project had three files at
+<code># typed: true</code>, then sorbet would report <code>3</code> for
+<code>types.input.files.sigil.true</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="call-site-level-typedness"></a><a href="#call-site-level-typedness" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Call-site-level typedness</h3>
+<pre><code class="hljs css language-text">types.input.sends.total
+types.input.sends.typed
+</code></pre>
+<p>These metrics count the number of various method call sites (“sends”) in a
+codebase. There are two metrics here:</p>
+<ul>
+<li><p><code>types.input.sends.total</code> is the total number of sends that are in
+<code># typed: true</code> files or higher. Sorbet doesn’t even attempt to type check
+method calls in <code># typed: false</code> files, so this metric represents all the
+method call sites Sorbet looked at.</p></li>
+<li><p><code>types.input.sends.typed</code> is the number of sends which Sorbet looked at
+<strong>and</strong> was sure that method existed. For example, in <code>x.foo</code>, if <code>x</code> is
+untyped, Sorbet doesn’t know whether a method called <code>foo</code> exists. But if <code>x</code>
+is typed, Sorbet knows whether <code>foo</code> exists, how many arguments it takes, and
+what their types are.</p>
+<p>This metric is <strong>not</strong> the number of method call sites to methods with a
+<code>sig</code>. It’s just the number of call sites where the receiver (<code>x</code> in <code>x.foo</code>)
+is not <a href="/docs/untyped">untyped</a>.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="metrics-philosophy"></a><a href="#metrics-philosophy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Metrics philosophy</h2>
+<p>Why track these metrics? These metrics have been the primary metrics tracked by
+numerous companies with successful track records of rolling out Sorbet to an
+existing codebase.</p>
+<p>Tracking file-level typedness makes sense. The <a href="/docs/static">type sigil</a> in a file
+controls whether type errors in that file are reported or silenced. Higher
+strictness levels report more errors, so having more files in higher strictness
+levels means that when Sorbet says “No errors! Great job.” it carries more
+weight.</p>
+<p>Tracking call-site-level typedness usually makes less sense to people. For most
+people, their gut instinct is to track “how many method definitons have
+<a href="/docs/sigs">signatures</a>.” (That is, instead of tracking at the call site, people
+are tempted to track at the definition site.)</p>
+<p>Tracking call-site-level typedness is better for a number of reasons:</p>
+<ul>
+<li><p>Code breaks when it runs, not when it’s defined. Call sites represent the
+individual places where code runs and thus could break. Call-site-level
+typedness informs how saturated the types check code that actually runs.</p></li>
+<li><p><a href="/docs/gradual">Untypedness is viral.</a> If one local variable is untyped, all
+calls on that method will return <code>T.untyped</code>. That result might be stored in a
+variable, and the process repeats. Having one source of untypedness in a
+method body can easily erase type information throughout the rest of the
+method body.</p></li>
+</ul>
+<p>Thus, call-site-level typedness matches up more closely with people’s intuitive
+notion of “type coverage.”</p>
+<p>Call-site-level typedness is also a useful <strong>counter-balance</strong> to file-level
+typedness. It’s “easy” to make a <code># typed: false</code> into a <code># typed: true</code> file:
+just use <a href="/docs/troubleshooting#escape-hatches"><code>T.unsafe(...)</code></a> to make individual
+parts of that file untyped—in effect, it’s the same as silencing errors with
+<code># typed: false</code>.</p>
+<p>By tracking call-site-level typedness, using <code>T.unsafe</code> to work around problems
+with <code># typed: true</code> makes file-level typedness go up at the cost of
+call-site-level typedness. This makes it harder to “game the system” by
+increasing type coverage in a not-very-useful way.</p>
+<h2><a class="anchor" aria-hidden="true" id="suggestions-for-driving-adoption"></a><a href="#suggestions-for-driving-adoption" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Suggestions for driving adoption</h2>
+<p>These two metrics (file-level and call-site-level typedness) are important at
+different phases of adopting Sorbet in a codebase.</p>
+<ol>
+<li><p>During the ramp-up, file-level typedness is more important. While ramping
+up, it’s important to enable the scope of Sorbet. For example, get as few
+files to be <code># typed: ignore</code> as possible, then start moving towards making
+as many files <code># typed: true</code> as possible. At this phase, <strong>don’t worry</strong>
+too much about adding method signatures.</p>
+<p>This step usually involves resolving syntax errors or basic type errors in
+<code>ignored</code> or <code>false</code> files (like whether a constant is defined or not). This
+process helps to identify issues that make a codebase hard to type check.</p></li>
+<li><p>Once the majority of files are typed <code># typed: true</code> or higher, it becomes
+important to drive up call-site-level typedness. This is a great time to
+figure out which are the most impactful files and methods to add type
+coverage to, and tackle those parts of a codebase first. These files might
+be files that are edited frequently, or where correctness and reliability
+are paramount.</p>
+<p>At this point, it’s great to start adding signatures, as individual type
+annotations will help propagate type information further throughout a
+codebase. For example, find the core abstractions in a codebase (like the
+models) and add types to those first.</p></li>
+<li><p>When a codebase gets to a certain level of Sorbet maturity, it can be useful
+to require that new files be written at a certain strictness level. For
+example, files at <code># typed: strict</code> are required to have signatures for all
+method definitions in that file. The <a href="https://github.com/Shopify/rubocop-sorbet"><code>rubocop-sorbet</code></a> gem has a number of
+Rubocop rules for enforcing various Sorbet conventions.</p></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="what-next"></a><a href="#what-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What next?</h2>
+<p>If you’re curious to hear more about how other companies have approached
+adopting Sorbet, here are some videos you can check out:</p>
+<ul>
+<li><p><a href="https://www.youtube.com/watch?v=v9oYeSZGkUw">Adopting Sorbet at Scale</a>, by Ufuk Kayserilioglu</p>
+<p>This talk explains how Shopify adopted Sorbet to leverage static typing in
+their Ruby codebase. They talk about their journey, the challenges they faced,
+and how they overcame them.</p></li>
+<li><p><a href="https://chanzuckerberg.wistia.com/medias/mypzu8ie86">Type Checking Ruby on Rails Code</a>, by Harry Doan</p>
+<p>This talk explains how the Chan-Zuckerberg Initiative developed and open
+sourced the <code>sorbet-rails</code> gem to make adopting Sorbet in a Rails codebase
+easier. They talk about specific challenges, and specific features of
+<code>sorbet-rails</code> that aided adoption in their codebase.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/adopting"><span class="arrow-prev">← </span><span>Adopting Sorbet</span></a><a class="docs-next button" href="/docs/quickref"><span>Quick Reference</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#collecting-metrics-from-sorbet">Collecting metrics from Sorbet</a></li><li><a href="#reporting-metrics-directly-to-statsd">Reporting metrics directly to statsd</a></li><li><a href="#which-metrics-to-track">Which metrics to track</a><ul class="toc-headings"><li><a href="#file-level-typedness">File-level typedness</a></li><li><a href="#call-site-level-typedness">Call-site-level typedness</a></li></ul></li><li><a href="#metrics-philosophy">Metrics philosophy</a></li><li><a href="#suggestions-for-driving-adoption">Suggestions for driving adoption</a></li><li><a href="#what-next">What next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>

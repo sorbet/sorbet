@@ -20,6 +20,7 @@
 <url> <loc>https://sorbet.org/docs/intersection-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/intersection-types" /> </url>
 <url> <loc>https://sorbet.org/docs/legal/trademark-policy</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/legal/trademark-policy" /> </url>
 <url> <loc>https://sorbet.org/docs/metaprogramming-plugins</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/metaprogramming-plugins" /> </url>
+<url> <loc>https://sorbet.org/docs/metrics</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/metrics" /> </url>
 <url> <loc>https://sorbet.org/docs/nilable-types</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/nilable-types" /> </url>
 <url> <loc>https://sorbet.org/docs/noreturn</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/noreturn" /> </url>
 <url> <loc>https://sorbet.org/docs/override-checking</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://sorbet.org/docs/override-checking" /> </url>
