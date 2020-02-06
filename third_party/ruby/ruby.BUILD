@@ -10,6 +10,7 @@ filegroup(
 
 build_ruby(
     name = "ruby-dist",
+    bundler = "@bundler_2_1_4//file",
     src = ":source",
     copts = [],
     linkopts = [],
