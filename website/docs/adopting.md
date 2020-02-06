@@ -196,3 +196,9 @@ See also
 
   Sorbet requires some type annotations in order to work. The most common kind
   of annotations are method signatures, or `sig`s.
+
+- [Tracking Adoption with Metrics](metrics.md)
+
+  Especially in large codebases, adopting Sorbet benefits from a concerted
+  effort to have the most impact. Tracking metrics is a great way to measure the
+  adoption effort over time, and Sorbet makes collecting them easy.

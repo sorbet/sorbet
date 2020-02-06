@@ -3,6 +3,7 @@
     "Getting Started": [
       "overview",
       "adopting",
+      "metrics",
       "quickref"
     ],
     "Static & Runtime": [
@@ -59,5 +60,9 @@
       "talks/ruby-conf-2019"
     ]
   },
-  "legal": { "Legal": [ "legal/trademark-policy" ] }
+  "legal": {
+    "Legal": [
+      "legal/trademark-policy"
+    ]
+  }
 }
