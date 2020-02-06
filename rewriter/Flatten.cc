@@ -111,17 +111,8 @@ class FlattenWalk {
 
         // push a method scope, possibly noting whether
         void pushScope(ScopeInfo info) {
-            if (stack.size() == 0 || stack.back().scopeInfo.scopeType == ScopeType::ClassScope) {
-                // we're at the top level of a class, not nested inside a method, which means we don't need to move
-                // anything: we'll add to the stack but don't need to allocate space on the move queue
-                stack.emplace_back(std::nullopt, info);
-            } else {
-                // we're nested inside another method: that means that whatever scope we're recording is going to need
-                // to be moved out, so we'll allocate space in the move queue and note the index of the allocated space
-                // (so that we can reconstruct the original traversal order)
                 stack.emplace_back(moveQueue.size(), info);
                 moveQueue.emplace_back();
-            }
         }
 
         // Pop a method scope, and if the scope corresponded to something which we need to move then return the
@@ -221,13 +212,6 @@ class FlattenWalk {
 
     // extract all the methods from the current queue and put them at the end of the class's current body
     ast::ClassDef::RHS_store addClassDefMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
-        if (curMethodSet().moveQueue.size() == 1 && rhs.size() == 1 && ast::isa_tree<ast::EmptyTree>(rhs[0].get())) {
-            // It was only 1 method to begin with, put it back
-            rhs.pop_back();
-            rhs.emplace_back(std::move(popCurMethodDefs()[0].expr));
-            return rhs;
-        }
-
         auto currentMethodDefs = popCurMethodDefs();
         // this adds all the methods at the appropriate 'staticness' level
 
@@ -247,31 +231,46 @@ class FlattenWalk {
         }
 
         // these will store the bodies of the `class << self` blocks we create at the end
-        vector<ast::ClassDef::RHS_store> nestedBlocks;
+        vector<ast::ClassDef::RHS_store> nestedClassBodies;
         for (int level = 2; level <= highestLevel; level++) {
-            nestedBlocks.emplace_back();
+            nestedClassBodies.emplace_back();
         }
 
         // this vector contains all the possible RHS target locations that we might move to
         vector<ast::ClassDef::RHS_store *> targets;
-        // 0 and 1 both go into the class itself
+        vector<vector<unique_ptr<ast::Expression>>> expressionsToBePutInTargets;
+        // 0 and 1 both go into the class itself, but we want to make sure we do it while preserving
+        // order
         targets.emplace_back(&rhs);
-        targets.emplace_back(&rhs);
+        targets.emplace_back(nullptr);
         // 2 and up go into the to-be-created `class << self` blocks
-        for (auto &tgt : nestedBlocks) {
+        for (auto &tgt : nestedClassBodies) {
             targets.emplace_back(&tgt);
         }
+        expressionsToBePutInTargets.resize(targets.size());
+
 
         // move everything to its appropriate target
         for (auto &expr : currentMethodDefs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
                 methodDef->setIsSelf(expr.staticLevel > 0);
             }
-            targets[expr.staticLevel]->emplace_back(std::move(expr.expr));
+            auto lvl = expr.staticLevel == 1? 0: expr.staticLevel;
+            expressionsToBePutInTargets[lvl].emplace_back(std::move(expr.expr));
+        }
+
+        {
+                int idx = -1;
+        for(auto &target: targets) {
+                idx +=1;
+                if (idx != 1) {
+                target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[idx].begin()), make_move_iterator(expressionsToBePutInTargets[idx].end()));
+                }
+        }
         }
 
         // generate the nested `class << self` blocks as needed and add them to the class
-        for (auto &body : nestedBlocks) {
+        for (auto &body : nestedClassBodies) {
             auto classDef =
                 ast::MK::Class(loc, loc,
                                make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Kind::Class,
@@ -292,17 +291,19 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+            /*
         if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
             ENFORCE(ident->name == core::Names::singleton());
             curMethodSet().pushScope(computeScopeInfo(ScopeType::ClassScope));
             return classDef;
-        }
+        }*/
         newMethodSet();
         return classDef;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        auto &methods = curMethodSet();
+        // auto &methods = curMethodSet();
+        /*
         if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
             // if we get a MethodData back, then we need to move this and replace it with an EmptyTree
             if (auto md = methods.popScope()) {
@@ -310,7 +311,7 @@ public:
                 return ast::MK::EmptyTree();
             }
             return classDef;
-        }
+        }*/
         classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
         return classDef;
     };
@@ -350,13 +351,12 @@ public:
     unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
-        if (auto md = methods.popScope()) {
-            // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-            auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
-            methods.addExpr(*md, move(methodDef));
-            return replacement;
-        }
-        return methodDef;
+        auto md = methods.popScope();
+        ENFORCE(md);
+        // we'll replace MethodDefs with the symbol that corresponds to the name of the method
+        auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+        methods.addExpr(*md, move(methodDef));
+        return replacement;
     };
 
     unique_ptr<ast::Expression> addTopLevelMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
