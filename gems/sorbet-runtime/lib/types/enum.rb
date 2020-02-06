@@ -261,6 +261,7 @@ class T::Enum
     serialized_val = serialized_val.frozen? ? serialized_val : serialized_val.dup.freeze
     @serialized_val = T.let(serialized_val, T.nilable(SerializedVal))
     @const_name = T.let(nil, T.nilable(Symbol))
+    self.class._register_instance(self)
   end
 
   sig {returns(NilClass).checked(:never)}
@@ -298,6 +299,13 @@ class T::Enum
     @fully_initialized ||= false
   end
 
+  # Maintains the order in which values are defined
+  sig {params(instance: T.untyped).void}
+  def self._register_instance(instance)
+    @values ||= []
+    @values << T.cast(instance, T.attached_class)
+  end
+
   # Entrypoint for allowing people to register new enum values.
   # All enum values must be defined within this block.
   sig {params(blk: T.proc.void).void}
@@ -308,13 +316,14 @@ class T::Enum
 
     @started_initializing = true
 
+    @values = T.let(nil, T.nilable(T::Array[T.attached_class]))
+
     yield
 
-    @values = T.let(nil, T.nilable(T::Array[T.attached_class]))
     @mapping = T.let(nil, T.nilable(T::Hash[SerializedVal, T.attached_class]))
+    @mapping = {}
 
     # Freeze the Enum class and bind the constant names into each of the instances.
-    @mapping = {}
     self.constants(false).each do |const_name|
       instance = self.const_get(const_name, false)
       if !instance.is_a?(self)
@@ -329,8 +338,14 @@ class T::Enum
       end
       @mapping[serialized] = instance
     end
-    @values = @mapping.values.sort.freeze
+    @values.freeze
     @mapping.freeze
+
+    orphaned_instances = T.must(@values) - @mapping.values
+    if !orphaned_instances.empty?
+      raise "Enum values must be assigned to constants: #{orphaned_instances.map {|v| v.instance_variable_get('@serialized_val')}}"
+    end
+
     @fully_initialized = true
   end
 

@@ -67,13 +67,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
-  describe 'sorting' do
-    it 'sorts according to serialized_val' do
-      assert_equal(CardSuit::CLUB, CardSuit.values.min) # 'c' is first alphabetically
-      assert_equal(CardSuit::SPADE, CardSuit.values.max)
-    end
-  end
-
   describe 'to_s' do
     it 'prints the full constant name' do
       assert_equal('#<T::Enum::Test::EnumTest::CardSuit::SPADE>', CardSuit::SPADE.to_s)
@@ -81,9 +74,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'values' do
-    it 'returns an array of enum instances' do
+    it 'returns an array of enum instances, sorted by code order' do
+      # note this is *not* alphabetical order (S before D)
       assert_equal(
-        [CardSuit::CLUB, CardSuit::DIAMOND, CardSuit::HEART, CardSuit::SPADE],
+        [CardSuit::CLUB, CardSuit::SPADE, CardSuit::DIAMOND, CardSuit::HEART],
         CardSuit.values
       )
     end
@@ -265,6 +259,13 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       )
     end
 
+    it 'does not allow `_register_instance` after enum has been defined' do
+      ex = assert_raises(RuntimeError) do
+        CardSuit._register_instance(CardSuit::HEART)
+      end
+      assert_match(/can't modify frozen Array/, ex.message)
+    end
+
     it 'returns the same object for #dup and #clone' do
       assert_equal(CardSuit::DIAMOND.object_id, CardSuit::DIAMOND.dup.object_id)
       assert_equal(CardSuit::DIAMOND.object_id, CardSuit::DIAMOND.clone.object_id)
@@ -303,6 +304,18 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         /Attempting to access Enum value on #<.*> before it has been initialized/,
         ex.message
       )
+    end
+
+    it 'does not allow instance without assigning to constant' do
+      ex = assert_raises(RuntimeError) do
+        Class.new(T::Enum) do
+          enums do
+            new('foo')
+            new
+          end
+        end
+      end
+      assert_equal('Enum values must be assigned to constants: ["foo", nil]', ex.message)
     end
   end
 
