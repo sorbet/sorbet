@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -12,27 +10,6 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.params({:"arg0" => ::Integer}).void()
-        end
-        :"private"
-        <self>.sig() do ||
-          <self>.params({:"arg0" => ::Integer}).void()
-        end
-        :"private_class_method"
-        <self>.private_class_method(:"outer_static")
-        <self>.private(:"outer_instance")
-        :"inner_static"
-        :"inner_instance"
-        <emptyTree>
-      end
-    end
-
     def self.private(arg0, <blk>)
       <emptyTree>
     end
@@ -45,16 +22,33 @@ begin
       <self>.private_class_method(:"inner_static")
     end
 
-    def outer_instance(<blk>)
-      <self>.class().private(:"inner_instance")
-    end
-
     def self.inner_static(<blk>)
       <emptyTree>
     end
 
+    def outer_instance(<blk>)
+      <self>.class().private(:"inner_instance")
+    end
+
     def inner_instance(<blk>)
       <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <self>.sig() do ||
+          <self>.params({:"arg0" => ::Integer}).void()
+        end
+        <self>.extend(::T::Sig)
+        :"private"
+        :"private_class_method"
+        <self>.private_class_method(:"outer_static")
+        <self>.private(:"outer_instance")
+        <emptyTree>
+      end
     end
   end
   <emptyTree>
