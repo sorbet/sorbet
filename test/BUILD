@@ -19,7 +19,7 @@ cc_binary(
         "//cfg/builder",
         "//core",
         "//definition_validator",
-        "//flattener",
+        "//class_flatten",
         "//infer",
         "//local_vars",
         "//main/autogen",

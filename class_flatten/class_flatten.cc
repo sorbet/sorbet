@@ -1,4 +1,4 @@
-#include "flattener/flatten.h"
+#include "class_flatten/class_flatten.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -9,9 +9,12 @@
 
 using namespace std;
 
-namespace sorbet::flatten {
+namespace sorbet::class_flatten {
 
 bool shouldExtract(core::Context ctx, const unique_ptr<ast::Expression> &what) {
+    if (ast::isa_tree<ast::MethodDef>(what.get())) {
+            return false;
+    }
     if (ast::isa_tree<ast::ClassDef>(what.get())) {
         return false;
     }
@@ -52,20 +55,15 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
 }
 
-class FlattenWalk {
+class ClassFlattenWalk {
 private:
 public:
-    FlattenWalk() {
-        newMethodSet();
-    }
-    ~FlattenWalk() {
-        ENFORCE(methodScopes.empty());
+    ~ClassFlattenWalk() {
         ENFORCE(classes.empty());
         ENFORCE(classStack.empty());
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
 
@@ -104,35 +102,14 @@ public:
         return classDef;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        auto &methods = curMethodSet();
-        methods.stack.emplace_back(methods.methods.size());
-        methods.methods.emplace_back();
-        return methodDef;
-    }
-
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        classDef->rhs = addMethodsFromRHS(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
         return ast::MK::EmptyTree();
-    };
-
-    unique_ptr<ast::Expression> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
-        auto &methods = curMethodSet();
-        ENFORCE(!methods.stack.empty());
-        ENFORCE(methods.methods.size() > methods.stack.back());
-        ENFORCE(methods.methods[methods.stack.back()] == nullptr);
-
-        auto loc = methodDef->declLoc;
-        auto name = methodDef->name;
-        methods.methods[methods.stack.back()] = std::move(methodDef);
-        methods.stack.pop_back();
-        return ast::MK::Symbol(loc, name);
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
@@ -160,77 +137,12 @@ public:
         return tree;
     }
 
-    unique_ptr<ast::Expression> addMethodsFromTree(core::Context ctx, unique_ptr<ast::Expression> tree) {
-        auto &methods = curMethodSet().methods;
-        if (methods.empty()) {
-            ENFORCE(popCurMethodDefs().empty());
-            return tree;
-        }
-        if (methods.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
-            // It was only 1 method to begin with, put it back
-            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0]);
-            return methodDef;
-        }
-
-        auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
-        if (insSeq == nullptr) {
-            ast::InsSeq::STATS_store stats;
-            tree = ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
-            return addMethodsFromTree(ctx, std::move(tree));
-        }
-
-        for (auto &method : popCurMethodDefs()) {
-            ENFORCE(!!method);
-            insSeq->stats.emplace_back(std::move(method));
-        }
-        return tree;
-    }
-
 private:
     vector<unique_ptr<ast::ClassDef>> sortedClasses() {
         ENFORCE(classStack.empty());
         auto ret = std::move(classes);
         classes.clear();
         return ret;
-    }
-
-    ast::ClassDef::RHS_store addMethodsFromRHS(core::Context ctx, ast::ClassDef::RHS_store rhs) {
-        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
-            (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
-            // It was only 1 method to begin with, put it back
-            rhs.pop_back();
-            rhs.emplace_back(std::move(popCurMethodDefs()[0]));
-            return rhs;
-        }
-        for (auto &method : popCurMethodDefs()) {
-            ENFORCE(method.get() != nullptr);
-            rhs.emplace_back(std::move(method));
-        }
-        return rhs;
-    }
-
-    vector<unique_ptr<ast::MethodDef>> popCurMethodDefs() {
-        auto ret = std::move(curMethodSet().methods);
-        ENFORCE(curMethodSet().stack.empty());
-        popCurMethodSet();
-        return ret;
-    };
-
-    struct Methods {
-        vector<unique_ptr<ast::MethodDef>> methods;
-        vector<int> stack;
-        Methods() = default;
-    };
-    void newMethodSet() {
-        methodScopes.emplace_back();
-    }
-    Methods &curMethodSet() {
-        ENFORCE(!methodScopes.empty());
-        return methodScopes.back();
-    }
-    void popCurMethodSet() {
-        ENFORCE(!methodScopes.empty());
-        methodScopes.pop_back();
     }
 
     // We flatten nested classes and methods into a flat list. We want to sort
@@ -244,18 +156,17 @@ private:
     // `methodScopes.stack`, which we push onto in the `preTransform* hook, and
     // pop from in the `postTransform` hook.
 
-    vector<Methods> methodScopes;
+    // vector<Methods> methodScopes;
     vector<unique_ptr<ast::ClassDef>> classes;
     vector<int> classStack;
 };
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
-    FlattenWalk flatten;
+    ClassFlattenWalk flatten;
     tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
-    tree.tree = flatten.addMethodsFromTree(ctx, std::move(tree.tree));
 
     return tree;
 }
 
-} // namespace sorbet::flatten
+} // namespace sorbet::class_flatten
