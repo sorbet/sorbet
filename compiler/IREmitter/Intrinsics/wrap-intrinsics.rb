@@ -3,61 +3,10 @@
 
 require 'set'
 require 'optparse'
-
-# Poor man's sorbet-runtime, because I don't want to figure out how
-# to make sorbet-runtime available within bazel.
-module T
-  module Sig
-    def sig(arg=nil, &blk); end
-  end
-end
+require_relative '../../../run/tools/preamble.rb'
 
 class Module
   include T::Sig
-end
-
-module T
-  def self.any(type_a, type_b, *types); end
-  def self.nilable(type); end
-  sig {returns(T.untyped)}
-  def self.untyped; end
-  sig {params(type: T.untyped, blk: T.untyped).returns(T.untyped)}
-  def self.type_alias(type=nil, &blk); end
-
-  def self.let(value, type, checked: true); value; end
-  def self.unsafe(value); value; end
-  def self.must(arg); arg; end
-  sig {params(value: T.untyped).returns(T.untyped)}
-  def self.reveal_type(value); value; end
-
-  module Array
-    sig {params(type: T.untyped).returns(T.untyped)}
-    def self.[](type); end
-  end
-  module Hash
-    sig {params(keys: T.untyped, values: T.untyped).returns(T.untyped)}
-    def self.[](keys, values); end
-  end
-  module Set
-    sig {params(type: T.untyped).returns(T.untyped)}
-    def self.[](type); end
-  end
-
-  Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
-
-  class Struct
-    sig {params(name: T.untyped, type: T.untyped).void}
-    def self.prop(name, type)
-      attr_accessor(name)
-    end
-
-    sig {params(opts: T::Hash[T.untyped, T.untyped]).void}
-    def initialize(opts = {})
-      opts.each do |key, value|
-        instance_variable_set("@#{key}", value)
-      end
-    end
-  end
 end
 
 module Intrinsics

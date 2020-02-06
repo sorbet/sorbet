@@ -9,6 +9,9 @@ module T
   def self.let(value, type, checked: true); value; end
   def self.untyped(); end
   def self.class_of(klass); end
+  def self.reveal_type(value); value; end
+  def self.type_alias(type=nil, &blk); end
+  def self.nilable(type); end
 end
 module T::Sig
   def sig(arg=nil, &blk); end
@@ -25,6 +28,25 @@ module T::Hash
   def self.[](arg1, arg2); end;
 end
 
+module T::Set
+  def self.[](arg); end;
+end
+
+module T
+  Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
+end
+
+class T::Struct
+  def self.prop(name, type)
+    attr_accessor(name)
+  end
+
+  def initialize(opts = {})
+    opts.each do |key, value|
+      instance_variable_set("@#{key}", value)
+    end
+  end
+end
 
 class Sorbet; end
 module Sorbet::Private; end
