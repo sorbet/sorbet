@@ -1,16 +1,85 @@
 # frozen_string_literal: true
+# typed: strict
 
 require 'set'
 require 'optparse'
 
-module Intrinsics
-  Method = Struct.new(:exported, :will_be_exported, :file, :klass, :rb_name, :c_name, :argc)
+# Poor man's sorbet-runtime, because I don't want to figure out how
+# to make sorbet-runtime available within bazel.
+module T
+  module Sig
+    def sig(arg=nil, &blk); end
+  end
+end
 
-  Edit = Struct.new(:orig, :edited, :line)
+class Module
+  include T::Sig
+end
+
+module T
+  def self.any(type_a, type_b, *types); end
+  def self.nilable(type); end
+  sig {returns(T.untyped)}
+  def self.untyped; end
+
+  def self.type_alias(&blk); end
+
+  def self.let(value, type, checked: true); value; end
+  def self.unsafe(value); value; end
+  def self.must(arg); arg; end
+  sig {params(value: T.untyped).returns(T.untyped)}
+  def self.reveal_type(value); value; end
+
+  module Array
+    sig {params(type: T.untyped).returns(T.untyped)}
+    def self.[](type); end
+  end
+  module Hash
+    sig {params(keys: T.untyped, values: T.untyped).returns(T.untyped)}
+    def self.[](keys, values); end
+  end
+  module Set
+    sig {params(type: T.untyped).returns(T.untyped)}
+    def self.[](type); end
+  end
+
+  Boolean = T.type_alias {T.any(TrueClass, FalseClass)}
+
+  class Struct
+    sig {params(name: T.untyped, type: T.untyped).void}
+    def self.prop(name, type)
+      attr_accessor(name)
+    end
+
+    sig {params(opts: T::Hash[T.untyped, T.untyped]).void}
+    def initialize(opts = {})
+      opts.each do |key, value|
+        instance_variable_set("@#{key}", value)
+      end
+    end
+  end
+end
+
+module Intrinsics
+  class Method < T::Struct
+    prop :exported, T::Boolean
+    prop :will_be_exported, T::Boolean
+    prop :file, String
+    prop :klass, String
+    prop :rb_name, String
+    prop :c_name, String
+    prop :argc, Integer
+  end
+
+  class Edit < T::Struct
+    prop :orig, String
+    prop :edited, String
+    prop :line, Integer
+  end
 
   class Main
 
-    SORBET_CLASSES = Set[
+    SORBET_CLASSES = T.let(Set[
       "Array",
       "Complex",
       "Enumerable",
@@ -21,14 +90,15 @@ module Intrinsics
       "NilClass",
       "Range",
       "String",
-    ]
+    ], T::Set[String])
 
-    DIFF_WHITELIST = Set[
+    DIFF_WHITELIST = T.let(Set[
       'string.c',
       'array.c',
       'numeric.c',
-    ]
+    ], T::Set[String])
 
+    sig {params(ruby: String, ruby_source: String).void}
     def self.run(ruby:, ruby_source:)
       puts "ruby binary: #{ruby}"
       puts "ruby source: #{ruby_source}"
@@ -36,12 +106,12 @@ module Intrinsics
       exported = exported_symbols(ruby: ruby)
       methods = methods_defined(ruby_source: ruby_source, exported: exported)
 
-      File.open('intrinsic-report.md', mode: 'w') do |report|
+      File.open('intrinsic-report.md', 'w') do |report|
         puts 'Writing intrinsic-report.md'
         write_report(report, methods)
       end
 
-      File.open('export-intrinsics.patch', mode: 'w') do |diff|
+      File.open('export-intrinsics.patch', 'w') do |diff|
         puts 'Writing export-intrinsics.patch'
         write_diff(ruby_source, diff, methods.filter {|k,_| DIFF_WHITELIST.include?(k)})
       end
@@ -49,28 +119,30 @@ module Intrinsics
       # group methods together
       grouped_methods = methods.values.flatten.group_by(&:c_name).values
 
-      File.open('WrappedIntrinsics.h', mode: 'w') do |header|
+      File.open('WrappedIntrinsics.h', 'w') do |header|
         puts 'Writing WrappedIntrinsics.h'
         write_header(header, grouped_methods)
       end
 
-      File.open('PayloadIntrinsics.c', mode: 'w') do |wrapper|
+      File.open('PayloadIntrinsics.c', 'w') do |wrapper|
         puts 'Writing PayloadIntrinsics.c'
         write_wrapper(wrapper, grouped_methods)
       end
     end
 
     # Collect a set of exported symbols from the ruby binary, using 'nm'
+    sig {params(ruby: String).returns(T::Set[String])}
     def self.exported_symbols(ruby:)
       exported = Set.new
 
-      if !File.exists?(ruby)
+      if !File.exist?(ruby)
         puts "Ruby binary is missing: #{ruby}"
         exit 1
       end
 
       IO.popen([ 'nm', ruby ]) do |io|
         io.each_line do |line|
+          line = T.let(line, String)
           if line =~ / T /
 
             # the line output format for nm is '<addr> <type> <name>'
@@ -78,7 +150,7 @@ module Intrinsics
 
             # There ends up being leading underscores in front of all the
             # symbols we care about on macOS
-            exported << symbol.delete_prefix('_')
+            exported << T.must(symbol).delete_prefix('_')
           end
         end
       end
@@ -87,12 +159,13 @@ module Intrinsics
     end
 
     # Collect methods defined by file
+    sig {params(ruby_source: String, exported: T::Set[String]).returns(T::Hash[String, T::Array[Method]])}
     def self.methods_defined(ruby_source:, exported:)
-      defined = {}
+      defined = T.let({}, T::Hash[String, T::Array[Method]])
 
       # change to the source dir to avoid absolute paths in the output
       Dir.chdir(ruby_source) do
-        files = []
+        files = T.let([], T::Array[String])
         IO.popen(
           [
             'find', '.',
@@ -102,8 +175,9 @@ module Intrinsics
             '-not', '-path', '*/gems/*',
           ]) do |io|
             io.each_line do |file|
+              file = T.let(file, String)
               # trim the trailing newline, and the leading './'
-              files << file.chomp[2..]
+              files << T.must(file.chomp[2..])
             end
         end
 
@@ -129,14 +203,15 @@ module Intrinsics
     RB_DEFINE_METHOD = /rb_define_method\(([^,]+),\s*\"([^,]+)\",([^,]+),(.*)/
 
     # Collect methods defined in a single file.
+    sig {params(exported: T::Set[String], file: String).returns(T::Array[Method])}
     def self.methods_from(exported:, file:)
-      methods = []
+      methods = T.let([], T::Array[Method])
 
-      File.open(file, mode = 'r') do |io|
+      File.open(file, 'r') do |io|
 
         # Seed the class list with cases that are defined outside of the source
         # file that defines its methods.
-        klasses = {
+        klasses = T.let({
           "rb_cArray" => "Array",
           "rb_cBasicObject" => "BasicObject",
           "rb_cFile" => "File",
@@ -153,7 +228,7 @@ module Intrinsics
           "rb_eSignal" => "SignalException",
           "rb_mEnumerable" => "Enumerable",
           "rb_mKernel" => "Kernel",
-        }
+        }, T::Hash[String, String])
 
         io.each_line do |line|
 
@@ -163,25 +238,35 @@ module Intrinsics
             RB_DEFINE_CLASS.match(line) ||
             RB_DEFINE_MODULE.match(line) ||
             RB_DEFINE_CLASS_UNDER.match(line) ||
-            RB_DEFINE_MODULE_UNDER.match(line) ||
+            RB_DEFINE_MODULE_UNDER.match(line)
 
           if klass_match
-            klasses[klass_match[1].chomp] = klass_match[2]
+            match_1 = T.must(klass_match[1])
+            match_2 = T.must(klass_match[2])
+            klasses[match_1.chomp] = match_2
           end
 
-          RB_DEFINE_METHOD.match(line) do |m|
-            klass = m[1].chomp
+          if m = RB_DEFINE_METHOD.match(line)
+            m1, m2, m3, m4 = T.must(m[1]), T.must(m[2]), T.must(m[3]), T.must(m[4])
+            klass = m1.chomp
 
             # It would be nice to log a message here if the class can't be
             # resolved, but in most cases they're classes we're not interested
             # in.
-            if klasses.has_key? klass
-              klass = klasses[klass]
-              rb_name = m[2]
-              c_name = m[3].lstrip.rstrip
-              argc = m[4].chomp.to_i
+            if klass_value = klasses[klass]
+              rb_name = m2
+              c_name = m3.lstrip.rstrip
+              argc = m4.chomp.to_i
 
-              methods << Method.new(exported.include?(c_name), false, file, klass, rb_name, c_name, argc)
+              methods << Method.new(
+                exported: exported.include?(c_name),
+                will_be_exported: false,
+                file: file,
+                klass: klass_value,
+                rb_name: rb_name,
+                c_name: c_name,
+                argc: argc
+              )
             end
           end
         end
@@ -190,6 +275,7 @@ module Intrinsics
       methods
     end
 
+    sig {params(report: File, files: T::Hash[String, T::Array[Method]]).void}
     def self.write_report(report, files)
       total_intrinsics = 0
       exported_intrinsics = 0
@@ -221,12 +307,20 @@ module Intrinsics
       report << "* Visible: #{exported_intrinsics}\n"
     end
 
+    sig do
+      params(
+        ruby_source: String,
+        diff: File,
+        methods: T::Hash[String, T::Array[Method]]
+      )
+        .void
+    end
     def self.write_diff(ruby_source, diff, methods)
       Dir.chdir(ruby_source) do
         methods.each do |file,methods|
           hidden = methods.filter {|m| !m.exported}
           if !hidden.empty?
-            edits = File.open(file, mode: 'r') do |io|
+            edits = File.open(file, 'r') do |io|
               expose_methods(hidden, io)
             end
 
@@ -241,19 +335,22 @@ module Intrinsics
       end
     end
 
+    sig {params(io: File, file: String).void}
     def self.diff_header(io, file)
       io << "--- #{file}\n"
       io << "+++ #{file}\n"
     end
 
+    sig {params(io: File, edit: Edit).void}
     def self.diff_chunk(io, edit)
       io << "@@ -#{edit.line} +#{edit.line} @@\n"
       io << "-#{edit.orig}"
       io << "+#{edit.edited}"
     end
 
+    sig {params(hidden: T.untyped, io: File).returns(T::Array[Edit])}
     def self.expose_methods(hidden, io)
-      edits = []
+      edits = T.let([], T::Array[Edit])
 
       previous = ''
       io.each_line.each_with_index do |line,idx|
@@ -275,33 +372,52 @@ module Intrinsics
 
     # Heuristic for finding a method definition given a line and the previous
     # line for context.
+    sig do
+      params(
+        previous: String,
+        line: String,
+        idx: Integer,
+        method: Method
+      )
+        .returns(T.nilable(Intrinsics::Edit))
+    end
     def self.generate_edit(previous, line, idx, method)
       if !line.match?(method.c_name)
         return nil
       end
 
       if previous.match?('^static VALUE$')
-        return Edit.new(previous, previous.sub('static ', ''), idx - 1)
+        return Edit.new(
+          orig: previous,
+          edited: previous.sub('static ', ''),
+          line: idx - 1
+        )
       end
 
       if line.match?('static VALUE')
-        return Edit.new(line, line.sub('static ', ''), idx)
+        return Edit.new(
+          orig: line,
+          edited: line.sub('static ', ''),
+          line: idx
+        )
       end
 
       nil
     end
 
 
+    sig {params(method: Method).returns(T.nilable(T::Boolean))}
     def self.should_wrap?(method)
       (method.exported || method.will_be_exported) && SORBET_CLASSES.include?(method.klass)
     end
 
+    sig {params(header: File, grouped_methods: T::Array[T::Array[Method]]).void}
     def self.write_header(header, grouped_methods)
       header << "// This file is autogenerated. Do not edit it by hand. Regenerate it with:\n"
       header << "//   cd compiler/IREmitter/Intrinsics && make\n"
 
       grouped_methods.each do |methods|
-        method = methods.first
+        method = methods.fetch(0)
         if should_wrap? method
           header << "    {core::Symbols::#{method.klass}(), "
           header << "\"#{method.rb_name}\", "
@@ -310,6 +426,7 @@ module Intrinsics
       end
     end
 
+    sig {params(wrapper: File, grouped_methods: T::Array[T::Array[Method]]).void}
     def self.write_wrapper(wrapper, grouped_methods)
 
       wrapper << <<~EOF
@@ -326,7 +443,7 @@ module Intrinsics
       EOF
 
       grouped_methods.each do |methods|
-        method = methods.first
+        method = methods.fetch(0)
         if should_wrap? method
 
           # TODO: comment about the ruby method
@@ -340,6 +457,7 @@ module Intrinsics
       wrapper << "#endif /* SORBET_LLVM_IMPORTED_INTRINSICS_H */\n"
     end
 
+    sig {params(wrapper: File, method: Method, methods: T::Array[Method]).void}
     def self.forward_declare_intrinsic(wrapper, method, methods)
 
       methods.each do |m|
@@ -365,6 +483,7 @@ module Intrinsics
       wrapper << ");\n"
     end
 
+    sig {params(wrapper: File, method: Method).void}
     def self.wrapper_implementation(wrapper, method)
 
       # NOTE: the sorbet calling convention differs from -1, in that we put the
