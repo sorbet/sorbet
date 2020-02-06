@@ -21,8 +21,8 @@ module T
   def self.nilable(type); end
   sig {returns(T.untyped)}
   def self.untyped; end
-
-  def self.type_alias(&blk); end
+  sig {params(type: T.untyped, blk: T.untyped).returns(T.untyped)}
+  def self.type_alias(type=nil, &blk); end
 
   def self.let(value, type, checked: true); value; end
   def self.unsafe(value); value; end
