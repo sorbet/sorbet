@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("//third_party:sorbet_version.bzl", "SORBET_SHA256", "SORBET_VERSION")
 
 # We define our externals here instead of directly in WORKSPACE
@@ -31,6 +31,12 @@ def sorbet_llvm_externals():
         build_file = "@com_stripe_sorbet_llvm//third_party:zlib.BUILD",
         sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
         strip_prefix = "zlib-1.2.11",
+    )
+
+    http_file(
+        name = "bundler_stripe",
+        urls = ["https://rubygems.org/downloads/bundler-1.17.3.gem"],
+        sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
     )
 
     for apply_patch in [True, False]:
