@@ -305,7 +305,7 @@ module Intrinsics
         if should_wrap? method
           header << "    {core::Symbols::#{method.klass}(), "
           header << "\"#{method.rb_name}\", "
-          header << "\"sorbet_int_#{method.c_name}\", Intrinsics::BlockHandled::BlockNotHandled},\n"
+          header << "\"sorbet_int_#{method.c_name}\", Intrinsics::HandleBlock::Unhandled},\n"
         end
       end
     end
