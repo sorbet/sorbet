@@ -54,6 +54,9 @@ done
 
 build_dir="$(mktemp -d)"
 
+# Add the compiler's directory the PATH, as this fixes builds with gcc
+export PATH="$(dirname "{cc}"):$PATH"
+
 # Copy everything to a separate directory to get rid of symlinks:
 # tool/rbinstall.rb will explicitly ignore symlinks when installing files,
 # and this feels more maintainable than patching it.
