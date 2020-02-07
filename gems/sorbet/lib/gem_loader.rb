@@ -556,6 +556,42 @@ class Sorbet::Private::GemLoader
         SPARQL::VERSION,
       ]
     end,
+    'selenium-webdriver' => proc do
+      my_require 'selenium/webdriver'
+      [
+        Selenium::WebDriver::Chrome,
+        Selenium::WebDriver::Chrome::Bridge,
+        Selenium::WebDriver::Chrome::Driver,
+        Selenium::WebDriver::Chrome::Profile,
+        Selenium::WebDriver::Chrome::Options,
+        Selenium::WebDriver::Chrome::Service,
+        Selenium::WebDriver::Edge,
+        Selenium::WebDriver::Firefox,
+        Selenium::WebDriver::Firefox::Extension,
+        Selenium::WebDriver::Firefox::ProfilesIni,
+        Selenium::WebDriver::Firefox::Profile,
+        Selenium::WebDriver::Firefox::Driver,
+        Selenium::WebDriver::Firefox::Options,
+        Selenium::WebDriver::Firefox::Service,
+        Selenium::WebDriver::IE,
+        Selenium::WebDriver::IE::Driver,
+        Selenium::WebDriver::IE::Options,
+        Selenium::WebDriver::IE::Service,
+        Selenium::WebDriver::Remote,
+        Selenium::WebDriver::Remote::Bridge,
+        Selenium::WebDriver::Remote::Driver,
+        Selenium::WebDriver::Remote::Response,
+        Selenium::WebDriver::Remote::Capabilities,
+        Selenium::WebDriver::Remote::Http::Common,
+        Selenium::WebDriver::Remote::Http::Default,
+        Selenium::WebDriver::Safari,
+        Selenium::WebDriver::Safari::Bridge,
+        Selenium::WebDriver::Safari::Driver,
+        Selenium::WebDriver::Safari::Options,
+        Selenium::WebDriver::Safari::Service,
+        Selenium::WebDriver::Support,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
