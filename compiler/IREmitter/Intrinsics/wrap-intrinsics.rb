@@ -49,7 +49,7 @@ module Intrinsics
 
     sig {params(ruby: String, ruby_source: String).void}
     def self.run(ruby:, ruby_source:)
-      puts "ruby binary: #{ruby}"
+      puts "ruby object: #{ruby}"
       puts "ruby source: #{ruby_source}"
 
       exported = exported_symbols(ruby: ruby)
@@ -79,13 +79,13 @@ module Intrinsics
       end
     end
 
-    # Collect a set of exported symbols from the ruby binary, using 'nm'
+    # Collect a set of exported symbols from the ruby binary or shared object, using 'nm'
     sig {params(ruby: String).returns(T::Set[String])}
     def self.exported_symbols(ruby:)
       exported = Set.new
 
       if !File.exist?(ruby)
-        puts "Ruby binary is missing: #{ruby}"
+        puts "Ruby binary or shared object is missing: #{ruby}"
         exit 1
       end
 
@@ -478,7 +478,7 @@ if __FILE__ == $0
 
   topdir = File.dirname($0) + '/../../..'
 
-  ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/bin/ruby'
+  ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.so.2.6'
 
   ruby_source = topdir + '/bazel-sorbet_llvm/external/sorbet_ruby_unpatched'
 
@@ -486,7 +486,7 @@ if __FILE__ == $0
 
     opts.banner = "Usage: wrap-intrinsics.rb [options]"
 
-    opts.on '-rPATH', '--ruby=PATH', 'Path to the ruby executable to analyze' do |path|
+    opts.on '-rPATH', '--ruby=PATH', 'Path to the ruby executable or shared object to analyze' do |path|
       ruby = File.realpath(path)
     end
 
