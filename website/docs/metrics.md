@@ -1,7 +1,7 @@
 ---
 id: metrics
 title: Tracking Adoption with Metrics
-sidebar_label: Tracking Adopption
+sidebar_label: Tracking Adoption
 ---
 
 There are two primary metrics that we recommend to track adoption of Sorbet in a
