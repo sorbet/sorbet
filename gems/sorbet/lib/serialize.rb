@@ -220,17 +220,16 @@ class Sorbet::Private::Serialize
   end
 
   def constant(const, value)
-    #if Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
-      #"  #{const} = type_template"
-    #elsif Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
-      #"  #{const} = type_member"
-    #else
-      #"  #{const} = ::T.let(nil, ::T.untyped)"
-    #end
     if KEYWORDS.include?(const.to_sym)
       return "# Illegal constant name: #{const}"
     end
-    "  #{const} = ::T.let(nil, ::T.untyped)"
+    if defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
+      value.variance == :invariant ? "  #{const} = type_member" : "  #{const} = type_member(#{value.variance})"
+    elsif defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
+      value.variance == :invariant ? "  #{const} = type_template" : "  #{const} = type_template(#{value.variance})"
+    else
+      "  #{const} = ::T.let(nil, ::T.untyped)"
+    end
   end
 
   def serialize_method(method, static=false, with_sig: true)
