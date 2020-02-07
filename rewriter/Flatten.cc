@@ -291,29 +291,25 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-            /*
-        if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
-            ENFORCE(ident->name == core::Names::singleton());
-            curMethodSet().pushScope(computeScopeInfo(ScopeType::ClassScope));
-            return classDef;
-        }*/
+        if (!curMethodSet().stack.empty()) {
+            curMethodSet().pushScope(computeScopeInfo(ScopeType::StaticMethodScope));
+        }
         newMethodSet();
         return classDef;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        // auto &methods = curMethodSet();
-        /*
-        if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
-            // if we get a MethodData back, then we need to move this and replace it with an EmptyTree
-            if (auto md = methods.popScope()) {
-                methods.addExpr(*md, move(classDef));
-                return ast::MK::EmptyTree();
-            }
-            return classDef;
-        }*/
         classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
-        return classDef;
+        auto &methods = curMethodSet();
+        if (curMethodSet().stack.empty()) {
+          return classDef;
+        }
+        // if this class is dirrectly nested inside a method, we want to steal it
+        auto md = methods.popScope();
+        ENFORCE(md);
+
+        methods.addExpr(*md, move(classDef));
+        return ast::MK::EmptyTree();
     };
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> send) {
