@@ -92,7 +92,7 @@ The complete list of constructs that affect Sorbet's flow-sensitive typing:
 - `block_given?` (internally, this is a special case of truthiness)
 
 > **Warning**: Sorbet's analysis for these constructs hinges on them not being
-> overridden! For example, Sorbet can behave unpredictably if when overriding
+> overridden! For example, Sorbet can behave unpredictably when overriding
 > `is_a?` in weird ways.
 
 ## Limitations of flow-sensitivity
