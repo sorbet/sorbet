@@ -292,14 +292,7 @@ public:
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         if (!curMethodSet().stack.empty()) {
-            auto scope = ScopeType::StaticMethodScope;
-
-            if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef->name.get())) {
-                if (ident->name == core::Names::singleton()) {
-                    scope = ScopeType::ClassScope;
-                }
-            }
-            curMethodSet().pushScope(computeScopeInfo(ScopeType::StaticMethodScope));
+            curMethodSet().pushScope(computeScopeInfo(ScopeType::InstanceMethodScope));
         }
         newMethodSet();
         return classDef;
