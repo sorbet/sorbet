@@ -12,8 +12,25 @@ build_ruby(
     name = "ruby-dist",
     src = ":source",
     bundler = "@bundler_stripe//file",
-    copts = [],
-    linkopts = [],
+    configure_opts = [
+        "--enable-shared",
+        "--sysconfdir=/etc",
+        "--disable-maintainer-mode",
+        "--disable-dependency-tracking",
+    ],
+    copts = [
+        "-Wdate-time",
+        "-D_FORTIFY_SOURCE=2",
+        "-g",
+        "-O2",
+        "-fstack-protector-strong",
+        "-Wformat",
+        "-Werror=format-security",
+    ],
+    linkopts = [
+        "-Wl,-Bsymbolic-functions",
+        "-Wl,-z,relro",
+    ],
     visibility = ["//visibility:private"],
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [
