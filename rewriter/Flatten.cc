@@ -111,8 +111,8 @@ class FlattenWalk {
 
         // push a method scope, possibly noting whether
         void pushScope(ScopeInfo info) {
-                stack.emplace_back(moveQueue.size(), info);
-                moveQueue.emplace_back();
+            stack.emplace_back(moveQueue.size(), info);
+            moveQueue.emplace_back();
         }
 
         // Pop a method scope, and if the scope corresponded to something which we need to move then return the
@@ -249,24 +249,24 @@ class FlattenWalk {
         }
         expressionsToBePutInTargets.resize(targets.size());
 
-
         // move everything to its appropriate target
         for (auto &expr : currentMethodDefs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
                 methodDef->setIsSelf(expr.staticLevel > 0);
             }
-            auto lvl = expr.staticLevel == 1? 0: expr.staticLevel;
+            auto lvl = expr.staticLevel == 1 ? 0 : expr.staticLevel;
             expressionsToBePutInTargets[lvl].emplace_back(std::move(expr.expr));
         }
 
         {
-                int idx = -1;
-        for(auto &target: targets) {
-                idx +=1;
+            int idx = -1;
+            for (auto &target : targets) {
+                idx += 1;
                 if (idx != 1) {
-                target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[idx].begin()), make_move_iterator(expressionsToBePutInTargets[idx].end()));
+                    target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[idx].begin()),
+                                   make_move_iterator(expressionsToBePutInTargets[idx].end()));
                 }
-        }
+            }
         }
 
         // generate the nested `class << self` blocks as needed and add them to the class
@@ -309,7 +309,7 @@ public:
         classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
         auto &methods = curMethodSet();
         if (curMethodSet().stack.empty()) {
-          return classDef;
+            return classDef;
         }
         // if this class is dirrectly nested inside a method, we want to steal it
         auto md = methods.popScope();

@@ -13,7 +13,7 @@ namespace sorbet::class_flatten {
 
 bool shouldExtract(core::Context ctx, const unique_ptr<ast::Expression> &what) {
     if (ast::isa_tree<ast::MethodDef>(what.get())) {
-            return false;
+        return false;
     }
     if (ast::isa_tree<ast::ClassDef>(what.get())) {
         return false;
