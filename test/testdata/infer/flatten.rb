@@ -22,20 +22,20 @@ xsss = T.let(
   T::Array[T::Array[T::Array[Integer]]],
 )
 
-T.assert_type!(flat_tuple.flatten, T::Array[Integer]);
-T.assert_type!(nested_tuple.flatten, T::Array[Integer])
+T.reveal_type(flat_tuple.flatten) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type(nested_tuple.flatten) # error: Revealed type: `T::Array[Integer]`
 
-T.assert_type!(xs.flatten, T::Array[Integer])
-T.assert_type!(xss.flatten, T::Array[Integer])
+T.reveal_type(xs.flatten) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type(xss.flatten) # error: Revealed type: `T::Array[Integer]`
 
-T.assert_type!(xss.flatten(0), T::Array[T::Array[Integer]])
-T.assert_type!(xss.flatten(1), T::Array[Integer])
-T.assert_type!(xss.flatten(2), T::Array[Integer])
+T.reveal_type(xss.flatten(0)) # error: Revealed type: `T::Array[T::Array[Integer]]`
+T.reveal_type(xss.flatten(1)) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type(xss.flatten(2)) # error: Revealed type: `T::Array[Integer]`
 
-T.assert_type!(xsss.flatten(-1), T::Array[Integer])
-T.assert_type!(xsss.flatten(0), T::Array[T::Array[T::Array[Integer]]])
-T.assert_type!(xsss.flatten(1), T::Array[T::Array[Integer]])
-T.assert_type!(xsss.flatten(2), T::Array[Integer])
+T.reveal_type(xsss.flatten(-1)) # error: Revealed type: `T::Array[Integer]`
+T.reveal_type(xsss.flatten(0)) # error: Revealed type: `T::Array[T::Array[T::Array[Integer]]]`
+T.reveal_type(xsss.flatten(1)) # error: Revealed type: `T::Array[T::Array[Integer]]`
+T.reveal_type(xsss.flatten(2)) # error: Revealed type: `T::Array[Integer]`
 
 xs.flatten(1 + 1) # error: You must pass an Integer literal to specify a depth
 

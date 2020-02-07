@@ -1982,7 +1982,7 @@ public:
             ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType->show(ctx));
         }
 
-        int64_t depth = INT64_MAX;
+        int64_t depth;
         if (args.args.size() == 1) {
             auto argTyp = args.args[0]->type;
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
@@ -2004,6 +2004,8 @@ public:
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;
             }
+        } else if (args.args.size() == 0) {
+            depth = INT64_MAX;
         } else {
             // If our arity is off, then calls.cc will report an error due to mismatch with the RBI elsewhere, so we
             // don't need to do anything special here
