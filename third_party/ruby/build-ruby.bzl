@@ -79,6 +79,7 @@ run_cmd ./configure \
         CPPFLAGS="${{inc_path[*]}} {copts}" \
         LDFLAGS="${{lib_path[*]}} {linkopts}" \
         OUTFLAG="-fvisibility=default -o" \
+        {configure_flags} \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -227,6 +228,7 @@ def _build_ruby_impl(ctx):
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             bundler = ctx.files.bundler[0].path,
+            configure_flags = " ".join(ctx.attr.configure_flags),
         )),
     )
 
@@ -251,6 +253,9 @@ build_ruby = rule(
         "bundler": attr.label(
             mandatory = True,
             doc = "The bundler gem to install",
+        ),
+        "configure_flags": attr.string_list(
+            doc = "Additional arguments to configure",
         ),
         "copts": attr.string_list(
             doc = "Additional copts for the ruby build",
