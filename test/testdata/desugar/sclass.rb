@@ -61,12 +61,10 @@ class G
     def wrapper
         class << self
             def inner
-                T.reveal_type(self) # error: type: `G`
+                T.reveal_type(self) # error: type: `T.class_of(G)`
             end
         end
-        inner # this would not be allowed dynamically, but we treat
-              # methods defined within instance methods as instance
-              # methods
+        inner # error: Method `inner` does not exist on
     end
     def self.g
         "g"

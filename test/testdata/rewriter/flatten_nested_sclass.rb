@@ -20,7 +20,7 @@ class B
 end
 
 B.new.foo
-B.new.bar
+B.new.bar # error: Method `bar` does not exist on `B`
 
 
 class C
