@@ -41,6 +41,37 @@ Now when you run it there are some useful functions for debugging:
 * `*(RString*)str` - Print the string contents of a `VALUE` which already is a String
 * `*(RString*)rb_class_name(klass)` - Print the name of a `VALUE` which is a Class
 
+If you see a message about local `.lldbinit` files when running `lldb`, you can
+either:
+
+-   ignore all local .lldbinit files:
+
+    ```
+    # ~/.lldbinit
+    settings set target.load-cwd-lldbinit false
+    ```
+
+-   run all local .lldbinit files:
+
+    ```
+    # ~/.lldbinit
+    settings set target.load-cwd-lldbinit true
+    ```
+
+-   make the choice run-by-run:
+
+    ```
+    lldb (--local-lldbinit|--no-lldbinit) <normal lldb args...>
+    ```
+
+To get source maps while debugging, make sure that our `.lldbinit` was run, and
+then use this custom LLDB command:
+
+```
+(lldb) rubysourcemaps
+```
+
+
 # Building on linux
 
 `apt get install libncurses-dev`
