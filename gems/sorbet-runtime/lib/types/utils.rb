@@ -151,6 +151,21 @@ module T::Utils
     "#{start_part}#{ellipsis}#{end_part}"
   end
 
+  def self.lift_enum(enum)
+    unless enum.is_a?(T::Types::Enum)
+      raise ArgumentError.new("#{enum.inspect} is not a T.enum")
+    end
+
+    classes = enum.values.map(&:class).uniq
+    if classes.empty?
+      T.untyped
+    elsif classes.length > 1
+      T::Types::Union.new(classes)
+    else
+      T::Types::Simple.new(classes.first)
+    end
+  end
+
   module Nilable
     # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.

@@ -79,6 +79,8 @@ module T::Props
           else
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
+        when T::Types::Enum
+          generate(T::Utils.lift_enum(type), mode, varname)
         else
           if type.singleton_class < T::Props::CustomType
             # Sometimes this comes wrapped in a T::Types::Simple and sometimes not
