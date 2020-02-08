@@ -11,8 +11,8 @@ end
 
 module Intrinsics
   class Method < T::Struct
-    prop :exported, T::Boolean
-    prop :will_be_exported, T::Boolean
+    prop :already_exported, T::Boolean
+    prop :did_export, T::Boolean
     prop :file, String
     prop :klass, String
     prop :rb_name, String
@@ -28,23 +28,100 @@ module Intrinsics
 
   class Main
 
-    SORBET_CLASSES = T.let(Set[
-      "Array",
-      "Complex",
-      "Enumerable",
-      "File",
-      "Float",
-      "Hash",
-      "Integer",
-      "NilClass",
-      "Range",
-      "String",
+    SORBET_SYMBOL_REFS = T.let(Set[
+      'Array',
+      'BasicObject',
+      'Class',
+      'Complex',
+      'Enumerable',
+      'Enumerator',
+      'FalseClass',
+      'File',
+      'Float',
+      'Hash',
+      'Integer',
+      'Kernel',
+      'Module',
+      'NilClass',
+      'Object',
+      'Proc',
+      'Range',
+      'Rational',
+      'Regexp',
+      'Set',
+      'Singleton',
+      'StandardError',
+      'String',
+      'Struct',
+      'Symbol',
+      'TrueClass',
     ], T::Set[String])
 
-    DIFF_WHITELIST = T.let(Set[
-      'string.c',
-      'array.c',
-      'numeric.c',
+    EXTERN_OVERRIDES = T.let({
+      'rb_int_powm' => 'extern VALUE rb_int_powm(int const argc, VALUE * const argv, VALUE const num);',
+      'rb_f_send' => 'extern VALUE rb_f_send(int argc, VALUE *argv, VALUE recv);',
+    }, T::Hash[String, String])
+
+    METHOD_WHITELIST = T.let(Set[
+      "Array#+",
+      "Array#<<",
+      "Array#<=>",
+      "Array#[]",
+      "Array#assoc",
+      "Array#at",
+      "Array#clear",
+      "Array#delete",
+      "Array#each",
+      "Array#include?",
+      "Array#initialize_copy",
+      "Array#last",
+      "Array#rassoc",
+      "Array#sort!",
+      "Array#sort",
+      "Float#*",
+      "Float#**",
+      "Float#+",
+      "Float#-@",
+      "Float#>",
+      "Float#abs",
+      "Float#finite?",
+      "Float#infinite?",
+      "Integer#%",
+      "Integer#&",
+      "Integer#*",
+      "Integer#**",
+      "Integer#+",
+      "Integer#-",
+      "Integer#-@",
+      "Integer#/",
+      "Integer#<<",
+      "Integer#<=>",
+      "Integer#===",
+      "Integer#>",
+      "Integer#>=",
+      "Integer#abs",
+      "Integer#div",
+      "Integer#divmod",
+      "Integer#fdiv",
+      "Integer#gcd",
+      "Integer#gcdlcm",
+      "Integer#lcm",
+      "Integer#odd?",
+      "Integer#pow",
+      "String#*",
+      "String#+",
+      "String#<<",
+      "String#==",
+      "String#dump",
+      "String#encoding",
+      "String#eql?",
+      "String#freeze",
+      "String#initialize_copy",
+      "String#inspect",
+      "String#intern",
+      "String#length",
+      "String#ord",
+      "String#succ",
     ], T::Set[String])
 
     sig {params(ruby: String, ruby_source: String).void}
@@ -55,18 +132,23 @@ module Intrinsics
       exported = exported_symbols(ruby: ruby)
       methods = methods_defined(ruby_source: ruby_source, exported: exported)
 
+      File.open('export-intrinsics.patch', 'w') do |diff|
+        puts 'Writing export-intrinsics.patch'
+        write_diff(ruby_source, diff, methods)
+      end
+
       File.open('intrinsic-report.md', 'w') do |report|
         puts 'Writing intrinsic-report.md'
         write_report(report, methods)
       end
 
-      File.open('export-intrinsics.patch', 'w') do |diff|
-        puts 'Writing export-intrinsics.patch'
-        write_diff(ruby_source, diff, methods.filter {|k,_| DIFF_WHITELIST.include?(k)})
-      end
-
       # group methods together
       grouped_methods = methods.values.flatten.group_by(&:c_name).values
+      # ensure consistent output order
+      grouped_methods.sort_by! do |methods|
+        method = methods.fetch(0)
+        "#{method.klass}##{method.rb_name}"
+      end
 
       File.open('WrappedIntrinsics.h', 'w') do |header|
         puts 'Writing WrappedIntrinsics.h'
@@ -208,8 +290,8 @@ module Intrinsics
               argc = m4.chomp.to_i
 
               methods << Method.new(
-                exported: exported.include?(c_name),
-                will_be_exported: false,
+                already_exported: exported.include?(c_name),
+                did_export: false,
                 file: file,
                 klass: klass_value,
                 rb_name: rb_name,
@@ -227,7 +309,7 @@ module Intrinsics
     sig {params(report: File, files: T::Hash[String, T::Array[Method]]).void}
     def self.write_report(report, files)
       total_intrinsics = 0
-      exported_intrinsics = 0
+      visible_intrinsics = 0
 
       report << "# Intrinsics by file\n"
       report << "\n"
@@ -238,14 +320,14 @@ module Intrinsics
         methods.each do |method|
 
           total_intrinsics += 1
-
-          exported = ' '
-          if method.exported
-            exported_intrinsics += 1
-            exported = 'x'
+          if method.already_exported || method.did_export
+            visible_intrinsics += 1
           end
 
-          report << "* [#{exported}] `#{method.c_name}` (`#{method.klass}##{method.rb_name}`)\n"
+          already_exported = method.already_exported ? "✔" : " "
+          did_export = method.did_export ? "✔" : " "
+
+          report << "* [#{already_exported} #{did_export}] `#{method.c_name}` (`#{method.klass}##{method.rb_name}`)\n"
         end
 
         report << "\n"
@@ -253,7 +335,7 @@ module Intrinsics
 
       report << "## Stats\n"
       report << "* Total:   #{total_intrinsics}\n"
-      report << "* Visible: #{exported_intrinsics}\n"
+      report << "* Visible: #{visible_intrinsics}\n"
     end
 
     sig do
@@ -267,7 +349,7 @@ module Intrinsics
     def self.write_diff(ruby_source, diff, methods)
       Dir.chdir(ruby_source) do
         methods.each do |file,methods|
-          hidden = methods.filter {|m| !m.exported}
+          hidden = methods.filter {|m| should_patch?(m)}
           if !hidden.empty?
             edits = File.open(file, 'r') do |io|
               expose_methods(hidden, io)
@@ -297,7 +379,7 @@ module Intrinsics
       io << "+#{edit.edited}"
     end
 
-    sig {params(hidden: T.untyped, io: File).returns(T::Array[Edit])}
+    sig {params(hidden: T::Array[Method], io: File).returns(T::Array[Edit])}
     def self.expose_methods(hidden, io)
       edits = T.let([], T::Array[Edit])
 
@@ -308,7 +390,7 @@ module Intrinsics
           edit = generate_edit(previous, line, idx+1, method)
           if !edit.nil?
             edits << edit
-            method.will_be_exported = true
+            method.did_export = true
             break
           end
         end
@@ -331,7 +413,7 @@ module Intrinsics
         .returns(T.nilable(Intrinsics::Edit))
     end
     def self.generate_edit(previous, line, idx, method)
-      if !line.match?(method.c_name)
+      if !line.match?(Regexp.new("#{method.c_name}\\("))
         return nil
       end
 
@@ -354,16 +436,39 @@ module Intrinsics
       nil
     end
 
+    # Make this method return `true` to emit all methods
+    sig {params(method: Method).returns(T::Boolean)}
+    def self.method_whitelisted?(method)
+      METHOD_WHITELIST.include?("#{method.klass}##{method.rb_name}")
+    end
+
+    sig {params(klass: String).returns(T::Boolean)}
+    def self.have_symbol_ref?(klass)
+      SORBET_SYMBOL_REFS.include?(klass)
+    end
+
+    sig {params(method: Method).returns(T::Boolean)}
+    def self.should_patch?(method)
+      !method.already_exported && \
+        have_symbol_ref?(method.klass) && \
+        method_whitelisted?(method) && \
+        method.argc != -2
+    end
 
     sig {params(method: Method).returns(T.nilable(T::Boolean))}
     def self.should_wrap?(method)
-      (method.exported || method.will_be_exported) && SORBET_CLASSES.include?(method.klass)
+      (method.already_exported || method.did_export) && \
+        have_symbol_ref?(method.klass) && \
+        method_whitelisted?(method) && \
+        method.argc != -2
     end
 
     sig {params(header: File, grouped_methods: T::Array[T::Array[Method]]).void}
     def self.write_header(header, grouped_methods)
       header << "// This file is autogenerated. Do not edit it by hand. Regenerate it with:\n"
       header << "//   cd compiler/IREmitter/Intrinsics && make\n"
+      header << "\n"
+      header << "// clang-format off\n"
 
       grouped_methods.each do |methods|
         method = methods.fetch(0)
@@ -373,6 +478,7 @@ module Intrinsics
           header << "\"sorbet_int_#{method.c_name}\", Intrinsics::HandleBlock::Unhandled},\n"
         end
       end
+      header << "    // clang-format on\n"
     end
 
     sig {params(wrapper: File, grouped_methods: T::Array[T::Array[Method]]).void}
@@ -414,11 +520,21 @@ module Intrinsics
       end
       wrapper << "// Calling convention: #{method.argc}\n"
 
+      extern_override = EXTERN_OVERRIDES[method.c_name]
+      if extern_override
+        wrapper << extern_override
+        wrapper << "\n"
+        return
+      end
+
       wrapper << "extern VALUE #{method.c_name}("
 
       case method.argc
       when -1
         wrapper << 'int argc, const VALUE *args, VALUE obj'
+      when -2
+        puts "Need to implement calling convention -2"
+        exit 1
       else
         args = ['VALUE obj']
 
