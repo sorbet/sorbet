@@ -19,8 +19,8 @@ cc_library(
         "//ast",
         "//ast/desugar",
         "//ast/treemap",
-        "//core",
         "//class_flatten",
+        "//core",
     ],
 )
 

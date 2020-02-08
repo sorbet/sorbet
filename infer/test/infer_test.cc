@@ -7,7 +7,7 @@
 #include "core/ErrorQueue.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
-#include "flattener/flatten.h"
+#include "class_flatten/class_flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
@@ -57,7 +57,7 @@ void processSource(core::GlobalState &cb, string str) {
     auto workers = WorkerPool::create(0, *logger);
     resolver::Resolver::run(ctx, move(trees), *workers);
     for (auto &tree : trees) {
-        tree = flatten::runOne(ctx, move(tree));
+        tree = class_flatten::runOne(ctx, move(tree));
     }
 }
 
