@@ -61,14 +61,7 @@ module T::Props
           if NO_TRANSFORM_TYPES.any? {|cls| raw <= cls}
             nil
           elsif raw < T::Props::Serializable
-            case mode
-            when Mode::SERIALIZE
-              "#{varname}.serialize(strict)"
-            when Mode::DESERIALIZE
-              "#{raw}.from_hash(#{varname})"
-            else
-              T.absurd(mode)
-            end
+            handle_serializable_subtype(varname, raw, mode)
           elsif raw.singleton_class < T::Props::CustomType
             handle_custom_type(varname, T.unsafe(raw), mode)
           else
@@ -97,15 +90,39 @@ module T::Props
       end
 
       sig {params(varname: String, type: Module, mode: Mode).returns(String).checked(:never)}
-      private_class_method def self.handle_custom_type(varname, type, mode)
+      private_class_method def self.handle_serializable_subtype(varname, type, mode)
         case mode
         when Mode::SERIALIZE
-          "T::Props::CustomType.checked_serialize(#{type}, #{varname})"
+          "#{varname}.serialize(strict)"
         when Mode::DESERIALIZE
-          "#{type}.deserialize(#{varname})"
+          type_name = T.must(module_name(type))
+          "#{type_name}.from_hash(#{varname})"
         else
           T.absurd(mode)
         end
+      end
+
+      sig {params(varname: String, type: Module, mode: Mode).returns(String).checked(:never)}
+      private_class_method def self.handle_custom_type(varname, type, mode)
+        case mode
+        when Mode::SERIALIZE
+          type_name = T.must(module_name(type))
+          "T::Props::CustomType.checked_serialize(#{type_name}, #{varname})"
+        when Mode::DESERIALIZE
+          type_name = T.must(module_name(type))
+          "#{type_name}.deserialize(#{varname})"
+        else
+          T.absurd(mode)
+        end
+      end
+
+      # Guard against overrides of `name` or `to_s`
+      MODULE_NAME = T.let(Module.instance_method(:name), UnboundMethod)
+      private_constant :MODULE_NAME
+
+      sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
+      private_class_method def self.module_name(type)
+        MODULE_NAME.bind(type).call
       end
     end
   end
