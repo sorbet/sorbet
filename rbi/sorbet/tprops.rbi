@@ -40,6 +40,11 @@ module T::Props::CustomType
   include Kernel
 end
 
+module T::Props::GeneratedCodeValidation
+  def self.validate_serialize(source); end
+  def self.validate_deserialize(source); end
+end
+
 class T::Props::Decorator
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
   DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
