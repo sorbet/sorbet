@@ -2,12 +2,12 @@
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "class_flatten/class_flatten.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
-#include "class_flatten/class_flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
