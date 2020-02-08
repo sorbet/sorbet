@@ -119,8 +119,6 @@ InsSeq{
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
     end
@@ -140,8 +138,6 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Literal{ value = :"<static-init>" }
-
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -160,8 +156,6 @@ InsSeq{
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       1
     end
@@ -181,8 +175,6 @@ InsSeq{
           symbol = ::<todo sym>
         }]
       rhs = [
-        Literal{ value = :"<static-init>" }
-
         MethodDef{
           flags = self
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
@@ -261,10 +253,8 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 
 --- symbol-table-raw end ---
 --- checking diff ---
-1,11d0
-1,26d0
-< 
-< 
+1,24d0
+1,9d0
 <               localVariable = <U <blk>>
 <             }]
 <           args = [Local{
@@ -273,7 +263,6 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 <           orig = nullptr
 <           rhs = Literal{ value = 1 }
 <           symbol = ::<todo sym>
-<         Literal{ value = :"<static-init>" }
 <         MethodDef{
 <         }
 <         }]
@@ -283,7 +272,6 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
 <       kind = class
 <       name = EmptyTree<<C <U <root>>>>
 <       rhs = [
-<     :"<static-init>"
 <     ClassDef{
 <     EmptyTree
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)
