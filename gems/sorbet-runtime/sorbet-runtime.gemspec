@@ -20,4 +20,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
+  # for validating generated code
+  s.add_development_dependency 'parser', '~> 2.7'
 end

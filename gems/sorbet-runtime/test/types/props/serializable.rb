@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 require_relative '../../test_helper'
 
+require 'parser/current'
+
 class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   def assert_prop_error(match, &blk)
     ex = assert_raises(ArgumentError) do
@@ -527,6 +529,51 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'can deserialize nil' do
       assert_equal([nil], ArrayOfNilableStruct.from_hash('prop' => [nil]).prop)
+    end
+  end
+
+  class ComplexStruct < T::Struct
+    prop :primitive, Integer
+    prop :nilable, T.nilable(Integer)
+    prop :nilable_on_read, T.nilable(Integer), raise_on_nil_write: true
+    prop :primitive_default, Integer, default: 0
+    prop :primitive_nilable_default, T.nilable(Integer), default: 0
+    prop :factory, Integer, factory: -> {0}
+    prop :primitive_array, T::Array[Integer]
+    prop :array_default, T::Array[Integer], default: []
+    prop :primitive_hash, T::Hash[String, Integer]
+    prop :array_of_nilable, T::Array[T.nilable(Integer)]
+    prop :nilable_array, T.nilable(T::Array[Integer])
+    prop :substruct, MySerializable
+    prop :nilable_substract, T.nilable(MySerializable)
+    prop :default_substruct, MySerializable, default: MySerializable.new
+    prop :array_of_substruct, T::Array[MySerializable]
+    prop :hash_of_substruct, T::Hash[String, MySerializable]
+    prop :custom_type, CustomType
+    prop :nilable_custom_type, T.nilable(CustomType)
+    prop :default_custom_type, CustomType, default: ''
+    prop :array_of_custom_type, T::Array[CustomType]
+    prop :hash_of_custom_type_to_substruct, T::Hash[CustomType, MySerializable]
+    prop :unidentified_type, Object
+    prop :nilable_unidentified_type, T.nilable(Object)
+    prop :array_of_unidentified_type, T::Array[Object]
+    prop :defaulted_unidentified_type, Object, default: Object.new
+    prop :hash_with_unidentified_types, T::Hash[Object, Object]
+  end
+
+  describe 'generated code' do
+    describe 'serialize' do
+      it 'validates' do
+        src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
+        T::Props::GeneratedCodeValidation.validate_serialize(src)
+      end
+    end
+
+    describe 'deserialize' do
+      it 'validates' do
+        src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
+        T::Props::GeneratedCodeValidation.validate_deserialize(src)
+      end
     end
   end
 end
