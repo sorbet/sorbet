@@ -63,6 +63,7 @@ constexpr ErrorClass TypeMemberCycle{5055, StrictLevel::False};
 constexpr ErrorClass ExperimentalAttachedClass{5056, StrictLevel::False};
 // constexpr ErrorClass GeneratedDeprecated{5056, StrictLevel::False};
 constexpr ErrorClass StaticAbstractModuleMethod{5057, StrictLevel::False};
+constexpr ErrorClass SuperClassModule{5056, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
