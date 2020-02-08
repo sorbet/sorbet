@@ -490,7 +490,8 @@ private:
                 // No superclass specified
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
-                       job.klass.data(ctx)->superClass() == core::Symbols::todo() || job.klass.data(ctx)->superClass() == core::Symbols::StubSuperClass() ||
+                       job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
+                       job.klass.data(ctx)->superClass() == core::Symbols::StubSuperClass() ||
                        job.klass.data(ctx)->superClass() == resolved) {
                 if (resolved.data(ctx)->isClassOrModuleModule()) {
                     if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::SuperClassModule)) {
