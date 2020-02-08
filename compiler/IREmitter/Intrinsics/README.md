@@ -1,21 +1,38 @@
-
 # Ruby intrinsic analyzer
 
-## Prerequisites
+## Adding more intrinsics
 
-* ruby binary
-* ruby source
+To add more intrinsics, edit the whitelists at the top of wrap-intrinsics.rb.
+You will need:
+
+- To know the name of the underlying Ruby class & method
+- To know that Sorbet has a SymbolRef with the same name as the Ruby class name
 
 ## Running
 
-Running `make` will generate the following files:
+To re-generate the whitelisted intrinsics:
 
-- `intrinsic-report.md` which details all of the intrinsics that are exported
-  from the ruby located in `//bazel-bin/external/sorbet_ruby/toolchain/bin/ruby`,
-  versus all of the intrinsics that are defined with `rb_define_method` in the
-  ruby source in `~/Downloads/ruby-2.6.3`.
-- `PayloadIntrinsics.c` includes intrinsic definitions for all intrinsics that
-  are exposed on the ruby executable we're linking with.
-- `WrappedIntrinsics.h` is a c++ vector initializer fragment that's meant to be
-  included into `SymbolBasedIntrinsics.cc`, and is what connects the wrappers
-  defined in `PayloadIntrinsics.c`.
+```
+(cd compiler/IREmitter/Intrinsics/ && make)
+```
+
+To regenate all intrinsics:
+
+```
+# Edit the method_whitelisted? method in wrap-intrinsics.rb to return `true`
+
+# then:
+(cd compiler/IREmitter/Intrinsics/ && make)
+```
+
+## Debugging
+
+- Look at `intrinsics-report.md`, which serializes the entirety of the
+  information the script was working from.
+
+- Half of the script is powered by running `nm` on an object to list it's
+  symbols. Sometimes that output can have changed unexpectedly.
+
+- Sometimes the generated diffs can be hard to read. They're usually better when
+  passing the `--patience` flag.
+
