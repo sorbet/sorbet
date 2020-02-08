@@ -575,12 +575,28 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
         T::Props::GeneratedCodeValidation.validate_serialize(src)
       end
+
+      it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
+        src = src.sub(/\.transform_values\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_serialize(src)
+        end
+      end
     end
 
     describe 'deserialize' do
       it 'validates' do
         src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
         T::Props::GeneratedCodeValidation.validate_deserialize(src)
+      end
+
+      it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
+        src = src.sub(/\.default\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_deserialize(src)
+        end
       end
     end
   end
