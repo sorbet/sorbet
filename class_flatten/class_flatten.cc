@@ -26,8 +26,6 @@ bool shouldExtract(core::Context ctx, const unique_ptr<ast::Expression> &what) {
         return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
     }
 
-    // Importantly, we DO extract methods, because MethodDef's are conceptually expressions that return a symbol.
-    // The treemap below will extract MethodDef's nested inside <static-init> (i.e., all of them) back to the top level.
     return true;
 }
 
@@ -145,18 +143,15 @@ private:
         return ret;
     }
 
-    // We flatten nested classes and methods into a flat list. We want to sort
+    // We flatten nested classes into a flat list. We want to sort
     // them by their starts, so that `class A; class B; end; end` --> `class A;
     // end; class B; end`.
     //
     // In order to make TreeMap work out, we can't remove them from the AST
     // until the `postTransform*` hook. Appending them to a list at that point
     // would result in an "bottom-up" ordering, so instead we store a stack of
-    // "where does the next definition belong" into `classStack` and
-    // `methodScopes.stack`, which we push onto in the `preTransform* hook, and
-    // pop from in the `postTransform` hook.
-
-    // vector<Methods> methodScopes;
+    // "where does the next definition belong" into `classStack`
+    // which we push onto in the `preTransform* hook, and pop from in the `postTransform` hook.
     vector<unique_ptr<ast::ClassDef>> classes;
     vector<int> classStack;
 };
