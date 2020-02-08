@@ -42,6 +42,7 @@ bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
 
         // Ignore code synthesized by Rewriter pass.
         [&](ast::Send *send) { result = !send->isRewriterSynthesized(); },
+        [&](ast::Literal *methodDef) { result = false; },
         [&](ast::MethodDef *methodDef) { result = !methodDef->isRewriterSynthesized(); },
 
         [&](ast::Expression *klass) { result = true; });
