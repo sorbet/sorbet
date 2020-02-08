@@ -18,13 +18,12 @@ module T::Props
 
       sig do
         params(
-          name: String,
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
         )
         .returns(String)
         .checked(:never)
       end
-      def self.generate(name, props)
+      def self.generate(props)
         parts = props.reject {|_, rules| rules[:dont_store]}.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
@@ -42,12 +41,11 @@ module T::Props
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
             SerdeTransform::Mode::SERIALIZE,
             ivar_name
-          )
-          transformed_val ||= ivar_name
+          ) || ivar_name
 
           nil_asserter =
             if rules[:fully_optional]
-              nil
+              ''
             else
               "required_prop_missing_from_serialize(#{prop.inspect}) if strict"
             end
@@ -65,7 +63,7 @@ module T::Props
         end
 
         <<~RUBY
-          def #{name}(strict)
+          def __t_props_generated_serialize(strict)
             h = {}
             #{parts.join("\n\n")}
             h

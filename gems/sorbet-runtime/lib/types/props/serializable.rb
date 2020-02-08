@@ -164,22 +164,12 @@ module T::Props::Serializable::DecoratorMethods
     res
   end
 
-  SERIALIZE_METHOD = '__t_props_generated_serialize'
-  private_constant :SERIALIZE_METHOD
-
   private def generate_serialize_source
-    T::Props::Private::SerializerGenerator.generate(
-      SERIALIZE_METHOD,
-      props,
-    )
+    T::Props::Private::SerializerGenerator.generate(props)
   end
-
-  DESERIALIZE_METHOD = '__t_props_generated_deserialize'
-  private_constant :DESERIALIZE_METHOD
 
   private def generate_deserialize_source
     T::Props::Private::DeserializerGenerator.generate(
-      DESERIALIZE_METHOD,
       props,
       props_with_defaults || {},
     )

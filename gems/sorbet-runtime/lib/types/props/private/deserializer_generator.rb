@@ -22,14 +22,13 @@ module T::Props
       # for unexpected input keys with minimal effect on the fast path).
       sig do
         params(
-          name: String,
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
           defaults: T::Hash[Symbol, T::Props::Private::ApplyDefault],
         )
         .returns(String)
         .checked(:never)
       end
-      def self.generate(name, props, defaults)
+      def self.generate(props, defaults)
         parts = props.reject {|_, rules| rules[:dont_store]}.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
@@ -47,8 +46,7 @@ module T::Props
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
             SerdeTransform::Mode::DESERIALIZE,
             'val'
-          )
-          transformed_val ||= 'val'
+          ) || 'val'
 
           nil_handler = generate_nil_handler(
             prop: prop,
@@ -70,7 +68,7 @@ module T::Props
         end
 
         <<~RUBY
-          def #{name}(hash)
+          def __t_props_generated_deserialize(hash)
             found = #{props.size}
             #{parts.join("\n\n")}
             found
@@ -118,16 +116,8 @@ module T::Props
           when ApplyPrimitiveDefault
             literal = default.default
             case literal
-            when String, Symbol
+            when String, Integer, Symbol, Float, TrueClass, FalseClass, NilClass
               literal.inspect
-            when Integer, Float
-              literal.to_s
-            when true
-              'true'
-            when false
-              'false'
-            when nil
-              'nil'
             else
               "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
             end
