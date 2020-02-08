@@ -12,7 +12,7 @@ module T::Props
     module DecoratorMethods
       extend T::Sig
 
-      sig {returns(T::Hash[Symbol, T.proc.returns(Private::RubyGen::TrustedRuby)]).checked(:never)}
+      sig {returns(T::Hash[Symbol, T.proc.returns(String)]).checked(:never)}
       private def lazily_defined_methods
         @lazily_defined_methods ||= {}
       end
@@ -26,7 +26,7 @@ module T::Props
         cls.send(:private, name)
       end
 
-      sig {params(name: Symbol, blk: T.proc.returns(Private::RubyGen::TrustedRuby)).void}
+      sig {params(name: Symbol, blk: T.proc.returns(String)).void}
       private def enqueue_lazy_method_definition!(name, &blk)
         lazily_defined_methods[name] = blk
 

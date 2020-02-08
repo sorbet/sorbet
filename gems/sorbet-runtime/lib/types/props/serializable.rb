@@ -164,7 +164,7 @@ module T::Props::Serializable::DecoratorMethods
     res
   end
 
-  SERIALIZE_METHOD = T::Props::Private::RubyGen::TrustedRuby.constant('__t_props_generated_serialize')
+  SERIALIZE_METHOD = '__t_props_generated_serialize'
   private_constant :SERIALIZE_METHOD
 
   private def generate_serialize_source
@@ -174,7 +174,7 @@ module T::Props::Serializable::DecoratorMethods
     )
   end
 
-  DESERIALIZE_METHOD = T::Props::Private::RubyGen::TrustedRuby.constant('__t_props_generated_deserialize')
+  DESERIALIZE_METHOD = '__t_props_generated_deserialize'
   private_constant :DESERIALIZE_METHOD
 
   private def generate_deserialize_source

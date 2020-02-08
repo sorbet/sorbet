@@ -5,7 +5,7 @@ module T::Props
   module Private
 
     # Generates a specialized `serialize` implementation for a subclass of
-    # T::Props::Serializable, using the facilities in `RubyGen`.
+    # T::Props::Serializable.
     #
     # The basic idea is that we analyze the props and for each prop, generate
     # the simplest possible logic as a block of Ruby source, so that we don't
@@ -13,111 +13,64 @@ module T::Props
     # when serializing a simple Integer. Then we join those together,
     # with a little shared logic to be able to detect when we get input keys
     # that don't match any prop.
-    #
-    # Each instance of this class is responsible for generating the Ruby source
-    # for a single prop; there's a class method which takes a hash of props
-    # and generates the full `serialize` implementation.
     module SerializerGenerator
       extend T::Sig
 
-      TrustedRuby = RubyGen::TrustedRuby
-
-      class SerializeMethod < RubyGen::Template
-        sig {params(name: TrustedRuby, parts: T::Array[PropSerializationLogic]).returns(SerializeMethod).checked(:never)}
-        def self.from_parts(name, parts)
-          new(
-            name: name,
-            body: TrustedRuby.join(parts.map(&:generate)),
-          )
-        end
-
-        sig {override.returns(String).checked(:never)}
-        def self.format_string
-          <<~RUBY
-            def %<name>s(strict)
-              h = {}
-              %<body>s
-              h
-            end
-          RUBY
-        end
-      end
-
-      class NilAsserter < RubyGen::Template
-        sig {params(prop: Symbol).returns(NilAsserter).checked(:never)}
-        def self.for_prop(prop)
-          new(prop: RubyGen::SymbolLiteral.new(prop))
-        end
-
-        sig {override.returns(String).checked(:never)}
-        def self.format_string
-          'required_prop_missing_from_serialize(%<prop>s) if strict'
-        end
-      end
-
-      class PropSerializationLogic < RubyGen::Template
-        EMPTY = T.let(TrustedRuby.constant(''), TrustedRuby)
-        private_constant :EMPTY
-
-        sig do
-          params(
-            serialized_form: String,
-            accessor_key: Symbol,
-            nil_asserter: T.nilable(NilAsserter),
-            serialized_val: TrustedRuby,
-          )
-          .returns(PropSerializationLogic)
-          .checked(:never)
-        end
-        def self.from(serialized_form:, accessor_key:, nil_asserter:, serialized_val:)
-          new(
-            serialized_form: RubyGen::StringLiteral.new(serialized_form),
-            accessor_key: RubyGen::InstanceVar.new(accessor_key),
-            nil_asserter: nil_asserter&.generate || EMPTY,
-            serialized_val: serialized_val,
-          )
-        end
-
-        # Don't serialize values that are nil to save space (both the
-        # nil value itself and the field name in the serialized BSON
-        # document)
-        sig {override.returns(String).checked(:never)}
-        def self.format_string
-          <<~RUBY
-            if %<accessor_key>s.nil?
-              %<nil_asserter>s
-            else
-              val = %<accessor_key>s
-              h[%<serialized_form>s] = %<serialized_val>s
-            end
-          RUBY
-        end
-      end
-
       sig do
         params(
-          name: TrustedRuby,
+          name: String,
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
         )
-        .returns(TrustedRuby)
+        .returns(String)
         .checked(:never)
       end
       def self.generate(name, props)
         parts = props.reject {|_, rules| rules[:dont_store]}.map do |prop, rules|
-          accessor_key = rules.fetch(:accessor_key)
+          # All of these strings should already be validated (directly or
+          # indirectly) in `validate_prop_name`, so we don't bother with a nice
+          # error message, but we double check here to prevent a refactoring
+          # from introducing a security vulnerability.
+          raise unless T::Props::Decorator::SAFE_NAME.match?(prop.to_s)
 
-          PropSerializationLogic.from(
-            accessor_key: accessor_key,
-            serialized_form: rules.fetch(:serialized_form),
-            nil_asserter: rules[:fully_optional] ? nil : NilAsserter.for_prop(prop),
-            serialized_val: SerdeTransform.generate(
-              T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
-              SerdeTransform::Mode::SERIALIZE,
-            ),
+          hash_key = rules.fetch(:serialized_form)
+          raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
+
+          ivar_name = rules.fetch(:accessor_key).to_s
+          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
+
+          transformed_val = SerdeTransform.generate(
+            T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
+            SerdeTransform::Mode::SERIALIZE,
+            ivar_name
           )
+          transformed_val ||= ivar_name
+
+          nil_asserter =
+            if rules[:fully_optional]
+              nil
+            else
+              "required_prop_missing_from_serialize(#{prop.inspect}) if strict"
+            end
+
+          # Don't serialize values that are nil to save space (both the
+          # nil value itself and the field name in the serialized BSON
+          # document)
+          <<~RUBY
+            if #{ivar_name}.nil?
+              #{nil_asserter}
+            else
+              h[#{hash_key.inspect}] = #{transformed_val}
+            end
+          RUBY
         end
 
-        SerializeMethod.from_parts(name, parts).generate
+        <<~RUBY
+          def #{name}(strict)
+            h = {}
+            #{parts.join("\n\n")}
+            h
+          end
+        RUBY
       end
     end
   end

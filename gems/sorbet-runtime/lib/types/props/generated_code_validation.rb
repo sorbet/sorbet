@@ -2,25 +2,31 @@
 # typed: true
 
 module T::Props
-  # Helper to validate generated code, to assauge security concerns around
+  # Helper to validate generated code, to mitigate security concerns around
   # `class_eval`. Not called by default; the expectation is this will be used
-  # in tests.
+  # in tests, iterating over all T::Props::Serializable subclasses.
   module GeneratedCodeValidation
+    extend Private::Parse
 
     class ValidationError < RuntimeError; end
 
     def self.validate_deserialize(source)
-      parsed = parse_to_ast(source)
+      parsed = parse(source)
 
+      # def %<name>(hash)
+      #   ...
+      # end
       assert_equal(:def, parsed.type)
       name, args, body = parsed.children
       assert_equal(:__t_props_generated_deserialize, name)
-
       assert_equal(s(:args, s(:arg, :hash)), args)
 
       assert_equal(:begin, body.type)
       init, *prop_clauses, ret = body.children
 
+      # found = %<prop_count>
+      # ...
+      # found
       assert_equal(:lvasgn, init.type)
       init_name, init_val = init.children
       assert_equal(:found, init_name)
@@ -37,17 +43,22 @@ module T::Props
     end
 
     def self.validate_serialize(source)
-      parsed = parse_to_ast(source)
+      parsed = parse(source)
 
+      # def %<name>(strict)
+      # ...
+      # end
       assert_equal(:def, parsed.type)
       name, args, body = parsed.children
       assert_equal(:__t_props_generated_serialize, name)
-
       assert_equal(s(:args, s(:arg, :strict)), args)
 
       assert_equal(:begin, body.type)
       init, *prop_clauses, ret = body.children
 
+      # h = {}
+      # ...
+      # h
       assert_equal(s(:lvasgn, :h, s(:hash)), init)
       assert_equal(s(:lvar, :h), ret)
 
@@ -56,23 +67,18 @@ module T::Props
       end
     end
 
-    private_class_method def self.parse_to_ast(source)
-      # This is an optional dependency for sorbet-runtime in general,
-      # but is required if this method is to be used.
-      require 'parser/current'
-      Parser::CurrentRuby.parse(source)
-    end
-
     private_class_method def self.validate_serialize_clause(clause)
       assert_equal(:if, clause.type)
       condition, if_body, else_body = clause.children
 
+      # if @%<accessor_key>.nil?
       assert_equal(:send, condition.type)
       receiver, method = condition.children
       assert_equal(:ivar, receiver.type)
       assert_equal(:nil?, method)
 
       unless if_body.nil?
+        # required_prop_missing_from_serialize(%<prop>) if strict
         assert_equal(:if, if_body.type)
         if_strict_condition, if_strict_body, if_strict_else = if_body.children
         assert_equal(s(:lvar, :strict), if_strict_condition)
@@ -84,23 +90,19 @@ module T::Props
         assert_equal(nil, if_strict_else)
       end
 
-      assert_equal(:begin, else_body.type)
-      assign_val, set_h = else_body.children
-      assert_equal(:lvasgn, assign_val.type)
-      assigned_ivar, assignment = assign_val.children
-      assert_equal(:val, assigned_ivar)
-      assert_equal(:ivar, assignment.type)
+      # h[%<serialized_form>] = ...
+      assert_equal(:send, else_body.type)
+      receiver, method, h_key, h_val = else_body.children
+      assert_equal(s(:lvar, :h), receiver)
+      assert_equal(:[]=, method)
+      assert_equal(:str, h_key.type)
 
-      assert_equal(:send, set_h.type)
-      set_h_receiver, set_h_method, set_h_key, set_h_val = set_h.children
-      assert_equal(s(:lvar, :h), set_h_receiver)
-      assert_equal(:[]=, set_h_method)
-      assert_equal(:str, set_h_key.type)
-
-      validate_lack_of_side_effects(set_h_val, whitelisted_methods_for_serialize)
+      validate_lack_of_side_effects(h_val, whitelisted_methods_for_serialize)
     end
 
     private_class_method def self.validate_deserialize_hash_read(clause)
+      # val = hash[%<serialized_form>s]
+
       assert_equal(:lvasgn, clause.type)
       name, val = clause.children
       assert_equal(:val, name)
@@ -112,6 +114,13 @@ module T::Props
     end
 
     private_class_method def self.validate_deserialize_ivar_set(clause)
+      # %<accessor_key>s = if val.nil?
+      #   found -= 1 unless hash.key?(%<serialized_form>s)
+      #   %<nil_handler>s
+      # else
+      #   %<serialized_val>s
+      # end
+
       assert_equal(:ivasgn, clause.type)
       ivar_name, deser_val = clause.children
       unless ivar_name.is_a?(Symbol)
@@ -141,20 +150,23 @@ module T::Props
     private_class_method def self.validate_deserialize_handle_nil(node)
       case node.type
       when :hash, :array, :str, :sym, :int, :float, :nil
-        # Primitives are ok
+        # Primitives are safe
       when :send
         receiver, method, arg = node.children
         if receiver.nil?
+          # required_prop_missing_from_deserialize(%<prop>)
           assert_equal(:required_prop_missing_from_deserialize, method)
           assert_equal(:sym, arg.type)
-        elsif receiver == s(:send, s(:send, s(:self), :class), :decorator)
+        elsif receiver == self_class_decorator
+          # self.class.decorator.raise_nil_deserialize_error(%<serialized_form>)
           assert_equal(:raise_nil_deserialize_error, method)
           assert_equal(:str, arg.type)
         elsif method == :default
+          # self.class.decorator.props_with_defaults.fetch(%<prop>).default
           assert_equal(:send, receiver.type)
           inner_receiver, inner_method, inner_arg = receiver.children
           assert_equal(
-            s(:send, s(:send, s(:send, s(:self), :class), :decorator), :props_with_defaults),
+            s(:send, self_class_decorator, :props_with_defaults),
             inner_receiver,
           )
           assert_equal(:fetch, inner_method)
@@ -167,6 +179,10 @@ module T::Props
       end
     end
 
+    private_class_method def self.self_class_decorator
+      @self_class_decorator ||= s(:send, s(:send, s(:self), :class), :decorator).freeze
+    end
+
     private_class_method def self.validate_lack_of_side_effects(node, whitelisted_methods_by_receiver_type)
       case node.type
       when :const
@@ -174,13 +190,16 @@ module T::Props
         # if applicable
       when :hash, :array, :str, :sym, :int, :float, :nil, :self
         # Primitives & self are ok
-      when :lvar, :arg
+      when :lvar, :arg, :ivar
+        # Reading local & instance variables & arguments is ok
         unless node.children.all? {|c| c.is_a?(Symbol)}
           raise ValidationError.new("Unexpected child for #{node.type}: #{node.inspect}")
         end
       when :args, :mlhs, :block, :begin, :if
+        # Blocks etc are read-only if their contents are read-only
         node.children.each {|c| validate_lack_of_side_effects(c, whitelisted_methods_by_receiver_type) if c}
       when :send
+        # Sends are riskier so check a whitelist
         receiver, method, *args = node.children
         if receiver
           if receiver.type == :send
@@ -208,22 +227,21 @@ module T::Props
       end
     end
 
+    # Method calls generated by SerdeTransform
     private_class_method def self.whitelisted_methods_for_serialize
       @whitelisted_methods_for_serialize ||= {
         :lvar => %i{serialize dup map transform_values transform_keys each_with_object []=},
+        :ivar => %i{serialize dup map transform_values transform_keys each_with_object},
         :const => %i{checked_serialize deep_clone_object},
       }
     end
 
+    # Method calls generated by SerdeTransform
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         :lvar => %i{dup map transform_values transform_keys each_with_object []=},
         :const => %i{deserialize from_hash deep_clone_object},
       }
-    end
-
-    private_class_method def self.s(type, *children)
-      Parser::AST::Node.new(type, children)
     end
   end
 end

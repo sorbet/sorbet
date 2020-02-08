@@ -5,7 +5,7 @@ module T::Props
   module Private
 
     # Generates a specialized `deserialize` implementation for a subclass of
-    # T::Props::Serializable, using the facilities in `RubyGen`.
+    # T::Props::Serializable.
     #
     # The basic idea is that we analyze the props and for each prop, generate
     # the simplest possible logic as a block of Ruby source, so that we don't
@@ -13,70 +13,8 @@ module T::Props
     # when deserializing a simple Integer. Then we join those together,
     # with a little shared logic to be able to detect when we get input keys
     # that don't match any prop.
-    #
-    # Each instance of this class is responsible for generating the Ruby source
-    # for a single prop; there's a class method which takes a hash of props
-    # and generates the full `deserialize` implementation.
     module DeserializerGenerator
       extend T::Sig
-
-      TrustedRuby = RubyGen::TrustedRuby
-
-      class DeserializeMethod < RubyGen::Template
-        sig {params(name: TrustedRuby, parts: T::Array[PropDeserializationLogic]).returns(DeserializeMethod).checked(:never)}
-        def self.from_parts(name, parts)
-          new(
-            name: name,
-            prop_count: RubyGen::IntegerLiteral.new(parts.size),
-            body: TrustedRuby.join(parts.map(&:generate)),
-          )
-        end
-
-        sig {override.returns(String).checked(:never)}
-        def self.format_string
-          <<~RUBY
-            def %<name>s(hash)
-              found = %<prop_count>s
-              %<body>s
-              found
-            end
-          RUBY
-        end
-      end
-
-      class PropDeserializationLogic < RubyGen::Template
-        sig do
-          params(
-            serialized_form: String,
-            accessor_key: Symbol,
-            nil_handler: T.any(TrustedRuby, RubyGen::TemplateVar),
-            serialized_val: TrustedRuby,
-          )
-          .returns(PropDeserializationLogic)
-          .checked(:never)
-        end
-        def self.from(serialized_form:, accessor_key:, nil_handler:, serialized_val:)
-          new(
-            serialized_form: RubyGen::StringLiteral.new(serialized_form),
-            accessor_key: RubyGen::InstanceVar.new(accessor_key),
-            nil_handler: nil_handler,
-            serialized_val: serialized_val,
-          )
-        end
-
-        sig {override.returns(String).checked(:never)}
-        def self.format_string
-          <<~RUBY
-            val = hash[%<serialized_form>s]
-            %<accessor_key>s = if val.nil?
-              found -= 1 unless hash.key?(%<serialized_form>s)
-              %<nil_handler>s
-            else
-              %<serialized_val>s
-            end
-          RUBY
-        end
-      end
 
       # Generate a method that takes a T::Hash[String, T.untyped] representing
       # serialized props, sets instance variables for each prop found in the
@@ -84,34 +22,127 @@ module T::Props
       # for unexpected input keys with minimal effect on the fast path).
       sig do
         params(
-          name: TrustedRuby,
+          name: String,
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
           defaults: T::Hash[Symbol, T::Props::Private::ApplyDefault],
         )
-        .returns(TrustedRuby)
+        .returns(String)
         .checked(:never)
       end
       def self.generate(name, props, defaults)
         parts = props.reject {|_, rules| rules[:dont_store]}.map do |prop, rules|
-          serialized_form = rules.fetch(:serialized_form)
+          # All of these strings should already be validated (directly or
+          # indirectly) in `validate_prop_name`, so we don't bother with a nice
+          # error message, but we double check here to prevent a refactoring
+          # from introducing a security vulnerability.
+          raise unless T::Props::Decorator::SAFE_NAME.match?(prop.to_s)
 
-          PropDeserializationLogic.from(
-            accessor_key: rules.fetch(:accessor_key),
-            serialized_form: serialized_form,
-            serialized_val: SerdeTransform.generate(
-              T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
-              SerdeTransform::Mode::DESERIALIZE,
-            ),
-            nil_handler: DeserializeHandleNil.generate(
-              prop: prop,
-              serialized_form: serialized_form,
-              default: defaults[prop],
-              nilable_type: T::Props::Utils.optional_prop?(rules),
-              raise_on_nil_write: !!rules[:raise_on_nil_write],
-            ),
+          hash_key = rules.fetch(:serialized_form)
+          raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
+
+          ivar_name = rules.fetch(:accessor_key).to_s
+          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
+
+          transformed_val = SerdeTransform.generate(
+            T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
+            SerdeTransform::Mode::DESERIALIZE,
+            'val'
           )
+          transformed_val ||= 'val'
+
+          nil_handler = generate_nil_handler(
+            prop: prop,
+            serialized_form: hash_key,
+            default: defaults[prop],
+            nilable_type: T::Props::Utils.optional_prop?(rules),
+            raise_on_nil_write: !!rules[:raise_on_nil_write],
+          )
+
+          <<~RUBY
+            val = hash[#{hash_key.inspect}]
+            #{ivar_name} = if val.nil?
+              found -= 1 unless hash.key?(#{hash_key.inspect})
+              #{nil_handler}
+            else
+              #{transformed_val}
+            end
+          RUBY
         end
-        DeserializeMethod.from_parts(name, parts).generate
+
+        <<~RUBY
+          def #{name}(hash)
+            found = #{props.size}
+            #{parts.join("\n\n")}
+            found
+          end
+        RUBY
+      end
+
+      # This is very similar to what we do in ApplyDefault, but has a few
+      # key differences that mean we don't just re-use the code:
+      #
+      # 1. Where the logic in construction is that we generate a default
+      #    if & only if the prop key isn't present in the input, here we'll
+      #    generate a default even to override an explicit nil, but only
+      #    if the prop is actually required.
+      # 2. Since we're generating raw Ruby source, we can remove a layer
+      #    of indirection for marginally better performance; this seems worth
+      #    it for the common cases of literals and empty arrays/hashes.
+      # 3. We need to care about the distinction between `raise_on_nil_write`
+      #    and actually non-nilable, where new-instance construction doesn't.
+      #
+      # So we fall back to ApplyDefault only when one of the cases just
+      # mentioned doesn't apply.
+      sig do
+        params(
+          prop: Symbol,
+          serialized_form: String,
+          default: T.nilable(ApplyDefault),
+          nilable_type: T::Boolean,
+          raise_on_nil_write: T::Boolean,
+        )
+        .returns(String)
+        .checked(:never)
+      end
+      private_class_method def self.generate_nil_handler(
+        prop:,
+        serialized_form:,
+        default:,
+        nilable_type:,
+        raise_on_nil_write:
+      )
+        if !nilable_type
+          case default
+          when NilClass
+            "self.class.decorator.raise_nil_deserialize_error(#{serialized_form.inspect})"
+          when ApplyPrimitiveDefault
+            literal = default.default
+            case literal
+            when String, Symbol
+              literal.inspect
+            when Integer, Float
+              literal.to_s
+            when true
+              'true'
+            when false
+              'false'
+            when nil
+              'nil'
+            else
+              "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
+            end
+          when ApplyEmptyArrayDefault
+            '[]'
+          when ApplyEmptyHashDefault
+            '{}'
+          else
+            "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
+          end
+        elsif raise_on_nil_write
+          "required_prop_missing_from_deserialize(#{prop.inspect})"
+        else
+          'nil'
+        end
       end
     end
   end
