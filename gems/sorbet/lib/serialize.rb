@@ -224,9 +224,9 @@ class Sorbet::Private::Serialize
       return "# Illegal constant name: #{const}"
     end
     if defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeMember)
-      value.variance == :invariant ? "  #{const} = type_member" : "  #{const} = type_member(#{value.variance})"
+      value.variance == :invariant ? "  #{const} = type_member" : "  #{const} = type_member(#{value.variance.inspect})"
     elsif defined?(T::Types) && Sorbet::Private::RealStdlib.real_is_a?(value, T::Types::TypeTemplate)
-      value.variance == :invariant ? "  #{const} = type_template" : "  #{const} = type_template(#{value.variance})"
+      value.variance == :invariant ? "  #{const} = type_template" : "  #{const} = type_template(#{value.variance.inspect})"
     else
       "  #{const} = ::T.let(nil, ::T.untyped)"
     end
