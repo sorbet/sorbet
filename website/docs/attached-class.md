@@ -91,3 +91,69 @@ T.reveal_type(Child.make) # Child
 
 Child.make.say_hi # No error now, as Child.make has the type Child
 ```
+
+## `T.attached_class` as an argument?
+
+At this point, it's natural to think about writing methods that accept arguments
+that take values of type `T.attached_class`; you would get more specific type
+information about the arguments when calling from a sub-class, so why not?
+Consider this example:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {returns(T.attached_class)}
+  def self.make
+    new
+  end
+
+  sig {params(x: T.attached_class).void}
+  def self.consume(x)
+  end
+end
+
+class Child < Parent; end
+
+Parent.consume(Parent.new)
+Child.consume(Parent.new) # We would like this to be an error
+```
+
+However, problems arise when you begin passing around singleton classes. Imagine
+that you write the method below, that accepts arguments of type
+`T.class_of(Parent)`.
+
+```ruby
+class A
+  extend T::Sig
+
+  sig {params(cls: T.class_of(Parent)).void}
+  def self.consume_parent(cls)
+    cls.consume(Parent.make)
+  end
+end
+```
+
+When we pass in `Parent` as the argument, everything is fine: `Parent.make`
+returns a value of type `Parent`, and `cls.consume` expects an argument of type
+`Parent`. However when we pass `Child` as an argument, problems arise:
+`Parent.make` still makes a value of type `Parent`, and since the only thing we
+know about `cls` is that it is a subtype of `T.class_of(Parent)`, we are forced
+to assume that its `T.attached_class` will be `Parent`. The result of this, is
+that the signature for `Child.consume` is violated, as it expects an argument
+whose type is a subtype of `Child`, and `Parent` doesn't satisfy that condition.
+
+Because of this situation, `T.attached_class` is only allowed to show up in the
+`returns` part of a signature, and if it does show up in the `params` of a
+signature, you'll get an error:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {params(x: T.attached_class).void}
+            # ^: error: type_template <AttachedClass> was defined as :out but is
+            # used in an :in context
+  def self.problem(x); end
+end
+```
