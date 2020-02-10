@@ -28,7 +28,7 @@ end
 class TestInheritace1 < A::AB
 end
 
-class TestInheritace2 < E::EA # error: Modules can't be superclasses
+class TestInheritace2 < E::EA
 end
 
 module A
