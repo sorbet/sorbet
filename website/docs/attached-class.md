@@ -91,3 +91,87 @@ T.reveal_type(Child.make) # Child
 
 Child.make.say_hi # No error now, as Child.make has the type Child
 ```
+
+## `T.attached_class` as an argument?
+
+Using `T.attached_class` as the type of parameters is an error in sorbet, and
+allowing it would cause soundness issues. To see why, let's take a look at an
+example:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {returns(T.attached_class)}
+  def self.make
+    new
+  end
+
+  sig {params(x: T.attached_class).void} # A bad type definition for `x`
+  def self.consume(x)
+    puts "consumed"
+  end
+end
+
+class Child < Parent
+  extend T::Sig
+
+  sig {void}
+  def say_hi
+    puts "hi"
+  end
+
+  sig {params(x: T.attached_class).void} # A bad type definition for `x`
+  def self.consume(x)
+    x.say_hi
+  end
+end
+
+Parent.consume(Parent.new)
+Child.consume(Parent.new) # We would like this to be an error
+```
+
+However, problems arise when you begin passing around singleton classes. Imagine
+that you write the method below, that accepts arguments of type
+`T.class_of(Parent)`.
+
+```ruby
+class A
+  extend T::Sig
+
+  sig {params(cls: T.class_of(Parent)).void}
+  def self.consume_parent(cls)
+    cls.consume(Parent.make)
+  end
+end
+```
+
+For the call to `cls.consume` in the body of `A.consume_parent`, we are always
+passing an argument whose type is `Parent`. Let's walk through two different
+calls to `A.consume_parent`:
+
+- `A.consume_parent(Parent)`
+  - `Parent` has type `T.class_of(Parent)`, and is acceptable for `cls`
+  - `Parent.consume` accepts values of type `Parent` (via `T.attached_class`)
+- `A.consume_parent(Child)`
+  - `Child` has type `T.class_of(Child)`, which is a subtype of
+    `T.class_of(Parent)` and is acceptable for `cls`
+  - `Child.consume` accepts arguments of type `Child` (via `T.attached_class`),
+    and thus will raise an error when `say_hi` is called on the instance
+    produced by `Parent.make`
+
+As these two cases show, Sorbet can't know whether the body of
+`A.consume_parent` type checks or not without knowledge about what type `cls` is
+at runtime. Because of this problem, `T.attached_class` is only allowed to show
+up in the `returns` part of a signature, and if it does show up in the `params`
+of a signature, you'll get an error:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {params(x: T.attached_class).void}
+            # ^: T.attached_class may only be used in an :out context, like returns
+  def self.problem(x); end
+end
+```

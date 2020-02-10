@@ -144,17 +144,24 @@ private:
                 auto paramVariance = paramData->variance();
 
                 if (!hasCompatibleVariance(polarity, paramVariance)) {
-                    if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
-                        auto flavor =
-                            paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
+                    if (paramData->name == core::Names::Constants::AttachedClass()) {
+                        if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
+                            e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.attached_class",
+                                        ":out", "returns");
+                        }
+                    } else {
+                        if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
+                            auto flavor =
+                                paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
 
-                        auto paramName = paramData->name.data(ctx)->show(ctx);
+                            auto paramName = paramData->name.data(ctx)->show(ctx);
 
-                        e.setHeader("`{}` `{}` was defined as `{}` but is used in an `{}` context", flavor, paramName,
-                                    showVariance(paramVariance), showPolarity(polarity));
+                            e.setHeader("`{}` `{}` was defined as `{}` but is used in an `{}` context", flavor,
+                                        paramName, showVariance(paramVariance), showPolarity(polarity));
 
-                        e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
-                                       showVariance(paramVariance));
+                            e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
+                                           showVariance(paramVariance));
+                        }
                     }
                 }
             },
