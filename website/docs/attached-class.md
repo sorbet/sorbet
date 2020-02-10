@@ -171,8 +171,7 @@ class Parent
   extend T::Sig
 
   sig {params(x: T.attached_class).void}
-            # ^: error: type_template <AttachedClass> was defined as :out but is
-            # used in an :in context
+            # ^: T.attached_class may only be used in an :out context, like returns
   def self.problem(x); end
 end
 ```
