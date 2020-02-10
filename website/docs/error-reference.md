@@ -518,6 +518,12 @@ Some alternatives:
   references to inherit from this class instead of including the original
   module.
 
+## 5058
+
+It's an error to use `T.attached_class` to describe the type of method
+parameters. See the [T.attached_class](attached-class.md) documentation for a
+more thorough description of why this is.
+
 ## 6002
 
 In `# typed: strict` files, Sorbet requires that all instance and class
