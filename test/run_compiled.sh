@@ -31,10 +31,10 @@ export llvmir
 # ensure that the extension is built
 "test/run_sorbet.sh" "$rb"
 
-ruby="./bazel-bin/external/sorbet_ruby/ruby"
+ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
 
 if [ -n "$DEBUG" ]; then
-  bazel build @sorbet_ruby//:ruby --config dbg --config static-libs 2>/dev/null
+  bazel build @sorbet_ruby//:ruby --config dbg 2>/dev/null
   command=("lldb" "--" "${ruby}")
 else
   bazel build @sorbet_ruby//:ruby -c opt 2>/dev/null
