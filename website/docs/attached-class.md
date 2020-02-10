@@ -160,9 +160,11 @@ calls to `A.consume_parent`:
     and thus will raise an error when `say_hi` is called on the instance
     produced by `Parent.make`
 
-Because of this problem, `T.attached_class` is only allowed to show up in the
-`returns` part of a signature, and if it does show up in the `params` of a
-signature, you'll get an error:
+As these two cases show, Sorbet can't know whether the body of
+`A.consume_parent` type checks or not without knowledge about what type `cls` is
+at runtime. Because of this problem, `T.attached_class` is only allowed to show
+up in the `returns` part of a signature, and if it does show up in the `params`
+of a signature, you'll get an error:
 
 ```ruby
 class Parent
