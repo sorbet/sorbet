@@ -148,6 +148,10 @@ class Sorbet::Private::GemLoader
       my_require 'sinatra/multi_route'
       my_require 'sinatra/contrib/version'
     end,
+    'sqreen' => proc do
+      ENV['SQREEN_DISABLE'] = 'true'
+      my_require 'sqreen'
+    end,
     'thin-attach_socket' => proc do
       my_require 'thin'
       my_require 'thin/attach_socket'
