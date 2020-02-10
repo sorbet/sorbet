@@ -19,3 +19,15 @@ class MyEnumerable
   def each(&blk)
   end
 end
+
+module MyCoVariant
+  extend T::Generic
+
+  Elem = type_member(:out)
+end
+
+module MyContraVariant
+  extend T::Generic
+
+  Elem = type_member(:in)
+end
