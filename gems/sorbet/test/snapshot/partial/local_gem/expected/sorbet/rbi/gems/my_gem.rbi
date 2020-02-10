@@ -8,6 +8,7 @@
 #   https://github.com/sorbet/sorbet-typed/new/master?filename=lib/my_gem/all/my_gem.rbi
 #
 # my_gem-0.0.0
+
 class MyGem
   def my_gem_thing; end
   def self.method; end

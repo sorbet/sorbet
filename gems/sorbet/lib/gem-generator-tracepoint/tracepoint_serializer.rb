@@ -55,7 +55,7 @@ module Sorbet::Private
 #   https://github.com/sorbet/sorbet-typed/new/master?filename=lib/#{gem[:gem]}/all/#{gem[:gem]}.rbi
 #
 ")
-            f.write("# #{gem[:gem]}-#{gem[:version]}\n")
+            f.write("# #{gem[:gem]}-#{gem[:version]}\n\n")
             klass_ids.each do |klass_id, class_def|
               klass = class_def.klass
 
