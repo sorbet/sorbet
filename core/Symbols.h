@@ -545,7 +545,6 @@ public:
 
     inline void setSuperClass(SymbolRef claz) {
         ENFORCE(isClassOrModule());
-        ENFORCE(claz != Symbols::StubModule());
         superClassOrRebind = claz;
     }
 

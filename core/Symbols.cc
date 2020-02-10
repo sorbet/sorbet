@@ -112,47 +112,20 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
     return resultType;
 }
 
-namespace {
-bool derivesFromModule(const core::Symbol *what, const GlobalState &gs, SymbolRef sym) {
-    for (SymbolRef a : what->mixins()) {
-        if (a == sym) {
-            return true;
-        }
-    }
-    if (what->superClass().exists()) {
-        ENFORCE(what->superClass().data(gs)->isClassOrModuleClass(), "superclass should be a class");
-        // normally, we disallow converting SymbolData to Symbol*, but with these functions being performanc
-        // sensitive, we use break glass dirrect call of `operator->`. Please don't cargo cult this, as it elides
-        // safety checks that are the reason why SymbolData exists
-        return derivesFromModule(what->superClass().data(gs).operator->(), gs, sym);
-    }
-    return false;
-}
-
-bool derivesFromClass(const core::Symbol *what, const GlobalState &gs, SymbolRef sym) {
-    if (what->superClass().exists()) {
-        ENFORCE(what->superClass().data(gs)->isClassOrModuleClass(), "superclass should be a class");
-        // see comment in derrivesFromModule
-        return sym == what->superClass() || derivesFromClass(what->superClass().data(gs).operator->(), gs, sym);
-    }
-    return false;
-}
-} // namespace
-
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
-        if (sym.data(gs)->isClassOrModuleClass()) {
-            return derivesFromClass(this, gs, sym);
+        for (SymbolRef a : mixins()) {
+            if (a == sym) {
+                return true;
+            }
         }
-        return derivesFromModule(this, gs, sym);
-    }
-
-    for (SymbolRef a : mixins()) {
-        if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
-            return true;
+    } else {
+        for (SymbolRef a : mixins()) {
+            if (a == sym || a.data(gs)->derivesFrom(gs, sym)) {
+                return true;
+            }
         }
     }
-
     if (this->superClass().exists()) {
         return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
