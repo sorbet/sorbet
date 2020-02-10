@@ -94,10 +94,9 @@ Child.make.say_hi # No error now, as Child.make has the type Child
 
 ## `T.attached_class` as an argument?
 
-At this point, it's natural to think about writing methods that accept arguments
-that take values of type `T.attached_class`; you would get more specific type
-information about the arguments when calling from a sub-class, so why not?
-Consider this example:
+Using `T.attached_class` as the type of parameters is an error in sorbet, and
+allowing it would cause soundness issues. To see why, let's take a look at an
+example:
 
 ```ruby
 class Parent
@@ -108,12 +107,25 @@ class Parent
     new
   end
 
-  sig {params(x: T.attached_class).void}
+  sig {params(x: T.attached_class).void} # A bad type definition for `x`
   def self.consume(x)
+    puts "consumed"
   end
 end
 
-class Child < Parent; end
+class Child < Parent
+  extend T::Sig
+
+  sig {void}
+  def say_hi
+    puts "hi"
+  end
+
+  sig {params(x: T.attached_class).void} # A bad type definition for `x`
+  def self.consume(x)
+    x.say_hi
+  end
+end
 
 Parent.consume(Parent.new)
 Child.consume(Parent.new) # We would like this to be an error
@@ -134,16 +146,21 @@ class A
 end
 ```
 
-When we pass in `Parent` as the argument, everything is fine: `Parent.make`
-returns a value of type `Parent`, and `cls.consume` expects an argument of type
-`Parent`. However when we pass `Child` as an argument, problems arise:
-`Parent.make` still makes a value of type `Parent`, and since the only thing we
-know about `cls` is that it is a subtype of `T.class_of(Parent)`, we are forced
-to assume that its `T.attached_class` will be `Parent`. The result of this, is
-that the signature for `Child.consume` is violated, as it expects an argument
-whose type is a subtype of `Child`, and `Parent` doesn't satisfy that condition.
+For the call to `cls.consume` in the body of `A.consume_parent`, we are always
+passing an argument whose type is `Parent`. Let's walk through two different
+calls to `A.consume_parent`:
 
-Because of this situation, `T.attached_class` is only allowed to show up in the
+- `A.consume_parent(Parent)`
+  - `Parent` has type `T.class_of(Parent)`, and is acceptable for `cls`
+  - `Parent.consume` accepts values of type `Parent` (via `T.attached_class`)
+- `A.consume_parent(Child)`
+  - `Child` has type `T.class_of(Child)`, which is a subtype of
+    `T.class_of(Parent)` and is acceptable for `cls`
+  - `Child.consume` accepts arguments of type `Child` (via `T.attached_class`),
+    and thus will raise an error when `say_hi` is called on the instance
+    produced by `Parent.make`
+
+Because of this problem, `T.attached_class` is only allowed to show up in the
 `returns` part of a signature, and if it does show up in the `params` of a
 signature, you'll get an error:
 
