@@ -594,7 +594,11 @@ if __FILE__ == $0
 
   topdir = File.dirname($0) + '/../../..'
 
-  ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.so.2.6'
+  if /darwin/ =~ RUBY_PLATFORM
+    ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.2.6.dylib'
+  else
+    ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.so.2.6'
+  end
 
   ruby_source = topdir + '/bazel-sorbet_llvm/external/sorbet_ruby_unpatched'
 
