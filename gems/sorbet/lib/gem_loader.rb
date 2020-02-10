@@ -596,6 +596,19 @@ class Sorbet::Private::GemLoader
         Selenium::WebDriver::Support,
       ]
     end,
+    'friendly_id' => proc do
+      my_require 'friendly_id'
+      [
+        FriendlyId::History,
+        FriendlyId::Slug,
+        FriendlyId::SimpleI18n,
+        FriendlyId::Reserved,
+        FriendlyId::Scoped,
+        FriendlyId::Slugged,
+        FriendlyId::Finders,
+        FriendlyId::SequentiallySlugged
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
