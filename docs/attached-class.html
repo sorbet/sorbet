@@ -142,7 +142,85 @@ T.reveal_type(Child.make) <span class="hljs-comment"># Child</span>
 
 Child.make.say_hi <span class="hljs-comment"># No error now, as Child.make has the type Child</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/noreturn"><span class="arrow-prev">← </span><span>T.noreturn</span></a><a class="docs-next button" href="/docs/intersection-types"><span>Intersection Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#typing-factory-methods">Typing factory methods</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="tattached_class-as-an-argument"></a><a href="#tattached_class-as-an-argument" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.attached_class</code> as an argument?</h2>
+<p>Using <code>T.attached_class</code> as the type of parameters is an error in sorbet, and
+allowing it would cause soundness issues. To see why, let’s take a look at an
+example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {returns(T.attached_class)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
+    new
+  <span class="hljs-keyword">end</span>
+
+  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void} <span class="hljs-comment"># A bad type definition for `x`</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume</span><span class="hljs-params">(x)</span></span>
+    puts <span class="hljs-string">"consumed"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  extend T::Sig
+
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">say_hi</span></span>
+    puts <span class="hljs-string">"hi"</span>
+  <span class="hljs-keyword">end</span>
+
+  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void} <span class="hljs-comment"># A bad type definition for `x`</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume</span><span class="hljs-params">(x)</span></span>
+    x.say_hi
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+Parent.consume(Parent.new)
+Child.consume(Parent.new) <span class="hljs-comment"># We would like this to be an error</span>
+</code></pre>
+<p>However, problems arise when you begin passing around singleton classes. Imagine
+that you write the method below, that accepts arguments of type
+<code>T.class_of(Parent)</code>.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">cls:</span> T.class_of(Parent)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume_parent</span><span class="hljs-params">(cls)</span></span>
+    cls.consume(Parent.make)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>For the call to <code>cls.consume</code> in the body of <code>A.consume_parent</code>, we are always
+passing an argument whose type is <code>Parent</code>. Let’s walk through two different
+calls to <code>A.consume_parent</code>:</p>
+<ul>
+<li><code>A.consume_parent(Parent)</code>
+<ul>
+<li><code>Parent</code> has type <code>T.class_of(Parent)</code>, and is acceptable for <code>cls</code></li>
+<li><code>Parent.consume</code> accepts values of type <code>Parent</code> (via <code>T.attached_class</code>)</li>
+</ul></li>
+<li><code>A.consume_parent(Child)</code>
+<ul>
+<li><code>Child</code> has type <code>T.class_of(Child)</code>, which is a subtype of
+<code>T.class_of(Parent)</code> and is acceptable for <code>cls</code></li>
+<li><code>Child.consume</code> accepts arguments of type <code>Child</code> (via <code>T.attached_class</code>),
+and thus will raise an error when <code>say_hi</code> is called on the instance
+produced by <code>Parent.make</code></li>
+</ul></li>
+</ul>
+<p>As these two cases show, Sorbet can’t know whether the body of
+<code>A.consume_parent</code> type checks or not without knowledge about what type <code>cls</code> is
+at runtime. Because of this problem, <code>T.attached_class</code> is only allowed to show
+up in the <code>returns</code> part of a signature, and if it does show up in the <code>params</code>
+of a signature, you’ll get an error:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void}
+            <span class="hljs-comment"># ^: T.attached_class may only be used in an :out context, like returns</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">problem</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/noreturn"><span class="arrow-prev">← </span><span>T.noreturn</span></a><a class="docs-next button" href="/docs/intersection-types"><span>Intersection Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#typing-factory-methods">Typing factory methods</a></li><li><a href="#tattached_class-as-an-argument"><code>T.attached_class</code> as an argument?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
