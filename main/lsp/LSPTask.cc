@@ -96,6 +96,10 @@ void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
     config.output->write(move(response));
 }
 
+LSPTask::Phase LSPRequestTask::finalPhase() const {
+    return Phase::RUN;
+}
+
 bool LSPRequestTask::cancel(const MessageId &id) {
     if (this->id.equals(id)) {
         // Don't report a latency metric for canceled requests.

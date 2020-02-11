@@ -103,6 +103,9 @@ protected:
 public:
     void run(LSPTypecheckerDelegate &typechecker) override;
 
+    // Requests cannot override this method, as runRequest must be run (and it only runs during the RUN phase).
+    Phase finalPhase() const override;
+
     bool cancel(const MessageId &id) override;
 };
 

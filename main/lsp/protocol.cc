@@ -88,6 +88,10 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 // Merge the counters from all of the worker threads with those stored in
                 // processingQueue.
                 taskQueue->counters = mergeCounters(move(taskQueue->counters));
+                if (taskQueue->terminate) {
+                    // We must have processed an exit notification, or one of the downstream threads exited.
+                    return;
+                }
             }
         }
     });
