@@ -7,10 +7,7 @@ Cannot write metrics file at `foo/bar/metrics2.json`
 No errors! Great job.
 Cannot write metrics file at `baz/metrics3.json`
 ------------------------------
-test/cli/metrics-file/test.rb:10: Error while executing subprocess plugin `test/cli/metrics-file/sorbet/plugin.rb` https://srb.help/3401
-    10 |  delegate :foo, to: :foo
-          ^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+No errors! Great job.
    "name": "ruby_typer.unknown..types.input.files",
    "value": 1
    "name": "ruby_typer.unknown..types.input.files.sigil.true",
