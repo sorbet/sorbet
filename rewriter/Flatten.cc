@@ -350,7 +350,7 @@ public:
         auto md = methods.popScope();
         ENFORCE(md);
         // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-        auto replacement = ast::MK::Symbol(methodDef->loc, methodDef->name);
+        auto replacement = ast::MK::Symbol(methodDef->declLoc, methodDef->name);
         methods.addExpr(*md, move(methodDef));
         return replacement;
     };
