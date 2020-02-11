@@ -6,16 +6,16 @@ pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 
-DEBUG=
+debug=
 if [ "$1" == "-d" ]; then
-  DEBUG=1
+  debug=1
   shift 1
 fi
 
-rb=$1
+rb_file=$1
 shift
 
-if [ -z "$rb" ]; then
+if [ -z "$rb_file" ]; then
   echo "Usage: test/run_compiled.sh [-d] <test_file>"
   echo
   echo "  NOTE: if the 'llvmir' environmenet variable is set, that will be used"
@@ -29,31 +29,37 @@ llvmir="$(mktemp -d)"
 export llvmir
 
 # ensure that the extension is built
-"test/run_sorbet.sh" "$rb"
+"test/run_sorbet.sh" "$rb_file"
 
 ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
 
-if [ -n "$DEBUG" ]; then
-  bazel build @sorbet_ruby//:ruby --config dbg 2>/dev/null
+echo
+info "Building Ruby..."
+
+if [ -n "$debug" ]; then
+  bazel build @sorbet_ruby//:ruby --config dbg
   command=("lldb" "--" "${ruby}")
 else
   bazel build @sorbet_ruby//:ruby -c opt 2>/dev/null
   command=( "${ruby}" )
 fi
 
+# Use force_compile to make patch_require.rb fail if the compiled extension
+# isn't found.
 command=("${command[@]}" \
   "--disable=gems" \
   "--disable=did_you_mean" \
   -I "run/tools" -rpreamble.rb -rpatch_require.rb \
-  -e "require './$rb'" \
+  -e "require './$rb_file'" \
   "$@" \
   )
 
-# Use force_compile to make patch_require.rb fail if the compiled extension
-# isn't found.
-llvmir="$llvmir" force_compile=1 "${command[@]}"
-exit_code=$?
+echo
+info "Running compiled Ruby output..."
+info "├─ llvmir=\"$llvmir\" force_compile=1 ${command[*]}"
 
-popd > /dev/null
-
-exit $exit_code
+if llvmir="$llvmir" force_compile=1 "${command[@]}"; then
+  success "└─ done."
+else
+  fatal "└─ Non-zero exit. See above."
+fi

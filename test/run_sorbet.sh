@@ -6,9 +6,9 @@ pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 
-DEBUG=
+debug=
 if [ "$1" == "-d" ]; then
-  DEBUG=1
+  debug=1
   shift 1
 fi
 
@@ -21,20 +21,17 @@ if [ -z "${llvmir:-}" ]; then
   llvmir=$(mktemp -d)
 fi
 
-attn "Writing output to '$llvmir'"
-
-if [ -n "$DEBUG" ]; then
-  bazel build //main:sorbet --config dbg --config static-libs 2>/dev/null
+echo
+info "Building SorbetLLVM..."
+if [ -n "$debug" ]; then
+  bazel build //main:sorbet --config dbg
 else
-  bazel build //main:sorbet -c opt 2>/dev/null
+  bazel build //main:sorbet -c opt
 fi
 
-if [ -z "$DEBUG" ]; then
-  info "Running sorbet"
-  command=( "./bazel-bin/main/sorbet" )
+if [ -z "$debug" ]; then
+  command=( "bazel-bin/main/sorbet" )
 else
-  info "Running sorbet (under lldb)"
-
   command=( "lldb" "--" "./bazel-bin/main/sorbet" )
 fi
 
@@ -44,9 +41,12 @@ command=( "${command[@]}" \
   "$@"  \
 )
 
-"${command[@]}"
-exit_code=$?
+echo
+info "Running SorbetLLVM to generate LLVM + shared object..."
+info "├─ ${command[*]}"
 
-popd > /dev/null
-
-exit $exit_code
+if "${command[@]}"; then
+  success "└─ successfully generated LLVM output."
+else
+  fatal "└─ compiling to LLVM failed. See above."
+fi

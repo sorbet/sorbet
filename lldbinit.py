@@ -27,11 +27,16 @@ import os
 
 project_root = os.path.dirname(os.path.realpath(__file__))
 
+
 def __lldb_init_module(debugger, internal_dict):
     result = lldb.SBCommandReturnObject()
     ci = debugger.GetCommandInterpreter()
     ci.HandleCommand("command script add -f lldbinit.cmd_rubysourcemap rubysourcemap", result)
-    print("Run 'rubysourcemap' to set up Ruby source maps")
+
+    cyan="\x1b[0;36m"
+    cnone="\x1b[0m"
+
+    print("(lldb) Run %srubysourcemap%s to set up Ruby source maps" % (cyan, cnone))
 
 
 def cmd_rubysourcemap(debugger, command, result, dict):
