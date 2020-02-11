@@ -105,4 +105,8 @@ bool SorbetWorkspaceEditTask::needsMultithreading(const LSPIndexer &index) const
     return !canTakeFastPath(index);
 }
 
+const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
+    return *params;
+}
+
 } // namespace sorbet::realmain::lsp

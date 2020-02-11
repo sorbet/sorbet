@@ -21,6 +21,9 @@ public:
 
     LSPTask::Phase finalPhase() const override;
 
+    // Used in tests only
+    const SorbetWorkspaceEditParams &getParams() const;
+
     void mergeNewer(SorbetWorkspaceEditTask &task);
     void index(LSPIndexer &indexer) override;
     void run(LSPTypecheckerDelegate &typechecker) override;
