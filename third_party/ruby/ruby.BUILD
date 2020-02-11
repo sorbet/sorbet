@@ -19,22 +19,25 @@ build_ruby(
         "--disable-dependency-tracking",
     ],
     copts = [
-        "-U_FORTIFY_SOURCE",
-        "-D_FORTIFY_SOURCE=2",
-        "-Wdate-time",
-        "-g",
-        "-O2",
-        "-fstack-protector-strong",
-        "-Wformat",
-        "-Werror=format-security",
-    ] + select({
-        # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
-        # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
-        "@com_stripe_ruby_typer//tools/config:darwin": [
-            "-Wno-macro-redefined",
-        ],
-        "//conditions:default": [],
-    }),
+                "-U_FORTIFY_SOURCE",
+                "-D_FORTIFY_SOURCE=2",
+                "-Wdate-time",
+                "-g",
+                "-fstack-protector-strong",
+                "-Wformat",
+                "-Werror=format-security",
+            ] + select({
+                # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
+                # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
+                "@com_stripe_ruby_typer//tools/config:darwin": [
+                    "-Wno-macro-redefined",
+                ],
+                "//conditions:default": [],
+            }) +
+            select({
+                "@com_stripe_ruby_typer//tools/config:dbg": [],
+                "//conditions:default": ["-O2"],
+            }),
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:linux": [
             "-Wl,-Bsymbolic-functions",
