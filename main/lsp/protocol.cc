@@ -221,7 +221,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 if (frontTask->finalPhase() == LSPTask::Phase::RUN && epochManager->getStatus().slowPathRunning &&
                     frontTask->canPreempt(indexer)) {
                     absl::Notification finished;
-                    string_view methodStr = convertLSPMethodToString(frontTask->method);
+                    string methodStr = convertLSPMethodToString(frontTask->method);
                     auto preemptTask =
                         make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueueMutex, *taskQueue, indexer);
                     auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
