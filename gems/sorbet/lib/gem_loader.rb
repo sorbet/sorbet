@@ -640,16 +640,20 @@ class Sorbet::Private::GemLoader
 
   def self.require_all_gems
     require 'bundler/setup'
+    require 'bundler/lockfile_parser'
 
+    specs = []
+    lockfile_parser = Bundler::LockfileParser.new(File.read(Bundler.default_lockfile))
     # Do not load gems in Gemfile where require is false
-    deps = Bundler.load.dependencies.reject { |dep| dep.autorequire && dep.autorequire.empty? }
-    specs = deps.flat_map do |dep|
-      begin
-        dep.to_specs
-      rescue Gem::MissingSpecError
-        []
-      end
-    end.to_set
+    dependencies = lockfile_parser.dependencies.reject { |name, dep| dep.autorequire && dep.autorequire.empty? }
+    required_dependency_names = dependencies.values.map(&:name)
+    # Only include the spec for a gem if it's autorequired.
+    lockfile_parser.specs.each do |spec|
+      specs << spec.dependencies if required_dependency_names.include?(spec.name)
+    end
+    specs.flatten!
+    specs.uniq! { |spec| spec.name }
+    specs = specs.to_set
 
     specs.sort_by(&:name).each do |gemspec|
       begin
