@@ -482,37 +482,103 @@ class Sorbet::Private::GemLoader
       my_require 'html_truncator'
     end,
     'actionpack' => proc do
-      my_require 'actionpack'
+      my_require 'action_pack'
+      my_require 'action_controller/railtie'
       [
         ActionController::Base,
-        ActionDispatch::SystemTestCase,
+        ActionController::API,
+        ActionController::Base,
+        ActionController::Metal,
+        ActionController::Middleware,
+        ActionController::Renderer,
+        ActionController::FormBuilder,
+        ActionController::TestCase,
+        ActionController::TemplateAssertions,
+        ActionController::ConditionalGet,
+        ActionController::ContentSecurityPolicy,
+        ActionController::Cookies,
+        ActionController::DataStreaming,
+        ActionController::DefaultHeaders,
+        ActionController::EtagWithTemplateDigest,
+        ActionController::EtagWithFlash,
+        ActionController::FeaturePolicy,
+        ActionController::Flash,
+        ActionController::ForceSSL,
+        ActionController::Head,
+        ActionController::Helpers,
+        ActionController::HttpAuthentication,
+        ActionController::BasicImplicitRender,
+        ActionController::ImplicitRender,
+        ActionController::Instrumentation,
+        ActionController::Logging,
+        ActionController::MimeResponds,
+        ActionController::ParamsWrapper,
+        ActionController::Redirecting,
+        ActionController::Renderers,
+        ActionController::Rendering,
+        ActionController::RequestForgeryProtection,
+        ActionController::Rescue,
+        ActionController::Streaming,
+        ActionController::StrongParameters,
+        ActionController::ParameterEncoding,
+        ActionController::Testing,
+        ActionController::UrlFor,
+        ActionDispatch::SystemTestCase
       ]
     end,
+    'actionview' => proc do
+      my_require 'action_view'
+      my_require 'action_view/railtie'
+      [
+        ActionView::Base,
+        ActionView::TestCase,
+      ]
+    end,
+    'actiontext' => proc do
+      my_require 'action_text'
+      my_require 'action_text/engine'
+    end,
+    'actionmailbox' => proc do
+      my_require 'action_mailbox'
+      my_require 'action_mailbox/engine'
+    end,
+    'actioncable' => proc do
+      my_require 'action_cable'
+      my_require 'action_cable/engine'
+    end,
     'actionmailer' => proc do
-      my_require 'actionmailer'
+      my_require 'action_mailer'
+      my_require 'action_mailer/railtie'
       [
         ActionMailer::Base,
         ActionMailer::MessageDelivery,
       ]
     end,
     'activejob' => proc do
-      my_require 'activejob'
+      my_require 'active_job'
+      my_require 'active_job/railtie'
       [
         ActiveJob::Base,
       ]
     end,
+    'activemodel' => proc do
+      my_require 'active_model'
+      my_require 'active_model/railtie'
+    end,
+    'activesupport' => proc do
+      my_require 'active_support'
+    end,
     'activerecord' => proc do
-      my_require 'activerecord'
+      my_require 'active_record'
+      my_require 'active_record/railtie'
       [
         ActiveRecord::Schema,
         ActiveRecord::Migration::Current,
       ]
     end,
-    'actionview' => proc do
-      my_require 'actionview'
-      [
-        ActionView::TestCase,
-      ]
+    'activestorage' => proc do
+      my_require 'active_storage'
+      my_require 'active_storage/engine'
     end,
     'rdoc' => proc do
       my_require 'rdoc'
