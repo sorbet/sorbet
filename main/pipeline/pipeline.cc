@@ -17,6 +17,7 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -31,7 +32,6 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
@@ -676,7 +676,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
-    resolved = flatten::runOne(ctx, move(resolved));
+    resolved = class_flatten::runOne(ctx, move(resolved));
 
     if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
         opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));

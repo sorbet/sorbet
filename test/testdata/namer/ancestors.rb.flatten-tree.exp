@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -36,36 +34,26 @@ begin
     end
   end
   module ::Mixin1<<C Mixin1>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Mixin2<<C Mixin2>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>, ::Mixin1)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <self>.include(::Mixin1)
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin2)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <self>.include(::Mixin2)
     end
   end
   class ::MultipleInclude<<C MultipleInclude>> < (::<todo sym>, ::Mixin2, ::Mixin1)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <self>.include(::Mixin1, ::Mixin2)
     end

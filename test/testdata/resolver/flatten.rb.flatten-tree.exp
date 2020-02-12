@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -27,31 +25,10 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      begin
-        :"foo"
-        :"sfoo"
-        :"food"
-        :"foos"
-        :"sfood"
-        :"sfoos"
-        <emptyTree>
-      end
-    end
-
     def foo(<blk>)
       begin
         :"food"
         :"foos"
-      end
-    end
-
-    def self.sfoo(<blk>)
-      begin
-        :"sfood"
-        :"sfoos"
       end
     end
 
@@ -63,12 +40,27 @@ begin
       <emptyTree>
     end
 
+    def self.sfoo(<blk>)
+      begin
+        :"sfood"
+        :"sfoos"
+      end
+    end
+
     def sfood(<blk>)
       <emptyTree>
     end
 
     def self.sfoos(<blk>)
       <emptyTree>
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        :"foo"
+        :"sfoo"
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -12,41 +10,6 @@ begin
     end
   end
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::T::Sig)
-        <self>.sig() do ||
-          <self>.void()
-        end
-        :"initialize"
-        <self>.sig() do ||
-          <self>.returns(::Integer)
-        end
-        :"v1"
-        <self>.sig() do ||
-          <self>.params({:"v1" => ::Integer}).returns(::Integer)
-        end
-        :"v1="
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        :"v2"
-        <self>.sig() do ||
-          <self>.params({:"v2" => ::String}).returns(::String)
-        end
-        :"v2="
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        :"v3"
-        :"v4="
-        :"v5="
-        <emptyTree>
-      end
-    end
-
     def initialize(<blk>)
       begin
         @v1 = begin
@@ -90,6 +53,39 @@ begin
 
     def v5=(v5, <blk>)
       @v5 = v5
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        <self>.sig() do ||
+          <self>.void()
+        end
+        <self>.sig() do ||
+          <self>.returns(::Integer)
+        end
+        <self>.sig() do ||
+          <self>.params({:"v1" => ::Integer}).returns(::Integer)
+        end
+        <self>.sig() do ||
+          <self>.returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.params({:"v2" => ::String}).returns(::String)
+        end
+        <self>.sig() do ||
+          <self>.returns(::String)
+        end
+        <self>.extend(::T::Sig)
+        :"initialize"
+        :"v1"
+        :"v1="
+        :"v2"
+        :"v2="
+        :"v3"
+        :"v4="
+        :"v5="
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

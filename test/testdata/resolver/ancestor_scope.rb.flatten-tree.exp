@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -33,15 +31,11 @@ begin
     end
   end
   class ::Other<<C Other>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         begin
@@ -61,15 +55,11 @@ begin
     end
   end
   module ::Test::Mixin<<C Mixin>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   module ::Test::Other<<C Other>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       <emptyTree>
     end

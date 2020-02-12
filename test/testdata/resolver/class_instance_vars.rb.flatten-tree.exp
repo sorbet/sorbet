@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
@@ -33,20 +31,6 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      begin
-        :"initialize"
-        @@class_var = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.let("hi", String)
-        end
-        :"hi"
-        <emptyTree>
-      end
-    end
-
     def initialize(<blk>)
       begin
         @ivar = begin
@@ -66,10 +50,20 @@ begin
         @ivar2
       end
     end
+
+    def self.<static-init>(<blk>)
+      begin
+        :"initialize"
+        @@class_var = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::String)
+          T.let("hi", String)
+        end
+        :"hi"
+        <emptyTree>
+      end
+    end
   end
   module ::Mixin<<C Mixin>> < ()
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       begin
         @@mixin_cvar = begin
@@ -82,7 +76,14 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    :"<static-init>"
+    def child_method(<blk>)
+      begin
+        @@class_var
+        @@mixin_cvar
+        @ivar2
+        @undefinedivar
+      end
+    end
 
     def self.<static-init>(<blk>)
       begin
@@ -94,19 +95,8 @@ begin
         <emptyTree>
       end
     end
-
-    def child_method(<blk>)
-      begin
-        @@class_var
-        @@mixin_cvar
-        @ivar2
-        @undefinedivar
-      end
-    end
   end
   class ::Child1<<C Child1>> < (::Alias)
-    :"<static-init>"
-
     def self.<static-init>(<blk>)
       @@class_var
     end

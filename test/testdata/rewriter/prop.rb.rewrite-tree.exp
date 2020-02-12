@@ -1,8 +1,62 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def main<<C <todo sym>>>(&<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2=("b"))
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().default())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_nilable())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().type())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().object())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of_explicit())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_array())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().hash_of())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const_explicit())
+      <emptyTree>::<C AdvancedODM>.new().const_explicit=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const())
+      <emptyTree>::<C AdvancedODM>.new().const=("b")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().no_class_arg())
+      <emptyTree>::<C AdvancedODM>.new().no_class_arg=(["b"])
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().enum_prop())
+      <emptyTree>::<C AdvancedODM>.new().enum_prop=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_!())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_lazy_())
+      <emptyTree>::<C AdvancedODM>.new().foreign_invalid_()
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().token())
+      <emptyTree>::<C PropHelpers>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().created())
+      <emptyTree>::<C PropHelpers>.new().created=(0.000000)
+      <emptyTree>::<C PropHelpers>.new().created=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().token())
+      <emptyTree>::<C PropHelpers2>.new().token=("tok_token")
+      <emptyTree>::<C PropHelpers2>.new().token=(nil)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().created())
+      <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C ShardingProp>.new().merchant())
+      <emptyTree>::<C ShardingProp>.new().merchant=("hi")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
+      <emptyTree>::<C EncryptedProp>.new().foo=("hello")
+      <emptyTree>::<C EncryptedProp>.new().foo=(nil)
+      <emptyTree>::<C EncryptedProp>.new().bar=("hello")
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset_nilable())
+      <emptyTree>::<C AdvancedODM>.new().ifunset=(nil)
+      <emptyTree>::<C AdvancedODM>.new().ifunset_nilable=(nil)
+    end
+  end
+
   class <emptyTree>::<C NotAODM><<C <todo sym>>> < (::<todo sym>)
     def self.prop<<C <todo sym>>>(*args, &<blk>)
       <emptyTree>
     end
+
+    :"prop"
 
     <self>.prop()
 
@@ -26,8 +80,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C SomeODM><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
     end
@@ -59,6 +111,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo2=<<C <todo sym>>>(arg0, &<blk>)
       <emptyTree>::<C T>.cast(nil, <emptyTree>::<C String>)
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"foo"
+
+    :"foo="
+
+    :"foo2"
+
+    :"foo2="
   end
 
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)  end
@@ -144,24 +206,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
     end
 
-    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
-      end
-
-      def array=<<C <todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
-
-      def array<<C <todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
-    end
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::T::Array.[](<emptyTree>::<C String>))
     end
@@ -194,24 +238,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
     end
 
-    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
-      end
-
-      def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
-
-      def array_of_explicit<<C <todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
-    end
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
@@ -228,24 +254,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
-    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
-      end
-
-      def t_array=<<C <todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
-      end
-
-      def t_array<<C <todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
-      end
-    end
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
     end
@@ -260,24 +268,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def hash_of=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
-    end
-
-    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
-      end
-
-      def hash_of=<<C <todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
-      end
-
-      def hash_of<<C <todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
-      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -302,24 +292,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def no_class_arg<<C <todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
-    end
-
-    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
-      end
-
-      def no_class_arg=<<C <todo sym>>>(arg0, &<blk>)
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
-
-      def no_class_arg<<C <todo sym>>>(&<blk>)
-        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
-      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -489,6 +461,200 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def ifunset_nilable=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
+
+    :"default"
+
+    :"default="
+
+    :"t_nilable"
+
+    :"t_nilable="
+
+    :"type"
+
+    :"type="
+
+    :"object"
+
+    :"object="
+
+    :"array"
+
+    :"array="
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      :"array="
+
+      :"array"
+    end
+
+    :"array_of"
+
+    :"array_of="
+
+    :"array_of_explicit"
+
+    :"array_of_explicit="
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array_of_explicit<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      :"array_of_explicit="
+
+      :"array_of_explicit"
+    end
+
+    :"t_array"
+
+    :"t_array="
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
+      end
+
+      :"t_array="
+
+      :"t_array"
+    end
+
+    :"hash_of"
+
+    :"hash_of="
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      :"hash_of="
+
+      :"hash_of"
+    end
+
+    :"const_explicit"
+
+    :"const"
+
+    :"no_class_arg"
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def no_class_arg=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<C Array>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def no_class_arg<<C <todo sym>>>(&<blk>)
+        ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      :"no_class_arg="
+
+      :"no_class_arg"
+    end
+
+    :"enum_prop"
+
+    :"foreign"
+
+    :"foreign="
+
+    :"foreign_"
+
+    :"foreign_!"
+
+    :"foreign_lazy"
+
+    :"foreign_lazy="
+
+    :"foreign_lazy_"
+
+    :"foreign_lazy_!"
+
+    :"foreign_proc"
+
+    :"foreign_proc="
+
+    :"foreign_proc_"
+
+    :"foreign_proc_!"
+
+    :"foreign_invalid"
+
+    :"foreign_invalid="
+
+    :"foreign_invalid_"
+
+    :"foreign_invalid_!"
+
+    :"ifunset"
+
+    :"ifunset="
+
+    :"ifunset_nilable"
+
+    :"ifunset_nilable="
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
@@ -523,6 +689,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def created=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
+
+    :"token"
+
+    :"token="
+
+    :"created"
+
+    :"created="
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
@@ -549,6 +723,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def created<<C <todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
+
+    :"token"
+
+    :"token="
+
+    :"created"
   end
 
   class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
@@ -559,6 +739,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def merchant<<C <todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
+
+    :"merchant"
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
@@ -609,57 +791,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def encrypted_bar<<C <todo sym>>>(&<blk>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
+
+    :"foo"
+
+    :"encrypted_foo"
+
+    :"foo="
+
+    :"encrypted_foo="
+
+    :"bar"
+
+    :"encrypted_bar"
   end
 
-  def main<<C <todo sym>>>(&<blk>)
-    begin
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo=("b"))
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C SomeODM>.new().foo2=("b"))
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().default())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_nilable())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().type())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().object())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().array_of_explicit())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().t_array())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().hash_of())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const_explicit())
-      <emptyTree>::<C AdvancedODM>.new().const_explicit=("b")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().const())
-      <emptyTree>::<C AdvancedODM>.new().const=("b")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().no_class_arg())
-      <emptyTree>::<C AdvancedODM>.new().no_class_arg=(["b"])
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().enum_prop())
-      <emptyTree>::<C AdvancedODM>.new().enum_prop=("hello")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_!())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_lazy_())
-      <emptyTree>::<C AdvancedODM>.new().foreign_invalid_()
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().token())
-      <emptyTree>::<C PropHelpers>.new().token=("tok_token")
-      <emptyTree>::<C PropHelpers>.new().token=(nil)
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().created())
-      <emptyTree>::<C PropHelpers>.new().created=(0.000000)
-      <emptyTree>::<C PropHelpers>.new().created=(nil)
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().token())
-      <emptyTree>::<C PropHelpers2>.new().token=("tok_token")
-      <emptyTree>::<C PropHelpers2>.new().token=(nil)
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers2>.new().created())
-      <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C ShardingProp>.new().merchant())
-      <emptyTree>::<C ShardingProp>.new().merchant=("hi")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
-      <emptyTree>::<C EncryptedProp>.new().foo=("hello")
-      <emptyTree>::<C EncryptedProp>.new().foo=(nil)
-      <emptyTree>::<C EncryptedProp>.new().bar=("hello")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset_nilable())
-      <emptyTree>::<C AdvancedODM>.new().ifunset=(nil)
-      <emptyTree>::<C AdvancedODM>.new().ifunset_nilable=(nil)
-    end
-  end
+  :"main"
 end

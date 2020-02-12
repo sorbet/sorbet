@@ -1,7 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
     <self>.sig() do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
@@ -97,5 +95,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def i=<<C <todo sym>>>(i, &<blk>)
       @i = i
     end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    :"a"
+
+    :"a="
+
+    :"b"
+
+    :"c"
+
+    :"b="
+
+    :"c="
+
+    :"d"
+
+    :"e"
+
+    :"f"
+
+    :"g="
+
+    :"h="
+
+    :"i="
   end
 end

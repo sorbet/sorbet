@@ -23,6 +23,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
     end
+
+    :"initialize"
+
+    :"foo"
+
+    :"foo="
   end
 
   <emptyTree>::<C Normal>.new()

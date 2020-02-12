@@ -12,6 +12,7 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/formatting.h"
@@ -20,7 +21,6 @@
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
-#include "flattener/flatten.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
@@ -346,7 +346,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
         handler.drainErrors();
 
-        resolvedTree = flatten::runOne(ctx, move(resolvedTree));
+        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
         handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
         handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });

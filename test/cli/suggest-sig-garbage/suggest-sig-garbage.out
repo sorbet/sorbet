@@ -35,32 +35,6 @@ suggest-sig-garbage.rb:147: Malformed signature: `generated` is invalid in this 
      147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-suggest-sig-garbage.rb:124: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
-     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    suggest-sig-garbage.rb:124: Replaced with `inherited`
-     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-                                                                         ^^^^^^^^^
-
-
-suggest-sig-garbage.rb:135: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
-     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
-     136 |  returns(T.untyped).
-     137 |  generated
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L128: Did you mean: `Class#inherited`?
-     128 |  def inherited(arg0); end
-            ^^^^^^^^^^^^^^^^^^^
-
-suggest-sig-garbage.rb:147: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
-     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    suggest-sig-garbage.rb:147: Replaced with `inherited`
-     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-                                                                         ^^^^^^^^^
-
-
 suggest-sig-garbage.rb:5: This function does not have a `sig` https://srb.help/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
@@ -251,6 +225,32 @@ suggest-sig-garbage.rb:152: This function does not have a `sig` https://srb.help
      152 |def recur
           ^
 
+suggest-sig-garbage.rb:124: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig-garbage.rb:124: Replaced with `inherited`
+     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+                                                                         ^^^^^^^^^
+
+
+suggest-sig-garbage.rb:135: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
+     135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
+     136 |  returns(T.untyped).
+     137 |  generated
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L128: Did you mean: `Class#inherited`?
+     128 |  def inherited(arg0); end
+            ^^^^^^^^^^^^^^^^^^^
+
+suggest-sig-garbage.rb:147: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
+     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-sig-garbage.rb:147: Replaced with `inherited`
+     147 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
+                                                                         ^^^^^^^^^
+
+
 suggest-sig-garbage.rb:41: This function does not have a `sig` https://srb.help/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
@@ -285,14 +285,6 @@ suggest-sig-garbage.rb:102: This function does not have a `sig` https://srb.help
      102 |Foo = Struct.new(:a, :b)
                                 ^
 
-suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
-     108 |  sig {params(merchant: Merchant).void}
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
-     108 |  sig {params(merchant: Merchant).void}
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 suggest-sig-garbage.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -306,6 +298,14 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` https://srb.help
 `
      105 |  class Merchant
           ^
+
+suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
+     108 |  sig {params(merchant: Merchant).void}
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
+     108 |  sig {params(merchant: Merchant).void}
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 42
 
 --------------------------------------------------------------------------

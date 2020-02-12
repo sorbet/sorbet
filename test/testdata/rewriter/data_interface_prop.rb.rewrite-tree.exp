@@ -1,4 +1,13 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def test<<C <todo sym>>>(&<blk>)
+    begin
+      di = <emptyTree>::<C SomeDataInterface>.new()
+      <emptyTree>::<C T>.reveal_type(di.foo())
+      <emptyTree>::<C T>.reveal_type(di.foo_())
+      <emptyTree>::<C T>.reveal_type(di.foo_!())
+    end
+  end
+
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)  end
 
   class <emptyTree>::<C SomeDataInterface><<C <todo sym>>> < (::<todo sym>)
@@ -33,14 +42,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo_!<<C <todo sym>>>(*opts:, &<blk>)
       ::T.unsafe(nil)
     end
+
+    :"foo"
+
+    :"foo="
+
+    :"foo_"
+
+    :"foo_!"
   end
 
-  def test<<C <todo sym>>>(&<blk>)
-    begin
-      di = <emptyTree>::<C SomeDataInterface>.new()
-      <emptyTree>::<C T>.reveal_type(di.foo())
-      <emptyTree>::<C T>.reveal_type(di.foo_())
-      <emptyTree>::<C T>.reveal_type(di.foo_!())
-    end
-  end
+  :"test"
 end

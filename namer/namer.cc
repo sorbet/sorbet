@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
+#include "class_flatten/class_flatten.h"
 #include "common/Timer.h"
 #include "common/typecase.h"
 #include "core/Context.h"
@@ -11,7 +12,6 @@
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
-#include "flattener/flatten.h"
 
 using namespace std;
 

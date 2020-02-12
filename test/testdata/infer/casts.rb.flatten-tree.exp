@@ -1,8 +1,6 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    :"<static-init>"
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
@@ -12,16 +10,6 @@ begin
     end
   end
   class ::TestCasts<<C TestCasts>> < (::<todo sym>)
-    :"<static-init>"
-
-    def self.<static-init>(<blk>)
-      begin
-        :"untyped"
-        :"test_casts"
-        <emptyTree>
-      end
-    end
-
     def untyped(<blk>)
       <emptyTree>
     end
@@ -63,6 +51,14 @@ begin
         end
         s.+("hi")
         s.+(3)
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        :"untyped"
+        :"test_casts"
+        <emptyTree>
       end
     end
   end

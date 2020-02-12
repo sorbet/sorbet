@@ -31,6 +31,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def bar=<<C <todo sym>>>(arg0, &<blk>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
+
+    :"foo"
+
+    :"foo="
+
+    :"bar"
+
+    :"bar="
   end
 
   <emptyTree>::<C Inexact>.new()

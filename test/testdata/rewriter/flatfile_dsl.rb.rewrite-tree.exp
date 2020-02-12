@@ -15,17 +15,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.field<<C <todo sym>>>(*_, &<blk>)
       <emptyTree>
     end
+
+    :"flatfile"
+
+    :"from"
+
+    :"pattern"
+
+    :"field"
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
-    <self>.flatfile() do ||
-      begin
-        <self>.from(<emptyTree>::<C Range>.new(1, 2), :"foo")
-        <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
-        <self>.field(:"baz")
-      end
-    end
-
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(::T.untyped())
     end
@@ -73,6 +73,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def baz=<<C <todo sym>>>(arg0, &<blk>)
       nil
     end
+
+    <self>.flatfile() do ||
+      begin
+        <self>.from(<emptyTree>::<C Range>.new(1, 2), :"foo")
+        <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
+        <self>.field(:"baz")
+      end
+    end
+
+    :"foo"
+
+    :"foo="
+
+    :"bar"
+
+    :"bar="
+
+    :"baz"
+
+    :"baz="
   end
 
   t = <emptyTree>::<C Flatfile>.new()
