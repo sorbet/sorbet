@@ -357,10 +357,16 @@ public:
         // if we get a MethodData back, then we need to move this and replace it
         auto md = methods.popScope();
         ENFORCE(md);
-        // we'll replace MethodDefs with the symbol that corresponds to the name of the method
-        auto replacement = ast::MK::Symbol(methodDef->declLoc, methodDef->name);
+
+        // Stash some stuff from the methodDef before we move it
+        auto loc = methodDef->declLoc;
+        auto name = methodDef->name;
+        auto keepName = methodDef->isSelf() ? core::Names::keepSelfDef() : core::Names::keepDef();
+
         methods.addExpr(*md, move(methodDef));
-        return replacement;
+
+        return ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
+                              ast::MK::Self(loc), ast::MK::Symbol(loc, name));
     };
 
     unique_ptr<ast::Expression> addTopLevelMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {
