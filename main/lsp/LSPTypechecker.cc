@@ -239,10 +239,13 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        for (const auto &tree : indexed) {
-            // Note: indexed entries for payload files don't have any contents.
-            if (tree.tree && !updatedFiles.contains(tree.file.id())) {
-                indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+        {
+            Timer timeit(logger, "slow_path.copy_indexes");
+            for (const auto &tree : indexed) {
+                // Note: indexed entries for payload files don't have any contents.
+                if (tree.tree && !updatedFiles.contains(tree.file.id())) {
+                    indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                }
             }
         }
         if (epochManager.wasTypecheckingCanceled()) {
