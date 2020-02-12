@@ -236,17 +236,25 @@ class FlattenWalk {
             nestedClassBodies.emplace_back();
         }
 
-        // this vector contains all the possible RHS target locations that we might move to
+        // This vector contains all the possible RHS_store target locations that we might move to.
+        // Both vectors are indexed by staticLevel.
         vector<ast::ClassDef::RHS_store *> targets;
-        vector<vector<unique_ptr<ast::Expression>>> expressionsToBePutInTargets;
-        // 0 and 1 both go into the class itself, but we want to make sure we do it while preserving
-        // order
+
+        // staticLevel 0 (no surrounding class << self) just goes into the top-level rhs.
+        // do it while preserving order
         targets.emplace_back(&rhs);
+
+        // staticLevel 1 (one surrounding class << self) also goes into the top-level rhs, but we want to interleave
+        // them in source order so there's some special handling. nullptr here ensures that this fails early.
         targets.emplace_back(nullptr);
-        // 2 and up go into the to-be-created `class << self` blocks
-        for (auto &tgt : nestedClassBodies) {
-            targets.emplace_back(&tgt);
+
+        // staticLevel 2 and up go into the to-be-created `class << self` blocks
+        for (auto &target : nestedClassBodies) {
+            targets.emplace_back(&target);
         }
+
+        vector<vector<unique_ptr<ast::Expression>>> expressionsToBePutInTargets;
+        // This makes each element be a length-0 vector
         expressionsToBePutInTargets.resize(targets.size());
 
         // move everything to its appropriate target
@@ -254,18 +262,18 @@ class FlattenWalk {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
                 methodDef->setIsSelf(expr.staticLevel > 0);
             }
-            auto lvl = expr.staticLevel == 1 ? 0 : expr.staticLevel;
-            expressionsToBePutInTargets[lvl].emplace_back(std::move(expr.expr));
+            auto targetLevel = expr.staticLevel == 1 ? 0 : expr.staticLevel;
+            expressionsToBePutInTargets[targetLevel].emplace_back(std::move(expr.expr));
         }
 
-        {
-            int idx = -1;
-            for (auto &target : targets) {
-                idx += 1;
-                if (idx != 1) {
-                    target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[idx].begin()),
-                                   make_move_iterator(expressionsToBePutInTargets[idx].end()));
-                }
+        int targetLevel = -1;
+        for (auto &target : targets) {
+            targetLevel += 1;
+            if (targetLevel == 1) {
+                ENFORCE(expressionsToBePutInTargets[targetLevel].empty());
+            } else {
+                target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[targetLevel].begin()),
+                               make_move_iterator(expressionsToBePutInTargets[targetLevel].end()));
             }
         }
 
