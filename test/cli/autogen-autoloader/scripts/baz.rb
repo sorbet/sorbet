@@ -4,5 +4,5 @@
 require 'script_gem'
 
 module Foo::Baz
-  'x'
+  p 'x'
 end

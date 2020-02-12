@@ -6,12 +6,12 @@ require 'my_gem'
 module Foo
   module Bar
     class Quuz
-      'x'
+      p 'x'
     end
 
     class Jazz < Quuz
       class JazBaz
-        'x'
+        p 'x'
         require 'in_class'
 
         def honk
@@ -23,5 +23,5 @@ module Foo
 end
 
 module DontInclude
-  1
+  p 1
 end

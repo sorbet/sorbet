@@ -3,13 +3,13 @@
 module Yabba
   module Dabba
     class Quuz < AWS::String
-      'x'
+      p 'x'
     end
 
     class Jazz
       class JazBaz
         VALUE = 1
-        'x'
+        p 'x'
       end
     end
   end

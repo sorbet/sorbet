@@ -1,3 +1,3 @@
 module Foo
-  1
+  p 1
 end
