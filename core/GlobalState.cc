@@ -178,6 +178,7 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
     ENFORCE(id == Symbols::Configatron_RootStore());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
+    id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::void_());
     id = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE(id == Symbols::typeAliasTemp());

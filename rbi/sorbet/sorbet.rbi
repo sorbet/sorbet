@@ -215,7 +215,7 @@ end
 ::ENV = T.let(T.unsafe(nil), Sorbet::Private::Static::ENVClass)
 
 # The magic type that sig {void} returns
-module Sorbet::Private::Static::Void
+class Sorbet::Private::Static::Void
 end
 
 class Sorbet::Private::Static::ReturnTypeInference
