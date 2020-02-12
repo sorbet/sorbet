@@ -18,7 +18,7 @@ vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<uniqu
 
 DocumentHighlightTask::DocumentHighlightTask(const LSPConfiguration &config, MessageId id,
                                              unique_ptr<TextDocumentPositionParams> params)
-    : LSPRequestTask(config, move(id)), params(move(params)) {}
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentDocumentHighlight), params(move(params)) {}
 
 unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentHighlight);

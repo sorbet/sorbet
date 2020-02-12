@@ -221,7 +221,7 @@ TEST_P(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                           "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
     // Should block ^ and V from merging.
-    requests.push_back(workspaceSymbol("foo.rb"));
+    requests.push_back(hover("foo.rb", 1, 1));
     requests.push_back(changeFile("foo.rb",
                                   "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                   "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",

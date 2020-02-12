@@ -1,20 +1,118 @@
 #include "main/lsp/LSPTask.h"
+#include "absl/synchronization/notification.h"
 #include "common/sort.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/lsp.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
 
-LSPTask::LSPTask(const LSPConfiguration &config, bool enableMultithreading)
-    : config(config), enableMultithreading(enableMultithreading) {}
+LSPTask::LSPTask(const LSPConfiguration &config, LSPMethod method) : config(config), method(method) {}
 
-LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, bool enableMultithreading)
-    : LSPTask(config, enableMultithreading), id(move(id)) {}
+LSPTask::~LSPTask() {
+    if (!latencyTimer) {
+        return;
+    }
+
+    // The code below creates a new timer for this specific request that immediately gets reported.
+    switch (method) {
+        case LSPMethod::$CancelRequest:
+        case LSPMethod::Exit:
+        case LSPMethod::PAUSE:
+        case LSPMethod::RESUME:
+        case LSPMethod::Shutdown:
+        case LSPMethod::SorbetError:
+        case LSPMethod::SorbetFence:
+        case LSPMethod::SorbetShowOperation:
+        case LSPMethod::SorbetTypecheckRunInfo:
+        case LSPMethod::TextDocumentPublishDiagnostics:
+        case LSPMethod::WindowShowMessage:
+            // Not a request we care about. Bucket it in case it gets large.
+            latencyTimer->fork("latency.other");
+            break;
+        case LSPMethod::Initialize:
+            latencyTimer->fork("latency.initialize");
+            break;
+        case LSPMethod::Initialized:
+            latencyTimer->fork("latency.initialized");
+            break;
+        case LSPMethod::SorbetReadFile:
+            latencyTimer->fork("latency.sorbetreadfile");
+            break;
+        case LSPMethod::SorbetWatchmanFileChange:
+        case LSPMethod::SorbetWorkspaceEdit:
+        case LSPMethod::TextDocumentDidChange:
+        case LSPMethod::TextDocumentDidClose:
+        case LSPMethod::TextDocumentDidOpen:
+            latencyTimer->fork("latency.fileedit");
+            break;
+        case LSPMethod::TextDocumentCodeAction:
+            latencyTimer->fork("latency.codeaction");
+            break;
+        case LSPMethod::TextDocumentCompletion:
+            latencyTimer->fork("latency.completion");
+            break;
+        case LSPMethod::TextDocumentDefinition:
+            latencyTimer->fork("latency.definition");
+            break;
+        case LSPMethod::TextDocumentDocumentHighlight:
+            latencyTimer->fork("latency.documenthighlight");
+            break;
+        case LSPMethod::TextDocumentDocumentSymbol:
+            latencyTimer->fork("latency.documentsymbol");
+            break;
+        case LSPMethod::TextDocumentHover:
+            latencyTimer->fork("latency.hover");
+            break;
+        case LSPMethod::TextDocumentReferences:
+            latencyTimer->fork("latency.references");
+            break;
+        case LSPMethod::TextDocumentSignatureHelp:
+            latencyTimer->fork("latency.signaturehelp");
+            break;
+        case LSPMethod::TextDocumentTypeDefinition:
+            latencyTimer->fork("latency.typedefinition");
+            break;
+        case LSPMethod::WorkspaceSymbol:
+            latencyTimer->fork("latency.workspacesymbol");
+            break;
+    }
+}
+
+LSPTask::Phase LSPTask::finalPhase() const {
+    return Phase::RUN;
+}
+
+void LSPTask::preprocess(LSPPreprocessor &preprocessor) {}
+
+void LSPTask::index(LSPIndexer &indexer) {}
+
+LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method)
+    : LSPTask(config, method), id(move(id)) {}
 
 void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
     auto response = runRequest(typechecker);
     ENFORCE(response != nullptr);
     config.output->write(move(response));
+}
+
+LSPTask::Phase LSPRequestTask::finalPhase() const {
+    return Phase::RUN;
+}
+
+bool LSPRequestTask::cancel(const MessageId &id) {
+    if (this->id.equals(id)) {
+        // Don't report a latency metric for canceled requests.
+        if (latencyTimer) {
+            latencyTimer->cancel();
+        }
+        auto response = make_unique<ResponseMessage>("2.0", id, method);
+        prodCounterInc("lsp.messages.canceled");
+        response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
+        config.output->write(move(response));
+        return true;
+    }
+    return false;
 }
 
 LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_view uri, const Position &pos,
@@ -69,6 +167,23 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
     }
 
     return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
+}
+
+bool LSPTask::needsMultithreading(const LSPIndexer &indexer) const {
+    return false;
+}
+
+bool LSPTask::isDelayable() const {
+    return false;
+}
+
+bool LSPTask::cancel(const MessageId &id) {
+    return false;
+}
+
+bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
+    // A task that can preempt cannot be multithreaded.
+    return !needsMultithreading(indexer);
 }
 
 vector<unique_ptr<Location>>
@@ -126,6 +241,43 @@ void LSPTask::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
     if (location != nullptr) {
         locs.push_back(std::move(location));
     }
+}
+
+LSPQueuePreemptionTask::LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished,
+                                               absl::Mutex &taskQueueMutex, TaskQueueState &taskQueue,
+                                               LSPIndexer &indexer)
+    : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueueMutex(taskQueueMutex), taskQueue(taskQueue),
+      indexer(indexer) {}
+
+void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
+    for (;;) {
+        unique_ptr<LSPTask> task;
+        {
+            absl::MutexLock lck(&taskQueueMutex);
+            if (taskQueue.pendingTasks.empty() || !taskQueue.pendingTasks.front()->canPreempt(indexer)) {
+                break;
+            }
+            task = move(taskQueue.pendingTasks.front());
+            taskQueue.pendingTasks.pop_front();
+
+            // Index while holding lock to prevent races with processing thread.
+            task->index(indexer);
+        }
+        prodCounterInc("lsp.messages.received");
+
+        if (task->finalPhase() == Phase::INDEX) {
+            continue;
+        }
+        task->run(tc);
+    }
+    finished.Notify();
+}
+
+LSPDangerousTypecheckerTask::LSPDangerousTypecheckerTask(const LSPConfiguration &config, LSPMethod method)
+    : LSPTask(config, method) {}
+
+void LSPDangerousTypecheckerTask::run(LSPTypecheckerDelegate &tc) {
+    Exception::raise("Bug: Dangerous typechecker tasks are expected to run specially");
 }
 
 } // namespace sorbet::realmain::lsp

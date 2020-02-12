@@ -2,7 +2,6 @@
 #define RUBY_TYPER_LSP_SHOWOPERATION_H
 
 #include <string>
-#include <string_view>
 
 namespace sorbet::realmain::lsp {
 class LSPOutput;

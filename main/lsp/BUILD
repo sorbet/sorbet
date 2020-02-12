@@ -4,6 +4,8 @@ cc_library(
         "*.cc",
         "requests/*.h",
         "requests/*.cc",
+        "notifications/*.h",
+        "notifications/*.cc",
         "watchman/*.cc",
     ]) + [
         "lsp_messages_gen.cc",
@@ -14,6 +16,7 @@ cc_library(
         "LocalVarSaver.h",
         "ShowOperation.h",
         "lsp_messages_gen_helpers.h",
+        "LSPIndexer.h",
         "LSPTask.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",

@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "core/core.h"
+#include "main/lsp/LSPIndexer.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LSPTypecheckerCoordinator.h"
@@ -20,47 +21,44 @@ namespace sorbet::realmain::lsp {
 
 class LSPInput;
 class LSPConfiguration;
+class LSPQueuePreemptionTask;
 
 class LSPLoop {
     friend class LSPWrapper;
+    friend class LSPQueuePreemptionTask;
 
     /** Encapsulates the active configuration for the language server. */
-    std::shared_ptr<const LSPConfiguration> config;
+    const std::shared_ptr<const LSPConfiguration> config;
+    /** Protects outgoingQueue. */
+    const std::shared_ptr<absl::Mutex> taskQueueMutex;
+    /** Contains the output of LSPPreprocessor -- messages that have been converted into tasks. */
+    const std::shared_ptr<TaskQueueState> taskQueue GUARDED_BY(taskQueueMutex);
+    const std::shared_ptr<core::lsp::TypecheckEpochManager> epochManager;
+
     /** The LSP preprocessor standardizes incoming messages and combines edits. */
     LSPPreprocessor preprocessor;
     /** The LSP typechecker coordinator typechecks file updates and runs queries. */
     LSPTypecheckerCoordinator typecheckerCoord;
+    /** The LSP indexer indexes incoming edits and makes fast/slow path decisions. */
+    LSPIndexer indexer;
+    /** A WorkerPool with 0 workers. */
+    std::unique_ptr<WorkerPool> emptyWorkers;
     /**
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
     std::thread::id mainThreadId;
-    /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state! We clone
-     * this global state every time we need to perform a slow path typechecking operation. */
-    std::unique_ptr<core::GlobalState> initialGS;
-    /** Contains file hashes for the files stored in `initialGS`. Used to determine if an edit can be typechecked
-     * incrementally. */
-    std::vector<core::FileHash> globalStateHashes;
-    /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
-    LSPFileUpdates pendingTypecheckUpdates;
-    /** Contains globalStateHashes evicted with `pendingTypecheckUpdates`. Used in slow path cancelation logic. */
-    UnorderedMap<int, core::FileHash> pendingTypecheckEvictedStateHashes;
 
-    std::unique_ptr<KeyValueStore> kvstore; // always null for now.
-    /** A WorkerPool with 0 workers. */
-    std::unique_ptr<WorkerPool> emptyWorkers;
-
-    void processRequestInternal(LSPMessage &msg);
+    void runTask(std::unique_ptr<LSPTask> task);
 
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
     void sendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime);
 
-    /** Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
-     * and file hashes. Also handles canceling the running slow path. */
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
+    /** Returns a set of tasks for the given LSPMessage. If said message is an edit, the edits are committed. */
+    std::vector<std::unique_ptr<LSPTask>> commitAndGetTasksForMessage(LSPMessage &msg);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,

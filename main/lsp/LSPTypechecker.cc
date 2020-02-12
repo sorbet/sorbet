@@ -599,62 +599,6 @@ void LSPTypechecker::changeThread() {
     typecheckerThreadId = newId;
 }
 
-vector<core::FileHash> LSPTypechecker::computeFileHashes(const LSPConfiguration &config,
-                                                         const vector<shared_ptr<core::File>> &files,
-                                                         WorkerPool &workers) {
-    Timer timeit(config.logger, "computeFileHashes");
-    vector<core::FileHash> res(files.size());
-    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
-    for (int i = 0; i < files.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
-    }
-
-    auto &logger = *config.logger;
-    logger.debug("Computing state hashes for {} files", files.size());
-
-    res.resize(files.size());
-
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, core::FileHash>> threadResult;
-        int processedByThread = 0;
-        int job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-
-                    if (!files[job]) {
-                        threadResult.emplace_back(job, core::FileHash{});
-                        continue;
-                    }
-                    auto hash = pipeline::computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, move(hash));
-                }
-            }
-        }
-
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    {
-        vector<pair<int, core::FileHash>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    res[a.first] = move(a.second);
-                }
-            }
-        }
-    }
-    return res;
-}
-
 TypecheckRun::TypecheckRun(vector<unique_ptr<core::Error>> errors, vector<core::FileRef> filesTypechecked,
                            LSPFileUpdates updates, bool tookFastPath,
                            std::optional<std::unique_ptr<core::GlobalState>> newGS)

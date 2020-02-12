@@ -101,14 +101,6 @@ class LSPTypechecker final {
     LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 
 public:
-    /**
-     * Computes state hashes for the given set of files. Does not require any typechecker state, so it is a static
-     * method.
-     */
-    static std::vector<core::FileHash> computeFileHashes(const LSPConfiguration &config,
-                                                         const std::vector<std::shared_ptr<core::File>> &files,
-                                                         WorkerPool &workers);
-
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
                    std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager);
     ~LSPTypechecker();
