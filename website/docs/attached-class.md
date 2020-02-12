@@ -131,9 +131,8 @@ Parent.consume(Parent.new)
 Child.consume(Parent.new) # We would like this to be an error
 ```
 
-However, problems arise when you begin passing around singleton classes. Imagine
-that you write the method below, that accepts arguments of type
-`T.class_of(Parent)`.
+Problems arise when you begin passing around singleton classes. Imagine that you
+write the method below, that accepts arguments of type `T.class_of(Parent)`.
 
 ```ruby
 class A
