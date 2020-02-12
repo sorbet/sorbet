@@ -2,7 +2,7 @@
 
 module Yabba::Dabba
   class Bar2
-    'x'
+    p 'x'
   end
 
   class NoBehavior; end
