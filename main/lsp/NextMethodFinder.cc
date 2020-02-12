@@ -36,13 +36,24 @@ unique_ptr<ast::MethodDef> NextMethodFinder::preTransformMethodDef(core::Context
     //   |def foo; end
 
     if (this->result_.exists()) {
-        // We've already found a result after, so current is not the first.
+        // Method defs are not guaranteed to be sorted in order by their declLocs
+        auto &resultLocs = this->result_.data(ctx)->locs();
+        auto maybeResultLoc = absl::c_find_if(resultLocs, inFileOfQuery);
+        ENFORCE(maybeResultLoc != resultLocs.end(), "Must exist, because otherwise it wouldn't have been the result_");
+        auto resultLoc = *maybeResultLoc;
+        if (currentLoc.beginPos() < resultLoc.beginPos()) {
+            // Found a method defined after the query but earlier than previous result: overwrite previous result
+            this->result_ = currentMethod;
+            return methodDef;
+        } else {
+            // We've already found an earlier result, so the current is not the first
+            return methodDef;
+        }
+    } else {
+        // Haven't found a result yet, so this one is the best so far.
+        this->result_ = currentMethod;
         return methodDef;
     }
-
-    this->result_ = currentMethod;
-
-    return methodDef;
 }
 
 const core::SymbolRef NextMethodFinder::result() const {
