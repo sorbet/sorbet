@@ -177,9 +177,8 @@ example:</p>
 Parent.consume(Parent.new)
 Child.consume(Parent.new) <span class="hljs-comment"># We would like this to be an error</span>
 </code></pre>
-<p>However, problems arise when you begin passing around singleton classes. Imagine
-that you write the method below, that accepts arguments of type
-<code>T.class_of(Parent)</code>.</p>
+<p>Problems arise when you begin passing around singleton classes. Imagine that you
+write the method below, that accepts arguments of type <code>T.class_of(Parent)</code>.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
