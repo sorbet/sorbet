@@ -440,30 +440,27 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        if (original->args.size() != 1) {
-            return original;
-        }
-
-        auto method = unwrapLiteralToMethodSymbol(ctx, original, original->args[0].get());
-        if (!method.exists()) {
-            return original;
-        }
-
-        switch (original->fun._id) {
-            case core::Names::private_()._id:
-            case core::Names::privateClassMethod()._id:
-                method.data(ctx)->setPrivate();
-                break;
-            case core::Names::protected_()._id:
-                method.data(ctx)->setProtected();
-                break;
-            case core::Names::public_()._id:
-                method.data(ctx)->setPublic();
-                break;
-            default:
+        if (original->args.size() == 1) {
+            auto method = unwrapLiteralToMethodSymbol(ctx, original, original->args[0].get());
+            if (!method.exists()) {
                 return original;
-        }
+            }
 
+            switch (original->fun._id) {
+                case core::Names::private_()._id:
+                case core::Names::privateClassMethod()._id:
+                    method.data(ctx)->setPrivate();
+                    break;
+                case core::Names::protected_()._id:
+                    method.data(ctx)->setProtected();
+                    break;
+                case core::Names::public_()._id:
+                    method.data(ctx)->setPublic();
+                    break;
+                default:
+                    return original;
+            }
+        }
         return original;
     }
 
@@ -599,7 +596,6 @@ public:
                 }
                 return;
             }
-            return;
         }
     }
 
