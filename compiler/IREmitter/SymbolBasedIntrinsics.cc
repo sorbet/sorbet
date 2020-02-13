@@ -28,6 +28,29 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
 };
 
+// TODO(jez) I copy pasted this from NameBasedIntrinsics.cc for sake of prototyping. DONT COMMIT
+core::SymbolRef removeRoot(core::SymbolRef sym) {
+    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
+        // Root methods end up going on object
+        sym = core::Symbols::Object();
+    }
+    return sym;
+}
+
+core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
+    core::SymbolRef sym;
+    if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
+        sym = classType->symbol;
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ.get())) {
+        sym = appliedType->klass;
+    } else {
+        ENFORCE(false);
+    }
+    sym = removeRoot(sym);
+    ENFORCE(sym.data(gs)->isClassOrModule());
+    return sym;
+}
+
 class CallCMethod : public SymbolBasedIntrinsicMethod {
 protected:
     core::SymbolRef rubyClass;
