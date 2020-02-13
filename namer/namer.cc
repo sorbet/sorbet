@@ -440,45 +440,69 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        core::SymbolRef method;
-        if (original->args.size() == 1) {
-            if (auto mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) {
-                // this handles the `private def foo` case
-                method = mdef->symbol;
-            } else if (auto sym = ast::cast_tree<ast::Literal>(original->args[0].get())) {
-                // this handles the `private :foo` case
-                if (!sym->isSymbol(ctx)) {
-                    return original;
-                }
-                auto name = sym->asSymbol(ctx);
-                auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-                if (original->fun._id == core::Names::privateClassMethod()._id) {
-                    owner = owner.data(ctx)->singletonClass(ctx);
-                }
-                method = ctx.state.lookupMethodSymbol(owner, name);
-                if (method == core::Symbols::noSymbol()) {
-                    return original;
-                }
-            } else {
+        if (original->args.size() != 1) {
+            return original;
+        }
+
+        auto method = unwrapLiteralToMethodSymbol(ctx, original, original->args[0].get());
+        if (!method.exists()) {
+            return original;
+        }
+
+        switch (original->fun._id) {
+            case core::Names::private_()._id:
+            case core::Names::privateClassMethod()._id:
+                method.data(ctx)->setPrivate();
+                break;
+            case core::Names::protected_()._id:
+                method.data(ctx)->setProtected();
+                break;
+            case core::Names::public_()._id:
+                method.data(ctx)->setPublic();
+                break;
+            default:
                 return original;
+        }
+
+        return original;
+    }
+
+    core::SymbolRef unwrapLiteralToMethodSymbol(core::MutableContext ctx, const unique_ptr<ast::Send> &original,
+                                                ast::Expression *expr) {
+        if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
+            // this handles the `private :foo` case
+            if (!sym->isSymbol(ctx)) {
+                return core::Symbols::noSymbol();
+            }
+            auto name = sym->asSymbol(ctx);
+            auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+            if (original->fun._id == core::Names::privateClassMethod()._id) {
+                owner = owner.data(ctx)->singletonClass(ctx);
+            }
+            return ctx.state.lookupMethodSymbol(owner, name);
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            if (send->fun != core::Names::keepDef() && send->fun != core::Names::keepSelfDef()) {
+                return core::Symbols::noSymbol();
             }
 
-            switch (original->fun._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                    method.data(ctx)->setPrivate();
-                    break;
-                case core::Names::protected_()._id:
-                    method.data(ctx)->setProtected();
-                    break;
-                case core::Names::public_()._id:
-                    method.data(ctx)->setPublic();
-                    break;
-                default:
-                    return original;
+            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+            if (recv == nullptr) {
+                return core::Symbols::noSymbol();
             }
+
+            if (recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+                return core::Symbols::noSymbol();
+            }
+
+            if (send->args.size() != 2) {
+                return core::Symbols::noSymbol();
+            }
+
+            return unwrapLiteralToMethodSymbol(ctx, original, send->args[1].get());
+        } else {
+            ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
+            return core::Symbols::noSymbol();
         }
-        return original;
     }
 
     // Allow stub symbols created to hold intrinsics to be filled in
@@ -575,6 +599,7 @@ public:
                 }
                 return;
             }
+            return;
         }
     }
 
