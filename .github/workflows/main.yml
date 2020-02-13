@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  request-review:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Request review for external contribution"
+      if: github.event.pull_request.head.repo.fork == true
+      uses: kunihiko-t/review-request-action@v0.1.3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        team-reviewers: "sorbet/runner"
