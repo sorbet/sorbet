@@ -59,7 +59,7 @@ subgraph "cluster_::<Class:BlockTest>#<static-init>" {
     "bb::<Class:BlockTest>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:BlockTest>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(BlockTest) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U BlockTest>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U BlockTest>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Symbol(:\"blockPass\") = :\"blockPass\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"blockPass\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(BlockTest) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U BlockTest>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U BlockTest>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$3: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$5: Symbol(:\"blockPass\") = :\"blockPass\"\l<returnMethodTemp>$2: Symbol(:\"blockPass\") = <statTemp>$3: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(BlockTest), <statTemp>$5: Symbol(:\"blockPass\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"blockPass\")\l<unconditional>\l"
     ];
 
     "bb::<Class:BlockTest>#<static-init>_0" -> "bb::<Class:BlockTest>#<static-init>_1" [style="bold"];

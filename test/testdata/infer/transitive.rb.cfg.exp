@@ -59,7 +59,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_2" -> "bb::<Class:A>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:A>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(A) = <selfRestore>$6\l<statTemp>$15: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$16: T.class_of(T) = alias <C T>\l<statTemp>$13: T.class_of(A) = <self>: T.class_of(A).extend(<statTemp>$15: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(A) = <selfRestore>$6\l<statTemp>$15: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$16: T.class_of(T) = alias <C T>\l<statTemp>$13: T.class_of(A) = <self>: T.class_of(A).extend(<statTemp>$15: T.class_of(T::Sig))\l<statTemp>$18: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$20: Symbol(:\"foo\") = :\"foo\"\l<statTemp>$17: Symbol(:\"foo\") = <statTemp>$18: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$20: Symbol(:\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_3" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_::<Class:Bar>#<static-init>" {
     "bb::<Class:Bar>#<static-init>_2" -> "bb::<Class:Bar>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Bar>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(Bar), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(Bar) = <selfRestore>$6\l<statTemp>$20: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$21: T.class_of(T) = alias <C T>\l<statTemp>$18: T.class_of(Bar) = <self>: T.class_of(Bar).extend(<statTemp>$20: T.class_of(T::Sig))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(Bar), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(Bar) = <selfRestore>$6\l<statTemp>$20: T.class_of(T::Sig) = alias <C Sig>\lkeep_for_ide$21: T.class_of(T) = alias <C T>\l<statTemp>$18: T.class_of(Bar) = <self>: T.class_of(Bar).extend(<statTemp>$20: T.class_of(T::Sig))\l<statTemp>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: Symbol(:\"baz\") = :\"baz\"\l<statTemp>$22: Symbol(:\"baz\") = <statTemp>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Bar), <statTemp>$25: Symbol(:\"baz\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Bar>#<static-init>_3" -> "bb::<Class:Bar>#<static-init>_1" [style="bold"];
