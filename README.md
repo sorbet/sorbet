@@ -827,3 +827,4 @@ Here are some sample config setups:
   - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
   - [clangd + clang-format (ALE)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L288-L303)
   - [clangd + clang-format (coc.nvim)](https://github.com/elliottt/vim-config/blob/35f328765528f6b322fb7d5a03fb3edd81067805/coc-settings.json#L3-L15)
+
