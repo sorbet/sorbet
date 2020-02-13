@@ -2,9 +2,15 @@
 #define RUBY_TYPER_LSPTASK_H
 
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/LSPTypecheckerCoordinator.h"
+#include "main/lsp/LSPTypechecker.h"
+
+namespace absl {
+class Notification;
+}
 
 namespace sorbet::realmain::lsp {
+class LSPIndexer;
+class LSPPreprocessor;
 /**
  * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
  * Contains miscellaneous helper methods that are useful in multiple tasks.
@@ -35,14 +41,51 @@ protected:
                                         std::vector<core::FileRef> frefs) const;
     LSPQueryResult queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) const;
 
-    LSPTask(const LSPConfiguration &config, bool enableMultithreading);
+    LSPTask(const LSPConfiguration &config, LSPMethod method);
 
 public:
-    const bool enableMultithreading;
+    virtual ~LSPTask();
 
-    virtual ~LSPTask() = default;
+    const LSPMethod method;
 
-    // Runs the task. Is only ever invoked from the typechecker thread.
+    // Measures the end-to-end latency of this task from the first message received from the client. Can be nullptr
+    // if not relevant.
+    std::unique_ptr<Timer> latencyTimer;
+
+    enum class Phase {
+        PREPROCESS = 1,
+        INDEX = 2,
+        RUN = 3,
+    };
+
+    /**
+     * If `true`, this task can be delayed in favor of processing other tasks sooner. Defaults to `false`.
+     */
+    virtual bool isDelayable() const;
+
+    // Attempts to cancel the task if it corresponds to the given request ID. Returns `true` if cancelation succeeds.
+    // The default implementation returns `false`.
+    virtual bool cancel(const MessageId &id);
+
+    virtual bool canPreempt(const LSPIndexer &) const;
+
+    virtual bool needsMultithreading(const LSPIndexer &) const;
+
+    // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
+    // indexer. The default implementation returns RUN.
+    virtual Phase finalPhase() const;
+
+    // Some tasks, like request cancelations, need to interface with the preprocessor. The default implementation is
+    // a no-op. Is only ever invoked from the preprocessor thread.
+    virtual void preprocess(LSPPreprocessor &preprocessor);
+
+    // Some tasks, like edits, need to interface with the indexer. Is only ever invoked from the processing
+    // thread, and is guaranteed to be invoked exactly once. The default implementation is a no-op.
+    // May be run from the processing thread (normally) or the typechecking thread (if preempting).
+    virtual void index(LSPIndexer &indexer);
+
+    // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
+    // not need to interface with the typechecker, this method must be implemented by all subclasses.
     virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
 };
 
@@ -53,12 +96,53 @@ class LSPRequestTask : public LSPTask {
 protected:
     const MessageId id;
 
-    LSPRequestTask(const LSPConfiguration &config, MessageId id, bool enableMultithreading = false);
+    LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method);
 
     virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) = 0;
 
 public:
     void run(LSPTypecheckerDelegate &typechecker) override;
+
+    // Requests cannot override this method, as runRequest must be run (and it only runs during the RUN phase).
+    Phase finalPhase() const override;
+
+    bool cancel(const MessageId &id) override;
+};
+
+/**
+ * A special form of LSPTask that has direct access to the typechecker and controls its own scheduling.
+ * Is only used for slow path-related tasks. Do not use for anything else.
+ */
+class LSPDangerousTypecheckerTask : public LSPTask {
+protected:
+    LSPDangerousTypecheckerTask(const LSPConfiguration &config, LSPMethod method);
+
+public:
+    // Should never be called; throws an exception. May be overridden by tasks that can be dangerous or not dangerous.
+    virtual void run(LSPTypecheckerDelegate &typechecker) override;
+    // Performs the actual work on the task.
+    virtual void runSpecial(LSPTypechecker &typechecker, WorkerPool &worker) = 0;
+    // Tells the scheduler how long to wait before it can schedule more tasks.
+    virtual void schedulerWaitUntilReady() = 0;
+};
+
+class LSPIndexer;
+struct TaskQueueState;
+
+/**
+ * Represents a preemption task. When run, it will run all tasks at the head of TaskQueueState that can preempt.
+ */
+class LSPQueuePreemptionTask final : public LSPTask {
+    absl::Notification &finished;
+    absl::Mutex &taskQueueMutex;
+    TaskQueueState &taskQueue GUARDED_BY(taskQueueMutex);
+    LSPIndexer &indexer;
+
+public:
+    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, absl::Mutex &taskQueueMutex,
+                           TaskQueueState &taskQueue, LSPIndexer &indexer);
+
+    void run(LSPTypecheckerDelegate &tc) override;
 };
 
 } // namespace sorbet::realmain::lsp

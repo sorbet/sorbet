@@ -1,4 +1,5 @@
 #include "core/lsp/PreemptionTaskManager.h"
+#include "core/ErrorQueue.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
@@ -11,7 +12,7 @@ PreemptionTaskManager::PreemptionTaskManager(shared_ptr<TypecheckEpochManager> e
 
 bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task) {
     TypecheckEpochManager::assertConsistentThread(
-        messageProcessingThreadId, "PreemptionTaskManager::trySchedulePreemptionTask", "message processing thread");
+        processingThreadId, "PreemptionTaskManager::trySchedulePreemptionTask", "processing thread");
     bool success = false;
     // Need to grab epoch lock so we have accurate information w.r.t. if typechecking is happening / if typechecking was
     // canceled. Avoids races with typechecking thread.
@@ -32,21 +33,37 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task
     return success;
 }
 
-bool PreemptionTaskManager::tryRunScheduledPreemptionTask() {
+bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs) {
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
     auto preemptTask = atomic_load(&this->preemptTask);
-    if (preemptTask != nullptr) {
+    if (preemptTask != nullptr &&
+        atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<Task>(nullptr))) {
         // Capture with write lock before running task. Ensures that all worker threads park before we proceed.
         absl::MutexLock lock(&typecheckMutex);
         // Invariant: Typechecking _cannot_ be canceled before or during a preemption task.
         ENFORCE(!epochManager->wasTypecheckingCanceled());
+        // The error queue is where typechecking puts all typechecking errors. For a given edit, Sorbet LSP runs
+        // typechecking and then drains the error queue. If we failed to temporarily swap it out during preemption, the
+        // preempted task will see all of the errors that have accumulated thus far on the slow path. Thus, we save the
+        // old error queue and replace so new operation starts fresh
+        auto previousErrorQueue = move(gs.errorQueue);
+        gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer);
+        gs.errorQueue->ignoreFlushes = true;
+        gs.tracer().debug("[Typechecker] Beginning preemption task.");
         preemptTask->run();
-        atomic_store(&this->preemptTask, shared_ptr<lsp::Task>(nullptr));
+        gs.tracer().debug("[Typechecker] Preemption task complete.");
+        gs.errorQueue = move(previousErrorQueue);
         ENFORCE(!epochManager->wasTypecheckingCanceled());
         return true;
     }
     return false;
+}
+
+bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(std::shared_ptr<Task> &task) {
+    TypecheckEpochManager::assertConsistentThread(
+        processingThreadId, "PreemptionTaskManager::tryCancelScheduledPreemptionTask", "processing thread");
+    return atomic_compare_exchange_strong(&preemptTask, &task, shared_ptr<Task>(nullptr));
 }
 
 unique_ptr<absl::ReaderMutexLock> PreemptionTaskManager::lockPreemption() const {

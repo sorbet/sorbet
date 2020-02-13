@@ -64,10 +64,10 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version,
-                                                bool cancellationExpected) {
+                                                bool cancellationExpected, int preemptionsExpected) {
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(newContents), core::File::Type::Normal);
-    return makeChange(getUri(path), newContents, version, cancellationExpected);
+    return makeChange(getUri(path), newContents, version, cancellationExpected, preemptionsExpected);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
@@ -78,6 +78,10 @@ unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {
 
 unique_ptr<LSPMessage> ProtocolTest::workspaceSymbol(string_view query) {
     return makeWorkspaceSymbolRequest(nextId++, query);
+}
+
+unique_ptr<LSPMessage> ProtocolTest::hover(string_view path, int line, int character) {
+    return makeHover(nextId++, getUri(path), line, character);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {

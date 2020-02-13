@@ -18,21 +18,29 @@ namespace sorbet::realmain::lsp {
  */
 class LSPFileUpdates final {
 public:
-    // This specific update contains versions [versionStart, versionEnd].
-    u4 versionEnd = 0;
-    u4 versionStart = 0;
+    // This specific update contains edits with the given epoch
+    u4 epoch = 0;
+    // The total number of edits that this update represents. Used for stats.
+    u4 editCount = 0;
+
     std::vector<std::shared_ptr<core::File>> updatedFiles;
-    bool canTakeFastPath = false;
-    // Indicates that this update contains a new file. Is a hack for TimeTravelingGlobalState.
-    bool hasNewFiles = false;
     std::vector<core::FileHash> updatedFileHashes;
     std::vector<ast::ParsedFile> updatedFileIndexes;
+
+    bool canTakeFastPath = false;
+    // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
+    // fast path.
+    bool hasNewFiles = false;
+    // If true, this update caused a slow path to be canceled.
+    bool canceledSlowPath = false;
     // Updated on typechecking thread. Contains indexes processed with typechecking global state.
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
     // (Optional) Updated global state object to use to typecheck this update.
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
+    // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
+    int preemptionsExpected = 0;
 
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.

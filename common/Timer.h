@@ -8,6 +8,10 @@
 
 namespace sorbet {
 class Timer {
+    Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args,
+          std::chrono::time_point<std::chrono::steady_clock> start);
+
 public:
     Timer(spdlog::logger &log, ConstExprStr name);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev);
@@ -25,6 +29,9 @@ public:
 
     // Don't report timer when it gets destructed.
     void cancel();
+
+    // Creates a new timer with the same start time and args but a different name.
+    Timer fork(ConstExprStr name);
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.

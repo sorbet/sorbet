@@ -19,18 +19,22 @@ private:
     std::shared_ptr<TypecheckEpochManager> epochManager;
     // Thread ID of the typechecking thread. Lazily set.
     std::optional<std::thread::id> typecheckingThreadId;
-    // Thread ID of the message processing thread. Lazily set.
-    std::optional<std::thread::id> messageProcessingThreadId;
+    // Thread ID of the processing thread. Lazily set.
+    std::optional<std::thread::id> processingThreadId;
 
 public:
     PreemptionTaskManager(std::shared_ptr<TypecheckEpochManager> epochManager);
-    // Run only from message processing thread.
+    // Run only from processing thread.
     // Attempts to preempt a running slow path to run the provided task. If it returns true, the task is guaranteed
     // to run.
     bool trySchedulePreemptionTask(std::shared_ptr<Task> task);
     // Run only from the typechecking thread.
     // Runs the scheduled preemption task, if any.
-    bool tryRunScheduledPreemptionTask();
+    // Handles running task with a fresh errorQueue, and restoring previous errorQueue when done.
+    bool tryRunScheduledPreemptionTask(core::GlobalState &gs);
+    // Run only from processing thread.
+    // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
+    bool tryCancelScheduledPreemptionTask(std::shared_ptr<Task> &task);
     // Run only from typechecker worker threads. Prevents preemption from occurring while the ReaderMutexLock is alive.
     std::unique_ptr<absl::ReaderMutexLock> lockPreemption() const;
     // (For testing only) Assert that typecheckMutex is held.
