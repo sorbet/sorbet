@@ -19,4 +19,5 @@ jobs:
       uses: kunihiko-t/review-request-action@v0.1.3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        team-reviewers: "sorbet/core-reviewers"
+        #team-reviewers: "sorbet/core-reviewers"
+        team-reviewers: "sorbet/runner"
