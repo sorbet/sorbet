@@ -83,16 +83,16 @@ public:
     };
 };
 
-class DefineMethodIntrinsic : public NameBasedIntrinsicMethod {
+class DefineMethodIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
-    DefineMethodIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+    DefineMethodIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
                                   const BasicBlockMap &blockMap,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const override {
         auto &builder = builderCast(build);
-        bool isSelf = send->fun == Names::defineMethodSingleton(cs);
-        ENFORCE(send->args.size() == 2);
+        bool isSelf = send->fun == core::Names::keepSelfDef();
+        ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
         auto ownerSym = typeToSym(cs, send->args[0].type);
 
         auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
@@ -119,11 +119,14 @@ public:
                                       llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
 
         builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
-        return Payload::rubyNil(cs, builder);
+        return Payload::varGet(cs, send->args[1].variable, builder, blockMap, aliases, rubyBlockId);
     }
 
+    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+        return {core::Symbols::Sorbet_Private_Static().data(cs)->lookupSingletonClass(cs)};
+    };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {Names::defineMethod(cs), Names::defineMethodSingleton(cs)};
+        return {core::Names::keepDef(), core::Names::keepSelfDef()};
     }
 } DefineMethodIntrinsic;
 
