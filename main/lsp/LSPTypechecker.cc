@@ -246,16 +246,17 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 // Note: indexed entries for payload files don't have any contents.
                 if (tree.tree && !updatedFiles.contains(tree.file.id())) {
                     indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
-                }
 
-                // Copying index trees is fast, but if you're in a huge project it can still take enough time to warrant
-                // checking if you should cancel typechecking.
-                if (count % 1000 == 0 && epochManager.wasTypecheckingCanceled()) {
-                    timeit.cancel();
-                    return;
+                    // Copying index trees is fast, but if you're in a huge project it can still take enough time to
+                    // warrant checking if you should cancel typechecking.
+                    // Assuming 0.04 ms per file, this will check every ~10ms.
+                    if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+                        timeit.cancel();
+                        return;
+                    }
+                    // Explicitly deferred to after check so that we check once at start of indexing.
+                    count++;
                 }
-                // Explicitly deferred to after check so that we check once at start of indexing.
-                count++;
             }
         }
         if (epochManager.wasTypecheckingCanceled()) {
