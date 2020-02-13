@@ -168,49 +168,49 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(nil)
     end
 
-    :"opt_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"opt_string")
 
-    :"get_opt_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_opt_string")
 
-    :"opt_string"
+    ::Sorbet::Private::Static.keep_def(<self>, :"opt_string")
 
-    :"opt_int_defaulted"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"opt_int_defaulted")
 
-    :"get_opt_int_defaulted"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_opt_int_defaulted")
 
-    :"opt_int_defaulted"
+    ::Sorbet::Private::Static.keep_def(<self>, :"opt_int_defaulted")
 
-    :"req_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"req_string")
 
-    :"get_req_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_req_string")
 
-    :"req_string"
+    ::Sorbet::Private::Static.keep_def(<self>, :"req_string")
 
-    :"implied_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"implied_string")
 
-    :"get_implied_string"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_implied_string")
 
-    :"implied_string"
+    ::Sorbet::Private::Static.keep_def(<self>, :"implied_string")
 
-    :"no_getter"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_getter")
 
-    :"get_no_setter"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_no_setter")
 
-    :"no_setter"
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_setter")
 
     <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
 
-    :"class_of"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"class_of")
 
-    :"get_class_of"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_class_of")
 
-    :"class_of"
+    ::Sorbet::Private::Static.keep_def(<self>, :"class_of")
 
-    :"root_const"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"root_const")
 
-    :"get_root_const"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"get_root_const")
 
-    :"root_const"
+    ::Sorbet::Private::Static.keep_def(<self>, :"root_const")
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
@@ -251,6 +251,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
 
-    :"test_instance_methods"
+    ::Sorbet::Private::Static.keep_def(<self>, :"test_instance_methods")
   end
 end

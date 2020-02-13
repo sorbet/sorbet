@@ -24,11 +24,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
     end
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
   end
 
   <emptyTree>::<C Root>.new()

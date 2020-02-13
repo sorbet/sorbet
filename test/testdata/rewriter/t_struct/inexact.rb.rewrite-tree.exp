@@ -32,13 +32,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
-    :"bar="
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar=")
   end
 
   <emptyTree>::<C Inexact>.new()

@@ -58,11 +58,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :"yielder"
-        :"blockpass"
-        :"mixed"
-        :"blockyield"
-        :"main"
+        ::Sorbet::Private::Static.keep_def(<self>, :"yielder")
+        ::Sorbet::Private::Static.keep_def(<self>, :"blockpass")
+        ::Sorbet::Private::Static.keep_def(<self>, :"mixed")
+        ::Sorbet::Private::Static.keep_def(<self>, :"blockyield")
+        ::Sorbet::Private::Static.keep_def(<self>, :"main")
         <emptyTree>
       end
     end

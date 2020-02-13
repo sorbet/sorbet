@@ -19,7 +19,7 @@ begin
     end
 
     def self.outer_static(<blk>)
-      <self>.private_class_method(:"inner_static")
+      <self>.private_class_method(::Sorbet::Private::Static.keep_self_def(<self>, :"inner_static"))
     end
 
     def self.inner_static(<blk>)
@@ -27,7 +27,7 @@ begin
     end
 
     def outer_instance(<blk>)
-      <self>.class().private(:"inner_instance")
+      <self>.class().private(::Sorbet::Private::Static.keep_def(<self>, :"inner_instance"))
     end
 
     def inner_instance(<blk>)
@@ -43,10 +43,10 @@ begin
           <self>.params({:"arg0" => ::Integer}).void()
         end
         <self>.extend(::T::Sig)
-        :"private"
-        :"private_class_method"
-        <self>.private_class_method(:"outer_static")
-        <self>.private(:"outer_instance")
+        ::Sorbet::Private::Static.keep_self_def(<self>, :"private")
+        ::Sorbet::Private::Static.keep_self_def(<self>, :"private_class_method")
+        <self>.private_class_method(::Sorbet::Private::Static.keep_self_def(<self>, :"outer_static"))
+        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :"outer_instance"))
         <emptyTree>
       end
     end

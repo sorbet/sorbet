@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   module <emptyTree>::<C ProtocMsgClass>::<C ProtocEnumModule><<C <todo sym>>> < ()
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::<root>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   module <emptyTree>::<C StripeMsgClass>::<C StripeEnumModule><<C <todo sym>>> < ()

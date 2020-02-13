@@ -1108,7 +1108,20 @@ ClassDef{
           rhs = EmptyTree
         }
 
-        Literal{ value = :"prop" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"prop" }
+          ]
+        }
 
         Send{
           recv = Local{
@@ -1662,13 +1675,65 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :"foo" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo" }
+          ]
+        }
 
-        Literal{ value = :"foo=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo=" }
+          ]
+        }
 
-        Literal{ value = :"foo2" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo2" }
+          ]
+        }
 
-        Literal{ value = :"foo2=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo2=" }
+          ]
+        }
       ]
     }
 
@@ -5179,25 +5244,155 @@ ClassDef{
           }
         }
 
-        Literal{ value = :"default" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"default" }
+          ]
+        }
 
-        Literal{ value = :"default=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"default=" }
+          ]
+        }
 
-        Literal{ value = :"t_nilable" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"t_nilable" }
+          ]
+        }
 
-        Literal{ value = :"t_nilable=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"t_nilable=" }
+          ]
+        }
 
-        Literal{ value = :"type" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"type" }
+          ]
+        }
 
-        Literal{ value = :"type=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"type=" }
+          ]
+        }
 
-        Literal{ value = :"object" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"object" }
+          ]
+        }
 
-        Literal{ value = :"object=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"object=" }
+          ]
+        }
 
-        Literal{ value = :"array" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array" }
+          ]
+        }
 
-        Literal{ value = :"array=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array=" }
+          ]
+        }
 
         ClassDef{
           kind = class
@@ -5411,19 +5606,97 @@ ClassDef{
               }
             }
 
-            Literal{ value = :"array=" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"array=" }
+              ]
+            }
 
-            Literal{ value = :"array" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"array" }
+              ]
+            }
           ]
         }
 
-        Literal{ value = :"array_of" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array_of" }
+          ]
+        }
 
-        Literal{ value = :"array_of=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array_of=" }
+          ]
+        }
 
-        Literal{ value = :"array_of_explicit" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array_of_explicit" }
+          ]
+        }
 
-        Literal{ value = :"array_of_explicit=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"array_of_explicit=" }
+          ]
+        }
 
         ClassDef{
           kind = class
@@ -5637,15 +5910,67 @@ ClassDef{
               }
             }
 
-            Literal{ value = :"array_of_explicit=" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"array_of_explicit=" }
+              ]
+            }
 
-            Literal{ value = :"array_of_explicit" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"array_of_explicit" }
+              ]
+            }
           ]
         }
 
-        Literal{ value = :"t_array" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"t_array" }
+          ]
+        }
 
-        Literal{ value = :"t_array=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"t_array=" }
+          ]
+        }
 
         ClassDef{
           kind = class
@@ -5886,15 +6211,67 @@ ClassDef{
               }
             }
 
-            Literal{ value = :"t_array=" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"t_array=" }
+              ]
+            }
 
-            Literal{ value = :"t_array" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"t_array" }
+              ]
+            }
           ]
         }
 
-        Literal{ value = :"hash_of" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"hash_of" }
+          ]
+        }
 
-        Literal{ value = :"hash_of=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"hash_of=" }
+          ]
+        }
 
         ClassDef{
           kind = class
@@ -6155,17 +6532,82 @@ ClassDef{
               }
             }
 
-            Literal{ value = :"hash_of=" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"hash_of=" }
+              ]
+            }
 
-            Literal{ value = :"hash_of" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"hash_of" }
+              ]
+            }
           ]
         }
 
-        Literal{ value = :"const_explicit" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"const_explicit" }
+          ]
+        }
 
-        Literal{ value = :"const" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"const" }
+          ]
+        }
 
-        Literal{ value = :"no_class_arg" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"no_class_arg" }
+          ]
+        }
 
         ClassDef{
           kind = class
@@ -6379,53 +6821,352 @@ ClassDef{
               }
             }
 
-            Literal{ value = :"no_class_arg=" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"no_class_arg=" }
+              ]
+            }
 
-            Literal{ value = :"no_class_arg" }
+            Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Sorbet::Private::Static
+              }
+              fun = <U keep_def>
+              block = nullptr
+              args = [
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"no_class_arg" }
+              ]
+            }
           ]
         }
 
-        Literal{ value = :"enum_prop" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"enum_prop" }
+          ]
+        }
 
-        Literal{ value = :"foreign" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign" }
+          ]
+        }
 
-        Literal{ value = :"foreign=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign=" }
+          ]
+        }
 
-        Literal{ value = :"foreign_" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_" }
+          ]
+        }
 
-        Literal{ value = :"foreign_!" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_!" }
+          ]
+        }
 
-        Literal{ value = :"foreign_lazy" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_lazy" }
+          ]
+        }
 
-        Literal{ value = :"foreign_lazy=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_lazy=" }
+          ]
+        }
 
-        Literal{ value = :"foreign_lazy_" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_lazy_" }
+          ]
+        }
 
-        Literal{ value = :"foreign_lazy_!" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_lazy_!" }
+          ]
+        }
 
-        Literal{ value = :"foreign_proc" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_proc" }
+          ]
+        }
 
-        Literal{ value = :"foreign_proc=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_proc=" }
+          ]
+        }
 
-        Literal{ value = :"foreign_proc_" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_proc_" }
+          ]
+        }
 
-        Literal{ value = :"foreign_proc_!" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_proc_!" }
+          ]
+        }
 
-        Literal{ value = :"foreign_invalid" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_invalid" }
+          ]
+        }
 
-        Literal{ value = :"foreign_invalid=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_invalid=" }
+          ]
+        }
 
-        Literal{ value = :"foreign_invalid_" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_invalid_" }
+          ]
+        }
 
-        Literal{ value = :"foreign_invalid_!" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foreign_invalid_!" }
+          ]
+        }
 
-        Literal{ value = :"ifunset" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"ifunset" }
+          ]
+        }
 
-        Literal{ value = :"ifunset=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"ifunset=" }
+          ]
+        }
 
-        Literal{ value = :"ifunset_nilable" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"ifunset_nilable" }
+          ]
+        }
 
-        Literal{ value = :"ifunset_nilable=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"ifunset_nilable=" }
+          ]
+        }
       ]
     }
 
@@ -6744,13 +7485,65 @@ ClassDef{
           }
         }
 
-        Literal{ value = :"token" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token" }
+          ]
+        }
 
-        Literal{ value = :"token=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token=" }
+          ]
+        }
 
-        Literal{ value = :"created" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created" }
+          ]
+        }
 
-        Literal{ value = :"created=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created=" }
+          ]
+        }
       ]
     }
 
@@ -6988,11 +7781,50 @@ ClassDef{
           }
         }
 
-        Literal{ value = :"token" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token" }
+          ]
+        }
 
-        Literal{ value = :"token=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token=" }
+          ]
+        }
 
-        Literal{ value = :"created" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created" }
+          ]
+        }
       ]
     }
 
@@ -7078,7 +7910,20 @@ ClassDef{
           }
         }
 
-        Literal{ value = :"merchant" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"merchant" }
+          ]
+        }
       ]
     }
 
@@ -7784,20 +8629,111 @@ ClassDef{
           }
         }
 
-        Literal{ value = :"foo" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo" }
+          ]
+        }
 
-        Literal{ value = :"encrypted_foo" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_foo" }
+          ]
+        }
 
-        Literal{ value = :"foo=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"foo=" }
+          ]
+        }
 
-        Literal{ value = :"encrypted_foo=" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_foo=" }
+          ]
+        }
 
-        Literal{ value = :"bar" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"bar" }
+          ]
+        }
 
-        Literal{ value = :"encrypted_bar" }
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_bar" }
+          ]
+        }
       ]
     }
 
-    Literal{ value = :"main" }
+    Send{
+      recv = ConstantLit{
+        orig = nullptr
+        symbol = ::Sorbet::Private::Static
+      }
+      fun = <U keep_def>
+      block = nullptr
+      args = [
+        Local{
+          localVariable = <U <self>>
+        }
+        Literal{ value = :"main" }
+      ]
+    }
   ]
 }

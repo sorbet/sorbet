@@ -93,18 +93,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"outside_method"
+    ::Sorbet::Private::Static.keep_def(<self>, :"outside_method")
 
     begin
       "works outside"
-      :"<it \'works outside\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works outside\'>")
     end
 
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(nil)
       begin
         "allows constants inside of IT"
-        :"<it \'allows constants inside of IT\'>"
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows constants inside of IT\'>")
       end
     end
 
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
       begin
         "allows let-ed constants inside of IT"
-        :"<it \'allows let-ed constants inside of IT\'>"
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows let-ed constants inside of IT\'>")
       end
     end
 
@@ -120,13 +120,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
       begin
         "allows path constants inside of IT"
-        :"<it \'allows path constants inside of IT\'>"
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows path constants inside of IT\'>")
       end
     end
 
     begin
       ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>")
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
@@ -146,26 +146,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        :"inside_method"
+        ::Sorbet::Private::Static.keep_def(<self>, :"inside_method")
         begin
           "works inside"
-          :"<it \'works inside\'>"
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works inside\'>")
         end
       end
     end
 
-    :"instance_helper"
+    ::Sorbet::Private::Static.keep_def(<self>, :"instance_helper")
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    :"<after>"
+    ::Sorbet::Private::Static.keep_def(<self>, :"<after>")
 
     begin
       "can read foo"
-      :"<it \'can read foo\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'can read foo\'>")
     end
 
-    :"random_method"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"random_method")
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -191,16 +191,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         begin
           <emptyTree>::<C Object>
-          :"<it \'Object\'>"
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'Object\'>")
         end
         begin
           <emptyTree>::<C Object>
-          :"<it \'Object\'>"
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'Object\'>")
         end
       end
     end
 
-    :"it"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"it")
 
     <self>.it("ignores methods without a block")
 
@@ -221,13 +221,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
         begin
           "contains nested describes"
-          :"<it \'contains nested describes\'>"
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'contains nested describes\'>")
         end
       end
     end
   end
 
-  :"junk"
+  ::Sorbet::Private::Static.keep_def(<self>, :"junk")
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end

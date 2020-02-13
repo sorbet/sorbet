@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   <emptyTree>::<C None>.new()

@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
   end
 
   <emptyTree>::<C A>.new().foo()
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       0
     end
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C B>.new().bar())
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"qux"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"qux")
   end
 
   <emptyTree>::<C D>.qux()

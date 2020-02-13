@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"prop"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"prop")
 
     <self>.prop()
 
@@ -114,13 +114,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"foo2"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo2")
 
-    :"foo2="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo2=")
   end
 
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)  end
@@ -462,25 +462,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    :"default"
+    ::Sorbet::Private::Static.keep_def(<self>, :"default")
 
-    :"default="
+    ::Sorbet::Private::Static.keep_def(<self>, :"default=")
 
-    :"t_nilable"
+    ::Sorbet::Private::Static.keep_def(<self>, :"t_nilable")
 
-    :"t_nilable="
+    ::Sorbet::Private::Static.keep_def(<self>, :"t_nilable=")
 
-    :"type"
+    ::Sorbet::Private::Static.keep_def(<self>, :"type")
 
-    :"type="
+    ::Sorbet::Private::Static.keep_def(<self>, :"type=")
 
-    :"object"
+    ::Sorbet::Private::Static.keep_def(<self>, :"object")
 
-    :"object="
+    ::Sorbet::Private::Static.keep_def(<self>, :"object=")
 
-    :"array"
+    ::Sorbet::Private::Static.keep_def(<self>, :"array")
 
-    :"array="
+    ::Sorbet::Private::Static.keep_def(<self>, :"array=")
 
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -499,18 +499,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
       end
 
-      :"array="
+      ::Sorbet::Private::Static.keep_def(<self>, :"array=")
 
-      :"array"
+      ::Sorbet::Private::Static.keep_def(<self>, :"array")
     end
 
-    :"array_of"
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of")
 
-    :"array_of="
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of=")
 
-    :"array_of_explicit"
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
 
-    :"array_of_explicit="
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
 
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -529,14 +529,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
       end
 
-      :"array_of_explicit="
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
 
-      :"array_of_explicit"
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
     end
 
-    :"t_array"
+    ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
 
-    :"t_array="
+    ::Sorbet::Private::Static.keep_def(<self>, :"t_array=")
 
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -555,14 +555,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
       end
 
-      :"t_array="
+      ::Sorbet::Private::Static.keep_def(<self>, :"t_array=")
 
-      :"t_array"
+      ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
     end
 
-    :"hash_of"
+    ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
 
-    :"hash_of="
+    ::Sorbet::Private::Static.keep_def(<self>, :"hash_of=")
 
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -581,16 +581,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
       end
 
-      :"hash_of="
+      ::Sorbet::Private::Static.keep_def(<self>, :"hash_of=")
 
-      :"hash_of"
+      ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
     end
 
-    :"const_explicit"
+    ::Sorbet::Private::Static.keep_def(<self>, :"const_explicit")
 
-    :"const"
+    ::Sorbet::Private::Static.keep_def(<self>, :"const")
 
-    :"no_class_arg"
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_class_arg")
 
     class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -609,52 +609,52 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.cast(::T.unsafe(nil), ::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
       end
 
-      :"no_class_arg="
+      ::Sorbet::Private::Static.keep_def(<self>, :"no_class_arg=")
 
-      :"no_class_arg"
+      ::Sorbet::Private::Static.keep_def(<self>, :"no_class_arg")
     end
 
-    :"enum_prop"
+    ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop")
 
-    :"foreign"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign")
 
-    :"foreign="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign=")
 
-    :"foreign_"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_")
 
-    :"foreign_!"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_!")
 
-    :"foreign_lazy"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy")
 
-    :"foreign_lazy="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy=")
 
-    :"foreign_lazy_"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy_")
 
-    :"foreign_lazy_!"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy_!")
 
-    :"foreign_proc"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc")
 
-    :"foreign_proc="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc=")
 
-    :"foreign_proc_"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc_")
 
-    :"foreign_proc_!"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc_!")
 
-    :"foreign_invalid"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid")
 
-    :"foreign_invalid="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid=")
 
-    :"foreign_invalid_"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid_")
 
-    :"foreign_invalid_!"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid_!")
 
-    :"ifunset"
+    ::Sorbet::Private::Static.keep_def(<self>, :"ifunset")
 
-    :"ifunset="
+    ::Sorbet::Private::Static.keep_def(<self>, :"ifunset=")
 
-    :"ifunset_nilable"
+    ::Sorbet::Private::Static.keep_def(<self>, :"ifunset_nilable")
 
-    :"ifunset_nilable="
+    ::Sorbet::Private::Static.keep_def(<self>, :"ifunset_nilable=")
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
@@ -690,13 +690,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
 
-    :"token"
+    ::Sorbet::Private::Static.keep_def(<self>, :"token")
 
-    :"token="
+    ::Sorbet::Private::Static.keep_def(<self>, :"token=")
 
-    :"created"
+    ::Sorbet::Private::Static.keep_def(<self>, :"created")
 
-    :"created="
+    ::Sorbet::Private::Static.keep_def(<self>, :"created=")
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
@@ -724,11 +724,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), ::Float)
     end
 
-    :"token"
+    ::Sorbet::Private::Static.keep_def(<self>, :"token")
 
-    :"token="
+    ::Sorbet::Private::Static.keep_def(<self>, :"token=")
 
-    :"created"
+    ::Sorbet::Private::Static.keep_def(<self>, :"created")
   end
 
   class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
@@ -740,7 +740,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), ::String)
     end
 
-    :"merchant"
+    ::Sorbet::Private::Static.keep_def(<self>, :"merchant")
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
@@ -792,18 +792,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"encrypted_foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"encrypted_foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"encrypted_foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"encrypted_foo=")
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
-    :"encrypted_bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"encrypted_bar")
   end
 
-  :"main"
+  ::Sorbet::Private::Static.keep_def(<self>, :"main")
 end

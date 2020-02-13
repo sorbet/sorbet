@@ -19,7 +19,7 @@ begin
         <self>.sig() do ||
           <self>.returns(::T2)
         end
-        :"test_resolve"
+        ::Sorbet::Private::Static.keep_def(<self>, :"test_resolve")
         <emptyTree>
       end
     end

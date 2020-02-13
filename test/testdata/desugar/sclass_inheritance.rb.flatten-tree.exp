@@ -32,7 +32,7 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
-        :"main"
+        ::Sorbet::Private::Static.keep_def(<self>, :"main")
         <self>.main()
         <emptyTree>
       end
@@ -60,7 +60,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <self>.include(::MM)
-        :"newer"
+        ::Sorbet::Private::Static.keep_def(<self>, :"newer")
         <emptyTree>
       end
     end
@@ -73,7 +73,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <self>.extend(::MM)
-        :"newer"
+        ::Sorbet::Private::Static.keep_self_def(<self>, :"newer")
         <emptyTree>
       end
     end
@@ -92,7 +92,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :"newerer"
+      ::Sorbet::Private::Static.keep_def(<self>, :"newerer")
     end
   end
   <emptyTree>

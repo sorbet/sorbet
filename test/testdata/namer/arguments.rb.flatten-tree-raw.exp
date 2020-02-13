@@ -248,9 +248,48 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              Literal{ value = :"take_arguments" }
-              Literal{ value = :"take_arguments<defaultArg>1" }
-              Literal{ value = :"take_arguments<defaultArg>2" }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Sorbet::Private::Static
+                }
+                fun = <U keep_def>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"take_arguments" }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Sorbet::Private::Static
+                }
+                fun = <U keep_def>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"take_arguments<defaultArg>1" }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Sorbet::Private::Static
+                }
+                fun = <U keep_def>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"take_arguments<defaultArg>2" }
+                ]
+              }
             ],
             expr = EmptyTree
           }

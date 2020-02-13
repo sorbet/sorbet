@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.instance(), <emptyTree>::<C Z$1>)
 
-    :"something_outside"
+    ::Sorbet::Private::Static.keep_def(<self>, :"something_outside")
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
