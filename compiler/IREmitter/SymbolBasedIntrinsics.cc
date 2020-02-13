@@ -83,6 +83,50 @@ public:
     };
 };
 
+class DefineMethodIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    DefineMethodIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
+        auto &builder = builderCast(build);
+        bool isSelf = send->fun == Names::defineMethodSingleton(cs);
+        ENFORCE(send->args.size() == 2);
+        auto ownerSym = typeToSym(cs, send->args[0].type);
+
+        auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
+        ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        core::NameRef funcNameRef(cs, lit->value);
+
+        auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
+        if (ownerSym == core::Symbols::Object() && !isSelf) {
+            // TODO Figure out if this speicial case is right
+            lookupSym = core::Symbols::Object();
+        }
+        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+        ENFORCE(funcSym.exists());
+        ENFORCE(funcSym.data(cs)->isMethod());
+        auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+        auto universalSignature =
+            llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
+        auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
+
+        auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
+        ENFORCE(rubyFunc);
+        builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
+                                      Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
+                                      llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+
+        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+        return Payload::rubyNil(cs, builder);
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {Names::defineMethod(cs), Names::defineMethodSingleton(cs)};
+    }
+} DefineMethodIntrinsic;
+
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
     Module_tripleEq() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
@@ -188,7 +232,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
-    vector<const SymbolBasedIntrinsicMethod *> res{&Module_tripleEq};
+    vector<const SymbolBasedIntrinsicMethod *> res{&DefineMethodIntrinsic, &Module_tripleEq};
     for (auto &method : knownCMethodsInstance) {
         res.emplace_back(&method);
     }
