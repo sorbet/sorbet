@@ -42,7 +42,7 @@ void Timer::cancel() {
     this->canceled = true;
 }
 
-Timer Timer::fork(ConstExprStr name) {
+Timer Timer::clone(ConstExprStr name) {
     Timer forked(log, name, prev, {}, start);
     forked.args = args;
     forked.canceled = canceled;

@@ -31,7 +31,7 @@ public:
     void cancel();
 
     // Creates a new timer with the same start time and args but a different name.
-    Timer fork(ConstExprStr name);
+    Timer clone(ConstExprStr name);
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.

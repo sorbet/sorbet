@@ -291,7 +291,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             slowPathOp = make_unique<ShowOperation>(*config, "SlowPathNonBlocking", "Typechecking in background");
         }
         // Report how long the slow path blocks preemption.
-        timeit.fork("slow_path.blocking_time");
+        timeit.clone("slow_path.blocking_time");
 
         // [Test only] Wait for a preemption if one is expected.
         while (updates.preemptionsExpected > 0) {

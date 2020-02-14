@@ -28,53 +28,53 @@ LSPTask::~LSPTask() {
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::WindowShowMessage:
             // Not a request we care about. Bucket it in case it gets large.
-            latencyTimer->fork("latency.other");
+            latencyTimer->clone("latency.other");
             break;
         case LSPMethod::Initialize:
-            latencyTimer->fork("latency.initialize");
+            latencyTimer->clone("latency.initialize");
             break;
         case LSPMethod::Initialized:
-            latencyTimer->fork("latency.initialized");
+            latencyTimer->clone("latency.initialized");
             break;
         case LSPMethod::SorbetReadFile:
-            latencyTimer->fork("latency.sorbetreadfile");
+            latencyTimer->clone("latency.sorbetreadfile");
             break;
         case LSPMethod::SorbetWatchmanFileChange:
         case LSPMethod::SorbetWorkspaceEdit:
         case LSPMethod::TextDocumentDidChange:
         case LSPMethod::TextDocumentDidClose:
         case LSPMethod::TextDocumentDidOpen:
-            latencyTimer->fork("latency.fileedit");
+            latencyTimer->clone("latency.fileedit");
             break;
         case LSPMethod::TextDocumentCodeAction:
-            latencyTimer->fork("latency.codeaction");
+            latencyTimer->clone("latency.codeaction");
             break;
         case LSPMethod::TextDocumentCompletion:
-            latencyTimer->fork("latency.completion");
+            latencyTimer->clone("latency.completion");
             break;
         case LSPMethod::TextDocumentDefinition:
-            latencyTimer->fork("latency.definition");
+            latencyTimer->clone("latency.definition");
             break;
         case LSPMethod::TextDocumentDocumentHighlight:
-            latencyTimer->fork("latency.documenthighlight");
+            latencyTimer->clone("latency.documenthighlight");
             break;
         case LSPMethod::TextDocumentDocumentSymbol:
-            latencyTimer->fork("latency.documentsymbol");
+            latencyTimer->clone("latency.documentsymbol");
             break;
         case LSPMethod::TextDocumentHover:
-            latencyTimer->fork("latency.hover");
+            latencyTimer->clone("latency.hover");
             break;
         case LSPMethod::TextDocumentReferences:
-            latencyTimer->fork("latency.references");
+            latencyTimer->clone("latency.references");
             break;
         case LSPMethod::TextDocumentSignatureHelp:
-            latencyTimer->fork("latency.signaturehelp");
+            latencyTimer->clone("latency.signaturehelp");
             break;
         case LSPMethod::TextDocumentTypeDefinition:
-            latencyTimer->fork("latency.typedefinition");
+            latencyTimer->clone("latency.typedefinition");
             break;
         case LSPMethod::WorkspaceSymbol:
-            latencyTimer->fork("latency.workspacesymbol");
+            latencyTimer->clone("latency.workspacesymbol");
             break;
     }
 }
