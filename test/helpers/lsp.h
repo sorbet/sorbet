@@ -14,7 +14,7 @@ std::string uriToFilePath(const LSPConfiguration &config, std::string_view uri);
 
 /** Creates the parameters to the `initialize` message, which advertises the client's capabilities. */
 std::unique_ptr<InitializeParams>
-makeInitializeParams(std::variant<std::string, JSONNullObject> rootPath,
+makeInitializeParams(std::optional<std::variant<std::string, JSONNullObject>> rootPath,
                      std::variant<std::string, JSONNullObject> rootUri, bool supportsMarkdown,
                      std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions);
 

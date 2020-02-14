@@ -132,9 +132,12 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
 }
 
 unique_ptr<InitializeParams>
-makeInitializeParams(variant<string, JSONNullObject> rootPath, variant<string, JSONNullObject> rootUri,
+makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
                      bool supportsMarkdown, std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
-    auto initializeParams = make_unique<InitializeParams>(rootPath, rootUri, make_unique<ClientCapabilities>());
+    auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
+    if (rootPath) {
+        initializeParams->rootPath = rootPath;
+    }
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
     initializeParams->trace = TraceKind::Off;
