@@ -99,6 +99,9 @@ class LSPTypechecker final {
      */
     LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 
+    /** Deep copy all entries in `indexed` that contain ASTs, except for those with IDs in the ignore set. */
+    void copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore, std::vector<ast::ParsedFile> &out) const;
+
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
                    std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager);
