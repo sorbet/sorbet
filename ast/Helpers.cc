@@ -72,7 +72,8 @@ bool BehaviorHelpers::checkEmptyDeep(const unique_ptr<ast::Expression> &expr) {
         expr.get(),
 
         [&](ast::Send *send) {
-            result = (send->fun == core::Names::keepForIde()) || send->fun == core::Names::include() ||
+            result = send->fun == core::Names::keepForIde() || send->fun == core::Names::keepDef() ||
+                     send->fun == core::Names::keepSelfDef() || send->fun == core::Names::include() ||
                      send->fun == core::Names::extend();
         },
 
