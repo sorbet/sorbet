@@ -25,9 +25,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-  :"foo"
+  ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-  :"foo<defaultArg>1"
+  ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
 
-  :"foo<defaultArg>2"
+  ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>2")
 end

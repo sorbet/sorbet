@@ -48,16 +48,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       3
     end
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
-    :"bar="
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar=")
 
-    :"initialize<defaultArg>1"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
   end
 end

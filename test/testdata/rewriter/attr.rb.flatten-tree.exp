@@ -76,14 +76,14 @@ begin
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)
-        :"initialize"
-        :"v1"
-        :"v1="
-        :"v2"
-        :"v2="
-        :"v3"
-        :"v4="
-        :"v5="
+        ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v1")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v1=")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v2")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v2=")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v3")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v4=")
+        ::Sorbet::Private::Static.keep_def(<self>, :"v5=")
         <emptyTree>
       end
     end

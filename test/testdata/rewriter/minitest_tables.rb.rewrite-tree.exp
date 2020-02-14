@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)  end
@@ -136,34 +136,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :"outside_method"
+    ::Sorbet::Private::Static.keep_def(<self>, :"outside_method")
 
-    :"test_each"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"test_each")
 
-    :"test_each_hash"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"test_each_hash")
 
-    :"it"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"it")
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |value|
-      :"<it \'works with instance methods\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works with instance methods\'>")
     end
 
     <emptyTree>::<C CONST_LIST> = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
-      :"<it \'succeeds with a constant list\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a constant list\'>")
     end
 
     <emptyTree>::<C ANOTHER_CONST_LIST> = <emptyTree>::<C T>.let([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST>) do |value|
-      :"<it \'succeeds with a typed constant list\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a typed constant list\'>")
     end
 
     local = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(local) do |value|
-      :"<it \'succeed with a local variable but cannot type it\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeed with a local variable but cannot type it\'>")
     end
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |x|
@@ -177,12 +177,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
       begin
         x = value.foo()
-        :"<it \'fails with non-it statements\'>"
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails with non-it statements\'>")
       end
     end
 
     <self>.test_each(["foo", 5, {:"x" => false}]) do |v|
-      :"<it \'handles lists with several types\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>")
     end
 
     <self>.test_each([1, 2, 3]) do |k, v|
@@ -198,11 +198,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.test_each_hash({:"foo" => 1, :"bar" => 2, :"baz" => 3}) do |k, v|
-      :"<it \'handles lists with several types\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>")
     end
 
     <self>.test_each_hash([1, 2, 3]) do |k, v|
-      :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>"
+      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>")
     end
 
     <self>.test_each_hash({:"foo" => 1, :"bar" => 2}) do |x|

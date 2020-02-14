@@ -282,71 +282,71 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :"read_write_predicate"
+    ::Sorbet::Private::Static.keep_def(<self>, :"read_write_predicate")
 
-    :"read_write_predicate"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"read_write_predicate")
 
-    :"read_write_predicate="
+    ::Sorbet::Private::Static.keep_def(<self>, :"read_write_predicate=")
 
-    :"read_write_predicate="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"read_write_predicate=")
 
-    :"read_write_predicate?"
+    ::Sorbet::Private::Static.keep_def(<self>, :"read_write_predicate?")
 
-    :"read_write_predicate?"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"read_write_predicate?")
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"foo=")
 
-    :"foo?"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo?")
 
-    :"foo?"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"foo?")
 
-    :"no_instance"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance")
 
-    :"no_instance="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance=")
 
-    :"no_instance?"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance?")
 
-    :"no_instance_reader"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_reader")
 
-    :"no_instance_reader="
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_instance_reader=")
 
-    :"no_instance_reader="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_reader=")
 
-    :"no_instance_reader?"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_reader?")
 
-    :"no_instance_writer"
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_instance_writer")
 
-    :"no_instance_writer"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_writer")
 
-    :"no_instance_writer="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_writer=")
 
-    :"no_instance_writer?"
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_instance_writer?")
 
-    :"no_instance_writer?"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance_writer?")
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
-    :"bar"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"bar")
 
-    :"bar="
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar=")
 
-    :"bar="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"bar=")
 
-    :"no_predicate"
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_predicate")
 
-    :"no_predicate"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_predicate")
 
-    :"no_predicate="
+    ::Sorbet::Private::Static.keep_def(<self>, :"no_predicate=")
 
-    :"no_predicate="
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_predicate=")
 
-    :"usages"
+    ::Sorbet::Private::Static.keep_def(<self>, :"usages")
 
     <self>.read_write_predicate()
 

@@ -32,15 +32,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("override")
     end
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   <emptyTree>::<C Override>.new()

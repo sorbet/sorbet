@@ -78,26 +78,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :"num_ok"
+    ::Sorbet::Private::Static.keep_def(<self>, :"num_ok")
 
-    :"compute_num_ok"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"compute_num_ok")
 
-    :"missing"
+    ::Sorbet::Private::Static.keep_def(<self>, :"missing")
 
-    :"num_wrong_value"
+    ::Sorbet::Private::Static.keep_def(<self>, :"num_wrong_value")
 
-    :"compute_num_wrong_value"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"compute_num_wrong_value")
 
-    :"num_wrong_type"
+    ::Sorbet::Private::Static.keep_def(<self>, :"num_wrong_type")
 
-    :"compute_num_wrong_type"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"compute_num_wrong_type")
 
     ::T.let("not_a_symbol", <emptyTree>::<C Symbol>)
 
-    :"not_a_symbol"
+    ::Sorbet::Private::Static.keep_def(<self>, :"not_a_symbol")
 
-    :"num_unknown_type"
+    ::Sorbet::Private::Static.keep_def(<self>, :"num_unknown_type")
 
-    :"compute_num_unknown_type"
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"compute_num_unknown_type")
   end
 end

@@ -83,11 +83,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :"b"
-        :"b="
-        :"y"
-        :"z"
-        :"example"
+        ::Sorbet::Private::Static.keep_def(<self>, :"b")
+        ::Sorbet::Private::Static.keep_def(<self>, :"b=")
+        ::Sorbet::Private::Static.keep_def(<self>, :"y")
+        ::Sorbet::Private::Static.keep_def(<self>, :"z")
+        ::Sorbet::Private::Static.keep_def(<self>, :"example")
         <emptyTree>
       end
     end

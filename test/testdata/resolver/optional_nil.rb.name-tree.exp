@@ -68,21 +68,21 @@ begin
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        :"foo"
+        ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-        :"bar"
+        ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
-        :"qux"
+        ::Sorbet::Private::Static.keep_def(<self>, :"qux")
 
-        :"baz"
+        ::Sorbet::Private::Static.keep_def(<self>, :"baz")
 
-        :"foo<defaultArg>1"
+        ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
 
-        :"bar<defaultArg>1"
+        ::Sorbet::Private::Static.keep_def(<self>, :"bar<defaultArg>1")
 
-        :"qux<defaultArg>1"
+        ::Sorbet::Private::Static.keep_def(<self>, :"qux<defaultArg>1")
 
-        :"baz<defaultArg>1"
+        ::Sorbet::Private::Static.keep_def(<self>, :"baz<defaultArg>1")
       end
       ::Sorbet::Private::Static.keep_for_ide(::Test)
       <emptyTree>

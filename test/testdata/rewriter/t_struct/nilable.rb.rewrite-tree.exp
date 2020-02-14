@@ -32,13 +32,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       nil
     end
 
-    :"initialize"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"initialize<defaultArg>1"
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new().foo())

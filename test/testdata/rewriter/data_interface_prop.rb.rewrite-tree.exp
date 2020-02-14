@@ -43,14 +43,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(nil)
     end
 
-    :"foo"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    :"foo="
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    :"foo_"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo_")
 
-    :"foo_!"
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo_!")
   end
 
-  :"test"
+  ::Sorbet::Private::Static.keep_def(<self>, :"test")
 end
