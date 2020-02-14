@@ -290,6 +290,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             slowPathOp = nullptr;
             slowPathOp = make_unique<ShowOperation>(*config, "SlowPathNonBlocking", "Typechecking in background");
         }
+        // Report how long the slow path blocks preemption.
+        timeit.fork("slow_path.blocking_time");
 
         // [Test only] Wait for a preemption if one is expected.
         while (updates.preemptionsExpected > 0) {
@@ -325,6 +327,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
+        // Don't report the runtime of a canceled slow path.
+        timeit.cancel();
         // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
         // this slow path.
         ENFORCE(cancelable);
