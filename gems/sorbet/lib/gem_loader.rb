@@ -302,7 +302,33 @@ class Sorbet::Private::GemLoader
     'i18n' => proc do
       my_require 'i18n'
       [
+        I18n::Backend,
+        I18n::Backend::Base,
+        I18n::Backend::InterpolationCompiler,
+        I18n::Backend::Cache,
+        I18n::Backend::CacheFile,
+        I18n::Backend::Cascade,
+        I18n::Backend::Chain,
+        I18n::Backend::Fallbacks,
+        I18n::Backend::Flatten,
+        I18n::Backend::Gettext,
+        I18n::Backend::KeyValue,
+        I18n::Backend::Memoize,
+        I18n::Backend::Metadata,
+        I18n::Backend::Pluralization,
+        I18n::Backend::Simple,
+        I18n::Backend::Transliterator,
+        I18n::Config,
+        I18n::Gettext,
+        I18n::Gettext::Helpers,
+        I18n::Locale,
+        I18n::Locale::Fallbacks,
+        I18n::Locale::Tag,
+        I18n::Locale::Tag::Parents,
         I18n::Locale::Tag::Rfc4646,
+        I18n::Locale::Tag::Simple,
+        I18n::Tests,
+        I18n::Middleware,
       ]
     end,
     'http-cookie' => proc do
