@@ -115,7 +115,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @ruby_vm_global_method_state = external local_unnamed_addr global i64, align 8
 @.str.13 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
-@"stackFramePrecomputed_func_<root>.<static-init>$111" = internal unnamed_addr global i8* null, align 8
+@"stackFramePrecomputed_func_<root>.<static-init>$112" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
@@ -128,16 +128,26 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_HasFib = private unnamed_addr constant [7 x i8] c"HasFib\00", align 1
 @rubyIdPrecomputed_fib = internal unnamed_addr global i64 0, align 8
 @str_fib = private unnamed_addr constant [4 x i8] c"fib\00", align 1
-@"stackFramePrecomputed_func_HasFib.<static-init>" = internal unnamed_addr global i8* null, align 8
+@stackFramePrecomputed_func_HasFib.fib = internal unnamed_addr global i8* null, align 8
+@rubyStrFrozen_fib = internal unnamed_addr global i64 0, align 8
+@str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
+@str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
 @"str_T.class_of(HasFib)" = private unnamed_addr constant [19 x i8] c"T.class_of(HasFib)\00", align 1
+@"rubyIdPrecomputed_<" = internal unnamed_addr global i64 0, align 8
+@"str_<" = private unnamed_addr constant [2 x i8] c"<\00", align 1
+@rubyIdPrecomputed_- = internal unnamed_addr global i64 0, align 8
+@str_- = private unnamed_addr constant [2 x i8] c"-\00", align 1
+@"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
+@"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
+@"ic_call_via_vm_+" = internal global %struct.FunctionInlineCache zeroinitializer
+@"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
+@"stackFramePrecomputed_func_HasFib.<static-init>" = internal unnamed_addr global i8* null, align 8
 @rubyIdPrecomputed_final = internal unnamed_addr global i64 0, align 8
 @str_final = private unnamed_addr constant [6 x i8] c"final\00", align 1
 @"str_T::Sig::WithoutRuntime" = private unnamed_addr constant [23 x i8] c"T::Sig::WithoutRuntime\00", align 1
 @rubyIdPrecomputed_sig = internal unnamed_addr global i64 0, align 8
-@str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
 @rubyIdPrecomputed_n = internal unnamed_addr global i64 0, align 8
 @str_n = private unnamed_addr constant [2 x i8] c"n\00", align 1
-@str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
 @"rubyIdPrecomputed_<build-hash>" = internal unnamed_addr global i64 0, align 8
 @"str_<build-hash>" = private unnamed_addr constant [13 x i8] c"<build-hash>\00", align 1
 @ic_call_via_vm_params = internal global %struct.FunctionInlineCache zeroinitializer
@@ -146,17 +156,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @ic_call_via_vm_returns = internal global %struct.FunctionInlineCache zeroinitializer
 @rubyIdPrecomputed_returns = internal unnamed_addr global i64 0, align 8
 @str_returns = private unnamed_addr constant [8 x i8] c"returns\00", align 1
-@stackFramePrecomputed_func_HasFib.fib = internal unnamed_addr global i8* null, align 8
-@rubyStrFrozen_fib = internal unnamed_addr global i64 0, align 8
-@"rubyIdPrecomputed_<" = internal unnamed_addr global i64 0, align 8
-@"str_<" = private unnamed_addr constant [2 x i8] c"<\00", align 1
-@rubyIdPrecomputed_- = internal unnamed_addr global i64 0, align 8
-@str_- = private unnamed_addr constant [2 x i8] c"-\00", align 1
-@"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
-@"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
-@llvm.global_ctors = appending global [18 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<top (required)>", i8* bitcast (i64* @"rubyIdPrecomputed_<top (required)>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyStrFrozen_<top (required)>", i8* bitcast (i64* @"rubyStrFrozen_<top (required)>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", i8* bitcast (i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_stackFramePrecomputed_func_<root>.<static-init>$111", i8* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_fib, i8* bitcast (i64* @rubyIdPrecomputed_fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_stackFramePrecomputed_func_HasFib.<static-init>", i8* bitcast (i8** @"stackFramePrecomputed_func_HasFib.<static-init>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_final, i8* bitcast (i64* @rubyIdPrecomputed_final to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_sig, i8* bitcast (i64* @rubyIdPrecomputed_sig to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_n, i8* bitcast (i64* @rubyIdPrecomputed_n to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<build-hash>", i8* bitcast (i64* @"rubyIdPrecomputed_<build-hash>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_params, i8* bitcast (i64* @rubyIdPrecomputed_params to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_returns, i8* bitcast (i64* @rubyIdPrecomputed_returns to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyStrFrozen_fib, i8* bitcast (i64* @rubyStrFrozen_fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_stackFramePrecomputed_func_HasFib.fib, i8* bitcast (i8** @stackFramePrecomputed_func_HasFib.fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<", i8* bitcast (i64* @"rubyIdPrecomputed_<" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_-, i8* bitcast (i64* @rubyIdPrecomputed_- to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_+", i8* bitcast (i64* @"rubyIdPrecomputed_+" to i8*) }]
-@"ic_call_via_vm_+" = internal global %struct.FunctionInlineCache zeroinitializer
-@"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
+@llvm.global_ctors = appending global [18 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<top (required)>", i8* bitcast (i64* @"rubyIdPrecomputed_<top (required)>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyStrFrozen_<top (required)>", i8* bitcast (i64* @"rubyStrFrozen_<top (required)>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", i8* bitcast (i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_stackFramePrecomputed_func_<root>.<static-init>$112", i8* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$112" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_unsafe, i8* bitcast (i64* @rubyIdPrecomputed_unsafe to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_fib, i8* bitcast (i64* @rubyIdPrecomputed_fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyStrFrozen_fib, i8* bitcast (i64* @rubyStrFrozen_fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_stackFramePrecomputed_func_HasFib.fib, i8* bitcast (i8** @stackFramePrecomputed_func_HasFib.fib to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<", i8* bitcast (i64* @"rubyIdPrecomputed_<" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_-, i8* bitcast (i64* @rubyIdPrecomputed_- to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_+", i8* bitcast (i64* @"rubyIdPrecomputed_+" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_stackFramePrecomputed_func_HasFib.<static-init>", i8* bitcast (i8** @"stackFramePrecomputed_func_HasFib.<static-init>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_final, i8* bitcast (i64* @rubyIdPrecomputed_final to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_sig, i8* bitcast (i64* @rubyIdPrecomputed_sig to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_n, i8* bitcast (i64* @rubyIdPrecomputed_n to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @"Constr_rubyIdPrecomputed_<build-hash>", i8* bitcast (i64* @"rubyIdPrecomputed_<build-hash>" to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_params, i8* bitcast (i64* @rubyIdPrecomputed_params to i8*) }, { i32, void ()*, i8* } { i32 0, void ()* @Constr_rubyIdPrecomputed_returns, i8* bitcast (i64* @rubyIdPrecomputed_returns to i8*) }]
 @guard_epoch_HasFib = linkonce local_unnamed_addr global i64 0
 @guarded_const_HasFib = linkonce local_unnamed_addr global i64 0
 @"guard_epoch_T::Sig::WithoutRuntime" = linkonce local_unnamed_addr global i64 0
@@ -788,7 +788,7 @@ sorbet_inlineCacheInvalidated.exit:               ; preds = %73, %77, %80, %82, 
 }
 
 ; Function Attrs: nounwind ssp
-define internal void @"Constr_stackFramePrecomputed_func_<root>.<static-init>$111"() #13 {
+define internal void @"Constr_stackFramePrecomputed_func_<root>.<static-init>$112"() #13 {
 sorbet_allocateRubyStackFrames.exit:
   %"rubyStr_<top (required)>" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
   %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
@@ -883,7 +883,7 @@ sorbet_allocateRubyStackFrames.exit:
   %58 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %50, align 8, !tbaa !32
   %59 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %58, i64 0, i32 2
   store i64* null, i64** %59, align 8, !tbaa !46
-  store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to %struct.rb_iseq_struct**), align 8
+  store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$112" to %struct.rb_iseq_struct**), align 8
   ret void
 }
 
@@ -1279,13 +1279,13 @@ entry:
   %2 = load i64, i64* %1, align 8, !tbaa !57
   %3 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %3)
-  %"stackFrame_func_<root>.<static-init>$1111.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$111" to i64*), align 8
+  %"stackFrame_func_<root>.<static-init>$1121.i" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_<root>.<static-init>$112" to i64*), align 8
   %4 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !11
   %5 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %4, i64 0, i32 2
   %6 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %5, align 8, !tbaa !13
   %7 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %6, i64 0, i32 2
   %8 = bitcast %struct.rb_iseq_struct** %7 to i64*
-  store i64 %"stackFrame_func_<root>.<static-init>$1111.i", i64* %8, align 8, !tbaa !16
+  store i64 %"stackFrame_func_<root>.<static-init>$1121.i", i64* %8, align 8, !tbaa !16
   %9 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %6, i64 0, i32 4
   %10 = load i64*, i64** %9, align 8, !tbaa !18
   %11 = load i64, i64* %10, align 8, !tbaa !9
@@ -1360,7 +1360,7 @@ afterSend.i:                                      ; preds = %entry
   %50 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %49, i64 0, i32 1, i64 0
   %51 = load i64, i64* %50, align 8
   %52 = icmp eq i64 %51, %24
-  br i1 %52, label %"func_<root>.<static-init>$111.exit", label %53
+  br i1 %52, label %"func_<root>.<static-init>$112.exit", label %53
 
 53:                                               ; preds = %23
   %54 = load i64, i64* @rb_cModule, align 8, !tbaa !9
@@ -1371,13 +1371,13 @@ afterSend.i:                                      ; preds = %entry
 sorbet_isa_class_of.exit.i.i:                     ; preds = %53
   %57 = tail call i64 @rb_class_inherited_p(i64 %51, i64 %24) #6
   %58 = icmp eq i64 %57, 0
-  br i1 %58, label %codeRepl, label %"func_<root>.<static-init>$111.exit", !prof !48
+  br i1 %58, label %codeRepl, label %"func_<root>.<static-init>$112.exit", !prof !48
 
 codeRepl:                                         ; preds = %53, %sorbet_isa_class_of.exit.i.i
   tail call fastcc void @Init_test_testdata_ruby_benchmark_app_fib.cold.1(i64 %51) #23
   unreachable
 
-"func_<root>.<static-init>$111.exit":             ; preds = %23, %sorbet_isa_class_of.exit.i.i
+"func_<root>.<static-init>$112.exit":             ; preds = %23, %sorbet_isa_class_of.exit.i.i
   store i64* inttoptr (i64 16 to i64*), i64** %48, align 8, !tbaa !11
   %rawSym.i.i = tail call i64 @rb_id2sym(i64 %rubyId_final.i.i) #20
   %callArgsAddr.i.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i.i, i64 0, i64 0
@@ -1387,11 +1387,11 @@ codeRepl:                                         ; preds = %53, %sorbet_isa_cla
   %needTakeSlowPath8 = icmp eq i64 %59, %60
   br i1 %needTakeSlowPath8, label %62, label %61, !prof !49
 
-61:                                               ; preds = %"func_<root>.<static-init>$111.exit"
+61:                                               ; preds = %"func_<root>.<static-init>$112.exit"
   tail call void @"const_recompute_T::Sig::WithoutRuntime"() #20
   br label %62
 
-62:                                               ; preds = %"func_<root>.<static-init>$111.exit", %61
+62:                                               ; preds = %"func_<root>.<static-init>$112.exit", %61
   %63 = load i64, i64* @"guarded_const_T::Sig::WithoutRuntime", align 8
   %64 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
   %65 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !19
@@ -1415,6 +1415,109 @@ codeRepl:                                         ; preds = %53, %sorbet_isa_cla
   %72 = call i32 @ruby_stack_check() #20
   %directSendResult.i = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr.i, i64 %24) #20
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %3)
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_stackFramePrecomputed_func_HasFib.fib() #13 {
+sorbet_allocateRubyStackFrames.exit:
+  %rubyStr_fib = load i64, i64* @rubyStrFrozen_fib, align 8
+  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
+  %0 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %rubyStr_fib, i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb", %struct.rb_iseq_struct* null, i32 1) #20
+  %1 = ptrtoint %struct.rb_iseq_struct* %0 to i64
+  tail call void @rb_gc_register_mark_object(i64 %1) #20
+  %2 = tail call i8* @ruby_xmalloc2(i64 7, i64 8) #20
+  %3 = tail call i8* @ruby_xmalloc2(i64 7, i64 4) #20
+  %4 = bitcast i8* %3 to i32*
+  store i32 0, i32* %4, align 4, !tbaa !0
+  %5 = bitcast i8* %2 to i32*
+  store i32 7, i32* %5, align 4, !tbaa !30
+  %6 = getelementptr inbounds i8, i8* %3, i64 4
+  %7 = bitcast i8* %6 to i32*
+  store i32 1, i32* %7, align 4, !tbaa !0
+  %8 = getelementptr inbounds i8, i8* %2, i64 8
+  %9 = bitcast i8* %8 to i32*
+  store i32 8, i32* %9, align 4, !tbaa !30
+  %10 = getelementptr inbounds i8, i8* %3, i64 8
+  %11 = bitcast i8* %10 to i32*
+  store i32 2, i32* %11, align 4, !tbaa !0
+  %12 = getelementptr inbounds i8, i8* %2, i64 16
+  %13 = bitcast i8* %12 to i32*
+  store i32 9, i32* %13, align 4, !tbaa !30
+  %14 = getelementptr inbounds i8, i8* %3, i64 12
+  %15 = bitcast i8* %14 to i32*
+  store i32 3, i32* %15, align 4, !tbaa !0
+  %16 = getelementptr inbounds i8, i8* %2, i64 24
+  %17 = bitcast i8* %16 to i32*
+  store i32 10, i32* %17, align 4, !tbaa !30
+  %18 = getelementptr inbounds i8, i8* %3, i64 16
+  %19 = bitcast i8* %18 to i32*
+  store i32 4, i32* %19, align 4, !tbaa !0
+  %20 = getelementptr inbounds i8, i8* %2, i64 32
+  %21 = bitcast i8* %20 to i32*
+  store i32 11, i32* %21, align 4, !tbaa !30
+  %22 = getelementptr inbounds i8, i8* %3, i64 20
+  %23 = bitcast i8* %22 to i32*
+  store i32 5, i32* %23, align 4, !tbaa !0
+  %24 = getelementptr inbounds i8, i8* %2, i64 40
+  %25 = bitcast i8* %24 to i32*
+  store i32 12, i32* %25, align 4, !tbaa !30
+  %26 = getelementptr inbounds i8, i8* %3, i64 24
+  %27 = bitcast i8* %26 to i32*
+  store i32 6, i32* %27, align 4, !tbaa !0
+  %28 = getelementptr inbounds i8, i8* %2, i64 48
+  %29 = bitcast i8* %28 to i32*
+  store i32 13, i32* %29, align 4, !tbaa !30
+  %30 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %0, i64 0, i32 2
+  %31 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %30, align 8, !tbaa !32
+  %32 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 0
+  %33 = bitcast %struct.rb_code_position_struct** %32 to i8**
+  store i8* %2, i8** %33, align 8, !tbaa !34
+  %34 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 1
+  %35 = bitcast i32** %34 to i8**
+  store i8* %3, i8** %35, align 8, !tbaa !43
+  %36 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 1
+  store i32 7, i32* %36, align 4, !tbaa !44
+  %37 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 2
+  store i32 7, i32* %37, align 8, !tbaa !45
+  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %0) #20
+  %38 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %30, align 8, !tbaa !32
+  %39 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %38, i64 0, i32 2
+  store i64* null, i64** %39, align 8, !tbaa !46
+  store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** bitcast (i8** @stackFramePrecomputed_func_HasFib.fib to %struct.rb_iseq_struct**), align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_rubyStrFrozen_fib() #13 {
+constr:
+  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 3) #20
+  tail call void @rb_gc_register_mark_object(i64 %0) #20
+  store i64 %0, i64* @rubyStrFrozen_fib, align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @"Constr_rubyIdPrecomputed_<"() #13 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<", i64 0, i64 0), i64 1) #20
+  store i64 %0, i64* @"rubyIdPrecomputed_<", align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @Constr_rubyIdPrecomputed_-() #13 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_-, i64 0, i64 0), i64 1) #20
+  store i64 %0, i64* @rubyIdPrecomputed_-, align 8
+  ret void
+}
+
+; Function Attrs: nounwind ssp
+define internal void @"Constr_rubyIdPrecomputed_+"() #13 {
+constr:
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 1) #20
+  store i64 %0, i64* @"rubyIdPrecomputed_+", align 8
   ret void
 }
 
@@ -1564,109 +1667,6 @@ define internal void @Constr_rubyIdPrecomputed_returns() #13 {
 constr:
   %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_returns, i64 0, i64 0), i64 7) #20
   store i64 %0, i64* @rubyIdPrecomputed_returns, align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @Constr_stackFramePrecomputed_func_HasFib.fib() #13 {
-sorbet_allocateRubyStackFrames.exit:
-  %rubyStr_fib = load i64, i64* @rubyStrFrozen_fib, align 8
-  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
-  %0 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %rubyStr_fib, i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb", %struct.rb_iseq_struct* null, i32 1) #20
-  %1 = ptrtoint %struct.rb_iseq_struct* %0 to i64
-  tail call void @rb_gc_register_mark_object(i64 %1) #20
-  %2 = tail call i8* @ruby_xmalloc2(i64 7, i64 8) #20
-  %3 = tail call i8* @ruby_xmalloc2(i64 7, i64 4) #20
-  %4 = bitcast i8* %3 to i32*
-  store i32 0, i32* %4, align 4, !tbaa !0
-  %5 = bitcast i8* %2 to i32*
-  store i32 7, i32* %5, align 4, !tbaa !30
-  %6 = getelementptr inbounds i8, i8* %3, i64 4
-  %7 = bitcast i8* %6 to i32*
-  store i32 1, i32* %7, align 4, !tbaa !0
-  %8 = getelementptr inbounds i8, i8* %2, i64 8
-  %9 = bitcast i8* %8 to i32*
-  store i32 8, i32* %9, align 4, !tbaa !30
-  %10 = getelementptr inbounds i8, i8* %3, i64 8
-  %11 = bitcast i8* %10 to i32*
-  store i32 2, i32* %11, align 4, !tbaa !0
-  %12 = getelementptr inbounds i8, i8* %2, i64 16
-  %13 = bitcast i8* %12 to i32*
-  store i32 9, i32* %13, align 4, !tbaa !30
-  %14 = getelementptr inbounds i8, i8* %3, i64 12
-  %15 = bitcast i8* %14 to i32*
-  store i32 3, i32* %15, align 4, !tbaa !0
-  %16 = getelementptr inbounds i8, i8* %2, i64 24
-  %17 = bitcast i8* %16 to i32*
-  store i32 10, i32* %17, align 4, !tbaa !30
-  %18 = getelementptr inbounds i8, i8* %3, i64 16
-  %19 = bitcast i8* %18 to i32*
-  store i32 4, i32* %19, align 4, !tbaa !0
-  %20 = getelementptr inbounds i8, i8* %2, i64 32
-  %21 = bitcast i8* %20 to i32*
-  store i32 11, i32* %21, align 4, !tbaa !30
-  %22 = getelementptr inbounds i8, i8* %3, i64 20
-  %23 = bitcast i8* %22 to i32*
-  store i32 5, i32* %23, align 4, !tbaa !0
-  %24 = getelementptr inbounds i8, i8* %2, i64 40
-  %25 = bitcast i8* %24 to i32*
-  store i32 12, i32* %25, align 4, !tbaa !30
-  %26 = getelementptr inbounds i8, i8* %3, i64 24
-  %27 = bitcast i8* %26 to i32*
-  store i32 6, i32* %27, align 4, !tbaa !0
-  %28 = getelementptr inbounds i8, i8* %2, i64 48
-  %29 = bitcast i8* %28 to i32*
-  store i32 13, i32* %29, align 4, !tbaa !30
-  %30 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %0, i64 0, i32 2
-  %31 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %30, align 8, !tbaa !32
-  %32 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 0
-  %33 = bitcast %struct.rb_code_position_struct** %32 to i8**
-  store i8* %2, i8** %33, align 8, !tbaa !34
-  %34 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 1
-  %35 = bitcast i32** %34 to i8**
-  store i8* %3, i8** %35, align 8, !tbaa !43
-  %36 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 1
-  store i32 7, i32* %36, align 4, !tbaa !44
-  %37 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %31, i64 0, i32 5, i32 2
-  store i32 7, i32* %37, align 8, !tbaa !45
-  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %0) #20
-  %38 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %30, align 8, !tbaa !32
-  %39 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %38, i64 0, i32 2
-  store i64* null, i64** %39, align 8, !tbaa !46
-  store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** bitcast (i8** @stackFramePrecomputed_func_HasFib.fib to %struct.rb_iseq_struct**), align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @Constr_rubyStrFrozen_fib() #13 {
-constr:
-  %0 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 3) #20
-  tail call void @rb_gc_register_mark_object(i64 %0) #20
-  store i64 %0, i64* @rubyStrFrozen_fib, align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @"Constr_rubyIdPrecomputed_<"() #13 {
-constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<", i64 0, i64 0), i64 1) #20
-  store i64 %0, i64* @"rubyIdPrecomputed_<", align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @Constr_rubyIdPrecomputed_-() #13 {
-constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_-, i64 0, i64 0), i64 1) #20
-  store i64 %0, i64* @rubyIdPrecomputed_-, align 8
-  ret void
-}
-
-; Function Attrs: nounwind ssp
-define internal void @"Constr_rubyIdPrecomputed_+"() #13 {
-constr:
-  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 1) #20
-  store i64 %0, i64* @"rubyIdPrecomputed_+", align 8
   ret void
 }
 
