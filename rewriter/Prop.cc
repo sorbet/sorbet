@@ -275,11 +275,11 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         //  T.unsafe(nil)
         // end
 
-        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
+        auto fkMethod = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fk_method, std::move(arg),
+        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fkMethod, std::move(arg),
                                                 ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                                 ast::MethodDef::RewriterSynthesized));
 
@@ -287,14 +287,14 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         ret.nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
                                              std::move(nonNilType)));
 
-        // def $fk_method_bang(**opts)
+        // def $fk_method_!(**opts)
         //  T.unsafe(nil)
         // end
 
-        auto fk_method_bang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
+        auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fk_method_bang, std::move(arg2),
+        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fkMethodBang, std::move(arg2),
                                                 ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                                 ast::MethodDef::RewriterSynthesized));
     }
