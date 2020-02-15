@@ -10,13 +10,13 @@ jobs:
     steps:
     - name: "Request review for external contribution"
       if: github.event.pull_request.head.repo.fork == true
-      uses: jez/review-request-action@jez-patch-1
+      uses: jez/review-request-action@277cc1d72e369ce2f2b2544fa2140f1a63270202
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         team-reviewers: "runner"
     - name: "Request review for internal contribution"
       if: github.event.pull_request.head.repo.fork == false
-      uses: jez/review-request-action@jez-patch-1
+      uses: jez/review-request-action@277cc1d72e369ce2f2b2544fa2140f1a63270202
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         team-reviewers: "core-reviewers"
