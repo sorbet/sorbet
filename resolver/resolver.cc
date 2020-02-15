@@ -1590,7 +1590,7 @@ private:
 
                     auto loc = lastSigs[0]->loc;
                     if (loc.file().data(ctx).originalSigil == core::StrictLevel::None &&
-                        !lastSigs.front()->isRewriterSynthesized()) {
+                        !lastSigs.front()->flags.isRewriterSynthesized) {
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
                             e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
                                         "none). If you're not sure which one to use, start with `{}`",

@@ -320,7 +320,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         target.isShadow = e.shadow;
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags), newRubyBlockId);
-                    auto send = make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk(), link);
+                    auto send =
+                        make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, !!s->flags.isPrivateOk, link);
                     core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_unique<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
@@ -418,7 +419,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 } else {
                     current->exprs.emplace_back(
                         cctx.target, s->loc,
-                        make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, s->isPrivateOk()));
+                        make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs, !!s->flags.isPrivateOk));
                 }
 
                 ret = current;
