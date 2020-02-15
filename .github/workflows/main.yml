@@ -13,11 +13,10 @@ jobs:
       uses: kunihiko-t/review-request-action@v0.1.3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        team-reviewers: "sorbet/runner"
+        team-reviewers: "runner"
     - name: "Request review for internal contribution"
       if: github.event.pull_request.head.repo.fork == false
       uses: kunihiko-t/review-request-action@v0.1.3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        #team-reviewers: "sorbet/core-reviewers"
-        team-reviewers: "sorbet/runner"
+        team-reviewers: "core-reviewers"
