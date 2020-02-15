@@ -423,12 +423,12 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // add entries here, without consulting the "node.*" counters from a
             // run over a representative code base.
             [&](parser::Send *send) {
-                u4 flags = 0;
+                Send::Flags flags;
                 auto rec = node2TreeImpl(dctx, std::move(send->receiver));
                 if (isa_tree<EmptyTree>(rec.get())) {
                     // 0-sized Loc, since `self.` doesn't appear in the original file.
                     rec = MK::Self(loc.copyWithZeroLength());
-                    flags |= Send::PRIVATE_OK;
+                    flags.isPrivateOk = true;
                 }
                 if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
                     // If we have a splat anywhere in the argument list, desugar

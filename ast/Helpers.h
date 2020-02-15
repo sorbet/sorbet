@@ -308,7 +308,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
@@ -318,7 +318,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(void_));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
@@ -327,7 +327,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
