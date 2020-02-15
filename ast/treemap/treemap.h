@@ -94,7 +94,7 @@ public:
                                                                                         \
     public:                                                                             \
         using type = HAS_MEMBER_##X;                                                    \
-        enum { value = sizeof(func<Derived>(0)) == 2 };                                 \
+        static constexpr std::size_t value = sizeof(func<Derived>(0)) == 2;             \
     };
 
 GENERATE_HAS_MEMBER(preTransformExpression);
