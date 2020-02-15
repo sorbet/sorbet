@@ -244,15 +244,15 @@ public:
                                            flags);
     }
 
-    static std::unique_ptr<Expression> Method0(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                               std::unique_ptr<Expression> rhs, u4 flags = 0) {
+    static std::unique_ptr<MethodDef> Method0(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                              std::unique_ptr<Expression> rhs, u4 flags = 0) {
         MethodDef::ARGS_store args;
         return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
-    static std::unique_ptr<Expression> Method1(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                               std::unique_ptr<Expression> arg0, std::unique_ptr<Expression> rhs,
-                                               u4 flags = 0) {
+    static std::unique_ptr<MethodDef> Method1(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                              std::unique_ptr<Expression> arg0, std::unique_ptr<Expression> rhs,
+                                              u4 flags = 0) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
         return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
