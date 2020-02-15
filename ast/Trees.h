@@ -456,9 +456,16 @@ class Send final : public Expression {
 public:
     core::NameRef fun;
 
-    static const int PRIVATE_OK = 1 << 0;
-    static const int REWRITER_SYNTHESIZED = 1 << 1;
-    u4 flags;
+    struct __attribute__((packed, aligned(1))) Flags {
+        bool isPrivateOk : 1;
+        bool isRewriterSynthesized : 1;
+
+        // In C++20 we can replace this with bit field initialzers
+        Flags() : isPrivateOk(false), isRewriterSynthesized(false) {}
+    };
+    CheckSize(Flags, 1, 1);
+
+    Flags flags;
 
     std::unique_ptr<Expression> recv;
 
@@ -468,19 +475,11 @@ public:
     std::unique_ptr<Block> block; // null if no block passed
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
-         std::unique_ptr<Block> block = nullptr, u4 flags = 0);
+         std::unique_ptr<Block> block = nullptr, Flags flags = {});
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-    bool isRewriterSynthesized() const {
-        return (flags & REWRITER_SYNTHESIZED) != 0;
-    }
-
-    bool isPrivateOk() const {
-        return (flags & PRIVATE_OK) != 0;
-    }
 
 private:
     virtual void _sanityCheck();
