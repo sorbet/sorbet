@@ -144,6 +144,12 @@ VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) __attribute__(
     return ret;
 }
 
+VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) __attribute__((always_inline)) {
+    VALUE ret = rb_reg_new(ptr, length, options);
+    rb_gc_register_mark_object(ret);
+    return ret;
+}
+
 VALUE sorbet_stringPlus(VALUE str1, VALUE str2) __attribute__((always_inline)) {
     return rb_str_plus(str1, str2);
 }

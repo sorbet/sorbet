@@ -73,6 +73,57 @@ llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &
                                            {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
 }
 
+llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
+                                       int options) {
+    auto &builder = builderCast(build);
+    // all regexp are frozen. We'll allocate it at load time and share it.
+    string rawName = "rubyRegexpFrozen_" + (string)str;
+    auto tp = llvm::Type::getInt64Ty(cs);
+    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+    llvm::Constant *indices[] = {zero};
+
+    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        llvm::IRBuilder<> globalInitBuilder(cs);
+        auto ret =
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        ret->setAlignment(8);
+        // create constructor
+        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
+        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
+
+        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
+        globalInitBuilder.SetInsertPoint(bb);
+        auto rawCString = Payload::toCString(cs, str, globalInitBuilder);
+        auto rawStr =
+            globalInitBuilder.CreateCall(cs.module->getFunction("sorbet_cPtrToRubyRegexpFrozen"),
+                                         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length())),
+
+                                          llvm::ConstantInt::get(cs, llvm::APInt(32, options))});
+        globalInitBuilder.CreateStore(rawStr,
+                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateRetVoid();
+        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+
+        return ret;
+    }));
+
+    ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
+            "you're calling this function from something low-level that passed a IRBuilder that points outside of "
+            "function currently being generated");
+    auto oldInsertPoint = builder.saveIP();
+    builder.SetInsertPoint(cs.functionEntryInitializers);
+    auto name = llvm::StringRef(str.data(), str.length());
+    auto global = builder.CreateLoad(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+        {"rubyRegexp_", name});
+    builder.restoreIP(oldInsertPoint);
+
+    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
+    return global;
+}
+
 llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
                                        bool frozen) {
     auto &builder = builderCast(build);

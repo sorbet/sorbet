@@ -210,6 +210,46 @@ public:
     };
 } Module_tripleEq;
 
+class Regexp_new : public SymbolBasedIntrinsicMethod {
+public:
+    Regexp_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
+        if (send->args.size() < 1 || send->args.size() > 2) {
+            // todo: make this work with options.
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
+        }
+        auto options = 0;
+        if (send->args.size() == 2) {
+            auto &arg1 = send->args[1];
+            auto literalOptions = core::cast_type<core::LiteralType>(arg1.type.get());
+            if (literalOptions == nullptr ||
+                literalOptions->literalKind != core::LiteralType::LiteralTypeKind::Integer) {
+                return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
+            }
+            options = literalOptions->value;
+        }
+
+        auto &arg0 = send->args[0];
+        auto literal = core::cast_type<core::LiteralType>(arg0.type.get());
+        if (literal == nullptr || literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, blockMap, aliases, rubyBlockId, blk);
+        }
+        auto &builder = builderCast(build);
+        auto str = core::NameRef(cs, literal->value).data(cs)->shortName(cs);
+        return Payload::cPtrToRubyRegexp(cs, builder, str, options);
+    };
+
+    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+        return {core::Symbols::Regexp().data(cs)->lookupSingletonClass(cs)};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::new_()};
+    };
+} Regexp_new;
+
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod,
@@ -259,7 +299,7 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
-    vector<const SymbolBasedIntrinsicMethod *> res{&DefineMethodIntrinsic, &Module_tripleEq};
+    vector<const SymbolBasedIntrinsicMethod *> res{&DefineMethodIntrinsic, &Module_tripleEq, &Regexp_new};
     for (auto &method : knownCMethodsInstance) {
         res.emplace_back(&method);
     }
