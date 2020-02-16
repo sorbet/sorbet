@@ -153,6 +153,7 @@ public:
     }
 } DefineMethodIntrinsic;
 
+/* Reuse logic from typeTest to speedup SomeClass === someVal */
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
     Module_tripleEq() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
