@@ -856,7 +856,7 @@ class Time < Object
     )
     .returns(Time)
   end
-  def round(arg0); end
+  def round(arg0 = 0); end
 
   # Returns `true` if *time* represents Saturday.
   #
