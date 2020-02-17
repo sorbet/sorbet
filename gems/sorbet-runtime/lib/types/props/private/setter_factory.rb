@@ -31,29 +31,64 @@ module T::Props
           T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
         end
         accessor_key = rules.fetch(:accessor_key)
-        raise_error = ->(val) {raise_pretty_error(klass, prop, non_nil_type, val)}
 
         # It seems like a bug that this affects the behavior of setters, but
         # some existing code relies on this behavior
         has_explicit_nil_default = rules.key?(:default) && rules.fetch(:default).nil?
 
+        # Use separate methods in order to ensure that we only close over necessary
+        # variables
         if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
-          proc do |val|
-            if val.nil?
-              instance_variable_set(accessor_key, nil)
-            elsif non_nil_type.valid?(val)
-              instance_variable_set(accessor_key, val)
-            else
-              raise_error.call(val)
-            end
-          end
+          nilable_proc(prop, accessor_key, non_nil_type)
         else
-          proc do |val|
-            if non_nil_type.valid?(val)
-              instance_variable_set(accessor_key, val)
-            else
-              raise_error.call(val)
-            end
+          non_nil_proc(prop, accessor_key, non_nil_type)
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+          non_nil_type: T.any(T::Types::Base, Module),
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type)
+        proc do |val|
+          if non_nil_type.valid?(val)
+            instance_variable_set(accessor_key, val)
+          else
+            T::Props::Private::SetterFactory.raise_pretty_error(
+              self.class,
+              prop,
+              non_nil_type,
+              val,
+            )
+          end
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+          non_nil_type: T.any(T::Types::Base, Module),
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type)
+        proc do |val|
+          if val.nil?
+            instance_variable_set(accessor_key, nil)
+          elsif non_nil_type.valid?(val)
+            instance_variable_set(accessor_key, val)
+          else
+            T::Props::Private::SetterFactory.raise_pretty_error(
+              self.class,
+              prop,
+              non_nil_type,
+              val,
+            )
           end
         end
       end
@@ -67,7 +102,7 @@ module T::Props
         )
         .void
       end
-      private_class_method def self.raise_pretty_error(klass, prop, type, val)
+      def self.raise_pretty_error(klass, prop, type, val)
         base_message = "Can't set #{klass.name}.#{prop} to #{val.inspect} (instance of #{val.class}) - need a #{type}"
 
         pretty_message = "Parameter '#{prop}': #{base_message}\n"
