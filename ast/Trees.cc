@@ -169,7 +169,7 @@ Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression>
 }
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
-           unique_ptr<Block> block, u4 flags)
+           unique_ptr<Block> block, Flags flags)
     : Expression(loc), fun(fun), flags(flags), recv(std::move(recv)), args(std::move(args)), block(std::move(block)) {
     categoryCounterInc("trees", "send");
     if (block) {

@@ -31,10 +31,9 @@ public:
     }
 
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                            Send::ARGS_store args, u4 flags = 0,
+                                            Send::ARGS_store args, Send::Flags flags = {},
                                             std::unique_ptr<ast::Block> blk = nullptr) {
-        auto send = std::make_unique<ast::Send>(loc, std::move(recv), fun, std::move(args), std::move(blk));
-        send->flags = flags;
+        auto send = std::make_unique<ast::Send>(loc, std::move(recv), fun, std::move(args), std::move(blk), flags);
         return send;
     }
 
@@ -46,7 +45,7 @@ public:
     static std::unique_ptr<Expression> Send0Block(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                                   std::unique_ptr<ast::Block> blk) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, std::move(nargs), 0, std::move(blk));
+        return Send(loc, std::move(recv), fun, std::move(nargs), {}, std::move(blk));
     }
 
     static std::unique_ptr<Expression> Send1(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
@@ -308,7 +307,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
@@ -318,7 +317,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(void_));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
@@ -327,7 +326,7 @@ public:
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
-        sigSend->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
 
@@ -383,7 +382,7 @@ public:
                      std::move(arg));
     }
 
-    static std::unique_ptr<Expression> SelfNew(core::Loc loc, ast::Send::ARGS_store args, u4 flags = 0,
+    static std::unique_ptr<Expression> SelfNew(core::Loc loc, ast::Send::ARGS_store args, Send::Flags flags = {},
                                                std::unique_ptr<ast::Block> block = nullptr) {
         auto magic = Constant(loc, core::Symbols::Magic());
         return Send(loc, std::move(magic), core::Names::selfNew(), std::move(args), flags, std::move(block));

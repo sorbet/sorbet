@@ -221,7 +221,7 @@ public:
             original->fun == core::Names::extend()) {
             ignoring.emplace_back(original.get());
         }
-        if (original->isPrivateOk() && original->fun == core::Names::require() && original->args.size() == 1) {
+        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));

@@ -423,12 +423,12 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
             // add entries here, without consulting the "node.*" counters from a
             // run over a representative code base.
             [&](parser::Send *send) {
-                u4 flags = 0;
+                Send::Flags flags;
                 auto rec = node2TreeImpl(dctx, std::move(send->receiver));
                 if (isa_tree<EmptyTree>(rec.get())) {
                     // 0-sized Loc, since `self.` doesn't appear in the original file.
                     rec = MK::Self(loc.copyWithZeroLength());
-                    flags |= Send::PRIVATE_OK;
+                    flags.isPrivateOk = true;
                 }
                 if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
                     // If we have a splat anywhere in the argument list, desugar
@@ -459,17 +459,17 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     unique_ptr<Expression> res;
                     if (block == nullptr) {
                         res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                       std::move(sendargs), 0);
+                                       std::move(sendargs), {});
                     } else {
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock.get())) && lit->isSymbol(dctx.ctx)) {
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                           std::move(sendargs), 0, symbol2Proc(dctx, std::move(convertedBlock)));
+                                           std::move(sendargs), {}, symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::callWithSplatAndBlock(), std::move(sendargs), 0);
+                                           core::Names::callWithSplatAndBlock(), std::move(sendargs), {});
                         }
                     }
                     result.swap(res);
@@ -507,7 +507,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                             }
 
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithBlock(),
-                                           std::move(sendargs), 0);
+                                           std::move(sendargs), {});
                         }
                     }
 
@@ -1128,7 +1128,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
 
                 Send::ARGS_store noargs;
                 auto res = MK::Send(loc, node2TreeImpl(dctx, std::move(for_->expr)), core::Names::each(),
-                                    std::move(noargs), 0, std::move(block));
+                                    std::move(noargs), {}, std::move(block));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {
