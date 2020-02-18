@@ -279,9 +279,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fkMethod, std::move(arg),
-                                                ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                                ast::MethodDef::RewriterSynthesized));
+        ret.nodes.emplace_back(
+            ast::MK::Method1(loc, loc, fkMethod, std::move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         ret.nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -294,9 +293,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(ast::MK::Method1(loc, loc, fkMethodBang, std::move(arg2),
-                                                ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                                ast::MethodDef::RewriterSynthesized));
+        ret.nodes.emplace_back(
+            ast::MK::Method1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
     }
 
     // Compute the Mutator
@@ -412,8 +410,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
         auto loc = klass->loc;
         klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
-        klass->rhs.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args),
-                                                ast::MK::EmptyTree(), ast::MethodDef::RewriterSynthesized));
+        klass->rhs.emplace_back(
+            ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args), ast::MK::EmptyTree()));
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {

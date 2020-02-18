@@ -124,8 +124,7 @@ vector<unique_ptr<ast::Expression>> Delegate::run(core::MutableContext ctx, cons
         args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
         args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
-        methodStubs.push_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree(),
-                                              ast::MethodDef::RewriterSynthesized));
+        methodStubs.push_back(ast::MK::Method(loc, loc, methodName, std::move(args), ast::MK::EmptyTree()));
     }
 
     return methodStubs;
