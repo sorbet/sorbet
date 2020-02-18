@@ -456,7 +456,7 @@ class Send final : public Expression {
 public:
     core::NameRef fun;
 
-    struct __attribute__((packed, aligned(1))) Flags {
+    struct Flags {
         bool isPrivateOk : 1;
         bool isRewriterSynthesized : 1;
 
