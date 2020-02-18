@@ -25,7 +25,7 @@ public:
                     core::Loc(classDef->declLoc.file(), classDef->declLoc.beginPos(), classDef->declLoc.beginPos());
                 auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             Names::defineTopClassOrModule(ctx), classDef->name->deepCopy());
-                ast::cast_tree<ast::Send>(magic.get())->flags |= ast::Send::REWRITER_SYNTHESIZED;
+                ast::cast_tree<ast::Send>(magic.get())->flags.isRewriterSynthesized = true;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;
                 continue;

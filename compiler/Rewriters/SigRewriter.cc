@@ -22,7 +22,7 @@ public:
                                          core::Names::sig());
         auto newSig = ast::cast_tree<ast::Send>(newSigExpr.get());
         newSig->block = move(send->block);
-        newSig->flags |= ast::Send::REWRITER_SYNTHESIZED;
+        newSig->flags.isRewriterSynthesized = true;
         return newSigExpr;
     }
 
