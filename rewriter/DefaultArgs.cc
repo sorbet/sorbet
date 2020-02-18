@@ -172,8 +172,9 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                         }
                         newMethods.emplace_back(move(sig));
                     }
-                    newMethods.emplace_back(ast::MK::Method(loc, loc, name, std::move(args), std::move(rhs),
-                                                            mdef->flags | ast::MethodDef::RewriterSynthesized));
+                    auto defaultArgDef = ast::MK::Method(loc, loc, name, std::move(args), std::move(rhs));
+                    defaultArgDef->setIsSelf(mdef->isSelf());
+                    newMethods.emplace_back(move(defaultArgDef));
                 }
                 lastSig = nullptr;
             },
