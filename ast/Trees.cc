@@ -448,18 +448,14 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
 
-    buf << "flags =";
-    // TODO(jez) Change this to show a list or something
+    auto stringifiedFlags = vector<string>{};
     if (this->flags.isSelfMethod) {
-        buf << " self";
+        stringifiedFlags.emplace_back("self");
     }
     if (this->flags.isRewriterSynthesized) {
-        buf << " rewriter";
+        stringifiedFlags.emplace_back("rewriter");
     }
-    if (!this->flags.isSelfMethod && !this->flags.isRewriterSynthesized) {
-        buf << " 0";
-    }
-    buf << '\n';
+    buf << fmt::format("flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
     printTabs(buf, tabs + 1);
     buf << "name = " << name.data(gs)->showRaw(gs) << "<"
