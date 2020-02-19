@@ -762,7 +762,6 @@ You are encouraged to play around with various clang-based tools which use the
     Diagnostics), but can be somewhat slower at times because it does not
     pre-index all your code like rtags does.
 
-
     After successfully compiling Sorbet, point your editor to use the
     `clangd` executable located in
     `bazel-sorbet/external/llvm_toolchain/bin/clangd`.
