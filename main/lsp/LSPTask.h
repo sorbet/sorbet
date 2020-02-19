@@ -58,6 +58,9 @@ public:
         RUN = 3,
     };
 
+    // Get this task's method as a string.
+    ConstExprStr methodString() const;
+
     /**
      * If `true`, this task can be delayed in favor of processing other tasks sooner. Defaults to `false`.
      */

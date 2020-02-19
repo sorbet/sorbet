@@ -33,7 +33,6 @@ HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_p
 
 unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
-    prodCategoryCounterInc("lsp.messages.processed", "textDocument.hover");
 
     const core::GlobalState &gs = typechecker.state();
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentHover);

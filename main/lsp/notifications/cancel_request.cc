@@ -12,7 +12,6 @@ LSPTask::Phase CancelRequestTask::finalPhase() const {
 }
 
 void CancelRequestTask::preprocess(LSPPreprocessor &preprocessor) {
-    prodCategoryCounterInc("lsp.messages.processed", "cancelRequest");
     preprocessor.cancelRequest(*params);
 }
 

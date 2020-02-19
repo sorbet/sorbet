@@ -281,7 +281,6 @@ unique_ptr<ResponseMessage> WorkspaceSymbolsTask::runRequest(LSPTypecheckerDeleg
     Timer timeit(typechecker.state().tracer(), "LSPLoop::handleWorkspaceSymbols");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::WorkspaceSymbol);
     ShowOperation op(config, "References", "Workspace symbol search...");
-    prodCategoryCounterInc("lsp.messages.processed", "workspace.symbols");
     SymbolMatcher matcher(config, typechecker.state());
     response->result = matcher.doQuery(params->query);
     return response;

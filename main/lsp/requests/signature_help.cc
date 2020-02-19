@@ -61,8 +61,6 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
         return response;
     }
 
-    prodCategoryCounterInc("lsp.messages.processed", "textDocument.signatureHelp");
-
     const core::GlobalState &gs = typechecker.state();
     auto result =
         queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentSignatureHelp);

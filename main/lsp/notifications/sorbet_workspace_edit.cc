@@ -61,8 +61,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     typechecker.typecheckOnFastPath(move(*updates));
-    prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
-    prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", updates->editCount - 1);
+    prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
 }
 
 void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) {
@@ -77,8 +76,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     startedNotification.Notify();
     // Only report stats if the edit was committed.
     if (!typechecker.typecheck(move(*updates), workers)) {
-        prodCategoryCounterInc("lsp.messages.processed", "sorbet/workspaceEdit");
-        prodCategoryCounterAdd("lsp.messages.processed", "sorbet/mergedEdits", updates->editCount - 1);
+        prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
     }
 }
 

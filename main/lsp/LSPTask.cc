@@ -13,69 +13,64 @@ LSPTask::~LSPTask() {
     if (!latencyTimer) {
         return;
     }
+    latencyTimer->setTag("method", methodString());
+}
 
-    // The code below creates a new timer for this specific request that immediately gets reported.
+ConstExprStr LSPTask::methodString() const {
     switch (method) {
         case LSPMethod::$CancelRequest:
+            return "cancelRequest";
         case LSPMethod::Exit:
+            return "exit";
         case LSPMethod::PAUSE:
+            return "PAUSE";
         case LSPMethod::RESUME:
+            return "RESUME";
         case LSPMethod::Shutdown:
+            return "shutdown";
         case LSPMethod::SorbetError:
+            return "sorbet.error";
         case LSPMethod::SorbetFence:
+            return "sorbet.fence";
         case LSPMethod::SorbetShowOperation:
         case LSPMethod::SorbetTypecheckRunInfo:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::WindowShowMessage:
-            // Not a request we care about. Bucket it in case it gets large.
-            latencyTimer->clone("latency.other");
-            break;
+            // Sorbet sends these to the client; the server shouldn't receive them.
+            return "other";
         case LSPMethod::Initialize:
-            latencyTimer->clone("latency.initialize");
-            break;
+            return "initialize";
         case LSPMethod::Initialized:
-            latencyTimer->clone("latency.initialized");
-            break;
+            return "initialized";
         case LSPMethod::SorbetReadFile:
-            latencyTimer->clone("latency.sorbetreadfile");
-            break;
+            return "sorbet.readFile";
         case LSPMethod::SorbetWatchmanFileChange:
+            return "sorbet.watchmanFileChange";
         case LSPMethod::SorbetWorkspaceEdit:
         case LSPMethod::TextDocumentDidChange:
         case LSPMethod::TextDocumentDidClose:
         case LSPMethod::TextDocumentDidOpen:
-            latencyTimer->clone("latency.fileedit");
-            break;
+            return "sorbet.workspaceEdit";
         case LSPMethod::TextDocumentCodeAction:
-            latencyTimer->clone("latency.codeaction");
-            break;
+            return "textDocument.codeAction";
         case LSPMethod::TextDocumentCompletion:
-            latencyTimer->clone("latency.completion");
-            break;
+            return "textDocument.completion";
         case LSPMethod::TextDocumentDefinition:
-            latencyTimer->clone("latency.definition");
-            break;
+            return "textDocument.definition";
         case LSPMethod::TextDocumentDocumentHighlight:
-            latencyTimer->clone("latency.documenthighlight");
-            break;
+            return "textDocument.documentHighlight";
         case LSPMethod::TextDocumentDocumentSymbol:
-            latencyTimer->clone("latency.documentsymbol");
-            break;
+            return "textDocument.documentSymbol";
         case LSPMethod::TextDocumentHover:
-            latencyTimer->clone("latency.hover");
-            break;
+            return "textDocument.hover";
         case LSPMethod::TextDocumentReferences:
-            latencyTimer->clone("latency.references");
-            break;
+            return "textDocument.references";
         case LSPMethod::TextDocumentSignatureHelp:
-            latencyTimer->clone("latency.signaturehelp");
-            break;
+            return "textDocument.signatureHelp";
         case LSPMethod::TextDocumentTypeDefinition:
-            latencyTimer->clone("latency.typedefinition");
-            break;
+            return "textDocument.typeDefinition";
         case LSPMethod::WorkspaceSymbol:
-            latencyTimer->clone("latency.workspacesymbol");
-            break;
+            return "workspace.symbol";
     }
 }
 
@@ -264,6 +259,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
             task->index(indexer);
         }
         prodCounterInc("lsp.messages.received");
+        categoryCounterInc("lsp.messages.processed", task->methodString());
 
         if (task->finalPhase() == Phase::INDEX) {
             continue;

@@ -272,6 +272,8 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
             // Only edits can be merged; avoid looping over the queue on every request.
             mergeFileChanges();
         }
+    } else {
+        categoryCounterInc("lsp.messages.processed", task->methodString());
     }
 }
 

@@ -764,8 +764,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
-    prodCategoryCounterInc("lsp.messages.processed", "textDocument.completion");
-
     const auto &gs = typechecker.state();
     auto uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);

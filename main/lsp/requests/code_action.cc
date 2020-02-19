@@ -20,8 +20,6 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
     vector<unique_ptr<CodeAction>> result;
 
-    prodCategoryCounterInc("lsp.messages.processed", "textDocument.codeAction");
-
     const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config.uri2FileRef(gs, params->textDocument->uri);
     if (!file.exists()) {

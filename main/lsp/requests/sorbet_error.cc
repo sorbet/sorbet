@@ -14,7 +14,6 @@ LSPTask::Phase SorbetErrorTask::finalPhase() const {
 }
 
 void SorbetErrorTask::preprocess(LSPPreprocessor &preprocessor) {
-    prodCategoryCounterInc("lsp.messages.processed", "sorbet.error");
     // Don't bother the main thread with these. Quickly handle.
     if (id.has_value()) {
         auto response = make_unique<ResponseMessage>("2.0", id.value(), LSPMethod::SorbetError);

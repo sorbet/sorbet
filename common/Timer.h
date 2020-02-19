@@ -32,6 +32,8 @@ public:
     // Don't report timer when it gets destructed.
     void cancel();
 
+    void setTag(ConstExprStr name, ConstExprStr value);
+
     // Creates a new timer with the same start time and args but a different name.
     Timer clone(ConstExprStr name);
 

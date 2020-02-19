@@ -57,6 +57,19 @@ Timer Timer::clone(ConstExprStr name) {
     return forked;
 }
 
+void Timer::setTag(ConstExprStr name, ConstExprStr value) {
+    // Check if tag is already set; if so, update value.
+    for (auto &tag : tags) {
+        const auto tagName = tag.first;
+        if (tagName.size == name.size && strncmp(tagName.str, name.str, tagName.size) == 0) {
+            tag.second = value;
+            return;
+        }
+    }
+    // Add new tag.
+    tags.push_back(make_pair(name, value));
+}
+
 Timer::~Timer() {
     auto clock = chrono::steady_clock::now();
     auto dur = clock - start;

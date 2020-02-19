@@ -15,7 +15,6 @@ void InitializeTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &ts) {
-    prodCategoryCounterInc("lsp.messages.processed", "initialize");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::Initialize);
     const auto &opts = config.opts;
     auto serverCap = make_unique<ServerCapabilities>();

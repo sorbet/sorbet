@@ -48,8 +48,7 @@ CounterState mergeCounters(CounterState counters) {
 }
 
 void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
-    // TODO(jvilk): This should actually be named latency...
-    msg.latencyTimer = make_unique<Timer>(logger, "processing_time");
+    msg.latencyTimer = make_unique<Timer>(logger, "task_latency");
 }
 } // namespace
 
