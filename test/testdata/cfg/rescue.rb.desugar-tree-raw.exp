@@ -7,7 +7,7 @@ ClassDef{
     }]
   rhs = [
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U main><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
@@ -64,7 +64,7 @@ ClassDef{
     }
 
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U a><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
@@ -74,7 +74,7 @@ ClassDef{
     }
 
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U b><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
@@ -84,7 +84,7 @@ ClassDef{
     }
 
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U c><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
@@ -94,7 +94,7 @@ ClassDef{
     }
 
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U d><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local

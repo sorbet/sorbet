@@ -10,7 +10,7 @@ InsSeq{
         }]
       rhs = [
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
               localVariable = <U <blk>>
@@ -56,7 +56,7 @@ InsSeq{
         }]
       rhs = [
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U take_arguments><<U take_arguments>>
           args = [Local{
               localVariable = <U a>
@@ -187,7 +187,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <DA <U take_arguments> $1><<DA <U take_arguments> $1>>
           args = [Local{
               localVariable = <U a>
@@ -214,7 +214,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
           args = [Local{
               localVariable = <U a>
@@ -241,7 +241,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U <static-init>><<U <static-init>>>
           args = [Local{
               localVariable = <U <blk>>
