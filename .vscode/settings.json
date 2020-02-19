@@ -9,7 +9,8 @@
   "clangd.semanticHighlighting": false,
   // Disable feature where Clangd auto-imports headers for missing references.
   // It inserts relative paths that we don't want.
-  "clangd.arguments": ["-header-insertion=never"],
+  "clangd.arguments": ["--header-insertion=never"],
+  "clangd.path": "bazel-sorbet/external/llvm_toolchain/bin/clangd",
   "files.associations": {
     "*.rbi": "ruby",
     "*.rbupdated": "ruby",

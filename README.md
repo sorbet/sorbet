@@ -758,16 +758,14 @@ You are encouraged to play around with various clang-based tools which use the
 
 -   [clangd] -- Clang-based language server implementation
 
-    ```shell
-    brew install llvm@8
-
-    # => /usr/local/opt/llvm/bin/clangd
-    # You might need to put this on your PATH to tell your editor about it.
-    ```
-
     `clangd` supports more features than `rtags` (specifically, reporting
     Diagnostics), but can be somewhat slower at times because it does not
     pre-index all your code like rtags does.
+
+
+    After successfully compiling Sorbet, point your editor to use the
+    `clangd` executable located in
+    `bazel-sorbet/external/llvm_toolchain/bin/clangd`.
 
 -   [clang-format] -- Clang-based source code formatter
 
@@ -808,8 +806,9 @@ You are encouraged to play around with various clang-based tools which use the
     run `clang-format` whenever you save. **Note: Microsoft's C/C++ extension
     does *not* work properly with Sorbet's `compile_commands.json`.**
 
-    clangd will need to be on your path, or you will need to change the
-    "clangd.path" setting.
+    The settings for this repository automatically configure vscode-clangd to
+    run the clangd executable in the `bazel-sorbet` directory. Note that you
+    will need to compile Sorbet once before it will work.
 
     clangd operates on `compile_commands.json`, so make sure you run the
     `./tools/scripts/build_compilation_db.sh` script.
