@@ -40,7 +40,7 @@ if [ -n "$debug" ]; then
   bazel build @sorbet_ruby//:ruby --config dbg
   command=("lldb" "--" "${ruby}")
 else
-  bazel build @sorbet_ruby//:ruby -c opt 2>/dev/null
+  bazel build @sorbet_ruby//:ruby -c opt
   command=( "${ruby}" )
 fi
 
