@@ -871,7 +871,11 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::MethodDef *c) {
             pickleAstHeader(p, 22, c);
             pickle(p, c->declLoc);
-            p.putU4(c->flags);
+            u1 flags;
+            static_assert(sizeof(flags) == sizeof(c->flags));
+            // Can replace this with std::bit_cast in C++20
+            memcpy(&flags, &c->flags, sizeof(flags));
+            p.putU1(flags);
             p.putU4(c->name._id);
             p.putU4(c->symbol._id);
             p.putU4(c->args.size());
@@ -1084,7 +1088,11 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
         }
         case 22: {
             auto declLoc = unpickleLoc(p, file);
-            auto flags = p.getU4();
+            auto flagsU1 = p.getU1();
+            ast::MethodDef::Flags flags;
+            static_assert(sizeof(flags) == sizeof(flagsU1));
+            // Can replace this with std::bit_cast in C++20
+            memcpy(&flags, &flagsU1, sizeof(flags));
             NameRef name = unpickleNameRef(p, gs);
             SymbolRef symbol(gs, p.getU4());
             auto argsSize = p.getU4();
