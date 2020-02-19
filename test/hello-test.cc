@@ -156,8 +156,9 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     ast::MethodDef::ARGS_store args;
     args.emplace_back(std::move(arg));
 
+    ast::MethodDef::Flags flags;
     unique_ptr<ast::Expression> methodDef =
-        make_unique<ast::MethodDef>(loc, loc, methodSym, name, std::move(args), std::move(rhs), false);
+        make_unique<ast::MethodDef>(loc, loc, methodSym, name, std::move(args), std::move(rhs), flags);
     unique_ptr<ast::Expression> emptyTree = ast::MK::EmptyTree();
     unique_ptr<ast::Expression> cnst = make_unique<ast::UnresolvedConstantLit>(loc, std::move(emptyTree), name);
 
