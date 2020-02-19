@@ -18,7 +18,7 @@ ClassDef{
         }]
       rhs = [
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U take_arguments><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local

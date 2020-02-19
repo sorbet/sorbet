@@ -7,7 +7,7 @@ ClassDef{
     }]
   rhs = [
     MethodDef{
-      flags = 0
+      flags = {}
       name = <U main><<C <U <todo sym>>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
@@ -1096,7 +1096,7 @@ ClassDef{
         }]
       rhs = [
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U prop><<C <U <todo sym>>>>
           args = [RestArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1394,7 +1394,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foo><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1472,7 +1472,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foo=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -1545,7 +1545,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U foo2><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1632,7 +1632,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U foo2=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -1800,7 +1800,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U default><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -1878,7 +1878,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U default=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -1962,7 +1962,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U t_nilable><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2070,7 +2070,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U t_nilable=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2154,7 +2154,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U type><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2232,7 +2232,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U type=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2306,7 +2306,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U object><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2384,7 +2384,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U object=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2458,7 +2458,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2536,7 +2536,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2620,7 +2620,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array_of><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2728,7 +2728,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array_of=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2812,7 +2812,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array_of_explicit><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -2890,7 +2890,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U array_of_explicit=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -2977,7 +2977,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U t_array><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3094,7 +3094,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U t_array=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3198,7 +3198,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U hash_of><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3327,7 +3327,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U hash_of=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3418,7 +3418,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U const_explicit><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3489,7 +3489,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U const><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3560,7 +3560,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U no_class_arg><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3637,7 +3637,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U enum_prop><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3694,7 +3694,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3772,7 +3772,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -3869,7 +3869,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -3942,7 +3942,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4002,7 +4002,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_lazy><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4080,7 +4080,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_lazy=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4177,7 +4177,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_lazy_><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4250,7 +4250,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_lazy_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4310,7 +4310,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_proc><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4388,7 +4388,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_proc=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4485,7 +4485,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_proc_><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4558,7 +4558,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_proc_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4618,7 +4618,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_invalid><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4696,7 +4696,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_invalid=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -4789,7 +4789,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_invalid_><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4868,7 +4868,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foreign_invalid_!><<C <U <todo sym>>>>
           args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
@@ -4928,7 +4928,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U ifunset><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5006,7 +5006,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U ifunset=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -5090,7 +5090,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U ifunset_nilable><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5198,7 +5198,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U ifunset_nilable=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -5447,7 +5447,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U array=><<C <U <todo sym>>>>
               args = [UnresolvedIdent{
                   kind = Local
@@ -5542,7 +5542,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U array><<C <U <todo sym>>>>
               args = [BlockArg{ expr = UnresolvedIdent{
                   kind = Local
@@ -5751,7 +5751,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U array_of_explicit=><<C <U <todo sym>>>>
               args = [UnresolvedIdent{
                   kind = Local
@@ -5846,7 +5846,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U array_of_explicit><<C <U <todo sym>>>>
               args = [BlockArg{ expr = UnresolvedIdent{
                   kind = Local
@@ -6051,7 +6051,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U t_array=><<C <U <todo sym>>>>
               args = [UnresolvedIdent{
                   kind = Local
@@ -6153,7 +6153,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U t_array><<C <U <todo sym>>>>
               args = [BlockArg{ expr = UnresolvedIdent{
                   kind = Local
@@ -6360,7 +6360,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U hash_of=><<C <U <todo sym>>>>
               args = [UnresolvedIdent{
                   kind = Local
@@ -6470,7 +6470,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U hash_of><<C <U <todo sym>>>>
               args = [BlockArg{ expr = UnresolvedIdent{
                   kind = Local
@@ -6662,7 +6662,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U no_class_arg=><<C <U <todo sym>>>>
               args = [UnresolvedIdent{
                   kind = Local
@@ -6757,7 +6757,7 @@ ClassDef{
             }
 
             MethodDef{
-              flags = rewriter
+              flags = {rewriter}
               name = <U no_class_arg><<C <U <todo sym>>>>
               args = [BlockArg{ expr = UnresolvedIdent{
                   kind = Local
@@ -7219,7 +7219,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U token><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7297,7 +7297,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U token=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7371,7 +7371,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U created><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7449,7 +7449,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U created=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7596,7 +7596,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U token><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7674,7 +7674,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U token=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -7748,7 +7748,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U created><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7877,7 +7877,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U merchant><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -7986,7 +7986,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foo><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -8092,7 +8092,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U encrypted_foo><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -8215,7 +8215,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U foo=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -8356,7 +8356,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U encrypted_foo=><<C <U <todo sym>>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -8465,7 +8465,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U bar><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -8571,7 +8571,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = rewriter
+          flags = {rewriter}
           name = <U encrypted_bar><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local

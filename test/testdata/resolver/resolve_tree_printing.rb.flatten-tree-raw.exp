@@ -10,7 +10,7 @@ InsSeq{
         }]
       rhs = [
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
               localVariable = <U <blk>>
@@ -56,7 +56,7 @@ InsSeq{
         }]
       rhs = [
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_while><<U has_while>>
           args = [Local{
               localVariable = <U <blk>>
@@ -76,7 +76,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_constant_with_resolution_scope><<U has_constant_with_resolution_scope>>
           args = [Local{
               localVariable = <U <blk>>
@@ -92,7 +92,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_global_field><<U has_global_field>>
           args = [Local{
               localVariable = <U <blk>>
@@ -104,7 +104,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_class_field><<U has_class_field>>
           args = [Local{
               localVariable = <U <blk>>
@@ -116,7 +116,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_next><<U has_next>>
           args = [Local{
               localVariable = <U <blk>>
@@ -137,7 +137,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_break><<U has_break>>
           args = [Local{
               localVariable = <U <blk>>
@@ -158,7 +158,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_return><<U has_return>>
           args = [Local{
               localVariable = <U <blk>>
@@ -167,7 +167,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U has_cast><<U has_cast>>
           args = [Local{
               localVariable = <U <blk>>
@@ -215,7 +215,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U <static-init>><<U <static-init>>>
           args = [Local{
               localVariable = <U <blk>>

@@ -10,7 +10,7 @@ InsSeq{
         }]
       rhs = [
         MethodDef{
-          flags = 0
+          flags = {}
           name = <U foo><<U foo>>
           args = [Local{
               localVariable = <U a>
@@ -29,7 +29,7 @@ InsSeq{
         }
 
         MethodDef{
-          flags = self
+          flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
               localVariable = <U <blk>>
