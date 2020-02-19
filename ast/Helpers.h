@@ -246,7 +246,7 @@ public:
     static std::unique_ptr<MethodDef> SyntheticMethod0(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                                        std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
-        return Method(loc, declLoc, name, std::move(args), std::move(rhs));
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
     static std::unique_ptr<MethodDef> SyntheticMethod1(core::Loc loc, core::Loc declLoc, core::NameRef name,
@@ -254,7 +254,7 @@ public:
                                                        std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
-        return Method(loc, declLoc, name, std::move(args), std::move(rhs));
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
     static std::unique_ptr<ClassDef> ClassOrModule(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,
