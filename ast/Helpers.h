@@ -234,28 +234,34 @@ public:
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                             MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs,
-                                             u4 flags = 0) {
+                                             MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<ast::BlockArg>(args.back().get()))) {
             auto blkLoc = core::Loc::none(declLoc.file());
             args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
-                                           flags);
+                                           0);
     }
 
-    static std::unique_ptr<Expression> Method0(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                               std::unique_ptr<Expression> rhs, u4 flags = 0) {
+    static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                      MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
+        auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
+        mdef->flags |= ast::MethodDef::Flags::RewriterSynthesized;
+        return mdef;
+    }
+
+    static std::unique_ptr<MethodDef> SyntheticMethod0(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                       std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
-        return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static std::unique_ptr<Expression> Method1(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                               std::unique_ptr<Expression> arg0, std::unique_ptr<Expression> rhs,
-                                               u4 flags = 0) {
+    static std::unique_ptr<MethodDef> SyntheticMethod1(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                       std::unique_ptr<Expression> arg0,
+                                                       std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
-        return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
     static std::unique_ptr<ClassDef> ClassOrModule(core::Loc loc, core::Loc declLoc, std::unique_ptr<Expression> name,

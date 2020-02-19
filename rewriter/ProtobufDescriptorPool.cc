@@ -55,8 +55,8 @@ vector<unique_ptr<ast::Expression>> ProtobufDescriptorPool::run(core::MutableCon
     if (sendMsgclass->fun == core::Names::msgclass()) {
         auto arg0 = ast::MK::Local(asgn->loc, core::Names::arg0());
         auto arg = ast::MK::OptionalArg(asgn->loc, std::move(arg0), ast::MK::Hash0(asgn->loc));
-        rhs.emplace_back(
-            ast::MK::Method1(asgn->loc, asgn->loc, core::Names::initialize(), std::move(arg), ast::MK::EmptyTree()));
+        rhs.emplace_back(ast::MK::SyntheticMethod1(asgn->loc, asgn->loc, core::Names::initialize(), std::move(arg),
+                                                   ast::MK::EmptyTree()));
     }
 
     vector<unique_ptr<ast::Expression>> res;

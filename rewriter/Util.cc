@@ -179,13 +179,12 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
 }
 
 unique_ptr<ast::Expression> ASTUtil::mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::Method0(loc, loc, name, move(rhs), ast::MethodDef::RewriterSynthesized);
+    return ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
 }
 
 unique_ptr<ast::Expression> ASTUtil::mkSet(core::Loc loc, core::NameRef name, core::Loc argLoc,
                                            unique_ptr<ast::Expression> rhs) {
-    return ast::MK::Method1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs),
-                            ast::MethodDef::RewriterSynthesized);
+    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
 }
 
 unique_ptr<ast::Expression> ASTUtil::mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {

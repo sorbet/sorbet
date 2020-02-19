@@ -1093,7 +1093,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs, file);
             }
-            auto ret = ast::MK::Method(loc, declLoc, name, std::move(args), std::move(rhs));
+            auto ret = ast::MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
             ret->flags = flags;
             ret->symbol = symbol;
             return ret;
