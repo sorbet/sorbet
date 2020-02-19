@@ -396,7 +396,7 @@ _ruby_internal_headers = rule(
     fragments = ["cpp"],
 )
 
-def ruby(bundler, configure_flags=[], copts=[], cppopts=[], linkopts=[], deps=[]):
+def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
