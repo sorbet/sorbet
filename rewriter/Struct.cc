@@ -118,7 +118,7 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
 
         body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::EmptyTree()));
         body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
-                                           ast::MK::Local(symLoc, name)));
+                                                    ast::MK::Local(symLoc, name)));
     }
 
     // Elem = type_member(fixed: T.untyped)
@@ -143,7 +143,7 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
 
     body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
     body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                      ast::MK::Cast(loc, dupName(asgn->lhs.get()))));
+                                               ast::MK::Cast(loc, dupName(asgn->lhs.get()))));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),

@@ -104,7 +104,7 @@ vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const a
             auto sig = ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                      ast::MK::Untyped(loc));
             auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
-                                        ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
+                                                 ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
             def->flags |= ast::MethodDef::Flags::SelfMethod;
             if (instanceWriter) {
                 addInstanceCounterPart(result, sig, def);

@@ -293,8 +293,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+        ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
+                                                         ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
     }
 
     // Compute the Mutator

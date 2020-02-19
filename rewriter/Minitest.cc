@@ -267,8 +267,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
-        auto method =
-            addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body))));
+        auto method = addSigVoid(
+            ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -290,8 +290,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(send->block->body))));
+        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),
+                                                           prepareBody(ctx, std::move(send->block->body))));
         method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }

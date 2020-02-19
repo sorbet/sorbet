@@ -86,7 +86,8 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         newArgs.emplace_back(arg->deepCopy());
     }
 
-    auto selfCall = ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs), ast::MK::Untyped(call->loc));
+    auto selfCall =
+        ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs), ast::MK::Untyped(call->loc));
     selfCall->flags |= ast::MethodDef::Flags::SelfMethod;
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
