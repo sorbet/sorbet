@@ -233,8 +233,8 @@ public:
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
-    static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                             MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
+    static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                      MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<ast::BlockArg>(args.back().get()))) {
             auto blkLoc = core::Loc::none(declLoc.file());
             args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
@@ -243,14 +243,15 @@ public:
                                            ast::MethodDef::Flags::RewriterSynthesized);
     }
 
-    static std::unique_ptr<MethodDef> Method0(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                              std::unique_ptr<Expression> rhs) {
+    static std::unique_ptr<MethodDef> SyntheticMethod0(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                       std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
         return Method(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static std::unique_ptr<MethodDef> Method1(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                              std::unique_ptr<Expression> arg0, std::unique_ptr<Expression> rhs) {
+    static std::unique_ptr<MethodDef> SyntheticMethod1(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                       std::unique_ptr<Expression> arg0,
+                                                       std::unique_ptr<Expression> rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
         return Method(loc, declLoc, name, std::move(args), std::move(rhs));
