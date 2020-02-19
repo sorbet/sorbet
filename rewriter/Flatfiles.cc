@@ -49,12 +49,12 @@ void handleFieldDefinition(core::MutableContext ctx, unique_ptr<ast::Expression>
         }
 
         methods.emplace_back(ast::MK::Sig0(send->loc, ast::MK::Untyped(send->loc)));
-        methods.emplace_back(ast::MK::Method0(send->loc, send->loc, *name, ast::MK::Nil(send->loc)));
+        methods.emplace_back(ast::MK::SyntheticMethod0(send->loc, send->loc, *name, ast::MK::Nil(send->loc)));
         auto var = ast::MK::Local(send->loc, core::Names::arg0());
         auto setName = name->addEq(ctx);
         methods.emplace_back(ast::MK::Sig1(send->loc, ast::MK::Symbol(send->loc, core::Names::arg0()),
                                            ast::MK::Untyped(send->loc), ast::MK::Untyped(send->loc)));
-        methods.emplace_back(ast::MK::Method1(send->loc, send->loc, setName, move(var), ast::MK::Nil(send->loc)));
+        methods.emplace_back(ast::MK::SyntheticMethod1(send->loc, send->loc, setName, move(var), ast::MK::Nil(send->loc)));
     }
 }
 
