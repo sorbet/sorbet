@@ -222,8 +222,7 @@ unique_ptr<MethodDef> buildMethod(DesugarContext dctx, core::Loc loc, core::Loc 
     unique_ptr<Expression> desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
     desugaredBody = validateRBIBody(dctx, move(desugaredBody));
 
-    auto mdef = MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(desugaredBody));
-    mdef->flags &= ~ast::MethodDef::Flags::RewriterSynthesized;
+    auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     mdef->setIsSelf(isSelf);
     return mdef;
 }

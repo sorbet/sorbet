@@ -233,14 +233,21 @@ public:
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
-    static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
-                                                      MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
+    static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                             MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back().get()) && !isa_tree<ast::BlockArg>(args.back().get()))) {
             auto blkLoc = core::Loc::none(declLoc.file());
             args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
-                                           ast::MethodDef::Flags::RewriterSynthesized);
+                                           0);
+    }
+
+    static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
+                                                      MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
+        auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
+        mdef->flags |= ast::MethodDef::Flags::RewriterSynthesized;
+        return mdef;
     }
 
     static std::unique_ptr<MethodDef> SyntheticMethod0(core::Loc loc, core::Loc declLoc, core::NameRef name,
