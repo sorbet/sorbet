@@ -1,43 +1,29 @@
 # vim: ft=bzl sw=4 ts=4 et
 
-load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "build_ruby", "ruby_archive", "ruby_binary", "ruby_headers", "ruby_internal_headers")
+load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "ruby")
 
-filegroup(
-    name = "source",
-    srcs = glob(["**/*"]),
-    visibility = ["//visibility:private"],
-)
-
-build_ruby(
-    name = "ruby-dist",
-    src = ":source",
+ruby(
     bundler = "@bundler_stripe//file",
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
+        "--localstatedir=/var",
         "--disable-maintainer-mode",
         "--disable-dependency-tracking",
     ],
     copts = [
-                "-U_FORTIFY_SOURCE",
-                "-D_FORTIFY_SOURCE=2",
-                "-Wdate-time",
-                "-g",
-                "-fstack-protector-strong",
-                "-Wformat",
-                "-Werror=format-security",
-            ] + select({
-                # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
-                # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
-                "@com_stripe_ruby_typer//tools/config:darwin": [
-                    "-Wno-macro-redefined",
-                ],
-                "//conditions:default": [],
-            }) +
-            select({
-                "@com_stripe_ruby_typer//tools/config:dbg": [],
-                "//conditions:default": ["-O2"],
-            }),
+        "-g",
+        "-fstack-protector-strong",
+        "-Wformat",
+        "-Werror=format-security",
+    ] + select({
+        "@com_stripe_ruby_typer//tools/config:dbg": [],
+        "//conditions:default": ["-O2"],
+    }),
+    cppopts = [
+        "-Wdate-time",
+        "-D_FORTIFY_SOURCE=2",
+    ],
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:linux": [
             "-Wl,-Bsymbolic-functions",
@@ -45,7 +31,6 @@ build_ruby(
         ],
         "//conditions:default": [],
     }),
-    visibility = ["//visibility:private"],
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [
             "@system_ssl_darwin//:ssl",
@@ -56,40 +41,4 @@ build_ruby(
             "@system_ssl_linux//:crypto",
         ],
     }),
-)
-
-ruby_headers(
-    name = "headers",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_internal_headers(
-    name = "headers-internal",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_archive(
-    name = "ruby.tar.gz",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_binary(
-    name = "ruby",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_binary(
-    name = "irb",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
-)
-
-ruby_binary(
-    name = "gem",
-    ruby = ":ruby-dist",
-    visibility = ["//visibility:public"],
 )
