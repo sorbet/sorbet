@@ -10,12 +10,14 @@ namespace sorbet {
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args,
+          std::initializer_list<std::pair<ConstExprStr, ConstExprStr>> tags,
           std::chrono::time_point<std::chrono::steady_clock> start);
 
 public:
     Timer(spdlog::logger &log, ConstExprStr name);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev);
     Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+    Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, ConstExprStr>> tags);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev);
@@ -48,6 +50,7 @@ private:
     FlowId prev;
     FlowId self;
     std::vector<std::pair<ConstExprStr, std::string>> args;
+    std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
     const std::chrono::time_point<std::chrono::steady_clock> start;
     bool canceled = false;
 };

@@ -190,16 +190,31 @@ vector<pair<const char *, string>> givenArgs2StoredArgs(vector<pair<ConstExprStr
     return stored;
 }
 
+vector<pair<const char *, const char *>> givenTags2StoredTags(vector<pair<ConstExprStr, ConstExprStr>> given) {
+    vector<pair<const char *, const char *>> stored;
+    for (auto &e : given) {
+        stored.emplace_back(e.first.str, e.second.str);
+    }
+    return stored;
+}
+
 void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
                std::chrono::time_point<std::chrono::steady_clock> end, vector<pair<ConstExprStr, string>> args,
-               FlowId self, FlowId previous) {
+               vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous) {
     ENFORCE(
         (self.id == 0) || (previous.id == 0),
         "format doesn't support chaining"); // see "case 1" in
                                             // https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
                                             // for workaround
-    CounterImpl::Timing tim{0,    measure.str, start, end, getThreadId(), givenArgs2StoredArgs(move(args)),
-                            self, previous};
+    CounterImpl::Timing tim{0,
+                            measure.str,
+                            start,
+                            end,
+                            getThreadId(),
+                            givenArgs2StoredArgs(move(args)),
+                            givenTags2StoredTags(move(tags)),
+                            self,
+                            previous};
     counterState.timingAdd(tim);
 }
 
