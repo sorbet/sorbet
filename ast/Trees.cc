@@ -449,16 +449,14 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
 
     buf << "flags =";
-    const pair<int, string_view> flags[] = {
-        {SelfMethod, "self"sv},
-        {RewriterSynthesized, "rewriter"sv},
-    };
-    for (auto &ent : flags) {
-        if ((this->flags & ent.first) != 0) {
-            buf << " " << ent.second;
-        }
+    // TODO(jez) Change this to show a list or something
+    if (this->flags.isSelfMethod) {
+        buf << " self";
     }
-    if (this->flags == 0) {
+    if (this->flags.isRewriterSynthesized) {
+        buf << " rewriter";
+    }
+    if (!this->flags.isSelfMethod && !this->flags.isRewriterSynthesized) {
         buf << " 0";
     }
     buf << '\n';
