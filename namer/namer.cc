@@ -602,7 +602,7 @@ public:
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         core::SymbolRef owner = methodOwner(ctx);
 
-        if (method->isSelf()) {
+        if (method->flags.isSelfMethod) {
             if (owner.data(ctx)->isClassOrModule()) {
                 owner = owner.data(ctx)->singletonClass(ctx);
             }
@@ -661,7 +661,7 @@ public:
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
-        if (method->isRewriterSynthesized()) {
+        if (method->flags.isRewriterSynthesized) {
             method->symbol.data(ctx)->setRewriterSynthesized();
         }
         return method;

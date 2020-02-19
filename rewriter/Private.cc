@@ -23,14 +23,14 @@ vector<unique_ptr<ast::Expression>> Private::run(core::MutableContext ctx, ast::
         return empty;
     }
 
-    if (send->fun == core::Names::private_() && mdef->isSelf()) {
+    if (send->fun == core::Names::private_() && mdef->flags.isSelfMethod) {
         if (auto e = ctx.state.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define private class methods", "private_class_method");
             auto beginPos = send->loc.beginPos();
             auto replacementLoc = core::Loc{send->loc.file(), beginPos, beginPos + 7};
             e.replaceWith("Replace with `private_class_method`", replacementLoc, "private_class_method");
         }
-    } else if (send->fun == core::Names::privateClassMethod() && !mdef->isSelf()) {
+    } else if (send->fun == core::Names::privateClassMethod() && !mdef->flags.isSelfMethod) {
         if (auto e = ctx.state.beginError(send->loc, core::errors::Rewriter::PrivateMethodMismatch)) {
             e.setHeader("Use `{}` to define private instance methods", "private");
             auto beginPos = send->loc.beginPos();

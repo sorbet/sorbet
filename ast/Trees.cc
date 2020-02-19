@@ -406,7 +406,7 @@ string InsSeq::showRaw(const core::GlobalState &gs, int tabs) {
 string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
 
-    if (isSelf()) {
+    if (this->flags.isSelfMethod) {
         buf << "def self.";
     } else {
         buf << "def ";

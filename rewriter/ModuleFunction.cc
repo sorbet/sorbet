@@ -72,7 +72,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
     vector<unique_ptr<ast::Expression>> stats;
     auto mdef = ast::cast_tree_const<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
-    if (mdef == nullptr || (mdef->flags & ast::MethodDef::SelfMethod) != 0) {
+    if (mdef == nullptr || mdef->flags.isSelfMethod) {
         stats.emplace_back(expr->deepCopy());
         return stats;
     }
