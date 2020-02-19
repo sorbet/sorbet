@@ -73,12 +73,13 @@ run_cmd() {{
     fi
 }}
 
+CC="{cc}" \
+CFLAGS="{copts}" \
+CXXFLAGS="{copts}" \
+CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
+LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
+OUTFLAG="-fvisibility=default -o" \
 run_cmd ./configure \
-        CC="{cc}" \
-        CFLAGS="${{inc_path[*]}} {copts}" \
-        CPPFLAGS="${{inc_path[*]}} {copts}" \
-        LDFLAGS="${{lib_path[*]}} {linkopts}" \
-        OUTFLAG="-fvisibility=default -o" \
         {configure_flags} \
         --enable-load-relative \
         --with-destdir="$out_dir" \
@@ -120,15 +121,6 @@ rm -rf "$build_dir"
 
 RubyInfo = provider()
 
-def _is_sanitizer_flag(flag):
-    return flag.startswith("-fsanitize") or \
-           flag.startswith("-fno-sanitize") or \
-           flag == "-DHAS_SANITIZER" or \
-           flag == "-DADDRESS_SANITIZER" or \
-           flag.endswith("asan_cxx-x86_64.a") or \
-           flag.endswith("ubsan_standalone_cxx-x86_64.a") or \
-           flag.endswith("ubsan_standalone-x86_64.a")
-
 def _build_ruby_impl(ctx):
     src_dir = ctx.label.workspace_root
 
@@ -146,34 +138,6 @@ def _build_ruby_impl(ctx):
         feature_configuration = feature_configuration,
         action_name = C_COMPILE_ACTION_NAME,
     )
-
-    cmdline = cc_common.get_memory_inefficient_command_line(
-        feature_configuration = feature_configuration,
-        action_name = C_COMPILE_ACTION_NAME,
-        variables = cc_common.create_compile_variables(
-            cc_toolchain = cc_toolchain,
-            feature_configuration = feature_configuration,
-        ),
-    )
-
-    # -Werror breaks configure, so we strip out all flags with a leading -W
-    # ruby doesn't work with asan or ubsan
-    flags = []
-    for flag in ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts:
-        if flag.startswith("-W") or \
-           flag == "-DHAS_SANITIZER" or \
-           flag == "-DADDRESS_SANITIZER" or \
-           _is_sanitizer_flag(flag):
-            continue
-
-        flags.append(flag)
-
-    ldflags = []
-    for flag in ctx.fragments.cpp.linkopts:
-        if _is_sanitizer_flag(flag):
-            continue
-
-        ldflags.append(flag)
 
     # process deps into include and linker paths
     hdrs = {}
@@ -220,8 +184,9 @@ def _build_ruby_impl(ctx):
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
-            copts = " ".join(cmdline + flags + ctx.attr.copts),
-            linkopts = " ".join(ldflags + ctx.attr.linkopts),
+            copts = " ".join(ctx.attr.copts),
+            linkopts = " ".join(ctx.attr.linkopts),
+            cppopts = " ".join(ctx.attr.cppopts),
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
@@ -245,7 +210,7 @@ def _build_ruby_impl(ctx):
         ),
     ]
 
-build_ruby = rule(
+_build_ruby = rule(
     implementation = _build_ruby_impl,
     attrs = {
         "src": attr.label(),
@@ -259,6 +224,9 @@ build_ruby = rule(
         ),
         "copts": attr.string_list(
             doc = "Additional copts for the ruby build",
+        ),
+        "cppopts": attr.string_list(
+            doc = "Additional preprocessor opts for the ruby build",
         ),
         "linkopts": attr.string_list(
             doc = "Additional linkopts for the ruby build",
@@ -301,7 +269,7 @@ def _ruby_archive_impl(ctx):
 
     return [DefaultInfo(files = depset([archive]))]
 
-ruby_archive = rule(
+_ruby_archive = rule(
     implementation = _ruby_archive_impl,
     attrs = {
         "ruby": attr.label(),
@@ -347,7 +315,7 @@ def _ruby_binary_impl(ctx):
 
     return [DefaultInfo(executable = wrapper, runfiles = runfiles)]
 
-ruby_binary = rule(
+_ruby_binary = rule(
     implementation = _ruby_binary_impl,
     attrs = {
         "ruby": attr.label(),
@@ -393,7 +361,7 @@ def _ruby_headers_impl(ctx):
 
     return _uses_headers(ctx, paths, headers)
 
-ruby_headers = rule(
+_ruby_headers = rule(
     implementation = _ruby_headers_impl,
     attrs = {
         "ruby": attr.label(),
@@ -415,7 +383,7 @@ def _ruby_internal_headers_impl(ctx):
 
     return _uses_headers(ctx, paths, headers)
 
-ruby_internal_headers = rule(
+_ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
     attrs = {
         "ruby": attr.label(),
@@ -427,3 +395,61 @@ ruby_internal_headers = rule(
     provides = [DefaultInfo, CcInfo],
     fragments = ["cpp"],
 )
+
+def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+    """
+    Define a ruby build.
+    """
+
+    native.filegroup(
+        name = "source",
+        srcs = native.glob(["**/*"]),
+        visibility = ["//visibility:private"],
+    )
+
+    _build_ruby(
+        name = "ruby-dist",
+        src = ":source",
+        bundler = bundler,
+        configure_flags = configure_flags,
+        copts = copts,
+        cppopts = cppopts,
+        linkopts = linkopts,
+        deps = deps,
+    )
+
+    _ruby_headers(
+        name = "headers",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_internal_headers(
+        name = "headers-internal",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_archive(
+        name = "ruby.tar.gz",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_binary(
+        name = "ruby",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_binary(
+        name = "irb",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_binary(
+        name = "gem",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
