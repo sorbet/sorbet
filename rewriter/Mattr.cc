@@ -92,7 +92,7 @@ vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const a
         auto loc = lit->loc;
         if (doReaders) {
             auto sig = ast::MK::Sig0(loc, ast::MK::Untyped(loc));
-            auto def = ast::MK::Method0(loc, loc, lit->asSymbol(ctx), ast::MK::EmptyTree());
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx), ast::MK::EmptyTree());
             def->flags |= ast::MethodDef::Flags::SelfMethod;
             if (instanceReader) {
                 addInstanceCounterPart(result, sig, def);
@@ -103,8 +103,8 @@ vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const a
         if (doWriters) {
             auto sig = ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                      ast::MK::Untyped(loc));
-            auto def = ast::MK::Method1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
-                                        ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
+            auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
+                                                 ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
             def->flags |= ast::MethodDef::Flags::SelfMethod;
             if (instanceWriter) {
                 addInstanceCounterPart(result, sig, def);
@@ -117,7 +117,7 @@ vector<unique_ptr<ast::Expression>> Mattr::run(core::MutableContext ctx, const a
             // from being generated.
             auto sig = ast::MK::Sig0(
                 loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
-            auto def = ast::MK::Method0(loc, loc, lit->asSymbol(ctx).addQuestion(ctx), ast::MK::False(loc));
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx).addQuestion(ctx), ast::MK::False(loc));
             def->flags |= ast::MethodDef::Flags::SelfMethod;
             if (instanceReader && instancePredicate) {
                 addInstanceCounterPart(result, sig, def);
