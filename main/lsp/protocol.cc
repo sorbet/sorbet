@@ -49,6 +49,7 @@ CounterState mergeCounters(CounterState counters) {
 
 void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
     msg.latencyTimer = make_unique<Timer>(logger, "task_latency");
+    msg.latencyTimer->setTag("canceled", "false");
 }
 } // namespace
 
