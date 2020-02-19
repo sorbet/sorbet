@@ -92,7 +92,8 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::rewriteDefn(core::MutableCon
     unique_ptr<ast::Expression> moduleCopy = expr->deepCopy();
     ENFORCE(moduleCopy, "Should be non-nil.");
     auto newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy.get());
-    newDefn->flags |= ast::MethodDef::SelfMethod | ast::MethodDef::RewriterSynthesized;
+    newDefn->flags.isSelfMethod = true;
+    newDefn->flags.isRewriterSynthesized = true;
     stats.emplace_back(move(moduleCopy));
 
     return stats;
@@ -133,7 +134,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::run(core::MutableContext ctx
             args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
             args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
             auto methodDef = ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree());
-            methodDef->flags |= ast::MethodDef::Flags::SelfMethod;
+            methodDef->flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {
             if (auto e = ctx.state.beginError(arg->loc, core::errors::Rewriter::BadModuleFunction)) {

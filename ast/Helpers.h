@@ -246,7 +246,7 @@ public:
     static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                                       MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
         auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
-        mdef->flags |= ast::MethodDef::Flags::RewriterSynthesized;
+        mdef->flags.isRewriterSynthesized = true;
         return mdef;
     }
 
