@@ -239,14 +239,15 @@ public:
             auto blkLoc = core::Loc::none(declLoc.file());
             args.emplace_back(std::make_unique<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
+        MethodDef::Flags flags;
         return std::make_unique<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs),
-                                           0);
+                                           flags);
     }
 
     static std::unique_ptr<MethodDef> SyntheticMethod(core::Loc loc, core::Loc declLoc, core::NameRef name,
                                                       MethodDef::ARGS_store args, std::unique_ptr<Expression> rhs) {
         auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
-        mdef->flags |= ast::MethodDef::Flags::RewriterSynthesized;
+        mdef->flags.isRewriterSynthesized = true;
         return mdef;
     }
 

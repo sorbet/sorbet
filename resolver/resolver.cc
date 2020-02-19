@@ -1563,7 +1563,7 @@ private:
             [&](ast::MethodDef *mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool rewriten = mdef->isRewriterSynthesized();
+                    bool rewriten = mdef->flags.isRewriterSynthesized;
                     bool isRBI = mdef->loc.file().data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
@@ -1609,7 +1609,7 @@ private:
                     // class, or the current singleton class, depending on if
                     // the current method is a self method.
                     core::SymbolRef sigOwner;
-                    if (mdef->isSelf()) {
+                    if (mdef->flags.isSelfMethod) {
                         sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
                     } else {
                         sigOwner = ctx.owner;

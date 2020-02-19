@@ -93,7 +93,9 @@ public:
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
 
         auto init = make_unique<ast::MethodDef>(loc, loc, sym, core::Names::staticInit(), std::move(args),
-                                                std::move(inits), true);
+                                                std::move(inits), ast::MethodDef::Flags());
+        init->flags.isRewriterSynthesized = false;
+        init->flags.isSelfMethod = true;
 
         classDef->rhs.emplace_back(std::move(init));
 

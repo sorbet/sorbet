@@ -260,7 +260,7 @@ class FlattenWalk {
         // move everything to its appropriate target
         for (auto &expr : currentMethodDefs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(expr.expr.get())) {
-                methodDef->setIsSelf(expr.staticLevel > 0);
+                methodDef->flags.isSelfMethod = expr.staticLevel > 0;
             }
             auto targetLevel = expr.staticLevel == 1 ? 0 : expr.staticLevel;
             expressionsToBePutInTargets[targetLevel].emplace_back(std::move(expr.expr));
@@ -347,8 +347,8 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
         // add a new scope for this method def
-        curMethodSet().pushScope(
-            computeScopeInfo(methodDef->isSelf() ? ScopeType::StaticMethodScope : ScopeType::InstanceMethodScope));
+        curMethodSet().pushScope(computeScopeInfo(methodDef->flags.isSelfMethod ? ScopeType::StaticMethodScope
+                                                                                : ScopeType::InstanceMethodScope));
         return methodDef;
     }
 
@@ -361,7 +361,7 @@ public:
         // Stash some stuff from the methodDef before we move it
         auto loc = methodDef->declLoc;
         auto name = methodDef->name;
-        auto keepName = methodDef->isSelf() ? core::Names::keepSelfDef() : core::Names::keepDef();
+        auto keepName = methodDef->flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
         methods.addExpr(*md, move(methodDef));
 

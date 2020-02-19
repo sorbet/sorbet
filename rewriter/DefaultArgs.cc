@@ -173,7 +173,7 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                         newMethods.emplace_back(move(sig));
                     }
                     auto defaultArgDef = ast::MK::SyntheticMethod(loc, loc, name, std::move(args), std::move(rhs));
-                    defaultArgDef->setIsSelf(mdef->isSelf());
+                    defaultArgDef->flags.isSelfMethod = mdef->flags.isSelfMethod;
                     newMethods.emplace_back(move(defaultArgDef));
                 }
                 lastSig = nullptr;

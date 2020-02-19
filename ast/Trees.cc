@@ -91,7 +91,7 @@ ClassDef::ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, uni
 }
 
 MethodDef::MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-                     unique_ptr<Expression> rhs, u4 flags)
+                     unique_ptr<Expression> rhs, Flags flags)
     : Declaration(loc, declLoc, symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");
     histogramInc("trees.methodDef.args", this->args.size());
@@ -406,7 +406,7 @@ string InsSeq::showRaw(const core::GlobalState &gs, int tabs) {
 string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
 
-    if (isSelf()) {
+    if (this->flags.isSelfMethod) {
         buf << "def self.";
     } else {
         buf << "def ";
@@ -449,16 +449,14 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
 
     buf << "flags =";
-    const pair<int, string_view> flags[] = {
-        {SelfMethod, "self"sv},
-        {RewriterSynthesized, "rewriter"sv},
-    };
-    for (auto &ent : flags) {
-        if ((this->flags & ent.first) != 0) {
-            buf << " " << ent.second;
-        }
+    // TODO(jez) Change this to show a list or something
+    if (this->flags.isSelfMethod) {
+        buf << " self";
     }
-    if (this->flags == 0) {
+    if (this->flags.isRewriterSynthesized) {
+        buf << " rewriter";
+    }
+    if (!this->flags.isSelfMethod && !this->flags.isRewriterSynthesized) {
         buf << " 0";
     }
     buf << '\n';
