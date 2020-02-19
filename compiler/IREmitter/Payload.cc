@@ -530,8 +530,7 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_globalVariableGet"),
-                {Payload::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder)});
-
+                {Payload::idIntern(cs, builder, alias.globalField.data(cs)->name.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
                                       {getClassVariableStoreClass(cs, builder, blockMap),
@@ -572,7 +571,7 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_globalVariableSet"),
-                {Payload::toCString(cs, alias.globalField.data(cs)->name.data(cs)->shortName(cs), builder), var});
+                {Payload::idIntern(cs, builder, alias.globalField.data(cs)->name.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, blockMap),
