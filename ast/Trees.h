@@ -147,36 +147,24 @@ public:
     ARGS_store args;
 
     core::NameRef name;
-    u4 flags;
 
-    // TODO(jez) This uses enum instead of enum class. We should not cargo cult this in new code.
-    enum Flags {
-        SelfMethod = 1,
-        RewriterSynthesized = 2,
+    struct Flags {
+        bool isSelfMethod : 1;
+        bool isRewriterSynthesized : 1;
+
+        // In C++20 we can replace this with bit field initialzers
+        Flags() : isSelfMethod(false), isRewriterSynthesized(false) {}
     };
+    CheckSize(Flags, 1, 1);
+
+    Flags flags;
 
     MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-              std::unique_ptr<Expression> rhs, u4 flags);
+              std::unique_ptr<Expression> rhs, Flags flags);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-    bool isSelf() const {
-        return (flags & SelfMethod) != 0;
-    }
-
-    bool isRewriterSynthesized() const {
-        return (flags & RewriterSynthesized) != 0;
-    }
-
-    void setIsSelf(bool isSelf) {
-        if (isSelf) {
-            flags |= SelfMethod;
-        } else {
-            flags &= ~SelfMethod;
-        }
-    }
 
 private:
     virtual void _sanityCheck();

@@ -91,7 +91,7 @@ ClassDef::ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, uni
 }
 
 MethodDef::MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-                     unique_ptr<Expression> rhs, u4 flags)
+                     unique_ptr<Expression> rhs, Flags flags)
     : Declaration(loc, declLoc, symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");
     histogramInc("trees.methodDef.args", this->args.size());
