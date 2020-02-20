@@ -28,7 +28,6 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         return response;
     }
 
-    prodCategoryCounterInc("lsp.messages.processed", "textDocument.documentHighlight");
     const core::GlobalState &gs = typechecker.state();
     auto uri = params->textDocument->uri;
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,

@@ -13,7 +13,6 @@ LSPTask::Phase ExitTask::finalPhase() const {
 }
 
 void ExitTask::preprocess(LSPPreprocessor &preprocessor) {
-    prodCategoryCounterInc("lsp.messages.processed", "exit");
     preprocessor.exit(exitCode);
 }
 

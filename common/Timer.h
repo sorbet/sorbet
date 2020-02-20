@@ -30,8 +30,11 @@ public:
     // Don't report timer when it gets destructed.
     void cancel();
 
+    // Add a tag to the statsd metrics for this timer. Will not appear in traces.
+    void setTag(ConstExprStr name, ConstExprStr value);
+
     // Creates a new timer with the same start time and args but a different name.
-    Timer fork(ConstExprStr name);
+    Timer clone(ConstExprStr name);
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.
@@ -47,7 +50,10 @@ private:
     ConstExprStr name;
     FlowId prev;
     FlowId self;
+    // 'args' appear in traces, but not in statsd metrics because they can cause an explosion in cardinality
     std::vector<std::pair<ConstExprStr, std::string>> args;
+    // 'tags' appear in statsd metrics but not in traces. They are ConstExprStr to limit cardinality.
+    std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
     const std::chrono::time_point<std::chrono::steady_clock> start;
     bool canceled = false;
 };

@@ -19,7 +19,6 @@ void InitializedTask::index(LSPIndexer &indexer) {
 }
 
 void InitializedTask::runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) {
-    prodCategoryCounterInc("lsp.messages.processed", "initialized");
     ENFORCE(this->indexer != nullptr);
     indexer->initialize(updates, workers);
     typechecker.initialize(move(updates), workers);

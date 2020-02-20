@@ -1,5 +1,6 @@
 #include "common/statsd/statsd.h"
 #include "common/Counters_impl.h"
+#include "common/formatting.h"
 
 extern "C" {
 #include "statsd-client.h"
@@ -24,9 +25,20 @@ class StatsdClientWrapper {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
     }
 
-    void addMetric(string_view name, size_t value, string_view type) {
+    string cleanTagNameOrValue(const char *tag) {
+        // The keys and values must not be empty, and must not contain commas. Keys must not contain colons.
+        // To keep things simple, we put the same restrictions on keys and values.
+        ENFORCE(strnlen(tag, 1) != 0);
+        return absl::StrReplaceAll(tag, {{":", "_"}, {"|", "_"}, {"@", "_"}, {",", "_"}});
+    }
+
+    void addMetric(string_view name, size_t value, string_view type, vector<pair<const char *, const char *>> tags) {
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
-        auto newLine = fmt::format("{}{}:{}|{}", link->ns ? link->ns : "", cleanMetricName(name), value, type);
+        auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type,
+                                   tags.empty() ? "" : "|#", fmt::map_join(tags, ",", [&](const auto &tag) -> string {
+                                       return fmt::format("{}:{}", cleanTagNameOrValue(tag.first),
+                                                          cleanTagNameOrValue(tag.second));
+                                   }));
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
             packet = packet + '\n' + newLine;
         } else {
@@ -52,12 +64,12 @@ public:
     }
 
     void gauge(string_view name, size_t value) { // type : g
-        addMetric(name, value, "g");
+        addMetric(name, value, "g", {});
     }
     void timing(const CounterImpl::Timing &tim) { // type: ms
         auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tim.end - tim.start).count();
-        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds,
-                  "ms"); // format suggested by #observability (@sjung and @an)
+        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds, "ms",
+                  tim.tags); // format suggested by #observability (@sjung and @an)
     }
 };
 
