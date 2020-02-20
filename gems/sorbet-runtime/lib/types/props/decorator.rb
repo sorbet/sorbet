@@ -429,7 +429,7 @@ class T::Props::Decorator
     end
 
     handle_foreign_option(name, cls, rules, rules[:foreign]) if rules[:foreign]
-    handle_foreign_hint_only_option(cls, rules[:foreign_hint_only]) if rules[:foreign_hint_only]
+    handle_foreign_hint_only_option(name, cls, rules[:foreign_hint_only]) if rules[:foreign_hint_only]
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
@@ -636,12 +636,13 @@ class T::Props::Decorator
 
   sig do
     params(
+      prop_name: Symbol,
       prop_cls: Module,
       foreign_hint_only: T.untyped,
     )
     .void
   end
-  private def handle_foreign_hint_only_option(prop_cls, foreign_hint_only)
+  private def handle_foreign_hint_only_option(prop_name, prop_cls, foreign_hint_only)
     if ![String, Array].include?(prop_cls) && !(prop_cls.is_a?(T::Props::CustomType))
       raise ArgumentError.new(
         "`foreign_hint_only` can only be used with String or Array prop types"
@@ -652,6 +653,21 @@ class T::Props::Decorator
       :foreign_hint_only, foreign_hint_only,
       valid_type_msg: "an individual or array of a model class, or a Proc returning such."
     )
+
+    unless foreign_hint_only.is_a?(Proc)
+      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign_hint_only}, notify: 'jerry')
+        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign_hint_only`. In other words:
+
+          instead of `prop :foo, String, foreign_hint_only: FooModel`
+          use `prop :foo, String, foreign_hint_only: -> {FooModel}`
+
+          OR
+
+          instead of `prop :foo, String, foreign_hint_only: [FooModel, BarModel]`
+          use `prop :foo, String, foreign_hint_only: -> {[FooModel, BarModel]}`
+
+      MESSAGE
+    end
   end
 
   # checked(:never) - Rules hash is expensive to check
@@ -743,6 +759,16 @@ class T::Props::Decorator
         "Using an array for `foreign` is no longer supported. Instead, use `foreign_hint_only` " \
         "with an array or a Proc that returns an array, e.g., foreign_hint_only: -> {[Foo, Bar]}"
       )
+    end
+
+    unless foreign.is_a?(Proc)
+      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign}, notify: 'jerry')
+        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
+
+          instead of `prop :foo, String, foreign: FooModel`
+          use `prop :foo, String, foreign: -> {FooModel}`
+
+      MESSAGE
     end
 
     define_foreign_method(prop_name, rules, foreign)
