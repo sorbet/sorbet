@@ -320,6 +320,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
     if (committed) {
         prodCategoryCounterInc("lsp.updates", "slowpath");
+        timeit.setTag("canceled", "false");
         // No need to keep around cancelation state!
         cancellationUndoState = nullptr;
         // Send diagnostics to client (we already committed file updates earlier).
@@ -327,8 +328,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
-        // Don't report the runtime of a canceled slow path.
-        timeit.cancel();
+        timeit.setTag("canceled", "true");
         // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
         // this slow path.
         ENFORCE(cancelable);
