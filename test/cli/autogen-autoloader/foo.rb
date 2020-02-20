@@ -4,6 +4,13 @@ require 'byebug'
 require 'my_gem'
 
 module Foo
+
+  # :Foo doesn't define behavior therefore this constant should get its own
+  # autoloader file.
+  TOP_LEVEL_CONST = some_method
+  # This should also happen for aliases.
+  Dabba = Yabba::Dabba
+
   module Bar
     class Quuz
       p 'x'

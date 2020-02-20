@@ -11,7 +11,9 @@ end
 
 Opus::Require.autoload_map(Foo, {
   Bar: "autoloader/Foo/Bar.rb",
+  Dabba: "autoloader/Foo/Dabba.rb",
   Errors: "autoloader/Foo/Errors.rb",
+  TOP_LEVEL_CONST: "autoloader/Foo/TOP_LEVEL_CONST.rb",
 })
 
 --- output/Foo/Bar.rb
@@ -55,6 +57,16 @@ class Foo::Bar::Quuz
 end
 
 Opus::Require.for_autoload(Foo::Bar::Quuz, "test/cli/autogen-autoloader/foo.rb")
+
+--- output/Foo/Dabba.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/foo.rb", [Foo, :Dabba])
 
 --- output/Foo/Errors.rb
 # frozen_string_literal: true
@@ -103,6 +115,16 @@ class Foo::Errors::MyError2 < Foo::Errors::BaseError
 end
 
 Opus::Require.for_autoload(Foo::Errors::MyError2, "test/cli/autogen-autoloader/errors.rb")
+
+--- output/Foo/TOP_LEVEL_CONST.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/foo.rb", [Foo, :TOP_LEVEL_CONST])
 
 --- output/Yabba.rb
 # frozen_string_literal: true
