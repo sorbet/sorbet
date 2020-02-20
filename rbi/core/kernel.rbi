@@ -530,6 +530,15 @@ module Kernel
   sig do
     params(
         arg0: T.any(String, Symbol),
+        include_all: T.untyped,
+    )
+    .returns(T::Boolean)
+  end
+  def respond_to?(arg0,include_all=false); end
+
+  sig do
+    params(
+        arg0: T.any(String, Symbol),
         arg1: BasicObject,
     )
     .returns(T.untyped)

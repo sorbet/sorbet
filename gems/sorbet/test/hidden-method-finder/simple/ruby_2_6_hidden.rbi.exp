@@ -9385,8 +9385,6 @@ module Kernel
 
   def object_id(); end
 
-  def respond_to?(*_); end
-
   def then(); end
 
   def yield_self(); end

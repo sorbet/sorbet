@@ -9077,8 +9077,6 @@ module Kernel
   def itself(); end
 
   def object_id(); end
-
-  def respond_to?(*_); end
 end
 
 module Kernel
