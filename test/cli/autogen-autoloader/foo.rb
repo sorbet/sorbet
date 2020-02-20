@@ -4,6 +4,11 @@ require 'byebug'
 require 'my_gem'
 
 module Foo
+
+  # :Foo doesn't define behavior therefore this constant should get its own
+  # autoloader file.
+  TOP_LEVEL_CONST = some_method
+
   module Bar
     class Quuz
       p 'x'
