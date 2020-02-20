@@ -630,7 +630,7 @@ class T::Props::Decorator
     end
 
     unless foreign.is_a?(Proc)
-      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {option_sym: option_sym})
+      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {option_sym: option_sym}, notify: 'jerry')
         Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
           instead of `prop :foo, String, foreign: FooModel`
           use `prop :foo, String, foreign: -> {FooModel}`
