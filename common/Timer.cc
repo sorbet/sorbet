@@ -94,13 +94,12 @@ Timer::~Timer() {
         log.debug("{}: {}ms", this->name.str, msCount);
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev);
 
-        if (!histogramBuckets.empty()) {
-            // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one.
-            for (const auto bucket : histogramBuckets) {
-                if (msCount < bucket) {
-                    prodHistogramInc(name, bucket);
-                    break;
-                }
+        // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one if a histogram
+        // is set. If histogramBuckets is empty (which is the common case), then nothing happens.
+        for (const auto bucket : histogramBuckets) {
+            if (msCount < bucket) {
+                prodHistogramInc(name, bucket);
+                break;
             }
         }
     }
