@@ -1,24 +1,9 @@
 #include "common/Timer.h"
-#include "common/sort.h"
 using namespace std;
 namespace sorbet {
-namespace {
-vector<int> ensureSorted(initializer_list<int> input) {
-    vector<int> output(input);
-    // Keep empty output empty; that means that there is no histogram.
-    if (!output.empty()) {
-        // Append a catch-all bucket.
-        output.push_back(INT_MAX);
-        fast_sort(output);
-    }
-    return output;
-}
-} // namespace
-
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              chrono::time_point<chrono::steady_clock> start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, args(args), start(start),
-      histogramBuckets(ensureSorted(histogramBuckets)) {}
+    : log(log), name(name), prev(prev), self{0}, args(args), start(start), histogramBuckets(histogramBuckets) {}
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
@@ -90,18 +75,8 @@ Timer::~Timer() {
     if (!canceled && dur > std::chrono::milliseconds(1)) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto dur = std::chrono::duration<double, std::milli>(clock - start);
-        const auto msCount = dur.count();
-        log.debug("{}: {}ms", this->name.str, msCount);
-        sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev);
-
-        // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one if a histogram
-        // is set. If histogramBuckets is empty (which is the common case), then nothing happens.
-        for (const auto bucket : histogramBuckets) {
-            if (msCount < bucket) {
-                prodHistogramInc(name, bucket);
-                break;
-            }
-        }
+        log.debug("{}: {}ms", this->name.str, dur.count());
+        sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }
 

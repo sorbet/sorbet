@@ -200,7 +200,8 @@ vector<pair<const char *, const char *>> givenTags2StoredTags(vector<pair<ConstE
 
 void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
                std::chrono::time_point<std::chrono::steady_clock> end, vector<pair<ConstExprStr, string>> args,
-               vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous) {
+               vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
+               vector<int> histogramBuckets) {
     ENFORCE(
         (self.id == 0) || (previous.id == 0),
         "format doesn't support chaining"); // see "case 1" in
@@ -216,6 +217,21 @@ void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady
                             self,
                             previous};
     counterState.timingAdd(tim);
+
+    if (!histogramBuckets.empty()) {
+        histogramBuckets.push_back(INT_MAX);
+        fast_sort(histogramBuckets);
+
+        auto msCount = std::chrono::duration<double, std::milli>(end - start).count();
+        // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one if a histogram
+        // is set. If histogramBuckets is empty (which is the common case), then nothing happens.
+        for (const auto bucket : histogramBuckets) {
+            if (msCount < bucket) {
+                prodHistogramInc(measure, bucket);
+                break;
+            }
+        }
+    }
 }
 
 void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value) {

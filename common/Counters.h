@@ -90,7 +90,8 @@ struct FlowId {
 void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
                std::chrono::time_point<std::chrono::steady_clock> end,
                std::vector<std::pair<ConstExprStr, std::string>> args,
-               std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous);
+               std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
+               std::vector<int> histogramBuckets);
 
 UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);

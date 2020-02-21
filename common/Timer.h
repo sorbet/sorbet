@@ -58,7 +58,7 @@ private:
     std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
     const std::chrono::time_point<std::chrono::steady_clock> start;
     // If not empty, report the time for this timer in the given histogram, where each entry forms an upper bound
-    // on a bucket. Is sorted from smallest to largest upper bound, and contains MAX_INT at the end as a catch-all.
+    // on a bucket.
     std::vector<int> histogramBuckets;
     bool canceled = false;
 };
