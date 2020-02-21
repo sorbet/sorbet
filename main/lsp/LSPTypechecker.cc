@@ -79,6 +79,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     if (isFastPath) {
         auto run = runFastPath(move(updates), workers);
+        prodCategoryCounterInc("lsp.updates", "fastpath");
         filesTypechecked = run.filesTypechecked;
         commitTypecheckRun(move(run));
     } else {
@@ -153,7 +154,6 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     fast_sort(subset);
     subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
 
-    prodCategoryCounterInc("lsp.updates", "fastpath");
     config->logger->debug("Taking fast path");
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
