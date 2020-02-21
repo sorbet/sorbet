@@ -229,16 +229,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       assert(test_model)
       assert_equal(obj.foreign2, test_model.id)
     end
-
-    it 'disallows non-proc arguments' do
-      T::Configuration.expects(:soft_assert_handler).with do |msg, _|
-        msg =~ /Please use a Proc that returns a model class instead/
-      end
-
-      Class.new(TestForeignProps) do
-        prop :foreign3, String, foreign: MyTestModel
-      end
-    end
   end
 
   class MyCustomType
