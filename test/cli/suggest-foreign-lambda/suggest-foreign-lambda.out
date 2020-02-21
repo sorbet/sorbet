@@ -1,0 +1,18 @@
+suggest-foreign-lambda.rb:6: The argument to `foreign:` must be a lambda https://srb.help/3508
+     6 |  prop :my_model, String, foreign: MyModel
+                                           ^^^^^^^
+  Autocorrect: Done
+    suggest-foreign-lambda.rb:6: Replaced with `-> {MyModel}`
+     6 |  prop :my_model, String, foreign: MyModel
+                                           ^^^^^^^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+class MyModel; end
+
+class MyOtherModel
+  prop :my_model, String, foreign: -> {MyModel}
+end

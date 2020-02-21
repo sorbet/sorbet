@@ -4,6 +4,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/Util.h"
 
 using namespace std;
@@ -219,9 +220,16 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         }
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
-            foreign = move(foreignTree);
-            if (auto body = ASTUtil::thunkBody(ctx, foreign.get())) {
-                foreign = std::move(body);
+            if (foreignTree != nullptr) {
+                foreign = move(foreignTree);
+                if (auto body = ASTUtil::thunkBody(ctx, foreign.get())) {
+                    foreign = std::move(body);
+                } else {
+                    if (auto e = ctx.state.beginError(foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                        e.setHeader("The argument to `{}` must be a lambda", "foreign:");
+                        e.replaceWith("Convert to lambda", foreign->loc, "-> {{{}}}", foreign->loc.source(ctx));
+                    }
+                }
             }
         }
     }
