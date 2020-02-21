@@ -5,8 +5,12 @@ namespace sorbet {
 namespace {
 vector<int> ensureSorted(initializer_list<int> input) {
     vector<int> output(input);
-    output.push_back(INT_MAX);
-    fast_sort(output);
+    // Keep empty output empty; that means that there is no histogram.
+    if (!output.empty()) {
+        // Append a catch-all bucket.
+        output.push_back(INT_MAX);
+        fast_sort(output);
+    }
     return output;
 }
 } // namespace
