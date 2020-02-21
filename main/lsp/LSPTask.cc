@@ -98,7 +98,8 @@ LSPTask::Phase LSPRequestTask::finalPhase() const {
 bool LSPRequestTask::cancel(const MessageId &id) {
     if (this->id.equals(id)) {
         if (latencyTimer) {
-            latencyTimer->setTag("canceled", "true");
+            latencyTimer->cancel();
+            latencyTimer = nullptr;
         }
         auto response = make_unique<ResponseMessage>("2.0", id, method);
         prodCounterInc("lsp.messages.canceled");

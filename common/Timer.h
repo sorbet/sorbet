@@ -10,14 +10,16 @@ namespace sorbet {
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args,
-          std::chrono::time_point<std::chrono::steady_clock> start);
+          std::chrono::time_point<std::chrono::steady_clock> start, std::initializer_list<int> histogramBuckets);
 
 public:
     Timer(spdlog::logger &log, ConstExprStr name);
+    Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<int> histogramBuckets);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev);
     Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
-          std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args,
+          std::initializer_list<int> histogramBuckets);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
@@ -55,6 +57,9 @@ private:
     // 'tags' appear in statsd metrics but not in traces. They are ConstExprStr to limit cardinality.
     std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
     const std::chrono::time_point<std::chrono::steady_clock> start;
+    // If not empty, report the time for this timer in the given histogram, where each entry forms an upper bound
+    // on a bucket.
+    std::vector<int> histogramBuckets;
     bool canceled = false;
 };
 } // namespace sorbet
