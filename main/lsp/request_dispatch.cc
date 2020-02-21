@@ -37,14 +37,19 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
 }
 
 void LSPLoop::runTask(unique_ptr<LSPTask> task) {
-    Timer timeit(config->logger, "task_run_blocking");
-    timeit.setTag("method", task->methodString());
     categoryCounterInc("lsp.messages.processed", task->methodString());
-    task->index(indexer);
+    {
+        Timer timeit(config->logger, "task_index");
+        timeit.setTag("method", task->methodString());
+        task->index(indexer);
+    }
     if (task->finalPhase() == LSPTask::Phase::INDEX) {
         // Task doesn't need the typechecker.
         return;
     }
+
+    Timer timeit(config->logger, "task_run");
+    timeit.setTag("method", task->methodString());
 
     // Check if the task is a dangerous task, as those are scheduled specially.
     if (auto *dangerousTask = dynamic_cast<LSPDangerousTypecheckerTask *>(task.get())) {

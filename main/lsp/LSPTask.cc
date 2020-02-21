@@ -247,7 +247,6 @@ LSPQueuePreemptionTask::LSPQueuePreemptionTask(const LSPConfiguration &config, a
 void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
     for (;;) {
         unique_ptr<LSPTask> task;
-        unique_ptr<Timer> timeit;
         {
             absl::MutexLock lck(&taskQueueMutex);
             if (taskQueue.pendingTasks.empty() || !taskQueue.pendingTasks.front()->canPreempt(indexer)) {
@@ -256,11 +255,12 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
             task = move(taskQueue.pendingTasks.front());
             taskQueue.pendingTasks.pop_front();
 
-            timeit = make_unique<Timer>(config.logger, "task_run_blocking");
-            timeit->setTag("method", task->methodString());
-
-            // Index while holding lock to prevent races with processing thread.
-            task->index(indexer);
+            {
+                Timer timeit(config.logger, "task_index");
+                timeit.setTag("method", task->methodString());
+                // Index while holding lock to prevent races with processing thread.
+                task->index(indexer);
+            }
         }
         prodCounterInc("lsp.messages.received");
         categoryCounterInc("lsp.messages.processed", task->methodString());
@@ -268,6 +268,8 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
         if (task->finalPhase() == Phase::INDEX) {
             continue;
         }
+        Timer timeit(config.logger, "task_run");
+        timeit.setTag("method", task->methodString());
         task->run(tc);
     }
     finished.Notify();
