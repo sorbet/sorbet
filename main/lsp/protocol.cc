@@ -270,7 +270,6 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 task = move(taskQueue->pendingTasks.front());
                 taskQueue->pendingTasks.pop_front();
             }
-            prodCounterInc("lsp.messages.received");
 
             logger->debug("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
             runTask(move(task));

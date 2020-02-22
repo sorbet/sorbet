@@ -262,7 +262,12 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
 
     auto task = getTaskForMessage(*msg);
     task->latencyTimer = move(msg->latencyTimer);
-    task->preprocess(*this);
+
+    {
+        Timer timeit(config->logger, "LSPTask::Preprocess");
+        timeit.setTag("method", task->methodString());
+        task->preprocess(*this);
+    }
     if (task->finalPhase() != LSPTask::Phase::PREPROCESS) {
         // Enqueue task to be processed on processing thread.
         absl::MutexLock lock(taskQueueMutex.get());
@@ -273,7 +278,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
             mergeFileChanges();
         }
     } else {
-        categoryCounterInc("lsp.messages.processed", task->methodString());
+        prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     }
 }
 

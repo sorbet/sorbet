@@ -37,8 +37,12 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
 }
 
 void LSPLoop::runTask(unique_ptr<LSPTask> task) {
-    categoryCounterInc("lsp.messages.processed", task->methodString());
-    task->index(indexer);
+    prodCategoryCounterInc("lsp.messages.processed", task->methodString());
+    {
+        Timer timeit(config->logger, "LSPTask::index");
+        timeit.setTag("method", task->methodString());
+        task->index(indexer);
+    }
     if (task->finalPhase() == LSPTask::Phase::INDEX) {
         // Task doesn't need the typechecker.
         return;

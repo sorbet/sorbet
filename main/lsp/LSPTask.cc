@@ -102,7 +102,7 @@ bool LSPRequestTask::cancel(const MessageId &id) {
             latencyTimer = nullptr;
         }
         auto response = make_unique<ResponseMessage>("2.0", id, method);
-        prodCounterInc("lsp.messages.canceled");
+        prodCategoryCounterInc("lsp.messages.canceled", methodString());
         response->error = make_unique<ResponseError>((int)LSPErrorCodes::RequestCancelled, "Request was canceled");
         config.output->write(move(response));
         return true;
@@ -255,15 +255,20 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
             task = move(taskQueue.pendingTasks.front());
             taskQueue.pendingTasks.pop_front();
 
-            // Index while holding lock to prevent races with processing thread.
-            task->index(indexer);
+            {
+                Timer timeit(config.logger, "LSPTask::index");
+                timeit.setTag("method", task->methodString());
+                // Index while holding lock to prevent races with processing thread.
+                task->index(indexer);
+            }
         }
-        prodCounterInc("lsp.messages.received");
-        categoryCounterInc("lsp.messages.processed", task->methodString());
+        prodCategoryCounterInc("lsp.messages.processed", task->methodString());
 
         if (task->finalPhase() == Phase::INDEX) {
             continue;
         }
+        Timer timeit(config.logger, "LSPTask::run");
+        timeit.setTag("method", task->methodString());
         task->run(tc);
     }
     finished.Notify();
