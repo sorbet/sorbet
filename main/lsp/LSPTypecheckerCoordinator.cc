@@ -22,6 +22,7 @@ namespace {
  * - core/lsp/PreemptionTaskManager: Knows nothing about any of this and just wants to run a method with no args.
  */
 class TypecheckerTask final : public core::lsp::Task {
+    const LSPConfiguration &config;
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
     const bool collectCounters;
@@ -31,8 +32,9 @@ class TypecheckerTask final : public core::lsp::Task {
     unique_ptr<Timer> timeUntilRun;
 
 public:
-    TypecheckerTask(unique_ptr<LSPTask> task, unique_ptr<LSPTypecheckerDelegate> delegate, bool collectCounters)
-        : task(move(task)), delegate(move(delegate)), collectCounters(collectCounters) {}
+    TypecheckerTask(const LSPConfiguration &config, unique_ptr<LSPTask> task,
+                    unique_ptr<LSPTypecheckerDelegate> delegate, bool collectCounters)
+        : config(config), task(move(task)), delegate(move(delegate)), collectCounters(collectCounters) {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
         timeUntilRun = move(timer);
@@ -49,7 +51,11 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         timeUntilRun = nullptr;
         started.Notify();
-        task->run(*delegate);
+        {
+            Timer timeit(config.logger, "LSPTask::run");
+            timeit.setTag("method", task->methodString());
+            task->run(*delegate);
+        }
         if (collectCounters) {
             counters = getAndClearThreadCounters();
         }
@@ -65,16 +71,19 @@ public:
 };
 
 class DangerousTypecheckerTask : public core::lsp::Task {
+    const LSPConfiguration &config;
     unique_ptr<LSPDangerousTypecheckerTask> task;
     LSPTypechecker &typechecker;
     WorkerPool &workers;
 
 public:
-    DangerousTypecheckerTask(unique_ptr<LSPDangerousTypecheckerTask> task, LSPTypechecker &typechecker,
-                             WorkerPool &workers)
-        : task(move(task)), typechecker(typechecker), workers(workers){};
+    DangerousTypecheckerTask(const LSPConfiguration &config, unique_ptr<LSPDangerousTypecheckerTask> task,
+                             LSPTypechecker &typechecker, WorkerPool &workers)
+        : config(config), task(move(task)), typechecker(typechecker), workers(workers){};
 
     void run() override {
+        Timer timeit(config.logger, "LSPDangerousTypecheckerTask::runSpecial");
+        timeit.setTag("method", task->methodString());
         task->runSpecial(typechecker, workers);
     }
 

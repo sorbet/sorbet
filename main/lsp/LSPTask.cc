@@ -256,7 +256,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
             taskQueue.pendingTasks.pop_front();
 
             {
-                Timer timeit(config.logger, "task_index");
+                Timer timeit(config.logger, "LSPTask::index");
                 timeit.setTag("method", task->methodString());
                 // Index while holding lock to prevent races with processing thread.
                 task->index(indexer);
@@ -268,7 +268,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
         if (task->finalPhase() == Phase::INDEX) {
             continue;
         }
-        Timer timeit(config.logger, "task_run");
+        Timer timeit(config.logger, "LSPTask::run");
         timeit.setTag("method", task->methodString());
         task->run(tc);
     }
