@@ -20,7 +20,7 @@ class Sorbet::Private::FetchRBIs
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
   SORBET_TYPED_YML = "#{RBI_CACHE_DIR}/.sorbet-typed.yml"
-  SUPPORTED_SORBET_TYPED_VERSIONS = [1]
+  SUPPORTED_SORBET_TYPED_VERSIONS = [1, 2]
 
   SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
   SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'origin/master'
@@ -54,10 +54,13 @@ class Sorbet::Private::FetchRBIs
     .returns(T::Array[String])
   end
   def self.matching_version_directories(root, version)
+    sorbet_typed_version = get_sorbet_typed_version
     paths = Dir.glob("#{root}/*/").select do |dir|
       basename = File.basename(dir.chomp('/'))
       requirements = basename.split(/[,&-]/) # split using ',', '-', or '&'
       requirements.all? do |requirement|
+        # Convert the version string if the sorbet-typed version is 2.
+        requirement = convert_version(requirement) if sorbet_typed_version == 2
         Gem::Requirement::PATTERN =~ requirement &&
           Gem::Requirement.create(requirement).satisfied_by?(version)
       end
@@ -66,6 +69,37 @@ class Sorbet::Private::FetchRBIs
     all_dir = "#{root}/all"
     paths << all_dir if Dir.exist?(all_dir)
     paths
+  end
+
+  # Convert a string from an escaped format to the unscaped Gem Requirement.
+  # e.g. given a string like 'gte; 1.0', return '>= 1.0'.
+  #
+  # The available values are:
+  # - '>=' is 'gte;', for greater than or equal to
+  # - '<=' is 'lte;', for less than or equal to
+  # - '>' is 'gt;', for greater than
+  # - '<' is 'lt;', for less than
+  # - '!=' is 'neq;', for not equal
+  # - '=' is 'eq;', for equal
+  # - '~>' is 'apx;', for approximate
+  #
+  # @param [string] version A string with escaped values.
+  # @return [string] A string in a format that RubyGems will accept.
+  T::Sig::WithoutRuntime.sig {params(version: String).returns(String)}
+  def self.convert_version(version)
+    version_key_map = {
+      'gte;': '>=', # greater than or equal to
+      'lte;': '<=', # less than or equal to
+      'gt;': '>', # greater than
+      'lt;': '<', # less than
+      'neq;': '!=', # not equal
+      'eq;': '=', # equal
+      'apx;': '~>' # approximate
+    }
+    version_key_map.each_pair do |key, val|
+      version.gsub!(key.to_s, val)
+    end
+    return version
   end
 
   # List of directories in lib/ruby whose names satisfy the current RUBY_VERSION
