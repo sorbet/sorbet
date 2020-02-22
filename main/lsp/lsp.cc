@@ -28,6 +28,7 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
+    Timer timeit(config->logger, "LSPLoop::sendCountersToStatsd");
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     const auto &opts = config->opts;
     // Record rusage-related stats.
@@ -35,12 +36,15 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     auto counters = getAndClearThreadCounters();
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
-
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
     }
+
     if (!opts.webTraceFile.empty()) {
+        timeit.setTag("webtracefile", "true");
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+    } else {
+        timeit.setTag("webtracefile", "false");
     }
 }
 
