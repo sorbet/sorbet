@@ -278,7 +278,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
             mergeFileChanges();
         }
     } else {
-        categoryCounterInc("lsp.messages.processed", task->methodString());
+        prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     }
 }
 
