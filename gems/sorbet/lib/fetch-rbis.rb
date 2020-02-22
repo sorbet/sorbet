@@ -7,6 +7,7 @@ require_relative './t'
 require 'bundler'
 require 'fileutils'
 require 'set'
+require 'yaml'
 
 class Sorbet; end
 module Sorbet::Private; end
@@ -18,6 +19,8 @@ class Sorbet::Private::FetchRBIs
 
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
+  SORBET_TYPED_YML = "#{RBI_CACHE_DIR}/.sorbet-typed.yml"
+  SUPPORTED_SORBET_TYPED_VERSIONS = [1]
 
   SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
   SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'origin/master'
@@ -100,9 +103,21 @@ class Sorbet::Private::FetchRBIs
     end
   end
 
+  # Get the sorbet-typed version from .sorbet-typed.yml.
+  T::Sig::WithoutRuntime.sig {returns(Integer)}
+  def self.get_sorbet_typed_version
+    sorbet_typed_yml = YAML.load(File.read(SORBET_TYPED_YML))
+    return sorbet_typed_yml['version']
+  end
+
   T::Sig::WithoutRuntime.sig {void}
   def self.main
     fetch_sorbet_typed
+
+    # Raise an error if the sorbet-typed version isn't included in SUPPORTED_SORBET_TYPED_VERSIONS.
+    unless SUPPORTED_SORBET_TYPED_VERSIONS.include?(get_sorbet_typed_version)
+      raise "Incompatible sorbet-typed version. Please upgrade Sorbet to use the latest signatures from sorbet-typed."
+    end
 
     gemspecs = Bundler.load.specs.sort_by(&:name)
 
