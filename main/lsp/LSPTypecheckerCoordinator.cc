@@ -131,7 +131,7 @@ void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> tas
 
 void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
     auto wrappedTask = make_shared<TypecheckerTask>(
-        move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
+        *config, move(task), make_unique<LSPTypecheckerDelegate>(workers, typechecker), hasDedicatedThread);
 
     asyncRunInternal(wrappedTask);
     wrappedTask->blockUntilComplete();
@@ -139,8 +139,9 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 shared_ptr<core::lsp::Task>
 LSPTypecheckerCoordinator::trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask) {
-    auto wrappedTask = make_shared<TypecheckerTask>(
-        move(preemptTask), make_unique<LSPTypecheckerDelegate>(*emptyWorkers, typechecker), hasDedicatedThread);
+    auto wrappedTask = make_shared<TypecheckerTask>(*config, move(preemptTask),
+                                                    make_unique<LSPTypecheckerDelegate>(*emptyWorkers, typechecker),
+                                                    hasDedicatedThread);
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
     wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
     if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
@@ -158,13 +159,13 @@ bool LSPTypecheckerCoordinator::tryCancelPreemption(shared_ptr<core::lsp::Task> 
 }
 
 void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedTask> initializedTask) {
-    auto dangerousTask = make_shared<DangerousTypecheckerTask>(move(initializedTask), typechecker, workers);
+    auto dangerousTask = make_shared<DangerousTypecheckerTask>(*config, move(initializedTask), typechecker, workers);
     asyncRunInternal(dangerousTask);
     dangerousTask->blockUntilReady();
 }
 
 void LSPTypecheckerCoordinator::typecheckOnSlowPath(unique_ptr<SorbetWorkspaceEditTask> editTask) {
-    auto dangerousTask = make_shared<DangerousTypecheckerTask>(move(editTask), typechecker, workers);
+    auto dangerousTask = make_shared<DangerousTypecheckerTask>(*config, move(editTask), typechecker, workers);
     asyncRunInternal(dangerousTask);
     dangerousTask->blockUntilReady();
 }
