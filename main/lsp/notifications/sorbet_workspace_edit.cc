@@ -49,7 +49,9 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
 }
 
 void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
-    latencyTimer->setTag("path", "fast");
+    if (latencyTimer != nullptr) {
+        latencyTimer->setTag("path", "fast");
+    }
     ENFORCE(updates != nullptr);
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
@@ -62,13 +64,17 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     typechecker.typecheckOnFastPath(move(*updates));
-    // TODO: Move into pushDiagnostics once we have fast feedback.
-    latencyTimer->clone("last_diagnostic_latency");
+    if (latencyTimer != nullptr) {
+        // TODO: Move into pushDiagnostics once we have fast feedback.
+        latencyTimer->clone("last_diagnostic_latency");
+    }
     prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
 }
 
 void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) {
-    latencyTimer->setTag("path", "slow");
+    if (latencyTimer != nullptr) {
+        latencyTimer->setTag("path", "slow");
+    }
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
     }
@@ -80,8 +86,10 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     startedNotification.Notify();
     // Only report stats if the edit was committed.
     if (!typechecker.typecheck(move(*updates), workers)) {
-        // TODO: Move into pushDiagnostics once we have fast feedback.
-        latencyTimer->clone("last_diagnostic_latency");
+        if (latencyTimer != nullptr) {
+            // TODO: Move into pushDiagnostics once we have fast feedback.
+            latencyTimer->clone("last_diagnostic_latency");
+        }
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
     }
 }
