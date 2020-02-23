@@ -16,6 +16,10 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :objs, T::Array[Inner]
   end
 
+  class StructWithUntypedProp < T::Struct
+    prop :bar, T.untyped
+  end
+
   it "raises when omitting a required prop" do
     err = assert_raises(ArgumentError) do
       MyStruct.new(foo: 'foo')
@@ -23,10 +27,22 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     assert_equal("Missing required prop `name` for class `Opus::Types::Test::Props::ConstructorTest::MyStruct`", err.message)
   end
 
+  it "raises when omitting a required untyped prop" do
+    err = assert_raises(ArgumentError) do
+      StructWithUntypedProp.new
+    end
+    assert_equal("Missing required prop `bar` for class `Opus::Types::Test::Props::ConstructorTest::StructWithUntypedProp`", err.message)
+  end
+
   it 'allows required props to be omitted if they have a default value' do
     m = MyStruct.new(name: "Alex",
                      foo: {color: :red})
     assert_equal("Hi", m.greeting)
+  end
+
+  it 'allows props to be omitted if they are nilable' do
+    m = MyStruct.new(name: "Alex")
+    assert_equal("Alex", m.name)
   end
 
   it 'populates props' do
@@ -38,9 +54,10 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   end
 
   it 'raises on unknown props' do
-    assert_raises(ArgumentError) do
-      MyStruct.new(notathing: 4)
+    err = assert_raises(ArgumentError) do
+      MyStruct.new(name: "Alex", notathing: 4)
     end
+    assert_equal("Opus::Types::Test::Props::ConstructorTest::MyStruct: Unrecognized properties: notathing", err.message)
   end
 
   it 'checks types' do
