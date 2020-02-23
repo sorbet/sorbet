@@ -701,6 +701,58 @@ class Sorbet::Private::GemLoader
         FriendlyId::SequentiallySlugged
       ]
     end,
+    'rdf' => proc do
+      my_require 'rdf'
+      my_require 'rdf/ntriples'
+      [
+        RDF::Countable,
+        RDF::Durable,
+        RDF::Enumerable,
+        RDF::Indexable,
+        RDF::Mutable,
+        RDF::Queryable,
+        RDF::Readable,
+        RDF::TypeCheck,
+        RDF::Transactable,
+        RDF::Writable,
+        RDF::Graph,
+        RDF::IRI,
+        RDF::Literal,
+        RDF::Node,
+        RDF::Resource,
+        RDF::Statement,
+        RDF::URI,
+        RDF::Value,
+        RDF::Term,
+        RDF::List,
+        RDF::Format,
+        RDF::Reader,
+        RDF::ReaderError,
+        RDF::Writer,
+        RDF::WriterError,
+        RDF::NTriples,
+        RDF::NQuads,
+        RDF::Changeset,
+        RDF::Dataset,
+        RDF::Repository,
+        RDF::Transaction,
+        RDF::Query,
+        RDF::Query::Pattern,
+        RDF::Query::Solution,
+        RDF::Query::Solutions,
+        RDF::Query::Variable,
+        RDF::Query::HashPatternNormalizer,
+        RDF::Vocabulary,
+        RDF::StrictVocabulary,
+        RDF::Util,
+        RDF::Util::Aliasing,
+        RDF::Util::Cache,
+        RDF::Util::File,
+        RDF::Util::Logger,
+        RDF::Util::UUID,
+        RDF::Util::Coercions,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
