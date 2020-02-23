@@ -77,6 +77,11 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     prop :foo5, T.nilable(T::Array[SubStruct])
   end
 
+  class StructWithUntypedField < T::Struct
+    prop :foo0, T.untyped
+    prop :foo1, T.nilable(T.untyped)
+  end
+
   class StructWithReqiredField < T::Struct
     prop :foo1, Integer
     prop :foo2, Integer
@@ -101,6 +106,12 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
 
       assert_equal(true, T::Props::Utils.optional_prop?(TestStruct.props[:foo5]))
       assert_nil(TestStruct.props[:foo5][:optional])
+
+      assert_equal(true, T::Props::Utils.required_prop?(StructWithUntypedField.props[:foo0]))
+      assert_nil(StructWithUntypedField.props[:foo0][:optional])
+
+      assert_equal(true, T::Props::Utils.optional_prop?(StructWithUntypedField.props[:foo1]))
+      assert_nil(StructWithUntypedField.props[:foo1][:optional])
     end
 
     it 'tstruct tnilable field type_object' do
