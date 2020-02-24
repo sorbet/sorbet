@@ -226,8 +226,9 @@ class Sorbet::Private::HiddenMethodFinder
     return if !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) && !Sorbet::Private::RealStdlib.real_is_a?(my_klass, Module)
 
     # We specifically don't typecheck anything in T:: since it is hardcoded
-    # into sorbet
-    return if real_name(my_klass) == 'T'
+    # into sorbet. We don't include anything in Sorbet::Private:: because
+    # it's private.
+    return if ['T', 'Sorbet::Private'].include?(real_name(my_klass))
 
     source_type = nil
     if !source_entry
