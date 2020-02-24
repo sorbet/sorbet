@@ -194,6 +194,8 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<ShutdownTask>(*config, id);
             case LSPMethod::SorbetError:
                 return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)), id);
+            case LSPMethod::GETCOUNTERS:
+                return make_unique<GetCountersTask>(*config, id);
             default:
                 return make_unique<SorbetErrorTask>(
                     *config,

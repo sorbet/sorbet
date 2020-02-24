@@ -26,6 +26,8 @@ ConstExprStr LSPTask::methodString() const {
             return "PAUSE";
         case LSPMethod::RESUME:
             return "RESUME";
+        case LSPMethod::GETCOUNTERS:
+            return "GETCOUNTERS";
         case LSPMethod::Shutdown:
             return "shutdown";
         case LSPMethod::SorbetError:
