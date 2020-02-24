@@ -49,7 +49,7 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: T.any(T::Types::Base, Module),
+          non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
         )
         .returns(SetterProc)
       end
@@ -59,7 +59,7 @@ module T::Props
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              self.class,
+              T.unsafe(self.class),
               prop,
               non_nil_type,
               val,
@@ -72,7 +72,7 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: T.any(T::Types::Base, Module),
+          non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
         )
         .returns(SetterProc)
       end
@@ -84,7 +84,7 @@ module T::Props
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              self.class,
+              T.unsafe(self.class),
               prop,
               non_nil_type,
               val,
