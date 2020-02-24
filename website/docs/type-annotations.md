@@ -61,7 +61,7 @@ end
 
 For more details on why Sorbet can only infer the types of instance variables in
 relatively narrow situations, see the section below about the
-[limitations of instance variable inference](#limitations-of-instance-variable-inference).
+[limitations of instance variable inference](#limitations-on-instance-variable-inference).
 
 ## Annotating constants
 
