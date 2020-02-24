@@ -36,10 +36,10 @@ def sorbet_llvm_externals():
     http_file(
         name = "bundler_stripe",
         urls = [
-            "https://rubygems.org/downloads/bundler-1.17.1.gem",
-            "https://intgems.local.corp.stripe.com:446/gems/bundler-1.17.1.gem",
+            "https://rubygems.org/downloads/bundler-1.17.3.gem",
+            "https://intgems.local.corp.stripe.com:446/gems/bundler-1.17.3.gem",
         ],
-        sha256 = "cc9042aff791fb05dc037da8dc617bee3fb4d77d74c3d921c2f51c23f231b24a",
+        sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
     )
 
     for apply_patch in [True, False]:
