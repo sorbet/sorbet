@@ -266,7 +266,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     task->latencyTimer = move(msg->latencyTimer);
 
     {
-        Timer timeit(config->logger, "LSPTask::Preprocess");
+        Timer timeit(config->logger, "LSPTask::preprocess");
         timeit.setTag("method", task->methodString());
         task->preprocess(*this);
     }

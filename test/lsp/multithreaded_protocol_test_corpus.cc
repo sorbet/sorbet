@@ -1,14 +1,15 @@
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
-#include "ProtocolTest.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
+#include "test/lsp/ProtocolTest.h"
 
 namespace sorbet::test::lsp {
 using namespace std;
 using namespace sorbet::realmain::lsp;
 
+namespace {
 optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) {
     if (msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo) {
         auto &typecheckInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg.asNotification().params);
@@ -16,14 +17,51 @@ optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) 
     }
     return nullopt;
 }
-
+} // namespace
 TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
+
+    requests.push_back(make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
     requests.push_back(
         changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
+    requests.push_back(make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
     assertDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
+
+    auto counters = getCounters();
+
+    vector<pair<ConstExprStr, int>> expectedMessageCounts = {
+        {"initialize", 1},
+        {"initialized", 1},
+        {"sorbet.workspaceEdit", 1},
+        {"GETCOUNTERS", 1},
+    };
+    cout << counters.getTimings("LSPTask::preprocess").size() << " " << counters.getTimings("LSPTask::index").size()
+         << " " << counters.getTimings("LSPTask::run").size() << "\n";
+    for (auto &expected : expectedMessageCounts) {
+        EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", expected.first), expected.second)
+            << expected.first.str;
+        EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", expected.first), expected.second)
+            << expected.first.str;
+        EXPECT_EQ(counters.getTimings("LSPTask::preprocess", {{"method", expected.first}}).size(), expected.second)
+            << expected.first.str;
+        EXPECT_EQ(counters.getTimings("LSPTask::index", {{"method", expected.first}}).size(), expected.second)
+            << expected.first.str;
+        EXPECT_EQ(counters.getTimings("LSPTask::run", {{"method", expected.first}}).size(), expected.second)
+            << expected.first.str;
+    }
+
+    EXPECT_EQ(counters.getHistogramCount("task_latency"), 4);
+    EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    // initialization + one slow path update
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 2);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
+
+    EXPECT_EQ(counters.getTimings("initial_index").size(), 1);
+    EXPECT_EQ(counters.getTimings("reIndexFromFileSystem").size(), 1);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {

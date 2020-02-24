@@ -40,6 +40,11 @@ class Proto;
 namespace web_tracer_framework {
 class Tracing;
 }
+
+namespace test::lsp {
+class CounterStateDatabase;
+}
+
 struct CounterState {
     CounterState();
     ~CounterState();
@@ -57,6 +62,7 @@ private:
     friend class core::Proto;
     friend class StatsD;
     friend class sorbet::web_tracer_framework::Tracing;
+    friend class sorbet::test::lsp::CounterStateDatabase;
 
     CounterState(std::unique_ptr<CounterImpl> counters);
     std::unique_ptr<CounterImpl> counters;

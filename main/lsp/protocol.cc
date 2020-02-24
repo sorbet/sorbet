@@ -88,7 +88,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
             {
                 absl::MutexLock lck(taskQueueMutex.get());
                 // Merge the counters from all of the worker threads with those stored in
-                // processingQueue.
+                // taskQueue.
                 taskQueue->counters = mergeCounters(move(taskQueue->counters));
                 if (taskQueue->terminate) {
                     // We must have processed an exit notification, or one of the downstream threads exited.
@@ -269,6 +269,11 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
                 task = move(taskQueue->pendingTasks.front());
                 taskQueue->pendingTasks.pop_front();
+
+                // Test only: Collect counters from other threads into this thread for reporting.
+                if (task->method == LSPMethod::GETCOUNTERS && !taskQueue->counters.hasNullCounters()) {
+                    counterConsume(move(taskQueue->counters));
+                }
             }
 
             logger->debug("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
