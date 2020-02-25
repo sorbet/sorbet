@@ -9632,10 +9632,6 @@ module RbConfig
   def self.ruby(); end
 end
 
-class Regexp
-  def match?(*_); end
-end
-
 module RubyVM::AbstractSyntaxTree
 end
 
