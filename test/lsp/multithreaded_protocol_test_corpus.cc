@@ -45,6 +45,7 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     auto counters = getCounters();
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
     EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    EXPECT_EQ(counters.getTimings("task_latency").size(), counters.getHistogramCount("task_latency"));
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.updates"), 1);
