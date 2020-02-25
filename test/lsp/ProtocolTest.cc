@@ -18,6 +18,8 @@ bool isTypecheckRun(const LSPMessage &msg) {
 
 CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
     EXPECT_FALSE(this->counters.hasNullCounters());
+    // Combines counters with the same name but different char* pointers.
+    this->counters.counters->canonicalize();
 }
 
 // Get counter value or 0.
