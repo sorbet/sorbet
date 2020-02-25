@@ -7,6 +7,7 @@
 #include "common/typecase.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
+#include "core/NameHash.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
 #include "lib/lizard_compress.h"
@@ -34,6 +35,7 @@ public:
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what);
     static void pickle(Pickler &p, core::Loc loc);
+    static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
 
     template <class T> static void pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t);
 
@@ -46,6 +48,7 @@ public:
     static Loc unpickleLoc(UnPickler &p, FileRef file);
     static unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, GlobalState &, FileRef file);
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
+    static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
 
     SerializerImpl() = delete;
 
@@ -224,17 +227,74 @@ int64_t UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
+void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
+    if (fh == nullptr) {
+        p.putU1(0);
+        return;
+    }
+    p.putU1(1);
+    p.putU4(fh->definitions.hierarchyHash);
+    p.putU4(fh->definitions.methodHashes.size());
+    for (const auto &[key, value] : fh->definitions.methodHashes) {
+        p.putU4(key._hashValue);
+        p.putU4(value);
+    }
+    p.putU4(fh->usages.constants.size());
+    for (const auto &e : fh->usages.constants) {
+        p.putU4(e._hashValue);
+    }
+    p.putU4(fh->usages.sends.size());
+    for (const auto &e : fh->usages.sends) {
+        p.putU4(e._hashValue);
+    }
+}
+
+unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
+    auto hadIt = p.getU1() != 0;
+    if (!hadIt) {
+        return nullptr;
+    }
+    FileHash ret;
+
+    ret.definitions.hierarchyHash = p.getU4();
+    auto methodHashSize = p.getU4();
+    ret.definitions.methodHashes.reserve(methodHashSize);
+    for (int it = 0; it < methodHashSize; it++) {
+        NameHash key;
+        key._hashValue = p.getU4();
+        ret.definitions.methodHashes[key] = p.getU4();
+    }
+    auto constantsSize = p.getU4();
+    ret.usages.constants.reserve(constantsSize);
+    for (int it = 0; it < constantsSize; it++) {
+        NameHash key;
+        key._hashValue = p.getU4();
+        ret.usages.constants.emplace_back(key);
+    }
+    auto sendsSize = p.getU4();
+    ret.usages.sends.reserve(sendsSize);
+    for (int it = 0; it < sendsSize; it++) {
+        NameHash key;
+        key._hashValue = p.getU4();
+        ret.usages.sends.emplace_back(key);
+    }
+    return make_unique<const FileHash>(move(ret));
+}
+
 void SerializerImpl::pickle(Pickler &p, const File &what) {
     p.putU1((u1)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
+    pickle(p, what.getFileHash());
 }
 
 shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
     auto t = (File::Type)p.getU1();
     auto path = string(p.getStr());
     auto source = string(p.getStr());
+    auto globalStateHash = SerializerImpl::unpickleFileHash(p);
     auto ret = make_shared<File>(std::move(path), std::move(source), t);
+    ret->setFileHash(move(globalStateHash));
     return ret;
 }
 

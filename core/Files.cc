@@ -113,7 +113,9 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
 }
 
 void File::setFileHash(unique_ptr<const FileHash> hash) {
-    hash_ = move(hash);
+    if (hash_ == nullptr) {
+        hash_ = move(hash);
+    }
 }
 
 const shared_ptr<const FileHash> &File::getFileHash() const {
