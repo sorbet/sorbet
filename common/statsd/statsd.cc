@@ -8,6 +8,7 @@ extern "C" {
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
+#include "version/version.h"
 
 #include <string>
 #include <sys/resource.h> // getrusage
@@ -20,6 +21,7 @@ class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
     string packet;
+    const string sorbetVersion = string(Version::build_scm_revision);
 
     string cleanMetricName(string_view name) {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
@@ -33,9 +35,11 @@ class StatsdClientWrapper {
     }
 
     void addMetric(string_view name, size_t value, string_view type, vector<pair<const char *, const char *>> tags) {
+        // Tag all metrics with the version of Sorbet.
+        tags.push_back(make_pair("sorbet_version", sorbetVersion.c_str()));
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
-        auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type,
-                                   tags.empty() ? "" : "|#", fmt::map_join(tags, ",", [&](const auto &tag) -> string {
+        auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type, "|#",
+                                   fmt::map_join(tags, ",", [&](const auto &tag) -> string {
                                        return fmt::format("{}:{}", cleanTagNameOrValue(tag.first),
                                                           cleanTagNameOrValue(tag.second));
                                    }));
