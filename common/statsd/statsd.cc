@@ -38,7 +38,7 @@ class StatsdClientWrapper {
         // Tag all metrics with the version of Sorbet.
         tags.push_back(make_pair("sorbet_version", sorbetVersion.c_str()));
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
-        auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type, "|#",
+        auto newLine = fmt::format("{}{}:{}|{}|#{}", link->ns ? link->ns : "", cleanMetricName(name), value, type,
                                    fmt::map_join(tags, ",", [&](const auto &tag) -> string {
                                        return fmt::format("{}:{}", cleanTagNameOrValue(tag.first),
                                                           cleanTagNameOrValue(tag.second));
