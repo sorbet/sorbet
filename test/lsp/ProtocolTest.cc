@@ -16,6 +16,92 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
+CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
+    EXPECT_FALSE(this->counters.hasNullCounters());
+    // Combines counters with the same name but different char* pointers.
+    this->counters.counters->canonicalize();
+}
+
+// Get counter value or 0.
+CounterImpl::CounterType CounterStateDatabase::getCounter(ConstExprStr counter) const {
+    auto internedCounter = counters.counters->internKey(counter.str);
+    const auto &it = counters.counters->counters.find(internedCounter);
+    if (it != counters.counters->counters.end()) {
+        return it->second;
+    }
+    return 0;
+}
+
+CounterImpl::CounterType CounterStateDatabase::getCategoryCounter(ConstExprStr counter, ConstExprStr category) const {
+    auto internedCounter = counters.counters->internKey(counter.str);
+    const auto &it = counters.counters->countersByCategory.find(internedCounter);
+    if (it == counters.counters->countersByCategory.end()) {
+        return 0;
+    }
+    auto internedCategory = counters.counters->internKey(category.str);
+    const auto &catIt = it->second.find(internedCategory);
+    if (catIt == it->second.end()) {
+        return 0;
+    }
+    return catIt->second;
+}
+
+CounterImpl::CounterType CounterStateDatabase::getCategoryCounterSum(ConstExprStr counter) const {
+    auto internedCounter = counters.counters->internKey(counter.str);
+    const auto &it = counters.counters->countersByCategory.find(internedCounter);
+    CounterImpl::CounterType total = 0;
+    if (it != counters.counters->countersByCategory.end()) {
+        for (const auto &catIt : it->second) {
+            total += catIt.second;
+        }
+    }
+    return total;
+}
+
+CounterImpl::CounterType CounterStateDatabase::getHistogramCount(ConstExprStr histogram) const {
+    auto internedHistogram = counters.counters->internKey(histogram.str);
+    CounterImpl::CounterType rv = 0;
+    const auto &it = counters.counters->histograms.find(internedHistogram);
+    if (it != counters.counters->histograms.end()) {
+        const auto &map = it->second;
+        for (const auto &entry : map) {
+            rv += entry.second;
+        }
+    }
+    return rv;
+}
+
+vector<CounterImpl::Timing> CounterStateDatabase::getTimings(ConstExprStr counter,
+                                                             vector<pair<ConstExprStr, ConstExprStr>> tags) const {
+    // Note: Timers don't have interned names.
+    vector<CounterImpl::Timing> rv;
+    for (const auto &timing : counters.counters->timings) {
+        if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing.tags.size() >= tags.size()) {
+            UnorderedMap<std::string, const char *> timingTags;
+            for (const auto &tag : timing.tags) {
+                timingTags[tag.first] = tag.second;
+            }
+
+            int tagsMatched = 0;
+            for (const auto &tag : tags) {
+                auto it = timingTags.find(tag.first.str);
+                if (it == timingTags.end()) {
+                    break;
+                }
+                if (strncmp(it->second, tag.second.str, tag.second.size + 1) != 0) {
+                    break;
+                }
+                tagsMatched++;
+            }
+
+            if (tagsMatched == tags.size()) {
+                rv.push_back(timing);
+            }
+        }
+    }
+    return rv;
+}
+
 void ProtocolTest::SetUp() {
     rootPath = "/Users/jvilk/stripe/pay-server";
     rootUri = fmt::format("file://{}", rootPath);
@@ -223,6 +309,17 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
 
     // Use same logic as main test runner.
     ErrorAssertion::checkAll(sourceFileContents, errorAssertions, diagnostics);
+}
+
+const CounterStateDatabase ProtocolTest::getCounters() {
+    auto results = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
+                                                       "2.0", nextId++, LSPMethod::GETCOUNTERS, nullopt)));
+    EXPECT_EQ(results.size(), 1);
+    auto &result = results.at(0);
+    EXPECT_TRUE(result->isResponse());
+    auto &response = result->asResponse();
+    auto &counters = get<unique_ptr<SorbetCounters>>(response.result.value());
+    return CounterStateDatabase(move(counters->counters));
 }
 
 } // namespace sorbet::test::lsp

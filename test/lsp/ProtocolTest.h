@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 // ^ Violates linting rules, so include first.
+#include "common/Counters.h"
+#include "common/Counters_impl.h"
 #include "main/lsp/wrapper.h"
 #include "test/helpers/MockFileSystem.h"
 
@@ -13,6 +15,25 @@ struct ExpectedDiagnostic {
     std::string path;
     int line;
     std::string message;
+};
+
+class CounterStateDatabase final {
+    const CounterState counters;
+
+public:
+    CounterStateDatabase(CounterState counters);
+
+    // Get counter value or 0.
+    CounterImpl::CounterType getCounter(ConstExprStr counter) const;
+
+    CounterImpl::CounterType getCategoryCounter(ConstExprStr counter, ConstExprStr category) const;
+
+    CounterImpl::CounterType getCategoryCounterSum(ConstExprStr counter) const;
+
+    CounterImpl::CounterType getHistogramCount(ConstExprStr histogram) const;
+
+    std::vector<CounterImpl::Timing> getTimings(ConstExprStr counter,
+                                                std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
 };
 
 /**
@@ -95,6 +116,11 @@ protected:
      */
     void updateDiagnostics(const std::vector<std::unique_ptr<LSPMessage>> &messages);
     void updateDiagnostics(const LSPMessage &message);
+
+    /**
+     * Request all counter metrics from the server. Used to assert that metrics are reporting correctly.
+     */
+    const CounterStateDatabase getCounters();
 };
 
 } // namespace sorbet::test::lsp

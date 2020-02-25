@@ -1300,11 +1300,14 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                              },
                                              classTypes);
 
+    auto SorbetCounters = makeObject("SorbetCounters", {}, classTypes, {"CounterState counters;"});
+
     /* Core LSPMessage objects */
     // N.B.: Only contains LSP methods that Sorbet actually cares about.
     // All others are ignored.
     auto LSPMethod = makeStrEnum("LSPMethod",
                                  {
+                                     "__GETCOUNTERS__",
                                      "__PAUSE__",
                                      "__RESUME__",
                                      "$/cancelRequest",
@@ -1340,6 +1343,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto methodField = makeField("method", LSPMethod);
     auto RequestMessageParamsType =
         makeDiscriminatedUnion(methodField, {
+                                                {"__GETCOUNTERS__", makeOptional(JSONNull)},
                                                 {"initialize", InitializeParams},
                                                 {"shutdown", makeOptional(JSONNull)},
                                                 {"textDocument/documentHighlight", TextDocumentPositionParams},
@@ -1365,6 +1369,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto ResponseMessageResultType = makeDiscriminatedUnion(
         requestMethodField,
         {
+            {"__GETCOUNTERS__", SorbetCounters},
             {"initialize", InitializeResult},
             {"shutdown", JSONNull},
             // DocumentHighlight[] | null
