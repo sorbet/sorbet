@@ -9286,10 +9286,6 @@ module RbConfig
   def self.ruby(); end
 end
 
-class Regexp
-  def match?(*_); end
-end
-
 class RubyVM::InstructionSequence
   def absolute_path(); end
 
