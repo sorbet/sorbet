@@ -13,7 +13,7 @@ namespace spd = spdlog;
 
 namespace sorbet {
 class WorkerPool;
-}
+} // namespace sorbet
 
 namespace sorbet::realmain::lsp {
 

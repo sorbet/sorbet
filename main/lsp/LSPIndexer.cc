@@ -8,6 +8,7 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
+#include "payload/payload.h"
 
 using namespace std;
 
@@ -47,8 +48,10 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
 }
 } // namespace
 
-LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS)
-    : config(config), initialGS(move(initialGS)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
+LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS,
+                       unique_ptr<KeyValueStore> kvstore)
+    : config(config), initialGS(move(initialGS)), kvstore(move(kvstore)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 LSPIndexer::~LSPIndexer() {
     for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
@@ -149,6 +152,10 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, "Indexing", "Indexing files...");
+    unique_ptr<OwnedKeyValueStore> kvstore;
+    if (this->kvstore != nullptr) {
+        kvstore = make_unique<OwnedKeyValueStore>(move(this->kvstore));
+    }
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
         vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
@@ -173,6 +180,9 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     computeFileHashes(initialGS->getFiles(), workers);
 
+    // Save globalstate into kvstore. Destroys kvstore, but we only initialize once so it's OK.
+    payload::retainGlobalState(initialGS, config->opts, move(kvstore));
+
     updates.epoch = 0;
     updates.canTakeFastPath = false;
     updates.updatedFileIndexes = move(indexed);
@@ -188,7 +198,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
     // Ensure all files have hashes.
-    computeFileHashes(edit.updates, *emptyWorkers);
+    computeFileHashes(edit.updates);
 
     update.updatedFiles = move(edit.updates);
     update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
@@ -231,6 +241,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     }
 
     {
+        // Explicitly null. It does not make sense to use kvstore for short-lived editor edits.
+        unique_ptr<OwnedKeyValueStore> kvstore;
         // Create a throwaway error queue. commitEdit may be called on two different threads, and we can't anticipate
         // which one it will be.
         initialGS->errorQueue =

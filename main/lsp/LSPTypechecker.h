@@ -8,7 +8,6 @@
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::core::lsp {
@@ -62,7 +61,6 @@ class LSPTypechecker final {
     std::vector<u4> diagnosticEpochs;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
-    std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
     std::unique_ptr<UndoState> cancellationUndoState;

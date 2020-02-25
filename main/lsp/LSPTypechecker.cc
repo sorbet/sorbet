@@ -205,10 +205,8 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
     for (auto &f : subset) {
-        unique_ptr<KeyValueStore> kvstore; // nullptr
-        // TODO: Thread through kvstore.
-        ENFORCE(this->kvstore == nullptr);
         // TODO(jvilk): We don't need to re-index files that didn't change.
+        unique_ptr<OwnedKeyValueStore> kvstore; // Use a null kvstore since this is likely a short-lived editor edit.
         auto t = pipeline::indexOne(config->opts, *gs, f, kvstore);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
@@ -231,8 +229,9 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
     } else {
         fref = gs->enterFile(file);
     }
+    // Use a null kvstore since this is likely a short-lived editor edit.
+    unique_ptr<OwnedKeyValueStore> kvstore;
     fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, opts);
-    std::unique_ptr<KeyValueStore> kvstore; // nullptr
     return make_pair(move(gs), pipeline::indexOne(opts, *gs, fref, kvstore));
 }
 } // namespace

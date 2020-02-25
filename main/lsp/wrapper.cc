@@ -40,8 +40,7 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     typeErrorsConsoleOut = make_shared<spd::logger>("typeDiagnostics", stderrColorSinkOut);
     typeErrorsConsoleOut->set_pattern("%v");
     auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut)));
-    // TODO: Thread kvstore through.
-    unique_ptr<KeyValueStore> kvstore;
+    unique_ptr<OwnedKeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, options, kvstore);
     setRequiredLSPOptions(*gs, options);
     return gs;
@@ -82,7 +81,7 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
     : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
-      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_)), opts(move(opts)) {}
+      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, nullptr)), opts(move(opts)) {}
 
 LSPWrapper::~LSPWrapper() = default;
 

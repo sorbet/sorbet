@@ -88,7 +88,7 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
 }
 
 unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
-                                               const unique_ptr<KeyValueStore> &kvstore) {
+                                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore && file.id() < gs.filesUsed()) {
         string fileHashKey = fileKey(gs, file);
         auto maybeCached = kvstore->read(fileHashKey);
@@ -105,7 +105,7 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
     return nullptr;
 }
 
-void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vector<ast::ParsedFile> &trees) {
+void cacheTrees(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore, vector<ast::ParsedFile> &trees) {
     if (!kvstore) {
         return;
     }
@@ -175,7 +175,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore) {
+                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
@@ -230,9 +230,9 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::File
     return {emptyParsedFile(file), vector<shared_ptr<core::File>>()};
 }
 
-pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
-                                                                          core::GlobalState &gs, core::FileRef file,
-                                                                          unique_ptr<KeyValueStore> &kvstore) {
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>>
+indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
+                    const unique_ptr<OwnedKeyValueStore> &kvstore) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
@@ -484,7 +484,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              unique_ptr<KeyValueStore> &kvstore) {
+                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
@@ -528,7 +528,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+                               const options::Options &opts, WorkerPool &workers,
+                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -568,7 +569,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
-                             unique_ptr<KeyValueStore> &kvstore) {
+                             const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (firstPass.pluginGeneratedFiles.empty()) {
         return firstPass;
     }
@@ -629,7 +630,8 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+                              const options::Options &opts, WorkerPool &workers,
+                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
@@ -883,7 +885,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
                                                        f.file.data(*gs).sourceType);
                 gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
-                unique_ptr<KeyValueStore> kvstore;
+                unique_ptr<OwnedKeyValueStore> kvstore;
                 f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
                 auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
                 vector<ast::ParsedFile> toBeReResolved;
@@ -1150,7 +1152,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
         fref.data(*lgs).strictLevel = pipeline::decideStrictLevel(*lgs, fref, emptyOpts);
     }
     vector<ast::ParsedFile> single;
-    unique_ptr<KeyValueStore> kvstore;
+    unique_ptr<OwnedKeyValueStore> kvstore;
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
     auto errs = lgs->errorQueue->drainAllErrors();

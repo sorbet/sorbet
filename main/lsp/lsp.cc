@@ -1,6 +1,7 @@
 #include "main/lsp/lsp.h"
 #include "common/Timer.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "common/statsd/statsd.h"
 #include "common/typecase.h"
 #include "common/web_tracer_framework/tracing.h"
@@ -16,11 +17,11 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-                 const std::shared_ptr<LSPConfiguration> &config)
+                 const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueueMutex(make_shared<absl::Mutex>()), taskQueue(make_shared<TaskQueueState>()),
       epochManager(initialGS->epochManager), preprocessor(config, taskQueueMutex, taskQueue),
       typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers),
-      indexer(config, move(initialGS)), emptyWorkers(WorkerPool::create(0, *config->logger)),
+      indexer(config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);

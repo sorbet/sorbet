@@ -714,10 +714,6 @@ void readOptions(Options &opts,
         }
 
         opts.runLSP = raw["lsp"].as<bool>();
-        if (opts.runLSP && !opts.cacheDir.empty()) {
-            logger->error("lsp mode does not yet support caching.");
-            throw EarlyReturnWithCode(1);
-        }
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
         // Certain features only need certain passes

@@ -28,6 +28,8 @@ class LSPIndexer final {
     /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state! We clone
      * this global state every time we need to perform a slow path typechecking operation. */
     std::unique_ptr<core::GlobalState> initialGS;
+    /** Key-value store used during initialization. */
+    std::unique_ptr<KeyValueStore> kvstore;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
@@ -35,7 +37,6 @@ class LSPIndexer final {
     std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
     /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
     UnorderedMap<int, std::shared_ptr<core::File>> evictedFiles;
-    std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
@@ -49,7 +50,8 @@ class LSPIndexer final {
                          bool containsPendingTypecheckUpdates) const;
 
 public:
-    LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS);
+    LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,
+               std::unique_ptr<KeyValueStore> kvstore);
     ~LSPIndexer();
 
     /**
