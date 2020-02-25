@@ -77,7 +77,8 @@ run_cmd() {{
     fi
 }}
 
-PATH="${{cc_path}}:$PATH" \
+export PATH="${{cc_path}}:$PATH"
+
 CC="${{cc_name}}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
