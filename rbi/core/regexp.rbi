@@ -1129,6 +1129,20 @@ class Regexp < Object
   end
   def match(arg0, arg1=T.unsafe(nil), &blk); end
 
+  # Returns a true or false indicates whether the regexp is matched or
+  # not without updating $~ and other related variables. If the second
+  # parameter is present, it specifies the position in the string to
+  # begin the search.
+  # https://ruby-doc.org/core-2.7.0/Regexp.html#method-i-match-3F
+  sig do
+    params(
+        arg0: String,
+        arg1: T.nilable(Integer),
+    )
+    .returns(T::Boolean)
+  end
+  def match?(arg0, arg1=T.unsafe(nil)); end
+
   # Returns a hash representing information about named captures of *rxp*.
   #
   # A key of the hash is a name of the named captures. A value of the hash is an

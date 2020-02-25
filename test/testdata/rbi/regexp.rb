@@ -6,3 +6,6 @@ T.reveal_type(maybe_match) # error: type: `T.nilable(MatchData)`
 /foo/.match('foo') do |m|
   T.reveal_type(m) # error: type: `MatchData`
 end
+
+T.reveal_type(/foo/.match?('foo'))  # error: type: `T::Boolean`
+T.reveal_type(/foo/.match?('foo', 1))  # error: type: `T::Boolean`
