@@ -1136,7 +1136,7 @@ class Regexp < Object
   # https://ruby-doc.org/core-2.7.0/Regexp.html#method-i-match-3F
   sig do
     params(
-        arg0: String,
+        arg0: T.nilable(T.any(String, Symbol)),
         arg1: T.nilable(Integer),
     )
     .returns(T::Boolean)
