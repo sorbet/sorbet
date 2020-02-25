@@ -9,7 +9,7 @@ cd ../../../..
 
 versions=("ruby_2_4" "ruby_2_6")
 
-if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@" >/dev/null 2>&1 ; then
+if ! bazel test //gems/sorbet/test/hidden-method-finder -c opt "$@"; then
     for test_dir in bazel-bin/gems/sorbet/test/hidden-method-finder/{simple,thorough}; do
         echo "Updating $test_dir"
         suite="$(basename "${test_dir}")"
