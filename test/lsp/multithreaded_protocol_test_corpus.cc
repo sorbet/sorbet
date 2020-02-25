@@ -18,50 +18,36 @@ optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) 
     return nullopt;
 }
 } // namespace
+
 TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     assertDiagnostics(initializeLSP(), {});
-    vector<unique_ptr<LSPMessage>> requests;
-
-    requests.push_back(make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
-    requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
-    requests.push_back(
-        changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
-    requests.push_back(make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
-    assertDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
-
-    auto counters = getCounters();
-
-    vector<pair<ConstExprStr, int>> expectedMessageCounts = {
-        {"initialize", 1},
-        {"initialized", 1},
-        {"sorbet.workspaceEdit", 1},
-        {"GETCOUNTERS", 1},
-    };
-    cout << counters.getTimings("LSPTask::preprocess").size() << " " << counters.getTimings("LSPTask::index").size()
-         << " " << counters.getTimings("LSPTask::run").size() << "\n";
-    for (auto &expected : expectedMessageCounts) {
-        EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", expected.first), expected.second)
-            << expected.first.str;
-        EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", expected.first), expected.second)
-            << expected.first.str;
-        EXPECT_EQ(counters.getTimings("LSPTask::preprocess", {{"method", expected.first}}).size(), expected.second)
-            << expected.first.str;
-        EXPECT_EQ(counters.getTimings("LSPTask::index", {{"method", expected.first}}).size(), expected.second)
-            << expected.first.str;
-        EXPECT_EQ(counters.getTimings("LSPTask::run", {{"method", expected.first}}).size(), expected.second)
-            << expected.first.str;
+    {
+        auto initCounters = getCounters();
+        EXPECT_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialize"), 1);
+        EXPECT_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialized"), 1);
+        EXPECT_EQ(initCounters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+        EXPECT_EQ(initCounters.getCategoryCounterSum("lsp.updates"), 1);
+        EXPECT_EQ(initCounters.getTimings("initial_index").size(), 1);
+        EXPECT_EQ(initCounters.getTimings("reIndexFromFileSystem").size(), 1);
+        EXPECT_EQ(initCounters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     }
 
-    EXPECT_EQ(counters.getHistogramCount("task_latency"), 4);
-    EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
-    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
-    // initialization + one slow path update
-    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 2);
-    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
-    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    sendAsync(*openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
+    sendAsync(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
 
-    EXPECT_EQ(counters.getTimings("initial_index").size(), 1);
-    EXPECT_EQ(counters.getTimings("reIndexFromFileSystem").size(), 1);
+    // Pause so that all latency timers for the above operations get reported.
+    this_thread::sleep_for(chrono::milliseconds(2));
+
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt))),
+                      {{"yolo1.rb", 3, "bear"}});
+
+    auto counters = getCounters();
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
+    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    EXPECT_EQ(counters.getCategoryCounterSum("lsp.updates"), 1);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
@@ -81,6 +67,9 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
                                                "T::Sig\n\nsig{returns(String)}\ndef hello\nBar.new.hello\nend\nend\n")),
                       {});
 
+    // clear counters
+    getCounters();
+
     // Slow path edits two files. One introduces error.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Syntax error in foo.rb.
@@ -97,8 +86,12 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Make another edit that fixes syntax error and should take fast path.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\nend\n", 2, false));
+    // Pause so that all latency timers for the above operations get reported.
+    this_thread::sleep_for(chrono::milliseconds(2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
     {
@@ -113,6 +106,19 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
                           {"bar.rb", 7, "Returning value that does not conform to method result type"},
                           {"baz.rb", 7, "Returning value that does not conform to method result type"},
                       });
+
+    auto counters = getCounters();
+    // N.B.: lsp.messages.processed contains canceled slow paths.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 2);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 2);
+
+    // We don't report task latencies for merged edits or canceled slow paths.
+    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
@@ -123,6 +129,9 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
     // Initial state: Two empty files.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
     assertDiagnostics(send(*openFile("bar.rb", "")), {});
+
+    // clear counters
+    getCounters();
 
     // Slow path 1: Edit foo to have an error since Bar doesn't exist. Expect a cancelation.
     sendAsync(*changeFile(
@@ -136,11 +145,15 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Slow path 2: Bar defines the expected method, but declared with a non-integer return value (so foo now has a new
     // error).
     sendAsync(*changeFile("bar.rb",
                           "# typed: true\n\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef bar\n10\nend\nend\n", 2,
                           false));
+    // Pause so that all latency timers for the above operations get reported.
+    this_thread::sleep_for(chrono::milliseconds(2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
     {
@@ -155,6 +168,18 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
                           {"foo.rb", 6, "Returning value that does not conform to method result type"},
                           {"bar.rb", 6, "Returning value that does not conform to method result type"},
                       });
+
+    auto counters = getCounters();
+    // N.B.: lsp.messages.processed contains canceled slow paths.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 2);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
+
+    // We don't report task latencies for merged edits or canceled slow paths.
+    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
@@ -164,6 +189,9 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
 
     // Create a new file.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
+
+    // clear counters
+    getCounters();
 
     // Slow path: Edit foo to have a class with a documentation string.
     sendAsync(*changeFile("foo.rb", "# typed: true\n# A class that does things.\nclass Foo\nextend T::Sig\nend\n", 2,
@@ -176,8 +204,12 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Send a hover to request the documentation string.
     sendAsync(*hover("foo.rb", 2, 6));
+    // Pause so that all latency timers for the above operations get reported.
+    this_thread::sleep_for(chrono::milliseconds(2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // First response should be hover.
     {
@@ -194,6 +226,19 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
         ASSERT_TRUE(status.has_value());
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
+
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    auto counters = getCounters();
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 1);
+
+    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 1);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHoverAndReturnsErrors) {
@@ -492,6 +537,33 @@ TEST_P(ProtocolTest, CanCancelSlowPathEvenIfAddsFile) {
     assertDiagnostics(
         send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
         {{"foo.rb", 5, "Returning value that does not conform to method result type"}, {"bar.rb", 6, "unexpected"}});
+}
+
+TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
+    assertDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertDiagnostics(
+        send(*openFile("foo.rb", "# typed: true\n# A class that does things.\nclass Foo\nextend T::Sig\nend\n")), {});
+
+    // clear counters
+    getCounters();
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // Send a hover to request the documentation string.
+    sendAsync(*hover("foo.rb", 2, 6));
+    // Pause so that all latency timer for the hover is >1ms and would normally get reported.
+    this_thread::sleep_for(chrono::milliseconds(2));
+    // Cancel the hover.
+    sendAsync(*cancelRequest(nextId - 1));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+    // Clear out the pipeline to wait for previous requests to finish.
+    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+
+    auto counters = getCounters();
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 0);
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.canceled", "textDocument.hover"), 1);
+    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "textDocument.hover"}}).size(), 0);
 }
 
 // Run these tests in multi-threaded mode.
