@@ -73,7 +73,7 @@ run_cmd() {{
     fi
 }}
 
-CC="{cc}" \
+CC="${{base}}/{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
 CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
@@ -180,7 +180,12 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.bundler,
+        inputs = depset(
+            direct = deps + ctx.files.src + ctx.files.bundler,
+            transitive = [
+                cc_toolchain.all_files,
+            ],
+        ),
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
