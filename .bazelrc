@@ -18,6 +18,13 @@ build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISC
 ##  Common build options across all build configurations
 ##
 
+# Enable strict_action_env flag to. For more information on this feature see
+# https://groups.google.com/forum/#!topic/bazel-discuss/_VmRfMyyHBk.
+# This will be the new default behavior at some point (and the flag was flipped
+# shortly in 0.21.0 - https://github.com/bazelbuild/bazel/issues/7026). Remove
+# this flag here once flipped in Bazel again.
+build --incompatible_strict_action_env
+
 # C / C++ Options
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
