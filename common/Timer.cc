@@ -47,7 +47,11 @@ void Timer::cancel() {
     this->canceled = true;
 }
 
-Timer Timer::clone(ConstExprStr name) {
+Timer Timer::clone() const {
+    return clone(name);
+}
+
+Timer Timer::clone(ConstExprStr name) const {
     Timer forked(log, name, prev, {}, start, {});
     forked.args = args;
     forked.tags = tags;

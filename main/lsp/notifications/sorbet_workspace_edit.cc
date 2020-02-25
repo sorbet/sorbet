@@ -45,7 +45,7 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(*params, cachedFileHashesOrEmpty));
+    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(latencyTimer, *params, cachedFileHashesOrEmpty));
 }
 
 void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {

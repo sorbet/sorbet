@@ -87,12 +87,12 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // Pause for a moderate amount of time so that we can check that the subsequent fast path uses the latency timer
+    // from the initial slow path.
+    this_thread::sleep_for(chrono::milliseconds(5));
+
     // Make another edit that fixes syntax error and should take fast path.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\nend\n", 2, false));
-    // Pause so that all latency timers for the above operations get reported.
-    this_thread::sleep_for(chrono::milliseconds(2));
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
     {
@@ -114,13 +114,17 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 2);
 
     // We don't report task latencies for merged edits or canceled slow paths.
-    EXPECT_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    auto taskLatency = counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}});
+    EXPECT_EQ(taskLatency.size(), 1);
+    EXPECT_GE(taskLatency[0].end - taskLatency[0].start, chrono::milliseconds(5));
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    auto lastDiagnosticLatency = counters.getTimings("last_diagnostic_latency");
+    EXPECT_EQ(lastDiagnosticLatency.size(), 1);
+    EXPECT_GE(lastDiagnosticLatency[0].end - lastDiagnosticLatency[0].start, chrono::milliseconds(5));
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {

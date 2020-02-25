@@ -96,6 +96,12 @@ UnorderedMap<int, core::FileHash> mergeEvictions(const UnorderedMap<int, core::F
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS)
     : config(config), initialGS(move(initialGS)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
+LSPIndexer::~LSPIndexer() {
+    if (pendingTypecheckLatencyTimer != nullptr) {
+        pendingTypecheckLatencyTimer->cancel();
+    }
+}
+
 vector<core::FileHash> LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files,
                                                      WorkerPool &workers) const {
     Timer timeit(config->logger, "computeFileHashes");
@@ -212,7 +218,10 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = move(savedErrorQueue);
 }
 
-LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, std::vector<core::FileHash> newHashesOrEmpty) {
+LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit,
+                                      std::vector<core::FileHash> newHashesOrEmpty) {
+    Timer timeit(config->logger, "LSPIndexer::commitEdit");
+    timeit.setTag("computedFileHashes", newHashesOrEmpty.empty() ? ConstExprStr("true") : ConstExprStr("false"));
     LSPFileUpdates update;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
@@ -310,6 +319,12 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, std::vect
     if (!update.canTakeFastPath) {
         update.updatedGS = initialGS->deepCopy();
         pendingTypecheckUpdates = update.copy();
+        if (pendingTypecheckLatencyTimer != nullptr) {
+            pendingTypecheckLatencyTimer->cancel();
+        }
+        if (latencyTimer != nullptr) {
+            pendingTypecheckLatencyTimer = make_unique<Timer>(latencyTimer->clone());
+        }
         pendingTypecheckEvictedStateHashes = std::move(evictedHashes);
     } else {
         // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
@@ -318,6 +333,13 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, std::vect
         auto mergedEvictions = mergeEvictions(pendingTypecheckEvictedStateHashes, evictedHashes);
         pendingTypecheckUpdates = move(merged);
         pendingTypecheckEvictedStateHashes = std::move(mergedEvictions);
+        if (update.canceledSlowPath && pendingTypecheckLatencyTimer != nullptr) {
+            // Replace edit's latencyTimer with that of the running slow path.
+            if (latencyTimer != nullptr) {
+                latencyTimer->cancel();
+            }
+            latencyTimer = make_unique<Timer>(pendingTypecheckLatencyTimer->clone());
+        }
     }
     // Don't copy over these (test-only) properties, as they only apply to the original request.
     pendingTypecheckUpdates.cancellationExpected = false;

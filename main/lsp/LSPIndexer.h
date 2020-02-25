@@ -30,6 +30,9 @@ class LSPIndexer final {
     std::vector<core::FileHash> globalStateHashes;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
+    /** Contains a clone of the latency timer for the pending typecheck operation. Is used to ensure that we correctly
+     * track the latency of canceled & rescheduled typechecking operations. */
+    std::unique_ptr<Timer> pendingTypecheckLatencyTimer;
     /** Contains globalStateHashes evicted with `pendingTypecheckUpdates`. Used in slow path cancelation logic. */
     UnorderedMap<int, core::FileHash> pendingTypecheckEvictedStateHashes;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
@@ -41,6 +44,7 @@ class LSPIndexer final {
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS);
+    ~LSPIndexer();
 
     /** Determines if the given edit can take the fast path relative to the most recently committed edit. */
     bool canTakeFastPath(const SorbetWorkspaceEditParams &params, const std::vector<core::FileHash> &fileHashes) const;
@@ -60,7 +64,8 @@ public:
      *
      * If `newHashesOrEmpty` contains file hashes, this function avoids re-computing those hashes.
      */
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit, std::vector<core::FileHash> newHashesOrEmpty);
+    LSPFileUpdates commitEdit(std::unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit,
+                              std::vector<core::FileHash> newHashesOrEmpty);
 };
 
 } // namespace sorbet::realmain::lsp
