@@ -91,7 +91,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
             latencyTimer->clone("last_diagnostic_latency");
         }
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
-    } else if (latencyTimer) {
+    } else if (latencyTimer != nullptr) {
         // Don't report a latency value for canceled slow paths.
         latencyTimer->cancel();
     }
