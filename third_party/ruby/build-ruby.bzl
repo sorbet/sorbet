@@ -62,6 +62,10 @@ export PATH="$(dirname "{cc}"):$PATH"
 # and this feels more maintainable than patching it.
 cp -aL "{src_dir}"/* "$build_dir"
 
+command -v realpath > /dev/null 2>&1 || {{ echo "will need realpath" ; exit 1; }}
+real_cc=$(realpath "{cc}")
+cc_path=$(dirname "${{real_cc}}")
+cc_name=$(basename "${{real_cc}}")
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
@@ -73,7 +77,8 @@ run_cmd() {{
     fi
 }}
 
-CC="${{base}}/{cc}" \
+PATH="${{cc_path}}:$PATH" \
+CC="${{cc_name}}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
 CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
