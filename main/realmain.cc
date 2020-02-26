@@ -84,15 +84,6 @@ void startHUPMonitor() {
     monitor.detach();
 }
 
-void addStandardMetrics() {
-#ifndef SORBET_REALMAIN_MIN
-    prodCounterAdd("release.build_scm_commit_count", Version::build_scm_commit_count);
-    prodCounterAdd("release.build_timestamp",
-                   chrono::duration_cast<std::chrono::seconds>(Version::build_timestamp.time_since_epoch()).count());
-    StatsD::addRusageStats();
-#endif
-}
-
 core::StrictLevel levelMinusOne(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::Ignore:
@@ -578,7 +569,7 @@ int realmain(int argc, char *argv[]) {
     }
 
 #ifndef SORBET_REALMAIN_MIN
-    addStandardMetrics();
+    StatsD::addStandardMetrics();
 
     if (!opts.someCounters.empty()) {
         if (opts.enableCounters) {
