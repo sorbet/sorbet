@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-
+set -x
 ar=$1
 link=$2
 output=$3
