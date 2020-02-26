@@ -9199,8 +9199,6 @@ class Hash
 
   def transform_keys!(); end
 
-  def transform_values(); end
-
   def transform_values!(); end
 
   def update(*_); end
