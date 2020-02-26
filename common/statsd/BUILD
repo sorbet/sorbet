@@ -15,6 +15,7 @@ cc_library(
     deps = [
         "//common",
         "//core",
+        "//version",
     ] + select({
         "//tools/config:webasm": [],
         "//conditions:default": ["@statsd"],

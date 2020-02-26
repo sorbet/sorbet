@@ -1,6 +1,7 @@
 #include "common/statsd/statsd.h"
 #include "common/Counters_impl.h"
 #include "common/formatting.h"
+#include "version/version.h"
 
 extern "C" {
 #include "statsd-client.h"
@@ -109,7 +110,7 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     return true;
 }
 
-void StatsD::addRusageStats() {
+void StatsD::addStandardMetrics() {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         prodCounterAdd("run.utilization.user_time.us", usage.ru_utime.tv_sec * 1000'000 + usage.ru_utime.tv_usec);
@@ -122,6 +123,9 @@ void StatsD::addRusageStats() {
         prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
         prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
     }
+    prodCounterAdd("release.build_scm_commit_count", Version::build_scm_commit_count);
+    prodCounterAdd("release.build_timestamp",
+                   chrono::duration_cast<std::chrono::seconds>(Version::build_timestamp.time_since_epoch()).count());
 }
 
 } // namespace sorbet

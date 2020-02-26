@@ -7,6 +7,6 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     return false;
 }
 
-void StatsD::addRusageStats() {}
+void StatsD::addStandardMetrics() {}
 
 } // namespace sorbet

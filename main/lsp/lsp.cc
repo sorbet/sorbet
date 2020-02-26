@@ -34,13 +34,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     const auto &opts = config->opts;
     auto counters = getAndClearThreadCounters();
     if (!opts.statsdHost.empty()) {
-        // Record rusage-related stats.
-        StatsD::addRusageStats();
-        // Record version information.
-        prodCounterAdd("release.build_scm_commit_count", Version::build_scm_commit_count);
-        prodCounterAdd(
-            "release.build_timestamp",
-            chrono::duration_cast<std::chrono::seconds>(Version::build_timestamp.time_since_epoch()).count());
+        // Record process and version stats.
+        StatsD::addStandardMetrics();
         lastMetricUpdateTime = currentTime;
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
