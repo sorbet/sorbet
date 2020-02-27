@@ -29,9 +29,13 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   it 'can validate prop value' do
     MyProps.validate_prop_value :foo, {}
 
-    assert_raises(TypeError) do
+    e = assert_raises(TypeError) do
       MyProps.validate_prop_value :foo, 'nope'
     end
+    assert_equal(
+      "Parameter 'foo': Can't set Opus::Types::Test::Props::PropsTest::MyProps.foo to \"nope\" (instance of String) - need a T::Hash[T.any(String, Symbol), Object]",
+      e.message.split("\n").first,
+    )
 
     assert_raises(RuntimeError) do
       MyProps.validate_prop_value :nope, 'does not matter'

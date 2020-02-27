@@ -39,9 +39,9 @@ module T::Props
         # Use separate methods in order to ensure that we only close over necessary
         # variables
         if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
-          nilable_proc(prop, accessor_key, non_nil_type)
+          nilable_proc(prop, accessor_key, non_nil_type, klass)
         else
-          non_nil_proc(prop, accessor_key, non_nil_type)
+          non_nil_proc(prop, accessor_key, non_nil_type, klass)
         end
       end
 
@@ -50,16 +50,17 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
+          klass: T.all(Module, T::Props::ClassMethods),
         )
         .returns(SetterProc)
       end
-      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type)
+      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass)
         proc do |val|
           if non_nil_type.valid?(val)
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              self.class,
+              klass,
               prop,
               non_nil_type,
               val,
@@ -73,10 +74,11 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
+          klass: T.all(Module, T::Props::ClassMethods),
         )
         .returns(SetterProc)
       end
-      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type)
+      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass)
         proc do |val|
           if val.nil?
             instance_variable_set(accessor_key, nil)
@@ -84,7 +86,7 @@ module T::Props
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              self.class,
+              klass,
               prop,
               non_nil_type,
               val,
@@ -95,7 +97,7 @@ module T::Props
 
       sig do
         params(
-          klass: T.untyped,
+          klass: T.all(Module, T::Props::ClassMethods),
           prop: Symbol,
           type: T.any(T::Types::Base, Module),
           val: T.untyped,
