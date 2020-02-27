@@ -59,7 +59,7 @@ module T::Props
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              T.unsafe(self.class),
+              self.class,
               prop,
               non_nil_type,
               val,
@@ -84,7 +84,7 @@ module T::Props
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
-              T.unsafe(self.class),
+              self.class,
               prop,
               non_nil_type,
               val,
@@ -95,7 +95,7 @@ module T::Props
 
       sig do
         params(
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.untyped,
           prop: Symbol,
           type: T.any(T::Types::Base, Module),
           val: T.untyped,
