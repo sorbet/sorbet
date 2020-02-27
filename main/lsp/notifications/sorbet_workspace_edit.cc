@@ -57,7 +57,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     latencyCancelSlowPath = nullptr;
     // For consistency; I don't expect this notification to be used for fast path edits.
     startedNotification.Notify();
-    if (updates->canTakeFastPath != FastPathDecision::FAST) {
+    if (updates->fastPathDecision != FastPathDecision::FAST) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     typechecker.typecheckOnFastPath(move(*updates));
@@ -100,11 +100,11 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
 
 bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
-        return updates->canTakeFastPath == FastPathDecision::FAST;
+        return updates->fastPathDecision == FastPathDecision::FAST;
     }
     if (cachedFastPathDecision == FastPathDecision::NOT_DETERMINED) {
         index.computeFileHashes(params->updates);
-        cachedFastPathDecision = index.canTakeFastPath(params->updates);
+        cachedFastPathDecision = index.makeFastPathDecision(params->updates);
     }
     return cachedFastPathDecision == FastPathDecision::FAST;
 }

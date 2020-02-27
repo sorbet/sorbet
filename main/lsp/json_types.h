@@ -32,7 +32,7 @@ public:
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
-    FastPathDecision canTakeFastPath = FastPathDecision::NOT_DETERMINED;
+    FastPathDecision fastPathDecision = FastPathDecision::NOT_DETERMINED;
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
     bool hasNewFiles = false;
@@ -50,7 +50,7 @@ public:
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *
-     * Does not handle updating `canTakeFastPath`.
+     * Resets `fastPathDecision`.
      */
     void mergeOlder(const LSPFileUpdates &older);
 

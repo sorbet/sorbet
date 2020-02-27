@@ -63,8 +63,12 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
             // This is the typecheck that caused us to cancel the previous slow path. Un-commit all typechecker changes.
             auto oldFilesWithErrors = cancellationUndoState->restore(gs, indexed, indexedFinalGS, filesThatHaveErrors);
             cancellationUndoState = nullptr;
+            auto fastPathDecision = updates.fastPathDecision;
             // Retypecheck all of the files that previously had errors.
             updates.mergeOlder(getNoopUpdate(oldFilesWithErrors));
+            // The merge operation resets `fastPathDecision`, but we know that retypechecking unchanged files
+            // has no influence on the fast path decision.
+            updates.fastPathDecision = fastPathDecision;
         } else {
             config->logger->debug("[Typechecker] Error: UndoState is missing for update that canceled slow path!");
         }
@@ -72,7 +76,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
 
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
-    const bool isFastPath = updates.canTakeFastPath == FastPathDecision::FAST;
+    const bool isFastPath = updates.fastPathDecision == FastPathDecision::FAST;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     if (isFastPath) {
         auto run = runFastPath(move(updates), workers);
@@ -99,7 +103,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     ENFORCE(!updates.cancellationExpected);
     ENFORCE(updates.preemptionsExpected == 0);
     // This path only works for fast path updates.
-    ENFORCE(updates.canTakeFastPath == FastPathDecision::FAST);
+    ENFORCE(updates.fastPathDecision == FastPathDecision::FAST);
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
@@ -198,7 +202,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     auto &logger = config->logger;
     unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, "SlowPathBlocking", "Typechecking...");
     Timer timeit(logger, "slow_path");
-    ENFORCE(updates.canTakeFastPath == FastPathDecision::SLOW || config->disableFastPath);
+    ENFORCE(updates.fastPathDecision == FastPathDecision::SLOW || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
     if (!updates.updatedGS.has_value()) {
         Exception::raise("runSlowPath called with an update that lacks an updated global state.");
@@ -458,7 +462,7 @@ void LSPTypechecker::pushDiagnostics(u4 epoch, vector<core::FileRef> filesTypech
 
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
     // The fast path cannot be canceled.
-    ENFORCE(!(updates.canTakeFastPath == FastPathDecision::FAST && couldBeCanceled));
+    ENFORCE(!(updates.fastPathDecision == FastPathDecision::FAST && couldBeCanceled));
     if (couldBeCanceled) {
         ENFORCE(updates.updatedGS.has_value());
         cancellationUndoState =
@@ -466,7 +470,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     }
 
     // Clear out state associated with old finalGS.
-    if (updates.canTakeFastPath == FastPathDecision::SLOW) {
+    if (updates.fastPathDecision == FastPathDecision::SLOW) {
         indexedFinalGS.clear();
     }
 
@@ -493,10 +497,10 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     }
 
     if (updates.updatedGS.has_value()) {
-        ENFORCE(updates.canTakeFastPath == FastPathDecision::SLOW);
+        ENFORCE(updates.fastPathDecision == FastPathDecision::SLOW);
         gs = move(updates.updatedGS.value());
     } else {
-        ENFORCE(updates.canTakeFastPath == FastPathDecision::FAST);
+        ENFORCE(updates.fastPathDecision == FastPathDecision::FAST);
     }
 }
 
@@ -558,7 +562,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
     LSPFileUpdates noop;
-    noop.canTakeFastPath = FastPathDecision::FAST;
+    noop.fastPathDecision = FastPathDecision::FAST;
     // Epoch isn't important for this update.
     noop.epoch = 0;
     for (auto fref : frefs) {
@@ -619,7 +623,7 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypecheck
     : typechecker(typechecker), workers(workers) {}
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates) {
-    if (updates.canTakeFastPath != FastPathDecision::FAST) {
+    if (updates.fastPathDecision != FastPathDecision::FAST) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
     auto committed = typechecker.typecheck(move(updates), workers);

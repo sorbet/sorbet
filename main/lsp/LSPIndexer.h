@@ -45,9 +45,10 @@ public:
     /** Determines if the given edit can take the fast path relative to the most recently committed edit. If
      * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past using
      * `evictedFiles`. */
-    FastPathDecision canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates = false) const;
-    FastPathDecision canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                     bool containsPendingTypecheckUpdates = false) const;
+    FastPathDecision makeFastPathDecision(const LSPFileUpdates &edit,
+                                          bool containsPendingTypecheckUpdates = false) const;
+    FastPathDecision makeFastPathDecision(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                                          bool containsPendingTypecheckUpdates = false) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
