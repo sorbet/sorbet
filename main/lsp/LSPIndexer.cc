@@ -291,7 +291,7 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
             initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge with the pending update.
             update.mergeOlder(pendingTypecheckUpdates);
-            update.fastPathDecision = makeFastPathDecision(update);
+            update.fastPathDecision = makeFastPathDecision(update, true);
             update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
         }
