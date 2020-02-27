@@ -111,6 +111,14 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     return ret;
 }
 
+void File::setFileHash(shared_ptr<FileHash> hash) {
+    hash_ = move(hash);
+}
+
+const shared_ptr<FileHash> &File::getFileHash() const {
+    return hash_;
+}
+
 FileRef::FileRef(unsigned int id) : _id(id) {
     ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
 }

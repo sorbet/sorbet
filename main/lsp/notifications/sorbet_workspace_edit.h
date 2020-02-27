@@ -10,11 +10,8 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     absl::Notification startedNotification;
     std::unique_ptr<Timer> latencyCancelSlowPath;
     std::unique_ptr<SorbetWorkspaceEditParams> params;
-    // Caches the file hashes computed for `canPreempt` to avoid recomputing them later.
-    mutable std::vector<core::FileHash> cachedFileHashesOrEmpty;
-    // Caches the fast path decision made with cachedFileHashesOrEmpty.
-    // Is only valid if `cachedFileHashesOrEmpty` is not empty.
-    mutable bool cachedFastPathDecision = false;
+    // Caches the fast path decision for the provided update. Becomes invalidated when the update changes.
+    mutable FastPathDecision cachedFastPathDecision = FastPathDecision::NOT_DETERMINED;
 
 public:
     SorbetWorkspaceEditTask(const LSPConfiguration &config, std::unique_ptr<SorbetWorkspaceEditParams> params);

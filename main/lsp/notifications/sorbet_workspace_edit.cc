@@ -37,15 +37,12 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedFileHashesOrEmpty.clear();
-    task.cachedFastPathDecision = false;
-
-    cachedFileHashesOrEmpty.clear();
-    cachedFastPathDecision = false;
+    task.cachedFastPathDecision = FastPathDecision::NOT_DETERMINED;
+    cachedFastPathDecision = FastPathDecision::NOT_DETERMINED;
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(latencyTimer, *params, cachedFileHashesOrEmpty));
+    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(latencyTimer, *params, cachedFastPathDecision));
 }
 
 void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
@@ -60,7 +57,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     latencyCancelSlowPath = nullptr;
     // For consistency; I don't expect this notification to be used for fast path edits.
     startedNotification.Notify();
-    if (updates->canTakeFastPath == false) {
+    if (updates->canTakeFastPath != FastPathDecision::FAST) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     typechecker.typecheckOnFastPath(move(*updates));
@@ -103,13 +100,13 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
 
 bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
-        return updates->canTakeFastPath;
+        return updates->canTakeFastPath == FastPathDecision::FAST;
     }
-    if (cachedFileHashesOrEmpty.empty()) {
-        cachedFileHashesOrEmpty = index.computeFileHashes(params->updates);
-        cachedFastPathDecision = index.canTakeFastPath(*params, cachedFileHashesOrEmpty);
+    if (cachedFastPathDecision == FastPathDecision::NOT_DETERMINED) {
+        index.computeFileHashes(params->updates);
+        cachedFastPathDecision = index.canTakeFastPath(params->updates);
     }
-    return cachedFastPathDecision;
+    return cachedFastPathDecision == FastPathDecision::FAST;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {

@@ -149,8 +149,10 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
     const core::NameHash symNameHash(gs, sym.data(gs)->name.data(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
-    for (auto &hash : typechecker.getFileHashes()) {
+    for (auto &file : typechecker.state().getFiles()) {
         i++;
+        ENFORCE(file->getFileHash() != nullptr);
+        const auto &hash = *file->getFileHash();
         const auto &usedSends = hash.usages.sends;
         const auto &usedConstants = hash.usages.constants;
         auto ref = core::FileRef(i);

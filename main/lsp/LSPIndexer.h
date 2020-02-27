@@ -25,16 +25,13 @@ class LSPIndexer final {
     /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state! We clone
      * this global state every time we need to perform a slow path typechecking operation. */
     std::unique_ptr<core::GlobalState> initialGS;
-    /** Contains file hashes for the files stored in `initialGS`. Used to determine if an edit can be typechecked
-     * incrementally. */
-    std::vector<core::FileHash> globalStateHashes;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timer for the pending typecheck operation. Is used to ensure that we correctly
      * track the latency of canceled & rescheduled typechecking operations. */
     std::unique_ptr<Timer> pendingTypecheckLatencyTimer;
-    /** Contains globalStateHashes evicted with `pendingTypecheckUpdates`. Used in slow path cancelation logic. */
-    UnorderedMap<int, core::FileHash> pendingTypecheckEvictedStateHashes;
+    /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
+    UnorderedMap<int, std::shared_ptr<core::File>> evictedFiles;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
@@ -46,13 +43,17 @@ public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS);
     ~LSPIndexer();
 
-    /** Determines if the given edit can take the fast path relative to the most recently committed edit. */
-    bool canTakeFastPath(const SorbetWorkspaceEditParams &params, const std::vector<core::FileHash> &fileHashes) const;
+    /** Determines if the given edit can take the fast path relative to the most recently committed edit. If
+     * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past using
+     * `evictedFiles`. */
+    FastPathDecision canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates = false) const;
+    FastPathDecision canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                                     bool containsPendingTypecheckUpdates = false) const;
 
     /**
-     * Computes state hashes for the given set of files.
+     * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
      */
-    std::vector<core::FileHash> computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
+    void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
     /** Initializes the indexer by indexing and hashing all files in the workspace. Mutates the LSPFileUpdates so it can
      * be passed to the typechecker to initialize it. */
@@ -61,11 +62,9 @@ public:
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
      * and file hashes. Also handles canceling the running slow path.
-     *
-     * If `newHashesOrEmpty` contains file hashes, this function avoids re-computing those hashes.
      */
     LSPFileUpdates commitEdit(std::unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit,
-                              std::vector<core::FileHash> newHashesOrEmpty);
+                              FastPathDecision cachedFastPathDecision);
 };
 
 } // namespace sorbet::realmain::lsp
