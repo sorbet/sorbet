@@ -36,8 +36,7 @@ class LSPIndexer final {
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
-    std::vector<core::FileHash> computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files,
-                                                  WorkerPool &workers) const;
+    void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS);

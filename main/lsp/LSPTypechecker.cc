@@ -135,6 +135,10 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
     for (auto &oldFile : gs->getFiles()) {
         i++;
+        if (oldFile == nullptr) {
+            continue;
+        }
+
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::NameHash> intersection;

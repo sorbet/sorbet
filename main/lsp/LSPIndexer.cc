@@ -40,10 +40,20 @@ LSPIndexer::~LSPIndexer() {
     }
 }
 
-vector<core::FileHash> LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files,
-                                                     WorkerPool &workers) const {
+void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, WorkerPool &workers) const {
+    // Fast abort if all files have hashes.
+    bool allFilesHaveHashes = true;
+    for (const auto &f : files) {
+        if (f != nullptr && f->getFileHash() == nullptr) {
+            allFilesHaveHashes = false;
+            break;
+        }
+    }
+    if (allFilesHaveHashes) {
+        return;
+    }
+
     Timer timeit(config->logger, "computeFileHashes");
-    vector<core::FileHash> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
         auto copy = i;
@@ -53,12 +63,10 @@ vector<core::FileHash> LSPIndexer::computeFileHashes(const vector<shared_ptr<cor
     auto &logger = *config->logger;
     logger.debug("Computing state hashes for {} files", files.size());
 
-    res.resize(files.size());
-
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, core::FileHash>>>>(files.size());
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, shared_ptr<core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, shared_ptr<core::FileHash>>>>>(files.size());
     workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, core::FileHash>> threadResult;
+        vector<pair<int, shared_ptr<core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;
         {
@@ -66,12 +74,12 @@ vector<core::FileHash> LSPIndexer::computeFileHashes(const vector<shared_ptr<cor
                 if (result.gotItem()) {
                     processedByThread++;
 
-                    if (!files[job]) {
-                        threadResult.emplace_back(job, core::FileHash{});
+                    if (!files[job] || files[job]->getFileHash() != nullptr) {
                         continue;
                     }
+
                     auto hash = pipeline::computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, move(hash));
+                    threadResult.emplace_back(job, make_shared<core::FileHash>(move(hash)));
                 }
             }
         }
@@ -82,17 +90,16 @@ vector<core::FileHash> LSPIndexer::computeFileHashes(const vector<shared_ptr<cor
     });
 
     {
-        vector<pair<int, core::FileHash>> threadResult;
+        vector<pair<int, shared_ptr<core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
-                    res[a.first] = move(a.second);
+                    files[a.first]->setFileHash(move(a.second));
                 }
             }
         }
     }
-    return res;
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {

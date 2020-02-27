@@ -151,6 +151,10 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
     int i = -1;
     for (auto &file : typechecker.state().getFiles()) {
         i++;
+        if (file == nullptr) {
+            continue;
+        }
+
         ENFORCE(file->getFileHash() != nullptr);
         const auto &hash = *file->getFileHash();
         const auto &usedSends = hash.usages.sends;
