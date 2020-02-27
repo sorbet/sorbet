@@ -28,6 +28,7 @@ ruby(
         "@com_stripe_ruby_typer//tools/config:linux": [
             "-Wl,-Bsymbolic-functions",
             "-Wl,-z,relro",
+            "-Wl,-z,noexecstack",
         ],
         "//conditions:default": [],
     }),
