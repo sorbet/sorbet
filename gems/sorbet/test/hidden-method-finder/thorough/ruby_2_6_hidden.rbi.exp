@@ -9364,7 +9364,6 @@ class Integer
   def nobits?(_); end
 
   def pow(*_); end
-  GMP_VERSION = ::T.let(nil, ::T.untyped)
 end
 
 class Integer

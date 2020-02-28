@@ -9055,7 +9055,6 @@ end
 class Integer
   include ::JSON::Ext::Generator::GeneratorMethods::Integer
   def digits(*_); end
-  GMP_VERSION = ::T.let(nil, ::T.untyped)
 end
 
 class JSON::Ext::Generator::State
