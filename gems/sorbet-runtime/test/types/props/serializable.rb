@@ -122,9 +122,33 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(m.serialize, m.class.from_hash(m.serialize).serialize)
     end
 
+    it 'round-trips extra props' do
+      m = a_serializable
+      input = m.serialize.merge('not_a_prop' => 'foo')
+      assert_equal('foo', m.class.from_hash(input).serialize['not_a_prop'])
+    end
+
     it 'does not call the constructor' do
       MySerializable.any_instance.expects(:new).never
       MySerializable.from_hash({})
+    end
+  end
+
+  class HasUnstoredProp < T::Struct
+    prop :stored, String
+    prop :not_stored, String, dont_store: true
+  end
+
+  describe 'dont_store' do
+    it 'does not store ignored prop' do
+      m = HasUnstoredProp.new(stored: 'foo', not_stored: 'bar')
+      assert_equal({'stored' => 'foo'}, m.serialize)
+    end
+
+    it 'still round-trips extra props' do
+      input = {'stored' => 'foo', 'not_a_prop' => 'bar'}
+      result = HasUnstoredProp.from_hash(input).serialize
+      assert_equal('bar', result['not_a_prop'])
     end
   end
 

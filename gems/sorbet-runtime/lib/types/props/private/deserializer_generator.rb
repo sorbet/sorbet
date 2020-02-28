@@ -29,7 +29,8 @@ module T::Props
         .checked(:never)
       end
       def self.generate(props, defaults)
-        parts = props.reject {|_, rules| rules[:dont_store]}.map do |prop, rules|
+        stored_props = props.reject {|_, rules| rules[:dont_store]}
+        parts = stored_props.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
           # error message, but we double check here to prevent a refactoring
@@ -69,7 +70,7 @@ module T::Props
 
         <<~RUBY
           def __t_props_generated_deserialize(hash)
-            found = #{props.size}
+            found = #{stored_props.size}
             #{parts.join("\n\n")}
             found
           end
