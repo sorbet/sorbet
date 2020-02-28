@@ -599,5 +599,30 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         end
       end
     end
+
+    describe 'disabling evaluation' do
+      it 'works' do
+        T::Props::HasLazilySpecializedMethods.disable_lazy_evaluation!
+
+        m = Class.new do
+          include T::Props::Serializable
+
+          prop :foo, T.nilable(String)
+        end
+
+        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
+          m.new.serialize
+        end
+
+        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
+          m.decorator.eagerly_define_lazy_methods!
+        end
+
+      end
+
+      after do
+        T::Props::HasLazilySpecializedMethods.remove_instance_variable(:@lazy_evaluation_disabled)
+      end
+    end
   end
 end

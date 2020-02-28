@@ -9,6 +9,28 @@ module T::Props
   # prop definition because we have no way of knowing whether we are defining
   # the last prop.
   module HasLazilySpecializedMethods
+    extend T::Sig
+
+    class SourceEvaluationDisabled < RuntimeError
+      def initialize
+        super("Evaluation of lazily-defined methods is disabled")
+      end
+    end
+
+    # Disable any future evaluation of lazily-defined methods.
+    #
+    # This is intended to be called after startup but before interacting with
+    # the outside world, to limit attack surface for our `class_eval` use.
+    sig {void}
+    def self.disable_lazy_evaluation!
+      @lazy_evaluation_disabled ||= true
+    end
+
+    sig {returns(T::Boolean)}
+    def self.lazy_evaluation_enabled?
+      !@lazy_evaluation_disabled
+    end
+
     module DecoratorMethods
       extend T::Sig
 
@@ -19,6 +41,10 @@ module T::Props
 
       sig {params(name: Symbol).void}
       private def eval_lazily_defined_method!(name)
+        if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
+          raise SourceEvaluationDisabled.new
+        end
+
         source = lazily_defined_methods.fetch(name).call
 
         cls = decorated_class
@@ -40,11 +66,18 @@ module T::Props
 
       sig {void}
       def eagerly_define_lazy_methods!
+        if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
+          raise SourceEvaluationDisabled.new
+        elsif lazily_defined_methods.empty?
+          return
+        end
+
         source = lazily_defined_methods.values.map(&:call).map(&:to_s).join("\n\n")
 
         cls = decorated_class
         cls.class_eval(source)
         lazily_defined_methods.keys.each {|name| cls.send(:private, name)}
+        lazily_defined_methods.clear
       end
     end
   end
