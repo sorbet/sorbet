@@ -36,3 +36,5 @@ $ar -t "$afile" | grep '.o$' | while read -r ofile; do
 done
 
 $link -o "$output" ./*.bc
+
+rm -rf "$workdir"
