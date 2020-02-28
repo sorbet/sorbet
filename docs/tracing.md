@@ -7,7 +7,7 @@ lightweight way to
 - identify areas of Sorbet that could be made faster
 
 This doc will walk through the process of how to collect such information, as
-well as give some rough tips for how to interpret this information.
+well as give some rough tips for how to interpret it.
 
 > **Note**: Making sense of the output of Sorbet's trace information involves
 > general familiarity with the architecture of Sorbet. If you haven't already,
