@@ -16,10 +16,6 @@ steps:
               - "SORBET_RUBYGEMS_API_KEY"
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
-  - label: ":mac: test"
-    command: .buildkite/test.sh
-    agents:
-      os: mac
   - label: ":linux: test"
     command: .buildkite/test.sh
     <<: *elastic
