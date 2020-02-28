@@ -190,3 +190,13 @@ module T::Props::TypeValidation::DecoratorMethods
   extend T::Sig
 end
 
+module T::Props::HasLazilySpecializedMethods
+  class SourceEvaluationDisabled < RuntimeError; end
+  def self.disable_lazy_evaluation!; end
+end
+
+module T::Props::GeneratedCodeValidation
+  class ValidationError < RuntimeError; end
+  def self.validate_deserialize(source); end
+  def self.validate_serialize(source); end
+end
