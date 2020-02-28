@@ -791,6 +791,18 @@ class Sorbet::Private::GemLoader
         RDF::Util::Coercions,
       ]
     end,
+    'rspec-core' => proc do
+      my_require 'rspec/core'
+    end,
+    'rspec-mocks' => proc do
+      my_require 'rspec/mocks'
+    end,
+    'rspec-support' => proc do
+      my_require 'rspec/support'
+    end,
+    'rspec-expectations' => proc do
+      my_require 'rspec/expectations'
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
