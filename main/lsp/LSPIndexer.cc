@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 namespace {
 const core::File &getOldFile(core::FileRef fref, const core::GlobalState &gs,
-                             const UnorderedMap<int, shared_ptr<core::File>> evictedFiles) {
+                             const UnorderedMap<int, shared_ptr<core::File>> &evictedFiles) {
     const auto &it = evictedFiles.find(fref.id());
     if (it != evictedFiles.end()) {
         return *it->second;
