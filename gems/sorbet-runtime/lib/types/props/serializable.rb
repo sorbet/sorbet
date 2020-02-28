@@ -42,10 +42,14 @@ module T::Props::Serializable
     hash_keys_matching_props = __t_props_generated_deserialize(hash)
     if hash.size > hash_keys_matching_props
       extra = hash.reject {|k, _| self.class.decorator.prop_by_serialized_forms.key?(k)}
-      if strict
-        raise "Unknown properties for #{self.class.name}: #{extra.keys.inspect}"
-      else
-        @_extra_props = extra
+      # `extra` could still be empty here if the input matches a `dont_store` prop;
+      # historically, we just ignore those
+      if !extra.empty?
+        if strict
+          raise "Unknown properties for #{self.class.name}: #{extra.keys.inspect}"
+        else
+          @_extra_props = extra
+        end
       end
     end
   end

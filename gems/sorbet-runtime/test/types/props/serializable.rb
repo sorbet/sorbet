@@ -139,16 +139,21 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :not_stored, String, dont_store: true
   end
 
-  describe 'dont_store' do
-    it 'does not store ignored prop' do
+  describe 'dont_store prop' do
+    it 'is not stored' do
       m = HasUnstoredProp.new(stored: 'foo', not_stored: 'bar')
       assert_equal({'stored' => 'foo'}, m.serialize)
     end
 
-    it 'still round-trips extra props' do
+    it 'does not prevent extra_props from round-tripping' do
       input = {'stored' => 'foo', 'not_a_prop' => 'bar'}
       result = HasUnstoredProp.from_hash(input).serialize
       assert_equal('bar', result['not_a_prop'])
+    end
+
+    it 'is allowed even on strict deserialize' do
+      input = {'stored' => 'foo', 'not_stored' => 'bar'}
+      refute_nil(HasUnstoredProp.from_hash!(input))
     end
   end
 
