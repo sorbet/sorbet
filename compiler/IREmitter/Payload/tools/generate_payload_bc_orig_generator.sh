@@ -2,16 +2,19 @@
 
 set -euo pipefail
 set -x
-ar=$1
-link=$2
-output=$3
-xxd=$4
-afile=$5
+ar="$(pwd)/$1"
+link="$(pwd)/$2"
+output="$(pwd)/$3"
+xxd="$(pwd)/$4"
+afile="$(pwd)/$5"
+workdir=$(mktemp -d)
+
+cd "$workdir"
 
 extract_bitcode() {
   local object_file="$1"
   local bc_file="$object_file.bc"
-
+  rm -rf "$object_file"
   $ar -x "$afile" "$object_file"
 
   if [[ "$OSTYPE" == "linux-gnu" ]]; then
