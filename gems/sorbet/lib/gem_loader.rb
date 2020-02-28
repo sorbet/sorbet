@@ -801,6 +801,15 @@ class Sorbet::Private::GemLoader
         RSpec::Core::ExampleStatusPersister,
         RSpec::Core::Profiler,
         RSpec::Core::DidYouMean,
+        RSpec::Core::Formatters::DocumentationFormatter,
+        RSpec::Core::Formatters::HtmlFormatter,
+        RSpec::Core::Formatters::FallbackMessageFormatter,
+        RSpec::Core::Formatters::ProgressFormatter,
+        RSpec::Core::Formatters::ProfileFormatter,
+        RSpec::Core::Formatters::JsonFormatter,
+        RSpec::Core::Formatters::BisectDRbFormatter,
+        RSpec::Core::Formatters::ExceptionPresenter,
+        RSpec::Core::Formatters::FailureListFormatter,
       ]
     end,
     'rspec-mocks' => proc do
