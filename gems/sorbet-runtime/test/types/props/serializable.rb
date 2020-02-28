@@ -174,7 +174,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       }
       m = MySerializable.from_hash(h)
       refute_equal(m.foo.object_id, h['foo'].object_id, "`foo` is the same object")
-      # refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
+      refute_equal(m.foo['hello'].object_id, h['foo']['hello'].object_id, "`foo.hello` is the same object")
     end
   end
 

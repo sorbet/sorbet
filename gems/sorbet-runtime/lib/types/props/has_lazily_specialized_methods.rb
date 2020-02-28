@@ -8,6 +8,12 @@ module T::Props
   # method using the full set of props on a class; we can't do that during
   # prop definition because we have no way of knowing whether we are defining
   # the last prop.
+  #
+  # See go/M8yrvzX2 (Stripe-internal) for discussion of security considerations.
+  # In outline, while `class_eval` is a bit scary, we believe that as long as
+  # all inputs are defined in version control (and this is enforced by calling
+  # `disable_lazy_evaluation!` appropriately), risk isn't significantly higher
+  # than with build-time codegen.
   module HasLazilySpecializedMethods
     extend T::Sig
 
