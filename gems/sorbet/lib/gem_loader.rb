@@ -557,7 +557,28 @@ class Sorbet::Private::GemLoader
       my_require 'action_view/railtie'
       [
         ActionView::Base,
+        ActionView::Context,
+        ActionView::Digestor,
+        ActionView::Helpers,
+        ActionView::LookupContext,
+        ActionView::Layouts,
+        ActionView::PathSet,
+        ActionView::RecordIdentifier,
+        ActionView::Rendering,
+        ActionView::RoutingUrlFor,
+        ActionView::Template,
+        ActionView::Template::Error,
+        ActionView::Template::RawFile,
+        ActionView::Template::Handlers,
+        ActionView::Template::HTML,
+        ActionView::Template::Inline,
+        ActionView::Template::Sources,
+        ActionView::Template::Text,
+        ActionView::Template::Types,
+        ActionView::UnboundTemplate,
+        ActionView::ViewPaths,
         ActionView::TestCase,
+        ActionView::CacheExpiry,
       ]
     end,
     'actiontext' => proc do
