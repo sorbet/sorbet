@@ -803,6 +803,15 @@ class Sorbet::Private::GemLoader
     'rspec-expectations' => proc do
       my_require 'rspec/expectations'
     end,
+    'kaminari-core' => proc do
+      my_require 'kaminari/core'
+    end,
+    'kaminari-activerecord' => proc do
+      my_require 'kaminari/activerecord'
+    end,
+    'kaminari-actionview' => proc do
+      my_require 'kaminari/actionview'
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
