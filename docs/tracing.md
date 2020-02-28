@@ -30,6 +30,8 @@ To collect a trace, run Sorbet with the `--web-trace-file=<file>` flag:
 
 # or, if you're trying to trace a whole project:
 ❯ srb tc --web-trace-file=trace.json
+
+# (If you're at Stripe, see http://go/types/tracing)
 ```
 
 Sorbet will typecheck the file or codebase like normal, and then write out
