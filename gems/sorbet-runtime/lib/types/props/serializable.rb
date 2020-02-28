@@ -41,7 +41,9 @@ module T::Props::Serializable
   def deserialize(hash, strict=false)
     hash_keys_matching_props = __t_props_generated_deserialize(hash)
     if hash.size > hash_keys_matching_props
-      extra = hash.reject {|k, _| self.class.decorator.prop_by_serialized_forms.key?(k)}
+      serialized_forms = self.class.decorator.prop_by_serialized_forms
+      extra = hash.reject {|k, _| serialized_forms.key?(k)}
+
       # `extra` could still be empty here if the input matches a `dont_store` prop;
       # historically, we just ignore those
       if !extra.empty?
