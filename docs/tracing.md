@@ -30,8 +30,6 @@ To collect a trace, run Sorbet with the `--web-trace-file=<file>` flag:
 
 # or, if you're trying to trace a whole project:
 ❯ srb tc --web-trace-file=trace.json
-
-# (if you're a Stripe employee, use `pay exec scripts/bin/typecheck` instead of `srb tc`)
 ```
 
 Sorbet will typecheck the file or codebase like normal, and then write out
