@@ -62,9 +62,10 @@ behavior:
 
 - `XDG_CACHE_HOME`
 
-  The `srb` command keeps a cache of `sorbet-typed` on disk. Setting
-  `XDG_CACHE_HOME` will change the folder where the `sorbet-typed` cache will
-  be. (The default when this is unset is to use `$HOME/.cache/`.)
+  The `srb` command keeps a cache of `sorbet-typed` and RBIs from gems with
+  `rbi/` directories on disk. Setting `XDG_CACHE_HOME` will change the folder
+  where the cache will be. (The default when this is unset is to use
+  `$HOME/.cache/`.)
 
 - `SRB_SORBET_TYPED_REVISION`
 
