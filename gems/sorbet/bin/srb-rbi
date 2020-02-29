@@ -210,10 +210,8 @@ If instead you want to explore your files locally, here are some things to try:
       make_step(Sorbet::Private::TodoRBI)
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
-
-    when 'find-gem-rbis', "#{ENV['HOME']}/.cache/sorbet/gem-rbis", "#{ENV['HOME']}/.cache/sorbet/gem-rbis/"
+    when 'find-gem-rbis', "#{ENV['HOME']}/.cache/sorbet/gem-rbis/", "#{ENV['HOME']}/.cache/sorbet/gem-rbis/"
       make_step(Sorbet::Private::FindGemRBIs)
-
     else
       puts "Unknown command: #{argv[0]}"
       puts self.usage
