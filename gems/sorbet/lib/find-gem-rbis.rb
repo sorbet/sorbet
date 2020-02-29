@@ -45,6 +45,10 @@ class Sorbet::Private::FindGemRBIs
   def self.output_file
     nil
   end
+
+  def self.cache_dir
+    RBI_CACHE_DIR
+  end
 end
 
 if $PROGRAM_NAME == __FILE__

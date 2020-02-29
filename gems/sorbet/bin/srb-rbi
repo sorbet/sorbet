@@ -188,8 +188,6 @@ If instead you want to explore your files locally, here are some things to try:
       exit(1)
     end
 
-    XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
-
     command = case (argv[0])
     when 'help', '--help'
       puts self.usage
@@ -212,7 +210,7 @@ If instead you want to explore your files locally, here are some things to try:
       make_step(Sorbet::Private::TodoRBI)
     when 'suggest-typed'
       make_step(Sorbet::Private::SuggestTyped)
-    when 'find-gem-rbis', "#{ENV['XDG_CACHE_HOME']}/sorbet/gem-rbis/"
+    when 'find-gem-rbis', Sorbet::Private::FindGemRBIs.cache_dir
       make_step(Sorbet::Private::FindGemRBIs)
     else
       puts "Unknown command: #{argv[0]}"
