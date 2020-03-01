@@ -123,7 +123,14 @@ module T::Private::Methods::CallValidation
     # this code is sig validation code.
     # Please issue `finish` to step out of it
 
-    return_value = original_method.bind(instance).call(*args, &blk)
+    bound_method = original_method.bind(instance)
+    return_value =
+      if call_includes_keyword_arguments?(method_sig, args)
+        kwargs = args.pop
+        bound_method.call(*args, **kwargs, &blk)
+      else
+        bound_method.call(*args, &blk)
+      end
     if should_sample
       t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
@@ -149,6 +156,13 @@ module T::Private::Methods::CallValidation
       end
       return_value
     end
+  end
+
+  def self.call_includes_keyword_arguments?(method_sig, args)
+    return false if method_sig.kwarg_types.empty?
+    return false unless args.last.is_a?(Hash)
+
+    !(args.last.keys || keys).empty?
   end
 
   @is_allowed_to_have_fast_path = true
