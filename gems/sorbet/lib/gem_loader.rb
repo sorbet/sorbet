@@ -647,9 +647,12 @@ class Sorbet::Private::GemLoader
     # Do not load gems in Gemfile where require is false
     dependencies = lockfile_parser.dependencies.reject { |name, dep| dep.autorequire && dep.autorequire.empty? }
     required_dependency_names = dependencies.values.map(&:name)
-    # Only include the spec for a gem if it's autorequired.
     lockfile_parser.specs.each do |spec|
-      specs << spec.dependencies if required_dependency_names.include?(spec.name)
+      # Only include the spec for a gem and it's dependencies if it's autorequired.
+      if required_dependency_names.include?(spec.name)
+        specs << spec
+        specs << spec.dependencies
+      end
     end
     specs.flatten!
     specs.uniq! { |spec| spec.name }
