@@ -725,6 +725,9 @@ class Sorbet::Private::GemLoader
         SPARQL::VERSION,
       ]
     end,
+    'sparql-client' => proc do
+      my_require 'sparql/client'
+    end,
     'selenium-webdriver' => proc do
       my_require 'selenium/webdriver'
       [
@@ -825,6 +828,96 @@ class Sorbet::Private::GemLoader
         RDF::Util::UUID,
         RDF::Util::Coercions,
       ]
+    end,
+    'rspec-core' => proc do
+      my_require 'rspec/core'
+      [
+        RSpec::SharedContext,
+        RSpec::Core::ExampleStatusPersister,
+        RSpec::Core::Profiler,
+        RSpec::Core::DidYouMean,
+        RSpec::Core::Formatters::DocumentationFormatter,
+        RSpec::Core::Formatters::HtmlFormatter,
+        RSpec::Core::Formatters::FallbackMessageFormatter,
+        RSpec::Core::Formatters::ProgressFormatter,
+        RSpec::Core::Formatters::ProfileFormatter,
+        RSpec::Core::Formatters::JsonFormatter,
+        RSpec::Core::Formatters::BisectDRbFormatter,
+        RSpec::Core::Formatters::ExceptionPresenter,
+        RSpec::Core::Formatters::FailureListFormatter,
+      ]
+    end,
+    'rspec-mocks' => proc do
+      my_require 'rspec/mocks'
+      [
+        RSpec::Mocks::AnyInstance,
+        RSpec::Mocks::ExpectChain,
+        RSpec::Mocks::StubChain,
+        RSpec::Mocks::MarshalExtension,
+        RSpec::Mocks::Matchers::HaveReceived,
+        RSpec::Mocks::Matchers::Receive,
+        RSpec::Mocks::Matchers::ReceiveMessageChain,
+        RSpec::Mocks::Matchers::ReceiveMessages,
+      ]
+    end,
+    'rspec-support' => proc do
+      my_require 'rspec/support'
+      [
+        RSpec::Support::Differ,
+      ]
+    end,
+    'rspec-expectations' => proc do
+      my_require 'rspec/expectations'
+      [
+        RSpec::Expectations::BlockSnippetExtractor,
+        RSpec::Expectations::FailureAggregator,
+        RSpec::Matchers::BuiltIn::BeAKindOf,
+        RSpec::Matchers::BuiltIn::BeAnInstanceOf,
+        RSpec::Matchers::BuiltIn::BeBetween,
+        RSpec::Matchers::BuiltIn::Be,
+        RSpec::Matchers::BuiltIn::BeComparedTo,
+        RSpec::Matchers::BuiltIn::BeFalsey,
+        RSpec::Matchers::BuiltIn::BeNil,
+        RSpec::Matchers::BuiltIn::BePredicate,
+        RSpec::Matchers::BuiltIn::BeTruthy,
+        RSpec::Matchers::BuiltIn::BeWithin,
+        RSpec::Matchers::BuiltIn::Change,
+        RSpec::Matchers::BuiltIn::Compound,
+        RSpec::Matchers::BuiltIn::ContainExactly,
+        RSpec::Matchers::BuiltIn::Cover,
+        RSpec::Matchers::BuiltIn::EndWith,
+        RSpec::Matchers::BuiltIn::Eq,
+        RSpec::Matchers::BuiltIn::Eql,
+        RSpec::Matchers::BuiltIn::Equal,
+        RSpec::Matchers::BuiltIn::Exist,
+        RSpec::Matchers::BuiltIn::Has,
+        RSpec::Matchers::BuiltIn::HaveAttributes,
+        RSpec::Matchers::BuiltIn::Include,
+        RSpec::Matchers::BuiltIn::All,
+        RSpec::Matchers::BuiltIn::Match,
+        RSpec::Matchers::BuiltIn::NegativeOperatorMatcher,
+        RSpec::Matchers::BuiltIn::OperatorMatcher,
+        RSpec::Matchers::BuiltIn::Output,
+        RSpec::Matchers::BuiltIn::PositiveOperatorMatcher,
+        RSpec::Matchers::BuiltIn::RaiseError,
+        RSpec::Matchers::BuiltIn::RespondTo,
+        RSpec::Matchers::BuiltIn::Satisfy,
+        RSpec::Matchers::BuiltIn::StartWith,
+        RSpec::Matchers::BuiltIn::ThrowSymbol,
+        RSpec::Matchers::BuiltIn::YieldControl,
+        RSpec::Matchers::BuiltIn::YieldSuccessiveArgs,
+        RSpec::Matchers::BuiltIn::YieldWithArgs,
+        RSpec::Matchers::BuiltIn::YieldWithNoArgs,
+      ]
+    end,
+    'kaminari-core' => proc do
+      my_require 'kaminari/core'
+    end,
+    'kaminari-activerecord' => proc do
+      my_require 'kaminari/activerecord'
+    end,
+    'kaminari-actionview' => proc do
+      my_require 'kaminari/actionview'
     end,
   }
 
