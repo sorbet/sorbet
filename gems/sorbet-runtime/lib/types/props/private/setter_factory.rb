@@ -7,6 +7,7 @@ module T::Props
       extend T::Sig
 
       SetterProc = T.type_alias {T.proc.params(val: T.untyped).void}
+      ValidateProc = T.type_alias {T.proc.params(prop: Symbol, value: T.untyped).void}
 
       sig do
         params(
@@ -31,6 +32,7 @@ module T::Props
           T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
         end
         accessor_key = rules.fetch(:accessor_key)
+        validate = rules[:setter_validate]
 
         # It seems like a bug that this affects the behavior of setters, but
         # some existing code relies on this behavior
@@ -39,9 +41,9 @@ module T::Props
         # Use separate methods in order to ensure that we only close over necessary
         # variables
         if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
-          nilable_proc(prop, accessor_key, non_nil_type, klass)
+          nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
         else
-          non_nil_proc(prop, accessor_key, non_nil_type, klass)
+          non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
         end
       end
 
@@ -51,12 +53,16 @@ module T::Props
           accessor_key: Symbol,
           non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
           klass: T.all(Module, T::Props::ClassMethods),
+          validate: T.nilable(ValidateProc)
         )
         .returns(SetterProc)
       end
-      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass)
+      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
         proc do |val|
           if non_nil_type.valid?(val)
+            if validate
+              validate.call(prop, val)
+            end
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
@@ -75,14 +81,18 @@ module T::Props
           accessor_key: Symbol,
           non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
           klass: T.all(Module, T::Props::ClassMethods),
+          validate: T.nilable(ValidateProc),
         )
         .returns(SetterProc)
       end
-      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass)
+      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
         proc do |val|
           if val.nil?
             instance_variable_set(accessor_key, nil)
           elsif non_nil_type.valid?(val)
+            if validate
+              validate.call(prop, val)
+            end
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(

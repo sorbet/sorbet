@@ -64,3 +64,4 @@ module Opus::Types; end
 module Opus::Types::Test; end
 class Opus::Types::Test::TypesTest < Critic::Unit::UnitTest; end
 module Opus::Types::Test::Props; end
+module Opus::Types::Test::Props::Private; end
