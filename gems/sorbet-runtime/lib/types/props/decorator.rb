@@ -67,6 +67,7 @@ class T::Props::Decorator
     clobber_existing_method!
     extra
     optional
+    setter_validate
     _tnilable
   }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
