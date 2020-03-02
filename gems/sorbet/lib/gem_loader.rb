@@ -663,6 +663,21 @@ class Sorbet::Private::GemLoader
     'activestorage' => proc do
       my_require 'active_storage'
       my_require 'active_storage/engine'
+      [
+        ActiveStorage::Attached,
+        ActiveStorage::Attached::Changes::CreateOne,
+        ActiveStorage::Attached::Changes::CreateMany,
+        ActiveStorage::Attached::Changes::CreateOneOfMany,
+        ActiveStorage::Attached::Changes::DeleteOne,
+        ActiveStorage::Attached::Changes::DeleteMany,
+        ActiveStorage::Service,
+        ActiveStorage::Service::Configurator,
+        ActiveStorage::Previewer,
+        ActiveStorage::Analyzer,
+        ActiveStorage::Transformers::Transformer,
+        ActiveStorage::Transformers::ImageProcessingTransformer,
+        ActiveStorage::Transformers::MiniMagickTransformer,
+      ]
     end,
     'rdoc' => proc do
       my_require 'rdoc'
