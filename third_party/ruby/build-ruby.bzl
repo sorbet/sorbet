@@ -247,7 +247,12 @@ _BUILD_ARCHIVE = """#!/bin/bash
 base=$PWD
 toolchain="$base/{toolchain}"
 
-hermetic_tar "$toolchain" "{output}"
+archive="$(mktemp)"
+
+hermetic_tar "$toolchain" "${{archive}}"
+gzip -c "${{archive}}" > "{output}"
+
+rm "${{archive}}"
 """
 
 def _ruby_archive_impl(ctx):
