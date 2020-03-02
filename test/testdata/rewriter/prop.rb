@@ -53,7 +53,7 @@ class AdvancedODM
 
     prop :enum_prop, enum: ["hello", "goodbye"]
 
-    prop :foreign, String, foreign: ForeignClass
+    prop :foreign, String, foreign: ForeignClass # error: must be a lambda
     prop :foreign_lazy, String, foreign: -> {ForeignClass}
     prop :foreign_proc, String, foreign: proc {ForeignClass}
     prop :foreign_invalid, String, foreign: proc { :not_a_type }
