@@ -8,8 +8,8 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
 
     prop :validated, T.untyped, setter_validate: -> (prop, value) { raise Error.new 'invalid' }
     prop :nilable_validated, T.nilable(Integer), setter_validate: -> (prop, value) { raise Error.new 'invalid' }
+    prop :unvalidated, T.untyped, setter_validate: -> (prop, value) { raise Error.new 'bad prop' unless prop == :unvalidated }
 
-    def some_method; end
   end
 
   describe 'setter_validate' do
@@ -17,6 +17,11 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
       obj = TestSetValidate.new
       ex = assert_raises { obj.validated = 5 }
       assert_equal('invalid', ex.message)
+    end
+
+    it "doesn't break set" do
+      obj = TestSetValidate.new(unvalidated: 3)
+      assert_equal(3, obj.unvalidated)
     end
 
     it 'runs when constructing' do
