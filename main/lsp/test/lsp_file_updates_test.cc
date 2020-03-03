@@ -144,7 +144,7 @@ TEST(LSPFileUpdatesTest, Copy) {
     updates.editCount = 10;
     updates.epoch = 10;
     updates.cancellationExpected = true;
-    updates.fastPathDecision = FastPathDecision::FAST;
+    updates.canTakeFastPath = true;
     updates.hasNewFiles = true;
     updates.updatedGS = unique_ptr<core::GlobalState>(nullptr);
     addFile(updates, core::FileRef(1), "foo.rb", "foo");
@@ -154,7 +154,7 @@ TEST(LSPFileUpdatesTest, Copy) {
     EXPECT_EQ(10, copy.epoch);
     EXPECT_EQ(10, copy.editCount);
     EXPECT_TRUE(copy.cancellationExpected);
-    EXPECT_EQ(copy.fastPathDecision, FastPathDecision::FAST);
+    EXPECT_TRUE(copy.canTakeFastPath);
     EXPECT_TRUE(copy.hasNewFiles);
     EXPECT_FALSE(copy.updatedGS.has_value());
 

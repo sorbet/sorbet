@@ -11,7 +11,8 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     std::unique_ptr<Timer> latencyCancelSlowPath;
     std::unique_ptr<SorbetWorkspaceEditParams> params;
     // Caches the fast path decision for the provided update. Becomes invalidated when the update changes.
-    mutable FastPathDecision cachedFastPathDecision = FastPathDecision::NOT_DETERMINED;
+    mutable bool cachedFastPathDecisionValid = false;
+    mutable bool cachedFastPathDecision = false;
 
 public:
     SorbetWorkspaceEditTask(const LSPConfiguration &config, std::unique_ptr<SorbetWorkspaceEditParams> params);

@@ -106,15 +106,15 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
-FastPathDecision LSPIndexer::makeFastPathDecision(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                                  bool containsPendingTypecheckUpdates) const {
+bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                                 bool containsPendingTypecheckUpdates) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
     if (config->disableFastPath) {
         logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
-        return FastPathDecision::SLOW;
+        return false;
     }
 
     const UnorderedMap<int, shared_ptr<core::File>> emptyMap;
@@ -125,7 +125,7 @@ FastPathDecision LSPIndexer::makeFastPathDecision(const std::vector<std::shared_
         if (!fref.exists()) {
             logger.debug("Taking slow path because {} is a new file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
-            return FastPathDecision::SLOW;
+            return false;
         } else {
             const auto &oldFile = getOldFile(fref, *initialGS, evictedFilesRef);
             ENFORCE(oldFile.getFileHash() != nullptr);
@@ -136,30 +136,29 @@ FastPathDecision LSPIndexer::makeFastPathDecision(const std::vector<std::shared_
             if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
                 logger.debug("Taking slow path because {} has a syntax error", f->path());
                 prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
-                return FastPathDecision::SLOW;
+                return false;
             } else if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
                        newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
                 logger.debug("Taking slow path because {} has changed definitions", f->path());
                 prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
-                return FastPathDecision::SLOW;
+                return false;
             }
         }
     }
 
     logger.debug("Taking fast path");
-    return FastPathDecision::FAST;
+    return false;
 }
 
-FastPathDecision LSPIndexer::makeFastPathDecision(const LSPFileUpdates &edit,
-                                                  bool containsPendingTypecheckUpdates) const {
+bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (edit.hasNewFiles) {
         logger.debug("Taking slow path because update has a new file");
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
-        return FastPathDecision::SLOW;
+        return false;
     }
-    return makeFastPathDecision(edit.updatedFiles, containsPendingTypecheckUpdates);
+    return canTakeFastPath(edit.updatedFiles, containsPendingTypecheckUpdates);
 }
 
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
@@ -201,7 +200,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     computeFileHashes(initialGS->getFiles(), workers);
 
     updates.epoch = 0;
-    updates.fastPathDecision = FastPathDecision::SLOW;
+    updates.canTakeFastPath = false;
     updates.updatedFileIndexes = move(indexed);
     updates.updatedGS = initialGS->deepCopy();
 
@@ -209,8 +208,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = move(savedErrorQueue);
 }
 
-LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit,
-                                      FastPathDecision cachedFastPathDecision) {
+LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
     LSPFileUpdates update;
     update.epoch = edit.epoch;
@@ -219,10 +217,7 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
     computeFileHashes(edit.updates, *emptyWorkers);
 
     update.updatedFiles = move(edit.updates);
-    update.fastPathDecision = cachedFastPathDecision;
-    if (update.fastPathDecision == FastPathDecision::NOT_DETERMINED) {
-        update.fastPathDecision = makeFastPathDecision(update);
-    }
+    update.canTakeFastPath = canTakeFastPath(update);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
 
@@ -287,11 +282,10 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
 
         // Cancel if the new update cannot take the fast path.
-        if (update.fastPathDecision == FastPathDecision::SLOW &&
-            initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
+        if (!update.canTakeFastPath && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge with the pending update.
             update.mergeOlder(pendingTypecheckUpdates);
-            update.fastPathDecision = makeFastPathDecision(update, true);
+            update.canTakeFastPath = canTakeFastPath(update, true);
             update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
         }
@@ -299,8 +293,7 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
 
     ENFORCE(update.updatedFiles.size() == update.updatedFileIndexes.size());
 
-    ENFORCE(update.fastPathDecision != FastPathDecision::NOT_DETERMINED);
-    if (update.fastPathDecision == FastPathDecision::FAST) {
+    if (update.canTakeFastPath) {
         // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
         auto merged = update.copy();
         merged.mergeOlder(pendingTypecheckUpdates);

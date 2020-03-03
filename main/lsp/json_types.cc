@@ -228,14 +228,14 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         auto &ast = older.updatedFileIndexes[i];
         updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
     }
-    fastPathDecision = FastPathDecision::NOT_DETERMINED;
+    canTakeFastPath = false;
 }
 
 LSPFileUpdates LSPFileUpdates::copy() const {
     LSPFileUpdates copy;
     copy.epoch = epoch;
     copy.editCount = editCount;
-    copy.fastPathDecision = fastPathDecision;
+    copy.canTakeFastPath = canTakeFastPath;
     copy.hasNewFiles = hasNewFiles;
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;

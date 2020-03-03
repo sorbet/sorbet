@@ -11,13 +11,6 @@
 #include <variant>
 
 namespace sorbet::realmain::lsp {
-
-enum class FastPathDecision {
-    NOT_DETERMINED = 1,
-    FAST = 2,
-    SLOW = 3,
-};
-
 /**
  * Encapsulates an update to LSP's file state in a compact form.
  * Placed into json_types.h because it is referenced from InitializedParams.
@@ -32,7 +25,7 @@ public:
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
-    FastPathDecision fastPathDecision = FastPathDecision::NOT_DETERMINED;
+    bool canTakeFastPath = false;
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
     bool hasNewFiles = false;
