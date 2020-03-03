@@ -238,3 +238,52 @@ Yes, you can use options like `--metrics-file` to produce statistics. For
 example, check out
 [sorbet-progress](https://github.com/jaredbeck/sorbet-progress) which uses those
 statistics to keep track of your progress adopting sorbet in big codebases.
+
+## When Ruby 3 gets types, what will the migration plan look like?
+
+The Sorbet team is actively involved in the Ruby 3 working group for static
+typing. There are some things we know and something we don't know about Ruby 3.
+
+Ruby 3 plans to ship type annotations for the standard library. These type
+annotations for the standard library will live in separate Ruby Signature (RBS)
+files, with the `*.rbs` extension. The exact syntax is not yet finalized. When
+the syntax is finalized, Sorbet intends to ingest both RBS and RBI formats, so
+that users can choose their favorite.
+
+Ruby 3 has no plans to change Ruby's syntax. To have type annotations for
+methods live in the same place as the method definition, the only option will be
+to continue using Sorbet's [method signatures](sigs.md). As such, the Sorbet
+docs will always use RBI syntax in examples, because the syntax is the same for
+signatures both within a Ruby file and in external [RBI files](rbi.md).
+
+Ruby 3 has no plans to ship a type checker for RBS annotations. Instead, Ruby 3
+plans to ship a type profiler, which will attempt to guess signatures for code
+without signatures. The only way to get type checking will be to use third party
+tools, like Sorbet.
+
+Ruby 3 plans to ship no specification for what the type annotations mean. Each
+third party type checker and the Ruby 3 type profiler will be allowed to ascribe
+their own meanings to individual type annotations. When there are ambiguities or
+constructs that one tool doesn't understand, it should fall back to `T.untyped`
+(or the equivalent in whatever RBS syntax decides to use for
+[this construct](untyped.md)).
+
+Ruby 3 plans to seed the initial type annotations for the standard library from
+Sorbet's extensive existing type annotations for the standard library. Sorbet
+already has great type annotations for the standard library in the form of
+[RBI files](rbi.md) which are used to type check millions of lines of production
+Ruby code every day.
+
+From all of this, we have every reason to believe that users of Sorbet will have
+a smooth transition to Ruby 3:
+
+- You will be able to either keep using Sorbet's RBI syntax or switch to using
+  RBS syntax.
+- The type definitions for the standard library will mean the same (because they
+  will have come from Sorbet!) but have a different syntax.
+- For inline type annotations with Ruby 3, you will have to continue using
+  Sorbet's `sig` syntax, no different from today.
+
+For more information, watch [this section](https://youtu.be/2g9R7PUCEXo?t=2022)
+from Matz's RubyConf 2019 keynote, which talks about his plans for typing in
+Ruby 3.
