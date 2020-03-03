@@ -13,8 +13,8 @@ using namespace sorbet::realmain::lsp;
 
 namespace {
 u4 nextHash = 0;
-shared_ptr<core::FileHash> getFileHash() {
-    auto hash = make_shared<core::FileHash>();
+unique_ptr<core::FileHash> getFileHash() {
+    auto hash = make_unique<core::FileHash>();
     hash->definitions.hierarchyHash = nextHash++;
     return hash;
 }

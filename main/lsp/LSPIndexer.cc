@@ -63,10 +63,10 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
     auto &logger = *config->logger;
     logger.debug("Computing state hashes for {} files", files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, shared_ptr<core::FileHash>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, shared_ptr<core::FileHash>>>>>(files.size());
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>>(files.size());
     workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, shared_ptr<core::FileHash>>> threadResult;
+        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;
         {
@@ -79,7 +79,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
                     }
 
                     auto hash = pipeline::computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, make_shared<core::FileHash>(move(hash)));
+                    threadResult.emplace_back(job, make_unique<core::FileHash>(move(hash)));
                 }
             }
         }
@@ -90,7 +90,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
     });
 
     {
-        vector<pair<int, shared_ptr<core::FileHash>>> threadResult;
+        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {

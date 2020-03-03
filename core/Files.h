@@ -100,7 +100,7 @@ public:
     /** Given a 1-based line number, returns a string view of the line. */
     std::string_view getLine(int i);
 
-    void setFileHash(std::shared_ptr<FileHash> hash);
+    void setFileHash(std::unique_ptr<FileHash> hash);
     const std::shared_ptr<FileHash> &getFileHash() const;
 
 private:

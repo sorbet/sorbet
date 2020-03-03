@@ -1,6 +1,7 @@
 #include "core/Files.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
+#include "core/NameHash.h"
 #include <vector>
 
 #include "absl/strings/match.h"
@@ -111,7 +112,7 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     return ret;
 }
 
-void File::setFileHash(shared_ptr<FileHash> hash) {
+void File::setFileHash(unique_ptr<FileHash> hash) {
     hash_ = move(hash);
 }
 
