@@ -281,11 +281,14 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
         ENFORCE(runningSlowPath.epoch <= pendingTypecheckUpdates.epoch);
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
 
-        // Cancel if the new update cannot take the fast path.
-        if (!update.canTakeFastPath && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
-            // Cancelation succeeded! Merge with the pending update.
-            update.mergeOlder(pendingTypecheckUpdates);
-            update.canTakeFastPath = canTakeFastPath(update, true);
+        auto merged = update.copy();
+        merged.mergeOlder(pendingTypecheckUpdates);
+        merged.canTakeFastPath = canTakeFastPath(merged, true);
+        // Cancel if old + new takes fast path, or if the new update will take the slow path anyway.
+        if ((merged.canTakeFastPath || !update.canTakeFastPath) &&
+            initialGS->epochManager->tryCancelSlowPath(merged.epoch)) {
+            // Cancelation succeeded! Use `merged` as the update.
+            update = move(merged);
             update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
         }
