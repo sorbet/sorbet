@@ -265,8 +265,8 @@ Ruby 3 plans to ship no specification for what the type annotations mean. Each
 third party type checker and the Ruby 3 type profiler will be allowed to ascribe
 their own meanings to individual type annotations. When there are ambiguities or
 constructs that one tool doesn't understand, it should fall back to `T.untyped`
-(or the equivalent in whatever RBS syntax decides to use for [this
-construct][untyped.md]).
+(or the equivalent in whatever RBS syntax decides to use for
+[this construct](untyped.md)).
 
 Ruby 3 plans to seed the initial type annotations for the standard library from
 Sorbet's extensive existing type annotations for the standard library. Sorbet
@@ -274,8 +274,8 @@ already has great type annotations for the standard library in the form of
 [RBI files](rbi.md) which are used to type check millions of lines of production
 Ruby code every day.
 
-From all of this, we have every reason to believe that all users of Sorbet will
-have a smooth transition to Ruby 3:
+From all of this, we have every reason to believe that users of Sorbet will have
+a smooth transition to Ruby 3:
 
 - You will be able to either keep using Sorbet's RBI syntax or switch to using
   RBS syntax.
