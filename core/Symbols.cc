@@ -934,12 +934,12 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
     return result;
 }
 
-TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
+TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
 
-    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
 
-    auto data = sealedSubclasses.data(ctx);
+    auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType.get());
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
@@ -955,16 +955,16 @@ TypePtr Symbol::sealedSubclassesToUnion(const Context ctx) const {
     while (auto orType = cast_type<OrType>(currentClasses.get())) {
         auto classType = cast_type<ClassType>(orType->right.get());
         ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(ctx)->attachedClass(ctx);
+        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(ctx, make_type<ClassType>(subclass), result);
+        result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
     auto lastClassType = cast_type<ClassType>(currentClasses.get());
     ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(ctx)->attachedClass(ctx);
+    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(ctx, make_type<ClassType>(subclass), result);
+    result = Types::any(gs, make_type<ClassType>(subclass), result);
 
     return result;
 }

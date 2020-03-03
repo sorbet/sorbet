@@ -11,22 +11,22 @@ bool TypeConstraint::isEmpty() const {
     return upperBounds.empty() && lowerBounds.empty();
 }
 
-void TypeConstraint::defineDomain(Context ctx, const InlinedVector<SymbolRef, 4> &typeParams) {
+void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &typeParams) {
     // ENFORCE(isEmpty()); // unfortunately this is false. See
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
-        ENFORCE(tp.data(ctx)->isTypeArgument());
-        auto typ = cast_type<TypeVar>(tp.data(ctx)->resultType.get());
+        ENFORCE(tp.data(gs)->isTypeArgument());
+        auto typ = cast_type<TypeVar>(tp.data(gs)->resultType.get());
         ENFORCE(typ != nullptr);
 
-        if (tp.data(ctx)->isCovariant()) {
+        if (tp.data(gs)->isCovariant()) {
             findLowerBound(typ->sym) = Types::bottom();
         } else {
             findUpperBound(typ->sym) = Types::top();
         }
     }
 }
-bool TypeConstraint::solve(Context ctx) {
+bool TypeConstraint::solve(const GlobalState &gs) {
     if (cantSolve) {
         return false;
     }
@@ -41,7 +41,7 @@ bool TypeConstraint::solve(Context ctx) {
         if (bound == Types::top()) {
             continue;
         }
-        auto approximation = bound->_approximate(ctx, *this);
+        auto approximation = bound->_approximate(gs, *this);
         if (approximation) {
             findSolution(tv) = approximation;
         } else {
@@ -57,7 +57,7 @@ bool TypeConstraint::solve(Context ctx) {
         if (sol) {
             continue;
         }
-        auto approximation = bound->_approximate(ctx, *this);
+        auto approximation = bound->_approximate(gs, *this);
         if (approximation) {
             sol = approximation;
         } else {
@@ -74,7 +74,7 @@ bool TypeConstraint::solve(Context ctx) {
             sol = upperBound;
         }
         if (upperBound) {
-            cantSolve = !Types::isSubType(ctx, findSolution(tv), upperBound);
+            cantSolve = !Types::isSubType(gs, findSolution(tv), upperBound);
             if (cantSolve) {
                 return false;
             }
@@ -85,7 +85,7 @@ bool TypeConstraint::solve(Context ctx) {
         auto &tv = k.first;
         auto &lowerBound = k.second;
 
-        cantSolve = !Types::isSubType(ctx, lowerBound, findSolution(tv));
+        cantSolve = !Types::isSubType(gs, lowerBound, findSolution(tv));
         if (cantSolve) {
             return false;
         }
@@ -95,14 +95,14 @@ bool TypeConstraint::solve(Context ctx) {
     return true;
 }
 
-bool TypeConstraint::rememberIsSubtype(Context ctx, const TypePtr &t1, const TypePtr &t2) {
+bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     ENFORCE(!wasSolved);
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         auto &entry = findUpperBound(t1p->sym);
         if (!entry) {
             entry = t2;
         } else if (t2->isFullyDefined()) {
-            entry = Types::all(ctx, entry, t2);
+            entry = Types::all(gs, entry, t2);
         } else {
             entry = AndType::make_shared(entry, t2);
         }
@@ -113,7 +113,7 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, const TypePtr &t1, const Typ
         if (!entry) {
             entry = t1;
         } else if (t1->isFullyDefined()) {
-            entry = Types::any(ctx, entry, t1);
+            entry = Types::any(gs, entry, t1);
         } else {
             entry = AndType::make_shared(entry, t1);
         }
@@ -121,19 +121,19 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, const TypePtr &t1, const Typ
     return true;
 }
 
-bool TypeConstraint::isAlreadyASubType(Context ctx, const TypePtr &t1, const TypePtr &t2) const {
+bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) const {
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         if (!hasLowerBound(t1p->sym)) {
-            return Types::isSubType(ctx, Types::top(), t2);
+            return Types::isSubType(gs, Types::top(), t2);
         }
-        return Types::isSubType(ctx, findLowerBound(t1p->sym), t2);
+        return Types::isSubType(gs, findLowerBound(t1p->sym), t2);
     } else {
         auto t2p = cast_type<TypeVar>(t2.get());
         ENFORCE(t2p != nullptr);
         if (!hasUpperBound(t2p->sym)) {
-            return Types::isSubType(ctx, t1, Types::bottom());
+            return Types::isSubType(gs, t1, Types::bottom());
         }
-        return Types::isSubType(ctx, t1, findUpperBound(t2p->sym));
+        return Types::isSubType(gs, t1, findUpperBound(t2p->sym));
     }
 }
 

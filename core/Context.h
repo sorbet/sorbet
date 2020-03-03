@@ -23,7 +23,7 @@ public:
     Context(const Context &other) noexcept : state(other.state), owner(other.owner) {}
     Context(const MutableContext &other) noexcept;
 
-    bool permitOverloadDefinitions(FileRef sigLoc) const;
+    static bool permitOverloadDefinitions(const core::GlobalState &gs, FileRef sigLoc, core::SymbolRef owner);
 
     Context withOwner(SymbolRef sym) const;
 
