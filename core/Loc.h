@@ -9,9 +9,20 @@ class SerializerImpl;
 }
 class GlobalState;
 
+constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
     unsigned int beginLoc : 24;
     unsigned int endLoc : 24;
+    u4 beginPos() const {
+        return beginLoc;
+    };
+
+    u4 endPos() const {
+        return endLoc;
+    }
+    bool exists() const {
+        return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
+    }
 };
 
 class Loc final {
@@ -21,8 +32,6 @@ class Loc final {
     } __attribute__((packed, aligned(8))) storage;
     template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
-
-    static constexpr int INVALID_POS_LOC = 0xffffff;
 
     void setFile(core::FileRef file) {
         storage.fileRef = file.id();
@@ -34,8 +43,7 @@ public:
     }
 
     bool exists() const {
-        return storage.fileRef != 0 && storage.offsets.endLoc != INVALID_POS_LOC &&
-               storage.offsets.beginLoc != INVALID_POS_LOC;
+        return storage.fileRef != 0 && storage.offsets.exists();
     }
 
     Loc join(Loc other) const;
