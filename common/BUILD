@@ -1,16 +1,20 @@
 cc_library(
     name = "common",
-    srcs = glob(
+    srcs = [
+        "os/os.h",
+        "os/os.cc",
+    ] + glob(
         [
             "*.cc",
             "*.h",
-            "os/**/*.cc",
-            "os/**/*.h",
         ],
-
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
         exclude = ["flycheck_*"],
-    ),
+    ) + select({
+        "//tools/config:darwin": ["os/mac.cc"],
+        "//tools/config:webasm": ["os/emscripten.cc"],
+        "//conditions:default": ["os/linux.cc"],
+    }),
     hdrs = [
         "FileOps.h",
         "FileSystem.h",
