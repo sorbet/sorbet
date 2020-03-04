@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 ar="$(pwd)/$1"
 link="$(pwd)/$2"
 output="$(pwd)/$3"
