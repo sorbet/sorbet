@@ -161,6 +161,10 @@ bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendin
     return canTakeFastPath(edit.updatedFiles, containsPendingTypecheckUpdates);
 }
 
+bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const {
+    return canTakeFastPath(changedFiles, false);
+}
+
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
@@ -217,7 +221,7 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
     computeFileHashes(edit.updates, *emptyWorkers);
 
     update.updatedFiles = move(edit.updates);
-    update.canTakeFastPath = canTakeFastPath(update);
+    update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
 
