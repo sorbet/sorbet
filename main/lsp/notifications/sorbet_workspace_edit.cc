@@ -67,6 +67,10 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (latencyTimer != nullptr) {
         // TODO: Move into pushDiagnostics once we have fast feedback.
         latencyTimer->clone("last_diagnostic_latency");
+        // Experiment: Weight by number of edits.
+        for (u4 i = 0; i < updates->editCount; i++) {
+            latencyTimer->clone("last_diagnostic_latency_weighted");
+        }
     }
     prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
 }
@@ -89,6 +93,10 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
         if (latencyTimer != nullptr) {
             // TODO: Move into pushDiagnostics once we have fast feedback.
             latencyTimer->clone("last_diagnostic_latency");
+            // Experiment: Weight by number of edits.
+            for (u4 i = 0; i < updates->editCount; i++) {
+                latencyTimer->clone("last_diagnostic_latency_weighted");
+            }
         }
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
     } else if (latencyTimer != nullptr) {
