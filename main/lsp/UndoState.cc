@@ -26,7 +26,7 @@ void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
 vector<core::FileRef> UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
                                          UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
                                          std::vector<core::FileRef> &filesThatHaveErrors) {
-    // Replace evicted index trees and file hashes.
+    // Replace evicted index trees.
     for (auto &entry : evictedIndexed) {
         indexed[entry.first] = move(entry.second);
     }

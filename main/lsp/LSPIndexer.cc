@@ -147,7 +147,7 @@ bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> 
     }
 
     logger.debug("Taking fast path");
-    return false;
+    return true;
 }
 
 bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const {
