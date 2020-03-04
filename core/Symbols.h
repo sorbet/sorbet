@@ -27,7 +27,7 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual void apply(Context ctx, DispatchArgs args, const Type *thisType, DispatchResult &res) const = 0;
+    virtual void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
@@ -520,7 +520,7 @@ public:
 
     void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
-    TypePtr sealedSubclassesToUnion(const Context ctx) const;
+    TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {

@@ -5,7 +5,7 @@ using namespace std;
 namespace sorbet::core {
 
 // This sorts the underlying `origins`
-vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) const {
+vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs) const {
     vector<ErrorLine> result;
     auto compare = [](Loc left, Loc right) {
         if (left.file() != right.file()) {

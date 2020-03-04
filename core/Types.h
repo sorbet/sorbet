@@ -75,26 +75,26 @@ enum class UntypedMode {
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
-    static TypePtr all(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
-    static TypePtr any(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /**
      * is every instance of  t1 an  instance of t2?
      *
      * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
-    static bool isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
-                                         UntypedMode mode);
+    static bool isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                         const TypePtr &t2, UntypedMode mode);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
-    static bool isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    static bool equiv(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
-    static bool isAsSpecificAs(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    static bool equivNoUntyped(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     static TypePtr top();
     static TypePtr bottom();
@@ -117,48 +117,48 @@ public:
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
 
-    static TypePtr dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);
-    static TypePtr approximateSubtract(Context ctx, const TypePtr &from, const TypePtr &what);
-    static bool canBeTruthy(Context ctx, const TypePtr &what);
-    static bool canBeFalsy(Context ctx, const TypePtr &what);
+    static TypePtr dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
+    static TypePtr approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what);
+    static bool canBeTruthy(const GlobalState &gs, const TypePtr &what);
+    static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
     enum class Combinator { OR, AND };
 
-    static TypePtr resultTypeAsSeenFrom(Context ctx, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
+    static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
                                         const std::vector<TypePtr> &targs);
 
-    static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(Context ctx, SymbolRef what, const std::vector<TypePtr> &targs,
-                                                         SymbolRef asIf);
+    static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(const GlobalState &gs, SymbolRef what,
+                                                         const std::vector<TypePtr> &targs, SymbolRef asIf);
     // Extract the return value type from a proc.
-    static TypePtr getProcReturnType(Context ctx, const TypePtr &procType);
-    static TypePtr instantiate(Context ctx, const TypePtr &what, const InlinedVector<SymbolRef, 4> &params,
+    static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
+    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, const InlinedVector<SymbolRef, 4> &params,
                                const std::vector<TypePtr> &targs);
     /** Replace all type variables in `what` with their instantiations.
      * Requires that `tc` has already been solved.
      */
-    static TypePtr instantiate(Context ctx, const TypePtr &what, const TypeConstraint &tc);
+    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
 
-    static TypePtr replaceSelfType(Context ctx, const TypePtr &what, const TypePtr &receiver);
+    static TypePtr replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
      * typechecking. We should be careful to only used this type when we are trying to guess a type.
      * We should do proper instatiation and subtype test after we have guessed type variables with
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
-    static TypePtr approximate(Context ctx, const TypePtr &what, const TypeConstraint &tc);
-    static TypePtr dispatchCallWithoutBlock(Context ctx, const TypePtr &recv, DispatchArgs args);
+    static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
+    static TypePtr dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, DispatchArgs args);
     static TypePtr dropLiteral(const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
-    static TypePtr glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static TypePtr glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     /** Internal implementation. You should probably use any(). */
-    static TypePtr lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    static TypePtr lubAll(Context ctx, std::vector<TypePtr> &elements);
-    static TypePtr arrayOf(Context ctx, const TypePtr &elem);
-    static TypePtr hashOf(Context ctx, const TypePtr &elem);
-    static TypePtr dropNil(Context ctx, const TypePtr &from);
+    static TypePtr lubAll(const GlobalState &gs, std::vector<TypePtr> &elements);
+    static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */
-    static TypePtr widen(Context ctx, const TypePtr &type);
+    static TypePtr widen(const GlobalState &gs, const TypePtr &type);
     static std::optional<int> getProcArity(const AppliedType &type);
 
     /** Unwrap SelfTypeParam instances that belong to the given owner, to a bare LambdaParam */
@@ -200,20 +200,20 @@ public:
     }
 
     virtual std::string typeName() const = 0;
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) = 0;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc);
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc);
 
-    virtual TypePtr _replaceSelfType(Context ctx, const TypePtr &receiver);
+    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver);
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) = 0;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) = 0;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) = 0;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
-    virtual void _sanityCheck(Context ctx) = 0;
-    void sanityCheck(Context ctx) {
+    virtual void _sanityCheck(const GlobalState &gs) = 0;
+    void sanityCheck(const GlobalState &gs) {
         if (!debug_mode)
             return;
-        _sanityCheck(ctx);
+        _sanityCheck(gs);
     }
 
     bool isUntyped() const;
@@ -222,7 +222,7 @@ public:
     virtual bool hasUntyped();
     virtual bool isFullyDefined() = 0;
     virtual int kind() = 0;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc);
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc);
     unsigned int hash(const GlobalState &gs) const;
 };
 CheckSize(Type, 8, 8);
@@ -251,11 +251,11 @@ public:
     virtual TypePtr underlying() const = 0;
     ProxyType() = default;
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) override;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) override;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const override;
 
-    void _sanityCheck(Context ctx) override;
+    void _sanityCheck(const GlobalState &gs) override;
 };
 CheckSize(ProxyType, 8, 8);
 
@@ -268,12 +268,12 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const override;
     virtual std::string show(const GlobalState &gs) const override;
     virtual std::string typeName() const override;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override final;
 
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    void _sanityCheck(Context ctx) final;
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    void _sanityCheck(const GlobalState &gs) final;
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
     virtual bool isFullyDefined() final;
     virtual bool hasUntyped() override final;
@@ -300,12 +300,12 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
@@ -322,12 +322,12 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
@@ -339,15 +339,15 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     SymbolRef symbol;
-    void _sanityCheck(Context ctx) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
@@ -366,14 +366,14 @@ public:
     virtual std::string typeName() const override;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
-    virtual TypePtr _replaceSelfType(Context ctx, const TypePtr &receiver) override;
+    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    void _sanityCheck(Context ctx) final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    void _sanityCheck(const GlobalState &gs) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 };
 CheckSize(SelfType, 8, 8);
@@ -401,7 +401,7 @@ public:
 
     bool equals(const LiteralType &rhs) const;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 };
@@ -417,17 +417,17 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 };
 CheckSize(TypeVar, 16, 8);
 
@@ -440,17 +440,17 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    void _sanityCheck(Context ctx) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual bool hasUntyped() override;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _replaceSelfType(Context ctx, const TypePtr &receiver) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
 
 private:
     /*
@@ -469,14 +469,14 @@ private:
     friend TypePtr Types::Boolean();
     friend class GlobalSubstitution;
     friend class serialize::SerializerImpl;
-    friend TypePtr lubDistributeOr(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr lubGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass);
+    friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
-    friend class Symbol; // the actual method is `recordSealedSubclass(MutableContext ctx, SymbolRef subclass)`,
-                         // but refering to it introduces a cycle
+    friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
+                         // subclass)`, but refering to it introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
@@ -491,18 +491,18 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
 
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    void _sanityCheck(Context ctx) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual TypePtr _replaceSelfType(Context ctx, const TypePtr &receiver) override;
+    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
     virtual bool hasUntyped() override;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
 private:
     /*
@@ -514,11 +514,11 @@ private:
     friend class serialize::SerializerImpl;
     friend class TypeConstraint;
 
-    friend TypePtr lubGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr glbDistributeAnd(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
@@ -536,16 +536,16 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
     virtual bool hasUntyped() override;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr underlying() const override;
 };
 CheckSize(ShapeType, 72, 8);
@@ -559,22 +559,22 @@ public:
     const TypePtr underlying_;
 
     TupleType(TypePtr underlying, std::vector<TypePtr> elements);
-    static TypePtr build(Context ctx, std::vector<TypePtr> elements);
+    static TypePtr build(const GlobalState &gs, std::vector<TypePtr> elements);
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showWithMoreInfo(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
-    void _sanityCheck(Context ctx) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual bool hasUntyped() override;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType() const;
@@ -591,20 +591,20 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
 
-    virtual TypePtr getCallArguments(Context ctx, NameRef name) final;
+    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     virtual bool hasUntyped() override;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual TypePtr _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
+    virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 };
 CheckSize(AppliedType, 40, 8);
 
@@ -628,14 +628,14 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    void _sanityCheck(Context ctx) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
+    void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() final;
 
-    virtual TypePtr _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+    virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() final;
-    virtual TypePtr _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr underlying() const override;
 };
 CheckSize(MetaType, 24, 8);
@@ -659,7 +659,7 @@ class TypeAndOrigins final {
 public:
     TypePtr type;
     InlinedVector<Loc, 2> origins;
-    std::vector<ErrorLine> origins2Explanations(Context ctx) const;
+    std::vector<ErrorLine> origins2Explanations(const GlobalState &gs) const;
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(const TypeAndOrigins &) = default;
