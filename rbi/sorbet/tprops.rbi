@@ -40,6 +40,11 @@ module T::Props::CustomType
   include Kernel
 end
 
+module T::Props::GeneratedCodeValidation
+  def self.validate_serialize(source); end
+  def self.validate_deserialize(source); end
+end
+
 class T::Props::Decorator
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
   DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
@@ -137,8 +142,6 @@ end
 module T::Props::Serializable
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
-  def required_prop_missing_from_deserialize(prop); end
-  def required_prop_missing_from_deserialize?(prop); end
   def serialize(strict = nil); end
   def with(changed_props); end
   def with_existing_hash(changed_props, existing_hash:); end
@@ -187,3 +190,13 @@ module T::Props::TypeValidation::DecoratorMethods
   extend T::Sig
 end
 
+module T::Props::HasLazilySpecializedMethods
+  class SourceEvaluationDisabled < RuntimeError; end
+  def self.disable_lazy_evaluation!; end
+end
+
+module T::Props::GeneratedCodeValidation
+  class ValidationError < RuntimeError; end
+  def self.validate_deserialize(source); end
+  def self.validate_serialize(source); end
+end

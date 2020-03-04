@@ -96,12 +96,18 @@ require_relative 'types/enum'
 # Props that run sigs statically so have to be after all the others :(
 require_relative 'types/props/private/setter_factory'
 require_relative 'types/props/private/apply_default'
+require_relative 'types/props/has_lazily_specialized_methods'
 require_relative 'types/props/optional'
 require_relative 'types/props/weak_constructor'
 require_relative 'types/props/constructor'
 require_relative 'types/props/pretty_printable'
+require_relative 'types/props/private/serde_transform'
+require_relative 'types/props/private/deserializer_generator'
+require_relative 'types/props/private/serializer_generator'
 require_relative 'types/props/serializable'
 require_relative 'types/props/type_validation'
+require_relative 'types/props/private/parser'
+require_relative 'types/props/generated_code_validation'
 
 require_relative 'types/struct'
 

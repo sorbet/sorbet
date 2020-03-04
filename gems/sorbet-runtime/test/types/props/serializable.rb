@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 require_relative '../../test_helper'
 
+require 'parser/current'
+
 class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   def assert_prop_error(match, &blk)
     ex = assert_raises(ArgumentError) do
@@ -120,9 +122,38 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(m.serialize, m.class.from_hash(m.serialize).serialize)
     end
 
+    it 'round-trips extra props' do
+      m = a_serializable
+      input = m.serialize.merge('not_a_prop' => 'foo')
+      assert_equal('foo', m.class.from_hash(input).serialize['not_a_prop'])
+    end
+
     it 'does not call the constructor' do
       MySerializable.any_instance.expects(:new).never
       MySerializable.from_hash({})
+    end
+  end
+
+  class HasUnstoredProp < T::Struct
+    prop :stored, String
+    prop :not_stored, String, dont_store: true
+  end
+
+  describe 'dont_store prop' do
+    it 'is not stored' do
+      m = HasUnstoredProp.new(stored: 'foo', not_stored: 'bar')
+      assert_equal({'stored' => 'foo'}, m.serialize)
+    end
+
+    it 'does not prevent extra_props from round-tripping' do
+      input = {'stored' => 'foo', 'not_a_prop' => 'bar'}
+      result = HasUnstoredProp.from_hash(input).serialize
+      assert_equal('bar', result['not_a_prop'])
+    end
+
+    it 'is allowed even on strict deserialize' do
+      input = {'stored' => 'foo', 'not_stored' => 'bar'}
+      refute_nil(HasUnstoredProp.from_hash!(input))
     end
   end
 
@@ -407,12 +438,20 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   class EnumStruct < T::Struct
     prop :enum, MyEnum
+    prop :enum_of_enums, T.nilable(T.enum([MyEnum::BAR]))
   end
 
   describe 'enum' do
     it 'round trips' do
-      s = EnumStruct.new(enum: MyEnum::FOO)
-      assert_equal(MyEnum::FOO, EnumStruct.from_hash(s.serialize).enum)
+      s = EnumStruct.new(enum: MyEnum::FOO, enum_of_enums: MyEnum::BAR)
+
+      serialized = s.serialize
+      assert_equal('foo', serialized['enum'])
+      assert_equal('bar', serialized['enum_of_enums'])
+
+      roundtripped = EnumStruct.from_hash(serialized)
+      assert_equal(MyEnum::FOO, roundtripped.enum)
+      assert_equal(MyEnum::BAR, roundtripped.enum_of_enums)
     end
   end
 
@@ -513,6 +552,106 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       hash = CustomSerializedForm.new(prop: 'foo').serialize
       assert_equal({'something_custom' => 'foo'}, hash)
       assert_equal('foo', CustomSerializedForm.from_hash(hash).prop)
+    end
+  end
+
+  class ArrayOfNilableStruct < T::Struct
+    prop :prop, T::Array[T.nilable(MyEnum)]
+  end
+
+  describe 'with array of nilable enums' do
+    it 'can deserialize non-nil' do
+      assert_equal([MyEnum::FOO], ArrayOfNilableStruct.from_hash('prop' => ['foo']).prop)
+    end
+
+    it 'can deserialize nil' do
+      assert_equal([nil], ArrayOfNilableStruct.from_hash('prop' => [nil]).prop)
+    end
+  end
+
+  class ComplexStruct < T::Struct
+    prop :primitive, Integer
+    prop :nilable, T.nilable(Integer)
+    prop :nilable_on_read, T.nilable(Integer), raise_on_nil_write: true
+    prop :primitive_default, Integer, default: 0
+    prop :primitive_nilable_default, T.nilable(Integer), default: 0
+    prop :factory, Integer, factory: -> {0}
+    prop :primitive_array, T::Array[Integer]
+    prop :array_default, T::Array[Integer], default: []
+    prop :primitive_hash, T::Hash[String, Integer]
+    prop :array_of_nilable, T::Array[T.nilable(Integer)]
+    prop :nilable_array, T.nilable(T::Array[Integer])
+    prop :substruct, MySerializable
+    prop :nilable_substract, T.nilable(MySerializable)
+    prop :default_substruct, MySerializable, default: MySerializable.new
+    prop :array_of_substruct, T::Array[MySerializable]
+    prop :hash_of_substruct, T::Hash[String, MySerializable]
+    prop :custom_type, CustomType
+    prop :nilable_custom_type, T.nilable(CustomType)
+    prop :default_custom_type, CustomType, default: ''
+    prop :array_of_custom_type, T::Array[CustomType]
+    prop :hash_of_custom_type_to_substruct, T::Hash[CustomType, MySerializable]
+    prop :unidentified_type, Object
+    prop :nilable_unidentified_type, T.nilable(Object)
+    prop :array_of_unidentified_type, T::Array[Object]
+    prop :defaulted_unidentified_type, Object, default: Object.new
+    prop :hash_with_unidentified_types, T::Hash[Object, Object]
+  end
+
+  describe 'generated code' do
+    describe 'serialize' do
+      it 'validates' do
+        src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
+        T::Props::GeneratedCodeValidation.validate_serialize(src)
+      end
+
+      it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
+        src = src.sub(/\.transform_values\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_serialize(src)
+        end
+      end
+    end
+
+    describe 'deserialize' do
+      it 'validates' do
+        src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
+        T::Props::GeneratedCodeValidation.validate_deserialize(src)
+      end
+
+      it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
+        src = src.sub(/\.default\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_deserialize(src)
+        end
+      end
+    end
+
+    describe 'disabling evaluation' do
+      it 'works' do
+        T::Props::HasLazilySpecializedMethods.disable_lazy_evaluation!
+
+        m = Class.new do
+          include T::Props::Serializable
+
+          prop :foo, T.nilable(String)
+        end
+
+        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
+          m.new.serialize
+        end
+
+        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
+          m.decorator.eagerly_define_lazy_methods!
+        end
+
+      end
+
+      after do
+        T::Props::HasLazilySpecializedMethods.remove_instance_variable(:@lazy_evaluation_disabled)
+      end
     end
   end
 end

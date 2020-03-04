@@ -80,5 +80,17 @@ module T::Props
         scalar_type?(val)
       end
     end
+
+    def self.checked_serialize(type, instance)
+      val = type.serialize(instance)
+      unless valid_serialization?(val, type)
+        msg = "#{type} did not serialize to a valid scalar type. It became a: #{val.class}"
+        if val.is_a?(Hash)
+          msg += "\nIf you want to store a structured Hash, consider using a T::Struct as your type."
+        end
+        raise T::Props::InvalidValueError.new(msg)
+      end
+      val
+    end
   end
 end
