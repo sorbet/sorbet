@@ -32,10 +32,10 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     Timer timeit(config->logger, "LSPLoop::sendCountersToStatsd");
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     const auto &opts = config->opts;
+    // Record process and version stats. Do this BEFORE clearing the thread counters!
+    StatsD::addStandardMetrics();
     auto counters = getAndClearThreadCounters();
     if (!opts.statsdHost.empty()) {
-        // Record process and version stats.
-        StatsD::addStandardMetrics();
         lastMetricUpdateTime = currentTime;
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
