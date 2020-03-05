@@ -39,8 +39,8 @@ class LSPIndexer final {
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
     /** Determines if the given edit can take the fast path relative to the most recently committed edit. If
-     * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past using
-     * `evictedFiles`. */
+     * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past (just prior to
+     * the currently running slow path) using `evictedFiles`. */
     bool canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const;
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                          bool containsPendingTypecheckUpdates) const;
