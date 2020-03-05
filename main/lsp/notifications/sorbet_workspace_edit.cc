@@ -12,6 +12,10 @@ SorbetWorkspaceEditTask::SorbetWorkspaceEditTask(const LSPConfiguration &config,
     if (this->params->updates.empty()) {
         latencyCancelSlowPath->cancel();
     }
+    if (this->latencyTimer != nullptr) {
+        params->diagnosticLatencyTimers.push_back(
+            make_unique<Timer>(this->latencyTimer->clone("last_diagnostic_latency_accurate")));
+    }
 };
 
 LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
@@ -63,16 +67,21 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (updates->canTakeFastPath == false) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
+
+    const auto editCount = updates->editCount;
     typechecker.typecheckOnFastPath(move(*updates));
     if (latencyTimer != nullptr) {
         // TODO: Move into pushDiagnostics once we have fast feedback.
         latencyTimer->clone("last_diagnostic_latency");
+        ENFORCE(editCount == params->diagnosticLatencyTimers.size());
         // Experiment: Weight by number of edits.
-        for (u4 i = 0; i < updates->editCount; i++) {
+        for (u4 i = 0; i < editCount; i++) {
             latencyTimer->clone("last_diagnostic_latency_weighted");
         }
+        // last_diagnostic_latency_accurate
+        params->diagnosticLatencyTimers.clear();
     }
-    prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
+    prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", editCount - 1);
 }
 
 void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) {
@@ -88,17 +97,21 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     // processing thread that it's safe to move on.
     typechecker.state().epochManager->startCommitEpoch(updates->epoch);
     startedNotification.Notify();
+    const auto editCount = updates->editCount;
     // Only report stats if the edit was committed.
     if (typechecker.typecheck(move(*updates), workers)) {
         if (latencyTimer != nullptr) {
             // TODO: Move into pushDiagnostics once we have fast feedback.
             latencyTimer->clone("last_diagnostic_latency");
+            ENFORCE(editCount == params->diagnosticLatencyTimers.size());
             // Experiment: Weight by number of edits.
-            for (u4 i = 0; i < updates->editCount; i++) {
+            for (u4 i = 0; i < editCount; i++) {
                 latencyTimer->clone("last_diagnostic_latency_weighted");
             }
+            // last_diagnostic_latency_accurate
+            params->diagnosticLatencyTimers.clear();
         }
-        prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", updates->editCount - 1);
+        prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", editCount - 1);
     } else if (latencyTimer != nullptr) {
         // Don't report a latency value for canceled slow paths.
         latencyTimer->cancel();

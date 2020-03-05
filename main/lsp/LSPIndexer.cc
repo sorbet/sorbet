@@ -315,16 +315,40 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
     ENFORCE(update.updatedFiles.size() == update.updatedFileHashes.size());
     ENFORCE(update.updatedFiles.size() == update.updatedFileIndexes.size());
 
+    if (pendingTypecheckLatencyTimer != nullptr && latencyTimer != nullptr) {
+        if (update.canceledSlowPath) {
+            // Replace edit's latencyTimer with that of the running slow path.
+            latencyTimer->cancel();
+            latencyTimer = make_unique<Timer>(pendingTypecheckLatencyTimer->clone());
+            // Merge diagnostic latency timers.
+            edit.diagnosticLatencyTimers.insert(edit.diagnosticLatencyTimers.end(),
+                                                make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.begin()),
+                                                make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.end()));
+            pendingTypecheckDiagnosticLatencyTimers.clear();
+            pendingTypecheckDiagnosticLatencyTimers.resize(edit.diagnosticLatencyTimers.size());
+            for (auto &timer : edit.diagnosticLatencyTimers) {
+                pendingTypecheckDiagnosticLatencyTimers.push_back(make_unique<Timer>(timer->clone()));
+            }
+
+        } else if (!update.canTakeFastPath) {
+            // Did not cancel slow path, but is a new slow path. Replace pendingTypecheckLatencyTimer and
+            // pendingTypecheckDiagnosticLatencyTimers.
+            pendingTypecheckLatencyTimer->cancel();
+            pendingTypecheckLatencyTimer = make_unique<Timer>(latencyTimer->clone());
+            for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
+                timer->cancel();
+            }
+            pendingTypecheckDiagnosticLatencyTimers.clear();
+            pendingTypecheckDiagnosticLatencyTimers.resize(edit.diagnosticLatencyTimers.size());
+            for (auto &timer : edit.diagnosticLatencyTimers) {
+                pendingTypecheckDiagnosticLatencyTimers.push_back(make_unique<Timer>(timer->clone()));
+            }
+        }
+    }
+
     // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
     if (!update.canTakeFastPath) {
         update.updatedGS = initialGS->deepCopy();
-        pendingTypecheckUpdates = update.copy();
-        if (pendingTypecheckLatencyTimer != nullptr) {
-            pendingTypecheckLatencyTimer->cancel();
-        }
-        if (latencyTimer != nullptr) {
-            pendingTypecheckLatencyTimer = make_unique<Timer>(latencyTimer->clone());
-        }
         pendingTypecheckEvictedStateHashes = std::move(evictedHashes);
     } else {
         // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
@@ -333,13 +357,6 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
         auto mergedEvictions = mergeEvictions(pendingTypecheckEvictedStateHashes, evictedHashes);
         pendingTypecheckUpdates = move(merged);
         pendingTypecheckEvictedStateHashes = std::move(mergedEvictions);
-        if (update.canceledSlowPath && pendingTypecheckLatencyTimer != nullptr) {
-            // Replace edit's latencyTimer with that of the running slow path.
-            if (latencyTimer != nullptr) {
-                latencyTimer->cancel();
-            }
-            latencyTimer = make_unique<Timer>(pendingTypecheckLatencyTimer->clone());
-        }
     }
     // Don't copy over these (test-only) properties, as they only apply to the original request.
     pendingTypecheckUpdates.cancellationExpected = false;

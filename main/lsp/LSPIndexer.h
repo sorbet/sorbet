@@ -33,6 +33,7 @@ class LSPIndexer final {
     /** Contains a clone of the latency timer for the pending typecheck operation. Is used to ensure that we correctly
      * track the latency of canceled & rescheduled typechecking operations. */
     std::unique_ptr<Timer> pendingTypecheckLatencyTimer;
+    std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
     /** Contains globalStateHashes evicted with `pendingTypecheckUpdates`. Used in slow path cancelation logic. */
     UnorderedMap<int, core::FileHash> pendingTypecheckEvictedStateHashes;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.

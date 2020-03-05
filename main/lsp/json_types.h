@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
 #include "ast/ast.h"
+#include "common/Timer.h"
 #include "common/common.h"
 #include "core/NameHash.h"
 #include "core/core.h"
@@ -9,6 +10,10 @@
 
 #include <optional>
 #include <variant>
+
+namespace sorbet {
+class Timer;
+}
 
 namespace sorbet::realmain::lsp {
 
@@ -22,7 +27,6 @@ public:
     u4 epoch = 0;
     // The total number of edits that this update represents. Used for stats.
     u4 editCount = 0;
-
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<core::FileHash> updatedFileHashes;
     std::vector<ast::ParsedFile> updatedFileIndexes;

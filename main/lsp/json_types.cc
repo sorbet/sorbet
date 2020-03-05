@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "common/Timer.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -270,6 +271,10 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     mergeCount += newerParams.mergeCount + 1;
     sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
     sorbetPreemptionsExpected += newerParams.sorbetPreemptionsExpected;
+    // Consume newerParams' diagnostic latency timers.
+    diagnosticLatencyTimers.insert(diagnosticLatencyTimers.end(),
+                                   make_move_iterator(newerParams.diagnosticLatencyTimers.begin()),
+                                   make_move_iterator(newerParams.diagnosticLatencyTimers.end()));
 }
 
 } // namespace sorbet::realmain::lsp
