@@ -23,7 +23,8 @@ struct LocOffsets {
     bool exists() const {
         return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
     }
-};
+} __attribute__((packed, aligned(1)));
+CheckSize(LocOffsets, 6, 1);
 
 class Loc final {
     struct {
