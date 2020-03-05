@@ -364,7 +364,27 @@ class Sorbet::Private::GemLoader
     'coderay' => proc do
       my_require 'coderay'
       [
+        CodeRay::VERSION,
+        CodeRay::FileType,
+        CodeRay::Tokens,
+        CodeRay::TokensProxy,
+        CodeRay::TokenKinds,
         CodeRay::PluginHost,
+        CodeRay::Plugin,
+        CodeRay::Scanners,
+        CodeRay::Scanners::Scanner,
+        CodeRay::Scanners::Java::BuiltinTypes,
+        CodeRay::Scanners::Ruby::Patterns,
+        CodeRay::Scanners::Ruby::StringState,
+        CodeRay::Encoders,
+        CodeRay::Encoders::Encoder,
+        CodeRay::Encoders::HTML::Output,
+        CodeRay::Encoders::HTML::CSS,
+        CodeRay::Encoders::HTML::Numbering,
+        CodeRay::Styles,
+        CodeRay::Styles::Style,
+        CodeRay::Duo,
+        CodeRay::WordList,
       ]
     end,
     'byebug' => proc do
