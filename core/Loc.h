@@ -9,16 +9,30 @@ class SerializerImpl;
 }
 class GlobalState;
 
+constexpr int INVALID_POS_LOC = 0xffffff;
+struct LocOffsets {
+    unsigned int beginLoc : 24;
+    unsigned int endLoc : 24;
+    u4 beginPos() const {
+        return beginLoc;
+    };
+
+    u4 endPos() const {
+        return endLoc;
+    }
+    bool exists() const {
+        return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
+    }
+} __attribute__((packed, aligned(1)));
+CheckSize(LocOffsets, 6, 1);
+
 class Loc final {
     struct {
-        unsigned int beginLoc : 24;
-        unsigned int endLoc : 24;
+        LocOffsets offsets;
         unsigned int fileRef : 16;
     } __attribute__((packed, aligned(8))) storage;
     template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
-
-    static constexpr int INVALID_POS_LOC = 0xffffff;
 
     void setFile(core::FileRef file) {
         storage.fileRef = file.id();
@@ -30,17 +44,17 @@ public:
     }
 
     bool exists() const {
-        return storage.fileRef != 0 && storage.endLoc != INVALID_POS_LOC && storage.beginLoc != INVALID_POS_LOC;
+        return storage.fileRef != 0 && storage.offsets.exists();
     }
 
     Loc join(Loc other) const;
 
     u4 beginPos() const {
-        return storage.beginLoc;
+        return storage.offsets.beginLoc;
     };
 
     u4 endPos() const {
-        return storage.endLoc;
+        return storage.offsets.endLoc;
     }
 
     FileRef file() const {
@@ -56,7 +70,7 @@ public:
         }
     }
 
-    inline Loc(FileRef file, u4 begin, u4 end) : storage{begin, end, file.id()} {
+    inline Loc(FileRef file, u4 begin, u4 end) : storage{{begin, end}, file.id()} {
         ENFORCE(begin <= INVALID_POS_LOC);
         ENFORCE(end <= INVALID_POS_LOC);
         ENFORCE(begin <= end);
@@ -90,16 +104,16 @@ public:
     static Detail offset2Pos(const File &file, u4 off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
     std::pair<u4, u4> getAs2u4() const {
-        auto low = (((u4)storage.beginLoc) << 8) + ((((u4)storage.fileRef) >> 8) & ((1 << 8) - 1));
-        auto high = (((u4)storage.endLoc) << 8) + ((((u4)storage.fileRef)) & ((1 << 8) - 1));
+        auto low = (((u4)storage.offsets.beginLoc) << 8) + ((((u4)storage.fileRef) >> 8) & ((1 << 8) - 1));
+        auto high = (((u4)storage.offsets.endLoc) << 8) + ((((u4)storage.fileRef)) & ((1 << 8) - 1));
         return {low, high};
     };
 
     // Intentionally not a constructor because we don't want to ever be able to call it unintentionally
     void setFrom2u4(u4 low, u4 high) {
         storage.fileRef = (high & ((1 << 8) - 1)) + ((low & ((1 << 8) - 1)) << 8);
-        storage.endLoc = high >> 8;
-        storage.beginLoc = low >> 8;
+        storage.offsets.endLoc = high >> 8;
+        storage.offsets.beginLoc = low >> 8;
     }
 
     // For a given Loc, returns
@@ -117,7 +131,7 @@ public:
 CheckSize(Loc, 8, 8);
 
 template <typename H> H AbslHashValue(H h, const Loc &m) {
-    return H::combine(std::move(h), m.storage.beginLoc, m.storage.endLoc, m.storage.fileRef);
+    return H::combine(std::move(h), m.storage.offsets.beginLoc, m.storage.offsets.endLoc, m.storage.fileRef);
 }
 } // namespace sorbet::core
 
