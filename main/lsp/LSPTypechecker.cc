@@ -43,15 +43,13 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     // We should always initialize with epoch 0.
     ENFORCE(updates.epoch == 0);
     this->initialized = true;
-    globalStateHashes = move(updates.updatedFileHashes);
     indexed = move(updates.updatedFileIndexes);
     // Initialize to all zeroes.
-    diagnosticEpochs = vector<u4>(globalStateHashes.size(), 0);
+    diagnosticEpochs = vector<u4>(indexed.size(), 0);
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
     auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
     ENFORCE(committed);
-    ENFORCE(globalStateHashes.size() == indexed.size());
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
@@ -63,11 +61,14 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
             // This is the typecheck that caused us to cancel the previous slow path. Un-commit all typechecker changes.
-            auto oldFilesWithErrors =
-                cancellationUndoState->restore(gs, indexed, indexedFinalGS, globalStateHashes, filesThatHaveErrors);
+            auto oldFilesWithErrors = cancellationUndoState->restore(gs, indexed, indexedFinalGS, filesThatHaveErrors);
             cancellationUndoState = nullptr;
+            auto fastPathDecision = updates.canTakeFastPath;
             // Retypecheck all of the files that previously had errors.
             updates.mergeOlder(getNoopUpdate(oldFilesWithErrors));
+            // The merge operation resets `fastPathDecision`, but we know that retypechecking unchanged files
+            // has no influence on the fast path decision.
+            updates.canTakeFastPath = fastPathDecision;
         } else {
             config->logger->debug("[Typechecker] Error: UndoState is missing for update that canceled slow path!");
         }
@@ -108,20 +109,17 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     {
-        const auto &hashes = updates.updatedFileHashes;
-        ENFORCE(updates.updatedFiles.size() == hashes.size());
-
-        int i = -1;
         for (auto &f : updates.updatedFiles) {
-            ++i;
             auto fref = gs->findFileByPath(f->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
             // path logic in LSPPreprocessor.
             ENFORCE(fref.exists());
+            ENFORCE(f->getFileHash() != nullptr);
             if (fref.exists()) {
                 // Update to existing file on fast path
-                auto &oldHash = globalStateHashes[fref.id()];
-                for (auto &p : hashes[i].definitions.methodHashes) {
+                ENFORCE(fref.data(*gs).getFileHash() != nullptr);
+                auto &oldHash = *fref.data(*gs).getFileHash();
+                for (auto &p : f->getFileHash()->definitions.methodHashes) {
                     auto fnd = oldHash.definitions.methodHashes.find(p.first);
                     ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
                     if (fnd->second != p.second) {
@@ -138,8 +136,15 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     }
 
     int i = -1;
-    for (auto &oldHash : globalStateHashes) {
+    // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
+    for (auto &oldFile : gs->getFiles()) {
         i++;
+        if (oldFile == nullptr) {
+            continue;
+        }
+
+        ENFORCE(oldFile->getFileHash() != nullptr);
+        const auto &oldHash = *oldFile->getFileHash();
         vector<core::NameHash> intersection;
         std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
                               oldHash.usages.sends.end(), std::back_inserter(intersection));
@@ -470,24 +475,21 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     }
 
     int i = -1;
-    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFileHashes.size() &&
-            updates.updatedFileHashes.size() == updates.updatedFiles.size());
-    ENFORCE(globalStateHashes.size() == indexed.size() && globalStateHashes.size() == diagnosticEpochs.size());
+    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
+    ENFORCE(indexed.size() == diagnosticEpochs.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
-            globalStateHashes.resize(id + 1);
             // No diagnostics sent yet; initialize new IDs to 0.
             diagnosticEpochs.resize(id + 1, 0);
         }
         if (cancellationUndoState != nullptr) {
             // Move the evicted values before they get replaced.
-            cancellationUndoState->recordEvictedState(move(indexed[id]), move(globalStateHashes[id]));
+            cancellationUndoState->recordEvictedState(move(indexed[id]));
         }
         indexed[id] = move(ast);
-        globalStateHashes[id] = move(updates.updatedFileHashes[i]);
     }
 
     for (auto &ast : updates.updatedFinalGSFileIndexes) {
@@ -569,7 +571,6 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         auto &index = indexed[fref.id()];
         noop.updatedFileIndexes.push_back({index.tree->deepCopy(), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
-        noop.updatedFileHashes.push_back(globalStateHashes[fref.id()]);
     }
     return noop;
 }
@@ -599,11 +600,6 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
         }
     }
     return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-}
-
-const std::vector<core::FileHash> &LSPTypechecker::getFileHashes() const {
-    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
-    return globalStateHashes;
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
@@ -650,10 +646,6 @@ const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) co
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
     return typechecker.getResolved(frefs);
-}
-
-const std::vector<core::FileHash> &LSPTypecheckerDelegate::getFileHashes() const {
-    return typechecker.getFileHashes();
 }
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {

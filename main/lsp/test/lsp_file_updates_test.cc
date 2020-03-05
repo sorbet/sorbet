@@ -13,9 +13,9 @@ using namespace sorbet::realmain::lsp;
 
 namespace {
 u4 nextHash = 0;
-core::FileHash getFileHash() {
-    core::FileHash hash;
-    hash.definitions.hierarchyHash = nextHash++;
+unique_ptr<core::FileHash> getFileHash() {
+    auto hash = make_unique<core::FileHash>();
+    hash->definitions.hierarchyHash = nextHash++;
     return hash;
 }
 
@@ -25,13 +25,14 @@ ast::ParsedFile getParsedFile(core::FileRef fref) {
 }
 
 shared_ptr<core::File> makeFile(std::string path, std::string contents) {
-    return make_shared<core::File>(move(path), move(contents), core::File::Type::Normal);
+    auto file = make_shared<core::File>(move(path), move(contents), core::File::Type::Normal);
+    file->setFileHash(getFileHash());
+    return file;
 }
 
 void addFile(LSPFileUpdates &updates, core::FileRef fref, std::string path, std::string contents) {
     updates.updatedFiles.push_back(makeFile(move(path), move(contents)));
     updates.updatedFileIndexes.push_back(getParsedFile(fref));
-    updates.updatedFileHashes.push_back(getFileHash());
 }
 
 } // namespace
@@ -105,7 +106,6 @@ TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
     newUpdates.mergeOlder(oldUpdates);
     ASSERT_EQ(3, newUpdates.updatedFiles.size());
     ASSERT_EQ(3, newUpdates.updatedFileIndexes.size());
-    ASSERT_EQ(3, newUpdates.updatedFileHashes.size());
 
     UnorderedMap<string, int> fileIndexes;
     int i = -1;
@@ -120,8 +120,8 @@ TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
         int i = fileIndexes["bar.rb"];
         EXPECT_EQ("newcontents", newUpdates.updatedFiles[i]->source());
         EXPECT_EQ(2, newUpdates.updatedFileIndexes[i].file.id());
-        EXPECT_NE(oldUpdates.updatedFileHashes[1].definitions.hierarchyHash,
-                  newUpdates.updatedFileHashes[i].definitions.hierarchyHash);
+        EXPECT_NE(oldUpdates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
+                  newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
     }
 
     {
@@ -129,8 +129,8 @@ TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
         int i = fileIndexes["foo.rb"];
         EXPECT_EQ("foo", newUpdates.updatedFiles[i]->source());
         EXPECT_EQ(1, newUpdates.updatedFileIndexes[i].file.id());
-        EXPECT_EQ(oldUpdates.updatedFileHashes[0].definitions.hierarchyHash,
-                  newUpdates.updatedFileHashes[i].definitions.hierarchyHash);
+        EXPECT_EQ(oldUpdates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
+                  newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
     }
 
     {
@@ -159,7 +159,6 @@ TEST(LSPFileUpdatesTest, Copy) {
     EXPECT_FALSE(copy.updatedGS.has_value());
 
     ASSERT_EQ(2, copy.updatedFiles.size());
-    ASSERT_EQ(2, copy.updatedFileHashes.size());
     ASSERT_EQ(2, copy.updatedFileIndexes.size());
 
     EXPECT_EQ("foo.rb", copy.updatedFiles[0]->path());
@@ -170,10 +169,10 @@ TEST(LSPFileUpdatesTest, Copy) {
     EXPECT_EQ(1, copy.updatedFileIndexes[0].file.id());
     EXPECT_EQ(2, copy.updatedFileIndexes[1].file.id());
 
-    EXPECT_EQ(updates.updatedFileHashes[0].definitions.hierarchyHash,
-              copy.updatedFileHashes[0].definitions.hierarchyHash);
-    EXPECT_EQ(updates.updatedFileHashes[1].definitions.hierarchyHash,
-              copy.updatedFileHashes[1].definitions.hierarchyHash);
+    EXPECT_EQ(updates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
+              copy.updatedFiles[0]->getFileHash()->definitions.hierarchyHash);
+    EXPECT_EQ(updates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
+              copy.updatedFiles[1]->getFileHash()->definitions.hierarchyHash);
 }
 
 TEST(LSPFileUpdatesTest, MergeOlderPreemptionExpected) {

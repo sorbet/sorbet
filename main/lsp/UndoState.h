@@ -17,8 +17,6 @@ class UndoState final {
     std::unique_ptr<core::GlobalState> evictedGs;
     // Stores index trees containing data stored in `gs` that have been evicted during the slow path operation.
     UnorderedMap<int, ast::ParsedFile> evictedIndexed;
-    // Stores file hashes that have been evicted during the slow path operation.
-    UnorderedMap<int, core::FileHash> evictedFileHashes;
     // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
     // Stores the list of files that had errors before the slow path began.
@@ -32,7 +30,7 @@ public:
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
      */
-    void recordEvictedState(ast::ParsedFile evictedIndexTree, core::FileHash evictedStateHash);
+    void recordEvictedState(ast::ParsedFile evictedIndexTree);
 
     /**
      * Undoes the slow path changes represented by this class. and clears the client's error list for any files that
@@ -41,7 +39,6 @@ public:
      */
     std::vector<core::FileRef> restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
                                        UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
-                                       std::vector<core::FileHash> &globalStateHashes,
                                        std::vector<core::FileRef> &filesThatHaveErrors);
 };
 

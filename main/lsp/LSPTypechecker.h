@@ -54,10 +54,7 @@ class LSPTypechecker final {
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
-    /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
-    std::vector<core::FileHash> globalStateHashes;
-    /** Stores the epoch in which we last sent diagnostics to the client for each file. Should be the same length as
-     * globalStateHashes. */
+    /** Stores the epoch in which we last sent diagnostics to the client for each file. */
     std::vector<u4> diagnosticEpochs;
     /** List of files that have had errors in last run*/
     std::vector<core::FileRef> filesThatHaveErrors;
@@ -106,7 +103,7 @@ public:
     ~LSPTypechecker();
 
     /**
-     * Conducts the first typechecking pass of the session, and initializes `gs`, `index`, and `globalStateHashes`
+     * Conducts the first typechecking pass of the session, and initializes `gs` and `index`
      * variables. Must be called before typecheck and other functions work.
      *
      * Writes all diagnostic messages to LSPOutput.
@@ -137,11 +134,6 @@ public:
      * Returns the parsed files for the given files, including resolver.
      */
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
-
-    /**
-     * Returns the hashes of all committed files.
-     */
-    const std::vector<core::FileHash> &getFileHashes() const;
 
     /**
      * Returns the currently active GlobalState.
@@ -203,11 +195,6 @@ public:
      * Returns the parsed files for the given files, including resolver.
      */
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
-
-    /**
-     * Returns the hashes of all committed files.
-     */
-    const std::vector<core::FileHash> &getFileHashes() const;
 
     /**
      * Returns the currently active GlobalState.

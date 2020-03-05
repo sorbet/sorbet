@@ -37,15 +37,14 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedFileHashesOrEmpty.clear();
+    task.cachedFastPathDecisionValid = false;
     task.cachedFastPathDecision = false;
-
-    cachedFileHashesOrEmpty.clear();
+    cachedFastPathDecisionValid = false;
     cachedFastPathDecision = false;
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(latencyTimer, *params, cachedFileHashesOrEmpty));
+    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(latencyTimer, *params));
 }
 
 void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
@@ -60,7 +59,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     latencyCancelSlowPath = nullptr;
     // For consistency; I don't expect this notification to be used for fast path edits.
     startedNotification.Notify();
-    if (updates->canTakeFastPath == false) {
+    if (!updates->canTakeFastPath) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     typechecker.typecheckOnFastPath(move(*updates));
@@ -105,9 +104,10 @@ bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
         return updates->canTakeFastPath;
     }
-    if (cachedFileHashesOrEmpty.empty()) {
-        cachedFileHashesOrEmpty = index.computeFileHashes(params->updates);
-        cachedFastPathDecision = index.canTakeFastPath(*params, cachedFileHashesOrEmpty);
+    if (!cachedFastPathDecisionValid) {
+        index.computeFileHashes(params->updates);
+        cachedFastPathDecision = index.canTakeFastPath(params->updates);
+        cachedFastPathDecisionValid = true;
     }
     return cachedFastPathDecision;
 }

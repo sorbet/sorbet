@@ -208,9 +208,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
 
-    ENFORCE(updatedFiles.size() == updatedFileHashes.size());
     ENFORCE(updatedFiles.size() == updatedFileIndexes.size());
-    ENFORCE(older.updatedFiles.size() == older.updatedFileHashes.size());
     ENFORCE(older.updatedFiles.size() == older.updatedFileIndexes.size());
 
     // For updates, we prioritize _newer_ updates.
@@ -227,10 +225,10 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         }
         encountered.emplace(f->path());
         updatedFiles.push_back(f);
-        updatedFileHashes.push_back(older.updatedFileHashes[i]);
         auto &ast = older.updatedFileIndexes[i];
         updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
     }
+    canTakeFastPath = false;
 }
 
 LSPFileUpdates LSPFileUpdates::copy() const {
@@ -240,7 +238,6 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.canTakeFastPath = canTakeFastPath;
     copy.hasNewFiles = hasNewFiles;
     copy.updatedFiles = updatedFiles;
-    copy.updatedFileHashes = updatedFileHashes;
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
     for (auto &ast : updatedFileIndexes) {

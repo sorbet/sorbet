@@ -11,7 +11,6 @@
 #include <variant>
 
 namespace sorbet::realmain::lsp {
-
 /**
  * Encapsulates an update to LSP's file state in a compact form.
  * Placed into json_types.h because it is referenced from InitializedParams.
@@ -24,7 +23,6 @@ public:
     u4 editCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
-    std::vector<core::FileHash> updatedFileHashes;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
     bool canTakeFastPath = false;
@@ -45,7 +43,7 @@ public:
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *
-     * Does not handle updating `canTakeFastPath`.
+     * Resets `fastPathDecision`.
      */
     void mergeOlder(const LSPFileUpdates &older);
 
