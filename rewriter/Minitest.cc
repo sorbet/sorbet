@@ -173,6 +173,10 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
     }
 }
 
+unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName,
+                                                unique_ptr<ast::Expression> body, ast::MethodDef::ARGS_store &args,
+                                                unique_ptr<ast::Expression> &iteratee);
+
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef eachName,
@@ -204,13 +208,27 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
+        if (send->fun == core::Names::describe() && send->args.size() == 1 && send->block != nullptr &&
+            send->block->args.size() == 0) {
+            auto &arg = send->args.front();
+            auto argString = to_s(ctx, arg);
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(ast::MK::Self(arg->loc));
+            ast::ClassDef::RHS_store rhs;
+            rhs.emplace_back(prepareTestEachBody(ctx, eachName, std::move(send->block->body), args, iteratee));
+
+            auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
+                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
+        }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
     }
 
-    return stmt;
+    return ast::MK::EmptyTree();
 }
 
 // this just walks the body of a `test_each` and tries to transform every statement

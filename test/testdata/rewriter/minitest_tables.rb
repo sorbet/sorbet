@@ -32,6 +32,9 @@ class MyTest
   sig {params(name: String, blk: T.proc.void).void}
   def self.it(name, &blk); end
 
+  sig {params(name: String, blk: T.proc.void).void}
+  def self.describe(name, &blk); end
+
   test_each [Parent.new, Child.new] do |value|
     it "works with instance methods" do
       puts value.foo
@@ -113,6 +116,16 @@ class MyTest
 
   test_each_hash({foo: 1, bar: 2}) do |x| # error: Wrong number of parameters for `test_each_hash` block
     it "does not handle more than one argument" do
+    end
+  end
+
+  describe "foo" do
+    test_each([1, 2, 3]) do |x|
+      describe("bar: #{x}") do
+        it "does a thing" do
+          
+        end
+      end
     end
   end
 
