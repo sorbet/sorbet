@@ -227,7 +227,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
           def <it 'does a thing'><<C <todo sym>>>(&<blk>)
             [1, 2, 3].each() do |x|
-              <emptyTree>
+              <emptyTree>::<C T>.reveal_type(x)
             end
           end
 
