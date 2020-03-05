@@ -55,7 +55,7 @@ h3[3] = nil # error: Expected `String` but found `NilClass` for argument `arg1`
 initial_hash = T.let({ a: 1.0, b: 3.0 }, T::Hash[Symbol, Float])
 transformed_hash = initial_hash.transform_values(&:to_s)
 T.assert_type!(transformed_hash, T::Hash[Symbol, String])
-initial_hash.transform_values(&:size) # error: Method `size?`` does not exist on `Float`
+initial_hash.transform_values(&:size) # error: Method `size` does not exist on `Float`
 initial_hash.transform_values.with_index do |v, i|
   T.assert_type!(v, Float)
   T.assert_type!(i, Integer)
