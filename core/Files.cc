@@ -112,11 +112,11 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     return ret;
 }
 
-void File::setFileHash(unique_ptr<FileHash> hash) {
+void File::setFileHash(unique_ptr<const FileHash> hash) {
     hash_ = move(hash);
 }
 
-const shared_ptr<FileHash> &File::getFileHash() const {
+const shared_ptr<const FileHash> &File::getFileHash() const {
     return hash_;
 }
 
