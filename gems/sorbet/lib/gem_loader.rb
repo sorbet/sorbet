@@ -919,6 +919,35 @@ class Sorbet::Private::GemLoader
     'kaminari-actionview' => proc do
       my_require 'kaminari/actionview'
     end,
+    'sxp' => proc do
+      my_require 'sxp'
+      [
+        SXP::Pair,
+        SXP::List,
+        SXP::Generator,
+        SXP::Reader,
+        SXP::Reader::Basic,
+        SXP::Reader::Extended,
+        SXP::Reader::Scheme,
+        SXP::Reader::CommonLisp,
+        SXP::Reader::SPARQL,
+      ]
+    end,
+    'ebnf' => proc do
+      my_require 'ebnf'
+      [
+        EBNF::Base,
+        EBNF::BNF,
+        EBNF::LL1,
+        EBNF::LL1::Lexer,
+        EBNF::LL1::Parser,
+        EBNF::LL1::Scanner,
+        EBNF::Parser,
+        EBNF::Rule,
+        EBNF::Writer,
+        EBNF::VERSION,
+      ]
+    end,
   }
 
   # This is so that the autoloader doesn't treat these as manditory requires
