@@ -608,6 +608,11 @@ class Sorbet::Private::GemLoader
     'actionmailbox' => proc do
       my_require 'action_mailbox'
       my_require 'action_mailbox/engine'
+      [
+        ActionMailbox::Base,
+        ActionMailbox::Router,
+        ActionMailbox::TestCase,
+      ]
     end,
     'actioncable' => proc do
       my_require 'action_cable'
