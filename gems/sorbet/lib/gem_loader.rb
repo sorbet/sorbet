@@ -604,6 +604,24 @@ class Sorbet::Private::GemLoader
     'actiontext' => proc do
       my_require 'action_text'
       my_require 'action_text/engine'
+      [
+        ActionText::Attachable,
+        ActionText::Attachables::ContentAttachment,
+        ActionText::Attachables::MissingAttachable,
+        ActionText::Attachables::RemoteImage,
+        ActionText::AttachmentGallery,
+        ActionText::Attachment,
+        ActionText::Attachments::Caching,
+        ActionText::Attachments::Minification,
+        ActionText::Attachments::TrixConversion,
+        ActionText::Attribute,
+        ActionText::Content,
+        ActionText::Fragment,
+        ActionText::HtmlConversion,
+        ActionText::PlainTextConversion,
+        ActionText::Serialization,
+        ActionText::TrixAttachment,
+      ]
     end,
     'actionmailbox' => proc do
       my_require 'action_mailbox'
