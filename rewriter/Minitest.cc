@@ -228,7 +228,7 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
     }
 
-    return ast::MK::EmptyTree();
+    return stmt;
 }
 
 // this just walks the body of a `test_each` and tries to transform every statement
