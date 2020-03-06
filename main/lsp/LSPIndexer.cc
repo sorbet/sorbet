@@ -364,7 +364,7 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
         pendingTypecheckEvictedStateHashes = std::move(mergedEvictions);
         if (!update.canceledSlowPath) {
             // This update preempted.
-            pendingTypecheckUpdates.committedEditCount++;
+            pendingTypecheckUpdates.committedEditCount += update.editCount;
         }
     }
     // Don't copy over these (test-only) properties, as they only apply to the original request.
