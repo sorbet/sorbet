@@ -6,11 +6,16 @@ module T::Props
     module SerdeTransform
       extend T::Sig
 
-      class Mode < T::Enum
-        enums do
-          SERIALIZE = new
-          DESERIALIZE = new
-        end
+      class Serialize; end
+      private_constant :Serialize
+      class Deserialize; end
+      private_constant :Deserialize
+      ModeType = T.type_alias {T.any(Serialize, Deserialize)}
+      private_constant :ModeType
+
+      module Mode
+        SERIALIZE = T.let(Serialize.new.freeze, Serialize)
+        DESERIALIZE = T.let(Deserialize.new.freeze, Deserialize)
       end
 
       NO_TRANSFORM_TYPES = T.let(
@@ -22,7 +27,7 @@ module T::Props
       sig do
         params(
           type: T.any(T::Types::Base, Module),
-          mode: Mode,
+          mode: ModeType,
           varname: String,
         )
         .returns(T.nilable(String))
@@ -91,12 +96,12 @@ module T::Props
         end
       end
 
-      sig {params(varname: String, type: Module, mode: Mode).returns(String).checked(:never)}
+      sig {params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never)}
       private_class_method def self.handle_serializable_subtype(varname, type, mode)
         case mode
-        when Mode::SERIALIZE
+        when Serialize
           "#{varname}.serialize(strict)"
-        when Mode::DESERIALIZE
+        when Deserialize
           type_name = T.must(module_name(type))
           "#{type_name}.from_hash(#{varname})"
         else
@@ -104,13 +109,13 @@ module T::Props
         end
       end
 
-      sig {params(varname: String, type: Module, mode: Mode).returns(String).checked(:never)}
+      sig {params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never)}
       private_class_method def self.handle_custom_type(varname, type, mode)
         case mode
-        when Mode::SERIALIZE
+        when Serialize
           type_name = T.must(module_name(type))
           "T::Props::CustomType.checked_serialize(#{type_name}, #{varname})"
-        when Mode::DESERIALIZE
+        when Deserialize
           type_name = T.must(module_name(type))
           "#{type_name}.deserialize(#{varname})"
         else
