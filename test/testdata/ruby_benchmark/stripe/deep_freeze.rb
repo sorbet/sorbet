@@ -49,8 +49,8 @@ module Opus::Utils
       .checked(:never)
     end
     def self.freeze_unchecked!(obj)
-      todo = T.let([obj], T::Array[T.untyped])
-      seen = T.let({}, T::Hash[Object, TrueClass])
+      todo = [T.unsafe(obj)]
+      seen = {}
 
       until todo.empty?
         o = todo.pop
