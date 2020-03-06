@@ -49,7 +49,7 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.updates"), 1);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 2);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
@@ -124,7 +124,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
     auto lastDiagnosticLatency = counters.getTimings("last_diagnostic_latency");
-    EXPECT_EQ(lastDiagnosticLatency.size(), 1);
+    EXPECT_EQ(lastDiagnosticLatency.size(), 3);
     EXPECT_GE(lastDiagnosticLatency[0].end - lastDiagnosticLatency[0].start, chrono::milliseconds(5));
 }
 
@@ -187,7 +187,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 2);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {

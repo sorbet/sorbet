@@ -47,16 +47,17 @@ void Timer::cancel() {
     this->canceled = true;
 }
 
-Timer Timer::clone() const {
+unique_ptr<Timer> Timer::clone() const {
     return clone(name);
 }
 
-Timer Timer::clone(ConstExprStr name) const {
-    Timer forked(log, name, prev, {}, start, {});
-    forked.args = args;
-    forked.tags = tags;
-    forked.canceled = canceled;
-    forked.histogramBuckets = histogramBuckets;
+unique_ptr<Timer> Timer::clone(ConstExprStr name) const {
+    // Using new to access private constructor.
+    auto forked = unique_ptr<Timer>(new Timer(log, name, prev, {}, start, {}));
+    forked->args = args;
+    forked->tags = tags;
+    forked->canceled = canceled;
+    forked->histogramBuckets = histogramBuckets;
     return forked;
 }
 
@@ -80,6 +81,9 @@ Timer::~Timer() {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto dur = std::chrono::duration<double, std::milli>(clock - start);
         log.debug("{}: {}ms", this->name.str, dur.count());
+        if (strncmp(this->name.str, "last_diagnostic_latency", 30) == 0) {
+            log.debug("latency");
+        }
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }

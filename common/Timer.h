@@ -26,6 +26,7 @@ public:
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+    Timer(const Timer &) = delete;
     ~Timer();
     FlowId getFlowEdge();
 
@@ -36,10 +37,10 @@ public:
     void setTag(ConstExprStr name, ConstExprStr value);
 
     // Creates a new timer with the same start time, tags, args, and name.
-    Timer clone() const;
+    std::unique_ptr<Timer> clone() const;
 
     // Creates a new timer with the same start time, tags, and args but a different name.
-    Timer clone(ConstExprStr name) const;
+    std::unique_ptr<Timer> clone(ConstExprStr name) const;
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.

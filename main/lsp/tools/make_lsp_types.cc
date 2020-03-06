@@ -1283,6 +1283,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "bool sorbetCancellationExpected = false;"
                        "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
                        "int sorbetPreemptionsExpected = 0;",
+                       "// For each edit rolled up into update, contains a timer used to report diagnostic latency.",
+                       "std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers;",
                        "// File updates contained in this edit.",
                        "std::vector<std::shared_ptr<core::File>> updates;",
                        "// Merge newerParams into this object, which mutates `epoch` and `updates`",

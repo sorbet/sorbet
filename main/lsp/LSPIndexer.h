@@ -27,9 +27,9 @@ class LSPIndexer final {
     std::unique_ptr<core::GlobalState> initialGS;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
-    /** Contains a clone of the latency timer for the pending typecheck operation. Is used to ensure that we correctly
-     * track the latency of canceled & rescheduled typechecking operations. */
-    std::unique_ptr<Timer> pendingTypecheckLatencyTimer;
+    /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
+     * that we correctly track the latency of canceled & rescheduled typechecking operations. */
+    std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
     /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
     UnorderedMap<int, std::shared_ptr<core::File>> evictedFiles;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
@@ -67,7 +67,7 @@ public:
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
      * and file hashes. Also handles canceling the running slow path.
      */
-    LSPFileUpdates commitEdit(std::unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit);
+    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
 };
 
 } // namespace sorbet::realmain::lsp

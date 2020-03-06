@@ -48,10 +48,9 @@ CounterState mergeCounters(CounterState counters) {
 }
 
 void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
-    // apparently make_unique doesn't like initializer lists, so I'm passing it a Timer object directly.
-    msg.latencyTimer = make_unique<Timer>(
-        Timer(logger, "task_latency",
-              {50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000}));
+    msg.latencyTimer = make_unique<Timer>(logger, "task_latency",
+                                          initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
+                                                                15000, 20000, 25000, 30000, 35000, 40000});
 }
 } // namespace
 
