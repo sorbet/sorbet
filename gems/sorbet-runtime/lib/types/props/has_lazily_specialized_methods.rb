@@ -27,6 +27,9 @@ module T::Props
     #
     # This is intended to be called after startup but before interacting with
     # the outside world, to limit attack surface for our `class_eval` use.
+    #
+    # Note it does _not_ prevent explicit calls to `eagerly_define_lazy_methods!`
+    # from working.
     sig {void}
     def self.disable_lazy_evaluation!
       @lazy_evaluation_disabled ||= true
@@ -72,11 +75,7 @@ module T::Props
 
       sig {void}
       def eagerly_define_lazy_methods!
-        if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
-          raise SourceEvaluationDisabled.new
-        elsif lazily_defined_methods.empty?
-          return
-        end
+        return if lazily_defined_methods.empty?
 
         source = lazily_defined_methods.values.map(&:call).map(&:to_s).join("\n\n")
 
