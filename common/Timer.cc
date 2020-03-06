@@ -47,18 +47,17 @@ void Timer::cancel() {
     this->canceled = true;
 }
 
-unique_ptr<Timer> Timer::clone() const {
+Timer Timer::clone() const {
     return clone(name);
 }
 
-unique_ptr<Timer> Timer::clone(ConstExprStr name) const {
-    // Using new to access private constructor.
-    auto forked = unique_ptr<Timer>(new Timer(log, name, prev, {}, start, {}));
-    forked->args = args;
-    forked->tags = tags;
-    forked->canceled = canceled;
-    forked->histogramBuckets = histogramBuckets;
-    return forked;
+Timer Timer::clone(ConstExprStr name) const {
+    Timer forked(log, name, prev, {}, start, {});
+    forked.args = args;
+    forked.tags = tags;
+    forked.canceled = canceled;
+    forked.histogramBuckets = histogramBuckets;
+    return move(forked);
 }
 
 void Timer::setTag(ConstExprStr name, ConstExprStr value) {

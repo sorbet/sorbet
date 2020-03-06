@@ -40,7 +40,7 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
     timers.clear();
     timers.reserve(newTimers.size());
     for (auto &timer : newTimers) {
-        timers.push_back(timer->clone());
+        timers.push_back(make_unique<Timer>(timer->clone()));
     }
 }
 } // namespace

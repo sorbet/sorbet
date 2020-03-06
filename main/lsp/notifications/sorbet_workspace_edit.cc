@@ -46,7 +46,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
     // latencyTimer is assigned prior to preprocess.
     if (this->latencyTimer != nullptr && !params->updates.empty()) {
-        params->diagnosticLatencyTimers.push_back(this->latencyTimer->clone("last_diagnostic_latency"));
+        params->diagnosticLatencyTimers.push_back(
+            make_unique<Timer>(this->latencyTimer->clone("last_diagnostic_latency")));
     }
 }
 
