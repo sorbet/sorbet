@@ -81,9 +81,6 @@ Timer::~Timer() {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto dur = std::chrono::duration<double, std::milli>(clock - start);
         log.debug("{}: {}ms", this->name.str, dur.count());
-        if (strncmp(this->name.str, "last_diagnostic_latency", 30) == 0) {
-            log.debug("latency");
-        }
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }
