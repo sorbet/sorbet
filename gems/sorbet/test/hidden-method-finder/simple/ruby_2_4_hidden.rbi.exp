@@ -8975,8 +8975,6 @@ class Hash
 
   def to_proc(); end
 
-  def transform_values(); end
-
   def transform_values!(); end
 
   def update(_); end
