@@ -205,6 +205,7 @@ string DidChangeTextDocumentParams::getSource(string_view oldFileContents) const
 
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     editCount += older.editCount;
+    committedEditCount += older.committedEditCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
@@ -238,6 +239,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     LSPFileUpdates copy;
     copy.epoch = epoch;
     copy.editCount = editCount;
+    copy.committedEditCount = committedEditCount;
     copy.canTakeFastPath = canTakeFastPath;
     copy.hasNewFiles = hasNewFiles;
     copy.updatedFiles = updatedFiles;

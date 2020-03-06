@@ -27,6 +27,8 @@ public:
     u4 epoch = 0;
     // The total number of edits that this update represents. Used for stats.
     u4 editCount = 0;
+    // The total number of edits in this update that are already committed (via preemption). Used for assertions.
+    u4 committedEditCount = 0;
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<core::FileHash> updatedFileHashes;
     std::vector<ast::ParsedFile> updatedFileIndexes;
