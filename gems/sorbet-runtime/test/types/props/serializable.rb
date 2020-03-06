@@ -643,10 +643,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
           m.new.serialize
         end
 
-        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
-          m.decorator.eagerly_define_lazy_methods!
-        end
-
+        # Explicit call is still ok
+        m.decorator.eagerly_define_lazy_methods!
       end
 
       after do
