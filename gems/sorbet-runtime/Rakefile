@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Make sure that sorbet-runtime does not do any early
+# initialization that would affect the ability to change
+# the checked level default value
+require "./lib/sorbet-runtime"
+T::Configuration.default_checked_level = :always
+
 task :test do
   Dir.glob('./test/**/*.rb').reject {|path| path.match(/^.\/test\/types\/fixtures\//)}.each(&method(:require))
 end
