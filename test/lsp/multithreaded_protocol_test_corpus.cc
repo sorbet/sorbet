@@ -443,7 +443,14 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndThenCancelBoth) {
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                           {"baz.rb", 5, "Returning value that does not conform to method result type"},
                       });
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 6);
+
+    auto counters = getCounters();
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 6);
+
+    // N.B.: This counter contains canceled edits.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 6);
+    // mergedEdits should not count the preempted fast path, but should count the canceled slow path.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndBothErrorsAreReported) {
