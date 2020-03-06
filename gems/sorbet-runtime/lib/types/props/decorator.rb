@@ -20,7 +20,7 @@ class T::Props::Decorator
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules])
   private_constant :EMPTY_PROPS
 
-  sig {params(klass: T.untyped).void}
+  sig {params(klass: T.untyped).void.checked(:never)}
   def initialize(klass)
     @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
     @class.plugins.each do |mod|
