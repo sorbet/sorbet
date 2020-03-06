@@ -26,9 +26,13 @@ public:
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
+    // Delete copy constructor to avoid accidentally copying and reporting a timer twice.
     Timer(const Timer &) = delete;
+    // Define custom move constructor to avoid reporting moved timers.
     Timer(Timer &&);
+
     ~Timer();
+
     FlowId getFlowEdge();
 
     // Don't report timer when it gets destructed.
