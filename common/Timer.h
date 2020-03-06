@@ -27,6 +27,7 @@ public:
     Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     Timer(const Timer &) = delete;
+    Timer(Timer &&);
     ~Timer();
     FlowId getFlowEdge();
 

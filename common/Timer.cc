@@ -31,6 +31,15 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name)
     : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}){};
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}){};
 
+// Explicitly define to avoid reporting the timer twice.
+Timer::Timer(Timer &&timer)
+    : log(timer.log), name(timer.name), prev(timer.prev), self(timer.self), args(move(timer.args)),
+      tags(move(timer.tags)), start(timer.start), histogramBuckets(move(timer.histogramBuckets)),
+      canceled(timer.canceled) {
+    // Don't report a latency metric for the moved timer.
+    timer.cancel();
+}
+
 int getGlobalTimingId() {
     static atomic<int> counter = 1;
     return ++counter;
@@ -57,7 +66,7 @@ Timer Timer::clone(ConstExprStr name) const {
     forked.tags = tags;
     forked.canceled = canceled;
     forked.histogramBuckets = histogramBuckets;
-    return move(forked);
+    return forked;
 }
 
 void Timer::setTag(ConstExprStr name, ConstExprStr value) {
