@@ -204,6 +204,7 @@ string DidChangeTextDocumentParams::getSource(string_view oldFileContents) const
 
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     editCount += older.editCount;
+    committedEditCount += older.committedEditCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
@@ -235,6 +236,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     LSPFileUpdates copy;
     copy.epoch = epoch;
     copy.editCount = editCount;
+    copy.committedEditCount = committedEditCount;
     copy.canTakeFastPath = canTakeFastPath;
     copy.hasNewFiles = hasNewFiles;
     copy.updatedFiles = updatedFiles;
@@ -267,6 +269,10 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     mergeCount += newerParams.mergeCount + 1;
     sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
     sorbetPreemptionsExpected += newerParams.sorbetPreemptionsExpected;
+    // Consume newerParams' diagnostic latency timers.
+    diagnosticLatencyTimers.insert(diagnosticLatencyTimers.end(),
+                                   make_move_iterator(newerParams.diagnosticLatencyTimers.begin()),
+                                   make_move_iterator(newerParams.diagnosticLatencyTimers.end()));
 }
 
 } // namespace sorbet::realmain::lsp

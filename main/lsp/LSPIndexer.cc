@@ -29,14 +29,28 @@ void mergeEvictedFiles(const UnorderedMap<int, shared_ptr<core::File>> &oldEvict
         newlyEvictedFiles[entry.first] = move(entry.second);
     }
 }
+
+// Cancels all timers in timers and clears the vector, and replaces with clones of newTimers.
+void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<unique_ptr<Timer>> &newTimers) {
+    for (auto &timer : timers) {
+        if (timer != nullptr) {
+            timer->cancel();
+        }
+    }
+    timers.clear();
+    timers.reserve(newTimers.size());
+    for (auto &timer : newTimers) {
+        timers.push_back(make_unique<Timer>(timer->clone()));
+    }
+}
 } // namespace
 
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS)
     : config(config), initialGS(move(initialGS)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 LSPIndexer::~LSPIndexer() {
-    if (pendingTypecheckLatencyTimer != nullptr) {
-        pendingTypecheckLatencyTimer->cancel();
+    for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
+        timer->cancel();
     }
 }
 
@@ -212,7 +226,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = move(savedErrorQueue);
 }
 
-LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWorkspaceEditParams &edit) {
+LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
     LSPFileUpdates update;
     update.epoch = edit.epoch;
@@ -300,29 +314,31 @@ LSPFileUpdates LSPIndexer::commitEdit(unique_ptr<Timer> &latencyTimer, SorbetWor
 
     ENFORCE(update.updatedFiles.size() == update.updatedFileIndexes.size());
 
+    if (update.canceledSlowPath) {
+        // Merge diagnostic latency timers; this edit contains the previous slow path.
+        edit.diagnosticLatencyTimers.insert(edit.diagnosticLatencyTimers.end(),
+                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.begin()),
+                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.end()));
+        clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
+    } else if (!update.canTakeFastPath) {
+        // Replace diagnostic latency timers; this is a new slow path that did not cancel the previous slow path.
+        clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
+    }
+
     if (update.canTakeFastPath) {
         // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
         auto merged = update.copy();
         merged.mergeOlder(pendingTypecheckUpdates);
         pendingTypecheckUpdates = move(merged);
-        if (update.canceledSlowPath && pendingTypecheckLatencyTimer != nullptr) {
-            // Replace edit's latencyTimer with that of the running slow path.
-            if (latencyTimer != nullptr) {
-                latencyTimer->cancel();
-            }
-            latencyTimer = make_unique<Timer>(pendingTypecheckLatencyTimer->clone());
+        if (!update.canceledSlowPath) {
+            // If a slow path is running, this update preempted.
+            pendingTypecheckUpdates.committedEditCount += update.editCount;
         }
         mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
     } else {
         // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
         update.updatedGS = initialGS->deepCopy();
         pendingTypecheckUpdates = update.copy();
-        if (pendingTypecheckLatencyTimer != nullptr) {
-            pendingTypecheckLatencyTimer->cancel();
-        }
-        if (latencyTimer != nullptr) {
-            pendingTypecheckLatencyTimer = make_unique<Timer>(latencyTimer->clone());
-        }
     }
 
     // newlyEvictedFiles contains the changes from this edit + changes from the pending typecheck, if applicable.

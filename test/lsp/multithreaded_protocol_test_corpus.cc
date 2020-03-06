@@ -2,6 +2,7 @@
 // ^ Violates linting rules, so include first.
 #include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/sort.h"
 #include "test/helpers/lsp.h"
 #include "test/lsp/ProtocolTest.h"
 
@@ -17,6 +18,22 @@ optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) 
     }
     return nullopt;
 }
+
+void sortTimersByStartTime(vector<CounterImpl::Timing> &times) {
+    fast_sort(times,
+              [](const CounterImpl::Timing &a, const CounterImpl::Timing &b) -> bool { return a.start < b.start; });
+}
+
+void checkDiagnosticTimes(vector<CounterImpl::Timing> times, size_t expectedSize) {
+    EXPECT_EQ(times.size(), expectedSize);
+    sortTimersByStartTime(times);
+
+    // No two diagnostic latency timers should have the same start timestamp.
+    for (size_t i = 1; i < times.size(); i++) {
+        EXPECT_LT(times[i - 1].start, times[i].start);
+    }
+}
+
 } // namespace
 
 TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
@@ -34,6 +51,8 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
 
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
+    // Pause to differentiate message times
+    this_thread::sleep_for(chrono::microseconds(100));
     sendAsync(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
 
     // Pause so that all latency timers for the above operations get reported.
@@ -49,7 +68,8 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.updates"), 1);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    // 1 per edit
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
@@ -76,6 +96,8 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Syntax error in foo.rb.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
+    // Pause to differentiate message times
+    this_thread::sleep_for(chrono::microseconds(100));
     // Typechecking error in bar.rb
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef hello\n\"hi\"\nend\nend\n",
@@ -88,7 +110,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
         ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // Pause for a moderate amount of time so that we can check that the subsequent fast path uses the latency timer
+    // Pause for a moderate amount of time so that we can check that the subsequent fast path includes the latency timer
     // from the initial slow path.
     this_thread::sleep_for(chrono::milliseconds(5));
 
@@ -123,9 +145,13 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
+
     auto lastDiagnosticLatency = counters.getTimings("last_diagnostic_latency");
-    EXPECT_EQ(lastDiagnosticLatency.size(), 1);
+    sortTimersByStartTime(lastDiagnosticLatency);
     EXPECT_GE(lastDiagnosticLatency[0].end - lastDiagnosticLatency[0].start, chrono::milliseconds(5));
+    EXPECT_GE(lastDiagnosticLatency[1].end - lastDiagnosticLatency[1].start, chrono::milliseconds(5));
+    // 1 per edit
+    checkDiagnosticTimes(lastDiagnosticLatency, 3);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
@@ -187,7 +213,8 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    // 1 per edit
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
@@ -247,7 +274,8 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 1);
-    EXPECT_EQ(counters.getTimings("last_diagnostic_latency").size(), 1);
+    // 1 per edit
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHoverAndReturnsErrors) {
@@ -288,6 +316,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHoverAndReturnsErrors) {
                       {
                           {"foo.rb", 6, "Returning value that does not conform to method result type"},
                       });
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 2);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPath) {
@@ -329,6 +358,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPath) {
                           {"foo.rb", 9, "Returning value that does not conform to method result type"},
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                       });
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathThatFixesAllErrors) {
@@ -366,6 +396,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathThatFixesAllErrors) {
 
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndThenCancelBoth) {
@@ -412,6 +443,14 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndThenCancelBoth) {
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                           {"baz.rb", 5, "Returning value that does not conform to method result type"},
                       });
+
+    auto counters = getCounters();
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 6);
+
+    // N.B.: This counter contains canceled edits.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 6);
+    // mergedEdits should not count the preempted fast path, but should count the canceled slow path.
+    EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndBothErrorsAreReported) {
@@ -453,6 +492,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndBothErrorsAreReported) {
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                           {"baz.rb", 5, "Returning value that does not conform to method result type"},
                       });
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
 }
 
 TEST_P(ProtocolTest, CanCancelSlowPathWithFastPathThatReintroducesOldError) {
@@ -499,6 +539,7 @@ TEST_P(ProtocolTest, CanCancelSlowPathWithFastPathThatReintroducesOldError) {
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {{"baz.rb", 5, "Returning value that does not conform to method result type"}});
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7);
 }
 
 TEST_P(ProtocolTest, CanCancelSlowPathEvenIfAddsFile) {
@@ -546,6 +587,7 @@ TEST_P(ProtocolTest, CanCancelSlowPathEvenIfAddsFile) {
     assertDiagnostics(
         send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
         {{"foo.rb", 5, "Returning value that does not conform to method result type"}, {"bar.rb", 6, "unexpected"}});
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
 }
 
 TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
@@ -573,6 +615,7 @@ TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.canceled", "textDocument.hover"), 1);
     EXPECT_EQ(counters.getTimings("task_latency", {{"method", "textDocument.hover"}}).size(), 0);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 0);
 }
 
 // Run these tests in multi-threaded mode.

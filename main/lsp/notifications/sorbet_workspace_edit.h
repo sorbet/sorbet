@@ -23,6 +23,7 @@ public:
     const SorbetWorkspaceEditParams &getParams() const;
 
     void mergeNewer(SorbetWorkspaceEditTask &task);
+    void preprocess(LSPPreprocessor &preprocess) override;
     void index(LSPIndexer &indexer) override;
     void run(LSPTypecheckerDelegate &typechecker) override;
     void runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) override;

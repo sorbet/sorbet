@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
 #include "ast/ast.h"
+#include "common/Timer.h"
 #include "common/common.h"
 #include "core/NameHash.h"
 #include "core/core.h"
@@ -19,8 +20,11 @@ class LSPFileUpdates final {
 public:
     // This specific update contains edits with the given epoch
     u4 epoch = 0;
-    // The total number of edits that this update represents. Used for stats.
+    // The total number of edits that this update represents. Used for stats and assertions.
     u4 editCount = 0;
+    // The total number of edits in this update that are already committed & had diagnostics sent out (via preemption).
+    // Used for stats and assertions.
+    u4 committedEditCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
