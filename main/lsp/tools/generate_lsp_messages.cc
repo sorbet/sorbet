@@ -33,8 +33,6 @@ int main(int argc, char **argv) {
     fmt::format_to(classFileBuffer, "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
     fmt::format_to(classFileBuffer, "namespace sorbet::realmain::lsp {{\n");
 
-    fmt::format_to(headerBuffer, "#include \"main/lsp/lsp_messages_enums_gen.h\"\n");
-
     vector<std::shared_ptr<JSONClassType>> enumTypes;
     vector<std::shared_ptr<JSONObjectType>> classTypes;
     makeLSPTypes(enumTypes, classTypes);

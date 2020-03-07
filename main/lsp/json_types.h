@@ -4,6 +4,7 @@
 #include "common/Timer.h"
 #include "common/common.h"
 #include "core/core.h"
+#include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"
 
 #include <optional>

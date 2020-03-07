@@ -1,12 +1,16 @@
 #ifndef RUBY_TYPER_LSPCONFIGURATION_H
 #define RUBY_TYPER_LSPCONFIGURATION_H
 
-#include "main/lsp/json_types.h"
+#include "core/Loc.h"
+#include "main/lsp/json_enums.h"
 #include "main/options/options.h"
 
 namespace sorbet::realmain::lsp {
 
 class LSPOutput;
+class InitializeParams;
+class Position;
+class Location;
 
 /**
  * Client options sent during initialization.

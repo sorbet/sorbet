@@ -7,7 +7,6 @@
 namespace sorbet::realmain::lsp {
 /**
  * Encapsulates an update to LSP's file state in a compact form.
- * Placed into json_types.h because it is referenced from InitializedParams.
  */
 class LSPFileUpdates final {
 public:

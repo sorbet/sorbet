@@ -17,6 +17,7 @@ class QueryResponse;
 } // namespace sorbet::core::lsp
 
 namespace sorbet::realmain::lsp {
+class ResponseError;
 
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;

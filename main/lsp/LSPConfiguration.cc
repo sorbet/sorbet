@@ -2,6 +2,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

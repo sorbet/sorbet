@@ -17,6 +17,7 @@ cc_library(
         "watchman/WatchmanProcess.h",
         "NextMethodFinder.h",
         "LocalVarFinder.h",
+        "json_enums.h",
         "LocalVarSaver.h",
         "ShowOperation.h",
         "lsp_messages_gen_helpers.h",
