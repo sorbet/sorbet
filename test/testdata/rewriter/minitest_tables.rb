@@ -122,7 +122,7 @@ class MyTest
   describe "foo" do
     test_each([1, 2, 3]) do |x|
       describe("bar: #{x}") do
-        it "does a thing" do
+        it "does a thing with #{x}" do
           T.reveal_type(x) # error: Revealed type: `Integer`
         end
       end

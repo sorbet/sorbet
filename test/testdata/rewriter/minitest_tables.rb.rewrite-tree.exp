@@ -177,15 +177,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |x|
-      <emptyTree>
+      y = x
     end
 
     <self>.test_each_hash({}) do |k, v|
-      <emptyTree>
+      y = k.+(v)
     end
 
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails with non-it statements\'>")
+      begin
+        x = value.foo()
+        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails with non-it statements\'>")
+      end
     end
 
     <self>.test_each(["foo", 5, {:"x" => false}]) do |v|
@@ -225,13 +228,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <self>.params({}).void()
           end
 
-          def <it 'does a thing'><<C <todo sym>>>(&<blk>)
+          def <it '::<Magic>.<string-interpolate>("bar: ", x)/::<Magic>.<string-interpolate>("does a thing with ", x)'><<C <todo sym>>>(&<blk>)
             [1, 2, 3].each() do |x|
               <emptyTree>::<C T>.reveal_type(x)
             end
           end
 
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'does a thing\'>")
+          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'::<Magic>.<string-interpolate>(\"bar: \", x)/::<Magic>.<string-interpolate>(\"does a thing with \", x)\'>")
         end
       end
     end
