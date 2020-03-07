@@ -175,13 +175,13 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
 
 unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName,
                                                 unique_ptr<ast::Expression> body, ast::MethodDef::ARGS_store &args,
-                                                unique_ptr<ast::Expression> &iteratee);
+                                                unique_ptr<ast::Expression> &iteratee, string_view context);
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef eachName,
                                          unique_ptr<ast::Expression> stmt, ast::MethodDef::ARGS_store &args,
-                                         unique_ptr<ast::Expression> &iteratee) {
+                                         unique_ptr<ast::Expression> &iteratee, string_view context) {
     // this statement must be a send
     if (auto send = ast::cast_tree<ast::Send>(stmt.get())) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
@@ -189,7 +189,8 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
             send->block->args.size() == 0) {
             // we use this for the name of our test
             auto argString = to_s(ctx, send->args.front());
-            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+            string qualifiedName = fmt::format("<it '{}{}'>", context, argString);
+            auto name = ctx.state.enterNameUTF8(qualifiedName);
 
             // pull constants out of the block
             ConstantMover constantMover;
@@ -216,7 +217,9 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
             ast::ClassDef::ANCESTORS_store ancestors;
             ancestors.emplace_back(ast::MK::Self(arg->loc));
             ast::ClassDef::RHS_store rhs;
-            rhs.emplace_back(prepareTestEachBody(ctx, eachName, std::move(send->block->body), args, iteratee));
+            string newContext = fmt::format("{}/", argString);
+            rhs.emplace_back(
+                prepareTestEachBody(ctx, eachName, std::move(send->block->body), args, iteratee, newContext));
 
             auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                     ctx.state.enterNameConstant("<describe '" + argString + "'>"));
@@ -234,16 +237,16 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
 // this just walks the body of a `test_each` and tries to transform every statement
 unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName,
                                                 unique_ptr<ast::Expression> body, ast::MethodDef::ARGS_store &args,
-                                                unique_ptr<ast::Expression> &iteratee) {
+                                                unique_ptr<ast::Expression> &iteratee, string_view context) {
     auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
     if (bodySeq) {
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, std::move(exp), args, iteratee);
+            exp = runUnderEach(ctx, eachName, std::move(exp), args, iteratee, context);
         }
 
-        bodySeq->expr = runUnderEach(ctx, eachName, std::move(bodySeq->expr), args, iteratee);
+        bodySeq->expr = runUnderEach(ctx, eachName, std::move(bodySeq->expr), args, iteratee, context);
     } else {
-        body = runUnderEach(ctx, eachName, std::move(body), args, iteratee);
+        body = runUnderEach(ctx, eachName, std::move(body), args, iteratee, context);
     }
 
     return body;
@@ -277,7 +280,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
                              ast::MK::Block(send->block->loc,
                                             prepareTestEachBody(ctx, send->fun, std::move(send->block->body),
-                                                                send->block->args, iteratee),
+                                                                send->block->args, iteratee, ""),
                                             std::move(send->block->args)));
     }
 
