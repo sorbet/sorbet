@@ -8,7 +8,10 @@ cc_library(
         "notifications/*.cc",
         "watchman/*.cc",
     ]) + [
+        "lsp_messages_gen.h",
         "lsp_messages_gen.cc",
+        "lsp_messages_enums_gen.h",
+        "lsp_messages_enums_gen.cc",
         "DefLocSaver.h",
         "watchman/WatchmanProcess.h",
         "NextMethodFinder.h",
@@ -30,7 +33,6 @@ cc_library(
         "LSPPreprocessor.h",
         "json_types.h",
         "lsp.h",
-        "lsp_messages_gen.h",
         "wrapper.h",
     ],
     linkstatic = select({
@@ -79,9 +81,13 @@ genrule(
     outs = [
         "lsp_messages_gen.h",
         "lsp_messages_gen.cc",
+        "lsp_messages_enums_gen.h",
+        "lsp_messages_enums_gen.cc",
     ],
-    cmd = "$(location :generate_lsp_messages) $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) && \
-             $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc)",
+    cmd = "$(location :generate_lsp_messages) $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
+             $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc) && \
+             $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
+             $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc)",
     tools = [
         ":generate_lsp_messages",
         "//tools:clang-format",
