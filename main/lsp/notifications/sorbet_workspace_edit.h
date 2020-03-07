@@ -5,6 +5,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class LSPFileUpdates;
 class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     std::unique_ptr<LSPFileUpdates> updates;
     absl::Notification startedNotification;

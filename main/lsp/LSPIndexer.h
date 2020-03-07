@@ -1,11 +1,14 @@
 #ifndef RUBY_TYPER_LSP_LSPINDEXER_H
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
-#include "common/concurrency/WorkerPool.h"
-#include "common/kvstore/KeyValueStore.h"
-#include "core/NameHash.h"
 #include "core/core.h"
+#include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
+
+namespace sorbet {
+class WorkerPool;
+class KeyValueStore;
+} // namespace sorbet
 
 namespace sorbet::realmain::lsp {
 

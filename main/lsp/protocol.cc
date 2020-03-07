@@ -12,6 +12,7 @@
 #include <iostream>
 
 using namespace std;
+namespace spd = spdlog;
 
 namespace sorbet::realmain::lsp {
 

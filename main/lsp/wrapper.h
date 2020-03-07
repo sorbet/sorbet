@@ -7,6 +7,9 @@
 #include "main/lsp/lsp.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <string_view>
+
+namespace spd = spdlog;
+
 namespace sorbet::realmain::lsp {
 
 class LSPOutputToVector;

@@ -1,5 +1,6 @@
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPIndexer.h"
 
 using namespace std;

@@ -12,6 +12,7 @@ cc_library(
         "lsp_messages_gen.cc",
         "lsp_messages_enums_gen.h",
         "lsp_messages_enums_gen.cc",
+        "LSPFileUpdates.h",
         "DefLocSaver.h",
         "watchman/WatchmanProcess.h",
         "NextMethodFinder.h",

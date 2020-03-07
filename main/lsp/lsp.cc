@@ -1,5 +1,6 @@
 #include "main/lsp/lsp.h"
 #include "common/Timer.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/statsd/statsd.h"
 #include "common/typecase.h"
 #include "common/web_tracer_framework/tracing.h"

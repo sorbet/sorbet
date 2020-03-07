@@ -1,4 +1,5 @@
 #include "main/lsp/wrapper.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/namer.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"

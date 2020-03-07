@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_REQUESTS_COMPLETION_H
 #define RUBY_TYPER_LSP_REQUESTS_COMPLETION_H
 
+#include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
