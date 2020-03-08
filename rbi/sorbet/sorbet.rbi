@@ -161,6 +161,24 @@ class Sorbet::Private::Static::ENVClass
     params(
         blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
+    .returns(T::Hash[String, String])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T.nilable(Sorbet::Private::Static::ENVClass))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter!(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
     .returns(Sorbet::Private::Static::ENVClass)
   end
   sig {returns(T::Enumerator[Elem])}
@@ -210,6 +228,24 @@ class Sorbet::Private::Static::ENVClass
   end
   sig {returns(T::Enumerator[Elem])}
   def reject!(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T::Hash[String, String])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def select(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(T.nilable(Sorbet::Private::Static::ENVClass))
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def select!(&blk); end
 
   sig do
     params(
