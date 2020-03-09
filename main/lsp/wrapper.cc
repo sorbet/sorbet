@@ -3,6 +3,7 @@
 #include "core/errors/namer.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include <memory>

@@ -6,6 +6,7 @@
 #include "common/FileOps.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 #include <iterator>

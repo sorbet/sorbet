@@ -5,6 +5,7 @@
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 
 namespace sorbet::test {
