@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class ReferenceParams;
 class ReferencesTask final : public LSPRequestTask {
     std::unique_ptr<ReferenceParams> params;
 

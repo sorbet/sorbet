@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     fmt::memory_buffer enumHeaderBuffer;
     fmt::memory_buffer enumClassFileBuffer;
 
+    fmt::format_to(enumClassFileBuffer, "#include \"main/lsp/json_types.h\"\n");
     fmt::format_to(enumClassFileBuffer, "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
     fmt::format_to(enumClassFileBuffer, "namespace sorbet::realmain::lsp {{\n");
 

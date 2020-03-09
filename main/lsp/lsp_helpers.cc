@@ -5,6 +5,7 @@
 #include "common/FileOps.h"
 #include "common/sort.h"
 #include "lsp.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

@@ -49,7 +49,7 @@ public:
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     const std::shared_ptr<options::Options> opts;
 
-    virtual ~LSPWrapper() = default;
+    virtual ~LSPWrapper();
 
     const LSPConfiguration &config() const;
 

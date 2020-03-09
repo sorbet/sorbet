@@ -2,6 +2,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPIndexer.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 
@@ -14,6 +15,8 @@ SorbetWorkspaceEditTask::SorbetWorkspaceEditTask(const LSPConfiguration &config,
         latencyCancelSlowPath->cancel();
     }
 };
+
+SorbetWorkspaceEditTask::~SorbetWorkspaceEditTask() = default;
 
 LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
     if (params->updates.empty()) {

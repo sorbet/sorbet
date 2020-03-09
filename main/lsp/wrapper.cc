@@ -83,6 +83,8 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
       lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_)), opts(move(opts)) {}
 
+LSPWrapper::~LSPWrapper() = default;
+
 SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                    shared_ptr<spd::logger> logger,
                                                    shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,

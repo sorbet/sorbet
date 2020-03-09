@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class SorbetErrorParams;
 class SorbetErrorTask final : public LSPTask {
     std::unique_ptr<SorbetErrorParams> params;
     std::optional<MessageId> id;

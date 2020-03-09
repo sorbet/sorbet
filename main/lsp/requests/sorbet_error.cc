@@ -1,5 +1,6 @@
 #include "main/lsp/requests/sorbet_error.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;

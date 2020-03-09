@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class DocumentSymbolParams;
 class DocumentSymbolTask final : public LSPRequestTask {
     std::unique_ptr<DocumentSymbolParams> params;
 

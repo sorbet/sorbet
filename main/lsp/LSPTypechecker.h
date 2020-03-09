@@ -22,7 +22,7 @@ class ResponseError;
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
     // (Optional) Error that occurred during the query that you can pass on to the client.
-    std::unique_ptr<ResponseError> error = nullptr;
+    std::unique_ptr<ResponseError> error;
 };
 
 class TypecheckRun final {

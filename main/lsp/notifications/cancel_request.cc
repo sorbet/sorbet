@@ -1,5 +1,6 @@
 #include "main/lsp/notifications/cancel_request.h"
 #include "main/lsp/LSPPreprocessor.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {

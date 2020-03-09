@@ -1,4 +1,5 @@
 #include "main/lsp/requests/shutdown.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

@@ -1,5 +1,6 @@
 #include "main/lsp/notifications/sorbet_fence.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

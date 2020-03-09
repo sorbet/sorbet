@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class WorkspaceSymbolParams;
 class WorkspaceSymbolsTask final : public LSPRequestTask {
     std::unique_ptr<WorkspaceSymbolParams> params;
 

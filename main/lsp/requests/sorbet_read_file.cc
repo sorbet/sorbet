@@ -1,4 +1,5 @@
 #include "main/lsp/requests/sorbet_read_file.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

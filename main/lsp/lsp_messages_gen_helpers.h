@@ -1,7 +1,9 @@
 #ifndef LSP_MESSAGES_GEN_HELPERS_H
 #define LSP_MESSAGES_GEN_HELPERS_H
 
-#include "main/lsp/json_types.h"
+#include "common/common.h"
+#include "main/lsp/json_enums.h"
+#include "rapidjson/document.h"
 
 namespace sorbet::realmain::lsp {
 

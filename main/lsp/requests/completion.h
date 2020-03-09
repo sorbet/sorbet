@@ -5,6 +5,8 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class CompletionParams;
+class CompletionItem;
 class CompletionTask final : public LSPRequestTask {
     std::unique_ptr<CompletionParams> params;
 

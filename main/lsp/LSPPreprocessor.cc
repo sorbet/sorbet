@@ -2,7 +2,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/notifications/notifications.h"
 #include "main/lsp/requests/requests.h"
 

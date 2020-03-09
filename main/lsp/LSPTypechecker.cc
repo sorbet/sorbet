@@ -15,6 +15,7 @@
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/UndoState.h"
+#include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {

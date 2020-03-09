@@ -5,6 +5,7 @@
 // ^ Violates linting rules, so include first.
 #include "common/Counters.h"
 #include "common/Counters_impl.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
 #include "test/helpers/MockFileSystem.h"
 

@@ -11,21 +11,6 @@
 #include <variant>
 
 namespace sorbet::realmain::lsp {
-enum class LSPErrorCodes {
-    // Defined by JSON RPC
-    ParseError = -32700,
-    InvalidRequest = -32600,
-    MethodNotFound = -32601,
-    InvalidParams = -32602, // todo
-    InternalError = -32603,
-    ServerErrorStart = -32099,
-    ServerErrorEnd = -32000,
-    ServerNotInitialized = -32002,
-    UnknownErrorCode = -32001,
-
-    // Defined by the LSP
-    RequestCancelled = -32800,
-};
 
 class DeserializationError : public std::runtime_error {
 public:
@@ -101,8 +86,6 @@ public:
     InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
                      const std::unique_ptr<rapidjson::Value> &found);
 };
-
-class JSONNullObject final {};
 
 class JSONBaseType {
 public:

@@ -1,7 +1,6 @@
 #include "test/LSPTest.h"
 
-#include <csignal>
-
+#include "common/concurrency/WorkerPool.h"
 #include "main/lsp/json_types.h"
 #include "payload/payload.h"
 

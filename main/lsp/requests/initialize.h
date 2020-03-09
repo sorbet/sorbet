@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class InitializeParams;
 class InitializeTask final : public LSPRequestTask {
     LSPConfiguration &mutableConfig;
     std::unique_ptr<InitializeParams> params;

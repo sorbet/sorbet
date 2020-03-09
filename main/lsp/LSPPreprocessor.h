@@ -8,6 +8,12 @@
 namespace sorbet::realmain::lsp {
 
 class LSPTask;
+class SorbetWorkspaceEditParams;
+class DidChangeTextDocumentParams;
+class DidCloseTextDocumentParams;
+class DidOpenTextDocumentParams;
+class WatchmanQueryResponse;
+class CancelParams;
 
 struct MessageQueueState {
     std::deque<std::unique_ptr<LSPMessage>> pendingRequests;

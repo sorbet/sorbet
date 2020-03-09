@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class CancelParams;
 class CancelRequestTask final : public LSPTask {
     const std::unique_ptr<CancelParams> params;
 

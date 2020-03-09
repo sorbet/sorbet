@@ -6,6 +6,7 @@
 
 namespace sorbet::realmain::lsp {
 class LSPFileUpdates;
+class SorbetWorkspaceEditParams;
 class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     std::unique_ptr<LSPFileUpdates> updates;
     absl::Notification startedNotification;
@@ -17,6 +18,7 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
 
 public:
     SorbetWorkspaceEditTask(const LSPConfiguration &config, std::unique_ptr<SorbetWorkspaceEditParams> params);
+    ~SorbetWorkspaceEditTask();
 
     LSPTask::Phase finalPhase() const override;
 
