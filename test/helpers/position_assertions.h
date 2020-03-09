@@ -2,7 +2,6 @@
 #define TEST_HELPERS_POSITION_ASSERTIONS_H
 
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
 #include "main/lsp/wrapper.h"
 #include "test/helpers/expectations.h"
 #include <regex>
