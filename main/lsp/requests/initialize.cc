@@ -1,4 +1,5 @@
 #include "main/lsp/requests/initialize.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

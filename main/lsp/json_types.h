@@ -1,77 +1,16 @@
 #ifndef RUBY_TYPER_LSP_JSON_TYPES_H
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
-#include "ast/ast.h"
 #include "common/Timer.h"
 #include "common/common.h"
-#include "core/NameHash.h"
 #include "core/core.h"
+#include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"
 
 #include <optional>
 #include <variant>
 
 namespace sorbet::realmain::lsp {
-/**
- * Encapsulates an update to LSP's file state in a compact form.
- * Placed into json_types.h because it is referenced from InitializedParams.
- */
-class LSPFileUpdates final {
-public:
-    // This specific update contains edits with the given epoch
-    u4 epoch = 0;
-    // The total number of edits that this update represents. Used for stats and assertions.
-    u4 editCount = 0;
-    // The total number of edits in this update that are already committed & had diagnostics sent out (via preemption).
-    // Used for stats and assertions.
-    u4 committedEditCount = 0;
-
-    std::vector<std::shared_ptr<core::File>> updatedFiles;
-    std::vector<ast::ParsedFile> updatedFileIndexes;
-
-    bool canTakeFastPath = false;
-    // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
-    // fast path.
-    bool hasNewFiles = false;
-    // If true, this update caused a slow path to be canceled.
-    bool canceledSlowPath = false;
-    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
-    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
-    // (Optional) Updated global state object to use to typecheck this update.
-    std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
-    // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
-    bool cancellationExpected = false;
-    // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
-    int preemptionsExpected = 0;
-
-    /**
-     * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
-     *
-     * Resets `fastPathDecision`.
-     */
-    void mergeOlder(const LSPFileUpdates &older);
-
-    /**
-     * Returns a copy of this LSPFileUpdates object. Does not handle deepCopying `updatedGS`.
-     */
-    LSPFileUpdates copy() const;
-};
-
-enum class LSPErrorCodes {
-    // Defined by JSON RPC
-    ParseError = -32700,
-    InvalidRequest = -32600,
-    MethodNotFound = -32601,
-    InvalidParams = -32602, // todo
-    InternalError = -32603,
-    ServerErrorStart = -32099,
-    ServerErrorEnd = -32000,
-    ServerNotInitialized = -32002,
-    UnknownErrorCode = -32001,
-
-    // Defined by the LSP
-    RequestCancelled = -32800,
-};
 
 class DeserializationError : public std::runtime_error {
 public:
@@ -147,8 +86,6 @@ public:
     InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
                      const std::unique_ptr<rapidjson::Value> &found);
 };
-
-class JSONNullObject final {};
 
 class JSONBaseType {
 public:

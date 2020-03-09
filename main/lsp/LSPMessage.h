@@ -2,10 +2,15 @@
 #define RUBY_TYPER_LSP_LSPMESSAGE_H
 
 #include "common/Timer.h"
-#include "main/lsp/json_types.h"
+#include "main/lsp/json_enums.h"
+#include "rapidjson/document.h"
 #include <variant>
 
 namespace sorbet::realmain::lsp {
+
+class RequestMessage;
+class ResponseMessage;
+class NotificationMessage;
 
 /**
  * Represents the ID on an LSP message.
@@ -52,6 +57,7 @@ public:
     LSPMessage(RawLSPMessage msg);
     LSPMessage(rapidjson::Document &d);
     LSPMessage(const std::string &json);
+    ~LSPMessage();
 
     /**
      * Tracks the latency of this specific message.

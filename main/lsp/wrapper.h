@@ -3,12 +3,21 @@
 
 #include "spdlog/spdlog.h"
 // has to come before the next spdlog include. This comment stops formatter from reordering them
+#include "core/core.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/lsp.h"
+#include "main/options/options.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <string_view>
+
+namespace spd = spdlog;
+
+namespace sorbet {
+class WorkerPool;
+}
+
 namespace sorbet::realmain::lsp {
 
+class LSPLoop;
 class LSPOutputToVector;
 class LSPProgrammaticInput;
 class LSPConfiguration;
@@ -46,7 +55,7 @@ public:
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     const std::shared_ptr<options::Options> opts;
 
-    virtual ~LSPWrapper() = default;
+    virtual ~LSPWrapper();
 
     const LSPConfiguration &config() const;
 

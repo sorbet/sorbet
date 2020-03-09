@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
 // has to go first as it violates our requirements
 
+#include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
 #include "core/Error.h"
+#include "core/ErrorQueue.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"

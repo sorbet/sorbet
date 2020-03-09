@@ -1,7 +1,7 @@
 #include "main/lsp/requests/type_definition.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

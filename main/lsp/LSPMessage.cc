@@ -1,4 +1,5 @@
 #include "LSPMessage.h"
+#include "json_types.h"
 
 using namespace std;
 
@@ -125,6 +126,8 @@ LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
 LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSONValue(d)) {}
 
 LSPMessage::LSPMessage(const std::string &json) : LSPMessage::LSPMessage(fromJSON(json)) {}
+
+LSPMessage::~LSPMessage() = default;
 
 optional<MessageId> LSPMessage::id() const {
     if (isRequest()) {

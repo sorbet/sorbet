@@ -4,8 +4,11 @@
 #include "absl/synchronization/mutex.h"
 #include "common/common.h"
 #include "core/core.h"
-#include "main/lsp/json_types.h"
 #include "spdlog/spdlog.h"
+
+namespace sorbet::realmain::lsp {
+class WatchmanQueryResponse;
+}
 
 namespace sorbet::realmain::lsp::watchman {
 class WatchmanProcess {

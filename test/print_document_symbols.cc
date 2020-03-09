@@ -1,6 +1,5 @@
 #include "common/FileSystem.h"
 #include "main/lsp/LSPMessage.h"
-#include "main/lsp/lsp.h"
 #include "main/lsp/wrapper.h"
 #include "test/helpers/lsp.h"
 #include <iostream>

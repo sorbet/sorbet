@@ -1,7 +1,7 @@
 #include "main/lsp/requests/document_highlight.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

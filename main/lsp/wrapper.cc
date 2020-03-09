@@ -1,8 +1,9 @@
 #include "main/lsp/wrapper.h"
+#include "core/ErrorQueue.h"
 #include "core/errors/namer.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/json_types.h"
+#include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include <memory>
@@ -82,6 +83,8 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
       lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_)), opts(move(opts)) {}
+
+LSPWrapper::~LSPWrapper() = default;
 
 SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                    shared_ptr<spd::logger> logger,

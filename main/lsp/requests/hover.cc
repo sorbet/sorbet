@@ -1,6 +1,7 @@
 #include "main/lsp/requests/hover.h"
 #include "absl/strings/ascii.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;

@@ -19,6 +19,7 @@
 // This is an implementation of LSP protocol (version 3.13) for Sorbet
 namespace sorbet::realmain::lsp {
 
+class MarkupContent;
 class LSPInput;
 class LSPConfiguration;
 class LSPQueuePreemptionTask;

@@ -5,6 +5,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
+#include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
 
 using namespace std;

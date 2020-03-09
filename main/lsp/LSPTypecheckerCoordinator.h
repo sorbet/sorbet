@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 #define RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 
+#include "common/concurrency/ConcurrentQueue.h"
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::core::lsp {

@@ -3,15 +3,16 @@
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/lsp/TypecheckEpochManager.h"
-#include "lsp.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LSPTask.h"
+#include "main/lsp/json_types.h"
+#include "main/lsp/lsp.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
 #include "main/options/options.h" // For EarlyReturnWithCode.
-#include <iostream>
 
 using namespace std;
+namespace spd = spdlog;
 
 namespace sorbet::realmain::lsp {
 

@@ -1,5 +1,6 @@
 #include "main/lsp/LSPTypecheckerCoordinator.h"
 #include "absl/synchronization/notification.h"
+#include "common/concurrency/WorkerPool.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"

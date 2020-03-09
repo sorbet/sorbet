@@ -1,5 +1,6 @@
 #include "main/lsp/requests/document_symbol.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;

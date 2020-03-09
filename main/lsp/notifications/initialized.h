@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_NOTIFICATIONS_INITIALIZED_H
 
 #include "absl/synchronization/notification.h"
+#include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {

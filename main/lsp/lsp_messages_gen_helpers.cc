@@ -1,4 +1,5 @@
 #include "main/lsp/lsp_messages_gen_helpers.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class TextDocumentIdentifier;
 class SorbetReadFileTask final : public LSPRequestTask {
     std::unique_ptr<TextDocumentIdentifier> params;
 

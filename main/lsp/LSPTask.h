@@ -11,6 +11,7 @@ class Notification;
 namespace sorbet::realmain::lsp {
 class LSPIndexer;
 class LSPPreprocessor;
+class DocumentHighlight;
 /**
  * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
  * Contains miscellaneous helper methods that are useful in multiple tasks.

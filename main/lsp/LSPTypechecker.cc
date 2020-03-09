@@ -4,6 +4,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/sort.h"
 #include "common/typecase.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -14,6 +15,7 @@
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/UndoState.h"
+#include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {

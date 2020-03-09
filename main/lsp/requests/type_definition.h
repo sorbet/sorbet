@@ -4,6 +4,7 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
+class TextDocumentPositionParams;
 class TypeDefinitionTask final : public LSPRequestTask {
     std::unique_ptr<TextDocumentPositionParams> params;
 

@@ -1,6 +1,6 @@
 #include "main/lsp/requests/definition.h"
 #include "core/lsp/QueryResponse.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/json_types.h"
 
 using namespace std;
 

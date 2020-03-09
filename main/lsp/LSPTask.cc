@@ -1,7 +1,10 @@
 #include "main/lsp/LSPTask.h"
 #include "absl/synchronization/notification.h"
 #include "common/sort.h"
+#include "core/NameHash.h"
+#include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
 namespace sorbet::realmain::lsp {

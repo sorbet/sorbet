@@ -10,6 +10,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
 using namespace std;

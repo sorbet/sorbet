@@ -4,7 +4,8 @@
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/sort.h"
-#include "lsp.h"
+#include "main/lsp/json_types.h"
+#include "main/lsp/lsp.h"
 
 using namespace std;
 

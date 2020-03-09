@@ -2,23 +2,27 @@
 #define RUBY_TYPER_LSP_LSPTYPECHECKER_H
 
 #include "ast/ast.h"
-#include "common/concurrency/WorkerPool.h"
-#include "common/kvstore/KeyValueStore.h"
-#include "core/ErrorQueue.h"
-#include "core/NameHash.h"
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/lsp/LSPFileUpdates.h"
+
+namespace sorbet {
+class WorkerPool;
+class KeyValueStore;
+} // namespace sorbet
 
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
-}
+class QueryResponse;
+} // namespace sorbet::core::lsp
 
 namespace sorbet::realmain::lsp {
+class ResponseError;
 
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
     // (Optional) Error that occurred during the query that you can pass on to the client.
-    std::unique_ptr<ResponseError> error = nullptr;
+    std::unique_ptr<ResponseError> error;
 };
 
 class TypecheckRun final {

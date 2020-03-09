@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "core/NameHash.h"
 #include "core/core.h"
+#include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/json_types.h"
 
 namespace sorbet::realmain::lsp::test {
