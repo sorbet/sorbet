@@ -1,6 +1,4 @@
 {
-  // Runs clang-format when you save (provided by vscode-clangd).
-  "editor.formatOnSave": true,
   "editor.insertSpaces": true,
   "editor.rulers": [120],
   // Clangd 9.0 has a new semantic highlighting feature, but it's buggy and causes
@@ -17,6 +15,9 @@
     "*.rbedited": "ruby"
   },
   "[cpp]": {
+    // Runs clang-format when you save (provided by vscode-clangd).
+    // We do not enable this globally as our RBIs and Markdown don't conform to a specific style.
+    "editor.formatOnSave": true,
     "editor.tabSize": 4,
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
