@@ -292,22 +292,19 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
 
     auto runningSlowPath = initialGS->epochManager->getStatus();
     if (runningSlowPath.slowPathRunning) {
-        // A cancelable slow path is currently running. Before running deepCopy(), check if we can cancel -- we might be
-        // able to avoid it.
+        // A cancelable slow path is currently running. Check if we can cancel.
         // Invariant: `pendingTypecheckUpdates` should contain the edits currently being typechecked on the slow path.
         // runningSlowPath.epoch should be in the interval (pendingTypecheckUpdates.epoch - editCount,
         // pendingTypecheckUpdates.epoch]
         ENFORCE(runningSlowPath.epoch <= pendingTypecheckUpdates.epoch);
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
 
-        auto merged = update.copy();
-        merged.mergeOlder(pendingTypecheckUpdates);
-        merged.canTakeFastPath = canTakeFastPath(merged, true);
-        // Cancel if old + new takes fast path, or if the new update will take the slow path anyway.
-        if ((merged.canTakeFastPath || !update.canTakeFastPath) &&
-            initialGS->epochManager->tryCancelSlowPath(merged.epoch)) {
-            // Cancelation succeeded! Use `merged` as the update.
-            update = move(merged);
+        // Cancel if the new update will take the slow path anyway.
+        if (!update.canTakeFastPath && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
+            // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
+            update.mergeOlder(pendingTypecheckUpdates);
+            // The two updates together could end up taking the fast path.
+            update.canTakeFastPath = canTakeFastPath(update, true);
             update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
         }
