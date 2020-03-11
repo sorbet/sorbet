@@ -36,3 +36,46 @@ if defined? ::RSpec::Mocks::AnyInstance
     end
   end
 end
+
+# Work around for sorbet-runtime wrapped methods.
+#
+# When a sig is defined, sorbet-runtime will replace the sigged method
+# with a wrapper. Those wrapper methods look like `foo(*args, &blk)`
+# so that wrappers can handle and pass on all the arguments supplied.
+#
+# However, that creates a problem with runtime reflection on the methods,
+# since when a sigged method is introspected, it will always return its
+# `arity` as `-1`, its `parameters` as `[[:rest, :args], [:block, :blk]]`,
+# and its `source_location` as `[<some_file_in_sorbet>, <some_line_number>]`.
+#
+# This might be a problem for some applications that rely on getting the
+# correct information from these methods.
+#
+# This compatibility module, when prepended to the `Method` class, would fix
+# the return values of `arity`, `parameters` and `source_location`.
+#
+# @example
+#   require 'sorbet-runtime'
+#   ::Method.prepend(T::CompatibilityPatches::MethodExtensions)
+module T
+  module CompatibilityPatches
+    module MethodExtensions
+      def arity
+        arity = super
+        return arity if arity != -1 || self.is_a?(Proc)
+        sig = T::Private::Methods.signature_for_method(self)
+        sig ? sig.method.arity : arity
+      end
+
+      def source_location
+        sig = T::Private::Methods.signature_for_method(self)
+        sig ? sig.method.source_location : super
+      end
+
+      def parameters
+        sig = T::Private::Methods.signature_for_method(self)
+        sig ? sig.method.parameters : super
+      end
+    end
+  end
+end
