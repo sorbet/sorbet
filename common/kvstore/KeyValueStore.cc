@@ -11,10 +11,10 @@ constexpr size_t MAX_DB_SIZE_BYTES =
     2L * 1024 * 1024 * 1024; // 2G. This is both maximum fs db size and max virtual memory usage.
 struct KeyValueStore::DBState {
     MDB_env *env;
-    MDB_dbi dbi;
 };
 
 struct OwnedKeyValueStore::TxnState {
+    MDB_dbi dbi;
     MDB_txn *txn;
     UnorderedMap<std::thread::id, MDB_txn *> readers;
 };
@@ -49,7 +49,6 @@ fail:
     throw_mdb_error("failed to create database"sv, rc);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
-    mdb_close(dbState->env, dbState->dbi);
     mdb_env_close(dbState->env);
 }
 
@@ -85,6 +84,8 @@ int OwnedKeyValueStore::commitOrAbortTransactions(bool commit) {
     }
     txnState->readers.clear();
     txnState->txn = nullptr;
+    ENFORCE(kvstore != nullptr);
+    mdb_close(kvstore->dbState->env, txnState->dbi);
     return rc;
 }
 
@@ -104,8 +105,7 @@ void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     dv.mv_size = value.size();
     dv.mv_data = (void *)value.data();
 
-    auto &dbState = *kvstore->dbState;
-    int rc = mdb_put(txnState->txn, dbState.dbi, &kv, &dv, 0);
+    int rc = mdb_put(txnState->txn, txnState->dbi, &kv, &dv, 0);
     if (rc != 0) {
         throw_mdb_error("failed write into database"sv, rc);
     }
@@ -137,7 +137,7 @@ u1 *OwnedKeyValueStore::read(string_view key) {
     kv.mv_size = key.size();
     kv.mv_data = (void *)key.data();
     MDB_val data;
-    rc = mdb_get(txn, kvstore->dbState->dbi, &kv, &data);
+    rc = mdb_get(txn, txnState->dbi, &kv, &data);
     if (rc != 0) {
         if (rc == MDB_NOTFOUND) {
             return nullptr;
@@ -152,7 +152,7 @@ void OwnedKeyValueStore::clear() {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
 
-    int rc = mdb_drop(txnState->txn, kvstore->dbState->dbi, 0);
+    int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
     if (rc != 0) {
         goto fail;
     }
@@ -195,7 +195,7 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_dbi_open(txnState->txn, kvstore->flavor.c_str(), MDB_CREATE, &dbState.dbi);
+    rc = mdb_dbi_open(txnState->txn, kvstore->flavor.c_str(), MDB_CREATE, &txnState->dbi);
     if (rc != 0) {
         goto fail;
     }
