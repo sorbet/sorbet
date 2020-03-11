@@ -5671,6 +5671,28 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"array" }
+                  value = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
             symbol = ::Sorbet::Private::Static
           }
           fun = <U keep_def>
@@ -6567,6 +6589,25 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"immutable" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
             symbol = ::Sorbet::Private::Static
           }
           fun = <U keep_def>
@@ -6591,6 +6632,32 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"const" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"immutable" }
+                  value = Literal{ value = true }
+                ]
+                [
+                  key = Literal{ value = :"array" }
+                  value = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U String>>
+                  }
+                ]
+              ]
+            }
           ]
         }
 
@@ -6856,6 +6923,30 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"enum" }
+                  value = Array{
+                    elems = [
+                      Literal{ value = "hello" }
+                      Literal{ value = "goodbye" }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
             symbol = ::Sorbet::Private::Static
           }
           fun = <U keep_def>
@@ -7111,6 +7202,25 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"ifunset" }
+                  value = Literal{ value = "" }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
             symbol = ::Sorbet::Private::Static
           }
           fun = <U keep_def>
@@ -7135,6 +7245,25 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"ifunset=" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"ifunset" }
+                  value = Literal{ value = "" }
+                ]
+              ]
+            }
           ]
         }
 
@@ -7808,6 +7937,25 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"token=" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T
+          }
+          fun = <U unsafe>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"immutable" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 

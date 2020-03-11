@@ -508,6 +508,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array_of=")
 
+    ::T.unsafe({:"array" => <emptyTree>::<C String>})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
@@ -586,9 +588,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
     end
 
+    ::T.unsafe({:"immutable" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"const_explicit")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"const")
+
+    ::T.unsafe({:"immutable" => true, :"array" => <emptyTree>::<C String>})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"no_class_arg")
 
@@ -613,6 +619,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :"no_class_arg")
     end
+
+    ::T.unsafe({:"enum" => ["hello", "goodbye"]})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop")
 
@@ -648,9 +656,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid_!")
 
+    ::T.unsafe({:"ifunset" => ""})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset=")
+
+    ::T.unsafe({:"ifunset" => ""})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset_nilable")
 
@@ -727,6 +739,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"token")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"token=")
+
+    ::T.unsafe({:"immutable" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"created")
   end

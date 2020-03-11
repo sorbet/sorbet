@@ -233,7 +233,10 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             }
         }
 
-        ret.nodes.emplace_back(ast::MK::Unsafe(send->loc, rules->deepCopy()));
+        // Keep around keyword args for IDE
+        if (!rules->keys.empty()) {
+            ret.nodes.emplace_back(ast::MK::Unsafe(send->loc, rules->deepCopy()));
+        }
     }
 
     ret.nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
