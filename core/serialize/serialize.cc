@@ -262,7 +262,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     for (int it = 0; it < methodHashSize; it++) {
         NameHash key;
         key._hashValue = p.getU4();
-        ret.definitions.methodHashes[key] = p.getU4();
+        ret.definitions.methodHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
     ret.usages.constants.reserve(constantsSize);

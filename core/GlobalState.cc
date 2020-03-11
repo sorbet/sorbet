@@ -1,6 +1,7 @@
 #include "GlobalState.h"
 
 #include "common/Timer.h"
+#include "common/sort.h"
 #include "core/Error.h"
 #include "core/Hashing.h"
 #include "core/NameHash.h"
@@ -1573,8 +1574,11 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     }
     unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
     for (const auto &e : methodHashes) {
-        result->methodHashes[e.first] = patchHash(e.second);
+        result->methodHashes.emplace_back(e.first, patchHash(e.second));
     }
+    // Sort the hashes. Semantically important for quickly diffing hashes.
+    fast_sort(result->methodHashes);
+
     result->hierarchyHash = patchHash(hierarchyHash);
     return result;
 }
