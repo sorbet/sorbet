@@ -32,7 +32,7 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
     }
 }
 
-// In debug builds, used to assert that we have not accidentally taken the fast path after a change to the set of
+// In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
 bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, u4>> &a,
                                          const std::vector<std::pair<core::NameHash, u4>> &b) {
