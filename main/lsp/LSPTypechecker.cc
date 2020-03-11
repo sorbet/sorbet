@@ -36,6 +36,10 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 // methods in a file.
 bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, u4>> &a,
                                          const std::vector<std::pair<core::NameHash, u4>> &b) {
+    if (a.size() != b.size()) {
+        return false;
+    }
+
     // Should be sorted.
     auto bIt = b.begin();
     for (const auto &methodA : a) {
@@ -142,8 +146,8 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
                 const auto &newMethodHashes = f->getFileHash()->definitions.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
-                ENFORCE(oldMethodHashes.size() != newMethodHashes.size(), "definitionHash should have failed");
-                ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes));
+                ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
+                        "definitionHash should have failed");
 
                 // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
