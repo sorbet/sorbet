@@ -1,6 +1,7 @@
 #include "main/lsp/LSPIndexer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
+#include "core/NameHash.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -68,53 +69,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
         return;
     }
 
-    Timer timeit(config->logger, "computeFileHashes");
-    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
-    for (int i = 0; i < files.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
-    }
-
-    auto &logger = *config->logger;
-    logger.debug("Computing state hashes for {} files", files.size());
-
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
-        int processedByThread = 0;
-        int job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-
-                    if (!files[job] || files[job]->getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    auto hash = pipeline::computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(move(hash)));
-                }
-            }
-        }
-
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    files[a.first]->setFileHash(move(a.second));
-                }
-            }
-        }
-    }
+    pipeline::computeFileHashes(files, *config->logger, workers);
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {

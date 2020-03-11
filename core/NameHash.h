@@ -44,7 +44,7 @@ struct GlobalStateHash {
     static constexpr int HASH_STATE_INVALID = 2;
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
     u4 hierarchyHash = HASH_STATE_NOT_COMPUTED;
-    UnorderedMap<NameHash, u4> methodHashes;
+    std::vector<std::pair<NameHash, u4>> methodHashes;
 };
 
 struct UsageHash {

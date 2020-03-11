@@ -113,7 +113,11 @@ unique_ptr<File> File::deepCopy(GlobalState &gs) const {
 }
 
 void File::setFileHash(unique_ptr<const FileHash> hash) {
-    hash_ = move(hash);
+    // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
+    // Avoid needlessly invalidating references to *hash_.
+    if (hash_ == nullptr) {
+        hash_ = move(hash);
+    }
 }
 
 const shared_ptr<const FileHash> &File::getFileHash() const {

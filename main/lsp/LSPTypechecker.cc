@@ -31,6 +31,35 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
     }
 }
+
+// In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
+// methods in a file.
+bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, u4>> &a,
+                                         const std::vector<std::pair<core::NameHash, u4>> &b) {
+    if (a.size() != b.size()) {
+        return false;
+    }
+
+    pair<core::NameHash, u4> previousHash; // Initializes to <0, 0>.
+    auto bIt = b.begin();
+    for (const auto &methodA : a) {
+        const auto &methodB = *bIt;
+        if (methodA.first != methodB.first) {
+            return false;
+        }
+
+        // Enforce that hashes are sorted in ascending order.
+        if (methodA < previousHash) {
+            return false;
+        }
+
+        previousHash = methodA;
+        bIt++;
+    }
+
+    return true;
+}
+
 } // namespace
 
 LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
@@ -111,6 +140,7 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
     {
+        vector<pair<core::NameHash, u4>> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
             auto fref = gs->findFileByPath(f->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -120,19 +150,29 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                auto &oldHash = *fref.data(*gs).getFileHash();
-                for (auto &p : f->getFileHash()->definitions.methodHashes) {
-                    auto fnd = oldHash.definitions.methodHashes.find(p.first);
-                    ENFORCE(fnd != oldHash.definitions.methodHashes.end(), "definitionHash should have failed");
-                    if (fnd->second != p.second) {
-                        changedHashes.emplace_back(p.first);
-                    }
-                }
+                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->definitions.methodHashes;
+                const auto &newMethodHashes = f->getFileHash()->definitions.methodHashes;
+
+                // Both oldHash and newHash should have the same methods, since this is the fast path!
+                ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
+                        "definitionHash should have failed");
+
+                // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
+                // deduped later.
+                set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
+                               newMethodHashes.end(), inserter(changedMethodHashes, changedMethodHashes.begin()));
+
                 gs = core::GlobalState::replaceFile(move(gs), fref, f);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                 fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
                 subset.emplace_back(fref);
             }
+        }
+
+        changedHashes.reserve(changedMethodHashes.size());
+        for (auto &changedMethodHash : changedMethodHashes) {
+            changedHashes.push_back(changedMethodHash.first);
         }
         core::NameHash::sortAndDedupe(changedHashes);
     }

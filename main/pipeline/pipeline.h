@@ -5,7 +5,6 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
-#include "core/NameHash.h"
 #include "main/options/options.h"
 
 namespace sorbet::core::lsp {
@@ -43,7 +42,9 @@ typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> w
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 
-core::FileHash computeFileHash(std::shared_ptr<core::File> forWhat, spdlog::logger &logger);
+// Computes file hashes for the given files, and stores them in the files.
+void computeFileHashes(const std::vector<std::shared_ptr<core::File>> files, spdlog::logger &logger,
+                       WorkerPool &workers);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
