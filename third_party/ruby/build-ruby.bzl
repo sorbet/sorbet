@@ -73,16 +73,16 @@ run_cmd() {{
     fi
 }}
 
+# This is a hack. The configure script builds up a command for compiling C
+# files that includes `-fvisibility=hidden`. To override it, our flag needs to
+# come after, so we inject a flag right before the `-o` option that comes near
+# the end of the command via OUTFLAG.
+OUTFLAG="-fvisibility=default -o" \
 CC="{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
 CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
 LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
-# This is a hack. The configure script builds up a command for compiling C
-# files that includes `-fvisibility=hidden`. To override it, our flag needs to
-# come after, so we inject a flag right before the `-o` option that comes near
-# the end of the command.
-OUTFLAG="-fvisibility=default -o" \
 run_cmd ./configure \
         {configure_flags} \
         --enable-load-relative \
