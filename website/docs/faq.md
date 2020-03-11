@@ -160,6 +160,57 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## Does Sorbet work with Rake and Rakefiles?
+
+Kind of, with some effort. Rake monkey patches the global `main` object (i.e.,
+top-level code) to extend their DSL, which Sorbet cannot understand:
+
+```ruby
+# -- from lib/rake/dsl_definition.rb --
+
+...
+
+# Extend the main object with the DSL commands. This allows top-level
+# calls to task, etc. to work from a Rakefile without polluting the
+# object inheritance tree.
+self.extend Rake::DSL
+```
+
+→
+[lib/rake/dsl_definition.rb](https://github.com/ruby/rake/blob/80e00e2d59ea5b230f2f0416c387c0b57184f1ff/lib/rake/dsl_definition.rb#L192-L195)
+
+Sorbet cannot model that a single instance of an object (in this case `main`)
+has a different inheritance hierarchy than that instance's class (in this case
+`Object`).
+
+To get around this, factor out all tasks defined the `Rakefile` that should be
+typechecked into an explicit class in a separate file, something like this:
+
+```ruby
+# -- my_rake_tasks.rb --
+
+# (1) Make a proper class inside a file with a *.rb extension
+class MyRakeTasks
+  # (2) Explicitly extend Rake::DSL in this class
+  extend Rake::DSL
+
+  # (3) Define tasks like normal:
+  task :test do
+    puts 'Testing...'
+  end
+
+  # ... more tasks ...
+end
+
+# -- Rakefile --
+
+# (4) Require that file from the Rakefile
+require_relative './my_rake_tasks'
+```
+
+For more information, see
+[this StackOverflow question](https://stackoverflow.com/a/60556206/1015863).
+
 ## How do I upgrade Sorbet?
 
 Sorbet has not reached version 1.0 yet. As such, it will make breaking changes
@@ -231,13 +282,6 @@ from YARD docs.
 Also see the [Community] page for more community-maintained projects!
 
 [sord]: https://github.com/AaronC81/sord
-
-## Can Sorbet produce statistics?
-
-Yes, you can use options like `--metrics-file` to produce statistics. For
-example, check out
-[sorbet-progress](https://github.com/jaredbeck/sorbet-progress) which uses those
-statistics to keep track of your progress adopting sorbet in big codebases.
 
 ## When Ruby 3 gets types, what will the migration plan look like?
 
