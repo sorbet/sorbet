@@ -26,6 +26,7 @@
 #include "common/sort.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
+#include "core/NameHash.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -1134,6 +1135,7 @@ core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Express
     return move(collector.acc);
 };
 
+namespace {
 core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
@@ -1157,6 +1159,56 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
 
     return {move(*lgs->hash()), move(allNames)};
+}
+}; // namespace
+
+void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logger &logger, WorkerPool &workers) {
+    Timer timeit(logger, "computeFileHashes");
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
+    for (int i = 0; i < files.size(); i++) {
+        auto copy = i;
+        fileq->push(move(copy), 1);
+    }
+
+    logger.debug("Computing state hashes for {} files", files.size());
+
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>>(files.size());
+    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+        int processedByThread = 0;
+        int job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    if (!files[job] || files[job]->getFileHash() != nullptr) {
+                        continue;
+                    }
+
+                    auto hash = computeFileHash(files[job], logger);
+                    threadResult.emplace_back(job, make_unique<core::FileHash>(move(hash)));
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    files[a.first]->setFileHash(move(a.second));
+                }
+            }
+        }
+    }
 }
 
 } // namespace sorbet::realmain::pipeline
