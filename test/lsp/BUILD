@@ -8,7 +8,7 @@ sh_binary(
 
 cc_test(
     name = "protocol_test_corpus",
-    timeout = "long",
+    size = "medium",
     srcs = [
         "ProtocolTest.cc",
         "ProtocolTest.h",
