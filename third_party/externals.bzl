@@ -63,6 +63,8 @@ def sorbet_llvm_externals():
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
                 build_file = build_file,
+                # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
+                # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
                 patches = ["@com_stripe_sorbet_llvm//third_party/ruby:export-intrinsics.patch"],
                 patch_tool = "patch",
             )
