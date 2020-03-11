@@ -40,15 +40,23 @@ bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameH
         return false;
     }
 
-    // Should be sorted.
+    pair<core::NameHash, u4> previousHash; // Initializes to <0, 0>.
     auto bIt = b.begin();
     for (const auto &methodA : a) {
         const auto &methodB = *bIt;
         if (methodA.first != methodB.first) {
             return false;
         }
+
+        // Enforce that hashes are sorted in ascending order.
+        if (methodA < previousHash) {
+            return false;
+        }
+
+        previousHash = methodA;
         bIt++;
     }
+
     return true;
 }
 
