@@ -66,7 +66,7 @@ module T::Props
         lazily_defined_methods[name] = blk
 
         cls = decorated_class
-        cls.define_method(name) do |*args|
+        cls.send(:define_method, name) do |*args|
           self.class.decorator.send(:eval_lazily_defined_method!, name)
           send(name, *args)
         end
