@@ -39,7 +39,7 @@ const users = [
     caption: 'Vonage',
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',
-  }
+  },
 ];
 
 const siteConfig = {
