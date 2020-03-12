@@ -126,7 +126,7 @@ u1 *OwnedKeyValueStore::read(string_view key) {
     MDB_txn *txn = nullptr;
     int rc = 0;
     {
-        absl::ReaderMutexLock lk(&kvstore->readers_mtx);
+        absl::ReaderMutexLock lk(&readers_mtx);
         auto fnd = txnState->readers.find(this_thread::get_id());
         if (fnd != txnState->readers.end()) {
             txn = fnd->second;
@@ -134,7 +134,7 @@ u1 *OwnedKeyValueStore::read(string_view key) {
         }
     }
     if (txn == nullptr) {
-        absl::WriterMutexLock lk(&kvstore->readers_mtx);
+        absl::WriterMutexLock lk(&readers_mtx);
         auto &txn_store = txnState->readers[this_thread::get_id()];
         ENFORCE(txn_store == nullptr);
         rc = mdb_txn_begin(kvstore->dbState->env, nullptr, MDB_RDONLY, &txn_store);
@@ -231,7 +231,7 @@ void OwnedKeyValueStore::refreshMainTransaction() {
         goto fail;
     }
     {
-        absl::WriterMutexLock lk(&kvstore->readers_mtx);
+        absl::WriterMutexLock lk(&readers_mtx);
         txnState->readers[writerId] = txnState->txn;
     }
     return;

@@ -17,7 +17,6 @@ class KeyValueStore final {
     const std::string flavor;
     struct DBState;
     const std::unique_ptr<DBState> dbState;
-    absl::Mutex readers_mtx;
 
 public:
     /**
@@ -48,13 +47,14 @@ public:
  * Only the thread that created OwnedKeyValueStore is allowed to invoke `write`.
  * Creating OwnedKeyValueStore grabs a lock and allows to have consistent view over database.
  *
- * To write changes to disk, one must call `commitAndClose` or `disown` with `commitChanges` set to `true`.
+ * To write changes to disk, one must call `commit`.
  */
 class OwnedKeyValueStore final {
     const std::thread::id writerId;
     std::unique_ptr<KeyValueStore> kvstore;
     struct TxnState;
     const std::unique_ptr<TxnState> txnState;
+    absl::Mutex readers_mtx;
 
     void clear();
     void refreshMainTransaction();
@@ -73,7 +73,7 @@ public:
     void write(std::string_view key, const std::vector<u1> &value);
 
     /** Aborts all changes without writing them to disk. Returns an unowned kvstore that can be re-owned if more writes
-     * are desired. */
+     * are desired. If not explicitly called, OwnedKeyValueStore will implicitly abort everything in the destructor. */
     static std::unique_ptr<KeyValueStore> abort(std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 
     /** Attempts to commit all changes to disk. Returns an unowned kvstore that can be re-owned if more writes are
