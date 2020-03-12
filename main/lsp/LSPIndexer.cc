@@ -180,11 +180,13 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     }
 
     // Use pipeline directly so we can pass along kvstore.
-    auto hashesChanged = pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers, kvstore);
+    bool shouldCommit = pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers, kvstore);
+    shouldCommit = payload::retainGlobalState(initialGS, config->opts, kvstore) || shouldCommit;
 
-    // Save globalstate into kvstore. Destroys kvstore, but we only initialize once so it's OK.
-    // Force a commit if we calculated new file hashes that weren't already in kvstore.
-    payload::retainGlobalState(initialGS, config->opts, move(kvstore), /* forceCommit */ hashesChanged);
+    if (shouldCommit) {
+        // We should only commit if we wrote new hashes or global state changed.
+        OwnedKeyValueStore::commit(*config->logger, move(kvstore));
+    }
 
     updates.epoch = 0;
     updates.canTakeFastPath = false;

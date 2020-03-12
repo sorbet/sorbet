@@ -58,7 +58,8 @@ class OwnedKeyValueStore final {
 
     void clear();
     void refreshMainTransaction();
-    int commitOrAbortTransactions(bool commit);
+    bool commit();
+    void abort();
 
 public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
@@ -71,12 +72,14 @@ public:
     /** can only be called from owning thread */
     void write(std::string_view key, const std::vector<u1> &value);
 
-    /** Convert an owned key value store into an unowned key value store. If `commitChanges` is `true`, writes are
-     * committed to disk. */
-    static std::unique_ptr<KeyValueStore> disown(std::unique_ptr<OwnedKeyValueStore> ownedKvstore, bool commitChanges);
+    /** Aborts all changes without writing them to disk. Returns an unowned kvstore that can be re-owned if more writes
+     * are desired. */
+    static std::unique_ptr<KeyValueStore> abort(std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 
-    /** Commits all changes to disk and closes the database. */
-    static bool commitAndClose(std::unique_ptr<OwnedKeyValueStore> kvstore);
+    /** Attempts to commit all changes to disk. Returns an unowned kvstore that can be re-owned if more writes are
+     * desired. */
+    static std::unique_ptr<KeyValueStore> commit(spdlog::logger &logger,
+                                                 std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 };
 
 } // namespace sorbet

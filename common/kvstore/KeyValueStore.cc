@@ -1,4 +1,5 @@
 #include "common/kvstore/KeyValueStore.h"
+#include "common/Timer.h"
 #include "lmdb.h"
 
 #include <utility>
@@ -69,28 +70,38 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     }
 }
 
-int OwnedKeyValueStore::commitOrAbortTransactions(bool commit) {
+void OwnedKeyValueStore::abort() {
+    // Note: txn being null indicates that the transaction has already ended, perhaps due to a commit.
+    if (txnState->txn == nullptr) {
+        return;
+    }
+    for (auto &txn : txnState->readers) {
+        mdb_txn_abort(txn.second);
+    }
+    txnState->readers.clear();
+    txnState->txn = nullptr;
+    ENFORCE(kvstore != nullptr);
+    mdb_close(kvstore->dbState->env, txnState->dbi);
+}
+
+bool OwnedKeyValueStore::commit() {
     // Note: txn being null indicates that the transaction has already ended, perhaps due to a commit.
     if (txnState->txn == nullptr) {
         return 0;
     }
     int rc = 0;
     for (auto &txn : txnState->readers) {
-        if (commit) {
-            rc = mdb_txn_commit(txn.second) || rc;
-        } else {
-            mdb_txn_abort(txn.second);
-        }
+        rc = mdb_txn_commit(txn.second) || rc;
     }
     txnState->readers.clear();
     txnState->txn = nullptr;
     ENFORCE(kvstore != nullptr);
     mdb_close(kvstore->dbState->env, txnState->dbi);
-    return rc;
+    return rc == 0;
 }
 
 OwnedKeyValueStore::~OwnedKeyValueStore() {
-    commitOrAbortTransactions(false);
+    abort();
 }
 
 void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
@@ -156,7 +167,7 @@ void OwnedKeyValueStore::clear() {
     if (rc != 0) {
         goto fail;
     }
-    rc = commitOrAbortTransactions(true);
+    rc = commit();
     if (rc != 0) {
         goto fail;
     }
@@ -228,17 +239,16 @@ fail:
     throw_mdb_error("failed to create transaction"sv, rc);
 }
 
-unique_ptr<KeyValueStore> OwnedKeyValueStore::disown(unique_ptr<OwnedKeyValueStore> ownedKvstore, bool commitChanges) {
-    ownedKvstore->commitOrAbortTransactions(commitChanges);
+unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+    ownedKvstore->abort();
     return move(ownedKvstore->kvstore);
 }
 
-bool OwnedKeyValueStore::commitAndClose(unique_ptr<OwnedKeyValueStore> k) {
-    int rc = k->commitOrAbortTransactions(true);
-    if (rc != 0) {
-        return false;
-    }
-    return true;
+unique_ptr<KeyValueStore> OwnedKeyValueStore::commit(spdlog::logger &logger,
+                                                     unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+    Timer timeit(logger, "kvstore.commit");
+    ownedKvstore->commit();
+    return move(ownedKvstore->kvstore);
 }
 
 } // namespace sorbet

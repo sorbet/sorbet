@@ -454,7 +454,7 @@ int realmain(int argc, char *argv[]) {
 
         unique_ptr<KeyValueStore> unownedKvstore;
         if (kvstore) {
-            unownedKvstore = OwnedKeyValueStore::disown(move(kvstore), /* commit */ true);
+            unownedKvstore = OwnedKeyValueStore::commit(*logger, move(kvstore));
         }
 
         auto output = make_shared<lsp::LSPStdout>(logger);
@@ -487,7 +487,10 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        payload::retainGlobalState(gs, opts, move(kvstore));
+        if (payload::retainGlobalState(gs, opts, kvstore)) {
+            // Only write changes to disk if GlobalState changed since the last time.
+            OwnedKeyValueStore::commit(*logger, move(kvstore));
+        }
 
         if (gs->runningUnderAutogen) {
 #ifndef SORBET_REALMAIN_MIN

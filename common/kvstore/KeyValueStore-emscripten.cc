@@ -28,7 +28,11 @@ OwnedKeyValueStore::~OwnedKeyValueStore() {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-int OwnedKeyValueStore::commitOrAbortTransactions(bool commit) {
+bool OwnedKeyValueStore::commit() {
+    throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
+}
+
+void OwnedKeyValueStore::abort() {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
@@ -56,11 +60,11 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-bool OwnedKeyValueStore::commitAndClose(unique_ptr<OwnedKeyValueStore> k) {
+unique_ptr<KeyValueStore> OwnedKeyValueStore::commit(spdlog::logger &logger, unique_ptr<OwnedKeyValueStore> k) {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-unique_ptr<KeyValueStore> OwnedKeyValueStore::disown(unique_ptr<OwnedKeyValueStore> ownedKvstore, bool commitChanges) {
+unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStore> ownedKvstore) {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
