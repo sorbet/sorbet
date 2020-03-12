@@ -21,11 +21,13 @@ public:
     // individual cached files, which can be loaded independently.
     static std::vector<u1> storePayloadAndNameTable(GlobalState &gs);
     static std::vector<u1> storeExpression(GlobalState &gs, std::unique_ptr<ast::Expression> &e);
+    static std::vector<u1> storeFileHash(std::shared_ptr<const core::FileHash> fh);
 
     // Loads an ast::Expression saved by storeExpression. Optionally overrides
     // the saved file ID to the caller-specified ID.
     static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p, u4 forceId = 0);
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
+    static std::unique_ptr<const core::FileHash> loadFileHash(spdlog::logger &logger, const u1 *const data);
 };
 }; // namespace sorbet::core::serialize
 

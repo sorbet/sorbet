@@ -72,7 +72,8 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
         return;
     }
 
-    pipeline::computeFileHashes(files, *config->logger, workers);
+    // We only use kvstore during initialization.
+    pipeline::computeFileHashes(files, *config->logger, workers, /* kvstore */ nullptr);
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {
@@ -178,10 +179,12 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         indexed.resize(initialGS->getFiles().size());
     }
 
-    computeFileHashes(initialGS->getFiles(), workers);
+    // Use pipeline directly so we can pass along kvstore.
+    auto hashesChanged = pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers, kvstore);
 
     // Save globalstate into kvstore. Destroys kvstore, but we only initialize once so it's OK.
-    payload::retainGlobalState(initialGS, config->opts, move(kvstore));
+    // Force a commit if we calculated new file hashes that weren't already in kvstore.
+    payload::retainGlobalState(initialGS, config->opts, move(kvstore), /* forceCommit */ hashesChanged);
 
     updates.epoch = 0;
     updates.canTakeFastPath = false;

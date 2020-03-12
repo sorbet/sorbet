@@ -78,25 +78,66 @@ public:
     }
 };
 
-string fileKey(core::GlobalState &gs, core::FileRef file) {
-    auto path = file.data(gs).path();
+string fileKey(const core::File &file, string_view subtype = ""sv) {
+    auto path = file.path();
     string key(path.begin(), path.end());
     key += "//";
-    auto hashBytes = sorbet::crypto_hashing::hash64(file.data(gs).source());
+    if (!subtype.empty()) {
+        key += subtype;
+        key += "//";
+    }
+    auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
     key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
     return key;
 }
 
-unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
+string fileHashKey(const core::File &file) {
+    return fileKey(file, "filehash");
+}
+
+unique_ptr<const core::FileHash> fetchFileHashFromCache(spd::logger &logger, core::File &file,
+                                                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    if (kvstore) {
+        string key = fileHashKey(file);
+        auto maybeCached = kvstore->read(key);
+        if (maybeCached) {
+            prodCounterInc("types.input.filehashes.kvstore.hit");
+            file.cachedFileHash = true;
+            return core::serialize::Serializer::loadFileHash(logger, maybeCached);
+        } else {
+            prodCounterInc("types.input.filehashes.kvstore.miss");
+        }
+    }
+    return nullptr;
+}
+
+void cacheFileHashes(const unique_ptr<OwnedKeyValueStore> &kvstore, const vector<shared_ptr<core::File>> &files) {
+    if (!kvstore) {
+        return;
+    }
+
+    for (auto &file : files) {
+        // payload files have their hashes cached in the initial GlobalState.
+        if (file == nullptr || file->isPayload() || file->cachedFileHash) {
+            continue;
+        }
+
+        string key = fileHashKey(*file);
+        kvstore->write(key, core::serialize::Serializer::storeFileHash(file->getFileHash()));
+    }
+}
+
+unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
                                                const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore && file.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(gs, file);
+    if (kvstore && fref.id() < gs.filesUsed()) {
+        auto &file = fref.data(gs);
+        string fileHashKey = fileKey(file);
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached) {
             prodCounterInc("types.input.files.kvstore.hit");
-            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
-            file.data(gs).cachedParseTree = true;
-            ENFORCE(cachedTree->loc.file() == file);
+            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, fref.id());
+            file.cachedParseTree = true;
+            ENFORCE(cachedTree->loc.file() == fref);
             return cachedTree;
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
@@ -113,7 +154,7 @@ void cacheTrees(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvs
         if (tree.file.data(gs).cachedParseTree || tree.file.data(gs).hasParseErrors) {
             continue;
         }
-        string fileHashKey = fileKey(gs, tree.file);
+        string fileHashKey = fileKey(tree.file.data(gs));
         kvstore->write(fileHashKey, core::serialize::Serializer::storeExpression(gs, tree.tree));
     }
 }
@@ -1164,7 +1205,8 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 }
 }; // namespace
 
-void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logger &logger, WorkerPool &workers) {
+bool computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logger &logger, WorkerPool &workers,
+                       const std::unique_ptr<OwnedKeyValueStore> &kvstore) {
     Timer timeit(logger, "computeFileHashes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
@@ -1174,10 +1216,11 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
 
     logger.debug("Computing state hashes for {} files", files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+    atomic<int> computed = 0;
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>>(files.size());
+    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger, &kvstore, &computed]() {
+        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;
         {
@@ -1189,8 +1232,12 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
                         continue;
                     }
 
-                    auto hash = computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(move(hash)));
+                    unique_ptr<const core::FileHash> hash = fetchFileHashFromCache(logger, *files[job], kvstore);
+                    if (!hash) {
+                        hash = make_unique<core::FileHash>(computeFileHash(files[job], logger));
+                        computed.fetch_add(1);
+                    }
+                    threadResult.emplace_back(job, move(hash));
                 }
             }
         }
@@ -1201,7 +1248,7 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
     });
 
     {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
@@ -1211,6 +1258,11 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
             }
         }
     }
+
+    // If kvstore is supplied, cache hashes on disk for next time.
+    cacheFileHashes(kvstore, files);
+
+    return computed.load() > 0;
 }
 
 } // namespace sorbet::realmain::pipeline

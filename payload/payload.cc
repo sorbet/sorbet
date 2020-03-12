@@ -42,10 +42,12 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
 }
 
 void retainGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
-                       unique_ptr<OwnedKeyValueStore> kvstore) {
+                       unique_ptr<OwnedKeyValueStore> kvstore, bool forceCommit) {
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
         Timer timeit(gs->tracer(), "write_global_state.kvstore");
         kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
+        OwnedKeyValueStore::commitAndClose(move(kvstore));
+    } else if (forceCommit) {
         OwnedKeyValueStore::commitAndClose(move(kvstore));
     }
 }

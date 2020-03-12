@@ -69,6 +69,7 @@ public:
     };
 
     bool cachedParseTree = false;
+    bool cachedFileHash = false;
     bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     bool pluginGenerated = false;
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.

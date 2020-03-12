@@ -1247,6 +1247,17 @@ vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expressi
     return pickler.result(FILE_COMPRESSION_DEGREE);
 }
 
+unique_ptr<const core::FileHash> Serializer::loadFileHash(spdlog::logger &logger, const u1 *const data) {
+    serialize::UnPickler up(data, logger);
+    return SerializerImpl::unpickleFileHash(up);
+}
+
+vector<u1> Serializer::storeFileHash(shared_ptr<const core::FileHash> fh) {
+    serialize::Pickler pickler;
+    SerializerImpl::pickle(pickler, move(fh));
+    return pickler.result(FILE_COMPRESSION_DEGREE);
+}
+
 NameRef SerializerImpl::unpickleNameRef(UnPickler &p, GlobalState &gs) {
     NameRef name(NameRef::WellKnown{}, p.getU4());
     ENFORCE(name.data(gs)->ref(gs) == name);

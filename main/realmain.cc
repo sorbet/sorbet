@@ -556,7 +556,7 @@ int realmain(int argc, char *argv[]) {
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
             // Store file hashes for LSP.
-            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers);
+            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers, /* kvstore; not relevant here */ nullptr);
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
