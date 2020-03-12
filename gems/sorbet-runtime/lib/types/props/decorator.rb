@@ -602,7 +602,7 @@ class T::Props::Decorator
   sig do
     params(
       prop_name: Symbol,
-      redaction: Chalk::Tools::RedactionUtils::RedactionDirectiveSpec,
+      redaction: T.untyped,
     )
     .void
   end
