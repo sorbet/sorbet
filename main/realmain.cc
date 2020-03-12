@@ -454,7 +454,8 @@ int realmain(int argc, char *argv[]) {
 
         unique_ptr<KeyValueStore> unownedKvstore;
         if (kvstore) {
-            unownedKvstore = OwnedKeyValueStore::commit(*logger, move(kvstore));
+            // There should not have been any writes to the kvstore, so no need to commit changes to disk.
+            unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));
         }
 
         auto output = make_shared<lsp::LSPStdout>(logger);
@@ -487,9 +488,9 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        if (payload::retainGlobalState(gs, opts, kvstore)) {
+        if (payload::retainGlobalState(gs, opts, kvstore) && kvstore) {
             // Only write changes to disk if GlobalState changed since the last time.
-            OwnedKeyValueStore::commit(*logger, move(kvstore));
+            OwnedKeyValueStore::bestEffortCommit(*logger, move(kvstore));
         }
 
         if (gs->runningUnderAutogen) {

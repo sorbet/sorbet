@@ -84,7 +84,7 @@ void OwnedKeyValueStore::abort() {
     mdb_close(kvstore->dbState->env, txnState->dbi);
 }
 
-bool OwnedKeyValueStore::commit() {
+int OwnedKeyValueStore::commit() {
     // Note: txn being null indicates that the transaction has already ended, perhaps due to a commit.
     if (txnState->txn == nullptr) {
         return 0;
@@ -97,7 +97,7 @@ bool OwnedKeyValueStore::commit() {
     txnState->txn = nullptr;
     ENFORCE(kvstore != nullptr);
     mdb_close(kvstore->dbState->env, txnState->dbi);
-    return rc == 0;
+    return rc;
 }
 
 OwnedKeyValueStore::~OwnedKeyValueStore() {
@@ -244,8 +244,8 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStor
     return move(ownedKvstore->kvstore);
 }
 
-unique_ptr<KeyValueStore> OwnedKeyValueStore::commit(spdlog::logger &logger,
-                                                     unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &logger,
+                                                               unique_ptr<OwnedKeyValueStore> ownedKvstore) {
     Timer timeit(logger, "kvstore.commit");
     ownedKvstore->commit();
     return move(ownedKvstore->kvstore);

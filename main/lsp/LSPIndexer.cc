@@ -185,7 +185,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     if (shouldCommit) {
         // We should only commit if we wrote new hashes or global state changed.
-        OwnedKeyValueStore::commit(*config->logger, move(kvstore));
+        OwnedKeyValueStore::bestEffortCommit(*config->logger, move(kvstore));
     }
 
     updates.epoch = 0;

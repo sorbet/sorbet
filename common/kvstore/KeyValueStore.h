@@ -58,7 +58,7 @@ class OwnedKeyValueStore final {
 
     void clear();
     void refreshMainTransaction();
-    bool commit();
+    int commit();
     void abort();
 
 public:
@@ -76,10 +76,10 @@ public:
      * are desired. If not explicitly called, OwnedKeyValueStore will implicitly abort everything in the destructor. */
     static std::unique_ptr<KeyValueStore> abort(std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 
-    /** Attempts to commit all changes to disk. Returns an unowned kvstore that can be re-owned if more writes are
-     * desired. */
-    static std::unique_ptr<KeyValueStore> commit(spdlog::logger &logger,
-                                                 std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
+    /** Attempts to commit all changes to disk. Can fail to commit changes silently. Returns an unowned kvstore that can
+     * be re-owned if more writes are desired. */
+    static std::unique_ptr<KeyValueStore> bestEffortCommit(spdlog::logger &logger,
+                                                           std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 };
 
 } // namespace sorbet
