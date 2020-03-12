@@ -65,7 +65,7 @@ cp -aL "{src_dir}"/* "$build_dir"
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
-    if ! "$@" >> build.log 2>&1; then
+    if ! "$@" < /dev/null >> build.log 2>&1; then
         echo "command $@ failed!"
         cat build.log
         echo "build dir: $build_dir"
@@ -109,17 +109,45 @@ find ccan -type f -name \*.h | while read file; do
   cp $file "$internal_incdir/$file"
 done
 
-# install bundler
-cp "$base/{bundler}" bundler.gem
+# Put the installed ruby into our path to run gem commands
+export PATH="$out_dir/bin:$PATH"
 
-# --local to avoid going to rubygmes for the gem
-# --env-shebang to not hardcode the path to ruby in the sandbox
-# --force because bundler is packaged with ruby starting with 2.6
-run_cmd "$out_dir/bin/gem" install --local --env-shebang --force bundler.gem
+# update rubygems
+cp "$base/{rubygems}" rubygems-update.gem
+
+run_cmd gem install --no-document --local --env-shebang rubygems-update.gem
+run_cmd update_rubygems
+
+# Fix the shebang in the wrapper scripts updated by 'update_rubygems'
+ruby_path="$(which ruby)"
+for file in gem bundle rake; do
+    sed -i'' -e "1s|$ruby_path|/usr/bin/env ruby|" "$out_dir/bin/$file"
+done
+
+# rubygems-update isn't needed after update_rubygems has been run
+run_cmd gem uninstall rubygems-update
+
+# NOTE: bundle and bundler are the same, but bundler doesn't get updated by
+# rubygems_update.
+cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
+
+{install_gems}
 
 popd > /dev/null
 
 rm -rf "$build_dir"
+
+"""
+
+_INSTALL_GEM = """
+
+# Copy {file} locally to avoid having the gem command accidentally interpret it
+# as a gem name, rather than a filename.
+cp "$base/{file}" package.gem
+
+# --local to avoid going to rubygmes for the gem
+# --env-shebang to not hardcode the path to ruby in the sandbox
+gem install --local --env-shebang package.gem
 
 """
 
@@ -181,10 +209,12 @@ def _build_ruby_impl(ctx):
 
     outputs = binaries + [libdir, incdir, sharedir, internal_incdir]
 
+    install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
+
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.bundler,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -196,8 +226,9 @@ def _build_ruby_impl(ctx):
             internal_incdir = internal_incdir.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
-            bundler = ctx.files.bundler[0].path,
+            rubygems = ctx.files.rubygems[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
+            install_gems = "\n".join(install_gems),
         )),
     )
 
@@ -219,9 +250,12 @@ _build_ruby = rule(
     attrs = {
         "src": attr.label(),
         "deps": attr.label_list(),
-        "bundler": attr.label(
+        "rubygems": attr.label(
             mandatory = True,
-            doc = "The bundler gem to install",
+            doc = "The rubygems-update gem to install and apply",
+        ),
+        "gems": attr.label_list(
+            doc = "Additional ruby gems to install into the ruby build",
         ),
         "configure_flags": attr.string_list(
             doc = "Additional arguments to configure",
@@ -409,7 +443,7 @@ _ruby_internal_headers = rule(
     fragments = ["cpp"],
 )
 
-def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+def ruby(rubygems, gems, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
@@ -423,12 +457,13 @@ def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [],
     _build_ruby(
         name = "ruby-dist",
         src = ":source",
-        bundler = bundler,
+        rubygems = rubygems,
         configure_flags = configure_flags,
         copts = copts,
         cppopts = cppopts,
         linkopts = linkopts,
         deps = deps,
+        gems = gems,
     )
 
     _ruby_headers(

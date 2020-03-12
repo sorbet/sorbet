@@ -3,7 +3,6 @@
 load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
-    bundler = "@bundler_stripe//file",
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
@@ -24,6 +23,9 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
     ],
+    gems = [
+        "@bundler_stripe//file",
+    ],
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:linux": [
             "-Wl,-Bsymbolic-functions",
@@ -32,6 +34,7 @@ ruby(
         ],
         "//conditions:default": [],
     }),
+    rubygems = "@rubygems_update_stripe//file",
     deps = select({
         "@com_stripe_ruby_typer//tools/config:darwin": [
             "@system_ssl_darwin//:ssl",

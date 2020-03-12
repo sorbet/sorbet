@@ -33,21 +33,24 @@ def sorbet_llvm_externals():
         strip_prefix = "zlib-1.2.11",
     )
 
-    # NOTE: We're currently selecting bundler-1.17.2 here, because that's what
-    # ships with ruby-2.6. This choice is forced by behavior in pay-server,
-    # where GEM_PATH is cleared, and GEM_HOME is reset to the vendor/bundle. The
-    # effect of this is that any other version of bundler we specify here will
-    # be forgotten in this cleaned environment, though the outer test-runner
-    # will have it available. Since the test-runner will create standalone
-    # bundles for use with tests, we end up with test failures due to bundler
-    # version mismatches.
     http_file(
         name = "bundler_stripe",
         urls = [
-            "https://rubygems.org/downloads/bundler-1.17.2.gem",
-            "https://intgems.local.corp.stripe.com:446/gems/bundler-1.17.2.gem",
+            "https://rubygems.org/downloads/bundler-1.17.3.gem",
+            "https://intgems.local.corp.stripe.com:446/gems/bundler-1.17.3.gem",
         ],
-        sha256 = "b954038e22e232cc94feb323187e42194b4ed6e16a1712b37e5bd6018ec17635",
+        sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
+    )
+
+    # NOTE: We use rubygems-update when building the ruby archive up, as this
+    # allows us to pick the default version of bundler and rubygems.
+    http_file(
+        name = "rubygems_update_stripe",
+        urls = [
+            "https://rubygems.org/downloads/rubygems-update-3.1.2.gem",
+            "https://intgems.local.corp.stripe.com:446/gems/rubygems-update-3.1.2.gem",
+        ],
+        sha256 = "7bfe4e5e274191e56da8d127c79df10d9120feb8650e4bad29238f4b2773a661",
     )
 
     for apply_patch in [True, False]:
