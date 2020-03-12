@@ -35,6 +35,11 @@ const users = [
     image: 'img/kickstarter-logo.png',
     infoLink: 'https://www.kickstarter.com/',
   },
+  {
+    caption: 'Vonage',
+    image: 'img/vonage-logo.png',
+    infoLink: 'https://www.vonage.com/',
+  }
 ];
 
 const siteConfig = {
