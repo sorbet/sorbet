@@ -181,12 +181,6 @@ class NameInserter {
         }
     }
 
-    void aliasMethod(core::MutableContext ctx, core::Loc loc, core::SymbolRef owner, core::NameRef newName,
-                     core::SymbolRef method) {
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(loc, owner, newName);
-        alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
-    }
-
     core::SymbolRef methodOwner(core::MutableContext ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
