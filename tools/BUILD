@@ -76,6 +76,7 @@ compilation_database(
         "//common/web_tracer_framework:tracing",
         "//common/statsd:statsd",
         "//version:version",
+        "//common/kvstore:kvstore_test",
         "//common/kvstore:kvstore",
         "//common/crypto_hashing:crypto_hashing",
         "//common:common_test",
