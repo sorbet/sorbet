@@ -4,6 +4,11 @@
 #include "core/core.h"
 
 namespace sorbet::core::serialize {
+struct CachedFile {
+    std::shared_ptr<core::File> file;
+    std::unique_ptr<ast::Expression> tree;
+};
+
 class Serializer {
 public:
     static const u4 VERSION = 5;
@@ -12,22 +17,22 @@ public:
     static const u1 FILE_COMPRESSION_DEGREE =
         10; // >20 introduce decompression slowdown, >10 introduces compression slowdown
 
-    // Serialize a global state
+    // Serialize a global state.
     static std::vector<u1> store(GlobalState &gs);
 
-    // Stores a GlobalState, but only includes `File`s with Type ==
-    // Payload. This can be used in conjunction with `storeExpression` to store
+    // Stores a GlobalState, but only includes `File`s with Type == Payload.
+    // This can be used in conjunction with `storeFile` to store
     // a global state containing a name table along side a large number of
     // individual cached files, which can be loaded independently.
     static std::vector<u1> storePayloadAndNameTable(GlobalState &gs);
-    static std::vector<u1> storeExpression(GlobalState &gs, std::unique_ptr<ast::Expression> &e);
-    static std::vector<u1> storeFileHash(std::shared_ptr<const core::FileHash> fh);
 
-    // Loads an ast::Expression saved by storeExpression. Optionally overrides
-    // the saved file ID to the caller-specified ID.
-    static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p, u4 forceId = 0);
+    // Serializes a file and its AST.
+    static std::vector<u1> storeFile(const core::File &file, ast::ParsedFile &tree);
+
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
-    static std::unique_ptr<const core::FileHash> loadFileHash(spdlog::logger &logger, const u1 *const data);
+
+    // Loads the given file and its AST. Overwrites file references in the AST with the given file ref.
+    static CachedFile loadFile(const GlobalState &gs, core::FileRef fref, const u1 *const data);
 };
 }; // namespace sorbet::core::serialize
 

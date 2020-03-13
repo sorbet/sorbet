@@ -246,7 +246,7 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStor
 
 unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &logger,
                                                                unique_ptr<OwnedKeyValueStore> ownedKvstore) {
-    Timer timeit(logger, "kvstore.commit");
+    Timer timeit(logger, "kvstore.bestEffortCommit");
     ownedKvstore->commit();
     return move(ownedKvstore->kvstore);
 }

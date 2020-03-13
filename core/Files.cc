@@ -116,6 +116,7 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
     // Avoid needlessly invalidating references to *hash_.
     if (hash_ == nullptr) {
+        cached = false;
         hash_ = move(hash);
     }
 }

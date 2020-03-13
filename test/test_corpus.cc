@@ -122,9 +122,10 @@ UnorderedSet<string> knownExpectations = {
     "document-symbols"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
-    auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
-    auto restored = core::serialize::Serializer::loadExpression(gs, saved.data());
-    return {move(restored), expr.file};
+    auto &savedFile = expr.file.data(gs);
+    auto saved = core::serialize::Serializer::storeFile(savedFile, expr);
+    auto restored = core::serialize::Serializer::loadFile(gs, expr.file, saved.data());
+    return {move(restored.tree), expr.file};
 }
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */

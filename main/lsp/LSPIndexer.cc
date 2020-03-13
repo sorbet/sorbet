@@ -72,8 +72,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
         return;
     }
 
-    // We only use kvstore during initialization.
-    pipeline::computeFileHashes(files, *config->logger, workers, /* kvstore */ nullptr);
+    pipeline::computeFileHashes(files, *config->logger, workers);
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {
@@ -157,9 +156,10 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     if (this->kvstore != nullptr) {
         kvstore = make_unique<OwnedKeyValueStore>(move(this->kvstore));
     }
+    vector<core::FileRef> inputFiles;
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
-        vector<core::FileRef> inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
+        inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
         for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, kvstore)) {
             int id = t.file.id();
             if (id >= indexed.size()) {
@@ -172,20 +172,19 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         initialGS->errorQueue->drainWithQueryResponses();
     }
 
+    pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
+    bool wroteGlobalState = payload::retainGlobalState(initialGS, config->opts, kvstore);
+    auto wroteFiles = pipeline::cacheTreesAndFiles(*initialGS, inputFiles, indexed, kvstore);
+    if (wroteGlobalState || wroteFiles) {
+        // Only write changes to disk if GlobalState changed since the last time.
+        OwnedKeyValueStore::bestEffortCommit(*config->logger, move(kvstore));
+    }
+
     // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
     // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
     // Resize the indexed array accordingly.
     if (indexed.size() < initialGS->getFiles().size()) {
         indexed.resize(initialGS->getFiles().size());
-    }
-
-    // Use pipeline directly so we can pass along kvstore.
-    bool shouldCommit = pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers, kvstore);
-    shouldCommit = payload::retainGlobalState(initialGS, config->opts, kvstore) || shouldCommit;
-
-    if (shouldCommit) {
-        // We should only commit if we wrote new hashes or global state changed.
-        OwnedKeyValueStore::bestEffortCommit(*config->logger, move(kvstore));
     }
 
     updates.epoch = 0;

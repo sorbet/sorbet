@@ -488,7 +488,9 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        if (payload::retainGlobalState(gs, opts, kvstore) && kvstore) {
+        auto wroteGlobalState = payload::retainGlobalState(gs, opts, kvstore);
+        auto wroteFiles = pipeline::cacheTreesAndFiles(*gs, inputFiles, indexed, kvstore);
+        if (wroteGlobalState || wroteFiles) {
             // Only write changes to disk if GlobalState changed since the last time.
             OwnedKeyValueStore::bestEffortCommit(*logger, move(kvstore));
         }
@@ -560,7 +562,7 @@ int realmain(int argc, char *argv[]) {
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
             // Store file hashes for LSP.
-            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers, /* kvstore; not relevant here */ nullptr);
+            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers);
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 

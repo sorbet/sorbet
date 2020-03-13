@@ -13,11 +13,11 @@ class PreemptionTaskManager;
 
 namespace sorbet::realmain::pipeline {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+                         std::unique_ptr<ast::Expression> cachedTree = nullptr);
 
 std::pair<ast::ParsedFile, std::vector<std::shared_ptr<core::File>>>
 indexOneWithPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                    const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+                    std::unique_ptr<ast::Expression> cachedTree = nullptr);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 
@@ -44,11 +44,15 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
 // Computes file hashes for the given files, and stores them in the files. If supplied, attempts to retrieve hashes from
 // the key-value store. Returns 'true' if it had to compute any file hashes.
-bool computeFileHashes(const std::vector<std::shared_ptr<core::File>> files, spdlog::logger &logger,
-                       WorkerPool &workers, const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+void computeFileHashes(const std::vector<std::shared_ptr<core::File>> files, spdlog::logger &logger,
+                       WorkerPool &workers);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
+
+// Caches any uncached trees and files. Returns true if it modifies kvstore.
+bool cacheTreesAndFiles(const core::GlobalState &gs, const std::vector<core::FileRef> &frefs,
+                        std::vector<ast::ParsedFile> &parsedFiles, const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H
