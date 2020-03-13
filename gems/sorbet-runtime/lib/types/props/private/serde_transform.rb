@@ -82,7 +82,12 @@ module T::Props
               "#{varname}.nil? ? nil : #{inner}"
             end
           else
-            "T::Props::Utils.deep_clone_object(#{varname})"
+            # Handle, e.g., T::Boolean
+            if type.types.all? {|t| generate(t, mode, varname).nil?}
+              nil
+            else
+              "T::Props::Utils.deep_clone_object(#{varname})"
+            end
           end
         when T::Types::Enum
           generate(T::Utils.lift_enum(type), mode, varname)

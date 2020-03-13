@@ -383,6 +383,47 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class BooleanStruct < T::Struct
+    prop :prop, T::Boolean
+    prop :nilable_prop, T.nilable(T::Boolean)
+  end
+
+  describe 'boolean props' do
+    it 'are not cloned on serde' do
+      T::Props::Utils.expects(:deep_clone_object).never
+
+      s = BooleanStruct.new(prop: true)
+      assert_equal(true, BooleanStruct.from_hash(s.serialize).prop)
+    end
+  end
+
+  class HeterogenousUnionStruct < T::Struct
+    prop :prop, T.any(String, MySerializable)
+  end
+
+  describe 'heterogenous union props' do
+    it 'are cloned on serde' do
+      T::Props::Utils.expects(:deep_clone_object).with('foo').at_least_once.returns('foo')
+
+      s = HeterogenousUnionStruct.new(prop: 'foo')
+      assert_equal('foo', HeterogenousUnionStruct.from_hash(s.serialize).prop)
+    end
+  end
+
+  class MultipleStructUnionStruct < T::Struct
+    prop :prop, T.any(MySerializable, MyNilableSerializable)
+  end
+
+  describe 'unions of two different serializables' do
+    it 'are just cloned on serde' do
+      obj = MyNilableSerializable.new
+      T::Props::Utils.expects(:deep_clone_object).with(obj).at_least_once.returns(obj)
+
+      s = MultipleStructUnionStruct.new(prop: obj)
+      assert_equal(obj, MultipleStructUnionStruct.from_hash(s.serialize).prop)
+    end
+  end
+
   class CustomType
     extend T::Props::CustomType
 
