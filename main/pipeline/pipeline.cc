@@ -1229,7 +1229,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, vector<ast::ParsedFile> &pa
         }
 
         auto &file = pfile.file.data(gs);
-        if (!file.cached) {
+        if (!file.cached && !file.hasParseErrors) {
             kvstore->write(fileKey(file), core::serialize::Serializer::storeFile(file, pfile));
             written = true;
         }
