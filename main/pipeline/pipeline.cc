@@ -1213,21 +1213,24 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
     }
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, const vector<core::FileRef> &frefs,
-                        vector<ast::ParsedFile> &parsedFiles, const unique_ptr<OwnedKeyValueStore> &kvstore) {
+bool cacheTreesAndFiles(const core::GlobalState &gs, vector<ast::ParsedFile> &parsedFiles,
+                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
     }
 
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
-    ENFORCE(frefs.size() == parsedFiles.size());
     int i = -1;
     bool written = false;
-    for (auto &fref : frefs) {
+    for (auto &pfile : parsedFiles) {
         i++;
-        if (fref.exists() && !fref.data(gs).cached) {
-            kvstore->write(fileKey(fref.data(gs)),
-                           core::serialize::Serializer::storeFile(fref.data(gs), parsedFiles[i]));
+        if (!pfile.file.exists()) {
+            continue;
+        }
+
+        auto &file = pfile.file.data(gs);
+        if (!file.cached) {
+            kvstore->write(fileKey(file), core::serialize::Serializer::storeFile(file, pfile));
             written = true;
         }
     }

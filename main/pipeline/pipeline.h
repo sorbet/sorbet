@@ -51,8 +51,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
                                     const options::Options &opts);
 
 // Caches any uncached trees and files. Returns true if it modifies kvstore.
-bool cacheTreesAndFiles(const core::GlobalState &gs, const std::vector<core::FileRef> &frefs,
-                        std::vector<ast::ParsedFile> &parsedFiles, const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+bool cacheTreesAndFiles(const core::GlobalState &gs, std::vector<ast::ParsedFile> &parsedFiles,
+                        const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

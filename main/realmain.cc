@@ -489,7 +489,7 @@ int realmain(int argc, char *argv[]) {
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
         auto wroteGlobalState = payload::retainGlobalState(gs, opts, kvstore);
-        auto wroteFiles = pipeline::cacheTreesAndFiles(*gs, inputFiles, indexed, kvstore);
+        auto wroteFiles = pipeline::cacheTreesAndFiles(*gs, indexed, kvstore);
         if (wroteGlobalState || wroteFiles) {
             // Only write changes to disk if GlobalState changed since the last time.
             OwnedKeyValueStore::bestEffortCommit(*logger, move(kvstore));
