@@ -610,6 +610,51 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class ModulePropStruct < T::Struct
+    module NonScalar
+    end
+
+    class ConcreteNonScalar
+      include NonScalar
+    end
+
+    module Scalar
+    end
+
+    class ConcreteScalar
+      include Scalar
+    end
+
+    prop :nonscalar, T.nilable(NonScalar)
+    prop :scalar, T.nilable(Scalar)
+  end
+
+  describe 'with a module prop type' do
+    before do
+      T::Configuration.scalar_types += [ModulePropStruct::Scalar.name]
+    end
+
+    after do
+      T::Configuration.scalar_types = nil
+    end
+
+    it 'is cloned on serde by default' do
+      val = ModulePropStruct::ConcreteNonScalar.new
+      T::Props::Utils.expects(:deep_clone_object).with(val).returns(val).at_least_once
+
+      s = ModulePropStruct.new(nonscalar: val)
+      assert_equal(val, ModulePropStruct.from_hash(s.serialize).nonscalar)
+    end
+
+    it 'is not cloned on serde if set as scalar' do
+      val = ModulePropStruct::ConcreteScalar.new
+      T::Props::Utils.expects(:deep_clone_object).never
+
+      s = ModulePropStruct.new(scalar: val)
+      assert_equal(val, ModulePropStruct.from_hash(s.serialize).scalar)
+    end
+  end
+
   class ComplexStruct < T::Struct
     prop :primitive, Integer
     prop :nilable, T.nilable(Integer)
