@@ -42,8 +42,6 @@ def sorbet_llvm_externals():
         sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
     )
 
-    # NOTE: We use rubygems-update when building the ruby archive up, as this
-    # allows us to pick the default version of bundler and rubygems.
     http_file(
         name = "rubygems_update_stripe",
         urls = [
