@@ -6,6 +6,7 @@
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
+#include "version/version.h"
 #include <memory>
 #include <regex>
 
@@ -27,7 +28,15 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
     options.runLSP = true;
 }
 
-unique_ptr<core::GlobalState>
+unique_ptr<KeyValueStore> getCache(const options::Options &options) {
+    if (!options.cacheDir.empty()) {
+        return make_unique<KeyValueStore>(Version::full_version_string, options.cacheDir,
+                                          options.skipRewriterPasses ? "nodsl" : "default");
+    }
+    return nullptr;
+}
+
+pair<unique_ptr<core::GlobalState>, unique_ptr<KeyValueStore>>
 createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options, int numWorkerThreads,
                                  shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> &stderrColorSinkOut,
                                  shared_ptr<spd::logger> &loggerOut, shared_ptr<spd::logger> &typeErrorsConsoleOut) {
@@ -39,11 +48,16 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     loggerOut = make_shared<spd::logger>("console", stderrColorSinkOut);
     typeErrorsConsoleOut = make_shared<spd::logger>("typeDiagnostics", stderrColorSinkOut);
     typeErrorsConsoleOut->set_pattern("%v");
-    auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut)));
+    auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut));
+
     unique_ptr<OwnedKeyValueStore> kvstore;
+    if (!options.cacheDir.empty()) {
+        auto unownedKvstore = getCache(options);
+        kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
+    }
     payload::createInitialGlobalState(gs, options, kvstore);
     setRequiredLSPOptions(*gs, options);
-    return gs;
+    return make_pair(move(gs), OwnedKeyValueStore::abort(move(kvstore)));
 }
 
 } // namespace
@@ -77,25 +91,30 @@ void MultiThreadedLSPWrapper::send(const std::string &json) {
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                        std::shared_ptr<spd::logger> logger,
                        shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                       shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath)
+                       shared_ptr<spd::logger> typeErrorsConsole, unique_ptr<KeyValueStore> kvstore,
+                       bool disableFastPath)
     : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), true, disableFastPath)),
-      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, nullptr)), opts(move(opts)) {}
+      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, move(kvstore))), opts(move(opts)) {}
 
 LSPWrapper::~LSPWrapper() = default;
 
 SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                    shared_ptr<spd::logger> logger,
                                                    shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                                                   shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath)
-    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), disableFastPath) {}
+                                                   shared_ptr<spd::logger> typeErrorsConsole,
+                                                   unique_ptr<KeyValueStore> kvstore, bool disableFastPath)
+    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(kvstore),
+                 disableFastPath) {}
 
 MultiThreadedLSPWrapper::MultiThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                  shared_ptr<spd::logger> logger,
                                                  shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                                                 shared_ptr<spd::logger> typeErrorsConsole, bool disableFastPath)
-    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), disableFastPath),
+                                                 shared_ptr<spd::logger> typeErrorsConsole,
+                                                 unique_ptr<KeyValueStore> kvstore, bool disableFastPath)
+    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(kvstore),
+                 disableFastPath),
       input(make_shared<LSPProgrammaticInput>()),
       lspThread(runInAThread("LSPWrapper", [&]() -> void { lspLoop->runLSP(input); })) {}
 
@@ -108,12 +127,13 @@ MultiThreadedLSPWrapper::~MultiThreadedLSPWrapper() {
 
 unique_ptr<SingleThreadedLSPWrapper>
 SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> options,
-                                                shared_ptr<spdlog::logger> logger, bool disableFastPath) {
+                                                shared_ptr<spdlog::logger> logger,
+                                                std::unique_ptr<KeyValueStore> kvstore, bool disableFastPath) {
     setRequiredLSPOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.
     // `make_unique` doesn't work because that method doesn't have access to the constructor.
-    auto wrapper =
-        new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), nullptr, nullptr, disableFastPath);
+    auto wrapper = new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), nullptr, nullptr, move(kvstore),
+                                                disableFastPath);
     return unique_ptr<SingleThreadedLSPWrapper>(wrapper);
 }
 
@@ -122,10 +142,10 @@ SingleThreadedLSPWrapper::create(string_view rootPath, shared_ptr<options::Optio
     shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     shared_ptr<spd::logger> logger;
     shared_ptr<spd::logger> typeErrorsConsole;
-    auto gs = createGlobalStateAndOtherObjects(rootPath, *options, 0, stderrColorSink, logger, typeErrorsConsole);
+    auto pair = createGlobalStateAndOtherObjects(rootPath, *options, 0, stderrColorSink, logger, typeErrorsConsole);
     // See comment in `SingleThreadedLSPWrapper::createWithGlobalState`
-    auto wrapper = new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), move(stderrColorSink),
-                                                move(typeErrorsConsole), disableFastPath);
+    auto wrapper = new SingleThreadedLSPWrapper(move(pair.first), move(options), move(logger), move(stderrColorSink),
+                                                move(typeErrorsConsole), move(pair.second), disableFastPath);
     return unique_ptr<SingleThreadedLSPWrapper>(wrapper);
 }
 
@@ -135,11 +155,11 @@ unique_ptr<MultiThreadedLSPWrapper> MultiThreadedLSPWrapper::create(string_view 
     shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     shared_ptr<spd::logger> logger;
     shared_ptr<spd::logger> typeErrorsConsole;
-    auto gs = createGlobalStateAndOtherObjects(rootPath, *options, numWorkerThreads, stderrColorSink, logger,
-                                               typeErrorsConsole);
+    auto pair = createGlobalStateAndOtherObjects(rootPath, *options, numWorkerThreads, stderrColorSink, logger,
+                                                 typeErrorsConsole);
     // See comment in `SingleThreadedLSPWrapper::createWithGlobalState`
-    auto wrapper = new MultiThreadedLSPWrapper(move(gs), move(options), move(logger), move(stderrColorSink),
-                                               move(typeErrorsConsole), disableFastPath);
+    auto wrapper = new MultiThreadedLSPWrapper(move(pair.first), move(options), move(logger), move(stderrColorSink),
+                                               move(typeErrorsConsole), move(pair.second), disableFastPath);
     return unique_ptr<MultiThreadedLSPWrapper>(wrapper);
 }
 

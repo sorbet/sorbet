@@ -452,11 +452,8 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
 
-        unique_ptr<KeyValueStore> unownedKvstore;
-        if (kvstore) {
-            // There should not have been any writes to the kvstore, so no need to commit changes to disk.
-            unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));
-        }
+        // There should not have been any writes to the kvstore, so no need to commit changes to disk.
+        unique_ptr<KeyValueStore> unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));
 
         auto output = make_shared<lsp::LSPStdout>(logger);
         lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),

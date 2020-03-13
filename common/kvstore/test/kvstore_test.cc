@@ -2,7 +2,7 @@
 // has to go first as it violates our requirements
 #include "spdlog/spdlog.h"
 // has to go above null_sink.h; this comment prevents reordering.
-#include "absl/strings/str_split.h"
+#include "absl/strings/str_split.h" // For StripAsciiWhitespace
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"

@@ -1,11 +1,14 @@
 #include "test/lsp/ProtocolTest.h"
+#include "absl/strings/str_split.h" // For StripAsciiWhitespace
 #include "test/helpers/MockFileSystem.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
 
+string exec(string cmd);
+
+namespace sorbet::test::lsp {
 namespace {
 bool isSorbetFence(const LSPMessage &msg) {
     return msg.isNotification() && msg.method() == LSPMethod::SorbetFence;
@@ -102,20 +105,42 @@ vector<CounterImpl::Timing> CounterStateDatabase::getTimings(ConstExprStr counte
     return rv;
 }
 
-void ProtocolTest::SetUp() {
-    rootPath = "/Users/jvilk/stripe/pay-server";
-    rootUri = fmt::format("file://{}", rootPath);
+void ProtocolTest::resetState() {
     fs = make_shared<MockFileSystem>(rootPath);
-    bool useMultithreading = GetParam();
+    diagnostics.clear();
+    sourceFileContents.clear();
+    auto config = GetParam();
     auto opts = make_shared<realmain::options::Options>();
     opts->disableWatchman = true;
-    if (useMultithreading) {
+    if (config.useCache) {
+        // Only recreate the cacheDir if we haven't created one before.
+        if (cacheDir.empty()) {
+            cacheDir = absl::StripAsciiWhitespace(exec("mktemp -d"));
+        }
+        opts->cacheDir = cacheDir;
+    }
+
+    if (config.useMultithreading) {
         lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
     } else {
         lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
     }
     lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();
+}
+
+void ProtocolTest::SetUp() {
+    rootPath = "/Users/jvilk/stripe/pay-server";
+    rootUri = fmt::format("file://{}", rootPath);
+    resetState();
+}
+
+void ProtocolTest::TearDown() {
+    if (!cacheDir.empty()) {
+        // Shut down lspwrapper before cleaning up database on disk.
+        lspWrapper = nullptr;
+        exec(fmt::format("rm -r {}", cacheDir));
+    }
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown,

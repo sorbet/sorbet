@@ -54,5 +54,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 bool cacheTreesAndFiles(const core::GlobalState &gs, std::vector<ast::ParsedFile> &parsedFiles,
                         const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
+// Exported for tests only.
+std::string fileKey(const core::File &file);
+
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

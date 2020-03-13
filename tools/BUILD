@@ -14,6 +14,7 @@ compilation_database(
         "//test/lsp:watchman_test_corpus",
         "//test/lsp:protocol_test_corpus",
         "//test/lsp:multithreaded_protocol_test_corpus",
+        "//test/lsp:cache_protocol_test_corpus",
         "//test/fuzz:fuzz_hover",
         "//test/fuzz:proto",
         "//test/fuzz:fuzz_doc_symbols",

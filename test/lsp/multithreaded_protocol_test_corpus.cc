@@ -619,6 +619,6 @@ TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
 }
 
 // Run these tests in multi-threaded mode.
-INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(true));
+INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{true}));
 
 } // namespace sorbet::test::lsp

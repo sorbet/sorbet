@@ -240,12 +240,18 @@ fail:
 }
 
 unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+    if (ownedKvstore == nullptr) {
+        return nullptr;
+    }
     ownedKvstore->abort();
     return move(ownedKvstore->kvstore);
 }
 
 unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &logger,
                                                                unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+    if (ownedKvstore == nullptr) {
+        return nullptr;
+    }
     Timer timeit(logger, "kvstore.bestEffortCommit");
     ownedKvstore->commit();
     return move(ownedKvstore->kvstore);
