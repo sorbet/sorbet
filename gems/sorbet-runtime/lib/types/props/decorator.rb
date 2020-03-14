@@ -378,16 +378,12 @@ class T::Props::Decorator
       # TODO: The type of this element is confusing. We should refactor so that
       # it can be always `type_object` (a PropType) or always `cls` (a Module)
       type: type,
-      # These are precomputed for performance
-      # TODO: A lot of these are only needed by T::Props::Serializable or T::Struct
-      # and can/should be moved accordingly.
-      type_is_custom_type: cls.singleton_class < T::Props::CustomType,
+      # TODO: The `type_is_*` properties are no longer used internally and should
+      # be removed once pay-server no longer depends on them.
       type_is_serializable: cls < T::Props::Serializable,
       type_is_array_of_serializable: !array_subdoc_type.nil?,
       type_is_hash_of_serializable_values: !hash_value_subdoc_type.nil?,
-      type_is_hash_of_custom_type_keys: !hash_key_custom_type.nil?,
       type_object: type_object,
-      type_needs_clone: needs_clone,
       accessor_key: "@#{name}".to_sym,
       sensitivity: sensitivity_and_pii[:sensitivity],
       pii: sensitivity_and_pii[:pii],
@@ -404,6 +400,8 @@ class T::Props::Decorator
       rules[:array] = array_subdoc_type
     end
 
+    # TODO: `serializable_subtype` is no longer used internally and should
+    # be removed once pay-server no longer depends on it.
     if rules[:type_is_serializable]
       rules[:serializable_subtype] = cls
     elsif array_subdoc_type

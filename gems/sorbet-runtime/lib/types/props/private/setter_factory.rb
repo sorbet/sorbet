@@ -26,11 +26,11 @@ module T::Props
         # `valid?` on it won't work as expected), so unwrap any T.nilable and
         # do a check manually. (Note this hack does not fix custom types as
         # collection elements.)
-        non_nil_type = if rules[:type_is_custom_type]
-          rules.fetch(:type)
-        else
-          T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+        non_nil_type = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+        if non_nil_type.is_a?(T::Types::Simple) && non_nil_type.raw_type.singleton_class < T::Props::CustomType
+          non_nil_type = non_nil_type.raw_type
         end
+
         accessor_key = rules.fetch(:accessor_key)
         validate = rules[:setter_validate]
 
