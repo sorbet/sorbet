@@ -23,7 +23,7 @@ realmain::options::Options createDefaultOptions(bool stressIncrementalResolver) 
 unique_ptr<const realmain::options::Options> opts =
     make_unique<const realmain::options::Options>(createDefaultOptions(false));
 
-unique_ptr<KeyValueStore> kvstore;
+unique_ptr<OwnedKeyValueStore> kvstore;
 
 unique_ptr<core::GlobalState> buildInitialGlobalState() {
     typeErrorsConsole->set_level(spd::level::critical);

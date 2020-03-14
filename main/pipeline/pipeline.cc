@@ -78,26 +78,26 @@ public:
     }
 };
 
-string fileKey(core::GlobalState &gs, core::FileRef file) {
-    auto path = file.data(gs).path();
+string fileKey(const core::File &file) {
+    auto path = file.path();
     string key(path.begin(), path.end());
     key += "//";
-    auto hashBytes = sorbet::crypto_hashing::hash64(file.data(gs).source());
+    auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
     key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
     return key;
 }
 
-unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef file,
-                                               const unique_ptr<KeyValueStore> &kvstore) {
-    if (kvstore && file.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(gs, file);
+unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs, core::FileRef fref,
+                                                           const core::File &file,
+                                                           const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    if (kvstore && fref.id() < gs.filesUsed()) {
+        string fileHashKey = fileKey(file);
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached) {
             prodCounterInc("types.input.files.kvstore.hit");
-            auto cachedTree = core::serialize::Serializer::loadExpression(gs, maybeCached, file.id());
-            file.data(gs).cachedParseTree = true;
-            ENFORCE(cachedTree->loc.file() == file);
-            return cachedTree;
+            auto cachedTree = core::serialize::Serializer::loadFile(gs, fref, maybeCached);
+            ENFORCE(cachedTree.tree->loc.file() == fref);
+            return make_unique<core::serialize::CachedFile>(move(cachedTree));
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
         }
@@ -105,17 +105,13 @@ unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::File
     return nullptr;
 }
 
-void cacheTrees(core::GlobalState &gs, unique_ptr<KeyValueStore> &kvstore, vector<ast::ParsedFile> &trees) {
-    if (!kvstore) {
-        return;
+unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
+    if (cachedFile) {
+        return move(cachedFile->tree);
     }
-    for (auto &tree : trees) {
-        if (tree.file.data(gs).cachedParseTree || tree.file.data(gs).hasParseErrors) {
-            continue;
-        }
-        string fileHashKey = fileKey(gs, tree.file);
-        kvstore->write(fileHashKey, core::serialize::Serializer::storeExpression(gs, tree.tree));
-    }
+    return nullptr;
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
@@ -175,15 +171,13 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<KeyValueStore> &kvstore) {
+                         unique_ptr<ast::Expression> tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
 
     Timer timeit(lgs.tracer(), "indexOne");
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(lgs, file, kvstore);
-
         if (!tree) {
             // tree isn't cached. Need to start from parser
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
@@ -216,6 +210,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         }
 
         rewriten.tree = move(tree);
+        ENFORCE(rewriten.tree->loc.file() == file);
         return rewriten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -232,15 +227,13 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::File
 
 pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
                                                                           core::GlobalState &gs, core::FileRef file,
-                                                                          unique_ptr<KeyValueStore> &kvstore) {
+                                                                          unique_ptr<ast::Expression> tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
 
     Timer timeit(gs.tracer(), "indexOneWithPlugins", {{"file", (string)file.data(gs).path()}});
     try {
-        unique_ptr<ast::Expression> tree = fetchTreeFromCache(gs, file, kvstore);
-
         if (!tree) {
             // tree isn't cached. Need to start from parser
             if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
@@ -292,6 +285,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         }
 
         rewriten.tree = move(tree);
+        ENFORCE(rewriten.tree->loc.file() == file);
         return {move(rewriten), resultPluginFiles};
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -424,10 +418,13 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
     }
 }
 
-void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
-                                     const options::Options &opts) {
+// Returns a non-null ast::Expression if kvstore contains the AST.
+unique_ptr<ast::Expression> readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+                                                            const options::Options &opts,
+                                                            const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    unique_ptr<ast::Expression> ast;
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
-        return;
+        return ast;
     }
     auto fileName = file.dataAllowingUnsafe(*gs).path();
     Timer timeit(gs->tracer(), "readFileWithStrictnessOverrides", {{"file", (string)fileName}});
@@ -446,9 +443,15 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
 
     {
         core::UnfreezeFileTable unfreezeFiles(*gs);
-        auto entered = gs->enterNewFileAt(
-            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal),
-            file);
+        auto fileObj =
+            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
+        auto maybeCached = fetchFileFromCache(*gs, file, *fileObj, kvstore);
+        if (maybeCached) {
+            fileObj = move(maybeCached->file);
+            ast = move(maybeCached->tree);
+        }
+
+        auto entered = gs->enterNewFileAt(move(fileObj), file);
         ENFORCE(entered == file);
     }
     if (enable_counters) {
@@ -469,6 +472,7 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     auto level = decideStrictLevel(*gs, file, opts);
     fileData.strictLevel = level;
     incrementStrictLevelCounter(level);
+    return ast;
 }
 
 struct IndexResult {
@@ -484,7 +488,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              unique_ptr<KeyValueStore> &kvstore) {
+                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
@@ -498,7 +502,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
-                cacheTrees(*ret.gs, kvstore, ret.trees);
             } else {
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 core::MutableContext ctx(*ret.gs, core::Symbols::root());
@@ -507,12 +510,11 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                     for (auto &tree : threadResult.res.trees) {
                         auto file = tree.file;
                         core::ErrorRegion errs(*ret.gs, file);
-                        if (!file.data(*ret.gs).cachedParseTree) {
+                        if (!file.data(*ret.gs).cached) {
                             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
                         }
                     }
                 }
-                cacheTrees(*ret.gs, kvstore, threadResult.res.trees);
                 ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
                                  make_move_iterator(threadResult.res.trees.end()));
 
@@ -528,7 +530,8 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
-                               const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+                               const options::Options &opts, WorkerPool &workers,
+                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -546,8 +549,8 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::FileRef file = job;
-                    readFileWithStrictnessOverrides(localGs, file, opts);
-                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, kvstore);
+                    auto cachedTree = readFileWithStrictnessOverrides(localGs, file, opts, kvstore);
+                    auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, move(cachedTree));
                     threadResult.res.pluginGeneratedFiles.insert(threadResult.res.pluginGeneratedFiles.end(),
                                                                  make_move_iterator(pluginFiles.begin()),
                                                                  make_move_iterator(pluginFiles.end()));
@@ -568,7 +571,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
-                             unique_ptr<KeyValueStore> &kvstore) {
+                             const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (firstPass.pluginGeneratedFiles.empty()) {
         return firstPass;
     }
@@ -593,7 +596,8 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
             if (result.gotItem()) {
                 core::FileRef file = job;
                 file.data(*localGs).strictLevel = decideStrictLevel(*localGs, file, opts);
-                threadResult.res.trees.emplace_back(indexOne(opts, *localGs, file, kvstore));
+                threadResult.res.trees.emplace_back(
+                    indexOne(opts, *localGs, file, fetchTreeFromCache(*localGs, file, file.data(*localGs), kvstore)));
             }
         }
 
@@ -629,7 +633,8 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+                              const options::Options &opts, WorkerPool &workers,
+                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
@@ -644,8 +649,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         // Run singlethreaded if only using 2 files
         size_t pluginFileCount = 0;
         for (auto file : files) {
-            readFileWithStrictnessOverrides(gs, file, opts);
-            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, kvstore);
+            auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
+            auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *gs, file, move(tree));
             ret.emplace_back(move(parsedFile));
             pluginFileCount += pluginFiles.size();
             for (auto &pluginFile : pluginFiles) {
@@ -655,9 +660,9 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
                     pluginFileRef = gs->enterFile(pluginFile);
                     pluginFileRef.data(*gs).strictLevel = decideStrictLevel(*gs, pluginFileRef, opts);
                 }
-                ret.emplace_back(indexOne(opts, *gs, pluginFileRef, kvstore));
+                ret.emplace_back(
+                    indexOne(opts, *gs, pluginFileRef, fetchTreeFromCache(*gs, pluginFileRef, *pluginFile, kvstore)));
             }
-            cacheTrees(*gs, kvstore, ret);
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
@@ -883,9 +888,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 auto newFile = make_shared<core::File>((string)f.file.data(*gs).path(), move(newSource),
                                                        f.file.data(*gs).sourceType);
                 gs = core::GlobalState::replaceFile(move(gs), f.file, move(newFile));
-                unique_ptr<KeyValueStore> kvstore;
                 f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
-                auto reIndexed = indexOne(opts, *gs, f.file, kvstore);
+                auto reIndexed = indexOne(opts, *gs, f.file);
                 vector<ast::ParsedFile> toBeReResolved;
                 toBeReResolved.emplace_back(move(reIndexed));
                 auto reresolved = pipeline::incrementalResolve(*gs, move(toBeReResolved), opts);
@@ -1150,9 +1154,8 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
         fref.data(*lgs).strictLevel = pipeline::decideStrictLevel(*lgs, fref, emptyOpts);
     }
     vector<ast::ParsedFile> single;
-    unique_ptr<KeyValueStore> kvstore;
 
-    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore));
+    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref));
     auto errs = lgs->errorQueue->drainAllErrors();
     auto allNames = getAllNames(*lgs, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
@@ -1172,10 +1175,10 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
 
     logger.debug("Computing state hashes for {} files", files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<core::FileHash>>>>>(files.size());
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>>(files.size());
     workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;
         {
@@ -1187,8 +1190,7 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
                         continue;
                     }
 
-                    auto hash = computeFileHash(files[job], logger);
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(move(hash)));
+                    threadResult.emplace_back(job, make_unique<core::FileHash>(computeFileHash(files[job], logger)));
                 }
             }
         }
@@ -1199,7 +1201,7 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
     });
 
     {
-        vector<pair<int, unique_ptr<core::FileHash>>> threadResult;
+        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
@@ -1209,6 +1211,30 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
             }
         }
     }
+}
+
+bool cacheTreesAndFiles(const core::GlobalState &gs, vector<ast::ParsedFile> &parsedFiles,
+                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    if (kvstore == nullptr) {
+        return false;
+    }
+
+    Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
+    int i = -1;
+    bool written = false;
+    for (auto &pfile : parsedFiles) {
+        i++;
+        if (!pfile.file.exists()) {
+            continue;
+        }
+
+        auto &file = pfile.file.data(gs);
+        if (!file.cached && !file.hasParseErrors) {
+            kvstore->write(fileKey(file), core::serialize::Serializer::storeFile(file, pfile));
+            written = true;
+        }
+    }
+    return written;
 }
 
 } // namespace sorbet::realmain::pipeline

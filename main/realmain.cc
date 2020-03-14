@@ -394,10 +394,11 @@ int realmain(int argc, char *argv[]) {
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
-    unique_ptr<KeyValueStore> kvstore;
+    unique_ptr<OwnedKeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
-                                             opts.skipRewriterPasses ? "nodsl" : "default");
+        auto unownedKvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
+                                                         opts.skipRewriterPasses ? "nodsl" : "default");
+        kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
     }
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -450,8 +451,13 @@ int realmain(int argc, char *argv[]) {
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
+
+        // There should not have been any writes to the kvstore, so no need to commit changes to disk.
+        unique_ptr<KeyValueStore> unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));
+
         auto output = make_shared<lsp::LSPStdout>(logger);
-        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger));
+        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),
+                          move(unownedKvstore));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
@@ -479,7 +485,12 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        payload::retainGlobalState(gs, opts, kvstore);
+        auto wroteGlobalState = payload::retainGlobalState(gs, opts, kvstore);
+        auto wroteFiles = pipeline::cacheTreesAndFiles(*gs, indexed, kvstore);
+        if (wroteGlobalState || wroteFiles) {
+            // Only write changes to disk if GlobalState changed since the last time.
+            OwnedKeyValueStore::bestEffortCommit(*logger, move(kvstore));
+        }
 
         if (gs->runningUnderAutogen) {
 #ifndef SORBET_REALMAIN_MIN

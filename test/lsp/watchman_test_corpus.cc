@@ -121,6 +121,6 @@ TEST_P(ProtocolTest, MergesMultipleWatchmanUpdates) {
 }
 
 // Run these tests in single-threaded mode.
-INSTANTIATE_TEST_SUITE_P(SingleThreadedProtocolTests, ProtocolTest, testing::Values(false));
+INSTANTIATE_TEST_SUITE_P(SingleThreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{false}));
 
 } // namespace sorbet::test::lsp

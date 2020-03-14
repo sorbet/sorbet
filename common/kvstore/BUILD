@@ -25,3 +25,22 @@ cc_library(
         "//conditions:default": ["@lmdb"],
     }),
 )
+
+cc_test(
+    name = "kvstore_test",
+    size = "small",
+    srcs = glob([
+        "test/*.cc",
+    ]),
+    copts = ["-Iexternal/gtest/include"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "kvstore",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

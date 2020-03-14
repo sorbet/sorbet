@@ -41,13 +41,13 @@ public:
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
-    static TypePtr unpickleType(UnPickler &p, GlobalState *gs);
-    static ArgInfo unpickleArgInfo(UnPickler &p, GlobalState *gs);
-    static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
+    static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
+    static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
+    static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static Loc unpickleLoc(UnPickler &p, FileRef file);
-    static unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, GlobalState &, FileRef file);
-    static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
+    static unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
+    static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
 
     SerializerImpl() = delete;
@@ -398,7 +398,7 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
     }
 }
 
-TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
+TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that size difference after
                           // compression is small and u4 is 10% faster
     switch (tag) {
@@ -491,7 +491,7 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     pickle(p, a.type.get());
 }
 
-ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, GlobalState *gs) {
+ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     ArgInfo result;
     result.name = core::NameRef(*gs, p.getU4());
     result.rebind = core::SymbolRef(gs, p.getU4());
@@ -552,7 +552,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
 }
 
-Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
+Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef(gs, p.getU4());
     result.name = NameRef(*gs, p.getU4());
@@ -766,7 +766,7 @@ vector<u1> Serializer::store(GlobalState &gs) {
     return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
 }
 
-vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
+std::vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
     Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
@@ -777,6 +777,21 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();
+}
+
+vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
+    Pickler p;
+    SerializerImpl::pickle(p, file);
+    SerializerImpl::pickleTree(p, tree.file, tree.tree);
+    return p.result(FILE_COMPRESSION_DEGREE);
+}
+
+CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref, const u1 *const data) {
+    UnPickler p(data, gs.tracer());
+    auto file = SerializerImpl::unpickleFile(p);
+    file->cached = true;
+    auto tree = SerializerImpl::unpickleExpr(p, gs, fref);
+    return CachedFile{move(file), move(tree)};
 }
 
 template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t) {
@@ -999,7 +1014,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", n->nodeName()); });
 }
 
-unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p, GlobalState &gs, FileRef file) {
+unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs, FileRef file) {
     u1 kind = p.getU1();
     if (kind == 1) {
         return nullptr;
@@ -1233,21 +1248,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
     Exception::raise("Not handled {}", kind);
 }
 
-unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p, u4 forceId) {
-    serialize::UnPickler up(p, gs.tracer());
-    u4 loaded = up.getU4();
-    FileRef fileId(forceId > 0 ? forceId : loaded);
-    return SerializerImpl::unpickleExpr(up, gs, fileId);
-}
-
-vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expression> &e) {
-    serialize::Pickler pickler;
-    pickler.putU4(e->loc.file().id());
-    SerializerImpl::pickle(pickler, e->loc.file(), e);
-    return pickler.result(FILE_COMPRESSION_DEGREE);
-}
-
-NameRef SerializerImpl::unpickleNameRef(UnPickler &p, GlobalState &gs) {
+NameRef SerializerImpl::unpickleNameRef(UnPickler &p, const GlobalState &gs) {
     NameRef name(NameRef::WellKnown{}, p.getU4());
     ENFORCE(name.data(gs)->ref(gs) == name);
     return name;

@@ -37,19 +37,25 @@ public:
                                                 std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
 };
 
+struct ProtocolTestConfig {
+    bool useMultithreading = false;
+    // Should the test use kvstore?
+    bool useCache = false;
+};
+
 /**
  * If parameter is 'true', LSP is configured in multithreaded mode.
  */
-class ProtocolTest : public testing::TestWithParam<bool> {
+class ProtocolTest : public testing::TestWithParam<ProtocolTestConfig> {
 protected:
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
     std::string rootUri;
+    std::string cacheDir;
     // Contains the current source file contents. Used to print pretty error messages.
     // TODO(jvilk): Remove and instead get state from Sorbet directly. Will be hard to maintain
     // once we test incremental diffs.
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
-    std::vector<std::unique_ptr<LSPMessage>> pendingRequests;
     // Currently active diagnostics, specifically using map to enforce sort order on filename.
     std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> diagnostics;
     // Emulated file system.
@@ -61,6 +67,11 @@ protected:
     ~ProtocolTest() override = default;
 
     void SetUp() override;
+
+    void TearDown() override;
+
+    /** Reset lspWrapper and other internal state. */
+    void resetState();
 
     /** Get an absolute file URI for the given relative file path. */
     std::string getUri(std::string_view filePath);

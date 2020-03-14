@@ -68,7 +68,7 @@ public:
         TombStone,
     };
 
-    bool cachedParseTree = false;
+    bool cached = false;         // If 'true', file is completely cached in kvstore.
     bool hasParseErrors = false; // some reasonable invariants don't hold for invalid files
     bool pluginGenerated = false;
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
