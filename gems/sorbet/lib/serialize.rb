@@ -328,6 +328,8 @@ class Sorbet::Private::Serialize
   def from_method(method)
     uniq = 0
     method.parameters.map.with_index do |(kind, name), index|
+      name = :args if kind == :rest && name == :*
+      name = :blk if kind == :block && name == :&
       if !name
         arg_name = method.name.to_s[0...-1]
         if (!KEYWORDS.include?(arg_name.to_sym)) && method.name.to_s.end_with?('=') && arg_name =~ /\A[a-z_][a-z0-9A-Z_]*\Z/ && index == 0
