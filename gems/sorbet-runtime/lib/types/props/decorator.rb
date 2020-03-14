@@ -367,13 +367,6 @@ class T::Props::Decorator
       end
     end
 
-    needs_clone =
-      if cls <= Array || cls <= Hash || cls <= Set
-        shallow_clone_ok(underlying_type_object) ? :shallow : true
-      else
-        false
-      end
-
     rules = rules.merge(
       # TODO: The type of this element is confusing. We should refactor so that
       # it can be always `type_object` (a PropType) or always `cls` (a Module)
@@ -520,26 +513,6 @@ class T::Props::Decorator
     end
 
     nil
-  end
-
-  # From T::Props::Utils.deep_clone_object, plus String
-  TYPES_NOT_NEEDING_CLONE = T.let([TrueClass, FalseClass, NilClass, Symbol, String, Numeric], T::Array[Module])
-
-  # checked(:never) - Typechecks internally
-  sig {params(type: PropType).returns(T.nilable(T::Boolean)).checked(:never)}
-  private def shallow_clone_ok(type)
-    inner_type =
-      if type.is_a?(T::Types::TypedArray)
-        type.type
-      elsif type.is_a?(T::Types::TypedSet)
-        type.type
-      elsif type.is_a?(T::Types::TypedHash)
-        type.values
-      end
-
-    inner_type.is_a?(T::Types::Simple) && TYPES_NOT_NEEDING_CLONE.any? do |cls|
-      inner_type.raw_type <= cls
-    end
   end
 
   sig do
