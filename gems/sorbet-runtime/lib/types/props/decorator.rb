@@ -343,12 +343,7 @@ class T::Props::Decorator
     prop_validate_definition!(name, cls, rules, type_object)
 
     # Retrive the possible underlying object with T.nilable.
-    underlying_type_object = T::Utils::Nilable.get_underlying_type_object(type_object)
     type = T::Utils::Nilable.get_underlying_type(type)
-
-    array_subdoc_type = array_subdoc_type(underlying_type_object)
-    hash_value_subdoc_type = hash_value_subdoc_type(underlying_type_object)
-    hash_key_custom_type = hash_key_custom_type(underlying_type_object)
 
     sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
     if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::Utils)
@@ -371,11 +366,6 @@ class T::Props::Decorator
       # TODO: The type of this element is confusing. We should refactor so that
       # it can be always `type_object` (a PropType) or always `cls` (a Module)
       type: type,
-      # TODO: The `type_is_*` properties are no longer used internally and should
-      # be removed once pay-server no longer depends on them.
-      type_is_serializable: cls < T::Props::Serializable,
-      type_is_array_of_serializable: !array_subdoc_type.nil?,
-      type_is_hash_of_serializable_values: !hash_value_subdoc_type.nil?,
       type_object: type_object,
       accessor_key: "@#{name}".to_sym,
       sensitivity: sensitivity_and_pii[:sensitivity],
@@ -386,28 +376,13 @@ class T::Props::Decorator
 
     validate_not_missing_sensitivity(name, rules)
 
-    # for backcompat
-    if type.is_a?(T::Types::TypedArray) && type.type.is_a?(T::Types::Simple)
-      rules[:array] = type.type.raw_type
-    elsif array_subdoc_type
-      rules[:array] = array_subdoc_type
-    end
-
-    # TODO: `serializable_subtype` is no longer used internally and should
-    # be removed once pay-server no longer depends on it.
-    if rules[:type_is_serializable]
-      rules[:serializable_subtype] = cls
-    elsif array_subdoc_type
-      rules[:serializable_subtype] = array_subdoc_type
-    elsif hash_value_subdoc_type && hash_key_custom_type
-      rules[:serializable_subtype] = {
-        keys: hash_key_custom_type,
-        values: hash_value_subdoc_type,
-      }
-    elsif hash_value_subdoc_type
-      rules[:serializable_subtype] = hash_value_subdoc_type
-    elsif hash_key_custom_type
-      rules[:serializable_subtype] = hash_key_custom_type
+    # for backcompat (the `:array` key is deprecated but because the name is
+    # so generic it's really hard to be sure it's not being relied on anymore)
+    if type.is_a?(T::Types::TypedArray)
+      inner = T::Utils::Nilable.get_underlying_type(type.type)
+      if inner.is_a?(Module)
+        rules[:array] = inner
+      end
     end
 
     rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
@@ -451,68 +426,6 @@ class T::Props::Decorator
         @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
       end
     end
-  end
-
-  # returns the subdoc of the array type, or nil if it's not a Document type
-  #
-  # checked(:never) - Typechecks internally
-  sig do
-    params(type: PropType)
-    .returns(T.nilable(Module))
-    .checked(:never)
-  end
-  private def array_subdoc_type(type)
-    if type.is_a?(T::Types::TypedArray)
-      el_type = T::Utils.unwrap_nilable(type.type) || type.type
-
-      if el_type.is_a?(T::Types::Simple) &&
-          (el_type.raw_type < T::Props::Serializable || el_type.raw_type.is_a?(T::Props::CustomType))
-        return el_type.raw_type
-      end
-    end
-
-    nil
-  end
-
-  # returns the subdoc of the hash value type, or nil if it's not a Document type
-  #
-  # checked(:never) - Typechecks internally
-  sig do
-    params(type: PropType)
-    .returns(T.nilable(Module))
-    .checked(:never)
-  end
-  private def hash_value_subdoc_type(type)
-    if type.is_a?(T::Types::TypedHash)
-      values_type = T::Utils.unwrap_nilable(type.values) || type.values
-
-      if values_type.is_a?(T::Types::Simple) &&
-          (values_type.raw_type < T::Props::Serializable || values_type.raw_type.is_a?(T::Props::CustomType))
-        return values_type.raw_type
-      end
-    end
-
-    nil
-  end
-
-  # returns the type of the hash key, or nil. Any CustomType could be a key, but we only expect T::Enum right now.
-  #
-  # checked(:never) - Typechecks internally
-  sig do
-    params(type: PropType)
-    .returns(T.nilable(Module))
-    .checked(:never)
-  end
-  private def hash_key_custom_type(type)
-    if type.is_a?(T::Types::TypedHash)
-      keys_type = T::Utils.unwrap_nilable(type.keys) || type.keys
-
-      if keys_type.is_a?(T::Types::Simple) && keys_type.raw_type.is_a?(T::Props::CustomType)
-        return keys_type.raw_type
-      end
-    end
-
-    nil
   end
 
   sig do
