@@ -60,7 +60,7 @@ module T::Props
                   'Deserialization error (probably unexpected stored type)',
                   klass: self.class,
                   prop: #{prop.inspect},
-                  value: val.inspect,
+                  value: val,
                   error: e.message
                 )
                 val
