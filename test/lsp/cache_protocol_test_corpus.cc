@@ -51,7 +51,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         lspWrapper = nullptr;
 
         auto kvstore = make_unique<OwnedKeyValueStore>(
-            make_unique<KeyValueStore>(Version::full_version_string, cacheDir, "default"));
+            make_unique<KeyValueStore>(sorbet_full_version_string, cacheDir, "default"));
         EXPECT_EQ(kvstore->read(updatedKey), nullptr);
 
         auto contents = kvstore->read(key);
@@ -104,7 +104,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         // Release cache lock.
         lspWrapper = nullptr;
         auto kvstore = make_unique<OwnedKeyValueStore>(
-            make_unique<KeyValueStore>(Version::full_version_string, cacheDir, "default"));
+            make_unique<KeyValueStore>(sorbet_full_version_string, cacheDir, "default"));
         auto updatedFileData = kvstore->read(updatedKey);
         ASSERT_NE(updatedFileData, nullptr);
 

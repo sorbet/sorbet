@@ -76,7 +76,6 @@ compilation_database(
         "//core:core_test",
         "//common/web_tracer_framework:tracing",
         "//common/statsd:statsd",
-        "//version:version",
         "//common/kvstore:kvstore_test",
         "//common/kvstore:kvstore",
         "//common/crypto_hashing:crypto_hashing",
@@ -97,6 +96,7 @@ compilation_database(
         "//main/pipeline/semantic_extension:interface",
         "//common/concurrency:concurrency",
         "//common:common",
+        "//version:version",
         "//third_party/progressbar:progressbar",
         # END compile_commands targets
     ],
