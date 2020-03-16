@@ -24,7 +24,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     auto pid = getpid();
     fmt::format_to(result,
                    "{{\"name\":\"process_name\",\"ph\":\"M\",\"pid\":{},\"args\":{{\"name\":\"Sorbet v{}\"}}}},\n", pid,
-                   Version::full_version_string);
+                   sorbet_full_version_string);
     counters.counters->canonicalize();
 
     for (auto &cat : counters.counters->countersByCategory) {

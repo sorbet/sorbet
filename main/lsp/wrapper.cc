@@ -30,7 +30,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
 
 unique_ptr<KeyValueStore> getCache(const options::Options &options) {
     if (!options.cacheDir.empty()) {
-        return make_unique<KeyValueStore>(Version::full_version_string, options.cacheDir,
+        return make_unique<KeyValueStore>(sorbet_full_version_string, options.cacheDir,
                                           options.skipRewriterPasses ? "nodsl" : "default");
     }
     return nullptr;

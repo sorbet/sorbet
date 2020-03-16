@@ -10,9 +10,7 @@ cc_library(
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = [
-        "//common",
-    ],
+    deps = [],  # this should have _no_ dependencies, we want it to be very light and not impose stuff
 )
 
 config_setting(

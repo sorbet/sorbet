@@ -1,6 +1,7 @@
 #include "version/version.h"
-#include "common/common.h"
-
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 /**
  * This file is *MAGIC*
  * When we compile if from Bazel, we do magical substitutions to some variables defined in CAPS in this file.
@@ -8,74 +9,70 @@
  *
  *  This file takes them and packages them to a API that is more pleasant to work with.
  */
-using namespace std;
 
-namespace sorbet {
+extern "C" {
+
 // NOTE: bazel ignores build flags for this.
 // this means that: we can't use c++14\c++11 features here
 // and this code has no debugger support
 
+// Manual configuration
+#define SORBET_VERSION "0.5"
+#define SORBET_CODENAME ""
+
+// Magic configuration
 #if BUILD_RELEASE
-constexpr string_view build_scm_clean = STABLE_BUILD_SCM_CLEAN;
-constexpr string_view build_scm_revision = STABLE_BUILD_SCM_REVISION;
-constexpr string_view build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
-constexpr long build_timestamp = BUILD_TIMESTAMP;
-constexpr bool is_release_build = true;
+const int sorbet_isReleaseBuild = 1;
+// all these defines should be provided externally
 #else
-constexpr string_view build_scm_clean = "1";
-constexpr string_view build_scm_revision = "master";
-constexpr string_view build_scm_commit_count = "0";
-constexpr long build_timestamp = 0;
-constexpr bool is_release_build = false;
+const int sorbet_isReleaseBuild = 0;
+#define STABLE_BUILD_SCM_CLEAN "0"
+#define STABLE_BUILD_SCM_COMMIT_COUNT "0"
+#define BUILD_TIMESTAMP 0
+#define STABLE_BUILD_SCM_REVISION "master"
 #endif
 
-#if DEBUG_SYMBOLS
-const bool Version::withDebugSymbols = true;
+const char *sorbet_build_scm_clean = STABLE_BUILD_SCM_CLEAN;
+const char *sorbet_build_scm_revision = STABLE_BUILD_SCM_REVISION;
+const int sorbet_build_scm_commit_count = atoi(STABLE_BUILD_SCM_COMMIT_COUNT);
+const long sorbet_build_timestamp = BUILD_TIMESTAMP;
+
+#ifdef DEBUG_SYMBOLS
+#define STABLE_BUILD_DEBUG_SYMBOLS "true"
+const int sorbet_isWithDebugSymbols = 1;
 #else
-const bool Version::withDebugSymbols = false;
+#define STABLE_BUILD_DEBUG_SYMBOLS "false"
+const int sorbet_isWithDebugSymbols = 0;
 #endif
 
-const string Version::version = "0.5"; // 0.01 alpha
-const string Version::codename = "";   // We Try Furiously
+const char *sorbet_version = "0.5"; // 0.01 alpha
+const char *sorbet_codename = "";   // We Try Furiously
 
-const bool Version::isReleaseBuild = is_release_build;
-
-string makeScmStatus() {
-    return build_scm_clean == "0"sv ? "-dirty" : "";
-}
-const string Version::build_scm_status = makeScmStatus();
-
-string makeScmRevision() {
-    return string(build_scm_revision);
-}
-const string Version::build_scm_revision = makeScmRevision();
-
-int makeScmCommitCount() {
-    return stoi(string(build_scm_commit_count));
-}
-const int Version::build_scm_commit_count = makeScmCommitCount();
-
-chrono::system_clock::time_point makeBuildTime() {
-    const long buildStampSec = build_timestamp;
-    chrono::system_clock::time_point res((chrono::seconds(buildStampSec)));
-    return res;
-}
-const chrono::system_clock::time_point Version::build_timestamp = makeBuildTime();
-
-string makeBuildTimeString() {
-    time_t timet = chrono::system_clock::to_time_t(Version::build_timestamp);
+static const char *append_build_in_release(const char *arg) {
+#if BUILD_RELEASE
+    time_t timet = sorbet_build_timestamp;
     tm *gmtTime = gmtime(&timet);
-    char buffer[512];
-    int written = strftime(buffer, sizeof(buffer), "%F %T GMT", gmtTime);
-    buffer[written] = '\0';
+    char *buffer = (char *)malloc(strlen(arg) + 100);
+    memcpy(buffer, arg, strlen(arg));
+    int written = strftime(buffer + strlen(arg), 100, "build on %F %T GMT",
+                           gmtTime); // non-release builds have 1970-01-01 00:00:00 GMT
+    buffer[written + strlen(arg)] = '\0';
     return buffer;
+#else
+    return arg;
+#endif
 }
-const string Version::build_timestamp_string = makeBuildTimeString(); // non-release builds have 1970-01-01 00:00:00 GMT
 
-const string Version::full_version_string =
-    Version::version + "." + to_string(Version::build_scm_commit_count) +
-    (Version::isReleaseBuild ? " git " + Version::build_scm_revision + Version::build_scm_status + " built on " +
-                                   Version::build_timestamp_string
-                             : " (non-release)") +
-    (Version::withDebugSymbols ? " debug_symbols=true" : "") + (debug_mode ? " debug_mode=true" : "");
-} // namespace sorbet
+const char *sorbet_full_version_string =
+    append_build_in_release(SORBET_VERSION "." STABLE_BUILD_SCM_COMMIT_COUNT
+#if BUILD_RELEASE
+                                           " git " STABLE_BUILD_SCM_REVISION
+#else
+                                           " (non-release)"
+#endif
+                                           "debug_symbols=" STABLE_BUILD_DEBUG_SYMBOLS " clean=" STABLE_BUILD_SCM_CLEAN
+#ifdef DEBUG_MODE
+                                           " debug_mode=true"
+#endif
+    );
+}
