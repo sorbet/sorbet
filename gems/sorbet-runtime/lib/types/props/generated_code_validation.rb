@@ -158,7 +158,8 @@ module T::Props
 
         assert_equal(:resbody, rescue_body.type)
         exceptions, assignment, handler =  rescue_body.children
-        assert_equal(nil, exceptions)
+        assert_equal(:array, exceptions.type)
+        exceptions.children.each {|c| assert_equal(:const, c.type)}
         assert_equal(:lvasgn, assignment.type)
         assert_equal([:e], assignment.children)
         validate_lack_of_side_effects(handler, whitelisted_methods_for_deserialize)

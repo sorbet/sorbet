@@ -150,12 +150,12 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
       assert_equal(10, doc.foo1)
       assert_equal(20, doc.foo2)
 
-      assert_raises(RuntimeError) do
+      assert_raises(T::Props::InvalidValueError) do
         StructWithReqiredField.from_hash({'foo2' => 20})
       end
 
       # The code should behave for deserialization.
-      assert_raises(RuntimeError) do
+      assert_raises(T::Props::InvalidValueError) do
         StructWithReqiredField.from_hash({'foo1' => 10})
       end
     end

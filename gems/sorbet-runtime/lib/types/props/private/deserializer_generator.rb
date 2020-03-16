@@ -49,13 +49,14 @@ module T::Props
             'val'
           )
           if transformation
-            # It's not clear that swallowing errors when the type is wrong is correct,
-            # but it's the historical behavior, and at least it makes things consistent
-            # between props with and without a transformation on deserialize.
+            # Rescuing exactly NoMethodError is intended as a temporary hack
+            # to preserve the semantics from before codegen. More generally
+            # we are inconsistent about typechecking on deser and need to decide
+            # our strategy here.
             transformed_val = <<~RUBY
               begin
                 #{transformation}
-              rescue => e
+              rescue NoMethodError => e
                 T::Configuration.soft_assert_handler(
                   'Deserialization error (probably unexpected stored type)',
                   klass: self.class,

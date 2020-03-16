@@ -18,8 +18,6 @@ module T::Props::Serializable
   def serialize(strict=true)
     begin
       h = __t_props_generated_serialize(strict)
-    rescue T::Props::InvalidValueError
-      raise
     rescue => e
       msg = self.class.decorator.message_with_generated_source_context(
         e,
@@ -27,7 +25,7 @@ module T::Props::Serializable
         :generate_serialize_source
       )
       if msg
-        raise msg
+        raise T::Props::InvalidValueError.new(msg)
       else
         raise
       end
@@ -64,7 +62,7 @@ module T::Props::Serializable
         :generate_deserialize_source
       )
       if msg
-        raise msg
+        raise T::Props::InvalidValueError.new(msg)
       else
         raise
       end
