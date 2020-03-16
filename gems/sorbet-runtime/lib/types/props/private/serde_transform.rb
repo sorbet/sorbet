@@ -69,16 +69,6 @@ module T::Props
             handle_serializable_subtype(varname, raw, mode)
           elsif raw.singleton_class < T::Props::CustomType
             handle_custom_type(varname, T.unsafe(raw), mode)
-          elsif T::Configuration.scalar_types.include?(raw.name)
-            # It's a bit of a hack that this is separate from NO_TRANSFORM_TYPES
-            # and doesn't check inheritance (like `T::Props::CustomType.scalar_type?`
-            # does), but it covers the main use case (pay-server's custom `Boolean`
-            # module) without either requiring `T::Configuration.scalar_types` to
-            # accept modules instead of strings (which produces load-order issues
-            # and subtle behavior changes) or eating the performance cost of doing
-            # an inheritance check by manually crawling a class hierarchy and doing
-            # string comparisons.
-            nil
           else
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
@@ -92,12 +82,7 @@ module T::Props
               "#{varname}.nil? ? nil : #{inner}"
             end
           else
-            # Handle, e.g., T::Boolean
-            if type.types.all? {|t| generate(t, mode, varname).nil?}
-              nil
-            else
-              "T::Props::Utils.deep_clone_object(#{varname})"
-            end
+            "T::Props::Utils.deep_clone_object(#{varname})"
           end
         when T::Types::Enum
           generate(T::Utils.lift_enum(type), mode, varname)
