@@ -135,14 +135,29 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'error message' do
-    before do
-      # Ensure that we actually can produce an error on deserialize
+    it 'is only soft-assert by default for prop deserialize error' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      result = MySerializable.from_hash({'foo' => "Won't respond like hash"})
+      assert_equal("Won't respond like hash", result.foo)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      assert_equal(MySerializable, extra_hash[:klass])
+      assert_equal(:foo, extra_hash[:prop])
+      assert_equal("Won't respond like hash", extra_hash[:value])
+    end
+
+    it 'includes relevant generated code on deserialize when we raise' do
       T::Configuration.soft_assert_handler = proc do |msg, extra|
         raise "#{msg} #{extra.inspect}"
       end
-    end
 
-    it 'includes relevant generated code on deserialize' do
       e = assert_raises(RuntimeError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
