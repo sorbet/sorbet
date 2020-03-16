@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#if defined(NDEBUG) && !defined(FORCE_DEBUG)
+#if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
 #else
 #undef DEBUG_MODE

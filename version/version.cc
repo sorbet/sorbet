@@ -54,7 +54,7 @@ static const char *append_build_in_release(const char *arg) {
     tm *gmtTime = gmtime(&timet);
     char *buffer = (char *)malloc(strlen(arg) + 100);
     memcpy(buffer, arg, strlen(arg));
-    int written = strftime(buffer + strlen(arg), 100, "build on %F %T GMT",
+    int written = strftime(buffer + strlen(arg), 100, " build on %F %T GMT",
                            gmtTime); // non-release builds have 1970-01-01 00:00:00 GMT
     buffer[written + strlen(arg)] = '\0';
     return buffer;
@@ -70,7 +70,7 @@ const char *sorbet_full_version_string =
 #else
                                            " (non-release)"
 #endif
-                                           "debug_symbols=" STABLE_BUILD_DEBUG_SYMBOLS " clean=" STABLE_BUILD_SCM_CLEAN
+                                           " debug_symbols=" STABLE_BUILD_DEBUG_SYMBOLS " clean=" STABLE_BUILD_SCM_CLEAN
 #ifdef DEBUG_MODE
                                            " debug_mode=true"
 #endif
