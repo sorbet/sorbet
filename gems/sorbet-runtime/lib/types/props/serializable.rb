@@ -223,7 +223,7 @@ module T::Props::Serializable::DecoratorMethods
     next_blank = line_num + (source_lines[line_num..-1].find_index(&:empty?) || 0)
     context = "  " + source_lines[(previous_blank + 1)...(next_blank)].join("\n  ")
     <<~MSG
-      Error in #{generated_method}: #{error.message}
+      Error in #{decorated_class.name}##{generated_method}: #{error.message}
       at line #{line_num-previous_blank-1} in:
       #{context}
     MSG
