@@ -162,9 +162,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
-      assert_includes(e.message, "undefined method `each_with_object'")
+      assert_includes(e.message, "undefined method `transform_values'")
       assert_includes(e.message, "foo")
-      assert_includes(e.message, "val.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}")
+      assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
     end
 
     it 'includes relevant generated code on serialize' do
@@ -174,8 +174,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         m.serialize
       end
 
-      assert_includes(e.message, "undefined method `each_with_object'")
-      assert_includes(e.message, 'h["foo"] = @foo.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}')
+      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
     end
   end
 
