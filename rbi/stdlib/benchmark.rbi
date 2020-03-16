@@ -323,10 +323,66 @@ module Benchmark
   def self.realtime(&blk); end
 end
 
-class Benchmark::Job < Object
+class Benchmark::Job
+  # Registers the given label and block pair in the job list.
+  sig do
+    params(
+        label: String,
+        blk: T.proc.void
+    )
+    .returns(T.self_type)
+  end
+  def item(label=T.unsafe(nil), &blk); end
+
+  # An array of 2-element arrays, consisting of label and block pairs.
+  sig {returns(T::Array[T.untyped])}
+  def list; end
+
+  # Registers the given label and block pair in the job list.
+  sig do
+    params(
+        label: String,
+        blk: T.proc.void
+    )
+    .returns(T.self_type)
+  end
+  def report(label=T.unsafe(nil), &blk); end
+
+  # Length of the widest label in the #list.
+  sig {returns(Integer)}
+  def width; end
 end
 
-class Benchmark::Report < Object
+class Benchmark::Report
+  # Prints the `label` and measured time for the block,
+  # formatted by `format`. See Tms#format for the
+  # formatting rules.
+  sig do
+    params(
+        label: String,
+        format: T.untyped,
+        blk: T.proc.void
+    )
+    .returns(T.self_type)
+  end
+  def item(label=T.unsafe(nil), *format, &blk); end
+
+  # An array of Benchmark::Tms objects representing each item.
+  sig {returns(T::Array[Benchmark::Tms])}
+  def list; end
+
+  # Prints the `label` and measured time for the block,
+  # formatted by `format`. See Tms#format for the
+  # formatting rules.
+  sig do
+    params(
+        label: String,
+        format: T.untyped,
+        blk: T.proc.void
+    )
+    .returns(T.self_type)
+  end
+  def report(label=T.unsafe(nil), *format, &blk); end
 end
 
 # A data object, representing the times associated with a benchmark measurement.
