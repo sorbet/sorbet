@@ -148,7 +148,23 @@ module T::Props
       assert_equal(s(:op_asgn, s(:lvasgn, :found), :-, s(:int, 1)), found_else_body)
 
       validate_deserialize_handle_nil(handle_nil)
-      validate_lack_of_side_effects(else_body, whitelisted_methods_for_deserialize)
+
+      if else_body.type == :kwbegin
+        rescue_expression, = else_body.children
+        assert_equal(:rescue, rescue_expression.type)
+
+        try, rescue_body = rescue_expression.children
+        validate_lack_of_side_effects(try, whitelisted_methods_for_deserialize)
+
+        assert_equal(:resbody, rescue_body.type)
+        exceptions, assignment, handler =  rescue_body.children
+        assert_equal(nil, exceptions)
+        assert_equal(:lvasgn, assignment.type)
+        assert_equal([:e], assignment.children)
+        validate_lack_of_side_effects(handler, whitelisted_methods_for_deserialize)
+      else
+        validate_lack_of_side_effects(else_body, whitelisted_methods_for_deserialize)
+      end
     end
 
     private_class_method def self.validate_deserialize_handle_nil(node)
@@ -244,7 +260,7 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         :lvar => %i{dup map transform_values transform_keys each_with_object nil? []=},
-        :const => %i{deserialize from_hash deep_clone_object},
+        :const => %i{deserialize from_hash deep_clone_object soft_assert_handler},
       }
     end
   end
