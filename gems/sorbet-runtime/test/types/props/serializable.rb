@@ -162,9 +162,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
-      assert_includes(e.message, "undefined method `each_with_object'")
+      assert_includes(e.message, "undefined method `transform_values'")
       assert_includes(e.message, "foo")
-      assert_includes(e.message, "val.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}")
+      assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
     end
 
     it 'includes relevant generated code on serialize' do
@@ -174,8 +174,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         m.serialize
       end
 
-      assert_includes(e.message, "undefined method `each_with_object'")
-      assert_includes(e.message, 'h["foo"] = @foo.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}')
+      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
     end
   end
 
@@ -428,6 +428,47 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class BooleanStruct < T::Struct
+    prop :prop, T::Boolean
+    prop :nilable_prop, T.nilable(T::Boolean)
+  end
+
+  describe 'boolean props' do
+    it 'are not cloned on serde' do
+      T::Props::Utils.expects(:deep_clone_object).never
+
+      s = BooleanStruct.new(prop: true)
+      assert_equal(true, BooleanStruct.from_hash(s.serialize).prop)
+    end
+  end
+
+  class HeterogenousUnionStruct < T::Struct
+    prop :prop, T.any(String, MySerializable)
+  end
+
+  describe 'heterogenous union props' do
+    it 'are cloned on serde' do
+      T::Props::Utils.expects(:deep_clone_object).with('foo').at_least_once.returns('foo')
+
+      s = HeterogenousUnionStruct.new(prop: 'foo')
+      assert_equal('foo', HeterogenousUnionStruct.from_hash(s.serialize).prop)
+    end
+  end
+
+  class MultipleStructUnionStruct < T::Struct
+    prop :prop, T.any(MySerializable, MyNilableSerializable)
+  end
+
+  describe 'unions of two different serializables' do
+    it 'are just cloned on serde' do
+      obj = MyNilableSerializable.new
+      T::Props::Utils.expects(:deep_clone_object).with(obj).at_least_once.returns(obj)
+
+      s = MultipleStructUnionStruct.new(prop: obj)
+      assert_equal(obj, MultipleStructUnionStruct.from_hash(s.serialize).prop)
+    end
+  end
+
   class CustomType
     extend T::Props::CustomType
 
@@ -611,6 +652,51 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'can deserialize nil' do
       assert_equal([nil], ArrayOfNilableStruct.from_hash('prop' => [nil]).prop)
+    end
+  end
+
+  class ModulePropStruct < T::Struct
+    module NonScalar
+    end
+
+    class ConcreteNonScalar
+      include NonScalar
+    end
+
+    module Scalar
+    end
+
+    class ConcreteScalar
+      include Scalar
+    end
+
+    prop :nonscalar, T.nilable(NonScalar)
+    prop :scalar, T.nilable(Scalar)
+  end
+
+  describe 'with a module prop type' do
+    before do
+      T::Configuration.scalar_types += [ModulePropStruct::Scalar.name]
+    end
+
+    after do
+      T::Configuration.scalar_types = nil
+    end
+
+    it 'is cloned on serde by default' do
+      val = ModulePropStruct::ConcreteNonScalar.new
+      T::Props::Utils.expects(:deep_clone_object).with(val).returns(val).at_least_once
+
+      s = ModulePropStruct.new(nonscalar: val)
+      assert_equal(val, ModulePropStruct.from_hash(s.serialize).nonscalar)
+    end
+
+    it 'is not cloned on serde if set as scalar' do
+      val = ModulePropStruct::ConcreteScalar.new
+      T::Props::Utils.expects(:deep_clone_object).never
+
+      s = ModulePropStruct.new(scalar: val)
+      assert_equal(val, ModulePropStruct.from_hash(s.serialize).scalar)
     end
   end
 
