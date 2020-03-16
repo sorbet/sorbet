@@ -1,23 +1,29 @@
 #ifndef SORBET_VERSION_H
 #define SORBET_VERSION_H
 
-#include <chrono>
-#include <string>
+// We want this header to be both a C++ and a C header, so that it can be depended on by very
+// low-level things
+#ifdef __cplusplus
+extern "C" {
+#endif
+#if defined(NDEBUG) && !defined(FORCE_DEBUG)
+#define DEBUG_MODE
+#else
+#undef DEBUG_MODE
+#endif
 
-namespace sorbet {
-class Version {
-public:
-    static const std::string version;
-    static const std::string codename;
-    static const std::string build_scm_revision;
-    static const int build_scm_commit_count;
-    static const std::string build_scm_status;
-    static const std::chrono::system_clock::time_point build_timestamp;
-    static const std::string build_timestamp_string;
-    static const std::string full_version_string;
-    static const bool isReleaseBuild;
-    static const bool withDebugSymbols;
-};
-} // namespace sorbet
+extern const char *sorbet_version;
+extern const char *sorbet_codename;
+extern const char *sorbet_build_scm_revision;
+extern const int sorbet_build_scm_commit_count;
+extern const char *sorbet_build_scm_status;
+extern const long sorbet_build_timestamp;
+extern const char *sorbet_full_version_string;
+extern const int sorbet_isReleaseBuild;
+extern const int sorbet_isWithDebugSymbols;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SORBET_VERSION_H

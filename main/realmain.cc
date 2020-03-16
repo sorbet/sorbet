@@ -374,9 +374,8 @@ int realmain(int argc, char *argv[]) {
         for (int i = 1; i < argc; i++) {
             absl::StrAppend(&argsConcat, " ", argv[i]);
         }
-        logger->debug("Running sorbet version {} with arguments: {}", Version::full_version_string, argsConcat);
-        if (!Version::isReleaseBuild && !opts.silenceDevMessage &&
-            std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
+        logger->debug("Running sorbet version {} with arguments: {}", sorbet_full_version_string, argsConcat);
+        if (!sorbet_isReleaseBuild && !opts.silenceDevMessage && std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
             logger->info("👋 Hey there! Heads up that this is not a release build of sorbet.\n"
                          "Release builds are faster and more well-supported by the Sorbet team.\n"
                          "Check out the README to learn how to build Sorbet in release mode.\n"
@@ -396,7 +395,7 @@ int realmain(int argc, char *argv[]) {
     logger->trace("building initial global state");
     unique_ptr<OwnedKeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        auto unownedKvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir,
+        auto unownedKvstore = make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
                                                          opts.skipRewriterPasses ? "nodsl" : "default");
         kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
     }
@@ -450,7 +449,7 @@ int realmain(int argc, char *argv[]) {
                       "More details at https://microsoft.github.io/language-server-protocol/specification."
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
-                      Version::full_version_string);
+                      sorbet_full_version_string);
 
         // There should not have been any writes to the kvstore, so no need to commit changes to disk.
         unique_ptr<KeyValueStore> unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));

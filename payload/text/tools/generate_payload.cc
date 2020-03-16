@@ -33,8 +33,8 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string_view>" << '\n' << "#include<vector>\nusing namespace std;\n";
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     string version;
-    if (sorbet::Version::isReleaseBuild) {
-        version = sorbet::Version::build_scm_revision;
+    if (sorbet_isReleaseBuild) {
+        version = sorbet_build_scm_revision;
     } else {
         version = "master";
     }

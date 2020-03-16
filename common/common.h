@@ -12,6 +12,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
 #include "spdlog/spdlog.h"
+#include "version/version.h"
 #include <stdint.h>
 #include <string>
 #include <string_view>
@@ -31,11 +32,9 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 
-#if defined(NDEBUG) && !defined(FORCE_DEBUG)
+#ifdef DEBUG_MODE
 constexpr bool debug_mode = false;
-#undef DEBUG_MODE
 #else
-#define DEBUG_MODE
 constexpr bool debug_mode = true;
 #endif
 
