@@ -16,7 +16,23 @@ module T::Props::Serializable
   #   values.
   # @return [Hash] A serialization of this object.
   def serialize(strict=true)
-    h = __t_props_generated_serialize(strict)
+    begin
+      h = __t_props_generated_serialize(strict)
+    rescue T::Props::InvalidValueError
+      raise
+    rescue => e
+      msg = self.class.decorator.message_with_generated_source_context(
+        e,
+        :__t_props_generated_serialize,
+        :generate_serialize_source
+      )
+      if msg
+        raise msg
+      else
+        raise
+      end
+    end
+
     h.merge!(@_extra_props) if @_extra_props
     h
   end
@@ -39,7 +55,21 @@ module T::Props::Serializable
   #  props on this instance.
   # @return [void]
   def deserialize(hash, strict=false)
-    hash_keys_matching_props = __t_props_generated_deserialize(hash)
+    begin
+      hash_keys_matching_props = __t_props_generated_deserialize(hash)
+    rescue => e
+      msg = self.class.decorator.message_with_generated_source_context(
+        e,
+        :__t_props_generated_deserialize,
+        :generate_deserialize_source
+      )
+      if msg
+        raise msg
+      else
+        raise
+      end
+    end
+
     if hash.size > hash_keys_matching_props
       serialized_forms = self.class.decorator.prop_by_serialized_forms
       extra = hash.reject {|k, _| serialized_forms.key?(k)}
@@ -179,6 +209,24 @@ module T::Props::Serializable::DecoratorMethods
       props,
       props_with_defaults || {},
     )
+  end
+
+  def message_with_generated_source_context(error, generated_method, generate_source_method)
+    line_label = error.backtrace.find {|l| l.end_with?("in `#{generated_method}'")}
+    return unless line_label
+
+    line_num = line_label.split(':')[1]&.to_i
+    return unless line_num
+
+    source_lines = self.send(generate_source_method).split("\n")
+    previous_blank = source_lines[0...line_num].rindex(&:empty?) || 0
+    next_blank = line_num + (source_lines[line_num..-1].find_index(&:empty?) || 0)
+    context = "  " + source_lines[(previous_blank + 1)...(next_blank)].join("\n  ")
+    <<~MSG
+      Error in #{decorated_class.name}##{generated_method}: #{error.message}
+      at line #{line_num-previous_blank-1} in:
+      #{context}
+    MSG
   end
 
   def raise_nil_deserialize_error(hkey)
