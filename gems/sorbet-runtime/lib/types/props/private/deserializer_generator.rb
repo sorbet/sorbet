@@ -43,11 +43,33 @@ module T::Props
           ivar_name = rules.fetch(:accessor_key).to_s
           raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
 
-          transformed_val = SerdeTransform.generate(
+          transformation = SerdeTransform.generate(
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
             SerdeTransform::Mode::DESERIALIZE,
             'val'
-          ) || 'val'
+          )
+          if transformation
+            # Rescuing exactly NoMethodError is intended as a temporary hack
+            # to preserve the semantics from before codegen. More generally
+            # we are inconsistent about typechecking on deser and need to decide
+            # our strategy here.
+            transformed_val = <<~RUBY
+              begin
+                #{transformation}
+              rescue NoMethodError => e
+                T::Configuration.soft_assert_handler(
+                  'Deserialization error (probably unexpected stored type)',
+                  klass: self.class,
+                  prop: #{prop.inspect},
+                  value: val,
+                  error: e.message
+                )
+                val
+              end
+            RUBY
+          else
+            transformed_val = 'val'
+          end
 
           nil_handler = generate_nil_handler(
             prop: prop,

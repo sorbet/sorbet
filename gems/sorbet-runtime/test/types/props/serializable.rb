@@ -135,8 +135,30 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'error message' do
-    it 'includes relevant generated code on deserialize' do
-      e = assert_raises(RuntimeError) do
+    it 'is only soft-assert by default for prop deserialize error' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      result = MySerializable.from_hash({'foo' => "Won't respond like hash"})
+      assert_equal("Won't respond like hash", result.foo)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      assert_equal(MySerializable, extra_hash[:klass])
+      assert_equal(:foo, extra_hash[:prop])
+      assert_equal("Won't respond like hash", extra_hash[:value])
+    end
+
+    it 'includes relevant generated code on deserialize when we raise' do
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        raise "#{msg} #{extra.inspect}"
+      end
+
+      e = assert_raises(T::Props::InvalidValueError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
@@ -148,7 +170,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'includes relevant generated code on serialize' do
       m = a_serializable
       m.instance_variable_set(:@foo, "Won't respond like hash")
-      e = assert_raises(RuntimeError) do
+      e = assert_raises(T::Props::InvalidValueError) do
         m.serialize
       end
 
