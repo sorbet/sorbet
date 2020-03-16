@@ -17,6 +17,120 @@ using namespace std;
 
 namespace sorbet::namer {
 
+struct FoundName {
+    enum class Kind : u1 { Class, Method };
+    Kind kind;
+    unique_ptr<ast::Expression> name;
+    core::SymbolRef symbol;
+    u4 owner;
+    core::Loc loc;
+    core::Loc declLoc;
+    // If a method: The method's arguments.
+    vector<core::ArgInfo> arguments;
+};
+
+struct Modifier {
+    enum class Kind : u1 { Class, Method };
+    Kind kind;
+    core::NameRef name;
+    core::NameRef modifier;
+    u4 ownerOrClass; // owner for method, class for class
+};
+
+/**
+ * Used with TreeMap to locate all of the class and method symbols defined in the tree.
+ * Does not mutate GlobalState, which allows us to parallelize this process.
+ * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
+ */
+class NameFinder {
+    std::vector<FoundName> foundNames;
+    std::vector<Modifier> modifiers;
+    // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
+    // Instead, we track the owner manually as an index into `foundNames`; the item at that index
+    // will define the `owner` symbol.
+    // The u4 is actually index + 1 so we reserve 0 for the root owner.
+    std::vector<u4> ownerStack;
+
+    unique_ptr<ast::Expression> arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg,
+                                           core::ArgInfo &argInfo) {
+        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+
+        // Note: If the argument isn't a keyword argument, this will be updated in the serial part of Namer.
+        argInfo.name = parsedArg.local._name;
+        argInfo.flags.isKeyword = parsedArg.keyword;
+        argInfo.flags.isBlock = parsedArg.block;
+        argInfo.flags.isRepeated = parsedArg.repeated;
+        if (parsedArg.default_) {
+            argInfo.flags.isDefault = true;
+            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+        }
+        return localExpr;
+    }
+
+    ast::MethodDef::ARGS_store fillInArgs(core::Context ctx, vector<ast::ParsedArg> parsedArgs,
+                                          vector<core::ArgInfo> &argInfo) {
+        ast::MethodDef::ARGS_store args;
+        bool inShadows = false;
+
+        int i = -1;
+        for (auto &arg : parsedArgs) {
+            i++;
+            auto localVariable = arg.local;
+
+            if (arg.shadow) {
+                inShadows = true;
+                auto localExpr = make_unique<ast::Local>(arg.loc, localVariable);
+                args.emplace_back(move(localExpr));
+            } else {
+                ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
+                parsedArgs.push_back({});
+                auto expr = arg2Symbol(ctx, i, move(arg), argInfo.back());
+                args.emplace_back(move(expr));
+            }
+        }
+
+        return args;
+    }
+
+    u4 getOwner() {
+        if (ownerStack.empty()) {
+            return 0;
+        }
+        return ownerStack.back();
+    }
+
+public:
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+        FoundName foundClass;
+        foundClass.kind = FoundName::Kind::Class;
+        foundClass.owner = getOwner();
+        foundClass.loc = klass->loc;
+        foundClass.declLoc = klass->declLoc;
+        foundClass.symbol = klass->symbol;
+        foundClass.name = klass->name->deepCopy();
+        foundNames.push_back(move(foundClass));
+        ownerStack.push_back(foundNames.size());
+        return klass;
+    }
+
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+        ownerStack.pop_back();
+
+        return klass;
+    }
+
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
+        ownerStack.push_back(foundNames.size());
+        return method;
+    }
+
+    unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
+        ownerStack.pop_back();
+
+        return method;
+    }
+};
+
 /**
  * Used with TreeMap to insert all the class and method symbols into the symbol
  * table.
