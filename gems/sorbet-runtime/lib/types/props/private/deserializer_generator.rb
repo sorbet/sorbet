@@ -43,11 +43,32 @@ module T::Props
           ivar_name = rules.fetch(:accessor_key).to_s
           raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
 
-          transformed_val = SerdeTransform.generate(
+          transformation = SerdeTransform.generate(
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
             SerdeTransform::Mode::DESERIALIZE,
             'val'
-          ) || 'val'
+          )
+          if transformation
+            # It's not clear that swallowing errors when the type is wrong is correct,
+            # but it's the historical behavior, and at least it makes things consistent
+            # between props with and without a transformation on deserialize.
+            transformed_val = <<~RUBY
+              begin
+                #{transformation}
+              rescue => e
+                T::Configuration.soft_assert_handler(
+                  'Deserialization error (probably unexpected stored type)',
+                  klass: self.class,
+                  prop: #{prop.inspect},
+                  value: val.inspect,
+                  error: e.message
+                )
+                val
+              end
+            RUBY
+          else
+            transformed_val = 'val'
+          end
 
           nil_handler = generate_nil_handler(
             prop: prop,

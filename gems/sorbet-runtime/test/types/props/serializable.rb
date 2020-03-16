@@ -135,6 +135,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'error message' do
+    before do
+      # Ensure that we actually can produce an error on deserialize
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        raise "#{msg} #{extra.inspect}"
+      end
+    end
+
     it 'includes relevant generated code on deserialize' do
       e = assert_raises(RuntimeError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
