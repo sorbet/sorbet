@@ -134,6 +134,29 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'error message' do
+    it 'includes relevant generated code on deserialize' do
+      e = assert_raises(RuntimeError) do
+        MySerializable.from_hash({'foo' => "Won't respond like hash"})
+      end
+
+      assert_includes(e.message, "undefined method `each_with_object'")
+      assert_includes(e.message, "foo")
+      assert_includes(e.message, "val.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}")
+    end
+
+    it 'includes relevant generated code on serialize' do
+      m = a_serializable
+      m.instance_variable_set(:@foo, "Won't respond like hash")
+      e = assert_raises(RuntimeError) do
+        m.serialize
+      end
+
+      assert_includes(e.message, "undefined method `each_with_object'")
+      assert_includes(e.message, 'h["foo"] = @foo.each_with_object({}) {|(k,v),h| h[T::Props::Utils.deep_clone_object(k)] = T::Props::Utils.deep_clone_object(v)}')
+    end
+  end
+
   class HasUnstoredProp < T::Struct
     prop :stored, String
     prop :not_stored, String, dont_store: true
