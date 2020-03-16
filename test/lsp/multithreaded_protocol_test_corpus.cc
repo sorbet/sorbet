@@ -45,7 +45,6 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
         EXPECT_EQ(initCounters.getCategoryCounter("lsp.updates", "slowpath"), 1);
         EXPECT_EQ(initCounters.getCategoryCounterSum("lsp.updates"), 1);
         EXPECT_EQ(initCounters.getTimings("initial_index").size(), 1);
-        EXPECT_EQ(initCounters.getTimings("reIndexFromFileSystem").size(), 1);
         EXPECT_EQ(initCounters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     }
 
