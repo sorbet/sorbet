@@ -174,9 +174,9 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
     bool wroteGlobalState = payload::retainGlobalState(initialGS, config->opts, kvstore);
-    auto wroteFiles = pipeline::cacheTreesAndFiles(*initialGS, indexed, kvstore);
-    if (wroteGlobalState || wroteFiles) {
+    if (wroteGlobalState) {
         // Only write changes to disk if GlobalState changed since the last time.
+        pipeline::cacheTreesAndFiles(*initialGS, indexed, kvstore);
         OwnedKeyValueStore::bestEffortCommit(*config->logger, move(kvstore));
     }
 

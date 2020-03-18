@@ -45,9 +45,8 @@ public:
 /**
  * A database with single writer and multiple readers.
  * Only the thread that created OwnedKeyValueStore is allowed to invoke `write`.
- * Creating OwnedKeyValueStore grabs a lock and allows to have consistent view over database.
- *
  * To write changes to disk, one must call `commit`.
+ * Creating OwnedKeyValueStore grabs a lock and allows to have consistent view over database.
  */
 class OwnedKeyValueStore final {
     const std::thread::id writerId;
