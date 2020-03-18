@@ -32,7 +32,6 @@ BasicObject::BasicObject = BasicObject
 
 class BigDecimal
   EXCEPTION_NaN = ::T.let(nil, ::T.untyped)
-  SIGN_NaN = ::T.let(nil, ::T.untyped)
 end
 
 class BigDecimal

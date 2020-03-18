@@ -7,6 +7,7 @@ BigDecimal.new(100, 2)
 BigDecimal('123')
 BigDecimal(999)
 BigDecimal('123', 4)
+BigDecimal::SIGN_NaN
 
 BigDecimal('0.5').round
 BigDecimal('0.5').round(1)

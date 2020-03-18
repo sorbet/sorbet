@@ -226,6 +226,9 @@ class BigDecimal < Numeric
   # Indicates that a value is +0. See
   # [`BigDecimal.sign`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-sign).
   SIGN_POSITIVE_ZERO = T.let(T.unsafe(nil), Integer)
+  # Indicates that a value is Not a Number. See
+  # [`BigDecimal::SIGN_NaN`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#SIGN_NaN)
+  SIGN_NaN = T.let(T.unsafe(nil), Integer)
 
   ### internal method, here for completeness
   # Internal method used to provide marshalling support. See the
