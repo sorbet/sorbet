@@ -53,7 +53,7 @@ class OwnedKeyValueStore final {
     std::unique_ptr<KeyValueStore> kvstore;
     struct TxnState;
     const std::unique_ptr<TxnState> txnState;
-    absl::Mutex readers_mtx;
+    mutable absl::Mutex readers_mtx;
 
     void clear();
     void refreshMainTransaction();
@@ -65,8 +65,8 @@ public:
     ~OwnedKeyValueStore();
 
     /** returns nullptr if not found*/
-    u1 *read(std::string_view key);
-    std::string_view readString(std::string_view key);
+    u1 *read(std::string_view key) const;
+    std::string_view readString(std::string_view key) const;
     void writeString(std::string_view key, std::string_view value);
     /** can only be called from owning thread */
     void write(std::string_view key, const std::vector<u1> &value);

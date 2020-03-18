@@ -4,6 +4,7 @@
 #include "core/NameHash.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
@@ -49,7 +50,7 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
 } // namespace
 
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS,
-                       unique_ptr<KeyValueStore> kvstore)
+                       unique_ptr<const OwnedKeyValueStore> kvstore)
     : config(config), initialGS(move(initialGS)), kvstore(move(kvstore)),
       emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
@@ -152,10 +153,6 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, "Indexing", "Indexing files...");
-    unique_ptr<OwnedKeyValueStore> kvstore;
-    if (this->kvstore != nullptr) {
-        kvstore = make_unique<OwnedKeyValueStore>(move(this->kvstore));
-    }
     vector<core::FileRef> inputFiles;
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
@@ -173,11 +170,12 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     }
 
     pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
-    bool wroteGlobalState = payload::retainGlobalState(initialGS, config->opts, kvstore);
-    if (wroteGlobalState) {
-        // Only write changes to disk if GlobalState changed since the last time.
-        pipeline::cacheTreesAndFiles(*initialGS, indexed, kvstore);
-        OwnedKeyValueStore::bestEffortCommit(*config->logger, move(kvstore));
+
+    // We're done with the kvstore.
+    kvstore = nullptr;
+    {
+        auto unownedKvStore = cache::maybeCreateKeyValueStore(config->opts);
+        cache::maybeCacheGlobalStateAndFiles(unownedKvStore, config->opts, *initialGS, indexed);
     }
 
     // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
@@ -246,7 +244,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
 
     {
         // Explicitly null. It does not make sense to use kvstore for short-lived editor edits.
-        unique_ptr<OwnedKeyValueStore> kvstore;
+        unique_ptr<const OwnedKeyValueStore> kvstore;
         // Create a throwaway error queue. commitEdit may be called on two different threads, and we can't anticipate
         // which one it will be.
         initialGS->errorQueue =

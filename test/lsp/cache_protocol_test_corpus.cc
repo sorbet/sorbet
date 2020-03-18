@@ -7,6 +7,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/serialize/serialize.h"
+#include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/null_sink.h"
@@ -26,7 +27,8 @@ TEST_P(ProtocolTest, LSPUsesCache) {
     auto key =
         realmain::pipeline::fileKey(core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
 
-    auto updatedFileContents = "# typed: true\n";
+    // Note: We need to introduce a new name, otherwise nametable doesn't change and we don't update the cache.
+    auto updatedFileContents = "# typed: true\nclass NewName\nend\n";
     auto updatedKey = realmain::pipeline::fileKey(
         core::File(string(filePath), string(updatedFileContents), core::File::Type::Normal, 0));
 
@@ -50,8 +52,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         // Release cache lock.
         lspWrapper = nullptr;
 
-        auto kvstore = make_unique<OwnedKeyValueStore>(
-            make_unique<KeyValueStore>(sorbet_full_version_string, cacheDir, "default"));
+        auto kvstore = make_unique<const OwnedKeyValueStore>(realmain::cache::maybeCreateKeyValueStore(*opts));
         EXPECT_EQ(kvstore->read(updatedKey), nullptr);
 
         auto contents = kvstore->read(key);
@@ -103,8 +104,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
 
         // Release cache lock.
         lspWrapper = nullptr;
-        auto kvstore = make_unique<OwnedKeyValueStore>(
-            make_unique<KeyValueStore>(sorbet_full_version_string, cacheDir, "default"));
+        auto kvstore = make_unique<const OwnedKeyValueStore>(realmain::cache::maybeCreateKeyValueStore(*opts));
         auto updatedFileData = kvstore->read(updatedKey);
         ASSERT_NE(updatedFileData, nullptr);
 

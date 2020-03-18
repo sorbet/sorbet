@@ -26,6 +26,7 @@
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
+#include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
@@ -393,11 +394,12 @@ int realmain(int argc, char *argv[]) {
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
-    unique_ptr<OwnedKeyValueStore> kvstore;
-    if (!opts.cacheDir.empty()) {
-        auto unownedKvstore = make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
-                                                         opts.skipRewriterPasses ? "nodsl" : "default");
-        kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
+    unique_ptr<const OwnedKeyValueStore> kvstore;
+    {
+        auto unownedKvstore = cache::maybeCreateKeyValueStore(opts);
+        if (unownedKvstore != nullptr) {
+            kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
+        }
     }
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -451,12 +453,8 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       sorbet_full_version_string);
 
-        // There should not have been any writes to the kvstore, so no need to commit changes to disk.
-        unique_ptr<KeyValueStore> unownedKvstore = OwnedKeyValueStore::abort(move(kvstore));
-
         auto output = make_shared<lsp::LSPStdout>(logger);
-        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),
-                          move(unownedKvstore));
+        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger), move(kvstore));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
@@ -484,11 +482,10 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        auto wroteGlobalState = payload::retainGlobalState(gs, opts, kvstore);
-        if (wroteGlobalState) {
-            // Only write changes to disk if GlobalState changed since the last time.
-            pipeline::cacheTreesAndFiles(*gs, indexed, kvstore);
-            OwnedKeyValueStore::bestEffortCommit(*logger, move(kvstore));
+        {
+            kvstore = nullptr;
+            auto unownedKvstore = cache::maybeCreateKeyValueStore(opts);
+            cache::maybeCacheGlobalStateAndFiles(unownedKvstore, opts, *gs, indexed);
         }
 
         if (gs->runningUnderAutogen) {

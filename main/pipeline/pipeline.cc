@@ -89,7 +89,7 @@ string fileKey(const core::File &file) {
 
 unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs, core::FileRef fref,
                                                            const core::File &file,
-                                                           const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore && fref.id() < gs.filesUsed()) {
         string fileHashKey = fileKey(file);
         auto maybeCached = kvstore->read(fileHashKey);
@@ -106,7 +106,7 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
 }
 
 unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
     if (cachedFile) {
         return move(cachedFile->tree);
@@ -421,7 +421,7 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 // Returns a non-null ast::Expression if kvstore contains the AST.
 unique_ptr<ast::Expression> readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
                                                             const options::Options &opts,
-                                                            const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     unique_ptr<ast::Expression> ast;
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
@@ -488,7 +488,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
@@ -531,7 +531,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
                                const options::Options &opts, WorkerPool &workers,
-                               const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -571,7 +571,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
-                             const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                             const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (firstPass.pluginGeneratedFiles.empty()) {
         return firstPass;
     }
@@ -634,7 +634,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
                               const options::Options &opts, WorkerPool &workers,
-                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs->tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;

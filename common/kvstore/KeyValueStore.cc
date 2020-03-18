@@ -122,7 +122,7 @@ void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     }
 }
 
-u1 *OwnedKeyValueStore::read(string_view key) {
+u1 *OwnedKeyValueStore::read(string_view key) const {
     MDB_txn *txn = nullptr;
     int rc = 0;
     {
@@ -177,7 +177,7 @@ fail:
     throw_mdb_error("failed to clear the database"sv, rc);
 }
 
-string_view OwnedKeyValueStore::readString(string_view key) {
+string_view OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
     if (!rawData) {
         return string_view();

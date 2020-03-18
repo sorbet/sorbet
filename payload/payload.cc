@@ -11,7 +11,7 @@ namespace sorbet::payload {
 constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
 
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
-                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
@@ -41,11 +41,11 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     }
 }
 
-bool retainGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-        Timer timeit(gs->tracer(), "write_global_state.kvstore");
-        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
+    if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
+        Timer timeit(gs.tracer(), "write_global_state.kvstore");
+        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(gs));
         return true;
     }
     return false;
