@@ -216,7 +216,7 @@ module Sorbet::Private
       def gem_from_location(location)
         match =
           location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
-          location&.match(/^.*\/(j?ruby)-([\d.]+)\//) || # jvm ruby stdlib
+          location&.match(/^.*\/(jruby)-([\d.]+)\//) || # jvm ruby stdlib
           location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
           location&.match(/^.*\/gems\/(?:(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/)?gems\/([^\/]+)-([^-\/]+)\//i) # gem
         if match.nil?
