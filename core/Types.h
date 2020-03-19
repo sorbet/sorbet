@@ -61,7 +61,7 @@ public:
     ArgInfo &operator=(ArgInfo &&) noexcept = default;
     ArgInfo deepCopy() const;
 };
-CheckSize(ArgInfo, 40, 8);
+CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
@@ -658,7 +658,7 @@ public:
 class TypeAndOrigins final {
 public:
     TypePtr type;
-    InlinedVector<Loc, 2> origins;
+    InlinedVector<Loc, 1> origins;
     std::vector<ErrorLine> origins2Explanations(const GlobalState &gs) const;
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;

@@ -40,7 +40,7 @@ public:
         return _id > rhs._id;
     }
 
-    inline u2 id() const {
+    inline unsigned int id() const {
         return _id;
     }
 
@@ -54,9 +54,9 @@ public:
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
 private:
-    u2 _id;
+    unsigned int _id : 24;
 };
-CheckSize(FileRef, 2, 2);
+CheckSize(FileRef, 4, 4);
 
 class File final {
 public:
