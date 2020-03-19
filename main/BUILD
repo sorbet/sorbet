@@ -93,7 +93,7 @@ cc_library(
     deps = [
         "//ast",
         "//core",
-        "//main/cache",
+        "//main/cache:cache-orig",
         "//main/options",
         "//main/pipeline:pipeline-orig",
         "//payload:interface",
