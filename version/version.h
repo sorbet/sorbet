@@ -6,10 +6,33 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef __cplusplus
+namespace sorbet {
+#endif
+
 #if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
+constexpr bool debug_mode = true;
 #else
 #undef DEBUG_MODE
+constexpr bool debug_mode = false;
+#endif
+
+#if !defined(EMSCRIPTEN)
+constexpr bool emscripten_build = false;
+#else
+constexpr bool emscripten_build = true;
+#endif
+
+#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
+constexpr bool fuzz_mode = false;
+#else
+constexpr bool fuzz_mode = true;
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 extern const char *sorbet_version;
