@@ -9,7 +9,6 @@ extern "C" {
 
 #ifdef __cplusplus
 namespace sorbet {
-#endif
 
 #if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
@@ -31,9 +30,9 @@ constexpr bool fuzz_mode = false;
 constexpr bool fuzz_mode = true;
 #endif
 
-#ifdef __cplusplus
-}
+} // namespace sorbet
 #endif
+// ^^^ __cplusplus
 
 extern const char *sorbet_version;
 extern const char *sorbet_codename;
