@@ -397,7 +397,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
 
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
-            builder.CreateStore(Payload::setRubyStackFrame(cs, builder, md), blockMap.lineNumberPtrsByFunction[funcId]);
+            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
+            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[funcId]);
+            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[funcId]);
         }
 
         if (!isBlock) {
@@ -428,6 +430,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
                 lastLoc = Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol, lastLoc,
+                                                 blockMap.iseqEncodedPtrsByFunction[bb->rubyBlockId],
                                                  blockMap.lineNumberPtrsByFunction[bb->rubyBlockId]);
                 typecase(
                     bind.value.get(),

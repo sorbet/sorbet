@@ -21,6 +21,7 @@ struct BasicBlockMap {
     std::vector<llvm::Function *> rubyBlocks2Functions;
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
+    std::vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
     bool usesBlockArgs;
 };
 } // namespace sorbet::compiler

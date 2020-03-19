@@ -460,15 +460,17 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
     return global;
 }
 
-llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
+std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                                   unique_ptr<ast::MethodDef> &md) {
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, md);
-    auto ret = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {stackFrame});
-    return ret;
+    auto pc = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {stackFrame});
+    auto iseq_encoded = builder.CreateCall(cs.module->getFunction("sorbet_getIseqEncoded"), {stackFrame});
+    return {pc, iseq_encoded};
 }
 
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym,
-                                 core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr) {
+                                 core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {
         return lastLoc;
     }
@@ -479,7 +481,8 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     }
     auto offset = lineno - sym.data(cs)->loc().position(cs).first.line;
     builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"),
-                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset)), builder.CreateLoad(lineNumberPtr)});
+                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset)), builder.CreateLoad(iseqEncodedPtr),
+                        builder.CreateLoad(lineNumberPtr)});
     return loc;
 }
 

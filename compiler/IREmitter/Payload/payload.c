@@ -17,6 +17,9 @@
 // This is probably a bad idea but is needed for so many things
 #include "vm_core.h"
 
+// This is for the enum definition for YARV instructions
+#include "insns.inc"
+
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
@@ -631,14 +634,23 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, 0, ISEQ_TYPE_METHOD);
     rb_gc_register_mark_object((VALUE)iseq);
 
+    // This is the table that tells us the hash entry for instruction types
+    const void *const *table = rb_vm_get_insns_address_table();
+    VALUE nop = (VALUE)table[YARVINSN_nop];
+
     // Even if start and end are on the same line, we still want one insns_info made
     int insn_num = endline - startline + 1;
     struct iseq_insn_info_entry *insns_info = ALLOC_N(struct iseq_insn_info_entry, insn_num);
     unsigned int *positions = ALLOC_N(unsigned int, insn_num);
+    VALUE *iseq_encoded = ALLOC_N(VALUE, insn_num);
     for (int i = 0; i < insn_num; i++) {
         int lineno = i + startline;
         positions[i] = i;
         insns_info[i].line_no = lineno;
+
+        // we fill iseq_encoded with NOP instructions; it only exists because it
+        // has to match the length of insns_info.
+        iseq_encoded[i] = nop;
     }
     iseq->body->insns_info.body = insns_info;
     iseq->body->insns_info.positions = positions;
@@ -646,8 +658,9 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     iseq->body->iseq_size = insn_num;
     iseq->body->insns_info.size = insn_num;
     rb_iseq_insns_info_encode_positions(iseq);
-    // Just an offset that has to be consistent with what we use in sorbet_setLineNumber
-    iseq->body->iseq_encoded = 0x0;
+
+    // One NOP per line, to match insns_info
+    iseq->body->iseq_encoded = iseq_encoded;
 
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
     return (unsigned char *)iseq;
@@ -661,9 +674,14 @@ const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
     return &cfp->pc;
 }
 
-void sorbet_setLineNumber(int offset, VALUE **storeLocation) {
+const VALUE *sorbet_getIseqEncoded(unsigned char *iseqchar) {
+    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
+    return iseq->body->iseq_encoded;
+}
+
+void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation) {
     // use pos+1 because PC should point at the next instruction
-    (*storeLocation) = ((VALUE *)0x0) + offset + 1;
+    (*storeLocation) = iseq_encoded + offset + 1;
 }
 
 VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {

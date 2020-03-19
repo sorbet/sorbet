@@ -205,6 +205,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrays;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
+    vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
     vector<llvm::Value *> escapedClosure;
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
     llvm::IRBuilder<> builder(cs);
@@ -215,6 +216,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
     }
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
+    auto iseqEncodedPtrType = llvm::Type::getInt64PtrTy(cs);
     for (auto &fun : rubyBlock2Function) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
@@ -239,6 +241,8 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
         sendArgArrays.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
+        auto iseqEncodedPtr = builder.CreateAlloca(iseqEncodedPtrType, nullptr, "iseqEncodedStore");
+        iseqEncodedPtrsByFunction.emplace_back(iseqEncodedPtr);
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
         i++;
     }
@@ -319,6 +323,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                                 move(rubyBlock2Function),
                                 {},
                                 move(lineNumberPtrsByFunction),
+                                move(iseqEncodedPtrsByFunction),
                                 usesBlock};
     approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
 

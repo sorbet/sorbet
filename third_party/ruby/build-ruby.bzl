@@ -99,7 +99,7 @@ internal_incdir="$base/{internal_incdir}"
 
 mkdir -p "$internal_incdir"
 
-cp *.h "$internal_incdir"
+cp *.h *.inc "$internal_incdir"
 
 find ccan -type d | while read dir; do
   mkdir -p "$internal_incdir/$dir"
