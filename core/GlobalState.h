@@ -69,7 +69,7 @@ public:
     SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u2 num,
+    SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
                                      const std::vector<int> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
@@ -102,8 +102,8 @@ public:
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;
 
-    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
-    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
+    NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const;
+    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num);
 
     NameRef enterNameConstant(NameRef original);
     NameRef enterNameConstant(std::string_view original);

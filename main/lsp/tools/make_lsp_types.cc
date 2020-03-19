@@ -1278,7 +1278,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    {
                        "u4 epoch = 0;",
                        "// Contains the number of individual edit messages merged into this edit.",
-                       "u2 mergeCount = 0;",
+                       "u4 mergeCount = 0;",
                        "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
                        "bool sorbetCancellationExpected = false;"
                        "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",

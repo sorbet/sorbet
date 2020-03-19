@@ -645,7 +645,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
-    u2 unique = 1;
+    u4 unique = 1;
     auto res = ownerScope->members().find(lookupName);
     while (res != ownerScope->members().end()) {
         ENFORCE(res->second.exists());
@@ -674,7 +674,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
-    u2 unique = 1;
+    u4 unique = 1;
     auto res = ownerScope->members().find(lookupName);
     while (res != ownerScope->members().end()) {
         ENFORCE(res->second.exists());
@@ -718,7 +718,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
             return res;
         }
     } else {
-        u2 unique = 1;
+        u4 unique = 1;
         NameRef lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
         auto res = ownerScope->members().find(lookupName);
         while (res != ownerScope->members().end()) {
@@ -826,7 +826,7 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
-SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u2 num,
+SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
                                               const vector<int> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
@@ -1094,7 +1094,7 @@ void GlobalState::expandNames(int growBy) {
     namesByHash.swap(new_namesByHash);
 }
 
-NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
+NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
@@ -1120,7 +1120,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
     return core::NameRef::noName();
 }
 
-NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
     unsigned int hashTableSize = namesByHash.size();
@@ -1226,7 +1226,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ENFORCE(whatData->name == origName);
-    u2 collisionCount = 1;
+    u4 collisionCount = 1;
     NameRef name;
     do {
         name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);

@@ -57,11 +57,11 @@ enum class UniqueNameKind : u1 {
 
 struct UniqueName final {
     NameRef original;
+    u4 num;
     UniqueNameKind uniqueNameKind;
-    u2 num;
 };
 
-CheckSize(UniqueName, 8, 4);
+CheckSize(UniqueName, 12, 4);
 
 struct ConstantName final {
     NameRef original;

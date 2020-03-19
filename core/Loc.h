@@ -29,7 +29,7 @@ CheckSize(LocOffsets, 6, 1);
 class Loc final {
     struct {
         LocOffsets offsets;
-        unsigned int fileRef : 16;
+        unsigned int fileRef : 24;
     } __attribute__((packed, aligned(8))) storage;
     template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
@@ -128,7 +128,7 @@ public:
         return Loc(file(), beginPos(), beginPos());
     }
 };
-CheckSize(Loc, 8, 8);
+CheckSize(Loc, 16, 8);
 
 template <typename H> H AbslHashValue(H h, const Loc &m) {
     return H::combine(std::move(h), m.storage.offsets.beginLoc, m.storage.offsets.endLoc, m.storage.fileRef);
