@@ -968,40 +968,6 @@ VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const rest
     return recv;
 }
 
-void rb_ary_splice(VALUE ary, long beg, long len, const VALUE *rptr, long rlen);
-
-VALUE sorbet_rb_array_square_br_eq(VALUE ary, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                   VALUE closure) {
-    long offset, beg, len;
-    VALUE rpl;
-
-    if (argc == 3) {
-        rb_check_frozen(ary);
-        beg = NUM2LONG(argv[0]);
-        len = NUM2LONG(argv[1]);
-        goto range;
-    }
-    rb_check_arity(argc, 2, 2);
-    rb_check_frozen(ary);
-    if (FIXNUM_P(argv[0])) {
-        offset = FIX2LONG(argv[0]);
-        goto fixnum;
-    }
-    if (rb_range_beg_len(argv[0], &beg, &len, RARRAY_LEN(ary), 1)) {
-        /* check if idx is Range */
-    range:
-        rpl = rb_ary_to_ary(argv[argc - 1]);
-        rb_ary_splice(ary, beg, len, RARRAY_CONST_PTR_TRANSIENT(rpl), RARRAY_LEN(rpl));
-        RB_GC_GUARD(rpl);
-        return argv[argc - 1];
-    }
-
-    offset = NUM2LONG(argv[0]);
-fixnum:
-    rb_ary_store(ary, offset, argv[1]);
-    return argv[1];
-}
-
 VALUE sorbet_rb_hash_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                VALUE closure) {
     rb_check_arity(argc, 1, 1);
