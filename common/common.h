@@ -32,24 +32,6 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 
-#ifdef DEBUG_MODE
-constexpr bool debug_mode = false;
-#else
-constexpr bool debug_mode = true;
-#endif
-
-#if !defined(EMSCRIPTEN)
-constexpr bool emscripten_build = false;
-#else
-constexpr bool emscripten_build = true;
-#endif
-
-#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
-constexpr bool fuzz_mode = false;
-#else
-constexpr bool fuzz_mode = true;
-#endif
-
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 
 // Used for cases like https://xkcd.com/2200/
