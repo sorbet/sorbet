@@ -148,9 +148,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       refute_nil(msg_string)
       refute_nil(extra_hash)
-      assert_equal(MySerializable, extra_hash[:klass])
-      assert_equal(:foo, extra_hash[:prop])
-      assert_equal("Won't respond like hash", extra_hash[:value])
+      storytime = extra_hash[:storytime]
+      assert_equal(MySerializable, storytime[:klass])
+      assert_equal(:foo, storytime[:prop])
+      assert_equal("Won't respond like hash", storytime[:value])
     end
 
     it 'includes relevant generated code on deserialize when we raise' do
