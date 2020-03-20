@@ -61,6 +61,7 @@ git rm -rf '*'
 tar -xjf _out_/website/website.tar.bz2 .
 git add .
 git reset HEAD _out_
+git reset HEAD sha.html
 dirty=
 git diff-index --quiet HEAD -- || dirty=1
 if [ "$dirty" != "" ]; then
