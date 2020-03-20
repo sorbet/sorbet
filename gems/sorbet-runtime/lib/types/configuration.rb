@@ -336,7 +336,7 @@ module T::Configuration
   #   T::Configuration.scalar_types = ["NilClass", "TrueClass", "FalseClass", ...]
   def self.scalar_types=(values)
     if values.nil?
-      @scalar_tyeps = values
+      @scalar_types = values
     else
       bad_values = values.select {|v| v.class != String}
       unless bad_values.empty?
