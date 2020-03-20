@@ -2294,158 +2294,6 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Object
-                }
-              ]
-            }
-          }
-          args = [
-          ]
-        }
-
-        MethodDef{
-          flags = {rewriter}
-          name = <U object><<C <U <todo sym>>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
-            }
-            fun = <U cast>
-            block = nullptr
-            args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::Object
-              }
-            ]
-          }
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
-          }
-          fun = <U sig>
-          block = Block {
-            args = [
-            ]
-            body = Send{
-              recv = Send{
-                recv = Local{
-                  localVariable = <U <self>>
-                }
-                fun = <U params>
-                block = nullptr
-                args = [
-                  Hash{
-                    pairs = [
-                      [
-                        key = Literal{ value = :"arg0" }
-                        value = ConstantLit{
-                          orig = nullptr
-                          symbol = ::Object
-                        }
-                      ]
-                    ]
-                  }
-                ]
-              }
-              fun = <U returns>
-              block = nullptr
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Object
-                }
-              ]
-            }
-          }
-          args = [
-          ]
-        }
-
-        MethodDef{
-          flags = {rewriter}
-          name = <U object=><<C <U <todo sym>>>>
-          args = [UnresolvedIdent{
-              kind = Local
-              name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
-            }
-            fun = <U cast>
-            block = nullptr
-            args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::Object
-              }
-            ]
-          }
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
-          }
-          fun = <U sig>
-          block = Block {
-            args = [
-            ]
-            body = Send{
-              recv = Send{
-                recv = Local{
-                  localVariable = <U <self>>
-                }
-                fun = <U params>
-                block = nullptr
-                args = [
-                  Hash{
-                    pairs = [
-                    ]
-                  }
-                ]
-              }
-              fun = <U returns>
-              block = nullptr
-              args = [
                 UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <C <U Array>>
@@ -5335,32 +5183,13 @@ ClassDef{
         }
 
         Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+          recv = Local{
+            localVariable = <U <self>>
           }
-          fun = <U keep_def>
+          fun = <U prop>
           block = nullptr
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
             Literal{ value = :"object" }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
-          }
-          fun = <U keep_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"object=" }
           ]
         }
 

@@ -48,4 +48,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C Default>.new({:"foo" => 3, :"bar" => 4})
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new({:"foo" => 3}).foo())
+
+  class <emptyTree>::<C Bad><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).void()
+    end
+
+    def initialize<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+    <self>.prop(:"no_type_on_prop")
+
+    <self>.const(:"no_type_on_const")
+  end
 end
