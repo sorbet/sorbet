@@ -111,7 +111,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
     if (type == nullptr) {
         if (send->args.size() == 1) {
-            type = ast::MK::Constant(send->loc, core::Symbols::Object());
+            return nullopt;
         } else {
             type = ASTUtil::dupType(send->args[1].get());
         }
