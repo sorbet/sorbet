@@ -59,10 +59,12 @@ module T::Props
               rescue NoMethodError => e
                 T::Configuration.soft_assert_handler(
                   'Deserialization error (probably unexpected stored type)',
-                  klass: self.class,
-                  prop: #{prop.inspect},
-                  value: val,
-                  error: e.message
+                  storytime: {
+                    klass: self.class,
+                    prop: #{prop.inspect},
+                    value: val,
+                    error: e.message
+                  }
                 )
                 val
               end
