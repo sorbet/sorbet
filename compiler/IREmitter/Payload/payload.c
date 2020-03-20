@@ -1,9 +1,14 @@
-#ifndef GRANITA_H
-#define GRANITA_H
-
-// for explanation of WTF is happening here, see ruby.h and
-// https://silverhammermba.github.io/emberb/c/ and
-// http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html
+//
+// payload.c
+//
+// Most of the APIs we're using here are normal Ruby C extension APIs.
+// Suggested reading:
+//
+// - <https://silverhammermba.github.io/emberb/c/>
+// - <http://clalance.blogspot.com/2011/01/writing-ruby-extensions-in-c-part-9.html>
+//
+// You'll also find a lot of useful information from grepping the Ruby source code.
+//
 
 // These are public Ruby headers. Feel free to add more from the include/ruby
 // directory
@@ -1267,4 +1272,3 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
            (long)&sorbet_getConstant;
 }
-#endif
