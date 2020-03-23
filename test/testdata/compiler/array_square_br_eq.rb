@@ -4,8 +4,8 @@
 
 x = T.let([1,2,3,4], T::Array[Integer])
 
-# TODO: we are trying to use a static internal method from array.c
-# (rb_ary_splice), and get a dynamic linker error at runtime.
+# These don't typecheck given Sorbet's RBI definitions even though they work in
+# normal Ruby.
 # x[1..2] = 0
 # puts x              # [1,0,4]
 # x[1..2] = [5,5,5]
