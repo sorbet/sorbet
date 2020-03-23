@@ -175,22 +175,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).returns(::Object)
-    end
-
-    def object<<C <todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), ::Object)
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({:"arg0" => ::Object}).returns(::Object)
-    end
-
-    def object=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), ::Object)
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C Array>)
     end
 
@@ -474,9 +458,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"type=")
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"object")
-
-    ::Sorbet::Private::Static.keep_def(<self>, :"object=")
+    <self>.prop(:"object")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array")
 

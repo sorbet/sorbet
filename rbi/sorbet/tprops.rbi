@@ -20,6 +20,7 @@ end
 module T::Props::ClassMethods
   sig {params(name: T.any(Symbol, String), cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
   def const(name, cls_or_args, args={}, &blk); end
+  sig {params(name: T.any(Symbol, String), cls: T.untyped, rules: T.untyped).void}
   def prop(name, cls, rules = nil); end
   def decorator; end
   def decorator_class; end

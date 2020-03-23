@@ -39,7 +39,7 @@ class AdvancedODM
     prop :t_nilable, T.nilable(String)
 
     prop :type, type: String
-    prop :object
+    prop :object  # error: Method `prop` does not exist on `T.class_of(AdvancedODM)`
     prop :array, Array
     prop :array_of, array: String
     prop :array_of_explicit, Array, array: String
@@ -91,7 +91,8 @@ def main
     T.reveal_type(AdvancedODM.new.t_nilable) # error: Revealed type: `T.nilable(String)`
 
     T.reveal_type(AdvancedODM.new.type) # error: Revealed type: `String`
-    T.reveal_type(AdvancedODM.new.object) # error: Revealed type: `Object`
+    T.reveal_type(AdvancedODM.new.object) # error: Revealed type: `T.untyped`
+                # ^^^^^^^^^^^^^^^^^^^^^^ error: Method `object` does not exist on `AdvancedODM`
     T.reveal_type(AdvancedODM.new.array) # error: Revealed type: `T::Array[T.untyped]`
     T.reveal_type(AdvancedODM.new.array_of) # error: Revealed type: `T::Array[String]`
     T.reveal_type(AdvancedODM.new.array_of_explicit) # error: Revealed type: `T::Array[T.untyped]`
