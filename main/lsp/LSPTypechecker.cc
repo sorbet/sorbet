@@ -244,9 +244,10 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
         fileq->push(move(copy), 1);
     }
 
+    const auto &epochManager = *gs->epochManager;
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
-    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &gs = this->gs]() {
+    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
         int job;
@@ -256,7 +257,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                     processedByThread++;
 
                     // Stop if typechecking was canceled.
-                    if (!gs->epochManager->wasTypecheckingCanceled()) {
+                    if (!epochManager.wasTypecheckingCanceled()) {
                         const auto &tree = indexed[job];
                         // Note: indexed entries for payload files don't have any contents.
                         if (tree.tree && !ignore.contains(tree.file.id())) {
@@ -283,7 +284,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
-    return !gs->epochManager->wasTypecheckingCanceled();
+    return !epochManager.wasTypecheckingCanceled();
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
