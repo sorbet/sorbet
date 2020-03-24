@@ -33,8 +33,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//third_party/progressbar",
         "//sorbet_version",
+        "//third_party/progressbar",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
