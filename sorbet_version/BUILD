@@ -1,9 +1,17 @@
-cc_library(
-    name = "sorbet_version",
-    srcs = select({
+filegroup(
+    name = "sorbet_version_srcs",
+    srcs = [
+        "sorbet_version.h",
+    ] + select({
         "be-versioned": ["sorbet_version_gen.c"],
         "//conditions:default": ["sorbet_version.c"],
     }),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "sorbet_version",
+    srcs = [":sorbet_version_srcs"],
     hdrs = ["sorbet_version.h"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
