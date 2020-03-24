@@ -4,7 +4,8 @@
 require_relative 'private/methods/_methods'
 
 # Work around an interaction bug with sorbet-runtime and rspec-mocks,
-# which occurs when using *_any_instance_of and and_call_original.
+# which occurs when using message expectations (*_any_instance_of,
+# expect, allow) and and_call_original.
 #
 # When a sig is defined, sorbet-runtime will replace the sigged method
 # with a wrapper that, upon first invocation, re-wraps the method with a faster
@@ -22,17 +23,28 @@ require_relative 'private/methods/_methods'
 #
 # We work around this by forcing re-wrapping before rspec stores a reference
 # to the method.
-if defined? ::RSpec::Mocks::AnyInstance
+if defined? ::RSpec::Mocks
   module T
     module CompatibilityPatches
-      module RecorderExtensions
-        def observe!(method_name)
-          method = @klass.instance_method(method_name.to_sym)
-          T::Private::Methods.maybe_run_sig_block_for_method(method)
-          super(method_name)
+      module RSpec
+        module RecorderExtensions
+          def observe!(method_name)
+            method = @klass.instance_method(method_name.to_sym)
+            T::Private::Methods.maybe_run_sig_block_for_method(method)
+            super(method_name)
+          end
         end
+        ::RSpec::Mocks::AnyInstance::Recorder.prepend(RecorderExtensions) if defined?(::RSpec::Mocks::AnyInstance::Recorder)
+
+        module MethodDoubleExtensions
+          def initialize(object, method_name, proxy)
+            method = object.method(method_name)
+            T::Private::Methods.maybe_run_sig_block_for_method(method)
+            super(object, method_name, proxy)
+          end
+        end
+        ::RSpec::Mocks::MethodDouble.prepend(MethodDoubleExtensions) if defined?(::RSpec::Mocks::MethodDouble)
       end
-      ::RSpec::Mocks::AnyInstance::Recorder.prepend(RecorderExtensions)
     end
   end
 end
