@@ -57,3 +57,7 @@ const char *sorbet_full_version_string = SORBET_VERSION "." QUOTED(STABLE_BUILD_
     " debug_mode=true"
 #endif
     ;
+
+const char *sorbet_getFullVersionString() {
+    return sorbet_full_version_string;
+}
