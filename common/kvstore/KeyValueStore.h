@@ -45,8 +45,9 @@ public:
 /**
  * A database with single writer and multiple readers.
  * Only the thread that created OwnedKeyValueStore is allowed to invoke `write`.
- * To write changes to disk, one must call `commit`.
  * Creating OwnedKeyValueStore grabs a lock and allows to have consistent view over database.
+ *
+ * To write changes to disk, one must call `commit`.
  */
 class OwnedKeyValueStore final {
     const std::thread::id writerId;
@@ -65,7 +66,7 @@ public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
     ~OwnedKeyValueStore();
 
-    /** Get the ID of the given session. Used for ENFORCEs. Wraps around. */
+    /** Get the ID of the given session. Used for ENFORCEs. */
     u4 sessionId() const;
 
     /** returns nullptr if not found*/
