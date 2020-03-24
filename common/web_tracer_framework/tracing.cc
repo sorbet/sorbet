@@ -7,7 +7,7 @@
 #include "common/JSON.h"
 #include "common/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 #include <chrono>
 #include <string>
 #include <unistd.h>

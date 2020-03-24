@@ -10,7 +10,7 @@
 #include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "main/lsp/LSPTask.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 
 using namespace std;
 

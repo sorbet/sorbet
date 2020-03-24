@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "absl/strings/escaping.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 
 using namespace std;
 

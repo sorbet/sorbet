@@ -30,9 +30,9 @@
 #include "main/realmain.h"
 #include "payload/payload.h"
 #include "resolver/resolver.h"
+#include "sorbet_version/sorbet_version.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include "version/version.h"
 
 #include <csignal>
 #include <poll.h>

@@ -13,8 +13,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
+        "//sorbet_version",
         "//third_party/licenses",
-        "//version",
         "@cxxopts",
         "@spdlog",
         "@yaml_cpp",

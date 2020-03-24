@@ -1,7 +1,7 @@
 #include "common/statsd/statsd.h"
 #include "common/Counters_impl.h"
 #include "common/formatting.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 
 extern "C" {
 #include "statsd-client.h"
