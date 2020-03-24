@@ -96,7 +96,7 @@ compilation_database(
         "//main/pipeline/semantic_extension:interface",
         "//common/concurrency:concurrency",
         "//common:common",
-        "//sorbet_version:version",
+        "//sorbet_version:sorbet_version",
         "//third_party/progressbar:progressbar",
         # END compile_commands targets
     ],

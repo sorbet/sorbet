@@ -1,10 +1,10 @@
 cc_library(
-    name = "version",
+    name = "sorbet_version",
     srcs = select({
-        "be-versioned": ["version_gen.cc"],
-        "//conditions:default": ["version.cc"],
+        "be-versioned": ["sorbet_version_gen.cc"],
+        "//conditions:default": ["sorbet_version.cc"],
     }),
-    hdrs = ["version.h"],
+    hdrs = ["sorbet_version.h"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -21,9 +21,9 @@ config_setting(
 )
 
 genrule(
-    name = "version_gen_cc",
-    srcs = ["version.cc"],
-    outs = ["version_gen.cc"],
+    name = "sorbet_version_gen_cc",
+    srcs = ["sorbet_version.cc"],
+    outs = ["sorbet_version_gen.cc"],
     cmd = """
     scm_status=$$(grep STABLE_BUILD_SCM_CLEAN bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_CLEAN //')
     scm_revision=$$(grep STABLE_BUILD_SCM_REVISION bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_REVISION //')
