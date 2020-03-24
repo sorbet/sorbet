@@ -20,6 +20,7 @@
     "classnames": "^2.2.6"
   },
   "resolutions": {
-    "**/underscore.string": "^3.3.5"
+    "**/underscore.string": "^3.3.5",
+    "**/minimist": "^1.2.2"
   }
 }
