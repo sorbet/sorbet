@@ -1,8 +1,8 @@
 cc_library(
     name = "sorbet_version",
     srcs = select({
-        "be-versioned": ["sorbet_version_gen.cc"],
-        "//conditions:default": ["sorbet_version.cc"],
+        "be-versioned": ["sorbet_version_gen.c"],
+        "//conditions:default": ["sorbet_version.c"],
     }),
     hdrs = ["sorbet_version.h"],
     linkstatic = select({
@@ -21,19 +21,19 @@ config_setting(
 )
 
 genrule(
-    name = "sorbet_version_gen_cc",
-    srcs = ["sorbet_version.cc"],
-    outs = ["sorbet_version_gen.cc"],
+    name = "sorbet_version_gen_c",
+    srcs = ["sorbet_version.c"],
+    outs = ["sorbet_version_gen.c"],
     cmd = """
     scm_status=$$(grep STABLE_BUILD_SCM_CLEAN bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_CLEAN //')
     scm_revision=$$(grep STABLE_BUILD_SCM_REVISION bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_REVISION //')
     scm_commit_count=$$(grep STABLE_BUILD_SCM_COMMIT_COUNT bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_COMMIT_COUNT //')
     build_timestamp=$$(grep BUILD_TIMESTAMP bazel-out/volatile-status.txt | sed 's/^BUILD_TIMESTAMP //')
     cat "$<" \\
-      | sed 's/BUILD_RELEASE/true/g' \\
+      | sed 's/BUILD_RELEASE/1/g' \\
       | sed 's/STABLE_BUILD_SCM_CLEAN/"'"$${scm_status}"'"/g' \\
       | sed 's/STABLE_BUILD_SCM_REVISION/"'"$${scm_revision}"'"/g' \\
-      | sed 's/STABLE_BUILD_SCM_COMMIT_COUNT/"'"$${scm_commit_count}"'"/g' \\
+      | sed 's/STABLE_BUILD_SCM_COMMIT_COUNT/'"$${scm_commit_count}"'/g' \\
       | sed 's/BUILD_TIMESTAMP/'"$${build_timestamp}"'/g' \\
       > "$@"
     """,
