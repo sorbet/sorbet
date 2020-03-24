@@ -26,7 +26,7 @@ require_relative 'private/methods/_methods'
 if defined? ::RSpec::Mocks
   module T
     module CompatibilityPatches
-      module RSpec
+      module RSpecCompatibility
         module RecorderExtensions
           def observe!(method_name)
             method = @klass.instance_method(method_name.to_sym)
@@ -38,8 +38,10 @@ if defined? ::RSpec::Mocks
 
         module MethodDoubleExtensions
           def initialize(object, method_name, proxy)
-            method = object.method(method_name)
-            T::Private::Methods.maybe_run_sig_block_for_method(method)
+            if ::Kernel.instance_method(:respond_to?).bind(object).call(method_name, true)
+              method = ::RSpec::Support.method_handle_for(object, method_name)
+              T::Private::Methods.maybe_run_sig_block_for_method(method)
+            end
             super(object, method_name, proxy)
           end
         end
