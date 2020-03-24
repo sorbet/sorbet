@@ -14,7 +14,7 @@ cc_library(
     deps = [
         "//core",
         "//third_party/licenses",
-        "//version",
+        "//sorbet_version",
         "@cxxopts",
         "@spdlog",
         "@yaml_cpp",

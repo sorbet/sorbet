@@ -12,6 +12,6 @@ cc_library(
     deps = [
         "//common",
         "//core",
-        "//version",
+        "//sorbet_version",
     ],
 )

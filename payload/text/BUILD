@@ -10,7 +10,7 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
-        "//version",
+        "//sorbet_version",
     ],
 )
 
