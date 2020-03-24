@@ -15,7 +15,7 @@
 #include "options.h"
 #include "sys/stat.h"
 #include "third_party/licenses/licenses.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 
 namespace spd = spdlog;
 using namespace std;

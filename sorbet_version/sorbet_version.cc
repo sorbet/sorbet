@@ -1,4 +1,4 @@
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 #include <cstdlib>
 #include <cstring>
 #include <ctime>

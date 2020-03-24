@@ -11,7 +11,7 @@
 #include "payload/payload.h"
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/lsp.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 
 namespace sorbet::test::lsp {
 using namespace std;

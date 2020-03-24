@@ -6,7 +6,7 @@
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
-#include "version/version.h"
+#include "sorbet_version/sorbet_version.h"
 #include <memory>
 #include <regex>
 
