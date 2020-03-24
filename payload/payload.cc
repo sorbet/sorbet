@@ -23,6 +23,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
                     gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
                 }
             }
+            gs->kvstoreSessionId = kvstore->sessionId();
             return;
         }
     }

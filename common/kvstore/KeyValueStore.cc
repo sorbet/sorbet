@@ -25,6 +25,8 @@ static void throw_mdb_error(string_view what, int err) {
     fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
     throw invalid_argument(string(what));
 }
+
+static atomic<u4> globalSessionId = 0;
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
@@ -68,6 +70,10 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         }
         return;
     }
+}
+
+u4 OwnedKeyValueStore::sessionId() const {
+    return _sessionId;
 }
 
 void OwnedKeyValueStore::abort() {
@@ -210,6 +216,9 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
+    // Increment session. Used for debug assertions.
+    _sessionId = globalSessionId++;
+
     // Per the docs for mdb_dbi_open:
     //
     // The database handle will be private to the current transaction

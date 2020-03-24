@@ -54,6 +54,7 @@ class OwnedKeyValueStore final {
     struct TxnState;
     const std::unique_ptr<TxnState> txnState;
     mutable absl::Mutex readers_mtx;
+    u4 _sessionId;
 
     void clear();
     void refreshMainTransaction();
@@ -63,6 +64,9 @@ class OwnedKeyValueStore final {
 public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
     ~OwnedKeyValueStore();
+
+    /** Get the ID of the given session. Used for ENFORCEs. Wraps around. */
+    u4 sessionId() const;
 
     /** returns nullptr if not found*/
     u1 *read(std::string_view key) const;
