@@ -1004,7 +1004,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 });
 
             typecheck_thread_result threadResult;
-            const auto &epochManager = ctx.state.epochManager;
             {
                 for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
@@ -1020,7 +1019,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                         (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }
                 }
-                if (cancelable && epochManager->wasTypecheckingCanceled()) {
+                if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return ast::ParsedFilesOrCancelled();
                 }
             }

@@ -234,7 +234,7 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
-void LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
+bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
                                  vector<ast::ParsedFile> &out) const {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.copy_indexes");
@@ -246,7 +246,7 @@ void LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
 
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
-    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore]() {
+    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &gs = this->gs]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
         int job;
@@ -255,10 +255,13 @@ void LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                 if (result.gotItem()) {
                     processedByThread++;
 
-                    const auto &tree = indexed[job];
-                    // Note: indexed entries for payload files don't have any contents.
-                    if (tree.tree && !ignore.contains(tree.file.id())) {
-                        threadResult.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                    // Stop if typechecking was canceled.
+                    if (!gs->epochManager->wasTypecheckingCanceled()) {
+                        const auto &tree = indexed[job];
+                        // Note: indexed entries for payload files don't have any contents.
+                        if (tree.tree && !ignore.contains(tree.file.id())) {
+                            threadResult.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                        }
                     }
                 }
             }
@@ -270,6 +273,7 @@ void LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     });
     {
         vector<ast::ParsedFile> threadResult;
+        out.reserve(indexed.size());
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
@@ -279,6 +283,7 @@ void LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
+    return !gs->epochManager->wasTypecheckingCanceled();
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
@@ -330,8 +335,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        copyIndexed(workers, updatedFiles, indexedCopies);
-        if (epochManager.wasTypecheckingCanceled()) {
+        if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
+            // Canceled.
             return;
         }
 
