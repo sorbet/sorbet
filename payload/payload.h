@@ -8,10 +8,10 @@
 namespace sorbet::payload {
 
 void createInitialGlobalState(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
-                              const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 /** Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens. */
-bool retainGlobalState(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                        const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 } // namespace sorbet::payload

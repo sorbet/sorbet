@@ -50,6 +50,7 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
+        "//main/cache",
         "//main/options",
         "//main/pipeline",
         "//payload:interface",

@@ -31,6 +31,8 @@ public:
 
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
 
+    static u4 loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
+
     // Loads the given file and its AST. Overwrites file references in the AST with the given file ref.
     static CachedFile loadFile(const GlobalState &gs, core::FileRef fref, const u1 *const data);
 };

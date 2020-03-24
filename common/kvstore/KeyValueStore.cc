@@ -25,6 +25,8 @@ static void throw_mdb_error(string_view what, int err) {
     fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
     throw invalid_argument(string(what));
 }
+
+static atomic<u4> globalSessionId = 0;
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
@@ -68,6 +70,10 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         }
         return;
     }
+}
+
+u4 OwnedKeyValueStore::sessionId() const {
+    return _sessionId;
 }
 
 void OwnedKeyValueStore::abort() {
@@ -122,7 +128,7 @@ void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     }
 }
 
-u1 *OwnedKeyValueStore::read(string_view key) {
+u1 *OwnedKeyValueStore::read(string_view key) const {
     MDB_txn *txn = nullptr;
     int rc = 0;
     {
@@ -177,7 +183,7 @@ fail:
     throw_mdb_error("failed to clear the database"sv, rc);
 }
 
-string_view OwnedKeyValueStore::readString(string_view key) {
+string_view OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
     if (!rawData) {
         return string_view();
@@ -210,6 +216,9 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
+    // Increment session. Used for debug assertions.
+    _sessionId = globalSessionId++;
+
     // Per the docs for mdb_dbi_open:
     //
     // The database handle will be private to the current transaction

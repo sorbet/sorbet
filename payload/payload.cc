@@ -1,4 +1,5 @@
 #include "payload/payload.h"
+#include "common/Random.h"
 #include "common/Timer.h"
 #include "core/serialize/serialize.h"
 #include "payload/binary/binary.h"
@@ -8,10 +9,12 @@ using namespace std;
 
 namespace sorbet::payload {
 
+namespace {
 constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
+}
 
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
-                              const unique_ptr<OwnedKeyValueStore> &kvstore) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
@@ -23,6 +26,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
                     gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
                 }
             }
+            gs->kvstoreSessionId = kvstore->sessionId();
             return;
         }
     }
@@ -41,12 +45,23 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     }
 }
 
-bool retainGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-        Timer timeit(gs->tracer(), "write_global_state.kvstore");
-        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
-        return true;
+    if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
+        auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
+        // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
+        // into the databaase.
+        const bool storedUidMatches =
+            maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
+        const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;
+
+        if (storedUidMatches || noPreviouslyStoredUuid) {
+            Timer timeit(gs.tracer(), "write_global_state.kvstore");
+            // Generate a new UUID, since this GS has changed since it was read.
+            gs.kvstoreUuid = Random::uniformU4();
+            kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(gs));
+            return true;
+        }
     }
     return false;
 }

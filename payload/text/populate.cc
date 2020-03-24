@@ -20,7 +20,7 @@ void polulateRBIsInto(unique_ptr<core::GlobalState> &gs) {
         }
     }
     realmain::options::Options emptyOpts;
-    unique_ptr<OwnedKeyValueStore> kvstore;
+    unique_ptr<const OwnedKeyValueStore> kvstore;
     auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
     auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
     realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away

@@ -70,6 +70,7 @@ cc_library(
         "//core",
         "//core/proto",
         "//main/autogen",
+        "//main/cache",
         "//main/lsp",
         "//main/options",
         "//main/pipeline",
@@ -92,6 +93,7 @@ cc_library(
     deps = [
         "//ast",
         "//core",
+        "//main/cache:cache-orig",
         "//main/options",
         "//main/pipeline:pipeline-orig",
         "//payload:interface",

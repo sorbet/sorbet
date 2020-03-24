@@ -191,6 +191,12 @@ public:
     // See ErrorQueue#queryResponse
     lsp::Query lspQuery;
 
+    // Stores the ID of the kvstore session that created this GlobalState (if any). Is used in debug assertions.
+    u4 kvstoreSessionId = 0;
+
+    // Stores a UUID that uniquely identifies this GlobalState in kvstore.
+    u4 kvstoreUuid = 0;
+
     FlowId creation; // used to track flow of global states
 
     // Indicates the number of times LSP has run the type checker with this global state.

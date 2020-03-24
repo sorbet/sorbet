@@ -13,7 +13,7 @@ namespace spd = spdlog;
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
+class OwnedKeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {
@@ -43,7 +43,7 @@ protected:
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
                std::shared_ptr<spd::logger> logger,
                std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-               std::shared_ptr<spd::logger> typeErrorsConsole, std::unique_ptr<KeyValueStore> kvstore,
+               std::shared_ptr<spd::logger> typeErrorsConsole, std::unique_ptr<const OwnedKeyValueStore> kvstore,
                bool disableFastPath);
 
 public:
@@ -84,15 +84,14 @@ class SingleThreadedLSPWrapper final : public LSPWrapper {
     SingleThreadedLSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
                              std::shared_ptr<spd::logger> logger,
                              std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                             std::shared_ptr<spd::logger> typeErrorsConsole, std::unique_ptr<KeyValueStore> kvstore,
-                             bool disableFastPath);
+                             std::shared_ptr<spd::logger> typeErrorsConsole,
+                             std::unique_ptr<const OwnedKeyValueStore> kvstore, bool disableFastPath);
 
 public:
-    static std::unique_ptr<SingleThreadedLSPWrapper> createWithGlobalState(std::unique_ptr<core::GlobalState> gs,
-                                                                           std::shared_ptr<options::Options> options,
-                                                                           std::shared_ptr<spdlog::logger> logger,
-                                                                           std::unique_ptr<KeyValueStore> kvstore,
-                                                                           bool disableFastPath = false);
+    static std::unique_ptr<SingleThreadedLSPWrapper>
+    createWithGlobalState(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> options,
+                          std::shared_ptr<spdlog::logger> logger, std::unique_ptr<const OwnedKeyValueStore> kvstore,
+                          bool disableFastPath = false);
 
     static std::unique_ptr<SingleThreadedLSPWrapper>
     create(std::string_view rootPath = std::string_view(),
@@ -125,8 +124,8 @@ class MultiThreadedLSPWrapper final : public LSPWrapper {
     MultiThreadedLSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
                             std::shared_ptr<spd::logger> logger,
                             std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                            std::shared_ptr<spd::logger> typeErrorsConsole, std::unique_ptr<KeyValueStore> kvstore,
-                            bool disableFastPath);
+                            std::shared_ptr<spd::logger> typeErrorsConsole,
+                            std::unique_ptr<const OwnedKeyValueStore> kvstore, bool disableFastPath);
 
 public:
     static std::unique_ptr<MultiThreadedLSPWrapper>

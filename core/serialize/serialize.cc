@@ -45,6 +45,7 @@ public:
     static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
+    static u4 unpickleGSUUID(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p, FileRef file);
     static unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
     static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
@@ -606,6 +607,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     Timer timeit(gs.tracer(), "pickleGlobalState");
     Pickler result;
     result.putU4(Serializer::VERSION);
+    result.putU4(gs.kvstoreUuid);
 
     absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
@@ -657,12 +659,21 @@ int nearestPowerOf2(int from) {
     return i;
 }
 
+u4 SerializerImpl::unpickleGSUUID(UnPickler &p) {
+    if (p.getU4() != Serializer::VERSION) {
+        Exception::raise("Payload version mismatch");
+    }
+    return p.getU4();
+}
+
 void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     Timer timeit(result.tracer(), "unpickleGS");
     result.creation = timeit.getFlowEdge();
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
     }
+
+    result.kvstoreUuid = p.getU4();
 
     vector<shared_ptr<File>> files(std::move(result.files));
     files.clear();
@@ -777,6 +788,11 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();
+}
+
+u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) {
+    UnPickler p(data, gs.tracer());
+    return SerializerImpl::unpickleGSUUID(p);
 }
 
 vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
