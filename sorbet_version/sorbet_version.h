@@ -41,8 +41,8 @@ extern const int sorbet_build_scm_commit_count;
 extern const char *sorbet_build_scm_status;
 extern const long sorbet_build_timestamp;
 extern const char *sorbet_full_version_string;
-extern const int sorbet_isReleaseBuild;
-extern const int sorbet_isWithDebugSymbols;
+extern const int sorbet_is_release_build;
+extern const int sorbet_is_with_debug_symbols;
 
 // Linking against a function symbol suffers fewer pitfalls vs linking against a data symbol, especially when it's
 // possible the symbol could be multiply defined (it's easier to make a function symbol weak than it is to make a

@@ -376,7 +376,8 @@ int realmain(int argc, char *argv[]) {
             absl::StrAppend(&argsConcat, " ", argv[i]);
         }
         logger->debug("Running sorbet version {} with arguments: {}", sorbet_full_version_string, argsConcat);
-        if (!sorbet_isReleaseBuild && !opts.silenceDevMessage && std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
+        if (!sorbet_is_release_build && !opts.silenceDevMessage &&
+            std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
             logger->info("👋 Hey there! Heads up that this is not a release build of sorbet.\n"
                          "Release builds are faster and more well-supported by the Sorbet team.\n"
                          "Check out the README to learn how to build Sorbet in release mode.\n"
