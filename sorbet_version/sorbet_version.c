@@ -70,8 +70,8 @@ const char *sorbet_getBuildSCMRevision() {
 const int sorbet_getBuildSCMCommitCount() {
     return sorbet_build_scm_commit_count;
 }
-const char *sorbet_getBuildSCMStatus() {
-    return sorbet_build_scm_status;
+const char *sorbet_getBuildSCMClean() {
+    return sorbet_build_scm_clean;
 }
 const long sorbet_getBuildTimestamp() {
     return sorbet_build_timestamp;
