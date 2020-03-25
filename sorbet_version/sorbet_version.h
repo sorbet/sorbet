@@ -44,13 +44,24 @@ extern const char *sorbet_full_version_string;
 extern const int sorbet_isReleaseBuild;
 extern const int sorbet_isWithDebugSymbols;
 
-// Dynamically linking against a function symbol suffers fewer pitfalls vs linking against a data symbol.
+// Linking against a function symbol suffers fewer pitfalls vs linking against a data symbol, especially when it's
+// possible the symbol could be multiply defined (it's easier to make a function symbol weak than it is to make a
+// constant global variable symbol weak: https://stackoverflow.com/questions/36087831).
+//
 // But using a data symbol directly can sometimes give better optimized code when there are no linking
 // concerns (e.g., we're only statically linking and all source code is available).
 //
-// Provide both options so people can choose based on their needs. tl;dr if you're writing code inside Sorbet itself,
-// prefer the global variables above.
+// Thus we provide both options so people can choose based on their needs. tl;dr if you're writing code inside Sorbet
+// itself, prefer the global variables above.
+const char *sorbet_getVersion();
+const char *sorbet_getCodename();
+const char *sorbet_getBuildSCMRevision();
+const int sorbet_getBuildSCMCommitCount();
+const char *sorbet_getBuildSCMStatus();
+const long sorbet_getBuildTimestamp();
 const char *sorbet_getFullVersionString();
+const int sorbet_getIsReleaseBuild();
+const int sorbet_getIsWithDebugSymbols();
 
 #ifdef __cplusplus
 }
