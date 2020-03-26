@@ -5,7 +5,6 @@
 #include "llvm/IR/MDBuilder.h"
 #include "llvm/Pass.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 
 #include "Passes.h"
 #include "common/typecase.h"
