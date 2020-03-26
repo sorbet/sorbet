@@ -2,6 +2,7 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
+#include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/ErrorQueue.h"
@@ -233,6 +234,59 @@ updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file,
 }
 } // namespace
 
+bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
+                                 vector<ast::ParsedFile> &out) const {
+    auto &logger = *config->logger;
+    Timer timeit(logger, "slow_path.copy_indexes");
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    for (int i = 0; i < indexed.size(); i++) {
+        auto copy = i;
+        fileq->push(move(copy), 1);
+    }
+
+    const auto &epochManager = *gs->epochManager;
+    shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
+    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
+        vector<ast::ParsedFile> threadResult;
+        int processedByThread = 0;
+        int job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    // Stop if typechecking was canceled.
+                    if (!epochManager.wasTypecheckingCanceled()) {
+                        const auto &tree = indexed[job];
+                        // Note: indexed entries for payload files don't have any contents.
+                        if (tree.tree && !ignore.contains(tree.file.id())) {
+                            threadResult.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                        }
+                    }
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+    {
+        vector<ast::ParsedFile> threadResult;
+        out.reserve(indexed.size());
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &copy : threadResult) {
+                    out.push_back(move(copy));
+                }
+            }
+        }
+    }
+    return !epochManager.wasTypecheckingCanceled();
+}
+
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
@@ -282,27 +336,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        {
-            Timer timeit(logger, "slow_path.copy_indexes");
-            u4 count = 0;
-            for (const auto &tree : indexed) {
-                // Note: indexed entries for payload files don't have any contents.
-                if (tree.tree && !updatedFiles.contains(tree.file.id())) {
-                    indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
-
-                    // Copying index trees is fast, but if you're in a huge project it can still take enough time to
-                    // warrant checking if you should cancel typechecking.
-                    // Assuming 0.04 ms per file, this will check every ~10ms.
-                    if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-                        timeit.cancel();
-                        return;
-                    }
-                    // Explicitly deferred to after check so that we check once at start of indexing.
-                    count++;
-                }
-            }
-        }
-        if (epochManager.wasTypecheckingCanceled()) {
+        if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
+            // Canceled.
             return;
         }
 
