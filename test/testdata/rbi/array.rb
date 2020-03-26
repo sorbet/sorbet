@@ -35,3 +35,5 @@ T.assert_type!([1,2].repeated_combination(1) {}, T::Array[Integer])
 # errors
 
 T::Array[Float].new.sum.nan? # error: Method `nan?` does not exist on `Integer` component of `T.any(Integer, Float)`
+
+T.assert_type!([1, 2, 3, nil, 4, nil, 5].compact, T::Array[Integer])

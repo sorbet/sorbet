@@ -736,7 +736,7 @@ class Array < Object
   # [ "a", nil, "b", nil, "c", nil ].compact
   #                   #=> [ "a", "b", "c" ]
   # ```
-  sig {returns(T::Array[T.untyped])}
+  sig {returns(T::Array[Elem])}
   def compact(); end
 
   # Removes `nil` elements from the array.
