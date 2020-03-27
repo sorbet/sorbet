@@ -462,6 +462,17 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<define-top-class-or-module>(arg: T.untyped) => Void
+    method = enterMethodSymbol (Loc::none(), Symbols::MagicSingleton(), Names::defineTopClassOrModule());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
