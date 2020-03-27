@@ -34,11 +34,22 @@ string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
 }
 } // namespace
 
-class ThreadState {
+// Sorbet's pipeline is architected such that one thread is typechecking one file at a time.
+// This struct allows us to store state local to one typechecking thread.
+class TypecheckThreadState {
 public:
+    // Creating an LLVMContext is somewhat expensive, so we don't want to create more than one per thread.
     llvm::LLVMContext lctx;
-    unique_ptr<llvm::Module> combinedModule;
+
+    // The file this thread is currently typechecking
     core::FileRef file;
+
+    // The output of IREmitter for a file.
+    //
+    // "Combined" because all the methods in this file get compiled and accumulated into this Module,
+    // but each method is typechecked (and thus compiled) individually.
+    unique_ptr<llvm::Module> combinedModule;
+
     bool aborted = false;
 };
 
@@ -46,11 +57,11 @@ class LLVMSemanticExtension : public SemanticExtension {
     optional<string> irOutputDir;
     bool forceCompiled;
     mutable struct {
-        UnorderedMap<std::thread::id, shared_ptr<ThreadState>> states;
+        UnorderedMap<std::thread::id, shared_ptr<TypecheckThreadState>> states;
         absl::Mutex mtx;
     } mutableState;
 
-    shared_ptr<ThreadState> getThreadState() const {
+    shared_ptr<TypecheckThreadState> getTypecheckThreadState() const {
         {
             absl::ReaderMutexLock lock(&mutableState.mtx);
             if (mutableState.states.contains(std::this_thread::get_id())) {
@@ -59,7 +70,7 @@ class LLVMSemanticExtension : public SemanticExtension {
         }
         {
             absl::WriterMutexLock lock(&mutableState.mtx);
-            return mutableState.states[std::this_thread::get_id()] = make_shared<ThreadState>();
+            return mutableState.states[std::this_thread::get_id()] = make_shared<TypecheckThreadState>();
         }
     }
 
@@ -103,7 +114,7 @@ public:
         if (!shouldCompile(gs, loc.file())) {
             return;
         }
-        auto threadState = getThreadState();
+        auto threadState = getTypecheckThreadState();
         if (threadState->aborted) {
             return;
         }
@@ -139,7 +150,7 @@ public:
         if (!shouldCompile(gs, f)) {
             return;
         }
-        auto threadState = getThreadState();
+        auto threadState = getTypecheckThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
         if (!module) {
