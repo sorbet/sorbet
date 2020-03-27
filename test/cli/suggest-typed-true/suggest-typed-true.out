@@ -142,3 +142,18 @@ def true_func
 end
 No errors! Great job.
 -------------------------
+No errors! Great job.
+# typed: true
+class Foo
+  def initialize
+    @bar = 1
+  end
+end
+# typed: true
+class Foo
+  def bar
+    @bar
+  end
+end
+No errors! Great job.
+-------------------------
