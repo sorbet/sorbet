@@ -165,9 +165,15 @@ class Random < Object
   # Alias of Random::DEFAULT.rand.
   sig do
     params(
-        max: Integer,
+        max: T.any(Integer, T::Range[Integer]),
     )
-    .returns(Numeric)
+    .returns(Integer)
+  end
+  sig do
+    params(
+        max: T.any(Float, T::Range[Float]),
+    )
+    .returns(Float)
   end
   def self.rand(max=T.unsafe(nil)); end
 
