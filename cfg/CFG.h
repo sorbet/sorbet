@@ -56,6 +56,9 @@ public:
     int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
+    // Tracks which Ruby block (do ... end) this BasicBlock was generated from.
+    // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
+    // rubyBlockId == 0 means code at the top-level of this method (outside any Ruby block).
     int rubyBlockId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
