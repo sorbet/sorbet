@@ -80,4 +80,9 @@ cat suggest-typed-behaviour-over-multiple-2.rb
 "$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-behaviour-over-multiple-1.rb suggest-typed-behaviour-over-multiple-2.rb 2>&1
 separator
 
+"$cwd/main/sorbet" --silence-dev-message -a --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-and-type.rb 2>&1
+cat suggest-typed-and-type.rb
+"$cwd/main/sorbet" --silence-dev-message --suggest-typed --error-white-list=7022 --typed=strict suggest-typed-and-type.rb 2>&1
+separator
+
 rm -r "$tmp"
