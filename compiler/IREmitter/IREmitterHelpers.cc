@@ -2,7 +2,6 @@
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
-#include "IREmitterHelpers.h"
 #include "Payload.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -10,6 +9,7 @@
 #include "common/sort.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/IREmitter/BasicBlockMap.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/Names/Names.h"
 
 using namespace std;

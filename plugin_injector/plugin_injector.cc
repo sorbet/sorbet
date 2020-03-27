@@ -9,6 +9,7 @@
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"
+#include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload/PayloadLoader.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/Rewriters/DefinitionRewriter.h"
@@ -92,8 +93,8 @@ public:
             return;
         }
 
-        sorbet::compiler::DefinitionRewriter::run(ctx, klass);
-        sorbet::compiler::SigRewriter::run(ctx, klass);
+        compiler::DefinitionRewriter::run(ctx, klass);
+        compiler::SigRewriter::run(ctx, klass);
     };
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
@@ -113,7 +114,7 @@ public:
         // loc.toString(gs));
         ENFORCE(loc.file().exists());
         if (!module) {
-            module = sorbet::compiler::PayloadLoader::readDefaultModule(lctx);
+            module = compiler::PayloadLoader::readDefaultModule(lctx);
             threadState->file = loc.file();
         } else {
             ENFORCE(threadState->file == loc.file());
@@ -121,9 +122,9 @@ public:
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get());
         try {
-            sorbet::compiler::IREmitter::run(state, cfg, md);
+            compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, loc.file());
-            sorbet::compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
+            compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {
             threadState->aborted = true;
         } catch (...) {
@@ -162,7 +163,7 @@ public:
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");
             }
             string fileName = objectFileName(gs, f);
-            sorbet::compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
+            compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
         }
     };
 

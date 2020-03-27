@@ -1,9 +1,14 @@
 #ifndef SORBET_COMPILER_PAYLOAD_H
 #define SORBET_COMPILER_PAYLOAD_H
 
+#include "compiler/Core/ForwardDeclarations.h"
+#include "core/core.h"
+
 namespace sorbet::compiler {
 
 struct BasicBlockMap;
+struct Alias;
+class CompilerState;
 
 // This class serves as forwarder to payload.c, which are the c wrappers for
 // Ruby functions. These functions can (and do) use information known during
