@@ -1364,6 +1364,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
+    result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
     result->dslPlugins = this->dslPlugins;
@@ -1414,9 +1415,7 @@ void GlobalState::_error(unique_ptr<Error> error) const {
         errorQueue->hadCritical = true;
     }
     auto loc = error->loc;
-    if (loc.file().exists() && error->what != errors::Infer::SuggestTyped &&
-        error->what != core::errors::Resolver::SigInFileWithoutSigil &&
-        error->what != core::errors::Namer::MultipleBehaviorDefs) {
+    if (loc.file().exists() && ignoredForSuggestTypedErrorClasses.count(error->what.code) == 0) {
         loc.file().data(*this).minErrorLevel_ = min(loc.file().data(*this).minErrorLevel_, error->what.minLevel);
     }
 
@@ -1432,6 +1431,10 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
         Exception::failInFuzzer();
     }
     return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+}
+
+void GlobalState::ignoreErrorClassForSuggestTyped(int code) {
+    ignoredForSuggestTypedErrorClasses.insert(code);
 }
 
 void GlobalState::suppressErrorClass(int code) {
