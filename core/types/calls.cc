@@ -499,7 +499,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
-        if (auto e = gs.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
+        // This is a hack. We want to always be able to build the error object
+        // so that it is not immediately sent to GlobalState::_error
+        // and recorded.
+        // Instead, the error always should get queued up in the
+        // errors list of the result so that the caller can deal with the error.
+        auto e = gs.beginError(args.locs.call, errors::Infer::UnknownMethod);
+        if (e) {
             string thisStr = thisType->show(gs);
             if (args.fullType.get() != thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
@@ -588,8 +594,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
                                             attached.data(gs)->showFullName(gs))));
                 }
             }
-            result.main.errors.emplace_back(e.build());
         }
+        result.main.errors.emplace_back(e.build());
         return result;
     }
 
