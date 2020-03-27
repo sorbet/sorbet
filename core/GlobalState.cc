@@ -463,7 +463,7 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
     // Synthesize <Magic>#<define-top-class-or-module>(arg: T.untyped) => Void
-    method = enterMethodSymbol (Loc::none(), Symbols::MagicSingleton(), Names::defineTopClassOrModule());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::defineTopClassOrModule());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
