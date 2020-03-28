@@ -316,12 +316,12 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                                 move(sendArgArrays),
                                 escapedClosure,
                                 std::move(escapedVariableIndices),
+                                {},
                                 sigVerificationBlock,
                                 postProcessBlock,
                                 move(blockLinks),
                                 move(rubyBlockArgs),
                                 move(rubyBlock2Function),
-                                {},
                                 move(lineNumberPtrsByFunction),
                                 move(iseqEncodedPtrsByFunction),
                                 usesBlockArgs};

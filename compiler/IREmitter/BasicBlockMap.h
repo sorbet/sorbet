@@ -67,6 +67,12 @@ struct BasicBlockMap {
     // TODO(jez) document escapedVariableIndices
     UnorderedMap<core::LocalVariable, int> escapedVariableIndices;
 
+    // Every local variable (including arguments) shows up as either an index into the closure (escapedVariableIndices)
+    // or something that was explicitly stack allocated.
+    //
+    // This mapping holds the latter: locals that don't come from the closure.
+    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+
     // Verifies arguments against the types dictated by the SymbolRef for this method.
     // Only one llvm::BasicBlock because Ruby blocks don't get their arg types checked--only Ruby methods.
     //
@@ -92,12 +98,6 @@ struct BasicBlockMap {
     //
     // idx: cfg::BasicBlock::rubyBlockId
     std::vector<llvm::Function *> rubyBlocks2Functions;
-
-    // Every local variable (including arguments) shows up as either an index into the closure (escapedVariableIndices)
-    // or something that was explicitly stack allocated.
-    //
-    // This mapping holds the latter: locals that don't come from the closure.
-    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
 
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
