@@ -32,13 +32,6 @@ gems/sorbet-runtime/Gemfile.lock
 # To distribute sorbet, we copy the built C++ binary here.
 /gems/sorbet-static/libexec/sorbet
 
-demo/Makefile
-demo/extconf.h
-demo/foobar.bundle
-demo/foobar.ll
-demo/foobar.o
-demo/mkmf.log
-
 # Used by tools/scripts/run_benchmarks.sh
 /tmp
 

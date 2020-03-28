@@ -24,9 +24,6 @@
 using namespace std;
 namespace sorbet::compiler {
 
-// https://docs.ruby-lang.org/en/2.6.0/extension_rdoc.html
-// and https://silverhammermba.github.io/emberb/c/ are your friends
-// use the `demo` module for experiments
 namespace {
 
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,

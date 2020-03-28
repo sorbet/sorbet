@@ -128,10 +128,3 @@ genrule(
         ":llvm-as",
     ],
 )
-
-# todo: we should generate the `ll` file with clang instead of having it commited to the repo
-# this will additionally make us specify a specific version of ruby in build
-# this will involve:
-#  - running something equivalent to `ruby extconf.rb` to generate the makefile. Find the `extconf.rb` in `demo` folder.
-#  - calling `make payload.ll` to generate the ll file for people's viewing
-#clang_tool("clang++") will give the "right" clang.
