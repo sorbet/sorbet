@@ -545,8 +545,8 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
                  Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
-    if (blockMap.escapedVariableIndeces.contains(local)) {
-        auto id = blockMap.escapedVariableIndeces.at(local);
+    if (blockMap.escapedVariableIndices.contains(local)) {
+        auto id = blockMap.escapedVariableIndices.at(local);
         auto store =
             builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
                                {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
@@ -587,8 +587,8 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
         }
         return;
     }
-    if (blockMap.escapedVariableIndeces.contains(local)) {
-        auto id = blockMap.escapedVariableIndeces.at(local);
+    if (blockMap.escapedVariableIndices.contains(local)) {
+        auto id = blockMap.escapedVariableIndices.at(local);
         auto store =
             builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
                                {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});

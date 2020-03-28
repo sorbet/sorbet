@@ -49,7 +49,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
         // nill out closure variables
 
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[0]);
-        auto escapedVariablesCount = blockMap.escapedVariableIndeces.size();
+        auto escapedVariablesCount = blockMap.escapedVariableIndices.size();
         for (auto i = 0; i < escapedVariablesCount; i++) {
             auto store = builder.CreateCall(
                 cs.module->getFunction("sorbet_getClosureElem"),
