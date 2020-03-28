@@ -199,7 +199,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                                                                  llvm::Function *mainFunc) {
     vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlock] = findCaptures(cs, md, cfg);
+    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
@@ -324,7 +324,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                                 {},
                                 move(lineNumberPtrsByFunction),
                                 move(iseqEncodedPtrsByFunction),
-                                usesBlock};
+                                usesBlockArgs};
     approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
 
     return approximation;
