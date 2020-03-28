@@ -315,6 +315,7 @@ NameDef names[] = {
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
+    {"defineTopClassOrModule", "<define-top-class-or-module>"},
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
