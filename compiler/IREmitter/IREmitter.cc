@@ -47,13 +47,13 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
-    for (auto funcId = 0; funcId < blockMap.rubyBlocks2Functions.size(); funcId++) {
-        auto func = blockMap.rubyBlocks2Functions[funcId];
-        cs.functionEntryInitializers = blockMap.functionInitializersByFunction[funcId];
-        builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[funcId]);
+    for (auto rubyBlockId = 0; rubyBlockId < blockMap.rubyBlocks2Functions.size(); rubyBlockId++) {
+        auto func = blockMap.rubyBlocks2Functions[rubyBlockId];
+        cs.functionEntryInitializers = blockMap.functionInitializersByFunction[rubyBlockId];
+        builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[rubyBlockId]);
         auto maxPositionalArgCount = 0;
         auto minPositionalArgCount = 0;
-        auto isBlock = funcId != 0;
+        auto isBlock = rubyBlockId != 0;
         auto hasRestArgs = false;
         auto hasKWArgs = false;
         auto hasKWRestArgs = false;
@@ -65,22 +65,22 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         core::LocalVariable restArgName;
         core::LocalVariable kwRestArgName;
 
-        auto argsFlags = getArgFlagsForBlockId(cs, funcId, cfg.symbol, blockMap);
+        auto argsFlags = getArgFlagsForBlockId(cs, rubyBlockId, cfg.symbol, blockMap);
         {
             auto argId = -1;
-            ENFORCE(argsFlags.size() == blockMap.rubyBlockArgs[funcId].size());
+            ENFORCE(argsFlags.size() == blockMap.rubyBlockArgs[rubyBlockId].size());
             for (auto &argFlags : argsFlags) {
                 argId += 1;
                 if (argFlags.isKeyword) {
                     hasKWArgs = true;
                     if (argFlags.isRepeated) {
-                        kwRestArgName = blockMap.rubyBlockArgs[funcId][argId];
+                        kwRestArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
                         hasKWRestArgs = true;
                     }
                     continue;
                 }
                 if (argFlags.isRepeated) {
-                    restArgName = blockMap.rubyBlockArgs[funcId][argId];
+                    restArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
                     hasRestArgs = true;
                     continue;
                 }
@@ -89,7 +89,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     continue;
                 }
                 if (argFlags.isBlock) {
-                    blkArgName = blockMap.rubyBlockArgs[funcId][argId];
+                    blkArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
                     continue;
                 }
                 maxPositionalArgCount += 1;
@@ -242,7 +242,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             if (!isBlock) {
                 auto selfArgRaw = func->arg_begin() + 2;
                 Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases,
-                                funcId);
+                                rubyBlockId);
             }
 
             for (auto i = 0; i < maxPositionalArgCount; i++) {
@@ -252,7 +252,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     auto &block = fillFromArgBlocks[i - minPositionalArgCount];
                     builder.SetInsertPoint(block);
                 }
-                const auto a = blockMap.rubyBlockArgs[funcId][i];
+                const auto a = blockMap.rubyBlockArgs[rubyBlockId][i];
                 if (!a._name.exists()) {
                     cs.failCompilation(md->loc, "this method has a block argument construct that's not supported");
                 }
@@ -261,7 +261,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 auto name = a._name.data(cs)->shortName(cs);
                 llvm::StringRef nameRef(name.data(), name.length());
                 auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-                Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
+                Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
                 if (i >= minPositionalArgCount) {
                     // check if we need to fill in the next variable from the arg
                     builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
@@ -320,9 +320,9 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                         rawValue = Payload::rubyNil(cs, builder);
                     }
                     auto argIndex = i + minPositionalArgCount;
-                    auto a = blockMap.rubyBlockArgs[funcId][argIndex];
+                    auto a = blockMap.rubyBlockArgs[rubyBlockId][argIndex];
 
-                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, funcId);
+                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
                 }
                 builder.CreateBr(fillFromDefaultBlocks[i + 1]);
             }
@@ -335,12 +335,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             if (hasRestArgs) {
                 Payload::varSet(cs, restArgName,
                                 Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
-                                builder, blockMap, aliases, funcId);
+                                builder, blockMap, aliases, rubyBlockId);
             }
             if (hasKWArgs) {
                 for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
                     if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
-                        auto name = blockMap.rubyBlockArgs[funcId][argId];
+                        auto name = blockMap.rubyBlockArgs[rubyBlockId][argId];
                         auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
                         auto rawRubySym = builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
 
@@ -383,12 +383,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                         kwArgValue->addIncoming(passedValue, isUndefEnd);
                         kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
 
-                        Payload::varSet(cs, name, kwArgValue, builder, blockMap, aliases, funcId);
+                        Payload::varSet(cs, name, kwArgValue, builder, blockMap, aliases, rubyBlockId);
                     }
                 }
                 if (hasKWRestArgs) {
                     Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, blockMap,
-                                    aliases, funcId);
+                                    aliases, rubyBlockId);
                 } else {
                     Payload::assertNoExtraKWArg(cs, builder, hashArgs);
                 }
@@ -398,8 +398,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
         {
             // Switch the current control frame from a C frame to a Ruby-esque one
             auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
-            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[funcId]);
-            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[funcId]);
+            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
+            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
         }
 
         if (!isBlock) {
@@ -407,7 +407,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
             builder.CreateBr(blockMap.sigVerificationBlock);
         } else {
             // jump dirrectly to user body
-            builder.CreateBr(blockMap.userEntryBlockByFunction[funcId]);
+            builder.CreateBr(blockMap.userEntryBlockByFunction[rubyBlockId]);
         }
     }
 }
