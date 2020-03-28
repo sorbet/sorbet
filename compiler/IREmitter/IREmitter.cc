@@ -698,7 +698,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
-    UnorderedMap<core::LocalVariable, Alias> aliases;
+
     llvm::Function *func;
 
     if (md->symbol.data(cs)->name != core::Names::staticInit()) {
@@ -717,6 +717,14 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
+
+    // Sorbet uses cfg::Alias to link a local variable to a global construct, like an instance variable or a constant.
+    //
+    // This mapping is essentially, "if you were about to access a local variable corresponding to an alias,
+    // this is the thing you should access instead"
+    //
+    // TODO(jez) Move this into BasicBlockMap
+    UnorderedMap<core::LocalVariable, Alias> aliases;
 
     const BasicBlockMap blockMap = IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, aliases, func);
 

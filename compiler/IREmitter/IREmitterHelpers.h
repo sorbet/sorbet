@@ -10,6 +10,8 @@ namespace sorbet::compiler {
 
 struct BasicBlockMap;
 
+// TODO(jez) This shouldn't be at the top-level (sorbet::compiler). It should probably be nested in something.
+// (Confusing to see bare `Alias` when there is also `cfg::Alias`)
 struct Alias {
     enum class AliasKind { Constant, InstanceField, ClassField, GlobalField };
     AliasKind kind;
