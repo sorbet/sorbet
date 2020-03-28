@@ -17,7 +17,7 @@ using namespace std;
 namespace sorbet::compiler {
 
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module)
-    : gs(gs), lctx(lctx), functionEntryInitializers(nullptr), module(module) {}
+    : gs(gs), lctx(lctx), module(module), functionEntryInitializers(nullptr) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
