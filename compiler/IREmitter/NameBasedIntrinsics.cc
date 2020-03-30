@@ -19,6 +19,7 @@
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
+#include "core/Names.h"
 #include <string_view>
 using namespace std;
 namespace sorbet::compiler {
@@ -109,7 +110,7 @@ public:
         return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {Names::defineTopClassOrModule(cs)};
+        return {core::Names::defineTopClassOrModule()};
     }
 } DefineClassIntrinsic;
 

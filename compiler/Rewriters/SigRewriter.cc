@@ -18,12 +18,11 @@ public:
             return send;
         }
 
-        auto newSigExpr = ast::MK::Send0(send->loc, ast::MK::Constant(send->loc, core::Symbols::T_Sig_WithoutRuntime()),
-                                         core::Names::sig());
-        auto newSig = ast::cast_tree<ast::Send>(newSigExpr.get());
-        newSig->block = move(send->block);
-        newSig->flags.isRewriterSynthesized = true;
-        return newSigExpr;
+        ast::Send::Flags flags = send->flags;
+        flags.isRewriterSynthesized = true;
+
+        return ast::MK::Send(send->loc, ast::MK::Constant(send->loc, core::Symbols::T_Sig_WithoutRuntime()),
+                             core::Names::sig(), std::move(send->args), flags, std::move(send->block));
     }
 
 private:

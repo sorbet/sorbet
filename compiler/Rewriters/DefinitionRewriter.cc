@@ -2,6 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "compiler/Names/Names.h"
+#include "core/Names.h"
 
 using namespace std;
 namespace sorbet::compiler {
@@ -23,8 +24,8 @@ public:
                 // which staticInit to call
                 auto loc =
                     core::Loc(classDef->declLoc.file(), classDef->declLoc.beginPos(), classDef->declLoc.beginPos());
-                auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
-                                            Names::defineTopClassOrModule(ctx), classDef->name->deepCopy());
+                auto magic = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                            core::Names::defineTopClassOrModule(), classDef->name->deepCopy());
                 ast::cast_tree<ast::Send>(magic.get())->flags.isRewriterSynthesized = true;
                 rootClassDef->rhs.insert(rootClassDef->rhs.begin() + i, move(magic));
                 i++;

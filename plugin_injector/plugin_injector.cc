@@ -92,9 +92,9 @@ public:
     }
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        if (!shouldCompile(ctx, klass->loc.file())) {
-            return;
-        }
+        // NOTE: we're unconditionally running the compiler rewrites here, even when we don't plan on compiling the
+        // file. This is so that we don't accidentally cache a version of the file without the rewrites applied.
+
         if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
             if (auto e = ctx.state.beginError(klass->loc, core::errors::Compiler::Untyped)) {
                 e.setHeader("File must be `typed: true` or higher to be compiled");
