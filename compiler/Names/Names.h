@@ -7,6 +7,7 @@ namespace sorbet::compiler {
 
 class Names {
 public:
+    static core::NameRef defineTopClassOrModule(const core::GlobalState &gs);
     static core::NameRef defineMethod(const core::GlobalState &gs);
     static core::NameRef defineMethodSingleton(const core::GlobalState &gs);
     static core::NameRef returnValue(const core::GlobalState &gs);
