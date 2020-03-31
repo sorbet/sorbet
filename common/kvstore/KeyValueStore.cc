@@ -26,11 +26,19 @@ static void throw_mdb_error(string_view what, int err) {
     throw invalid_argument(string(what));
 }
 
-static atomic<u4> globalSessionId = 0;
+// Only one kvstore can be created per process -- the MDB env is shared. Used to enforce that we never create
+// multiple simultaneous kvstores.
+static atomic<bool> kvstoreInUse = false;
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
+    ENFORCE(!this->version.empty());
+    bool expected = false;
+    if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+    }
+
     int rc = mdb_env_create(&dbState->env);
     if (rc != 0) {
         goto fail;
@@ -53,6 +61,10 @@ fail:
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     mdb_env_close(dbState->env);
+    bool expected = true;
+    if (!kvstoreInUse.compare_exchange_strong(expected, false)) {
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+    }
 }
 
 OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
@@ -72,15 +84,16 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     }
 }
 
-u4 OwnedKeyValueStore::sessionId() const {
-    return _sessionId;
-}
-
-void OwnedKeyValueStore::abort() {
+void OwnedKeyValueStore::abort() const {
     // Note: txn being null indicates that the transaction has already ended, perhaps due to a commit.
     if (txnState->txn == nullptr) {
         return;
     }
+
+    if (writerId != this_thread::get_id()) {
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+    }
+
     for (auto &txn : txnState->readers) {
         mdb_txn_abort(txn.second);
     }
@@ -95,6 +108,11 @@ int OwnedKeyValueStore::commit() {
     if (txnState->txn == nullptr) {
         return 0;
     }
+
+    if (writerId != this_thread::get_id()) {
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+    }
+
     int rc = 0;
     for (auto &txn : txnState->readers) {
         rc = mdb_txn_commit(txn.second) || rc;
@@ -216,8 +234,6 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    // Increment session. Used for debug assertions.
-    _sessionId = globalSessionId++;
 
     // Per the docs for mdb_dbi_open:
     //
@@ -248,7 +264,7 @@ fail:
     throw_mdb_error("failed to create transaction"sv, rc);
 }
 
-unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<const OwnedKeyValueStore> ownedKvstore) {
     if (ownedKvstore == nullptr) {
         return nullptr;
     }

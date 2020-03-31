@@ -63,7 +63,7 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-            const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<const OwnedKeyValueStore> kvstore);
+            const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.

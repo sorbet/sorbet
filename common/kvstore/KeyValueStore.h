@@ -51,23 +51,20 @@ public:
  */
 class OwnedKeyValueStore final {
     const std::thread::id writerId;
-    std::unique_ptr<KeyValueStore> kvstore;
+    // Mutable so that abort() can be const.
+    mutable std::unique_ptr<KeyValueStore> kvstore;
     struct TxnState;
     const std::unique_ptr<TxnState> txnState;
     mutable absl::Mutex readers_mtx;
-    u4 _sessionId;
 
     void clear();
     void refreshMainTransaction();
     int commit();
-    void abort();
+    void abort() const;
 
 public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
     ~OwnedKeyValueStore();
-
-    /** Get the ID of the given session. Used for ENFORCEs. */
-    u4 sessionId() const;
 
     /** returns nullptr if not found*/
     u1 *read(std::string_view key) const;
@@ -77,11 +74,12 @@ public:
     void write(std::string_view key, const std::vector<u1> &value);
 
     /** Aborts all changes without writing them to disk. Returns an unowned kvstore that can be re-owned if more writes
-     * are desired. If not explicitly called, OwnedKeyValueStore will implicitly abort everything in the destructor. */
-    static std::unique_ptr<KeyValueStore> abort(std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
+     * are desired. If not explicitly called, OwnedKeyValueStore will implicitly abort everything in the destructor.
+     * Must be called by the owning thread. */
+    static std::unique_ptr<KeyValueStore> abort(std::unique_ptr<const OwnedKeyValueStore> ownedKvstore);
 
     /** Attempts to commit all changes to disk. Can fail to commit changes silently. Returns an unowned kvstore that can
-     * be re-owned if more writes are desired. */
+     * be re-owned if more writes are desired.  Must be called by the owning thread. */
     static std::unique_ptr<KeyValueStore> bestEffortCommit(spdlog::logger &logger,
                                                            std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
 };

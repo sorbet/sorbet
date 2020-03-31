@@ -108,3 +108,8 @@ TEST_F(KeyValueStoreTest, FlavorsHaveDifferentContents) {
         EXPECT_EQ(owned->readString("hello"), "");
     }
 }
+
+TEST_F(KeyValueStoreTest, CannotCreateTwoKvstores) {
+    auto kvstore1 = make_unique<KeyValueStore>("1", directory, "vanilla");
+    EXPECT_THROW(make_unique<KeyValueStore>("1", directory, "vanilla"), invalid_argument);
+}

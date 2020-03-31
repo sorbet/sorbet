@@ -395,13 +395,7 @@ int realmain(int argc, char *argv[]) {
     vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
-    unique_ptr<const OwnedKeyValueStore> kvstore;
-    {
-        auto unownedKvstore = cache::maybeCreateKeyValueStore(opts);
-        if (unownedKvstore != nullptr) {
-            kvstore = make_unique<OwnedKeyValueStore>(move(unownedKvstore));
-        }
-    }
+    unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
@@ -462,7 +456,8 @@ int realmain(int argc, char *argv[]) {
                       sorbet_full_version_string);
 
         auto output = make_shared<lsp::LSPStdout>(logger);
-        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger), move(kvstore));
+        lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),
+                          OwnedKeyValueStore::abort(move(kvstore)));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
 #endif
     } else {
@@ -490,11 +485,8 @@ int realmain(int argc, char *argv[]) {
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
 
-        {
-            kvstore = nullptr;
-            auto unownedKvstore = cache::maybeCreateKeyValueStore(opts);
-            cache::maybeCacheGlobalStateAndFiles(unownedKvstore, opts, *gs, indexed);
-        }
+        // Create a new OwnedKeyValueStore to reset const-ness.
+        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, indexed);
 
         if (gs->runningUnderAutogen) {
 #ifndef SORBET_REALMAIN_MIN
