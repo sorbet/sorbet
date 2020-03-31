@@ -441,6 +441,13 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
+    if (opts.suggestTyped) {
+        gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
+        gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
+        if (!opts.stripeMode) {
+            gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
 
     logger->trace("done building initial global state");
 
