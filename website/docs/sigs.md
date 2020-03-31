@@ -250,6 +250,47 @@ end
 Main.name_length(Main.greet('Alice')) # => error!
 ```
 
+## Class Methods
+
+There are at least three ways to define class (static) methods in Ruby.
+Sorbet only supports the first.
+
+1. `def self.greet` - supported
+
+```ruby
+class Main
+  extend T::Sig
+  
+  sig {params(name: String).void}
+  def self.greet(name)
+    puts "Hello, #{name}!"
+  end
+end
+```
+
+2. `class << self` - not supported
+
+```ruby
+class Main
+  class << self
+    extend T::Sig
+    sig {params(name: String).void}
+    def greet(name)
+      # etc.
+```
+
+3. `def Main.greet` - not supported
+
+```ruby
+extend T::Sig
+sig {params(name: String).void}
+def Main.greet(name)
+  # etc.
+```
+
+In addition to being unsupported by Sorbet, the third style (`def Main.greet`)
+should be avoided because it defines `sig` on the global namespace.
+
 ## Why do we need signatures?
 
 Taking a step back, why do we need `sig`s in the first place?
