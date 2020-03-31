@@ -173,7 +173,6 @@ string Loc::showRaw(const GlobalState &gs) const {
         if (absl::StartsWith(path, external_prefix)) {
             // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
             path = path.substr(external_prefix.size());
-            fmt::print("things! {}\n", path);
         }
     }
 
