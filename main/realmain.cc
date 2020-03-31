@@ -484,8 +484,6 @@ int realmain(int argc, char *argv[]) {
         }
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
-
-        // Create a new OwnedKeyValueStore to reset const-ness.
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, indexed);
 
         if (gs->runningUnderAutogen) {
