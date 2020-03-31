@@ -207,9 +207,9 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             }
         },
         [&](Type *) { result = from; });
-    ENFORCE(Types::isSubType(gs, result, from),
-            "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from->toString(gs),
-            klass.data(gs)->showFullName(gs), result->toString(gs));
+    // ENFORCE(Types::isSubType(gs, result, from),
+    //         "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from->toString(gs),
+    //         klass.data(gs)->showFullName(gs), result->toString(gs));
     return result;
 }
 
