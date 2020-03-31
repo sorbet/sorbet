@@ -206,6 +206,11 @@ public:
         }
         return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
     };
+    virtual std::unique_ptr<SemanticExtension> defaultInstance() const override {
+        auto forceCompile = false;
+        optional<string> irOutputDir;
+        return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompile);
+    }
     virtual ~LLVMSemanticExtensionProvider(){};
 };
 
