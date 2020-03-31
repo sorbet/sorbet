@@ -60,6 +60,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
         native.sh_test(
             name = "test_{}/{}".format(test_name_prefix, name),
             srcs = ["test_corpus_forwarder.sh"],
+            deps = ["@bazel_tools//tools/bash/runfiles"],
             args = ["--single_test=$(location {})".format(sentinel), "--gtest_filter={}/*".format(filter)] + extra_args,
             data = data,
             size = "small",
