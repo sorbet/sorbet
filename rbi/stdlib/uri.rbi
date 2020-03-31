@@ -215,7 +215,7 @@ module URI
         str: String,
         enc: Encoding,
     )
-    .returns(T::Array[[String, String]])
+    .returns(String)
   end
   def self.decode_www_form_component(str, enc=Encoding::UTF_8); end
 
