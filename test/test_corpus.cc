@@ -207,11 +207,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
-    auto providers = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
-    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
-    realmain::options::Options opts;
-    realmain::options::readOptions(opts, extensions, 0, nullptr, providers, logger);
-    gs->semanticExtensions = std::move(extensions);
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs->semanticExtensions.emplace_back(provider->defaultInstance());
+    }
 
     gs->censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs->tracer());
@@ -550,6 +548,11 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs.semanticExtensions.emplace_back(provider->defaultInstance());
+    }
+
     gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
 
