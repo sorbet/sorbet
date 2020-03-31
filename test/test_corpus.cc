@@ -110,6 +110,11 @@ public:
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         auto symbol = cfg->symbol;
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
+        if (cfg) {
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->typecheck(ctx, *cfg, m);
+            }
+        }
         cfgs.push_back(move(cfg));
         return m;
     }
@@ -201,6 +206,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     auto gs = make_unique<core::GlobalState>(errorQueue);
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs->semanticExtensions.emplace_back(provider->defaultInstance());
+    }
+
     gs->censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs->tracer());
 
@@ -373,6 +383,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx, file);
+            }
             resolvedTree.tree.reset();
 
             handler.addObserved("cfg", [&]() {
@@ -404,9 +417,16 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             CFGCollectorAndTyper collector;
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx, file);
+            }
             resolvedTree.tree.reset();
             handler.drainErrors();
         }
+    }
+
+    for (auto &extension : gs->semanticExtensions) {
+        extension->finishTypecheck(*gs);
     }
 
     handler.checkExpectations();
@@ -528,6 +548,11 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
     core::GlobalState gs(errorQueue);
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs.semanticExtensions.emplace_back(provider->defaultInstance());
+    }
+
     gs.censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs.tracer());
 
