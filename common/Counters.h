@@ -1,7 +1,9 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
+#include "absl/container/flat_hash_map.h"
 #include "common/ConstExprStr.h"
-#include "common/common.h"
+#include "sorbet_version/sorbet_version.h"
+#include "spdlog/spdlog.h"
 #include <chrono>
 #include <string>
 
@@ -99,7 +101,7 @@ void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady
                std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
                std::vector<int> histogramBuckets);
 
-UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
+absl::flat_hash_map<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
 
 } // namespace sorbet

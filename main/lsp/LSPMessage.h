@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPMESSAGE_H
 
 #include "common/Timer.h"
+#include "common/common.h"
 #include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"
 #include <variant>
