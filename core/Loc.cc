@@ -167,10 +167,20 @@ string Loc::showRaw(const GlobalState &gs) const {
     } else {
         path = "???"sv;
     }
+
+    if (gs.censorForSnapshotTests) {
+        auto external_prefix = "external/com_stripe_ruby_typer/"sv;
+        if (absl::StartsWith(path, external_prefix)) {
+            // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
+            path = path.substr(external_prefix.size());
+            fmt::print("things! {}\n", path);
+        }
+    }
+
     if (!exists()) {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
-    if (absl::StartsWith(path, "https://github.com/sorbet/sorbet/tree/master/") && gs.censorForSnapshotTests) {
+    if (gs.censorForSnapshotTests && absl::StartsWith(path, "https://github.com/sorbet/sorbet/tree/master/")) {
         // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
         return fmt::format("Loc {{file={} start=removed end=removed}}", path);
     }
