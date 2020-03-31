@@ -35,6 +35,12 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
     ENFORCE(!this->version.empty());
     bool expected = false;
+    // From the docs for mdb_dbi_open:
+    // > This function must not be called from multiple concurrent transactions in the same process. A transaction that
+    // > uses this function must finish (either commit or abort) before any other transaction in the process may use
+    // > this function.
+    // http://www.lmdb.tech/doc/group__mdb.html#gac08cad5b096925642ca359a6d6f0562a
+    // That function is called in OwnedKeyValueStore.
     if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
         throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
     }
