@@ -51,7 +51,7 @@ public:
  */
 class OwnedKeyValueStore final {
     const std::thread::id writerId;
-    // Mutable so that abort() can be const.
+    // Mutable so that private method abort() can be const.
     mutable std::unique_ptr<KeyValueStore> kvstore;
     struct TxnState;
     const std::unique_ptr<TxnState> txnState;
