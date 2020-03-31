@@ -23,7 +23,7 @@ source .buildkite/tools/setup-bazel.sh
 
 err=0
 
-./bazel test //... --config=dbg -c opt --test_summary=terse --test_output=errors || err=$?
+./bazel test @com_stripe_ruby_typer//test //... --config=dbg -c opt --test_summary=terse --test_output=errors || err=$?
 
 echo "--- uploading test results"
 

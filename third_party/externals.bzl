@@ -3,6 +3,8 @@ load("//third_party:sorbet_version.bzl", "SORBET_SHA256", "SORBET_VERSION")
 
 # We define our externals here instead of directly in WORKSPACE
 def sorbet_llvm_externals():
+    # WARNING: if you're using a local version of sorbet you won't get patches
+    # applied to test_corpus_runner that run sorbet_llvm during testing.
     use_local = False
     if not use_local:
         http_archive(
@@ -10,6 +12,8 @@ def sorbet_llvm_externals():
             url = "https://github.com/sorbet/sorbet/archive/{}.zip".format(SORBET_VERSION),
             sha256 = SORBET_SHA256,
             strip_prefix = "sorbet-{}".format(SORBET_VERSION),
+            patch_args = ["-p1"],
+            patches = ["//third_party:sorbet_test_corpus_runner.patch"],
         )
     else:
         native.local_repository(

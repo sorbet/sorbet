@@ -1,0 +1,13 @@
+diff --git a/test/BUILD b/test/BUILD
+index c17df6c99..e79b71e75 100644
+--- a/test/BUILD
++++ b/test/BUILD
+@@ -24,7 +24,7 @@ cc_binary(
+         "//local_vars",
+         "//main/autogen",
+         "//main/lsp",
+-        "//main/pipeline/semantic_extension:none",
++        "@com_stripe_sorbet_llvm//plugin_injector",
+         "//namer",
+         "//payload",
+         "//resolver",
