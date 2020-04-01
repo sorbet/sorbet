@@ -9,8 +9,8 @@
 namespace sorbet {
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
-          std::initializer_list<std::pair<ConstExprStr, std::string>> args,
-          std::chrono::time_point<std::chrono::steady_clock> start, std::initializer_list<int> histogramBuckets);
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args, std::chrono::nanoseconds start,
+          std::initializer_list<int> histogramBuckets);
 
 public:
     Timer(spdlog::logger &log, ConstExprStr name);
@@ -65,7 +65,9 @@ private:
     std::vector<std::pair<ConstExprStr, std::string>> args;
     // 'tags' appear in statsd metrics but not in traces. They are ConstExprStr to limit cardinality.
     std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
-    const std::chrono::time_point<std::chrono::steady_clock> start;
+    // It would be far better for type safety to store this as a std::chrono::time_point,
+    // but we don't know the clock a priori, because it's platform specific.
+    const std::chrono::nanoseconds start;
     // If not empty, report the time for this timer in the given histogram, where each entry forms an upper bound
     // on a bucket.
     std::vector<int> histogramBuckets;

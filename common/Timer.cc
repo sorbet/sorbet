@@ -1,13 +1,20 @@
 #include "common/Timer.h"
 using namespace std;
 namespace sorbet {
+
+chrono::nanoseconds clock_gettime_coarse() {
+    timespec tp;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
+    return chrono::nanoseconds(tp.tv_nsec);
+}
+
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
-             chrono::time_point<chrono::steady_clock> start, initializer_list<int> histogramBuckets)
+             chrono::nanoseconds start, initializer_list<int> histogramBuckets)
     : log(log), name(name), prev(prev), self{0}, args(args), start(start), histogramBuckets(histogramBuckets) {}
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
-    : Timer(log, name, prev, args, chrono::steady_clock::now(), histogramBuckets){};
+    : Timer(log, name, prev, args, clock_gettime_coarse(), histogramBuckets){};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
     : Timer(log, name, FlowId{0}, args, {}){};
@@ -83,11 +90,11 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 }
 
 Timer::~Timer() {
-    auto clock = chrono::steady_clock::now();
+    auto clock = clock_gettime_coarse();
     auto dur = clock - start;
-    if (!canceled && dur > std::chrono::milliseconds(1)) {
+    if (!canceled && dur > chrono::nanoseconds(chrono::milliseconds(1))) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
-        auto dur = std::chrono::duration<double, std::milli>(clock - start);
+        auto dur = chrono::duration<double, milli>(clock - start);
         log.debug("{}: {}ms", this->name.str, dur.count());
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }

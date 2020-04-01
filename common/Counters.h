@@ -95,8 +95,7 @@ struct FlowId {
     int id;
 };
 
-void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
-               std::chrono::time_point<std::chrono::steady_clock> end,
+void timingAdd(ConstExprStr measure, std::chrono::nanoseconds start, std::chrono::nanoseconds end,
                std::vector<std::pair<ConstExprStr, std::string>> args,
                std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
                std::vector<int> histogramBuckets);

@@ -198,15 +198,16 @@ vector<pair<const char *, const char *>> givenTags2StoredTags(vector<pair<ConstE
     return stored;
 }
 
-void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
-               std::chrono::time_point<std::chrono::steady_clock> end, vector<pair<ConstExprStr, string>> args,
-               vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
-               vector<int> histogramBuckets) {
-    ENFORCE(
-        (self.id == 0) || (previous.id == 0),
-        "format doesn't support chaining"); // see "case 1" in
-                                            // https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
-                                            // for workaround
+void timingAdd(ConstExprStr measure, chrono::nanoseconds start, chrono::nanoseconds end,
+               vector<pair<ConstExprStr, string>> args, vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self,
+               FlowId previous, vector<int> histogramBuckets) {
+    // Can't use ENFORCE, because each ENFORCE creates a new Timer.
+    if (!(self.id == 0 || previous.id == 0)) {
+        // see "case 1" in https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
+        // for workaround
+        Exception::raise("format doesn't support chaining");
+    }
+
     CounterImpl::Timing tim{0,
                             measure.str,
                             start,
