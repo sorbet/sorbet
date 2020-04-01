@@ -24,6 +24,7 @@
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
+#include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -138,6 +139,7 @@ public:
         }
         if (replaceNodes.empty()) {
             ModuleFunction::run(ctx, classDef.get());
+            SigRewriter::run(ctx, classDef.get());
             return classDef;
         }
 
@@ -155,6 +157,7 @@ public:
             }
         }
         ModuleFunction::run(ctx, classDef.get());
+        SigRewriter::run(ctx, classDef.get());
 
         return classDef;
     }

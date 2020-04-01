@@ -316,6 +316,22 @@ void GlobalState::initEmpty() {
     id = id.data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::T_Private_Types_Void_VOIDSingleton());
 
+    // T.class_of(T::Sig::WithoutRuntime)
+    id = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
+
+    // T::Sig::WithoutRuntime.sig
+    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::sigWithoutRuntime());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

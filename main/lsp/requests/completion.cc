@@ -557,7 +557,11 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
         receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
     }
     auto methodOwner = targetMethod.data(gs)->owner;
-    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
+
+    // TODO: Completion with `T::Sig::WithoutRuntime.sig` introduces a bug where we can complete signatures across
+    // class/module boundaries.
+    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs) ||
+          receiverSym == core::Symbols::T_Sig_WithoutRuntimeSingleton())) {
         // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
         return nullptr;
     }
@@ -668,7 +672,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
     auto what = maybeAlias.data(gs)->dealias(gs);
 
-    if (what == core::Symbols::sig()) {
+    if (what == core::Symbols::sig() || what == core::Symbols::sigWithoutRuntime()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
             return item;
         }

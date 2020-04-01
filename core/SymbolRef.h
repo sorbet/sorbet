@@ -417,6 +417,18 @@ public:
         return SymbolRef(nullptr, 88);
     }
 
+    // 89 is the attached class of VOIDSingleton
+
+    static SymbolRef T_Sig_WithoutRuntimeSingleton() {
+        return SymbolRef(nullptr, 90);
+    }
+
+    // 91 is the attached class of T_Sig_WithoutRuntimeSingleton
+
+    static SymbolRef sigWithoutRuntime() {
+        return SymbolRef(nullptr, 92);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 3 - 3);
