@@ -36,6 +36,7 @@ cc_library(
         "//plugin",
         "//resolver",
         "//rewriter",
+        "//third_party/rbs_parser",
     ],
 )
 
@@ -75,5 +76,6 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
+        "//third_party/rbs_parser",
     ],
 )

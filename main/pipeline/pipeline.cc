@@ -41,6 +41,9 @@
 #include "pipeline.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
+#include "third_party/rbs_parser/src/Driver.hh"
+#include "third_party/rbs_parser/src/Lexer.hh"
+#include "third_party/rbs_parser/src/PrintRBI.hh"
 
 using namespace std;
 
@@ -329,6 +332,30 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
     return what;
 }
 
+core::FileRef reserveRBS(unique_ptr<core::GlobalState> &gs, string &file) {
+    rbs_parser::File rbsFile(file);
+    try {
+        rbs_parser::Driver driver(&rbsFile);
+        rbs_parser::Lexer lexer(rbsFile.source());
+        rbs_parser::Parser parser(driver, lexer);
+        parser.parse();
+    } catch (rbs_parser::FileNotFoundException &re) {
+        if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::RBSError)) {
+            e.setHeader("{}: Not found", file);
+        }
+        return gs->enterFile(file, "");
+    } catch (rbs_parser::ParseError &re) {
+        if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::RBSError)) {
+            e.setHeader("{}:{}", file, re.what());
+        }
+        return gs->enterFile(file, "");
+    }
+    std::stringstream rbi;
+    rbs_parser::PrintRBI visitor(rbi, "true");
+    rbsFile.acceptVisitor(&visitor);
+    return gs->enterFile(file, rbi.str());
+}
+
 vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
     Timer timeit(gs->tracer(), "reserveFiles");
     vector<core::FileRef> ret;
@@ -336,7 +363,11 @@ vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vect
     for (auto f : files) {
         auto fileRef = gs->findFileByPath(f);
         if (!fileRef.exists()) {
-            fileRef = gs->reserveFileRef(f);
+            if (absl::EndsWith(f, ".rbs")) {
+                fileRef = reserveRBS(gs, f);
+            } else {
+                fileRef = gs->reserveFileRef(f);
+            }
         }
         ret.emplace_back(move(fileRef));
     }

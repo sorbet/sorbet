@@ -172,7 +172,7 @@ bool File::isPayload() const {
 }
 
 bool File::isRBI() const {
-    return absl::EndsWith(path(), ".rbi");
+    return absl::EndsWith(path(), ".rbi") || absl::EndsWith(path(), ".rbs");
 }
 
 bool File::isStdlib() const {
