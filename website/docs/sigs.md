@@ -250,6 +250,42 @@ end
 Main.name_length(Main.greet('Alice')) # => error!
 ```
 
+## Adding sigs to class methods
+
+There are many ways to define class (static) methods in Ruby. How a method is
+defined changes where the `extend T::Sig` line needs to go. These are the two
+preferred ways to define class methods with sigs:
+
+1.  `def self.greet`
+
+    ```ruby
+    class Main
+      # In this style, at the top level of the class
+      extend T::Sig
+
+      sig {params(name: String).void}
+      def self.greet(name)
+        puts "Hello, #{name}!"
+      end
+    end
+    ```
+
+2.  `class << self`
+
+    ```ruby
+    class Main
+      class << self
+        # In this style, inside the `class << self`
+        extend T::Sig
+
+        sig {params(name: String).void}
+        def greet(name)
+          # ...
+        end
+      end
+    end
+    ```
+
 ## Why do we need signatures?
 
 Taking a step back, why do we need `sig`s in the first place?
