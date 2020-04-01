@@ -201,14 +201,13 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
         cerr << "PHASE 2\n";
-        // Register signal handler _before_ forking to avoid race.
-        bool signaled = false;
-        _handler = [&signaled](int code) { signaled = true; };
-        signal(SIGHUP, baseHandler);
         // Fork before grabbing DB lock.
         const int child_pid = fork();
         if (child_pid == 0) {
             cerr << "CHILD: Waiting for signal\n";
+            bool signaled = false;
+            _handler = [&signaled](int code) { signaled = true; };
+            signal(SIGHUP, baseHandler);
             // Child process; wait for signal before writing to cache.
             while (!signaled) {
             }
@@ -250,9 +249,8 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
                 }
                 Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for child");
             }
-            EXPECT_EQ(0, exitCode);
-
             cerr << "PARENT: Running LSP\n";
+            EXPECT_EQ(0, exitCode);
 
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
