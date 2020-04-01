@@ -369,6 +369,20 @@ class CSV < Object
 
   sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
   def self.generate(str = "", **options, &blk); end
+
+  # This method is a shortcut for converting a single row ([`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html))
+  # into a [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #
+  # The `options` parameter can be anything [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) understands.
+  # This method understands an additional `:encoding` parameter to set the base
+  # Encoding for the output.  This method will try to guess your Encoding from
+  # the first non-`nil` field in `row`, if possible, but you may need to use
+  # this parameter as a backup plan.
+  #
+  # The `:row_sep` `option` defaults to `$INPUT_RECORD_SEPARATOR`
+  # (`$/`) when calling this method.
+  sig { params(row: T::Array[String], options: T.untyped).returns(String) }
+  def self.generate_line(row, **options); end
 end
 
 # A [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is part
