@@ -23,15 +23,20 @@ namespace {
 // Inspired by https://github.com/google/googletest/issues/1153#issuecomment-428247477
 int wait_for_child_fork(int pid) {
     int status;
-    if (0 > waitpid(pid, &status, 0)) {
+    const int rv = waitpid(pid, &status, WNOHANG);
+    if (rv < 0) {
         std::cerr << "[----------]  Waitpid error!" << std::endl;
+        return -2;
+    }
+    if (rv == 0) {
+        // process is still running.
         return -1;
     }
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);
     } else {
         std::cerr << "[----------]  Non-normal exit from child!" << std::endl;
-        return -2;
+        return -3;
     }
 }
 
@@ -166,6 +171,9 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
                           {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
     }
 
+    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+    auto nullLogger = std::make_shared<spdlog::logger>("null", sink);
+
     // LSP should have written cache to disk with file hashes from initialization.
     {
         auto opts = lspWrapper->opts;
@@ -177,9 +185,7 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
         auto contents = kvstore->read(key);
         ASSERT_NE(contents, nullptr);
 
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
-        auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
+        auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*nullLogger, *nullLogger)));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
@@ -228,14 +234,23 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
         } else {
             cerr << "PARENT: resetState\n";
             resetState();
-            cerr << "PARENT: Sending signal to child\n";
-            // Tell child process to mutate the cache.
-            kill(child_pid, SIGHUP);
-
             cerr << "PARENT: waiting for child to exit\n";
 
             // Wait for child process to finish mutating the cache.
-            EXPECT_EQ(0, wait_for_child_fork(child_pid));
+            int exitCode = 0;
+            while (true) {
+                // Tell child process to mutate the cache.
+                kill(child_pid, SIGHUP);
+                // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
+                exitCode = wait_for_child_fork(child_pid);
+                ASSERT_GE(exitCode, -1);
+                if (exitCode >= 0) {
+                    // Child exited.
+                    break;
+                }
+                Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for child");
+            }
+            EXPECT_EQ(0, exitCode);
 
             cerr << "PARENT: Running LSP\n";
 
