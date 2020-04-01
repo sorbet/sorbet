@@ -13,7 +13,7 @@ def sorbet_llvm_externals():
             sha256 = SORBET_SHA256,
             strip_prefix = "sorbet-{}".format(SORBET_VERSION),
             patch_args = ["-p1"],
-            patches = ["//third_party:sorbet_test_corpus_runner.patch"],
+            patches = ["@com_stripe_sorbet_llvm//third_party:sorbet_test_corpus_runner.patch"],
         )
     else:
         native.local_repository(
