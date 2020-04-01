@@ -107,9 +107,12 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
+        auto defn = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
-        return ast::MK::EmptyTree();
+
+        return defn;
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
