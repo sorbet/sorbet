@@ -1,0 +1,74 @@
+No errors! Great job.
+
+------------------------------------------------------------------
+
+test/cli/rbs/ko.rb:4: Expected `String` but found `Integer(42)` for argument `s` https://srb.help/7002
+     4 |bar.foo(42)
+        ^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:4: Method `Foo#foo` has specified `s` as `String`
+     4 |  sig { params(s: String, i: Integer).returns(String) }
+                       ^
+  Got Integer(42) originating from:
+    test/cli/rbs/ko.rb:4:
+     4 |bar.foo(42)
+                ^^
+
+test/cli/rbs/ko.rb:4: Not enough arguments provided for method `Foo#foo`. Expected: `2`, got: `1` https://srb.help/7004
+     4 |bar.foo(42)
+        ^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:5: `Foo#foo` defined here
+     5 |  def foo(s, i); end
+          ^^^^^^^^^^^^^
+
+test/cli/rbs/ko.rb:5: Too many arguments provided for method `Bar#bar1`. Expected: `1`, got: `2` https://srb.help/7004
+     5 |bar.bar1(nil, nil)
+        ^^^^^^^^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:12: `bar1` defined here
+    12 |  def bar1(s); end
+          ^^^^^^^^^^^
+
+test/cli/rbs/ko.rb:6: Expected `T.nilable(String)` but found `Integer(42)` for argument `s` https://srb.help/7002
+     6 |bar.bar1(42, "string")
+        ^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:11: Method `Bar#bar1` has specified `s` as `T.nilable(String)`
+    11 |  sig { params(s: T.nilable(String)).returns(T.nilable(String)) }
+                       ^
+  Got Integer(42) originating from:
+    test/cli/rbs/ko.rb:6:
+     6 |bar.bar1(42, "string")
+                 ^^
+
+test/cli/rbs/ko.rb:6: Too many arguments provided for method `Bar#bar1`. Expected: `1`, got: `2` https://srb.help/7004
+     6 |bar.bar1(42, "string")
+        ^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:12: `bar1` defined here
+    12 |  def bar1(s); end
+          ^^^^^^^^^^^
+
+test/cli/rbs/ko.rb:7: Expected `String` but found `Integer(42)` for argument `s` https://srb.help/7002
+     7 |bar.bar2(42, 42)
+        ^^^^^^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:14: Method `Bar#bar2` has specified `s` as `String`
+    14 |  sig { params(s: String, i: T.nilable(Integer)).void }
+                       ^
+  Got Integer(42) originating from:
+    test/cli/rbs/ko.rb:7:
+     7 |bar.bar2(42, 42)
+                 ^^
+
+test/cli/rbs/ko.rb:13: Expected `String` but found `Integer(42)` for argument `x` https://srb.help/7002
+    13 |baz.baz(42, "baz")
+        ^^^^^^^^^^^^^^^^^^
+    test/cli/rbs/sorbet/rbs/a.rbs:26: Method `Baz#baz` has specified `x` as `String`
+    26 |  sig { type_parameters(:Y).params(x: X, y: T.type_parameter(:Y)).returns(T::Hash[X, T.type_parameter(:Y)]) }
+                                           ^
+  Got Integer(42) originating from:
+    test/cli/rbs/ko.rb:13:
+    13 |baz.baz(42, "baz")
+                ^^
+Errors: 7
+
+------------------------------------------------------------------
+
+???: test/cli/rbs/sorbet/rbs/error.rbs:1:1-1:3: syntax error, unexpected tLIDENT, expecting tUIDENT or tUKEYWORD https://srb.help/1005
+Errors: 1

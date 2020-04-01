@@ -1,0 +1,17 @@
+module Foo
+	def foo: (String s, Integer i) -> String
+end
+
+class Bar
+	include Foo
+
+	def bar1: (String? s) -> String?
+
+	def bar2: (String s, ?Integer i) -> void
+
+	def bar3: ?{ (Integer) -> String } -> String
+end
+
+class Baz[X] < Bar
+	def baz: [Y] (X x, Y y) -> Hash[X, Y]
+end

@@ -12,6 +12,7 @@ def cli_test(path):
         data = native.glob([
             "{}/**/*.rb".format(name),
             "{}/**/*.rbi".format(name),
+            "{}/**/*.rbs".format(name),
             "{}/**/*.rake".format(name),
             "{}/**/*.ru".format(name),
             "{}/*.rbi".format(name),
