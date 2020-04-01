@@ -194,6 +194,7 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
+        cout << "PHASE 2\n";
         // Register signal handler _before_ forking to avoid race.
         bool signaled = false;
         _handler = [&signaled](int code) { signaled = true; };
@@ -201,9 +202,11 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
         // Fork before grabbing DB lock.
         const int child_pid = fork();
         if (child_pid == 0) {
+            cout << "CHILD: Waiting for signal\n";
             // Child process; wait for signal before writing to cache.
             while (!signaled) {
             }
+            cout << "CHILD: Signal received\n";
 
             // Let's update a file and write over the cache.
             resetState();
@@ -218,20 +221,30 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             EXPECT_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
             EXPECT_EQ(counters.getCounter("cache.committed"), 1);
 
+            cout << "CHILD: Exiting " << testing::Test::HasFailure() << "\n";
+
             // Exit explicitly here to stop fork from running the rest of the test suite.
             exit(testing::Test::HasFailure());
         } else {
+            cout << "PARENT: resetState\n";
             resetState();
+            cout << "PARENT: Sending signal to child\n";
             // Tell child process to mutate the cache.
             kill(child_pid, SIGHUP);
 
+            cout << "PARENT: waiting for child to exit\n";
+
             // Wait for child process to finish mutating the cache.
             EXPECT_EQ(0, wait_for_child_fork(child_pid));
+
+            cout << "PARENT: Running LSP\n";
 
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
             assertDiagnostics(initializeLSP(),
                               {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
+
+            cout << "PARENT: Done\n";
 
             // We should not use the cache since it has been dirtied.
             auto counters = getCounters();
