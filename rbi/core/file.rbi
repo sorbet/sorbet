@@ -1060,7 +1060,7 @@ class File < IO
     params(
         file: T.any(String, Pathname, IO),
     )
-    .returns(T.nilable(Integer))
+    .returns(T::Boolean)
   end
   def self.zero?(file); end
 
