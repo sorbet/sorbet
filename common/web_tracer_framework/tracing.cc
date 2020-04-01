@@ -52,11 +52,11 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
 
     for (const auto &e : counters.counters->timings) {
         string maybeArgs;
-        if (!e.args.empty()) {
-            maybeArgs = fmt::format(",\"args\":{{{}}}", fmt::map_join(e.args, ",", [](const auto &nameValue) -> string {
-                                        return fmt::format("\"{}\":\"{}\"", JSON::escape(nameValue.first),
-                                                           JSON::escape(nameValue.second));
-                                    }));
+        if (e.args != nullptr && !e.args->empty()) {
+            maybeArgs = fmt::format(
+                ",\"args\":{{{}}}", fmt::map_join(*e.args, ",", [](const auto &nameValue) -> string {
+                    return fmt::format("\"{}\":\"{}\"", JSON::escape(nameValue.first), JSON::escape(nameValue.second));
+                }));
         }
 
         string maybeFlow;

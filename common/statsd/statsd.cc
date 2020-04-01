@@ -69,8 +69,10 @@ public:
     }
     void timing(const CounterImpl::Timing &tim) { // type: ms
         auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(tim.end - tim.start).count();
-        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds, "ms",
-                  tim.tags); // format suggested by #observability (@sjung and @an)
+        if (tim.tags != nullptr) {
+            addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds, "ms",
+                      *tim.tags); // format suggested by #observability (@sjung and @an)
+        }
     }
 };
 
