@@ -207,7 +207,7 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             cerr << "CHILD: Waiting for signal\n";
             bool signaled = false;
             _handler = [&signaled](int code) { signaled = true; };
-            signal(SIGHUP, baseHandler);
+            signal(SIGUSR1, baseHandler);
             // Child process; wait for signal before writing to cache.
             while (!signaled) {
             }
@@ -239,7 +239,7 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             int exitCode = 0;
             while (true) {
                 // Tell child process to mutate the cache.
-                kill(child_pid, SIGHUP);
+                kill(child_pid, SIGUSR1);
                 // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
                 exitCode = wait_for_child_fork(child_pid);
                 ASSERT_GE(exitCode, -1);
