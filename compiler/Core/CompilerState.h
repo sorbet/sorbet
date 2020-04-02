@@ -12,13 +12,16 @@ namespace sorbet::compiler {
 // Like GlobalState, but for sorbet_llvm.
 class CompilerState {
 public:
-    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *);
+    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *,
+                  llvm::BasicBlock *globalConstructorsEntry);
 
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
     llvm::Module *module;
+    // TODO(jez) Arguably this is another one that's only relevant for IREmitter...
+    llvm::BasicBlock *globalConstructorsEntry;
 
     // Our own state
 

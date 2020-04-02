@@ -1,4 +1,5 @@
 // These violate our poisons so have to happen first
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
@@ -49,6 +50,12 @@ public:
     // "Combined" because all the methods in this file get compiled and accumulated into this Module,
     // but each method is typechecked (and thus compiled) individually.
     unique_ptr<llvm::Module> combinedModule;
+
+    // The function that holds calls to global constructors
+    //
+    // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
+    // our sorbet_ruby version check.
+    llvm::BasicBlock *globalConstructorsEntry;
 
     bool aborted = false;
 };
@@ -125,13 +132,22 @@ public:
         // loc.toString(gs));
         ENFORCE(loc.file().exists());
         if (!module) {
+            ENFORCE(threadState->globalConstructorsEntry == nullptr);
             module = compiler::PayloadLoader::readDefaultModule(lctx);
             threadState->file = loc.file();
+
+            auto linkageType = llvm::Function::InternalLinkage;
+            auto noArgs = std::vector<llvm::Type *>(0, llvm::Type::getVoidTy(lctx));
+            auto varArgs = false;
+            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), noArgs, varArgs);
+            auto globalConstructors = llvm::Function::Create(ft, linkageType, "sorbet_globalConstructors", *module);
+            threadState->globalConstructorsEntry = llvm::BasicBlock::Create(lctx, "entry", globalConstructors);
         } else {
             ENFORCE(threadState->file == loc.file());
+            ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
-        compiler::CompilerState state(gs, lctx, module.get());
+        compiler::CompilerState state(gs, lctx, module.get(), threadState->globalConstructorsEntry);
         try {
             compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, loc.file());
@@ -152,7 +168,14 @@ public:
         }
         auto threadState = getTypecheckThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
+
+        llvm::IRBuilder<> builder(lctx);
+        builder.SetInsertPoint(threadState->globalConstructorsEntry);
+        builder.CreateRetVoid();
+
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
+        threadState->globalConstructorsEntry = nullptr;
+
         if (!module) {
             ENFORCE(!threadState->file.exists());
             return;
@@ -166,9 +189,10 @@ public:
         ENFORCE(f == threadState->file);
 
         ENFORCE(threadState->combinedModule == nullptr);
+        ENFORCE(threadState->globalConstructorsEntry == nullptr);
         threadState->file = core::FileRef();
 
-        compiler::CompilerState cs(gs, lctx, module.get());
+        compiler::CompilerState cs(gs, lctx, module.get(), nullptr);
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
             if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");

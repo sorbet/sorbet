@@ -770,6 +770,8 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     builder.SetInsertPoint(bb);
 
     if (IREmitterHelpers::isStaticInit(cs, sym)) {
+        builder.CreateCall(cs.module->getFunction("sorbet_globalConstructors"), {});
+
         core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
         // Call the LLVM method that was made by run() from this Init_ method

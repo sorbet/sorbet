@@ -1,7 +1,6 @@
 // These violate our poisons so have to happen first
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
-#include "llvm/Transforms/Utils/ModuleUtils.h" // appendToGlobalCtors
 
 #include "IREmitterHelpers.h"
 #include "Payload.h"
@@ -104,7 +103,8 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
         globalInitBuilder.CreateStore(rawStr,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
         globalInitBuilder.CreateRetVoid();
-        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalInitBuilder.CreateCall(constr, {});
 
         return ret;
     }));
@@ -159,7 +159,8 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         globalInitBuilder.CreateStore(rawStr,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
         globalInitBuilder.CreateRetVoid();
-        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalInitBuilder.CreateCall(constr, {});
 
         return ret;
     }));
@@ -214,7 +215,8 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
         globalInitBuilder.CreateStore(rawID,
                                       llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
         globalInitBuilder.CreateRetVoid();
-        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalInitBuilder.CreateCall(constr, {});
 
         return ret;
     }));
@@ -446,7 +448,8 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
         ret->setAlignment(8);
         // create constructor
         auto constr = allocateRubyStackFramesImpl(cs, md, ret);
-        llvm::appendToGlobalCtors(*cs.module, constr, 0, ret);
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalInitBuilder.CreateCall(constr, {});
 
         return ret;
     }));
