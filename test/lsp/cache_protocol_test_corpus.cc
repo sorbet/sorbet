@@ -189,6 +189,8 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
+        // Note: I had trouble getting signals to work in CI. Even in a loop where the parent process sent a signal to
+        // the child, the child never received the signal. So, I'm using a file to communicate instead.
         auto signalFile = cacheDir + "/signal_file";
         // Fork before grabbing DB lock.
         const int child_pid = fork();
