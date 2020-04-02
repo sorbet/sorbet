@@ -17,7 +17,20 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              EmptyTree
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::<Magic>
+                }
+                fun = <U <define-top-class-or-module>>
+                block = nullptr
+                args = [
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = ::A
+                  }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   orig = nullptr

@@ -5,7 +5,7 @@ begin
       begin
         $a = 1
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::A)
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end

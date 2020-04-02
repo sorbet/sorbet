@@ -4,37 +4,37 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::NormalClass)
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::ANamespace)
           ::Sorbet::Private::Static.keep_for_ide(::ANamespace)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::ANamespace::ClassInNamespace)
           ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ClassInNamespace)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Parent)
           ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Mixin)
           ::Sorbet::Private::Static.keep_for_ide(::Mixin)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::OtherMixin)
           ::Sorbet::Private::Static.keep_for_ide(::OtherMixin)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Child)
           ::Sorbet::Private::Static.keep_for_ide(::Child)
           ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
@@ -57,12 +57,12 @@ begin
         ::Sorbet::Private::Static.keep_def(<self>, :"normal_method")
         ::Sorbet::Private::Static.keep_self_def(<self>, :"normal_static_method")
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::NormalClass::InnerClass)
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::NormalClass::InnerModule)
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerModule)
           <emptyTree>
         end
@@ -83,7 +83,7 @@ begin
   module ::ANamespace<<C ANamespace>> < ()
     def self.<static-init>(<blk>)
       begin
-        <emptyTree>
+        ::<Magic>.<define-top-class-or-module>(::ANamespace::ObviousChild)
         ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ObviousChild)
         <emptyTree>
       end

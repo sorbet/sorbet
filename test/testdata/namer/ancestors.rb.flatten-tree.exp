@@ -4,28 +4,28 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Mixin1)
           ::Sorbet::Private::Static.keep_for_ide(::Mixin1)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Mixin2)
           ::Sorbet::Private::Static.keep_for_ide(::Mixin2)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Parent)
           ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::Child)
           ::Sorbet::Private::Static.keep_for_ide(::Child)
           ::Sorbet::Private::Static.keep_for_ide(::Parent)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::MultipleInclude)
           ::Sorbet::Private::Static.keep_for_ide(::MultipleInclude)
           <emptyTree>
         end
