@@ -62,6 +62,8 @@ export PATH="$(dirname "{cc}"):$PATH"
 # and this feels more maintainable than patching it.
 cp -aL "{src_dir}"/* "$build_dir"
 
+{install_extra_srcs}
+
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
@@ -72,6 +74,9 @@ run_cmd() {{
         exit 1
     fi
 }}
+
+run_cmd sed -i.bak -e 's@^COMMONOBJS\( *\)=@COMMONOBJS\\1= {extra_srcs_object_files}@' common.mk
+run_cmd rm -f common.mk.bak
 
 # This is a hack. The configure script builds up a command for compiling C
 # files that includes `-fvisibility=hidden`. To override it, our flag needs to
@@ -139,6 +144,13 @@ popd > /dev/null
 
 rm -rf "$build_dir"
 
+"""
+
+# Attempt to preserve the directory structure of the extra source files, so that things like #include
+# directives "just work". For example, `#include "foo/foo.h"` would mean `foo.h` needs to be inside `foo/`
+_INSTALL_EXTRA_SRC = """
+mkdir -p "$build_dir/{dirname}"
+cp "{file}" "$build_dir/{dirname}/{basename}"
 """
 
 _INSTALL_GEM = """
@@ -211,12 +223,26 @@ def _build_ruby_impl(ctx):
 
     outputs = binaries + [libdir, incdir, sharedir, internal_incdir]
 
+    install_extra_srcs = []
+    extra_srcs_object_files = []
+    for extra_src in ctx.attr.extra_srcs:
+        dirname = extra_src.label.package
+
+        for file in extra_src.files.to_list():
+            basename = file.basename
+            install_extra_srcs.append(_INSTALL_EXTRA_SRC.format(file = file.path, dirname = dirname, basename = basename))
+
+            if file.extension == "c":
+                without_ext = basename[0:basename.rfind(".")]
+                extra_obj = "{dirname}/{without_ext}.$(OBJEXT)".format(without_ext = without_ext, dirname = dirname)
+                extra_srcs_object_files.append(extra_obj)
+
     install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
 
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -230,6 +256,8 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
+            install_extra_srcs = "\n".join(install_extra_srcs),
+            extra_srcs_object_files = " ".join(extra_srcs_object_files),
             install_gems = "\n".join(install_gems),
         )),
     )
@@ -257,6 +285,9 @@ _build_ruby = rule(
         ),
         "gems": attr.label_list(
             doc = "Additional ruby gems to install into the ruby build",
+        ),
+        "extra_srcs": attr.label_list(
+            doc = "A list of *.c and *.h files to treat as extra source files to libruby",
         ),
         "configure_flags": attr.string_list(
             doc = "Additional arguments to configure",
@@ -454,7 +485,7 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
-def ruby(rubygems, gems, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+def ruby(rubygems, gems, extra_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
@@ -468,6 +499,7 @@ def ruby(rubygems, gems, configure_flags = [], copts = [], cppopts = [], linkopt
     _build_ruby(
         name = "ruby-dist",
         src = ":source",
+        extra_srcs = extra_srcs,
         rubygems = rubygems,
         configure_flags = configure_flags,
         copts = copts,

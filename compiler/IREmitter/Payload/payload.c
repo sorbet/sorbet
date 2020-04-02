@@ -10,6 +10,8 @@
 // You'll also find a lot of useful information from grepping the Ruby source code.
 //
 
+#include "sorbet_version/sorbet_version.h"
+
 // These are public Ruby headers. Feel free to add more from the include/ruby
 // directory
 #include "ruby/encoding.h" // for rb_encoding
@@ -47,6 +49,56 @@ const char *dbg_p(VALUE obj) __attribute__((weak)) {
 
 void stopInDebugger() {
     __asm__("int $3");
+}
+
+// ****
+// ****                       sorbet_ruby version information fallback
+// ****
+#ifdef SORBET_LLVM_PAYLOAD
+
+// A strong version of these functions will be linked into libruby.so when Ruby is built as sorbet_ruby.
+// When our compiled C extensions are loaded by sorbet_ruby, calls will resolve to the symbol inside libruby.so.
+// When our compiled C extensions are loaded by a system Ruby or an rbenv-built Ruby, these weak symbols act as
+// a fallback so that we can gracefully exit (Ruby exception) when not run under sorbet_ruby instead of
+// ungracefully exit (dynamic symbol resolution error + corrupt Ruby VM).
+const char *sorbet_getBuildSCMRevision() __attribute__((weak)) {
+    rb_raise(rb_eRuntimeError,
+             "sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.");
+}
+
+const int sorbet_getIsReleaseBuild() __attribute__((weak)) {
+    rb_raise(rb_eRuntimeError,
+             "sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.");
+}
+
+#endif
+
+// Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
+// That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
+// is never referenced, then it is never resolved."
+//
+// Thus, by putting our version check first before any other code in the C extension runs, and backing
+// up the symbols our version check relies on with weak symbols, we can guarantee that the user never
+// sees a symbol resolution error from loading a shared object when they shouldn't have.
+void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision)
+    __attribute__((always_inline)) {
+    if (!compile_time_is_release_build) {
+        // Skipping version check: This shared object was compiled by a non-release version of SorbetLLVM
+        return;
+    }
+
+    const int runtime_is_release_build = sorbet_getIsReleaseBuild();
+    if (!runtime_is_release_build) {
+        // Skipping version check: sorbet_ruby is a non-release version
+        return;
+    }
+
+    const char *runtime_build_scm_revision = sorbet_getBuildSCMRevision();
+    if (strcmp(compile_time_build_scm_revision, runtime_build_scm_revision) != 0) {
+        rb_raise(rb_eRuntimeError,
+                 "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
+                 runtime_build_scm_revision, compile_time_build_scm_revision);
+    }
 }
 
 // ****
@@ -1230,6 +1282,12 @@ VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) c
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.
 // ****
 
+#ifdef SORBET_LLVM_PAYLOAD
+// These forward declarations don't actually exist except in the LLVM IR we generate for each C extension,
+// so this function fails to link when compiling the payload into libruby.so.
+//
+// We don't actually need this function to be present in that shared object, so we can omit it.
+
 VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen) __attribute__((const));
 VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) __attribute__((const));
 
@@ -1238,3 +1296,5 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
            (long)&sorbet_getConstant;
 }
+
+#endif

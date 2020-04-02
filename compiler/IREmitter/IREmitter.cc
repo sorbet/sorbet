@@ -770,6 +770,16 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     builder.SetInsertPoint(bb);
 
     if (IREmitterHelpers::isStaticInit(cs, sym)) {
+        // We include sorbet_version.c when compiling sorbet_llvm itself to get the expected version.
+        // The actual version will be linked into libruby.so and compared against at runtime.
+        auto compileTimeBuildSCMRevision = sorbet_getBuildSCMRevision();
+        auto compileTimeIsReleaseBuild = sorbet_getIsReleaseBuild();
+        builder.CreateCall(cs.module->getFunction("sorbet_ensureSorbetRuby"),
+                           {
+                               llvm::ConstantInt::get(cs, llvm::APInt(32, compileTimeIsReleaseBuild, true)),
+                               Payload::toCString(cs, compileTimeBuildSCMRevision, builder),
+                           });
+
         builder.CreateCall(cs.module->getFunction("sorbet_globalConstructors"), {});
 
         core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());

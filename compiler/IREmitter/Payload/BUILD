@@ -52,13 +52,19 @@ cc_library(
         "-fPIC",
         "-march=x86-64",
     ],
-
     # disable opt flags, as they add `-ffunction-sections` and `-fdata-sections`
     # See https://github.com/bazelbuild/bazel/issues/8706 for why `nocopts` is gone
     features = ["-opt"],
     linkstatic = 1,  # we are doing this only for llvm ir
+    local_defines = [
+        # When this variable is defined, it means we're building the payload for use within sorbet_llvm,
+        # not for the purpose of being included in libruby (though we don't do that yet).
+        # TODO(jez) Link SorbetLLVM's payload into libruby.so.
+        "SORBET_LLVM_PAYLOAD",
+    ],
     visibility = ["//visibility:public"],
     deps = [
+        "@com_stripe_ruby_typer//sorbet_version",
         "@sorbet_ruby//:headers",
         "@sorbet_ruby//:headers-internal",
     ],
