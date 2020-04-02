@@ -19,15 +19,7 @@ microseconds clock_gettime_coarse() {
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              microseconds start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, start(start) {
-    if (args.size() != 0) {
-        this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
-    }
-
-    if (histogramBuckets.size() != 0) {
-        this->histogramBuckets = make_unique<vector<int>>(histogramBuckets);
-    }
-}
+    : log(log), name(name), prev(prev), self{0}, args(args), start(start), histogramBuckets(histogramBuckets) {}
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
@@ -86,35 +78,24 @@ Timer Timer::clone() const {
 
 Timer Timer::clone(ConstExprStr name) const {
     Timer forked(log, name, prev, {}, start, {});
-    if (this->args != nullptr) {
-        forked.args = make_unique<vector<pair<ConstExprStr, string>>>(*args);
-    }
-    if (this->tags != nullptr) {
-        forked.tags = make_unique<vector<pair<ConstExprStr, ConstExprStr>>>(*tags);
-    }
+    forked.args = args;
+    forked.tags = tags;
     forked.canceled = canceled;
-    if (this->histogramBuckets != nullptr) {
-        forked.histogramBuckets = make_unique<vector<int>>(*histogramBuckets);
-    }
+    forked.histogramBuckets = histogramBuckets;
     return forked;
 }
 
 void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     // Check if tag is already set; if so, update value.
-    if (tags != nullptr) {
-        for (auto &tag : *tags) {
-            const auto tagName = tag.first;
-            if (tagName.size == name.size && strncmp(tagName.str, name.str, tagName.size) == 0) {
-                tag.second = value;
-                return;
-            }
+    for (auto &tag : tags) {
+        const auto tagName = tag.first;
+        if (tagName.size == name.size && strncmp(tagName.str, name.str, tagName.size) == 0) {
+            tag.second = value;
+            return;
         }
     }
     // Add new tag.
-    if (tags == nullptr) {
-        tags = make_unique<vector<pair<ConstExprStr, ConstExprStr>>>();
-    }
-    tags->push_back(make_pair(name, value));
+    tags.push_back(make_pair(name, value));
 }
 
 Timer::~Timer() {

@@ -88,7 +88,7 @@ void CounterImpl::timingAdd(CounterImpl::Timing timing) {
     if (fuzz_mode) {
         return;
     }
-    this->timings.emplace_back(move(timing));
+    this->timings.emplace_back(timing);
 }
 
 thread_local CounterImpl counterState;
@@ -139,7 +139,7 @@ void counterConsume(CounterState cs) {
         counterState.prodCounterAdd(e.first, e.second);
     }
     for (auto &e : cs.counters->timings) {
-        counterState.timingAdd(move(e));
+        counterState.timingAdd(e);
     }
 }
 
@@ -181,37 +181,25 @@ int getThreadId() {
     return counter;
 }
 
-unique_ptr<vector<pair<const char *, string>>>
-givenArgs2StoredArgs(unique_ptr<vector<pair<ConstExprStr, string>>> given) {
-    if (given == nullptr) {
-        return nullptr;
-    }
-
-    unique_ptr<vector<pair<const char *, string>>> stored = make_unique<vector<pair<const char *, string>>>();
-    for (auto &e : *given) {
-        stored->emplace_back(e.first.str, move(e.second));
+vector<pair<const char *, string>> givenArgs2StoredArgs(vector<pair<ConstExprStr, string>> given) {
+    vector<pair<const char *, string>> stored;
+    for (auto &e : given) {
+        stored.emplace_back(e.first.str, move(e.second));
     }
     return stored;
 }
 
-unique_ptr<vector<pair<const char *, const char *>>>
-givenTags2StoredTags(unique_ptr<vector<pair<ConstExprStr, ConstExprStr>>> given) {
-    if (given == nullptr) {
-        return nullptr;
-    }
-
-    unique_ptr<vector<pair<const char *, const char *>>> stored =
-        make_unique<vector<pair<const char *, const char *>>>();
-    for (auto &e : *given) {
-        stored->emplace_back(e.first.str, e.second.str);
+vector<pair<const char *, const char *>> givenTags2StoredTags(vector<pair<ConstExprStr, ConstExprStr>> given) {
+    vector<pair<const char *, const char *>> stored;
+    for (auto &e : given) {
+        stored.emplace_back(e.first.str, e.second.str);
     }
     return stored;
 }
 
-void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
-               unique_ptr<vector<pair<ConstExprStr, string>>> args,
-               unique_ptr<vector<pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,
-               unique_ptr<vector<int>> histogramBuckets) {
+void timingAdd(ConstExprStr measure, microseconds start, microseconds end, vector<pair<ConstExprStr, string>> args,
+               vector<pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
+               vector<int> histogramBuckets) {
     // Can't use ENFORCE, because each ENFORCE creates a new Timer.
     if (!(self.id == 0 || previous.id == 0)) {
         // see "case 1" in https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit?pli=1#
@@ -228,16 +216,16 @@ void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
                             givenTags2StoredTags(move(tags)),
                             self,
                             previous};
-    counterState.timingAdd(move(tim));
+    counterState.timingAdd(tim);
 
-    if (histogramBuckets != nullptr && !histogramBuckets->empty()) {
-        histogramBuckets->push_back(INT_MAX);
-        fast_sort(*histogramBuckets);
+    if (!histogramBuckets.empty()) {
+        histogramBuckets.push_back(INT_MAX);
+        fast_sort(histogramBuckets);
 
         auto msCount = (end.usec - start.usec) / 1'000;
         // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one if a histogram
         // is set. If histogramBuckets is empty (which is the common case), then nothing happens.
-        for (const auto bucket : *histogramBuckets) {
+        for (const auto bucket : histogramBuckets) {
             if (msCount < bucket) {
                 prodHistogramInc(measure, bucket);
                 break;
@@ -291,7 +279,7 @@ void CounterImpl::canonicalize() {
     }
 
     for (auto &e : this->timings) {
-        out.timingAdd(move(e));
+        out.timingAdd(e);
     }
 
     this->countersByCategory = std::move(out.countersByCategory);

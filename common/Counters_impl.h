@@ -37,8 +37,8 @@ struct CounterImpl {
         char const *measure;
         microseconds start, end;
         int threadId;
-        std::unique_ptr<std::vector<std::pair<char const *, std::string>>> args;
-        std::unique_ptr<std::vector<std::pair<char const *, char const *>>> tags;
+        std::vector<std::pair<char const *, std::string>> args;
+        std::vector<std::pair<char const *, char const *>> tags;
         FlowId self;
         FlowId prev;
     };
