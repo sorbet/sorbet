@@ -99,11 +99,11 @@ public:
     }
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        if (!shouldCompile(ctx, klass->loc.file())) {
+        if (!shouldCompile(ctx, klass->declLoc.file())) {
             return;
         }
-        if (klass->loc.file().data(ctx).strictLevel < core::StrictLevel::True) {
-            if (auto e = ctx.state.beginError(klass->loc, core::errors::Compiler::Untyped)) {
+        if (klass->declLoc.file().data(ctx).strictLevel < core::StrictLevel::True) {
+            if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Compiler::Untyped)) {
                 e.setHeader("File must be `typed: true` or higher to be compiled");
             }
         }
@@ -147,7 +147,7 @@ public:
             ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
-        compiler::CompilerState state(gs, lctx, module.get(), threadState->globalConstructorsEntry);
+        compiler::CompilerState state(gs, lctx, module.get(), threadState->file, threadState->globalConstructorsEntry);
         try {
             compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, loc.file());
@@ -192,7 +192,7 @@ public:
         ENFORCE(threadState->globalConstructorsEntry == nullptr);
         threadState->file = core::FileRef();
 
-        compiler::CompilerState cs(gs, lctx, module.get(), nullptr);
+        compiler::CompilerState cs(gs, lctx, module.get(), f, nullptr);
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
             if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");

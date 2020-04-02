@@ -4,6 +4,7 @@
 #include "common/ConstExprStr.h"
 #include "common/Exception.h"
 #include "compiler/Core/ForwardDeclarations.h"
+#include "core/Files.h"
 #include <memory>
 #include <string_view>
 
@@ -12,10 +13,9 @@ namespace sorbet::compiler {
 // Like GlobalState, but for sorbet_llvm.
 class CompilerState {
 public:
-    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *,
-                  llvm::BasicBlock *globalConstructorsEntry);
-
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
+    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, core::FileRef,
+                  llvm::BasicBlock *globalConstructorsEntry);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
@@ -29,6 +29,7 @@ public:
     // (A better option might be to create an IREmitterContext of some sort.)
     llvm::BasicBlock *functionEntryInitializers;
 
+    core::FileRef file;
     // useful apis for getting common types
 
     llvm::StructType *getValueType();

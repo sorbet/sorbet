@@ -21,8 +21,7 @@ public:
                 // is still in Sorbet.
                 // this helps us decompose cases where a single file is reopened multiple times and allows us to know
                 // which staticInit to call
-                auto loc =
-                    core::Loc(classDef->declLoc.file(), classDef->declLoc.beginPos(), classDef->declLoc.beginPos());
+                auto loc = core::LocOffsets{classDef->declLoc.beginPos(), classDef->declLoc.beginPos()};
                 auto magic = ast::MK::Send1(loc, ast::MK::Unsafe(loc, ast::MK::Constant(loc, core::Symbols::root())),
                                             Names::defineTopClassOrModule(ctx), classDef->name->deepCopy());
                 ast::cast_tree<ast::Send>(magic.get())->flags.isRewriterSynthesized = true;

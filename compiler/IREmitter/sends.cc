@@ -135,8 +135,7 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                 (blk == nullptr || symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
                 auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
                 for (auto &c : potentialClasses) {
-                    auto leftType =
-                        core::Types::dropSubtypesOf(core::Context(cs, core::Symbols::root()), remainingType, c);
+                    auto leftType = core::Types::dropSubtypesOf(cs, remainingType, c);
 
                     if (leftType != remainingType) {
                         remainingType = leftType;

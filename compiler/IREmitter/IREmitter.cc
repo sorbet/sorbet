@@ -251,7 +251,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 }
                 const auto a = blockMap.rubyBlockArgs[rubyBlockId][i];
                 if (!a._name.exists()) {
-                    cs.failCompilation(md->loc, "this method has a block argument construct that's not supported");
+                    cs.failCompilation(md->declLoc, "this method has a block argument construct that's not supported");
                 }
 
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
@@ -426,7 +426,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
         core::Loc lastLoc;
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                lastLoc = Payload::setLineNumber(cs, builder, bind.loc, cfg.symbol, lastLoc,
+                lastLoc = Payload::setLineNumber(cs, builder, core::Loc(cs.file, bind.loc), cfg.symbol, lastLoc,
                                                  blockMap.iseqEncodedPtrsByFunction[bb->rubyBlockId],
                                                  blockMap.lineNumberPtrsByFunction[bb->rubyBlockId]);
                 typecase(
@@ -486,7 +486,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                     },
                     [&](cfg::Return *i) {
                         if (bb->rubyBlockId != 0) {
-                            cs.failCompilation(bind.loc, "returns through multiple stacks not implemented");
+                            cs.failCompilation(core::Loc(cs.file, bind.loc),
+                                               "returns through multiple stacks not implemented");
                         }
                         isTerminated = true;
                         auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
@@ -556,7 +557,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::Unanalyzable *i) {
-                        cs.failCompilation(bind.loc, "exceptions are not supported in compiled mode");
+                        cs.failCompilation(core::Loc(cs.file, bind.loc),
+                                           "exceptions are not supported in compiled mode");
                     },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */
@@ -701,7 +703,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     if (md->symbol.data(cs)->name != core::Names::staticInit()) {
         func = IREmitterHelpers::getOrCreateFunction(cs, md->symbol);
     } else {
-        func = IREmitterHelpers::getOrCreateStaticInit(cs, md->symbol, md->loc);
+        func = IREmitterHelpers::getOrCreateStaticInit(cs, md->symbol, md->declLoc);
     }
     func = IREmitterHelpers::cleanFunctionBody(cs, func);
     {

@@ -407,7 +407,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
     auto cs1 = cs;
     cs1.functionEntryInitializers = bei;
 
-    auto loc = md->loc;
+    auto loc = md->declLoc;
     auto sym = md->symbol;
     auto funcName =
         IREmitterHelpers::isStaticInit(cs1, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
