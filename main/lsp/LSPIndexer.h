@@ -7,7 +7,7 @@
 
 namespace sorbet {
 class WorkerPool;
-class OwnedKeyValueStore;
+class KeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {
@@ -29,7 +29,7 @@ class LSPIndexer final {
      * this global state every time we need to perform a slow path typechecking operation. */
     std::unique_ptr<core::GlobalState> initialGS;
     /** Key-value store used during initialization. */
-    std::unique_ptr<const OwnedKeyValueStore> kvstore;
+    std::unique_ptr<KeyValueStore> kvstore;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
@@ -51,7 +51,7 @@ class LSPIndexer final {
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,
-               std::unique_ptr<const OwnedKeyValueStore> kvstore);
+               std::unique_ptr<KeyValueStore> kvstore);
     ~LSPIndexer();
 
     /**

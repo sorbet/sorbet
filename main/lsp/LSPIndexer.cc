@@ -50,7 +50,7 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
 } // namespace
 
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> initialGS,
-                       unique_ptr<const OwnedKeyValueStore> kvstore)
+                       unique_ptr<KeyValueStore> kvstore)
     : config(config), initialGS(move(initialGS)), kvstore(move(kvstore)),
       emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
@@ -154,10 +154,11 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, "Indexing", "Indexing files...");
     vector<core::FileRef> inputFiles;
+    unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
         inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-        for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, kvstore)) {
+        for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore)) {
             int id = t.file.id();
             if (id >= indexed.size()) {
                 indexed.resize(id + 1);
@@ -170,13 +171,8 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     }
 
     pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
-
-    // We're done with the kvstore.
-    kvstore = nullptr;
-    {
-        auto unownedKvStore = cache::maybeCreateKeyValueStore(config->opts);
-        cache::maybeCacheGlobalStateAndFiles(unownedKvStore, config->opts, *initialGS, indexed);
-    }
+    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
+                                         indexed);
 
     // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
     // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
