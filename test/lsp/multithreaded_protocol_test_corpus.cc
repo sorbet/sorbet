@@ -25,15 +25,20 @@ void sortTimersByStartTime(vector<CounterImpl::Timing> &times) {
     });
 }
 
-void checkDiagnosticTimes(vector<CounterImpl::Timing> times, size_t expectedSize) {
+void checkDiagnosticTimes(vector<CounterImpl::Timing> times, size_t expectedSize, bool assertUniqueStartTimes) {
     EXPECT_EQ(times.size(), expectedSize);
     sortTimersByStartTime(times);
 
-    // No two diagnostic latency timers should have the same start timestamp.
-    for (size_t i = 1; i < times.size(); i++) {
-        EXPECT_LT(times[i - 1].start.usec, times[i].start.usec);
+    if (assertUniqueStartTimes) {
+        // No two diagnostic latency timers should have the same start timestamp.
+        for (size_t i = 1; i < times.size(); i++) {
+            EXPECT_LT(times[i - 1].start.usec, times[i].start.usec);
+        }
     }
 }
+
+// The resolution of MONOTONIC_COARSE seems to be ~1ms, so we use >1ms delay to ensure unique clock values.
+constexpr auto timestampGranularity = chrono::milliseconds(2);
 
 } // namespace
 
@@ -51,8 +56,8 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
 
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
-    // Pause to differentiate message times
-    this_thread::sleep_for(chrono::milliseconds(1));
+    // Pause to differentiate message times.
+    this_thread::sleep_for(timestampGranularity);
     sendAsync(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
 
     // Pause so that all latency timers for the above operations get reported.
@@ -69,7 +74,7 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.updates"), 1);
     // 1 per edit
-    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2);
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2, /* assertUniqueStartTimes */ true);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
@@ -97,7 +102,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     // Syntax error in foo.rb.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
     // Pause to differentiate message times
-    this_thread::sleep_for(chrono::milliseconds(1));
+    this_thread::sleep_for(chrono::milliseconds(2));
     // Typechecking error in bar.rb
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef hello\n\"hi\"\nend\nend\n",
@@ -151,7 +156,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     EXPECT_GE(lastDiagnosticLatency[0].end.usec - lastDiagnosticLatency[0].start.usec, 5'000 /* 5ms */);
     EXPECT_GE(lastDiagnosticLatency[1].end.usec - lastDiagnosticLatency[1].start.usec, 5'000 /* 5ms */);
     // 1 per edit
-    checkDiagnosticTimes(move(lastDiagnosticLatency), 3);
+    checkDiagnosticTimes(move(lastDiagnosticLatency), 3, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
@@ -185,7 +190,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
                           "# typed: true\n\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef bar\n10\nend\nend\n", 2,
                           false));
     // Pause so that all latency timers for the above operations get reported.
-    this_thread::sleep_for(chrono::milliseconds(2));
+    this_thread::sleep_for(timestampGranularity);
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
@@ -214,7 +219,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
     // 1 per edit
-    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2);
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2, /* assertUniqueStartTimes */ true);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
@@ -275,7 +280,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHover) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "query"), 1);
     // 1 per edit
-    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1);
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithHoverAndReturnsErrors) {
@@ -316,7 +321,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithHoverAndReturnsErrors) {
                       {
                           {"foo.rb", 6, "Returning value that does not conform to method result type"},
                       });
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 2);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 2, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPath) {
@@ -358,7 +363,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPath) {
                           {"foo.rb", 9, "Returning value that does not conform to method result type"},
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                       });
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathThatFixesAllErrors) {
@@ -396,7 +401,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathThatFixesAllErrors) {
 
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndThenCancelBoth) {
@@ -445,7 +450,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndThenCancelBoth) {
                       });
 
     auto counters = getCounters();
-    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 6);
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 6, /* assertUniqueStartTimes */ false);
 
     // N.B.: This counter contains canceled edits.
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 6);
@@ -492,7 +497,7 @@ TEST_P(ProtocolTest, CanPreemptSlowPathWithFastPathAndBothErrorsAreReported) {
                           {"bar.rb", 5, "Returning value that does not conform to method result type"},
                           {"baz.rb", 5, "Returning value that does not conform to method result type"},
                       });
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanCancelSlowPathWithFastPathThatReintroducesOldError) {
@@ -539,7 +544,7 @@ TEST_P(ProtocolTest, CanCancelSlowPathWithFastPathThatReintroducesOldError) {
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {{"baz.rb", 5, "Returning value that does not conform to method result type"}});
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanCancelSlowPathEvenIfAddsFile) {
@@ -587,7 +592,7 @@ TEST_P(ProtocolTest, CanCancelSlowPathEvenIfAddsFile) {
     assertDiagnostics(
         send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
         {{"foo.rb", 5, "Returning value that does not conform to method result type"}, {"bar.rb", 6, "unexpected"}});
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5, /* assertUniqueStartTimes */ false);
 }
 
 TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
@@ -615,7 +620,7 @@ TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.messages.canceled", "textDocument.hover"), 1);
     EXPECT_EQ(counters.getTimings("task_latency", {{"method", "textDocument.hover"}}).size(), 0);
-    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 0);
+    checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 0, /* assertUniqueStartTimes */ false);
 }
 
 // Run these tests in multi-threaded mode.
