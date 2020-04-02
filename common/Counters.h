@@ -4,7 +4,6 @@
 #include "common/ConstExprStr.h"
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/spdlog.h"
-#include <chrono>
 #include <string>
 
 namespace sorbet {
@@ -95,7 +94,8 @@ struct FlowId {
     int id;
 };
 
-void timingAdd(ConstExprStr measure, std::chrono::nanoseconds start, std::chrono::nanoseconds end,
+struct microseconds;
+void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
                std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args,
                std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,
                std::unique_ptr<std::vector<int>> histogramBuckets);

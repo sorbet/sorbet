@@ -69,9 +69,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
 
         fmt::format_to(result,
                        "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
-                       e.measure, (std::chrono::duration<double, std::micro>(e.start)).count(),
-                       (std::chrono::duration<double, std::micro>(e.end - e.start)).count(), pid, e.threadId, maybeArgs,
-                       maybeFlow);
+                       e.measure, e.start.usec, e.end.usec - e.start.usec, pid, e.threadId, maybeArgs, maybeFlow);
     }
 
     fmt::format_to(result, "\n");

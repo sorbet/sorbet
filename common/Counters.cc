@@ -4,7 +4,6 @@
 #include "common/formatting.h"
 #include "common/sort.h"
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <iomanip> // set
 #include <sstream>
@@ -209,7 +208,7 @@ givenTags2StoredTags(unique_ptr<vector<pair<ConstExprStr, ConstExprStr>>> given)
     return stored;
 }
 
-void timingAdd(ConstExprStr measure, chrono::nanoseconds start, chrono::nanoseconds end,
+void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
                unique_ptr<vector<pair<ConstExprStr, string>>> args,
                unique_ptr<vector<pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,
                unique_ptr<vector<int>> histogramBuckets) {
@@ -235,7 +234,7 @@ void timingAdd(ConstExprStr measure, chrono::nanoseconds start, chrono::nanoseco
         histogramBuckets->push_back(INT_MAX);
         fast_sort(*histogramBuckets);
 
-        auto msCount = std::chrono::duration<double, std::milli>(end - start).count();
+        auto msCount = (end.usec - start.usec) / 1'000;
         // Find the bucket for this value. The last bucket is INT_MAX, so it's guaranteed to pick one if a histogram
         // is set. If histogramBuckets is empty (which is the common case), then nothing happens.
         for (const auto bucket : *histogramBuckets) {
@@ -391,8 +390,8 @@ string getCounterStatistics(vector<string> names) {
         vector<pair<string, string>> sortedTimings;
         UnorderedMap<string, vector<double>> timings;
         for (const auto &e : counterState.timings) {
-            std::chrono::duration<double, std::milli> durationMs = e.end - e.start;
-            timings[e.measure].emplace_back(durationMs.count());
+            int64_t durationMs = (e.end.usec - e.start.usec) / 1'000;
+            timings[e.measure].emplace_back(durationMs);
         }
         for (const auto &e : timings) {
             if (!shouldShow(names, e.first)) {

@@ -1,15 +1,19 @@
 #ifndef SORBET_TIMER_H
 #define SORBET_TIMER_H
 #include "common/Counters.h"
-#include <chrono>
 #include <memory>
 #include <string>
 #include <thread>
 
 namespace sorbet {
+
+struct microseconds {
+    int64_t usec;
+};
+
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
-          std::initializer_list<std::pair<ConstExprStr, std::string>> args, std::chrono::nanoseconds start,
+          std::initializer_list<std::pair<ConstExprStr, std::string>> args, microseconds start,
           std::initializer_list<int> histogramBuckets);
 
 public:
@@ -67,7 +71,7 @@ private:
     std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags;
     // It would be far better for type safety to store this as a std::chrono::time_point,
     // but we don't know the clock a priori, because it's platform specific.
-    const std::chrono::nanoseconds start;
+    const microseconds start;
     // If not empty, report the time for this timer in the given histogram, where each entry forms an upper bound
     // on a bucket.
     std::unique_ptr<std::vector<int>> histogramBuckets;

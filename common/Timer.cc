@@ -2,14 +2,21 @@
 using namespace std;
 namespace sorbet {
 
-chrono::nanoseconds clock_gettime_coarse() {
+microseconds clock_gettime_coarse() {
     timespec tp;
+#ifdef __linux__
+    // This is faster, as measured via the benchmark here:
+    // https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
+    // but is not portable.
     clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
-    return chrono::nanoseconds(tp.tv_nsec);
+#else
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+#endif
+    return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
 }
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
-             chrono::nanoseconds start, initializer_list<int> histogramBuckets)
+             microseconds start, initializer_list<int> histogramBuckets)
     : log(log), name(name), prev(prev), self{0}, start(start) {
     if (args.size() != 0) {
         this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
@@ -110,11 +117,12 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
-    auto dur = clock - start;
-    if (!canceled && dur > chrono::nanoseconds(chrono::milliseconds(1))) {
+    auto dur = microseconds{clock.usec - start.usec};
+    auto threshold = microseconds{1'000}; // 1ms
+    if (!canceled && dur.usec > threshold.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
-        auto dur = chrono::duration<double, milli>(clock - start);
-        log.debug("{}: {}ms", this->name.str, dur.count());
+        auto durMs = (clock.usec - start.usec) / 1'000;
+        log.debug("{}: {}ms", this->name.str, durMs);
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }
