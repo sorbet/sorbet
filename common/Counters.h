@@ -46,6 +46,12 @@ namespace test::lsp {
 class CounterStateDatabase;
 }
 
+// We are explicitly not using <chrono> in this file, because we profiled it and realized that
+// using its abstractions for computing on and gathering times were a substantial overhead.
+struct microseconds {
+    int64_t usec;
+};
+
 struct CounterState {
     CounterState();
     ~CounterState();
@@ -94,7 +100,6 @@ struct FlowId {
     int id;
 };
 
-struct microseconds;
 void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
                std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args,
                std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,

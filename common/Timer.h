@@ -7,12 +7,6 @@
 
 namespace sorbet {
 
-// We are explicitly not using <chrono> in this file, because we profiled it and realized that
-// using its abstractions for computing on and gathering times were a substantial overhead.
-struct microseconds {
-    int64_t usec;
-};
-
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args, microseconds start,
