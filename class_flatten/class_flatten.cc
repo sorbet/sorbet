@@ -65,6 +65,14 @@ public:
         classStack.emplace_back(classes.size());
         classes.emplace_back();
 
+        return classDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        ENFORCE(!classStack.empty());
+        ENFORCE(classes.size() > classStack.back());
+        ENFORCE(classes[classStack.back()] == nullptr);
+
         auto inits = extractClassInit(ctx, classDef);
 
         core::SymbolRef sym;
@@ -99,14 +107,8 @@ public:
 
         classDef->rhs.emplace_back(std::move(init));
 
-        return classDef;
-    }
-
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        ENFORCE(!classStack.empty());
-        ENFORCE(classes.size() > classStack.back());
-        ENFORCE(classes[classStack.back()] == nullptr);
-
+        // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
+        // available to the containing static-init
         auto defn = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
 
         classes[classStack.back()] = std::move(classDef);
