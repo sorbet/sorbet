@@ -111,6 +111,59 @@ module Enumerable
   end
   def collect_concat(&blk); end
 
+  # Enumerates over the items, chunking them together based on the return value of the block.
+  # Consecutive elements which return the same block value are chunked together.
+  # For example, consecutive even numbers and odd numbers can be chunked as follows.
+  #
+  # ```ruby
+  # [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5].chunk { |n|
+  #   n.even?
+  # }.each { |even, ary|
+  #   p [even, ary]
+  # }
+  # ```
+  #
+  # This method is especially useful for sorted series of elements. The
+  # following example counts words for each initial letter.
+  #
+  # ```ruby
+  # open("/usr/share/dict/words", "r:iso-8859-1") { |f|
+  #   f.chunk { |line| line.ord }.each { |ch, lines| p [ch.chr, lines.length] }
+  # }
+  # ```
+  #
+  sig do
+    type_parameters(:U)
+      .params(blk: T.proc.params(elt: Elem).returns(T.type_parameter(:U)))
+      .returns(T::Enumerable[[T.type_parameter(:U), T::Array[Elem]]])
+  end
+  sig { returns(T::Enumerator[Elem]) }
+  def chunk(&blk); end
+
+  # Creates an enumerator for each chunked elements. The beginnings of chunks are defined by the block.
+  # This method split each chunk using adjacent elements, _elt\_before_ and _elt\_after_, in the receiver enumerator. This method split chunks between _elt\_before_ and _elt\_after_ where the block returns `false`.
+  # The block is called the length of the receiver enumerator minus one.
+  # The result enumerator yields the chunked elements as an array. So `each` method can be called as follows:
+  #
+  # ```ruby
+  # enum.chunk_while { |elt_before, elt_after| bool }.each { |ary| ... }
+  # ```
+  #
+  # Increasing (non-decreasing) subsequence can be chunked as follows:
+  #
+  # ```ruby
+  # a = [0, 9, 2, 2, 3, 2, 7, 5, 9, 5]
+  # p a.chunk_while {|i, j| i <= j }.to_a
+  # #=> [[0, 9], [2, 2, 3], [2, 7], [5, 9], [5]]
+  # ```
+  #
+  # [`Enumerable#slice_when`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-slice_when) does the same, except splitting when the block returns `true` instead of `false`.
+  sig {
+    params(blk: T.proc.params(elt_before: Elem, elt_after: Elem).returns(T::Boolean))
+    .returns(T::Enumerable[T::Array[Elem]])
+  }
+  def chunk_while(&blk); end
+
   # Returns the number of items in `enum` through enumeration. If an argument is
   # given, the number of items in `enum` that are equal to `item` are counted.
   # If a block is given, it counts the number of elements yielding a true value.
