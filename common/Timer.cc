@@ -2,12 +2,14 @@
 using namespace std;
 namespace sorbet {
 
+// We are using clock_gettime instead of similar APIs from the C++ <chrono> library,
+// because this was measured to make timers noticably faster.
+//
+// https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
 microseconds clock_gettime_coarse() {
     timespec tp;
 #ifdef __linux__
-    // This is faster, as measured via the benchmark here:
-    // https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
-    // but is not portable.
+    // This is faster, as measured via the benchmark above, but is not portable.
     clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
 #else
     clock_gettime(CLOCK_MONOTONIC, &tp);
