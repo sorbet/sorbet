@@ -381,7 +381,7 @@ class CSV < Object
   #
   # The `:row_sep` `option` defaults to `$INPUT_RECORD_SEPARATOR`
   # (`$/`) when calling this method.
-  sig { params(row: T::Array[String], options: T.untyped).returns(String) }
+  sig { params(row: T::Array[T.nilable(String)], options: T.untyped).returns(String) }
   def self.generate_line(row, **options); end
 end
 
