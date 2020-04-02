@@ -89,7 +89,7 @@ public:
         ENFORCE(it != refMap.end());
         def.defining_ref = it->second;
         refs[it->second.id()].is_defining_ref = true;
-        refs[it->second.id()].definitionLoc = original->loc;
+        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original->loc);
 
         auto ait = original->ancestors.begin();
         if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
@@ -166,11 +166,11 @@ public:
             ref.nesting.pop_back();
             ref.scope = nesting.back();
         }
-        ref.loc = original->loc;
+        ref.loc = core::Loc(ctx.file, original->loc);
 
         // This will get overridden if this loc is_defining_ref at the point
         // where we set that flag.
-        ref.definitionLoc = original->loc;
+        ref.definitionLoc = core::Loc(ctx.file, original->loc);
         ref.name = constantName(ctx, original.get());
         auto sym = original->symbol;
         if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
@@ -208,7 +208,7 @@ public:
         auto &ref = refs[refMap[lhs].id()];
         def.defining_ref = ref.id;
         ref.is_defining_ref = true;
-        ref.definitionLoc = original->loc;
+        ref.definitionLoc = core::Loc(ctx.file, original->loc);
 
         def.defines_behavior = true;
         def.is_empty = false;

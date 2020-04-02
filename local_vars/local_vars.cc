@@ -16,7 +16,7 @@ class LocalNameInserter {
     struct NamedArg {
         core::NameRef name;
         core::LocalVariable local;
-        core::Loc loc;
+        core::LocOffsets loc;
         unique_ptr<ast::Reference> expr;
     };
 
@@ -84,16 +84,14 @@ class LocalNameInserter {
     struct LocalFrame {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
-        core::Loc loc;
         std::optional<u4> oldBlockCounter = nullopt;
         u4 localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;
     };
 
-    LocalFrame &pushBlockFrame(core::Loc loc, bool insideMethod) {
+    LocalFrame &pushBlockFrame(bool insideMethod) {
         auto &frame = scopeStack.emplace_back();
-        frame.loc = loc;
         frame.localId = blockCounter;
         frame.insideBlock = true;
         frame.insideMethod = insideMethod;
@@ -101,25 +99,23 @@ class LocalNameInserter {
         return frame;
     }
 
-    LocalFrame &enterBlock(core::Loc loc) {
+    LocalFrame &enterBlock() {
         // NOTE: the base-case for this being a valid initialization is setup by
         // the `create()` static method.
-        return pushBlockFrame(loc, scopeStack.back().insideMethod);
+        return pushBlockFrame(scopeStack.back().insideMethod);
     }
 
-    LocalFrame &enterMethod(core::Loc loc) {
+    LocalFrame &enterMethod() {
         auto &frame = scopeStack.emplace_back();
-        frame.loc = loc;
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
         blockCounter = 1;
         return frame;
     }
 
-    LocalFrame &enterClass(core::Loc loc) {
+    LocalFrame &enterClass() {
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
-        frame.loc = loc;
         blockCounter = 1;
         return frame;
     }
@@ -183,7 +179,7 @@ class LocalNameInserter {
 
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        enterClass(klass->declLoc);
+        enterClass();
         return klass;
     }
 
@@ -193,7 +189,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterMethod(method->declLoc);
+        enterMethod();
 
         method->args = fillInArgs(nameArgs(ctx, method->args));
         return method;
@@ -212,7 +208,7 @@ public:
                     original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
                 }
             } else {
-                if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
+                if (auto e = ctx.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
                     e.setHeader("`{}` outside of method", "super");
                 }
             }
@@ -223,7 +219,7 @@ public:
 
     unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         auto outerArgs = scopeStack.back().args;
-        auto &frame = enterBlock(blk->loc);
+        auto &frame = enterBlock();
         frame.args = std::move(outerArgs);
         auto &parent = *(scopeStack.end() - 2);
 
@@ -263,12 +259,13 @@ private:
     LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
-        pushBlockFrame(core::Loc::none(), false);
+        pushBlockFrame(false);
     }
 };
 
-ast::ParsedFile LocalVars::run(core::MutableContext ctx, ast::ParsedFile tree) {
+ast::ParsedFile LocalVars::run(core::GlobalState &gs, ast::ParsedFile tree) {
     LocalNameInserter localNameInserter;
+    sorbet::core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
     tree.tree = ast::TreeMap::apply(ctx, localNameInserter, move(tree.tree));
     return tree;
 }

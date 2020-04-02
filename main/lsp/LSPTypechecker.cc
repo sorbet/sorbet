@@ -594,7 +594,7 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
     }
     for (auto &t : indexedCopies) {
         LocalVarSaver localVarSaver;
-        core::Context ctx(gs, core::Symbols::root());
+        core::Context ctx(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, localVarSaver, move(t.tree));
     }
 }
@@ -605,7 +605,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     }
     for (auto &t : indexedCopies) {
         DefLocSaver defLocSaver;
-        core::Context ctx(gs, core::Symbols::root());
+        core::Context ctx(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, defLocSaver, move(t.tree));
     }
 }

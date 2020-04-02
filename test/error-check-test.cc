@@ -33,10 +33,12 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     sorbet::core::UnfreezeNameTable nt(gs);
     sorbet::core::UnfreezeSymbolTable st(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
-    sorbet::core::MutableContext ctx(gs, core::Symbols::root());
-    auto ast = sorbet::parser::Parser::run(gs, "<test input>", "a");
+
+    core::FileRef fileId = gs.enterFile("<test input>", "a");
+    auto ast = sorbet::parser::Parser::run(gs, fileId);
 
     try {
+        sorbet::core::MutableContext ctx(gs, core::Symbols::root(), fileId);
         auto desugared = sorbet::ast::desugar::node2Tree(ctx, move(ast));
     } catch (SorbetException &) {
     }

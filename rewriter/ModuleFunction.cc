@@ -123,7 +123,7 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::run(core::MutableContext ctx
                 if (validAttr) {
                     methodName = nameRef;
                 } else {
-                    if (auto e = ctx.state.beginError(lit->loc, core::errors::Rewriter::BadModuleFunction)) {
+                    if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::BadModuleFunction)) {
                         e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                     }
                 }
@@ -133,11 +133,12 @@ vector<unique_ptr<ast::Expression>> ModuleFunction::run(core::MutableContext ctx
             ast::MethodDef::ARGS_store args;
             args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
             args.emplace_back(std::make_unique<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
-            auto methodDef = ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree());
+            auto methodDef = ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), methodName, std::move(args),
+                                                      ast::MK::EmptyTree());
             methodDef->flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {
-            if (auto e = ctx.state.beginError(arg->loc, core::errors::Rewriter::BadModuleFunction)) {
+            if (auto e = ctx.beginError(arg->loc, core::errors::Rewriter::BadModuleFunction)) {
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }

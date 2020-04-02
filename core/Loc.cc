@@ -11,6 +11,15 @@
 namespace sorbet::core {
 
 using namespace std;
+LocOffsets LocOffsets::join(LocOffsets other) const {
+    if (!this->exists()) {
+        return other;
+    }
+    if (!other.exists()) {
+        return *this;
+    }
+    return LocOffsets{min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos())};
+}
 
 Loc Loc::join(Loc other) const {
     if (!this->exists()) {

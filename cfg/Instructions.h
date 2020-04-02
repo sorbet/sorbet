@@ -86,20 +86,20 @@ class Send final : public Instruction {
 public:
     VariableUseSite recv;
     core::NameRef fun;
-    core::Loc receiverLoc;
+    core::LocOffsets receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
-    InlinedVector<core::Loc, 2> argLocs;
+    InlinedVector<core::LocOffsets, 2> argLocs;
     bool isPrivateOk;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-         const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs,
+    Send(core::LocalVariable recv, core::NameRef fun, core::LocOffsets receiverLoc,
+         const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs,
          bool isPrivateOk = false, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(const core::GlobalState &gs) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 };
-CheckSize(Send, 184, 8);
+CheckSize(Send, 160, 8);
 
 class Return final : public Instruction {
 public:

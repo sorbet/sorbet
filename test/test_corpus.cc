@@ -220,7 +220,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
     }
-    core::MutableContext ctx(*gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
@@ -242,8 +241,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto file : files) {
         errs.emplace_back(*gs, file);
 
-        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
-            file.data(ctx).source().find("# typed:") == string::npos) {
+        if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
+            file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(*gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
         }
         unique_ptr<parser::Node> nodes;
@@ -262,7 +261,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         ast::ParsedFile desugared;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
-            auto file = nodes->loc.file();
+
+            core::MutableContext ctx(*gs, core::Symbols::root(), file);
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
@@ -277,6 +277,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
+                core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
                 rewriten = testSerialize(
                     *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
@@ -284,8 +285,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
             handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
 
+            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
         } else {
+            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
             if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
                 ADD_FAILURE() << "Running Rewriter passes with autogen isn't supported";
@@ -299,7 +302,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(localNamed));
-            vTmp = namer::Namer::run(ctx, move(vTmp));
+            vTmp = namer::Namer::run(*gs, move(vTmp));
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
@@ -314,13 +317,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             core::UnfreezeNameTable nameTableAccess(*gs);
             core::UnfreezeSymbolTable symbolAccess(*gs);
 
-            trees = resolver::Resolver::runConstantResolution(ctx, move(trees), *workers);
+            trees = resolver::Resolver::runConstantResolution(*gs, move(trees), *workers);
         }
         handler.addObserved(
             "autogen",
             [&]() {
                 stringstream payload;
                 for (auto &tree : trees) {
+                    core::Context ctx(*gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree));
                     tree = move(pf.tree);
                     payload << pf.toString(ctx);
@@ -334,7 +338,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     } else {
         core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-        trees = move(resolver::Resolver::run(ctx, move(trees), *workers).result());
+        trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
         handler.drainErrors();
     }
 
@@ -349,12 +353,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
     // distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(ctx).source().size() > rhs.file.data(ctx).source().size();
+        return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
     });
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree.file;
 
+        core::Context ctx(*gs, core::Symbols::root(), file);
         resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
         handler.drainErrors();
 
@@ -365,13 +370,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
-                auto path = file.data(ctx).path();
+                auto path = file.data(*gs).path();
                 ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).strictLevel < core::StrictLevel::True) {
-                auto path = file.data(ctx).path();
+            if (file.data(*gs).strictLevel < core::StrictLevel::True) {
+                auto path = file.data(*gs).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
             }
@@ -382,6 +387,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
+            core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
             auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
@@ -413,9 +419,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(ctx).originalSigil >= core::StrictLevel::True) {
+        if (resolvedTree.tree != nullptr && file.data(*gs).originalSigil >= core::StrictLevel::True) {
             checkTree();
             CFGCollectorAndTyper collector;
+            core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
             ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
@@ -486,7 +493,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
         handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
-        core::MutableContext ctx(*gs, core::Symbols::root());
+        core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
         handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
@@ -504,7 +511,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(file));
-            vTmp = namer::Namer::run(ctx, move(vTmp));
+            vTmp = namer::Namer::run(*gs, move(vTmp));
             file = testSerialize(*gs, move(vTmp[0]));
         }
 
@@ -514,7 +521,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     // resolver
-    trees = resolver::Resolver::runTreePasses(ctx, move(newTrees));
+    trees = resolver::Resolver::runTreePasses(*gs, move(newTrees));
 
     for (auto &resolvedTree : trees) {
         handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
@@ -562,7 +569,6 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     } else {
         core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     }
-    core::MutableContext ctx(gs, core::Symbols::root());
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
@@ -584,8 +590,8 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     for (auto file : files) {
         errs.emplace_back(gs, file);
 
-        if (FileOps::getFileName(file.data(ctx).path()) != whitelistedTypedNoneTest &&
-            file.data(ctx).source().find("# typed:") == string::npos) {
+        if (FileOps::getFileName(file.data(gs).path()) != whitelistedTypedNoneTest &&
+            file.data(gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
         }
         unique_ptr<parser::Node> nodes;

@@ -621,7 +621,7 @@ string fieldType(FieldType arg) {
         case FieldType::Uint:
             return "u4";
         case FieldType::Loc:
-            return "core::Loc";
+            return "core::LocOffsets";
     }
 }
 
@@ -630,7 +630,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << "public:" << '\n';
 
     // generate constructor
-    out << "    " << node.name << "(core::Loc loc";
+    out << "    " << node.name << "(core::LocOffsets loc";
     for (auto &arg : node.fields) {
         out << ", " << fieldType(arg.type) << " " << arg.name;
     }

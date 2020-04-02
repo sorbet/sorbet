@@ -28,8 +28,8 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
     return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
-string_view AutoloaderConfig::normalizePath(core::Context ctx, core::FileRef file) const {
-    auto path = file.data(ctx).path();
+string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
+    auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
         if (absl::StartsWith(path, prefix)) {
             return path.substr(prefix.size());
@@ -61,7 +61,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
-NamedDefinition NamedDefinition::fromDef(const core::Context ctx, ParsedFile &parsedFile, DefinitionRef def) {
+NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile &parsedFile, DefinitionRef def) {
     vector<core::NameRef> parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
         auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);
@@ -71,14 +71,14 @@ NamedDefinition NamedDefinition::fromDef(const core::Context ctx, ParsedFile &pa
             parentName = parentRef.name;
         }
     }
-    const auto &pathStr = parsedFile.tree.file.data(ctx).path();
+    const auto &pathStr = parsedFile.tree.file.data(gs).path();
     u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
-    return {def.data(parsedFile), parsedFile.showFullName(ctx, def),
+    return {def.data(parsedFile), parsedFile.showFullName(gs, def),
             parentName,           parsedFile.requires,
             parsedFile.tree.file, pathDepth};
 }
 
-bool NamedDefinition::preferredTo(core::Context ctx, const NamedDefinition &lhs, const NamedDefinition &rhs) {
+bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
     ENFORCE(lhs.nameParts == rhs.nameParts, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
     // Secondarily, the same idea for defs with less nesting in their path.
@@ -89,30 +89,30 @@ bool NamedDefinition::preferredTo(core::Context ctx, const NamedDefinition &lhs,
     if (lhs.pathDepth != rhs.pathDepth) {
         return lhs.pathDepth < rhs.pathDepth;
     }
-    return lhs.fileRef.data(ctx).path() < rhs.fileRef.data(ctx).path();
+    return lhs.fileRef.data(gs).path() < rhs.fileRef.data(gs).path();
 }
 
-void showHelper(core::Context ctx, fmt::memory_buffer &buf, const DefTree &node, int level) {
-    auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
-    fmt::format_to(buf, "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(ctx),
+void showHelper(const core::GlobalState &gs, fmt::memory_buffer &buf, const DefTree &node, int level) {
+    auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(gs).path(); };
+    fmt::format_to(buf, "{} [{}]\n", node.root() ? "<ROOT>" : node.name().show(gs),
                    fmt::map_join(node.namedDefs, ", ", fileRefToString));
     for (const auto &[name, tree] : node.children) {
         for (int i = 0; i < level; ++i) {
             fmt::format_to(buf, "  ");
         }
-        showHelper(ctx, buf, *tree, level + 1);
+        showHelper(gs, buf, *tree, level + 1);
     }
 }
 
-string DefTree::show(core::Context ctx, int level) const {
+string DefTree::show(const core::GlobalState &gs, int level) const {
     fmt::memory_buffer buf;
-    showHelper(ctx, buf, *this, 0);
+    showHelper(gs, buf, *this, 0);
     return to_string(buf);
 }
 
-string DefTree::fullName(core::Context ctx) const {
+string DefTree::fullName(const core::GlobalState &gs) const {
     return fmt::format("{}",
-                       fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(ctx); }));
+                       fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
 }
 
 string join(string path, string file) {
@@ -170,7 +170,7 @@ core::NameRef DefTree::name() const {
     return nameParts.back();
 }
 
-string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alCfg) const {
+string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
 
@@ -181,29 +181,29 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
         definingFile = file();
     }
     if (definingFile.exists()) {
-        requires(ctx, alCfg, buf);
+        requires(gs, alCfg, buf);
     }
 
     string fullName = "nil";
     string casgnArg;
-    auto type = definitionType(ctx);
+    auto type = definitionType(gs);
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
         fullName = root() ? "Object" : fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string {
-                                                       return nr.show(ctx);
+                                                       return nr.show(gs);
                                                    }));
         if (!root()) {
             fmt::format_to(buf, "Opus::Require.on_autoload('{}')\n", fullName);
-            predeclare(ctx, fullName, buf);
+            predeclare(gs, fullName, buf);
         }
         if (!children.empty()) {
             fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
             vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
-                           [ctx](const auto &pair) { return make_pair(pair.first, pair.first.show(ctx)); });
+                           [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
             fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
             for (const auto &pair : childNames) {
                 fmt::format_to(buf, "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
-                               children.at(pair.first)->path(ctx));
+                               children.at(pair.first)->path(gs));
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
@@ -211,26 +211,26 @@ string DefTree::renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &alC
         ENFORCE(nameParts.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
                                fmt::map_join(nameParts.begin(), --nameParts.end(),
-                                             "::", [&](const auto &nr) -> string { return nr.show(ctx); }),
-                               nameParts.back().show(ctx));
+                                             "::", [&](const auto &nr) -> string { return nr.show(gs); }),
+                               nameParts.back().show(gs));
     }
 
     if (definingFile.exists()) {
         fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\"{})\n", fullName,
-                       alCfg.normalizePath(ctx, definingFile), casgnArg);
+                       alCfg.normalizePath(gs, definingFile), casgnArg);
     }
     return to_string(buf);
 }
 
-void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) const {
+void DefTree::requires(const core::GlobalState &gs, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) const {
     if (root() || !hasDef()) {
         return;
     }
-    auto &ndef = definition(ctx);
+    auto &ndef = definition(gs);
     vector<string> reqs;
     for (auto reqRef : ndef.requires) {
         if (alCfg.includeRequire(reqRef)) {
-            string req = reqRef.show(ctx);
+            string req = reqRef.show(gs);
             reqs.emplace_back(req);
         }
     }
@@ -241,13 +241,13 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
     }
 }
 
-void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) const {
-    if (hasDef() && definitionType(ctx) == Definition::Type::Class) {
+void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt::memory_buffer &buf) const {
+    if (hasDef() && definitionType(gs) == Definition::Type::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
-        auto &def = definition(ctx);
+        auto &def = definition(gs);
         if (!def.parentName.empty()) {
             fmt::format_to(buf, " < {}",
-                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
+                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
         }
     } else {
         fmt::format_to(buf, "\nmodule {}", fullName);
@@ -256,34 +256,34 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
     fmt::format_to(buf, "\nend\n");
 }
 
-string DefTree::path(core::Context ctx) const {
-    auto toPath = [&](const auto &fr) -> string { return fr.show(ctx); };
+string DefTree::path(const core::GlobalState &gs) const {
+    auto toPath = [&](const auto &fr) -> string { return fr.show(gs); };
     return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
 }
 
-Definition::Type DefTree::definitionType(core::Context ctx) const {
+Definition::Type DefTree::definitionType(const core::GlobalState &gs) const {
     if (!hasDef()) {
         return Definition::Type::Module;
     }
-    return definition(ctx).def.type;
+    return definition(gs).def.type;
 }
 
 bool DefTree::hasDef() const {
     return (nonBehaviorDef != nullptr) || !namedDefs.empty();
 }
 
-const NamedDefinition &DefTree::definition(core::Context ctx) const {
+const NamedDefinition &DefTree::definition(const core::GlobalState &gs) const {
     if (!namedDefs.empty()) {
-        ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", fullName(ctx),
+        ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", fullName(gs),
                 namedDefs.size());
         return namedDefs[0];
     } else {
-        ENFORCE(nonBehaviorDef != nullptr, "Could not find any definitions for '{}'", fullName(ctx));
+        ENFORCE(nonBehaviorDef != nullptr, "Could not find any definitions for '{}'", fullName(gs));
         return *nonBehaviorDef;
     }
 }
 
-void DefTreeBuilder::addParsedFileDefinitions(core::Context ctx, const AutoloaderConfig &alConfig,
+void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const AutoloaderConfig &alConfig,
                                               std::unique_ptr<DefTree> &root, ParsedFile &pf) {
     ENFORCE(root->root());
     if (!alConfig.includePath(pf.path)) {
@@ -293,12 +293,12 @@ void DefTreeBuilder::addParsedFileDefinitions(core::Context ctx, const Autoloade
         if (def.id.id() == 0) {
             continue;
         }
-        addSingleDef(ctx, alConfig, root, NamedDefinition::fromDef(ctx, pf, def.id));
+        addSingleDef(gs, alConfig, root, NamedDefinition::fromDef(gs, pf, def.id));
     }
 }
 
-void DefTreeBuilder::addSingleDef(core::Context ctx, const AutoloaderConfig &alCfg, std::unique_ptr<DefTree> &root,
-                                  NamedDefinition ndef) {
+void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                  std::unique_ptr<DefTree> &root, NamedDefinition ndef) {
     if (!alCfg.include(ndef)) {
         return;
     }
@@ -315,40 +315,40 @@ void DefTreeBuilder::addSingleDef(core::Context ctx, const AutoloaderConfig &alC
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));
     } else {
-        updateNonBehaviorDef(ctx, *node, move(ndef));
+        updateNonBehaviorDef(gs, *node, move(ndef));
     }
 }
 
-DefTree DefTreeBuilder::merge(core::Context ctx, DefTree lhs, DefTree rhs) {
+DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
     ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     if (rhs.nonBehaviorDef) {
-        updateNonBehaviorDef(ctx, lhs, move(*rhs.nonBehaviorDef.get()));
+        updateNonBehaviorDef(gs, lhs, move(*rhs.nonBehaviorDef.get()));
     }
     for (auto &[rname, rchild] : rhs.children) {
         auto lchild = lhs.children.find(rname);
         if (lchild == lhs.children.end()) {
             lhs.children[rname] = move(rchild);
         } else {
-            lhs.children[rname] = make_unique<DefTree>(merge(ctx, move(*lchild->second), move(*rchild)));
+            lhs.children[rname] = make_unique<DefTree>(merge(gs, move(*lchild->second), move(*rchild)));
         }
     }
     return lhs;
 }
 
-void DefTreeBuilder::updateNonBehaviorDef(core::Context ctx, DefTree &node, NamedDefinition ndef) {
+void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef) {
     if (!node.namedDefs.empty()) {
         // Non behavior-defining definitions do not matter for nodes that have behavior. There is no
         // need to continue tracking it.
         return;
     }
-    if ((node.nonBehaviorDef == nullptr) || NamedDefinition::preferredTo(ctx, ndef, *node.nonBehaviorDef)) {
+    if ((node.nonBehaviorDef == nullptr) || NamedDefinition::preferredTo(gs, ndef, *node.nonBehaviorDef)) {
         node.nonBehaviorDef = make_unique<NamedDefinition>(move(ndef));
     }
 }
 
-void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderConfig &alCfg, DefTree &root) {
+void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &alCfg, DefTree &root) {
     core::FileRef definingFile;
     if (!root.namedDefs.empty()) {
         definingFile = root.file();
@@ -360,31 +360,31 @@ void DefTreeBuilder::collapseSameFileDefs(core::Context ctx, const AutoloaderCon
     for (auto it = root.children.begin(); it != root.children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
-            collapseSameFileDefs(ctx, alCfg, *child);
+            collapseSameFileDefs(gs, alCfg, *child);
         } else {
             root.children.erase(it);
         }
     }
 }
 
-void AutoloadWriter::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, const std::string &path,
+void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path,
                                     const DefTree &root) {
     UnorderedSet<string> toDelete; // Remove from this set as we write files
     if (FileOps::exists(path)) {
         vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
         toDelete.insert(make_move_iterator(existingFiles.begin()), make_move_iterator(existingFiles.end()));
     }
-    write(ctx, alCfg, path, toDelete, root);
+    write(gs, alCfg, path, toDelete, root);
     for (const auto &file : toDelete) {
         FileOps::removeFile(file);
     }
 }
 
-void AutoloadWriter::write(core::Context ctx, const AutoloaderConfig &alCfg, const std::string &path,
+void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path,
                            UnorderedSet<std::string> &toDelete, const DefTree &node) {
-    string name = node.root() ? "root" : node.name().show(ctx);
+    string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(ctx, alCfg));
+    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
@@ -392,7 +392,7 @@ void AutoloadWriter::write(core::Context ctx, const AutoloaderConfig &alCfg, con
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            write(ctx, alCfg, subdir, toDelete, *child);
+            write(gs, alCfg, subdir, toDelete, *child);
         }
     }
 }

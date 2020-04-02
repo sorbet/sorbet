@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 namespace sorbet::ast {
 struct ParsedArg {
-    core::Loc loc;
+    core::LocOffsets loc;
     core::LocalVariable local;
     std::unique_ptr<ast::Expression> default_;
     bool keyword = false;

@@ -99,7 +99,7 @@ struct Path {
 
     void setType(core::GlobalState &gs, core::TypePtr tp) {
         if (myType) {
-            myType = core::Types::any(core::MutableContext(gs, core::Symbols::root()), myType, tp);
+            myType = core::Types::any(gs, myType, tp);
         } else {
             myType = tp;
         }
@@ -145,8 +145,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
             for (const auto &child : node) {
                 auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::untypedUntracked();
                 if (elemType) {
-                    elemType =
-                        core::Types::any(core::MutableContext(gs, core::Symbols::root()), elemType, thisElemType);
+                    elemType = core::Types::any(gs, elemType, thisElemType);
                 } else {
                     elemType = thisElemType;
                 }

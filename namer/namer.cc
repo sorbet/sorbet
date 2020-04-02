@@ -32,7 +32,7 @@ class NameInserter {
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                    if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
                 }
@@ -42,7 +42,7 @@ class NameInserter {
             } else if (node->isSelfReference()) {
                 // self::Foo
             } else {
-                if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                     e.setHeader("Dynamic constant references are unsupported");
                 }
             }
@@ -54,7 +54,7 @@ class NameInserter {
         core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
         if (!existing.exists()) {
             if (!newOwner.data(ctx)->isClassOrModule()) {
-                if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
+                if (auto e = ctx.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = constLit->cnst.data(ctx)->show(ctx);
                     auto newOwnerName = newOwner.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
@@ -64,7 +64,7 @@ class NameInserter {
                 node = ast::MK::EmptyTree();
                 return owner;
             }
-            existing = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
+            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, constLit->loc), newOwner, constLit->cnst);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -82,7 +82,7 @@ class NameInserter {
                 localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
             }
 
-            ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
+            ctx.owner.data(ctx)->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
             return move(localExpr);
         }
 
@@ -96,7 +96,7 @@ class NameInserter {
         }
         // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        auto &argInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
@@ -153,14 +153,14 @@ class NameInserter {
         }
 
         if (send->args.empty()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
                 e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
             }
             return;
         }
 
         if (send->block != nullptr) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
                 e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
             }
             return;
@@ -179,7 +179,7 @@ class NameInserter {
             if (isValidAncestor(arg.get())) {
                 dest->emplace_back(arg->deepCopy());
             } else {
-                if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
+                if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
@@ -234,7 +234,7 @@ public:
                 if (klassSymbol.exists()) {
                     klass->symbol = klassSymbol;
                 } else {
-                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    if (auto e = ctx.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                         e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
                         e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
                     }
@@ -266,7 +266,7 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
                 auto renamed = ctx.state.findRenamedSymbol(klass->symbol.data(ctx)->owner, klass->symbol);
                 if (renamed.exists()) {
-                    if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    if (auto e = ctx.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                         e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
                         e.addErrorLine(renamed.data(ctx)->loc(), "Previous definition");
                     }
@@ -291,8 +291,8 @@ public:
             klass->symbol.data(ctx)->setClassSealed();
 
             auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
-            auto sealedSubclasses =
-                ctx.state.enterMethodSymbol(send->loc, classOfKlass, core::Names::sealedSubclasses());
+            auto sealedSubclasses = ctx.state.enterMethodSymbol(core::Loc(ctx.file, send->loc), classOfKlass,
+                                                                core::Names::sealedSubclasses());
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -308,9 +308,9 @@ public:
         if (send->fun == core::Names::declareInterface()) {
             klass->symbol.data(ctx)->setClassInterface();
             if (klass->kind == ast::ClassDef::Kind::Class) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
-                    e.replaceWith("Change `interface!` to `abstract!`", send->loc, "abstract!");
+                    e.replaceWith("Change `interface!` to `abstract!`", core::Loc(ctx.file, send->loc), "abstract!");
                 }
             }
         }
@@ -353,7 +353,7 @@ public:
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass->ancestors) {
                 if (!isValidAncestor(anc.get())) {
-                    if (auto e = ctx.state.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
+                    if (auto e = ctx.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
@@ -371,9 +371,9 @@ public:
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (klass->symbol == core::Symbols::root()) {
-            ctx.state.staticInitForFile(klass->loc);
+            ctx.state.staticInitForFile(core::Loc(ctx.file, klass->loc));
         } else {
-            ctx.state.staticInitForClass(klass->symbol, klass->loc);
+            ctx.state.staticInitForClass(klass->symbol, core::Loc(ctx.file, klass->loc));
         }
 
         if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
@@ -396,7 +396,7 @@ public:
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
-        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
+        return ast::MK::InsSeq(loc.offsets(), std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
@@ -710,7 +710,7 @@ public:
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
-            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
+            if (auto e = ctx.beginError(asgn->loc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
@@ -719,7 +719,7 @@ public:
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);
         if (!scope.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidClassOwner)) {
+            if (auto e = ctx.beginError(asgn->loc, core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = lhs->cnst.data(ctx)->show(ctx);
                 auto scopeName = scope.data(ctx)->show(ctx);
                 e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
@@ -729,7 +729,7 @@ public:
             // Mangle this one out of the way, and re-enter a symbol with this name as a class.
             auto scopeName = scope.data(ctx)->name;
             ctx.state.mangleRenameSymbol(scope, scopeName);
-            scope = ctx.state.enterClassSymbol(lhs->scope->loc, scope.data(ctx)->owner, scopeName);
+            scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, lhs->scope->loc), scope.data(ctx)->owner, scopeName);
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -737,9 +737,9 @@ public:
         auto currSym = ctx.state.lookupSymbol(scope, lhs->cnst);
         auto name = sym.exists() ? sym.data(ctx)->name : lhs->cnst;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
-                e.addErrorLine(asgn->loc, "Previous definition");
+                e.addErrorLine(core::Loc(ctx.file, asgn->loc), "Previous definition");
             }
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
@@ -750,11 +750,11 @@ public:
             if (renamedSym.exists()) {
                 if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(asgn->loc, "Previous definition");
+                    e.addErrorLine(core::Loc(ctx.file, asgn->loc), "Previous definition");
                 }
             }
         }
-        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, name);
+        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, lhs->loc), scope, name);
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
@@ -770,13 +770,13 @@ public:
         core::Variance variance = core::Variance::Invariant;
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
         if (!ctx.owner.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }
             return ast::MK::EmptyTree();
         }
         if (ctx.owner == core::Symbols::root()) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
             auto send = ast::MK::Send0Block(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
@@ -788,7 +788,7 @@ public:
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
         if (!send->args.empty()) {
             if (send->args.size() > 2) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
                 auto send = ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
@@ -808,7 +808,7 @@ public:
                 } else if (name == core::Names::invariant()) {
                     variance = core::Variance::Invariant;
                 } else {
-                    if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    if (auto e = ctx.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",
                                     ":" + core::Names::covariant().show(ctx),
                                     ":" + core::Names::contravariant().show(ctx));
@@ -816,7 +816,7 @@ public:
                 }
             } else {
                 if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Invalid param, must be a :symbol");
                     }
                 }
@@ -828,15 +828,15 @@ public:
         if (existingTypeMember.exists()) {
             // if we already have a type member but it was constructed in a different file from the one we're looking
             // at, then we need to raise an error
-            if (existingTypeMember.data(ctx)->loc().file() != asgn->loc.file()) {
-                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
+                if (auto e = ctx.beginError(asgn->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
-                    e.addErrorLine(asgn->loc, "Also defined here");
+                    e.addErrorLine(core::Loc(ctx.file, asgn->loc), "Also defined here");
                 }
             }
 
@@ -845,7 +845,7 @@ public:
             // error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
@@ -858,13 +858,13 @@ public:
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
-            sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+            sym = ctx.state.enterTypeMember(core::Loc(ctx.file, asgn->loc), onSymbol, typeName->cnst, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -873,15 +873,15 @@ public:
             if (isTypeTemplate) {
                 auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
-                if (oldSym.exists() &&
-                    !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, asgn->loc) ||
+                                         oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                    if (auto e = ctx.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
                         e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
                         e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                     }
                     ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
                 }
-                auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
+                auto alias = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, asgn->loc), context, typeName->cnst);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
             }
         }
@@ -921,11 +921,11 @@ public:
                     return asgn;
                 } else if (fixed) {
                     // both fixed and bounds were specified
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Type member is defined with bounds and `{}`", "fixed");
                     }
                 } else {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Missing required param `{}`", "fixed");
                     }
                 }
@@ -986,20 +986,21 @@ private:
     UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
 
-std::vector<ast::ParsedFile> Namer::run(core::MutableContext ctx, std::vector<ast::ParsedFile> trees) {
+std::vector<ast::ParsedFile> Namer::run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees) {
     NameInserter nameInserter;
     for (auto &tree : trees) {
         auto file = tree.file;
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
         try {
             ast::ParsedFile ast;
             {
-                Timer timeit(ctx.state.tracer(), "naming", {{"file", (string)file.data(ctx).path()}});
+                Timer timeit(gs.tracer(), "naming", {{"file", (string)file.data(gs).path()}});
                 core::ErrorRegion errs(ctx, file);
                 tree.tree = ast::ShallowMap::apply(ctx, nameInserter, std::move(tree.tree));
             }
         } catch (SorbetException &) {
             Exception::failInFuzzer();
-            if (auto e = ctx.state.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
                 e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(ctx).path());
             }
         }

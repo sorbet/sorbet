@@ -40,7 +40,7 @@ bool isTStruct(ast::Expression *expr) {
 
 struct PropInfo {
     core::NameRef name;
-    core::Loc loc;
+    core::LocOffsets loc;
     unique_ptr<ast::Expression> type;
     optional<unique_ptr<ast::Expression>> default_;
 };
@@ -55,10 +55,10 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
     core::NameRef name = core::NameRef::noName();
-    core::Loc nameLoc;
+    core::LocOffsets nameLoc;
 
     core::NameRef computedByMethodName = core::NameRef::noName();
-    core::Loc computedByMethodNameLoc;
+    core::LocOffsets computedByMethodNameLoc;
 
     switch (send->fun._id) {
         case core::Names::prop()._id:
@@ -70,23 +70,24 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         case core::Names::tokenProp()._id:
         case core::Names::timestampedTokenProp()._id:
             name = core::Names::token();
-            nameLoc =
-                core::Loc(send->loc.file(),
-                          send->loc.beginPos() + (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
-                          send->loc.endPos() - 5); // get the 'token' part of it
+            nameLoc = core::LocOffsets{send->loc.beginPos() +
+                                           (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
+                                       send->loc.endPos() - 5}; // get the 'token' part of it
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::createdProp()._id:
             name = core::Names::created();
-            nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
-                                send->loc.endPos() - 5); // 5 is the difference between `created_prop` and `created`
+            nameLoc =
+                core::LocOffsets{send->loc.beginPos(),
+                                 send->loc.endPos() - 5}; // 5 is the difference between `created_prop` and `created`
             type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchantProp()._id:
             isImmutable = true;
             name = core::Names::merchant();
-            nameLoc = core::Loc(send->loc.file(), send->loc.beginPos(),
-                                send->loc.endPos() - 5); // 5 is the difference between `merchant_prop` and `merchant`
+            nameLoc =
+                core::LocOffsets{send->loc.beginPos(),
+                                 send->loc.endPos() - 5}; // 5 is the difference between `merchant_prop` and `merchant`
             type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
 
@@ -105,8 +106,9 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             return std::nullopt;
         }
         name = sym->asSymbol(ctx);
-        ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
-        nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
+        ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() &&
+                core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+        nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 
     if (type == nullptr) {
@@ -225,9 +227,10 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                 if (auto body = ASTUtil::thunkBody(ctx, foreign.get())) {
                     foreign = std::move(body);
                 } else {
-                    if (auto e = ctx.state.beginError(foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                    if (auto e = ctx.beginError(foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
                         e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                        e.replaceWith("Convert to lambda", foreign->loc, "-> {{{}}}", foreign->loc.source(ctx));
+                        e.replaceWith("Convert to lambda", core::Loc(ctx.file, foreign->loc), "-> {{{}}}",
+                                      core::Loc(ctx.file, foreign->loc).source(ctx));
                     }
                 }
             }
@@ -246,9 +249,9 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                                                  computedByMethodName, std::move(unsafeNil));
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
-        ret.nodes.emplace_back(ASTUtil::mkGet(loc, name, std::move(assertTypeMatches)));
+        ret.nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, std::move(assertTypeMatches)));
     } else {
-        ret.nodes.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, std::move(getType))));
+        ret.nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::Cast(loc, std::move(getType))));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -259,7 +262,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         ret.nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        ret.nodes.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        ret.nodes.emplace_back(
+            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
     }
 
     // Compute the `_` foreign accessor
@@ -287,8 +291,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+        ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethod, std::move(arg),
+                                                         ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         ret.nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -301,7 +305,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
+        ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethodBang, std::move(arg2),
                                                          ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
     }
 
@@ -313,7 +317,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        rhs.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        rhs.emplace_back(
+            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
@@ -344,11 +349,11 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
         if (mutator.get()) {
             rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
-            rhs.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, std::move(mutator))));
+            rhs.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::Cast(loc, std::move(mutator))));
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();
-            ret.nodes.emplace_back(ast::MK::Class(loc, loc,
+            ret.nodes.emplace_back(ast::MK::Class(loc, core::Loc(ctx.file, loc),
                                                   ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
                                                   std::move(ancestors), std::move(rhs)));
         }
@@ -418,8 +423,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
         auto loc = klass->loc;
         klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
-        klass->rhs.emplace_back(
-            ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(args), ast::MK::EmptyTree()));
+        klass->rhs.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
+                                                         std::move(args), ast::MK::EmptyTree()));
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {

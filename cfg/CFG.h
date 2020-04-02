@@ -27,7 +27,7 @@ public:
     VariableUseSite cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
-    core::Loc loc;
+    core::LocOffsets loc;
     bool isCondSet() {
         return cond.variable._name.id() >= 0;
     }
@@ -37,11 +37,11 @@ public:
 class Binding final {
 public:
     VariableUseSite bind;
-    core::Loc loc;
+    core::LocOffsets loc;
 
     std::unique_ptr<Instruction> value;
 
-    Binding(core::LocalVariable bind, core::Loc loc, std::unique_ptr<Instruction> value);
+    Binding(core::LocalVariable bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
@@ -84,6 +84,7 @@ public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
+    core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
      *

@@ -7,7 +7,7 @@ namespace sorbet::local_vars {
 
 class LocalVars final {
 public:
-    static ast::ParsedFile run(core::MutableContext ctx, ast::ParsedFile tree);
+    static ast::ParsedFile run(core::GlobalState &gs, ast::ParsedFile tree);
 
     LocalVars() = delete;
 };

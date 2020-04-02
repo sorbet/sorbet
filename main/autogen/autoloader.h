@@ -18,7 +18,7 @@ struct AutoloaderConfig {
     // Should definitions in this namespace be collapsed into their
     // parent if they all are from the same file?
     bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
-    std::string_view normalizePath(core::Context ctx, core::FileRef file) const;
+    std::string_view normalizePath(const core::GlobalState &gs, core::FileRef file) const;
 
     std::string rootDir;
     std::string preamble;
@@ -37,8 +37,8 @@ struct AutoloaderConfig {
 };
 
 struct NamedDefinition {
-    static NamedDefinition fromDef(const core::Context, ParsedFile &, DefinitionRef);
-    static bool preferredTo(core::Context, const NamedDefinition &lhs, const NamedDefinition &rhs);
+    static NamedDefinition fromDef(const core::GlobalState &, ParsedFile &, DefinitionRef);
+    static bool preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs);
 
     Definition def;
     std::vector<core::NameRef> nameParts;
@@ -69,11 +69,11 @@ public:
 
     bool root() const;
     core::NameRef name() const;
-    std::string path(core::Context ctx) const;
-    std::string show(core::Context ctx, int level = 0) const; // Render the entire tree
-    std::string fullName(core::Context) const;
+    std::string path(const core::GlobalState &gs) const;
+    std::string show(const core::GlobalState &gs, int level = 0) const; // Render the entire tree
+    std::string fullName(const core::GlobalState &) const;
 
-    std::string renderAutoloadSrc(core::Context ctx, const AutoloaderConfig &) const;
+    std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -83,12 +83,12 @@ public:
 
 private:
     core::FileRef file() const;
-    void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf) const;
-    void requires(core::Context ctx, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
+    void predeclare(const core::GlobalState &gs, std::string_view fullName, fmt::memory_buffer &buf) const;
+    void requires(const core::GlobalState &gs, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
-    const NamedDefinition &definition(core::Context) const;
-    Definition::Type definitionType(core::Context) const;
+    const NamedDefinition &definition(const core::GlobalState &) const;
+    Definition::Type definitionType(const core::GlobalState &) const;
 
     friend class DefTreeBuilder;
 };
@@ -96,24 +96,25 @@ private:
 class DefTreeBuilder {
 public:
     // Add all definitions in a parsed file to a `DefTree` root.
-    static void addParsedFileDefinitions(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
-                                         ParsedFile &);
-    static void addSingleDef(core::Context, const AutoloaderConfig &, std::unique_ptr<DefTree> &root, NamedDefinition);
+    static void addParsedFileDefinitions(const core::GlobalState &, const AutoloaderConfig &,
+                                         std::unique_ptr<DefTree> &root, ParsedFile &);
+    static void addSingleDef(const core::GlobalState &, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
+                             NamedDefinition);
 
-    static DefTree merge(core::Context, DefTree lhs, DefTree rhs);
-    static void collapseSameFileDefs(core::Context, const AutoloaderConfig &, DefTree &root);
+    static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
+    static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
-    static void updateNonBehaviorDef(core::Context, DefTree &node, NamedDefinition ndef);
+    static void updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef);
 };
 
 class AutoloadWriter {
 public:
-    static void writeAutoloads(core::Context ctx, const AutoloaderConfig &, const std::string &path,
+    static void writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                                const DefTree &root);
 
 private:
-    static void write(core::Context ctx, const AutoloaderConfig &, const std::string &path,
+    static void write(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                       UnorderedSet<std::string> &toDelete, const DefTree &node);
 };
 

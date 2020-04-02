@@ -289,9 +289,8 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     auto &blkArg = method.data(gs)->arguments().back();
     ENFORCE(blkArg.flags.isBlock);
 
-    auto ctx = core::Context{gs, core::Symbols::root()};
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type->isUntyped();
-    if (hasBlockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blkArg.type)) {
+    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
         string blkArgs;
         if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type.get())) {
             if (appliedType->targs.size() >= 2) {
@@ -466,8 +465,8 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
 
     // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
     LocalVarFinder localVarFinder(method);
-    auto ctx = core::Context{gs, core::Symbols::root()};
     for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
     }
 
@@ -493,8 +492,8 @@ core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const
     auto resolved = typechecker.getResolved(files);
 
     NextMethodFinder nextMethodFinder(queryLoc);
-    auto ctx = core::Context{gs, core::Symbols::root()};
     for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, nextMethodFinder, move(t.tree));
     }
 

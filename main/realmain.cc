@@ -171,7 +171,7 @@ struct AutogenResult {
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
-void runAutogen(core::Context ctx, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
+void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
@@ -181,7 +181,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         fileq->push(move(i), 1);
     }
 
-    workers.multiplexJob("runAutogen", [&ctx, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
@@ -191,9 +191,11 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(ctx).isRBI()) {
+                if (tree.file.data(gs).isRBI()) {
                     continue;
                 }
+
+                core::Context ctx(gs, core::Symbols::root(), tree.file);
                 auto pf = autogen::Autogen::generate(ctx, move(tree));
                 tree = move(pf.tree);
 
@@ -241,7 +243,7 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
         merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root = autogen::DefTreeBuilder::merge(ctx, move(root), move(*out.defTree));
+            root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
@@ -257,11 +259,11 @@ void runAutogen(core::Context ctx, options::Options &opts, const autogen::Autolo
     if (opts.print.AutogenAutoloader.enabled) {
         {
             Timer timeit(logger, "autogenAutoloaderPrune");
-            autogen::DefTreeBuilder::collapseSameFileDefs(ctx, autoloaderCfg, root);
+            autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
         }
         {
             Timer timeit(logger, "autogenAutoloaderWrite");
-            autogen::AutoloadWriter::writeAutoloads(ctx, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
+            autogen::AutoloadWriter::writeAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, root);
         }
     }
 
@@ -493,8 +495,6 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
-            core::MutableContext ctx(*gs, core::Symbols::root());
-
             indexed = pipeline::name(*gs, move(indexed), opts);
             autogen::AutoloaderConfig autoloaderCfg;
             {
@@ -506,11 +506,11 @@ int realmain(int argc, char *argv[]) {
                     auto file = tree.file;
                     errs.emplace_back(*gs, file);
                 }
-                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed), *workers);
+                indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
                 autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
             }
 
-            runAutogen(ctx, opts, autoloaderCfg, *workers, indexed);
+            runAutogen(*gs, opts, autoloaderCfg, *workers, indexed);
 #endif
         } else {
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());

@@ -27,7 +27,8 @@ TEST(DesugarTest, SimpleDesugar) { // NOLINT
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
 
-    auto ast = sorbet::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
+    sorbet::core::FileRef fileId = gs.enterFile("<test>", "def hello_world; p :hello; end");
+    auto ast = sorbet::parser::Parser::run(gs, fileId);
+    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root(), fileId);
     auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
 }

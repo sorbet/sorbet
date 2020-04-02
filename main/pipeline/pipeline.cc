@@ -53,7 +53,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file().data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
+        if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
@@ -96,7 +96,6 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
         if (maybeCached) {
             prodCounterInc("types.input.files.kvstore.hit");
             auto cachedTree = core::serialize::Serializer::loadFile(gs, fref, maybeCached);
-            ENFORCE(cachedTree.tree->loc.file() == fref);
             return make_unique<core::serialize::CachedFile>(move(cachedTree));
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
@@ -137,7 +136,7 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
                                        const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
     unique_ptr<ast::Expression> ast;
-    core::MutableContext ctx(gs, core::Symbols::root());
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::ErrorRegion errs(gs, file);
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
@@ -153,7 +152,7 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
 }
 
 unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
-    core::MutableContext ctx(gs, core::Symbols::root());
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
     Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     core::ErrorRegion errs(gs, file);
@@ -162,7 +161,7 @@ unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef fil
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
     Timer timeit(gs.tracer(), "runLocalVars", {{"file", (string)tree.file.data(gs).path()}});
-    core::MutableContext ctx(gs, core::Symbols::root());
+    core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
 
@@ -210,7 +209,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         }
 
         rewriten.tree = move(tree);
-        ENFORCE(rewriten.tree->loc.file() == file);
         return rewriten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -251,7 +249,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 #ifndef SORBET_REALMAIN_MIN
             {
                 Timer timeit(gs.tracer(), "plugins_text");
-                core::MutableContext ctx(gs, core::Symbols::root());
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
                 core::ErrorRegion errs(gs, file);
 
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
@@ -285,7 +283,6 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
         }
 
         rewriten.tree = move(tree);
-        ENFORCE(rewriten.tree->loc.file() == file);
         return {move(rewriten), resultPluginFiles};
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -299,13 +296,12 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts) {
     try {
-        core::MutableContext ctx(gs, core::Symbols::root());
         {
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            what = sorbet::namer::Namer::run(ctx, move(what));
+            what = sorbet::namer::Namer::run(gs, move(what));
         }
 
         {
@@ -315,7 +311,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
+            what = sorbet::resolver::Resolver::runTreePasses(gs, move(what));
         }
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
@@ -504,13 +500,13 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
-                core::MutableContext ctx(*ret.gs, core::Symbols::root());
                 {
                     Timer timeit(cgs->tracer(), "substituteTrees");
                     for (auto &tree : threadResult.res.trees) {
                         auto file = tree.file;
                         core::ErrorRegion errs(*ret.gs, file);
                         if (!file.data(*ret.gs).cached) {
+                            core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
                             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
                         }
                     }
@@ -618,9 +614,9 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
     {
         Timer timeit(suppliedFilesAndPluginFiles.gs->tracer(), "incremental_resolve");
         core::GlobalSubstitution substitution(*protoGs, *suppliedFilesAndPluginFiles.gs, protoGs.get());
-        core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root());
         for (auto &tree : firstPass.trees) {
             auto file = tree.file;
+            core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root(), file);
             core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
         }
@@ -749,10 +745,9 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     }
 
     {
-        core::MutableContext ctx(gs, core::Symbols::root());
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        what = namer::Namer::run(ctx, move(what));
+        what = namer::Namer::run(gs, move(what));
         gs.errorQueue->flushErrors();
     }
     return what;
@@ -777,9 +772,9 @@ public:
 vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
                                               vector<ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
-    core::MutableContext ctx(gs, core::Symbols::root());
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
+        core::MutableContext ctx(gs, core::Symbols::root(), resolved.file);
         resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
     }
     auto &missing = walk.unresolvedConstants;
@@ -836,7 +831,7 @@ public:
 ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
                                                         int prohibitedLinesStart, int prohibitedLinesEnd) {
     DefinitionLinesBlacklistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
-    what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), enforcer, move(what.tree));
+    what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, move(what.tree));
     return what;
 }
 
@@ -861,7 +856,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             return ast::ParsedFilesOrCancelled(move(what));
         }
 
-        core::MutableContext ctx(*gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(gs->tracer(), "resolving");
@@ -872,7 +866,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            auto maybeResult = resolver::Resolver::run(ctx, move(what), workers);
+            auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
             if (!maybeResult.hasResult()) {
                 return maybeResult;
             }
@@ -947,7 +941,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
         }
 
-        core::Context ctx(*gs, core::Symbols::root());
+        const core::GlobalState &igs = *gs;
 
         // We want to start typeckecking big files first because it helps with better work distribution
         fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -960,7 +954,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob(
-                "typecheck", [ctx, &opts, epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
+                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
                     typecheck_thread_result threadResult;
                     ast::ParsedFile job;
                     int processedByThread = 0;
@@ -980,15 +974,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                 // [IDE] Also, don't do work if the file has changed under us since we began
                                 // typechecking!
                                 // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
-                                const bool fileWasChanged = preemptionManager && job.file.data(ctx).epoch > epoch;
+                                const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
                                 if (!isCanceled && !fileWasChanged) {
                                     core::FileRef file = job.file;
                                     try {
+                                        core::Context ctx(igs, core::Symbols::root(), file);
                                         threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
-                                        ctx.state.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                                 file.data(ctx).path());
+                                        igs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                           file.data(igs).path());
                                     }
                                 }
                             }
@@ -1130,9 +1125,9 @@ public:
     }
 };
 
-core::UsageHash getAllNames(const core::GlobalState &gs, unique_ptr<ast::Expression> &tree) {
+core::UsageHash getAllNames(core::Context ctx, unique_ptr<ast::Expression> &tree) {
     AllNamesCollector collector;
-    tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root()), collector, move(tree));
+    tree = ast::TreeMap::apply(ctx, collector, move(tree));
     core::NameHash::sortAndDedupe(collector.acc.sends);
     core::NameHash::sortAndDedupe(collector.acc.constants);
     return move(collector.acc);
@@ -1156,7 +1151,8 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref));
     auto errs = lgs->errorQueue->drainAllErrors();
-    auto allNames = getAllNames(*lgs, single[0].tree);
+    core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
+    auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
     pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
 

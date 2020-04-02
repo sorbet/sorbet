@@ -50,7 +50,7 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
+    return ast::MK::InsSeq(klass->declLoc.offsets(), std::move(inits), ast::MK::EmptyTree());
 }
 
 class ClassFlattenWalk {
@@ -87,12 +87,12 @@ public:
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
         // methods and block arguments before us.
-        auto blkLoc = core::Loc::none(loc.file());
+        auto blkLoc = core::LocOffsets::none();
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = make_unique<ast::MethodDef>(loc, loc, sym, core::Names::staticInit(), std::move(args),
+        auto init = make_unique<ast::MethodDef>(loc.offsets(), loc, sym, core::Names::staticInit(), std::move(args),
                                                 std::move(inits), ast::MethodDef::Flags());
         init->flags.isRewriterSynthesized = false;
         init->flags.isSelfMethod = true;

@@ -25,27 +25,29 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
     auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
     // Insert extra {}'s when a hash literal does not have them.
     // Example: `T.type_alias(a: Integer,  b: String)`
-    bool wrapHash = hash != nullptr && hash->loc.source(ctx)[0] != '{';
-    auto [start, end] = send->loc.position(ctx);
+    bool wrapHash = hash != nullptr && core::Loc(ctx.file, hash->loc).source(ctx)[0] != '{';
+    auto [start, end] = core::Loc(ctx.file, send->loc).position(ctx);
     if (start.line == end.line) {
         if (wrapHash) {
-            e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{{{}}}}}", arg->loc.source(ctx));
+            e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{{{}}}}}",
+                          core::Loc(ctx.file, arg->loc).source(ctx));
         } else {
-            e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias {{{}}}", arg->loc.source(ctx));
+            e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{}}}",
+                          core::Loc(ctx.file, arg->loc).source(ctx));
         }
     } else {
-        auto loc = arg->loc;
+        auto loc = core::Loc(ctx.file, arg->loc);
         core::Loc endLoc(loc.file(), loc.endPos(), loc.endPos());
         string argIndent = getIndent(ctx, endLoc);
-        string argSrc = fmt::format("{}{}", argIndent, arg->loc.source(ctx));
+        string argSrc = fmt::format("{}{}", argIndent, core::Loc(ctx.file, arg->loc).source(ctx));
         if (wrapHash) {
             argSrc = fmt::format("{}{{\n{}\n{}}}", argIndent, indented(argSrc), argIndent);
         }
-        if (send->loc.position(ctx).second.line == endLoc.position(ctx).second.line) {
+        if (core::Loc(ctx.file, send->loc).position(ctx).second.line == endLoc.position(ctx).second.line) {
             argSrc = indented(argSrc);
         }
-        e.replaceWith("Convert to lazy type alias", send->loc, "T.type_alias do\n{}\n{}end", argSrc,
-                      getIndent(ctx, send->loc));
+        e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias do\n{}\n{}end",
+                      argSrc, getIndent(ctx, core::Loc(ctx.file, send->loc)));
     }
 }
 
