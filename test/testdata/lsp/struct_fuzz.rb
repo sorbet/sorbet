@@ -3,7 +3,6 @@
   ::B=Struct.new:x
 # ^^^^^^^^^^^^^^^^ error: Method `keep_def` does not exist on `T.class_of(Sorbet::Private::Static)`
 # ^^^^^^^^^^^^^^^^ error: Method `params` does not exist on `T.class_of(B)`
-# ^^^^^^^^^^^^^^^^ error: Method `sig` does not exist on `T.class_of(T::Sig::WithoutRuntime)`
 # ^^^^^^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(B)`
 # ^^^^^^^^^^^^^^^^ error: Method `unsafe` does not exist on `T.class_of(T)`
 #                ^ error: Method `keep_def` does not exist on `T.class_of(Sorbet::Private::Static)`
