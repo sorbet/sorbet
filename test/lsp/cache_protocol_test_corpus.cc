@@ -24,14 +24,14 @@ namespace {
 int wait_for_child_fork(int pid) {
     int status;
     if (waitpid(pid, &status, 0) < 0) {
-        std::cerr << "[----------]  Waitpid error!" << std::endl;
-        return -2;
+        cerr << "[----------]  Waitpid error!" << std::endl;
+        return -1;
     }
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);
     } else {
-        std::cerr << "[----------]  Non-normal exit from child!" << std::endl;
-        return -3;
+        cerr << "[----------]  Non-normal exit from child!" << std::endl;
+        return -2;
     }
 }
 } // namespace
@@ -189,17 +189,14 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
-        cerr << "PHASE 2\n";
         auto signalFile = cacheDir + "/signal_file";
         // Fork before grabbing DB lock.
         const int child_pid = fork();
         if (child_pid == 0) {
-            cerr << "CHILD: Waiting for signal\n";
             // Child process; wait for file to exist before writing to cache.
             while (!FileOps::exists(signalFile)) {
                 Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for signal");
             }
-            cerr << "CHILD: Signal received\n";
 
             // Let's update a file and write over the cache.
             resetState();
@@ -214,14 +211,10 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             EXPECT_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
             EXPECT_EQ(counters.getCounter("cache.committed"), 1);
 
-            cerr << "CHILD: Exiting " << testing::Test::HasFailure() << "\n";
-
             // Exit explicitly here to stop fork from running the rest of the test suite.
             exit(testing::Test::HasFailure());
         } else {
-            cerr << "PARENT: resetState\n";
             resetState();
-            cerr << "PARENT: waiting for child to exit\n";
 
             // Tell child process to mutate the cache by writing a file.
             // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
@@ -230,14 +223,10 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             // Wait for child process to finish mutating the cache.
             EXPECT_EQ(0, wait_for_child_fork(child_pid));
 
-            cerr << "PARENT: Running LSP\n";
-
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
             assertDiagnostics(initializeLSP(),
                               {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
-
-            cerr << "PARENT: Done\n";
 
             // We should not use the cache since it has been dirtied.
             auto counters = getCounters();
