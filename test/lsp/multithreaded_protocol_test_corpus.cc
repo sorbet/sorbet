@@ -52,7 +52,7 @@ TEST_P(ProtocolTest, MultithreadedWrapperWorks) {
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
     // Pause to differentiate message times
-    this_thread::sleep_for(chrono::microseconds(100));
+    this_thread::sleep_for(chrono::milliseconds(1));
     sendAsync(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
 
     // Pause so that all latency timers for the above operations get reported.
@@ -97,7 +97,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     // Syntax error in foo.rb.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
     // Pause to differentiate message times
-    this_thread::sleep_for(chrono::microseconds(100));
+    this_thread::sleep_for(chrono::milliseconds(1));
     // Typechecking error in bar.rb
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef hello\n\"hi\"\nend\nend\n",
