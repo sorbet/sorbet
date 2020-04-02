@@ -49,7 +49,7 @@ public:
 
     bool isSelfReference() const;
 };
-CheckSize(Expression, 24, 8);
+CheckSize(Expression, 16, 8);
 
 struct ParsedFile {
     std::unique_ptr<ast::Expression> tree;
@@ -94,7 +94,7 @@ class Reference : public Expression {
 public:
     Reference(core::LocOffsets loc);
 };
-CheckSize(Reference, 24, 8);
+CheckSize(Reference, 16, 8);
 
 class Declaration : public Expression {
 public:
@@ -103,7 +103,7 @@ public:
 
     Declaration(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol);
 };
-CheckSize(Declaration, 48, 8);
+CheckSize(Declaration, 32, 8);
 
 class ClassDef final : public Declaration {
 public:
@@ -136,7 +136,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(ClassDef, 144, 8);
+CheckSize(ClassDef, 136, 8);
 
 class MethodDef final : public Declaration {
 public:
@@ -169,7 +169,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(MethodDef, 88, 8);
+CheckSize(MethodDef, 72, 8);
 
 class If final : public Expression {
 public:
@@ -187,7 +187,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(If, 48, 8);
+CheckSize(If, 40, 8);
 
 class While final : public Expression {
 public:
@@ -203,7 +203,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(While, 40, 8);
+CheckSize(While, 32, 8);
 
 class Break final : public Expression {
 public:
@@ -218,7 +218,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Break, 32, 8);
+CheckSize(Break, 24, 8);
 
 class Retry final : public Expression {
 public:
@@ -231,7 +231,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Retry, 24, 8);
+CheckSize(Retry, 16, 8);
 
 class Next final : public Expression {
 public:
@@ -246,7 +246,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Next, 32, 8);
+CheckSize(Next, 24, 8);
 
 class Return final : public Expression {
 public:
@@ -261,7 +261,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Return, 32, 8);
+CheckSize(Return, 24, 8);
 
 class RescueCase final : public Expression {
 public:
@@ -285,7 +285,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(RescueCase, 64, 8);
+CheckSize(RescueCase, 56, 8);
 
 class Rescue final : public Expression {
 public:
@@ -307,7 +307,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Rescue, 72, 8);
+CheckSize(Rescue, 64, 8);
 
 class Local final : public Reference {
 public:
@@ -322,7 +322,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Local, 32, 8);
+CheckSize(Local, 24, 8);
 
 class UnresolvedIdent final : public Reference {
 public:
@@ -344,7 +344,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(UnresolvedIdent, 32, 8);
+CheckSize(UnresolvedIdent, 24, 8);
 
 class RestArg final : public Reference {
 public:
@@ -359,7 +359,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(RestArg, 32, 8);
+CheckSize(RestArg, 24, 8);
 
 class KeywordArg final : public Reference {
 public:
@@ -374,7 +374,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(KeywordArg, 32, 8);
+CheckSize(KeywordArg, 24, 8);
 
 class OptionalArg final : public Reference {
 public:
@@ -390,7 +390,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(OptionalArg, 40, 8);
+CheckSize(OptionalArg, 32, 8);
 
 class BlockArg final : public Reference {
 public:
@@ -405,7 +405,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(BlockArg, 32, 8);
+CheckSize(BlockArg, 24, 8);
 
 class ShadowArg final : public Reference {
 public:
@@ -420,7 +420,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(ShadowArg, 32, 8);
+CheckSize(ShadowArg, 24, 8);
 
 class Assign final : public Expression {
 public:
@@ -436,7 +436,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Assign, 40, 8);
+CheckSize(Assign, 32, 8);
 
 class Block;
 
@@ -472,7 +472,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-// CheckSize(Send, 64, 8);
+CheckSize(Send, 64, 8);
 
 class Cast final : public Expression {
 public:
@@ -491,7 +491,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Cast, 56, 8);
+CheckSize(Cast, 48, 8);
 
 class Hash final : public Expression {
 public:
@@ -511,7 +511,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Hash, 72, 8);
+CheckSize(Hash, 64, 8);
 
 class Array final : public Expression {
 public:
@@ -530,7 +530,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Array, 64, 8);
+CheckSize(Array, 56, 8);
 
 class Literal final : public Expression {
 public:
@@ -552,7 +552,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(Literal, 40, 8);
+CheckSize(Literal, 32, 8);
 
 class UnresolvedConstantLit final : public Expression {
 public:
@@ -568,7 +568,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 40, 8);
+CheckSize(UnresolvedConstantLit, 32, 8);
 
 class ConstantLit final : public Expression {
 public:
@@ -590,7 +590,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(ConstantLit, 64, 8);
+CheckSize(ConstantLit, 56, 8);
 
 class ZSuperArgs final : public Expression {
 public:
@@ -604,7 +604,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(ZSuperArgs, 24, 8);
+CheckSize(ZSuperArgs, 16, 8);
 
 class Block final : public Expression {
 public:
@@ -618,7 +618,7 @@ public:
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
     virtual void _sanityCheck();
 };
-CheckSize(Block, 56, 8);
+CheckSize(Block, 48, 8);
 
 class InsSeq final : public Expression {
 public:
@@ -639,7 +639,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(InsSeq, 72, 8);
+CheckSize(InsSeq, 64, 8);
 
 class EmptyTree final : public Expression {
 public:
@@ -652,7 +652,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
-CheckSize(EmptyTree, 24, 8);
+CheckSize(EmptyTree, 16, 8);
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

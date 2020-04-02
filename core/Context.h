@@ -37,7 +37,7 @@ public:
 
     void trace(std::string_view msg) const;
 };
-CheckSize(Context, 24, 8);
+CheckSize(Context, 16, 8);
 
 class MutableContext final {
 public:
@@ -71,7 +71,7 @@ public:
 
     void trace(std::string_view msg) const;
 };
-CheckSize(MutableContext, 24, 8);
+CheckSize(MutableContext, 16, 8);
 
 } // namespace sorbet::core
 

@@ -32,7 +32,7 @@ struct LocOffsets {
         return LocOffsets{beginPos(), beginPos()};
     }
 };
-CheckSize(LocOffsets, 8, 8);
+CheckSize(LocOffsets, 8, 4);
 
 class Loc final {
     struct {
@@ -124,7 +124,7 @@ public:
     //
     std::pair<Loc, u4> findStartOfLine(const GlobalState &gs) const;
 };
-CheckSize(Loc, 16, 8);
+CheckSize(Loc, 12, 4);
 
 template <typename H> H AbslHashValue(H h, const Loc &m) {
     return H::combine(std::move(h), m.storage.offsets.beginLoc, m.storage.offsets.endLoc, m.storage.fileRef.id());

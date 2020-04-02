@@ -99,7 +99,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 };
-CheckSize(Send, 184, 8);
+CheckSize(Send, 160, 8);
 
 class Return final : public Instruction {
 public:
