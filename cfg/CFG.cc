@@ -251,7 +251,7 @@ string BasicBlock::showRaw(core::Context ctx) const {
     return to_string(buf);
 }
 
-Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
+Binding::Binding(core::LocalVariable bind, core::LocOffsets loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
 } // namespace sorbet::cfg

@@ -7,12 +7,13 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
+void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
     unique_ptr<CFG> res(new CFG); // private constructor
+    res->file = md.declLoc.file();
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
     if (res->symbol.data(ctx)->isAbstract()) {
         res->basicBlocks.clear();
@@ -54,7 +55,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     for (auto kv : aliases) {
         core::SymbolRef global = kv.first;
         core::LocalVariable local = kv.second;
-        aliasesPrefix.emplace_back(local, global.data(ctx)->loc(), make_unique<Alias>(global));
+        aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_unique<Alias>(global));
         if (global.data(ctx)->isField() || global.data(ctx)->isStaticField()) {
             res->minLoops[local] = CFG::MIN_LOOP_FIELD;
         } else {
@@ -62,7 +63,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         }
     }
     for (auto kv : discoveredUndeclaredFields) {
-        aliasesPrefix.emplace_back(kv.second, core::Loc::none(),
+        aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
                                    make_unique<Alias>(core::Symbols::Magic_undeclaredFieldStub()));
         res->minLoops[kv.second] = CFG::MIN_LOOP_FIELD;
     }

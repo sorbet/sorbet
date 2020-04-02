@@ -70,9 +70,9 @@ string LoadSelf::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs, bool isPrivateOk,
-           const shared_ptr<core::SendAndBlockLink> &link)
+Send::Send(core::LocalVariable recv, core::NameRef fun, core::LocOffsets receiverLoc,
+           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs,
+           bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
       link(move(link)) {
     this->args.resize(args.size());

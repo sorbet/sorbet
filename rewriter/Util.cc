@@ -179,19 +179,20 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
 }
 
 unique_ptr<ast::Expression> ASTUtil::mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
+    return ast::MK::SyntheticMethod0(loc.offsets(), loc, name, move(rhs));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkSet(core::Loc loc, core::NameRef name, core::Loc argLoc,
+unique_ptr<ast::Expression> ASTUtil::mkSet(core::Loc loc, core::NameRef name, core::LocOffsets argLoc,
                                            unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
+    return ast::MK::SyntheticMethod1(loc.offsets(), loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
+unique_ptr<ast::Expression> ASTUtil::mkNilable(core::LocOffsets loc, unique_ptr<ast::Expression> type) {
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className) {
+unique_ptr<ast::Expression> ASTUtil::mkMutator(core::MutableContext ctx, core::LocOffsets loc,
+                                               core::NameRef className) {
     auto chalk = ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                              core::Names::Constants::Chalk());
     auto odm = ast::MK::UnresolvedConstant(loc, move(chalk), core::Names::Constants::ODM());

@@ -11,7 +11,7 @@ using namespace std;
 namespace sorbet::cfg {
 
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
-                     core::Loc loc) {
+                     core::LocOffsets loc) {
     thenb->flags |= CFG::WAS_JUMP_DESTINATION;
     elseb->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
@@ -27,7 +27,7 @@ void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *the
     }
 }
 
-void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc loc) {
+void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
     to->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
@@ -41,7 +41,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc 
     }
 }
 
-void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
+void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
     auto *db = inWhat.deadBlock();
     if (from != db) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
@@ -93,7 +93,7 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
         auto fnd = cctx.discoveredUndeclaredFields.find(id->name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
             if (id->kind != ast::UnresolvedIdent::Kind::Global) {
-                if (auto e = cctx.ctx.state.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
+                if (auto e = cctx.ctx.beginError(id->loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id->name.show(cctx.ctx));
                 }
             }
@@ -107,7 +107,8 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     }
 }
 
-void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, unique_ptr<Instruction> inst) {
+void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::LocOffsets loc,
+                                unique_ptr<Instruction> inst) {
     auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
     inserted.value->isSynthetic = true;
 }
@@ -267,7 +268,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv.get())) {
                         if (cnst->symbol == core::Symbols::T()) {
                             if (s->args.size() != 1) {
-                                if (auto e = cctx.ctx.state.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
+                                if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
                                     e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd",
                                                 s->args.size());
                                 }
@@ -277,7 +278,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                             if (ast::isa_tree<ast::Send>(s->args[0].get())) {
                                 // Providing a send is the most common way T.absurd is misused
-                                if (auto e = cctx.ctx.state.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
+                                if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
                                     e.setHeader("`{}` expects to be called on a variable, not a method call",
                                                 "T.absurd", s->args.size());
                                 }
@@ -298,7 +299,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 
                 InlinedVector<core::LocalVariable, 2> args;
-                InlinedVector<core::Loc, 2> argLocs;
+                InlinedVector<core::LocOffsets, 2> argLocs;
                 for (auto &exp : s->args) {
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
@@ -326,7 +327,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto solveConstraint = make_unique<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     core::LocalVariable restoreSelf = cctx.newTemporary(core::Names::selfRestore());
-                    synthesizeExpr(current, restoreSelf, core::Loc::none(),
+                    synthesizeExpr(current, restoreSelf, core::LocOffsets::none(),
                                    make_unique<Ident>(core::LocalVariable::selfVariable()));
 
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, newRubyBlockId);
@@ -360,12 +361,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         // Inserting a statement that does not directly map to any source text. Make its loc
                         // 0-length so LSP ignores it in queries.
-                        core::Loc zeroLengthLoc = arg.loc.copyWithZeroLength();
+                        core::LocOffsets zeroLengthLoc = arg.loc.copyWithZeroLength();
                         bodyBlock->exprs.emplace_back(
                             idxTmp, zeroLengthLoc,
                             make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
-                        InlinedVector<core::Loc, 2> locs{zeroLengthLoc};
+                        InlinedVector<core::LocOffsets, 2> locs{zeroLengthLoc};
                         auto isPrivateOk = false;
                         bodyBlock->exprs.emplace_back(argLoc, arg.loc,
                                                       make_unique<Send>(argTemp, core::Names::squareBrackets(),
@@ -437,7 +438,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 }
 
                 if (cctx.nextScope == nullptr) {
-                    if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
+                    if (auto e = cctx.ctx.beginError(a->loc, core::errors::CFG::NoNextScope)) {
                         e.setHeader("No `{}` block around `{}`", "do", "next");
                     }
                     // I guess just keep going into deadcode?
@@ -470,7 +471,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a->loc, make_unique<Ident>(blockBreakAssign));
 
                 if (cctx.breakScope == nullptr) {
-                    if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
+                    if (auto e = cctx.ctx.beginError(a->loc, core::errors::CFG::NoNextScope)) {
                         e.setHeader("No `{}` block around `{}`", "do", "break");
                     }
                     // I guess just keep going into deadcode?
@@ -483,7 +484,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Retry *a) {
                 if (cctx.rescueScope == nullptr) {
-                    if (auto e = cctx.ctx.state.beginError(a->loc, core::errors::CFG::NoNextScope)) {
+                    if (auto e = cctx.ctx.beginError(a->loc, core::errors::CFG::NoNextScope)) {
                         e.setHeader("No `{}` block around `{}`", "begin", "retry");
                     }
                     // I guess just keep going into deadcode?
@@ -549,7 +550,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
                         InlinedVector<core::LocalVariable, 2> args;
-                        InlinedVector<core::Loc, 2> argLocs = {loc};
+                        InlinedVector<core::LocOffsets, 2> argLocs = {loc};
                         args.emplace_back(exceptionClass);
 
                         auto isPrivateOk = false;
@@ -586,7 +587,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Hash *h) {
                 InlinedVector<core::LocalVariable, 2> vars;
-                InlinedVector<core::Loc, 2> locs;
+                InlinedVector<core::LocOffsets, 2> locs;
                 for (int i = 0; i < h->keys.size(); i++) {
                     core::LocalVariable keyTmp = cctx.newTemporary(core::Names::hashTemp());
                     core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
@@ -598,7 +599,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(h->values[i]->loc);
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
-                synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
+                synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
 
                 auto isPrivateOk = false;
                 current->exprs.emplace_back(
@@ -609,7 +610,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Array *a) {
                 InlinedVector<core::LocalVariable, 2> vars;
-                InlinedVector<core::Loc, 2> locs;
+                InlinedVector<core::LocOffsets, 2> locs;
                 for (auto &elem : a->elems) {
                     core::LocalVariable tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
@@ -617,7 +618,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(a->loc);
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
-                synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
+                synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
                 auto isPrivateOk = false;
                 current->exprs.emplace_back(
                     cctx.target, a->loc,
@@ -649,7 +650,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         return ret;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
-        if (auto e = cctx.ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
+        if (auto e = cctx.ctx.beginError(what->loc, core::errors::Internal::InternalError)) {
             e.setHeader("Failed to convert tree to CFG (backtrace is above )");
         }
         throw;

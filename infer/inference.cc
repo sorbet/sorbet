@@ -119,7 +119,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, parent->bexit.loc, *cfg.get(), bb, knowledgeFilter);
+                    current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,
+                                      knowledgeFilter);
                 }
             }
         }
@@ -151,7 +152,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
                         continue;
                     }
-                    if (auto e = ctx.state.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
+                    if (auto e = ctx.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
                     }
                     break;
@@ -174,7 +175,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         typedSendCount++;
                     } else if (bind.bind.type->hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame()._id););
-                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
                         }
                     }
@@ -183,14 +184,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bind.bind.type->sanityCheck(ctx);
                 if (bind.bind.type->isBottom()) {
                     current.isDead = true;
-                    madeBlockDead = bind.loc;
+                    madeBlockDead = core::Loc(ctx.file, bind.loc);
                 }
                 if (current.isDead) {
                     // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                     bb->firstDeadInstructionIdx = i;
                 }
             } else if (current.isDead && !bind.value->isSynthetic) {
-                if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
                     e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
                 }

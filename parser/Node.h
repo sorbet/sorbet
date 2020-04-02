@@ -7,7 +7,7 @@ namespace sorbet::parser {
 
 class Node {
 public:
-    Node(core::Loc loc) : loc(loc) {
+    Node(core::LocOffsets loc) : loc(loc) {
         ENFORCE(loc.exists(), "Location of parser node is none");
     }
     virtual ~Node() = default;
@@ -18,7 +18,7 @@ public:
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
-    core::Loc loc;
+    core::LocOffsets loc;
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;

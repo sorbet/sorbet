@@ -56,7 +56,7 @@ core::TypePtr getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &e
     typecase(
         expr.get(), [&](ast::Literal *lit) { result = lit->value; },
         [&](ast::Expression *expr) {
-            if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type literal");
             }
             result = core::Types::untypedUntracked();
@@ -158,7 +158,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
         while (tsend != nullptr) {
             if (tsend->fun == core::Names::typeParameters()) {
                 if (parent != nullptr) {
-                    if (auto e = ctx.state.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed signature; Type parameters can only be specified in outer sig");
                     }
                     break;
@@ -169,22 +169,20 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                             auto name = c->asSymbol(ctx);
                             auto &typeArgSpec = sig.enterTypeArgByName(name);
                             if (typeArgSpec.type) {
-                                if (auto e = ctx.state.beginError(arg->loc,
-                                                                  core::errors::Resolver::InvalidMethodSignature)) {
+                                if (auto e = ctx.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
                                     e.setHeader("Malformed signature; Type argument `{}` was specified twice",
                                                 name.show(ctx));
                                 }
                             }
                             typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todo());
-                            typeArgSpec.loc = arg->loc;
+                            typeArgSpec.loc = core::Loc(ctx.file, arg->loc);
                         } else {
-                            if (auto e =
-                                    ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            if (auto e = ctx.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
                                 e.setHeader("Malformed signature; Type parameters are specified with symbols");
                             }
                         }
                     } else {
-                        if (auto e = ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed signature; Type parameters are specified with symbols");
                         }
                     }
@@ -207,7 +205,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     break;
                 case core::Names::bind()._id: {
                     if (sig.seen.bind) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
                         }
                         sig.bind = core::SymbolRef();
@@ -215,7 +213,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     sig.seen.bind = true;
 
                     if (send->args.size() != 1) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "bind", 1,
                                         send->args.size());
                         }
@@ -239,7 +237,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     }
 
                     if (!validBind) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Can only bind to simple class names", send->fun.show(ctx));
                         }
                     }
@@ -248,7 +246,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 }
                 case core::Names::params()._id: {
                     if (sig.seen.params) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
                         }
                         sig.argTypes.clear();
@@ -260,7 +258,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     }
 
                     if (send->args.size() > 1) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
                                         "0-1", send->args.size());
                         }
@@ -268,7 +266,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
 
                     auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                     if (hash == nullptr) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             auto paramsStr = send->fun.show(ctx);
                             e.setHeader("`{}` expects keyword arguments", paramsStr);
                             e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
@@ -285,8 +283,8 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
                                 getResultTypeAndBindWithSelfTypeParams(ctx, *value, *parent, args.withRebind());
-                            sig.argTypes.emplace_back(
-                                ParsedSig::ArgSpec{key->loc, name, resultAndBind.type, resultAndBind.rebind});
+                            sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key->loc), name,
+                                                                         resultAndBind.type, resultAndBind.rebind});
                         }
                     }
                     break;
@@ -301,7 +299,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     sig.seen.override_ = true;
 
                     if (send->args.size() > 1) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
                                         "0-1", send->args.size());
                         }
@@ -310,8 +308,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     if (send->args.size() == 1) {
                         auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                         if (hash == nullptr) {
-                            if (auto e =
-                                    ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                                 auto paramsStr = send->fun.show(ctx);
                                 e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                             }
@@ -336,13 +333,13 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     break;
                 }
                 case core::Names::implementation()._id:
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
                         if (send->recv->isSelfReference()) {
-                            e.replaceWith("Replace with `override`", send->loc, "override");
+                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "override");
                         } else {
-                            e.replaceWith("Replace with `override`", send->loc, "{}.override",
-                                          send->recv->loc.source(ctx));
+                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "{}.override",
+                                          core::Loc(ctx.file, send->recv->loc).source(ctx));
                         }
                     }
                     break;
@@ -352,7 +349,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::returns()._id: {
                     sig.seen.returns = true;
                     if (send->args.size() != 1) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
                                         send->args.size());
                         }
@@ -361,7 +358,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
 
                     auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
                     if (nil && nil->isNil(ctx)) {
-                        const auto loc = send->args[0]->loc;
+                        const auto loc = core::Loc(ctx.file, send->args[0]->loc);
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("You probably meant `.returns(NilClass)`");
                             e.replaceWith("Replace with `NilClass`", loc, "NilClass");
@@ -384,17 +381,18 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::onFailure()._id:
                     break;
                 case core::Names::final_()._id:
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
                         e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
                                     "{{final. ...}}`");
                     }
                     break;
                 default:
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
                         e.setHeader("Malformed signature: `{}` is invalid in this context", send->fun.show(ctx));
-                        e.addErrorLine(send->loc, "Consult https://sorbet.org/docs/sigs for signature syntax");
+                        e.addErrorLine(core::Loc(ctx.file, send->loc),
+                                       "Consult https://sorbet.org/docs/sigs for signature syntax");
                     }
             }
             auto recv = ast::cast_tree<ast::Send>(send->recv.get());
@@ -403,7 +401,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
             if (!recv && !reportedInvalidMethod) {
                 if (!send->recv->isSelfReference()) {
                     if (!sig.seen.proc) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed signature: `{}` being invoked on an invalid receiver",
                                         send->fun.show(ctx));
                         }
@@ -464,14 +462,14 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             }
             auto arr = ast::cast_tree<ast::Literal>(send->args[0].get());
             if (!arr || !arr->isSymbol(ctx)) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("type_parameter requires a symbol");
                 }
                 return core::Types::untypedUntracked();
             }
             auto fnd = sig.findTypeArgByName(arr->asSymbol(ctx));
             if (!fnd.type) {
-                if (auto e = ctx.state.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unspecified type parameter");
                 }
                 return core::Types::untypedUntracked();
@@ -487,13 +485,13 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
                 { return core::Types::Object(); }
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                 }
                 return core::Types::untypedUntracked();
             }
             if (arr->elems.empty()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum([]) is invalid");
                 }
                 return core::Types::untypedUntracked();
@@ -516,27 +514,27 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
 
             auto *obj = ast::cast_tree<ast::ConstantLit>(arg);
             if (!obj) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of needs a Class as its argument");
                 }
                 return core::Types::untypedUntracked();
             }
             auto maybeAliased = obj->symbol;
             if (maybeAliased.data(ctx)->isTypeAlias()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
                 return core::Types::untypedUntracked();
             }
             if (maybeAliased.data(ctx)->isTypeMember()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_member");
                 }
                 return core::Types::untypedUntracked();
             }
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.data(ctx)->isStaticField()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
                 }
                 return core::Types::untypedUntracked();
@@ -544,7 +542,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
 
             auto singleton = sym.data(ctx)->singletonClass(ctx);
             if (!singleton.exists()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
                 }
                 return core::Types::untypedUntracked();
@@ -557,22 +555,23 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             if (args.allowSelfType) {
                 return core::make_type<core::SelfType>();
             }
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level T.self_type is supported");
             }
             return core::Types::untypedUntracked();
         case core::Names::experimentalAttachedClass()._id:
         case core::Names::attachedClass()._id:
             if (send->fun == core::Names::experimentalAttachedClass()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::ExperimentalAttachedClass)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ExperimentalAttachedClass)) {
                     e.setHeader("`{}` has been stabilized and is no longer experimental",
                                 "T.experimental_attached_class");
-                    e.replaceWith("Replace with `T.attached_class`", send->loc, "T.attached_class");
+                    e.replaceWith("Replace with `T.attached_class`", core::Loc(ctx.file, send->loc),
+                                  "T.attached_class");
                 }
             }
 
             if (!ctx.owner.data(ctx)->isSingletonClass(ctx)) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`T.{}` may only be used in a singleton class method context",
                                 core::Names::attachedClass().show(ctx));
                 }
@@ -587,7 +586,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             return core::Types::bottom();
 
         default:
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported method `{}`", "T." + send->fun.show(ctx));
             }
             return core::Types::untypedUntracked();
@@ -628,7 +627,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                     keys.emplace_back(lit->value);
                     values.emplace_back(val);
                 } else {
-                    if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed type declaration. Shape keys must be literals");
                     }
                 }
@@ -675,7 +674,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                                                sym == core::Symbols::Enumerable() || sym == core::Symbols::Enumerator();
                     auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                                      : core::errors::Resolver::GenericClassWithoutTypeArgs;
-                    if (auto e = ctx.state.beginError(i->loc, level)) {
+                    if (auto e = ctx.beginError(i->loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                     sym.show(ctx));
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
@@ -683,8 +682,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
                         if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
                             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                            e.replaceWith("Add type arguments", i->loc, "{}{}[T.untyped, T.untyped]", typePrefix,
-                                          i->loc.source(ctx));
+                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i->loc),
+                                          "{}{}[T.untyped, T.untyped]", typePrefix,
+                                          core::Loc(ctx.file, i->loc).source(ctx));
                         } else if (isStdlibWhitelisted || isBuiltinGeneric) {
                             // the default provided here for builtin generic types is 1, and that might need to change
                             // if we add other builtin generics (but ideally we should never need to do so!)
@@ -693,8 +693,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                             for (int i = 0; i < numTypeArgs; i++) {
                                 untypeds.emplace_back("T.untyped");
                             }
-                            e.replaceWith("Add type arguments", i->loc, "{}{}[{}]", typePrefix, i->loc.source(ctx),
-                                          absl::StrJoin(untypeds, ", "));
+                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i->loc), "{}{}[{}]", typePrefix,
+                                          core::Loc(ctx.file, i->loc).source(ctx), absl::StrJoin(untypeds, ", "));
                         }
                     }
                 }
@@ -743,8 +743,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
-                        if (auto e =
-                                ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
+                        if (auto e = ctx.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
                             string typeStr = sym.show(ctx);
 
@@ -764,14 +763,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                     }
                 } else {
                     // a type member has occurred in a context that doesn't allow them
-                    if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
                         e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
                     }
                     result.type = core::Types::untypedUntracked();
                 }
             } else if (sym.data(ctx)->isStaticField()) {
-                if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(),
                                    "If you are trying to define a type alias, you should use `{}` here",
@@ -779,7 +778,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 }
                 result.type = core::Types::untypedUntracked();
             } else {
-                if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Not a class type `{}`", maybeAliased.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
@@ -790,7 +789,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
-                        if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                             e.setHeader("Using `{}` is not permitted here", "bind");
                         }
                     } else {
@@ -801,7 +800,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 vector<core::TypePtr> targs;
 
                 if (sig.returns == nullptr) {
-                    if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed T.proc: You must specify a return type");
                     }
                     targs.emplace_back(core::Types::untypedUntracked());
@@ -815,7 +814,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
                 auto arity = targs.size() - 1;
                 if (arity > core::Symbols::MAX_PROC_ARITY) {
-                    if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed T.proc: Too many arguments (max `{}`)", core::Symbols::MAX_PROC_ARITY);
                     }
                     result.type = core::Types::untypedUntracked();
@@ -830,7 +829,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             auto *recvi = ast::cast_tree<ast::ConstantLit>(recv);
             if (recvi == nullptr) {
-                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -843,7 +842,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
-                if (auto e = ctx.state.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
+                if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -851,7 +850,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             }
 
             if (s->fun != core::Names::squareBrackets()) {
-                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -860,13 +859,13 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> holders;
             InlinedVector<const core::TypeAndOrigins *, 2> targs;
-            InlinedVector<core::Loc, 2> argLocs;
+            InlinedVector<core::LocOffsets, 2> argLocs;
             targs.reserve(s->args.size());
             argLocs.reserve(s->args.size());
             holders.reserve(s->args.size());
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
-                ty.origins.emplace_back(arg->loc);
+                ty.origins.emplace_back(core::Loc(ctx.file, arg->loc));
                 ty.type = core::make_type<core::MetaType>(
                     getResultTypeWithSelfTypeParams(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
@@ -889,7 +888,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 corrected = core::Symbols::T_Set();
             }
             if (corrected.exists()) {
-                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
+                if (auto e = ctx.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
                     e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx)->show(ctx) + "[...]",
                                 recvi->symbol.data(ctx)->show(ctx) + "[...]", recvi->symbol.data(ctx)->show(ctx));
                     e.addErrorSection(
@@ -897,7 +896,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                                                                      recvi->symbol.data(ctx)->show(ctx) + "[...]")));
                     e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.data(ctx)->show(ctx),
                                               corrected.data(ctx)->show(ctx)),
-                                  recvi->loc, "{}", corrected.data(ctx)->show(ctx));
+                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.data(ctx)->show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
@@ -907,7 +906,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             corrected = corrected.data(ctx)->dealias(ctx);
 
             if (!corrected.data(ctx)->isClassOrModule()) {
-                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Expected a class or module");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -917,6 +916,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             core::CallLocs locs{
+                ctx.file,
                 s->loc,
                 recvi->loc,
                 argLocs,
@@ -942,7 +942,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 return;
             }
 
-            if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
             }
             result.type = core::Types::untypedUntracked();
@@ -951,14 +951,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             if (slf->isSelfReference()) {
                 result.type = ctxOwnerData->selfType(ctx);
             } else {
-                if (auto e = ctx.state.beginError(slf->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(slf->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unsupported type syntax");
                 }
                 result.type = core::Types::untypedUntracked();
             }
         },
         [&](ast::Expression *expr) {
-            if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type syntax");
             }
             result.type = core::Types::untypedUntracked();

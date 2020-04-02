@@ -10,7 +10,7 @@ unique_ptr<ast::Local> LocalVarSaver::postTransformLocal(core::Context ctx, uniq
     if (ctx.owner.data(ctx)->isMethod()) {
         owner = ctx.owner;
     } else if (ctx.owner == core::Symbols::root()) {
-        owner = ctx.state.lookupStaticInitForFile(local->loc);
+        owner = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local->loc));
     } else {
         ENFORCE(ctx.owner.data(ctx)->isClassOrModule());
         owner = ctx.state.lookupStaticInitForClass(ctx.owner);
@@ -24,12 +24,13 @@ unique_ptr<ast::Local> LocalVarSaver::postTransformLocal(core::Context ctx, uniq
 
         auto enclosingMethod = ctx.owner;
         if (enclosingMethod.data(ctx)->isClassOrModule()) {
-            enclosingMethod = ctx.owner == core::Symbols::root() ? ctx.state.lookupStaticInitForFile(local->loc)
-                                                                 : ctx.state.lookupStaticInitForClass(ctx.owner);
+            enclosingMethod = ctx.owner == core::Symbols::root()
+                                  ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local->loc))
+                                  : ctx.state.lookupStaticInitForClass(ctx.owner);
         }
 
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::IdentResponse(local->loc, local->localVariable, tp, enclosingMethod));
+            ctx, core::lsp::IdentResponse(core::Loc(ctx.file, local->loc), local->localVariable, tp, enclosingMethod));
     }
 
     return local;
@@ -46,7 +47,8 @@ unique_ptr<ast::MethodDef> LocalVarSaver::postTransformMethodDef(core::Context c
                 // (Ditto)
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
+                    ctx, core::lsp::IdentResponse(core::Loc(ctx.file, localExp->loc), localExp->localVariable, tp,
+                                                  methodDef->symbol));
             }
         }
     }

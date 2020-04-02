@@ -64,9 +64,9 @@ struct SpawningWalker {
 
             optional<string> output;
             {
-                string className = klass->name->loc.source(ctx);
+                string className = core::Loc(ctx.file, klass->name->loc).source(ctx);
                 string_view shortName = send->fun.data(ctx)->shortName(ctx);
-                string sendSource = send->loc.source(ctx);
+                string sendSource = core::Loc(ctx.file, send->loc).source(ctx);
 
                 vector<string> args(ctx.state.dslRubyExtraArgs);
                 args.emplace_back(*command);
@@ -105,14 +105,14 @@ struct SpawningWalker {
                     format_to(generatedSource, "{}", "end;");
                 }
 
-                auto path = fmt::format("{}//plugin-generated|{}.rbi", klass->loc.file().data(ctx).path(),
-                                        subprocessResults.size());
+                auto path =
+                    fmt::format("{}//plugin-generated|{}.rbi", ctx.file.data(ctx).path(), subprocessResults.size());
                 auto file =
                     make_shared<core::File>(move(path), fmt::to_string(generatedSource), core::File::Type::Normal);
                 file->pluginGenerated = true;
                 subprocessResults.emplace_back(move(file));
             } else {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Plugin::SubProcessError)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Plugin::SubProcessError)) {
                     e.setHeader("Error while executing subprocess plugin `{}`", *command);
                 }
             }

@@ -9,7 +9,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::Loc loc) {
+unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
     auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
     auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
     auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
@@ -19,7 +19,7 @@ unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, co
     return ASTUtil::mkNilable(loc, move(ev));
 }
 
-unique_ptr<ast::Expression> mkNilableString(core::Loc loc) {
+unique_ptr<ast::Expression> mkNilableString(core::LocOffsets loc) {
     return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
@@ -47,8 +47,9 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         return empty;
     }
     name = sym->asSymbol(ctx);
-    ENFORCE(sym->loc.source(ctx).size() > 1 && sym->loc.source(ctx)[0] == ':');
-    auto nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
+    ENFORCE(core::Loc(ctx.file, sym->loc).source(ctx).size() > 1 &&
+            core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+    auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
     ast::Hash *rules = nullptr;
@@ -67,10 +68,11 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
     // Compute the getters
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableString(loc)));
-    stats.emplace_back(ASTUtil::mkGet(loc, name, ast::MK::Cast(loc, mkNilableString(loc))));
+    stats.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::Cast(loc, mkNilableString(loc))));
 
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableEncryptedValue(ctx, loc)));
-    stats.emplace_back(ASTUtil::mkGet(loc, enc_name, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+    stats.emplace_back(
+        ASTUtil::mkGet(core::Loc(ctx.file, loc), enc_name, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     core::NameRef setName = name.addEq(ctx);
     core::NameRef setEncName = enc_name.addEq(ctx);
 
@@ -79,13 +81,14 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         stats.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableString(loc)),
                          mkNilableString(loc)));
-        stats.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
+        stats.emplace_back(
+            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
 
         stats.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
             mkNilableEncryptedValue(ctx, loc)));
-        stats.emplace_back(
-            ASTUtil::mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+        stats.emplace_back(ASTUtil::mkSet(core::Loc(ctx.file, loc), setEncName, nameLoc,
+                                          ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     }
 
     // Compute the Mutator
@@ -95,13 +98,14 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         rhs.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(nameLoc, ast::MK::Symbol(loc, core::Names::arg0()), mkNilableString(loc)),
                          mkNilableString(loc)));
-        rhs.emplace_back(ASTUtil::mkSet(loc, setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
+        rhs.emplace_back(
+            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, mkNilableString(loc))));
 
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
             mkNilableEncryptedValue(ctx, loc)));
-        rhs.emplace_back(
-            ASTUtil::mkSet(loc, setEncName, nameLoc, ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
+        rhs.emplace_back(ASTUtil::mkSet(core::Loc(ctx.file, loc), setEncName, nameLoc,
+                                        ast::MK::Cast(loc, mkNilableEncryptedValue(ctx, loc))));
     }
 
     return stats;
