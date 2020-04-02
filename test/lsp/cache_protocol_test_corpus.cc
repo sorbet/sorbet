@@ -3,6 +3,7 @@
 #include "ProtocolTest.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "common/FileOps.h"
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
@@ -13,7 +14,6 @@
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/lsp.h"
-#include <signal.h>
 
 namespace sorbet::test::lsp {
 using namespace std;
@@ -23,14 +23,9 @@ namespace {
 // Inspired by https://github.com/google/googletest/issues/1153#issuecomment-428247477
 int wait_for_child_fork(int pid) {
     int status;
-    const int rv = waitpid(pid, &status, WNOHANG);
-    if (rv < 0) {
+    if (waitpid(pid, &status, 0) < 0) {
         std::cerr << "[----------]  Waitpid error!" << std::endl;
         return -2;
-    }
-    if (rv == 0) {
-        // process is still running.
-        return -1;
     }
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);
@@ -38,12 +33,6 @@ int wait_for_child_fork(int pid) {
         std::cerr << "[----------]  Non-normal exit from child!" << std::endl;
         return -3;
     }
-}
-
-function<void(int)> _handler;
-// Used to register a lambda as a signal handler.
-void baseHandler(int signal) {
-    _handler(signal);
 }
 } // namespace
 
@@ -201,15 +190,14 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
         cerr << "PHASE 2\n";
+        auto signalFile = cacheDir + "/signal_file";
         // Fork before grabbing DB lock.
         const int child_pid = fork();
         if (child_pid == 0) {
             cerr << "CHILD: Waiting for signal\n";
-            bool signaled = false;
-            _handler = [&signaled](int code) { signaled = true; };
-            signal(SIGUSR1, baseHandler);
-            // Child process; wait for signal before writing to cache.
-            while (!signaled) {
+            // Child process; wait for file to exist before writing to cache.
+            while (!FileOps::exists(signalFile)) {
+                Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for signal");
             }
             cerr << "CHILD: Signal received\n";
 
@@ -235,22 +223,14 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             resetState();
             cerr << "PARENT: waiting for child to exit\n";
 
+            // Tell child process to mutate the cache by writing a file.
+            // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
+            FileOps::write(signalFile, " ");
+
             // Wait for child process to finish mutating the cache.
-            int exitCode = 0;
-            while (true) {
-                // Tell child process to mutate the cache.
-                kill(child_pid, SIGUSR1);
-                // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
-                exitCode = wait_for_child_fork(child_pid);
-                ASSERT_GE(exitCode, -1);
-                if (exitCode >= 0) {
-                    // Child exited.
-                    break;
-                }
-                Timer::timedSleep(chrono::microseconds(1000), *nullLogger, "Waiting for child");
-            }
+            EXPECT_EQ(0, wait_for_child_fork(child_pid));
+
             cerr << "PARENT: Running LSP\n";
-            EXPECT_EQ(0, exitCode);
 
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
