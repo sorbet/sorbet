@@ -11,8 +11,8 @@ class GlobalState;
 
 constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
-    unsigned int beginLoc : 24;
-    unsigned int endLoc : 24;
+    u4 beginLoc;
+    u4 endLoc;
     u4 beginPos() const {
         return beginLoc;
     };
