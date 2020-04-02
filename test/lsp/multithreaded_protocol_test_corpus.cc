@@ -19,18 +19,17 @@ optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) 
     return nullopt;
 }
 
-void sortTimersByStartTime(vector<CounterImpl::Timing> &times) {
-    fast_sort(times,
-              [](const CounterImpl::Timing &a, const CounterImpl::Timing &b) -> bool { return a.start < b.start; });
+void sortTimersByStartTime(vector<const CounterImpl::Timing *> &times) {
+    fast_sort(times, [](const auto *a, const auto *b) -> bool { return a->start.usec < b->start.usec; });
 }
 
-void checkDiagnosticTimes(vector<CounterImpl::Timing> times, size_t expectedSize) {
+void checkDiagnosticTimes(vector<const CounterImpl::Timing *> times, size_t expectedSize) {
     EXPECT_EQ(times.size(), expectedSize);
     sortTimersByStartTime(times);
 
     // No two diagnostic latency timers should have the same start timestamp.
     for (size_t i = 1; i < times.size(); i++) {
-        EXPECT_LT(times[i - 1].start, times[i].start);
+        EXPECT_LT(times[i - 1]->start.usec, times[i]->start.usec);
     }
 }
 
@@ -138,7 +137,7 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
     // We don't report task latencies for merged edits or canceled slow paths.
     auto taskLatency = counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}});
     EXPECT_EQ(taskLatency.size(), 1);
-    EXPECT_GE(taskLatency[0].end - taskLatency[0].start, chrono::milliseconds(5));
+    EXPECT_GE(taskLatency[0]->end.usec - taskLatency[0]->start.usec, 5'000 /* 5ms */);
     EXPECT_EQ(counters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
     EXPECT_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
@@ -147,10 +146,10 @@ TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits) {
 
     auto lastDiagnosticLatency = counters.getTimings("last_diagnostic_latency");
     sortTimersByStartTime(lastDiagnosticLatency);
-    EXPECT_GE(lastDiagnosticLatency[0].end - lastDiagnosticLatency[0].start, chrono::milliseconds(5));
-    EXPECT_GE(lastDiagnosticLatency[1].end - lastDiagnosticLatency[1].start, chrono::milliseconds(5));
+    EXPECT_GE(lastDiagnosticLatency[0]->end.usec - lastDiagnosticLatency[0]->start.usec, 5'000 /* 5ms */);
+    EXPECT_GE(lastDiagnosticLatency[1]->end.usec - lastDiagnosticLatency[1]->start.usec, 5'000 /* 5ms */);
     // 1 per edit
-    checkDiagnosticTimes(lastDiagnosticLatency, 3);
+    checkDiagnosticTimes(move(lastDiagnosticLatency), 3);
 }
 
 TEST_P(ProtocolTest, CancelsSlowPathWhenNewEditWouldTakeSlowPath) {
