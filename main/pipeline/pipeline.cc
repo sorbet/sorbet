@@ -97,9 +97,6 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
             prodCounterInc("types.input.files.kvstore.hit");
             auto cachedTree = core::serialize::Serializer::loadFile(gs, fref, maybeCached);
             ENFORCE(cachedTree.tree->loc.file() == fref);
-            // Ensure that the trees were read in the same session that read GlobalState -- otherwise, it may reference
-            // a name not in the name table!
-            ENFORCE(kvstore->sessionId() == gs.kvstoreSessionId);
             return make_unique<core::serialize::CachedFile>(move(cachedTree));
         } else {
             prodCounterInc("types.input.files.kvstore.miss");

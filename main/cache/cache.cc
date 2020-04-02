@@ -8,15 +8,29 @@
 using namespace std;
 
 namespace sorbet::realmain::cache {
-unique_ptr<KeyValueStore> maybeCreateKeyValueStore(const options::Options &opts) {
+unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &opts) {
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    return make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
-                                      opts.skipRewriterPasses ? "nodsl" : "default");
+    return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
+                                                                      opts.skipRewriterPasses ? "nodsl" : "default"));
 }
 
-void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> &kvstore, const options::Options &opts,
+unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
+    if (kvstore == nullptr) {
+        return nullptr;
+    }
+
+    auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
+    if (payload::kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
+        return ownedKvstore;
+    }
+
+    // Some other process has written to kvstore; don't use.
+    return nullptr;
+}
+
+void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
                                    core::GlobalState &gs, vector<ast::ParsedFile> &indexed) {
     if (kvstore == nullptr) {
         return;
@@ -27,9 +41,11 @@ void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> &kvstore, const opt
     if (wroteGlobalState) {
         // Only write changes to disk if GlobalState changed since the last time.
         pipeline::cacheTreesAndFiles(gs, indexed, ownedKvstore);
-        kvstore = OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
+        OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
+        prodCounterInc("cache.committed");
     } else {
-        kvstore = OwnedKeyValueStore::abort(move(ownedKvstore));
+        prodCounterInc("cache.aborted");
+        OwnedKeyValueStore::abort(move(ownedKvstore));
     }
 }
 
