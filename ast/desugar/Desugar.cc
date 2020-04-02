@@ -163,12 +163,14 @@ bool isIVarAssign(Expression *stat) {
 }
 
 unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expression> body) {
-    if (!body->loc.exists()) {
-        return body;
-    }
     if (!dctx.enclosingMethodLoc.file().data(dctx.ctx).isRBI()) {
         return body;
     }
+    if (!body->loc.exists()) {
+        return body;
+    }
+
+    auto loc = core::Loc(dctx.enclosingMethodLoc.file(), body->loc);
     if (isa_tree<EmptyTree>(body.get())) {
         return body;
     } else if (isa_tree<Assign>(body.get())) {
