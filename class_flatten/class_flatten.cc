@@ -77,6 +77,7 @@ public:
 
         core::SymbolRef sym;
         auto loc = classDef->declLoc;
+        std::unique_ptr<ast::Expression> replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -84,8 +85,15 @@ public:
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.lookupStaticInitForFile(loc);
+
+            // Skip emitting a place-holder for the root object.
+            replacement = ast::MK::EmptyTree();
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
+
+            // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
+            // available to the containing static-init
+            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
@@ -107,14 +115,10 @@ public:
 
         classDef->rhs.emplace_back(std::move(init));
 
-        // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
-        // available to the containing static-init
-        auto defn = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
-
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
 
-        return defn;
+        return replacement;
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {
