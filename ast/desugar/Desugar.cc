@@ -166,8 +166,7 @@ unique_ptr<Expression> validateRBIBody(DesugarContext dctx, unique_ptr<Expressio
     if (!body->loc.exists()) {
         return body;
     }
-    auto loc = core::Loc(dctx.enclosingMethodLoc.file(), body->loc);
-    if (!loc.file().data(dctx.ctx).isRBI()) {
+    if (!dctx.enclosingMethodLoc.file().data(dctx.ctx).isRBI()) {
         return body;
     }
     if (isa_tree<EmptyTree>(body.get())) {
