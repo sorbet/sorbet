@@ -1509,8 +1509,9 @@ ClassDef{
         }
 
         Send{
-          recv = Local{
-            localVariable = <U <self>>
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {
@@ -1589,8 +1590,9 @@ ClassDef{
         }
 
         Send{
-          recv = Local{
-            localVariable = <U <self>>
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T::Sig::WithoutRuntime
           }
           fun = <U sig>
           block = Block {

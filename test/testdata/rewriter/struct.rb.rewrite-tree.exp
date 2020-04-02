@@ -107,7 +107,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         arg0
       end
 
-      <self>.sig() do ||
+      ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C A>)
       end
 
@@ -115,7 +115,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C T>.cast(nil, <emptyTree>::<C A>)
       end
 
-      <self>.sig() do ||
+      ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C BasicObject>)
       end
 
@@ -123,7 +123,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         nil
       end
 
-      <self>.sig() do ||
+      ::T::Sig::WithoutRuntime.sig() do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C BasicObject>)
       end
 

@@ -298,15 +298,7 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` https://srb.help
 `
      105 |  class Merchant
           ^
-
-suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
-     108 |  sig {params(merchant: Merchant).void}
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-suggest-sig-garbage.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
-     108 |  sig {params(merchant: Merchant).void}
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 42
+Errors: 40
 
 --------------------------------------------------------------------------
 

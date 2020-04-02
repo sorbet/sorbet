@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    <self>.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -104,7 +104,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C T>.cast(<emptyTree>::<C T>.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    <self>.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
     end
 

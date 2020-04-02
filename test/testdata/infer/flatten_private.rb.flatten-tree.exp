@@ -36,10 +36,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"arg0" => ::Integer}).void()
         end
         <self>.extend(::T::Sig)

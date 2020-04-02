@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <self>.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
