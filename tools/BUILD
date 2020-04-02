@@ -56,6 +56,7 @@ compilation_database(
         "//main/cache:cache",
         "//payload:interface",
         "//main/pipeline:pipeline",
+        "//third_party/rbs_parser:rbs_parser",
         "//rewriter:rewriter",
         "//resolver:resolver",
         "//plugin:plugin",
