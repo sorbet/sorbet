@@ -219,7 +219,6 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             resetState();
 
             // Tell child process to mutate the cache by writing a file.
-            // Returns -1 if child is still running, or exitcode if it exited. Other negative values are errors.
             FileOps::write(signalFile, " ");
 
             // Wait for child process to finish mutating the cache.
