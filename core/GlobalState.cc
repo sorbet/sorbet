@@ -320,7 +320,6 @@ void GlobalState::initEmpty() {
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
-    Context ctx(*this, Symbols::root());
 
     // Synthesize <Magic>#<build-hash>(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
@@ -366,7 +365,7 @@ void GlobalState::initEmpty() {
         arg.flags.isRepeated = true;
         arg.type = Types::String();
     }
-    method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
+    method.data(*this)->resultType = Types::any(*this, Types::nilClass(), Types::String());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;

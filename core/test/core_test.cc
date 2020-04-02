@@ -132,33 +132,4 @@ TEST(CoreTest, Substitute) { // NOLINT
     ASSERT_TRUE(other2.data(gs2)->kind == NameKind::UTF8);
     ASSERT_EQ("<U other>", other2.showRaw(gs2));
 }
-
-TEST(CoreTest, LocTest) { // NOLINT
-    constexpr auto maxFileId = 0xffff - 1;
-    constexpr auto maxOffset = 0xffffff - 1;
-    for (auto fileRef = 0; fileRef < maxFileId; fileRef = fileRef * 2 + 1) {
-        for (auto beginPos = 0; beginPos < maxOffset; beginPos = beginPos * 2 + 1) {
-            for (auto endPos = beginPos; endPos < maxOffset; endPos = endPos * 2 + 1) {
-                Loc loc(core::FileRef(fileRef), beginPos, endPos);
-                EXPECT_EQ(loc.file().id(), fileRef);
-                EXPECT_EQ(loc.beginPos(), beginPos);
-                EXPECT_EQ(loc.endPos(), endPos);
-            }
-        }
-    }
-    for (auto fileRef = 0; fileRef < maxFileId; fileRef = fileRef * 2 + 1) {
-        for (auto beginPos = 0; beginPos < maxOffset; beginPos = beginPos * 2 + 1) {
-            for (auto endPos = beginPos; endPos < maxOffset; endPos = endPos * 2 + 1) {
-                Loc loc(core::FileRef(fileRef), beginPos, endPos);
-                auto [low, high] = loc.getAs2u4();
-                Loc loc2;
-                loc2.setFrom2u4(low, high);
-                EXPECT_EQ(loc.file().id(), loc2.file().id());
-                EXPECT_EQ(loc.beginPos(), loc2.beginPos());
-                EXPECT_EQ(loc.endPos(), loc2.endPos());
-            }
-        }
-    }
-}
-
 } // namespace sorbet::core
