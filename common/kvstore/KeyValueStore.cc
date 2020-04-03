@@ -35,6 +35,12 @@ static void throw_mdb_error(string_view what, int err) {
 // http://www.lmdb.tech/doc/group__mdb.html#gac08cad5b096925642ca359a6d6f0562a
 // That function is called in OwnedKeyValueStore.
 static atomic<bool> kvstoreInUse = false;
+
+int mdbReaderListCallback(const char *msg, void *ctx) {
+    string *output = (string *)ctx;
+    *output = string(msg);
+    return 0;
+}
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
@@ -57,7 +63,9 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_open(dbState->env, this->path.c_str(), 0, 0664);
+    // _disable_ thread local storage so that any thread can close/abort a reader transaction.
+    // otherwise, we will end up leaving stale transactions in the database, leading to `MDB_READERS_FULL` errors.
+    rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
     if (rc != 0) {
         goto fail;
     }
@@ -71,6 +79,15 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     if (!kvstoreInUse.compare_exchange_strong(expected, false)) {
         throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
     }
+}
+
+string KeyValueStore::getReaderLockTable() {
+    string ctxString;
+    const int err = mdb_reader_list(dbState->env, mdbReaderListCallback, &ctxString);
+    if (err < 0) {
+        throw_mdb_error("Failure checking for stale readers", err);
+    }
+    return ctxString;
 }
 
 OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)

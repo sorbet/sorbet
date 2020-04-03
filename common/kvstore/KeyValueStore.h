@@ -3,6 +3,7 @@
 #include "absl/synchronization/mutex.h"
 #include "common/common.h"
 #include <thread>
+
 namespace sorbet {
 
 class OwnedKeyValueStore;
@@ -38,6 +39,9 @@ public:
      */
     KeyValueStore(std::string version, std::string path, std::string flavor);
     ~KeyValueStore() noexcept(false);
+
+    // Used in tests to assert that OwnedKeyValueStore cleans up reader transactions.
+    std::string getReaderLockTable();
 
     friend class OwnedKeyValueStore;
 };
