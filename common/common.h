@@ -18,12 +18,6 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <string_view>
 #include <type_traits>
 
-#if !defined(NDEBUG)
-// So you can use `cout` when debugging. Not included in production as it is a
-// performance hit.
-#include <iostream>
-#endif
-
 namespace sorbet {
 
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
