@@ -44,6 +44,28 @@ int mdbReaderListCallback(const char *msg, void *ctx) {
     *output = string(msg);
     return 0;
 }
+
+bool hasNoOutstandingReaders(MDB_env *env) {
+    string ctxString;
+    /*
+     * LMDB only has two APIs to grok the reader list
+     * (http://www.lmdb.tech/doc/group__mdb.html#ga8550000cd0501a44f57ee6dff0188744)
+     *
+     * - `mdb_reader_check`, which checks for stale transactions. Unfortunately a reader isn't stale if the owning
+     * thread is still alive, and LMDB seems to clean up stale transactions automatically somehow prior to me calling
+     * this function, so it doesn't work.
+     * - `mdb_reader_list`, which produces a human-readable string containing the lock table contents (used in mdb_stat
+     * CLI tool). It accepts a callback.
+     *
+     * I use the latter, as it's the only way to check if the lock table contains contents when we expect that it
+     * doesn't.
+     */
+    const int err = mdb_reader_list(env, mdbReaderListCallback, &ctxString);
+    if (err < 0) {
+        throw_mdb_error("Failure checking for stale readers", err);
+    }
+    return ctxString.find("(no active readers)") != string::npos;
+}
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
@@ -88,26 +110,8 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     }
 }
 
-string KeyValueStore::getReaderLockTable() {
-    string ctxString;
-    /*
-     * LMDB only has two APIs to grok the reader list
-     * (http://www.lmdb.tech/doc/group__mdb.html#ga8550000cd0501a44f57ee6dff0188744)
-     *
-     * - `mdb_reader_check`, which checks for stale transactions. Unfortunately a reader isn't stale if the owning
-     * thread is still alive, and LMDB seems to clean up stale transactions automatically somehow prior to me calling
-     * this function, so it doesn't work.
-     * - `mdb_reader_list`, which produces a human-readable string containing the lock table contents (used in mdb_stat
-     * CLI tool). It accepts a callback.
-     *
-     * I use the latter, as it's the only way to check if the lock table contains contents when we expect that it
-     * doesn't.
-     */
-    const int err = mdb_reader_list(dbState->env, mdbReaderListCallback, &ctxString);
-    if (err < 0) {
-        throw_mdb_error("Failure checking for stale readers", err);
-    }
-    return ctxString;
+void KeyValueStore::enforceNoOutstandingReaders() const {
+    ENFORCE(hasNoOutstandingReaders(dbState->env));
 }
 
 OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)

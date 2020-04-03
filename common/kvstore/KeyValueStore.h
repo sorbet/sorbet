@@ -40,7 +40,7 @@ public:
     ~KeyValueStore() noexcept(false);
 
     // Used in tests to assert that OwnedKeyValueStore cleans up reader transactions.
-    std::string getReaderLockTable();
+    void enforceNoOutstandingReaders() const;
 
     friend class OwnedKeyValueStore;
 };
