@@ -26,21 +26,30 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 
+// Wraps input in double quotes. https://stackoverflow.com/a/6671729
+#define Q(x) #x
+#define QUOTED(x) Q(x)
+
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 
 // Used for cases like https://xkcd.com/2200/
 // where there is some assumption that you believe should always hold.
 // Please use this to explicitly write down what assumptions was the code written under.
 // One day they might be violated and you'll help the next person debug the issue.
-#define ENFORCE(x, ...)                                                                             \
-    ((::sorbet::debug_mode && !(x)) ? ({                                                            \
-        ::sorbet::Exception::failInFuzzer();                                                        \
-        if (stopInDebugger()) {                                                                     \
-            (void)!(x);                                                                             \
-        }                                                                                           \
-        ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
-    })                                                                                              \
-                                    : false)
+#define ENFORCE(x, ...)                                                                                        \
+    do {                                                                                                       \
+        if (::sorbet::debug_mode) {                                                                            \
+            auto __enforceTimer =                                                                              \
+                ::sorbet::Timer(*(::spdlog::default_logger_raw()), "ENFORCE: " __FILE__ ":" QUOTED(__LINE__)); \
+            if (!(x)) {                                                                                        \
+                ::sorbet::Exception::failInFuzzer();                                                           \
+                if (stopInDebugger()) {                                                                        \
+                    (void)!(x);                                                                                \
+                }                                                                                              \
+                ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__));    \
+            }                                                                                                  \
+        }                                                                                                      \
+    } while (false);
 
 #define DEBUG_ONLY(X) \
     if (debug_mode) { \
@@ -140,4 +149,5 @@ std::string demangle(const char *mangled);
 #pragma GCC poison rexec rexec_af
 
 #include "Exception.h"
+#include "Timer.h"
 #endif
