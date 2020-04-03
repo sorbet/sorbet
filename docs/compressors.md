@@ -1,4 +1,4 @@
-Sorbet internally uses a lizard(LZ5) compressor to compress internal datastructures, with compression level 15.
+Sorbet internally uses a lizard(LZ5) compressor to compress internal datastructures, with compression level 10.
 Decision to use it was made via the following benchmark(run with https://github.com/inikep/lzbench)
 Note that we care a lot about decompression speed, followed by size. We care a bit about compression speed, but not much.
 The numbers below are measured on the GlobalState of Sorbet for the stdlib.
