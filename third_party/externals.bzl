@@ -53,10 +53,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "rapidjson",
-        url = "https://github.com/Tencent/rapidjson/archive/d87b698d0fcc10a5f632ecbc80a9cb2a8fa094a5.zip",
-        sha256 = "5428830eae1e19d0436e64b214c727aab4a33379129cdede11b0507974ad134f",
+        url = "https://github.com/Tencent/rapidjson/archive/f376690822cbc2d17044e626be5df21f7d91ca8f.zip",
+        sha256 = "9425276583dff9020cee6332472b0cf247ae325cb5f26dbe157183f747da3910",
         build_file = "@com_stripe_ruby_typer//third_party:rapidjson.BUILD",
-        strip_prefix = "rapidjson-d87b698d0fcc10a5f632ecbc80a9cb2a8fa094a5",
+        strip_prefix = "rapidjson-f376690822cbc2d17044e626be5df21f7d91ca8f",
     )
 
     http_archive(
