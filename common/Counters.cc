@@ -315,7 +315,7 @@ string getCounterStatistics(vector<string> names) {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15.15}\n", cat.first, "", (double)sum);
+        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15}\n", cat.first, "", sum);
 
         if (sum == 0) {
             sum = 1;
@@ -323,7 +323,7 @@ string getCounterStatistics(vector<string> names) {
         for (auto &e : sorted) {
             auto perc = e.first * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
-            fmt::format_to(buf, "  {:>40.40} :{:15.15}, {:3.1f}% {}\n", e.second, (double)e.first, perc, hashes);
+            fmt::format_to(buf, "  {:>40.40} :{:15}, {:3.1f}% {}\n", e.second, e.first, perc, hashes);
         }
         fmt::format_to(buf, "\n");
     }
@@ -340,7 +340,7 @@ string getCounterStatistics(vector<string> names) {
         }
         fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15.15}\n", hist.first, "", (double)sum);
+        fmt::format_to(buf, " {}\n{:<36.36} Total :{:15}\n", hist.first, "", sum);
 
         CounterImpl::CounterType header = 0;
         auto it = sorted.begin();
@@ -352,7 +352,7 @@ string getCounterStatistics(vector<string> names) {
         if (it != sorted.begin()) {
             auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
-            fmt::format_to(buf, "  <{:>39.39} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)header, perc,
+            fmt::format_to(buf, "  <{:>39.39} :{:15}, {:5.1f}% {}\n", to_string(it->first), header, perc,
                            hashes);
         }
 
@@ -360,14 +360,14 @@ string getCounterStatistics(vector<string> names) {
             header += it->second;
             auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
-            fmt::format_to(buf, "  {:>40.40} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)it->second, perc,
+            fmt::format_to(buf, "  {:>40.40} :{:15}, {:5.1f}% {}\n", to_string(it->first), it->second, perc,
                            hashes);
             it++;
         }
         if (it != sorted.end()) {
             auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
-            fmt::format_to(buf, "  >={:>38.38} :{:15.15}, {:5.1f}% {}\n", to_string(it->first), (double)(sum - header),
+            fmt::format_to(buf, "  >={:>38.38} :{:15}, {:5.1f}% {}\n", to_string(it->first), sum - header,
                            perc, hashes);
         }
         fmt::format_to(buf, "\n");
@@ -416,7 +416,7 @@ string getCounterStatistics(vector<string> names) {
                 continue;
             }
 
-            string line = fmt::format("  {:>40.40} :{:15.15}\n", e.first, (double)e.second);
+            string line = fmt::format("  {:>40.40} :{:15}\n", e.first, e.second);
             sortedOther.emplace_back(e.first, line);
         }
 
