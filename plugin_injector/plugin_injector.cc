@@ -12,9 +12,8 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload/PayloadLoader.h"
+#include "compiler/Names/Names.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
-#include "compiler/Rewriters/DefinitionRewriter.h"
-#include "compiler/Rewriters/SigRewriter.h"
 #include "core/ErrorQueue.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
@@ -89,6 +88,11 @@ class LLVMSemanticExtension : public SemanticExtension {
             return true;
         }
         // TODO parse this the same way as `typed:`
+        return isCompiledTrue(gs, f);
+    }
+
+    bool isCompiledTrue(const core::GlobalState &gs, const core::FileRef &f) const {
+        // TODO parse this the same way as `typed:`
         return f.data(gs).source().find("# compiled: true\n") != string_view::npos;
     }
 
@@ -99,20 +103,7 @@ public:
     }
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override {
-        if (!shouldCompile(ctx, klass->declLoc.file())) {
-            return;
-        }
-        if (klass->declLoc.file().data(ctx).strictLevel < core::StrictLevel::True) {
-            if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Compiler::Untyped)) {
-                e.setHeader("File must be `typed: true` or higher to be compiled");
-            }
-        }
-        if (!ast::isa_tree<ast::EmptyTree>(klass->name.get())) {
-            return;
-        }
-
-        compiler::DefinitionRewriter::run(ctx, klass);
-        compiler::SigRewriter::run(ctx, klass);
+        compiler::Names::init(ctx);
     };
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,

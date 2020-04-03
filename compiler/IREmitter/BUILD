@@ -17,6 +17,7 @@ cc_library(
         "//compiler/Names",
         "@com_stripe_ruby_typer//ast",
         "@com_stripe_ruby_typer//cfg",
+        "@com_stripe_ruby_typer//core",
         "@spdlog",
     ],
 )

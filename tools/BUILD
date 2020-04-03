@@ -13,7 +13,6 @@ compilation_database(
         "//third_party/xxd:xxd",
         "//main:sorbet",
         "//plugin_injector:plugin_injector",
-        "//compiler/Rewriters:Rewriters",
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/Passes:Passes",
         "//compiler/Linker:Linker",

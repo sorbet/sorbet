@@ -2,6 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "compiler/Names/Names.h"
+#include "core/Names.h"
 
 using namespace std;
 namespace sorbet::compiler {
