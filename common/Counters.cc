@@ -187,7 +187,7 @@ givenArgs2StoredArgs(unique_ptr<vector<pair<ConstExprStr, string>>> given) {
         return nullptr;
     }
 
-    unique_ptr<vector<pair<const char *, string>>> stored = make_unique<vector<pair<const char *, string>>>();
+    auto stored = make_unique<vector<pair<const char *, string>>>();
     for (auto &e : *given) {
         stored->emplace_back(e.first.str, move(e.second));
     }
@@ -200,8 +200,7 @@ givenTags2StoredTags(unique_ptr<vector<pair<ConstExprStr, ConstExprStr>>> given)
         return nullptr;
     }
 
-    unique_ptr<vector<pair<const char *, const char *>>> stored =
-        make_unique<vector<pair<const char *, const char *>>>();
+    auto stored = make_unique<vector<pair<const char *, const char *>>>();
     for (auto &e : *given) {
         stored->emplace_back(e.first.str, e.second.str);
     }
