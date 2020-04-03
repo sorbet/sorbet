@@ -135,4 +135,5 @@ TEST_F(KeyValueStoreTest, LeavesNoStaleTransactions) {
     // Thread is now ended; if it left a reader transaction, it'll appear stale in the table.
     auto lockTable = kvstore->getReaderLockTable();
     EXPECT_TRUE(lockTable.find("(no active readers)") != string::npos) << lockTable;
+    testFinished.Notify();
 }
