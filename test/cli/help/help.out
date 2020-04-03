@@ -6,7 +6,7 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string     Parse an inline ruby string (default: )
+  -e, string     Parse an inline ruby string (default: "")
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
   -h,            Show short help
@@ -22,7 +22,7 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string     Parse an inline ruby string (default: )
+  -e, string     Parse an inline ruby string (default: "")
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
   -h,            Show short help
@@ -36,7 +36,7 @@ Typechecker for Ruby
 Usage:
   sorbet [OPTION...] <path 1> <path 2> ...
 
-  -e, string     Parse an inline ruby string (default: )
+  -e, string     Parse an inline ruby string (default: "")
   -q, --quiet    Silence all non-critical errors
   -v, --verbose  Verbosity level [0-3]
   -h,            Show short help
@@ -50,15 +50,15 @@ Usage:
       --configatron-dir path    Path to configatron yaml folders
       --configatron-file path   Path to configatron yaml files
       --web-trace-file file     Web trace file. For use with chrome
-                                about://tracing (default: )
-      --debug-log-file file     Path to debug log file (default: )
+                                about://tracing (default: "")
+      --debug-log-file file     Path to debug log file (default: "")
       --reserve-mem-kb arg      Preallocate the specified amount of memory
                                 for symbol+name tables (default: 0)
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
       --remove-path-prefix prefix
                                 Remove the provided path prefix from all
                                 printed paths. Defaults to the input directory
-                                passed to Sorbet, if any. (default: )
+                                passed to Sorbet, if any. (default: "")
   -a, --autocorrect             Auto-correct source files with suggested
                                 fixes
       --suggest-runtime-profiled
@@ -122,7 +122,7 @@ Usage:
                                 output
       --autogen-autoloader-preamble arg
                                 Preamble to add to each autoloader file
-                                (default: )
+                                (default: "")
       --autogen-autoloader-root arg
                                 Root directory for autoloader output
                                 (default: autoloader)
@@ -189,21 +189,21 @@ Usage:
                                 (default: auto)
       --typed-override filepath.yaml
                                 Yaml config that overrides strictness levels
-                                on files (default: )
-      --store-state file        Store state into file (default: )
+                                on files (default: "")
+      --store-state file        Store state into file (default: "")
       --cache-dir dir           Use the specified folder to cache data
-                                (default: )
+                                (default: "")
       --suppress-non-critical   Exit 0 unless there was a critical error
       --dsl-plugins filepath.yaml
                                 YAML config that configures external DSL
-                                plugins (default: )
+                                plugins (default: "")
       --counter counter         Print internal counter
-      --statsd-host host        StatsD sever hostname (default: )
+      --statsd-host host        StatsD sever hostname (default: "")
       --counters                Print all internal counters
       --suggest-typed           Suggest which typed: sigils to add or upgrade
       --statsd-prefix prefix    StatsD prefix (default: ruby_typer.unknown)
       --statsd-port port        StatsD server port (default: 8200)
-      --metrics-file file       File to export metrics to (default: )
+      --metrics-file file       File to export metrics to (default: "")
       --metrics-prefix file     Prefix to use in metrics (default:
                                 ruby_typer.unknown.)
       --metrics-branch branch   Branch to report in metrics export (default:

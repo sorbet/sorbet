@@ -11,18 +11,18 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "yaml_cpp",
-        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.zip",
-        sha256 = "292c8de66bfda19a2ca08a32a8c1ec39b709ac75f54e6be0735940db2dbdff76",
+        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.zip",
+        sha256 = "7c0ddc08a99655508ae110ba48726c67e4a10b290c214aed866ce4bbcbe3e84c",
         build_file = "@com_stripe_ruby_typer//third_party:yaml_cpp.BUILD",
-        strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
+        strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
     )
 
     http_archive(
         name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/a7148b718ea2fabb8387cb90aee9bf448da63e65.zip",  # v1.3.1
-        sha256 = "115ba04ec00988955a54e52791d18e7ac99d2a4a00a361dc00ca7032d0890faa",
+        url = "https://github.com/gabime/spdlog/archive/c2b47430fb210c8822177407b9e4b82d4ef7455d.zip",  # v1.3.1
+        sha256 = "08b7e0f1d7c62a56dfbac5678979967690ccd9e074acd3762a2a49d8731961e6",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-a7148b718ea2fabb8387cb90aee9bf448da63e65",
+        strip_prefix = "spdlog-c2b47430fb210c8822177407b9e4b82d4ef7455d",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
@@ -30,33 +30,33 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "e4f8bedb19a93d0dccc359a126f51158282e0b24d92e0cad9c76a9699698268d",
-        strip_prefix = "protobuf-3.11.2",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.2.zip"],
+        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+        strip_prefix = "protobuf-3.11.4",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
     )
 
     http_archive(
         name = "libprotobuf-mutator",
-        url = "https://github.com/google/libprotobuf-mutator/archive/d761b622751ae8c226db3d8daaaf4c6aab5e5243.zip",
-        sha256 = "2083e7e502530fd6cc5eea3fd36ed72968d055cf3675569854f24e4ebd08903a",
+        url = "https://github.com/google/libprotobuf-mutator/archive/68e10c13248517c5bcd531d0e02be483da83fc13.zip",
+        sha256 = "8684276b996e8d8541ed3703420f9dbcc17702bd7b13c6f3d9c13a4656597c76",
         build_file = "@com_stripe_ruby_typer//third_party:libprotobuf-mutator.BUILD",
-        strip_prefix = "libprotobuf-mutator-d761b622751ae8c226db3d8daaaf4c6aab5e5243",
+        strip_prefix = "libprotobuf-mutator-68e10c13248517c5bcd531d0e02be483da83fc13",
     )
 
     http_archive(
         name = "lmdb",
-        url = "https://github.com/DarkDimius/lmdb/archive/15a9c2604e3401593110ddf6c9e2e16a4b28e68e.zip",
-        sha256 = "f633f39c5be156deb950839d5f905fcd2e325a7cb82b095950a28590ba82450b",
+        url = "https://github.com/DarkDimius/lmdb/archive/75766ec2b663b360be8eea9730a7adc0d252ce7e.zip",
+        sha256 = "bd120470d62c6f3433f80bb9841f09f158924081eb0c3236da6e8d1a0976eccc",
         build_file = "@com_stripe_ruby_typer//third_party:lmdb.BUILD",
-        strip_prefix = "lmdb-15a9c2604e3401593110ddf6c9e2e16a4b28e68e",
+        strip_prefix = "lmdb-75766ec2b663b360be8eea9730a7adc0d252ce7e",
     )
 
     http_archive(
         name = "rapidjson",
-        url = "https://github.com/Tencent/rapidjson/archive/d87b698d0fcc10a5f632ecbc80a9cb2a8fa094a5.zip",
-        sha256 = "5428830eae1e19d0436e64b214c727aab4a33379129cdede11b0507974ad134f",
+        url = "https://github.com/Tencent/rapidjson/archive/f376690822cbc2d17044e626be5df21f7d91ca8f.zip",
+        sha256 = "9425276583dff9020cee6332472b0cf247ae325cb5f26dbe157183f747da3910",
         build_file = "@com_stripe_ruby_typer//third_party:rapidjson.BUILD",
-        strip_prefix = "rapidjson-d87b698d0fcc10a5f632ecbc80a9cb2a8fa094a5",
+        strip_prefix = "rapidjson-f376690822cbc2d17044e626be5df21f7d91ca8f",
     )
 
     http_archive(
@@ -101,10 +101,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "cxxopts",
-        url = "https://github.com/jarro2783/cxxopts/archive/cb60381e84df99a4829e3d3c657c06380f916d0f.zip",
-        sha256 = "69b1e8d5145567f552db476ab3c3bb769c1790f4e40b4d3901de1d233c94b78b",
+        url = "https://github.com/jarro2783/cxxopts/archive/b0f67a06de3446aa97a4943ad0ad6086460b2b61.zip",
+        sha256 = "8635d7305e6623e7f4c635dae901891eb1151cee3106445d124c696361bb70fc",
         build_file = "@com_stripe_ruby_typer//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-cb60381e84df99a4829e3d3c657c06380f916d0f",
+        strip_prefix = "cxxopts-b0f67a06de3446aa97a4943ad0ad6086460b2b61",
     )
 
     http_archive(
@@ -117,9 +117,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        url = "https://github.com/abseil/abseil-cpp/archive/d9aa92d7fb324314f9df487ac23d32a25650b742.zip",
-        sha256 = "caf4c323eb6211397df96dd5ff96e46c7e5dd77c74d3daed2181f87868159eca",
-        strip_prefix = "abseil-cpp-d9aa92d7fb324314f9df487ac23d32a25650b742",
+        url = "https://github.com/abseil/abseil-cpp/archive/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08.zip",
+        sha256 = "afcab9f226ac4ca6b6b7c9ec704a995fe32a6b555d6935b0de247ae6ac6940e0",
+        strip_prefix = "abseil-cpp-62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08",
     )
 
     http_archive(
@@ -177,18 +177,18 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "com_github_msgpack_msgpack",
-        url = "https://github.com/msgpack/msgpack-c/archive/3129326432dde8d509326ae9720a33f46dd56917.zip",
-        sha256 = "bcd2760b6d33b0ad5f8ed895be8ccdb4edea3134378f0bb1b856f98f3a03f0f2",
+        url = "https://github.com/msgpack/msgpack-c/archive/7893d4d8c9ba8a8699c5c33152deaabf409250b3.zip",
+        sha256 = "72dadac3def5180a701a3b251e9f1105c2b126907dc384d933370b7df5b73951",
         build_file = "@com_stripe_ruby_typer//third_party:msgpack.BUILD",
-        strip_prefix = "msgpack-c-3129326432dde8d509326ae9720a33f46dd56917",
+        strip_prefix = "msgpack-c-7893d4d8c9ba8a8699c5c33152deaabf409250b3",
     )
 
     http_archive(
         name = "com_github_d_bahr_crcpp",
-        url = "https://github.com/d-bahr/CRCpp/archive/534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2.zip",
-        sha256 = "c8adb9b91072e3578f0af802a4abc3c68109301dc6ef0708b34863d168e39747",
+        url = "https://github.com/d-bahr/CRCpp/archive/51fbc35ef892e98abe91a51f7320749c929d72bd.zip",
+        sha256 = "57c4c127b5aa4451556969d6929cf9465a5d5481b3442ddb878d95296caeee4b",
         build_file = "@com_stripe_ruby_typer//third_party:crcpp.BUILD",
-        strip_prefix = "CRCpp-534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2",
+        strip_prefix = "CRCpp-51fbc35ef892e98abe91a51f7320749c929d72bd",
     )
 
     http_archive(
@@ -236,10 +236,10 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "cpp_subprocess",
-        url = "https://github.com/arun11299/cpp-subprocess/archive/6931e3d69fb36e6eae099585646e54ac644bf99c.zip",
-        sha256 = "aa06e3749687c236a311ff93a0b973582a41a9effbc0126b0e101c05f3391bdc",
+        url = "https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip",
+        sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
-        strip_prefix = "cpp-subprocess-6931e3d69fb36e6eae099585646e54ac644bf99c",
+        strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
     http_file(
