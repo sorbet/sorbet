@@ -62,15 +62,15 @@ private:
     FlowId prev;
     FlowId self;
     // 'args' appear in traces, but not in statsd metrics because they can cause an explosion in cardinality
-    std::vector<std::pair<ConstExprStr, std::string>> args;
+    std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args;
     // 'tags' appear in statsd metrics but not in traces. They are ConstExprStr to limit cardinality.
-    std::vector<std::pair<ConstExprStr, ConstExprStr>> tags;
+    std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags;
     // It would be far better for type safety to store this as a std::chrono::time_point,
     // but we don't know the clock a priori, because it's platform specific.
     const microseconds start;
     // If not empty, report the time for this timer in the given histogram, where each entry forms an upper bound
     // on a bucket.
-    std::vector<int> histogramBuckets;
+    std::unique_ptr<std::vector<int>> histogramBuckets;
     bool canceled = false;
 };
 } // namespace sorbet

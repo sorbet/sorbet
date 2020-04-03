@@ -69,8 +69,10 @@ public:
     }
     void timing(const CounterImpl::Timing &tim) { // type: ms
         auto nanoseconds = (tim.end.usec - tim.start.usec) * 1'000;
-        addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds, "ms",
-                  tim.tags); // format suggested by #observability (@sjung and @an)
+        if (tim.tags != nullptr) {
+            addMetric(absl::StrCat(tim.measure, ".duration_ns"), nanoseconds, "ms",
+                      *tim.tags); // format suggested by #observability (@sjung and @an)
+        }
     }
 };
 

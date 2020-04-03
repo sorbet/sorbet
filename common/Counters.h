@@ -101,9 +101,9 @@ struct FlowId {
 };
 
 void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
-               std::vector<std::pair<ConstExprStr, std::string>> args,
-               std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
-               std::vector<int> histogramBuckets);
+               std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args,
+               std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,
+               std::unique_ptr<std::vector<int>> histogramBuckets);
 
 absl::flat_hash_map<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);

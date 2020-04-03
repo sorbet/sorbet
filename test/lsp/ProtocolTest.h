@@ -33,8 +33,8 @@ public:
 
     CounterImpl::CounterType getHistogramCount(ConstExprStr histogram) const;
 
-    std::vector<CounterImpl::Timing> getTimings(ConstExprStr counter,
-                                                std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
+    std::vector<const CounterImpl::Timing *>
+    getTimings(ConstExprStr counter, std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
 };
 
 struct ProtocolTestConfig {
