@@ -358,7 +358,9 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
     }
 
     for (auto it = root.children.begin(); it != root.children.end(); /*nothing*/) {
-        auto copyIt = it++; // see https://github.com/abseil/abseil-cpp/blob/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08/absl/container/internal/raw_hash_set.h#L1157-L1169 for why
+        auto copyIt = it++; // see
+                            // https://github.com/abseil/abseil-cpp/blob/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08/absl/container/internal/raw_hash_set.h#L1157-L1169
+                            // for why
         auto &child = copyIt->second;
 
         if (child->hasDifferentFile(definingFile)) {

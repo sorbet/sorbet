@@ -352,23 +352,21 @@ string getCounterStatistics(vector<string> names) {
         if (it != sorted.begin()) {
             auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
-            fmt::format_to(buf, "  <{:>39.39} :{:15}, {:5.1f}% {}\n", to_string(it->first), header, perc,
-                           hashes);
+            fmt::format_to(buf, "  <{:>39.39} :{:15}, {:5.1f}% {}\n", to_string(it->first), header, perc, hashes);
         }
 
         while (it != sorted.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
             auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
-            fmt::format_to(buf, "  {:>40.40} :{:15}, {:5.1f}% {}\n", to_string(it->first), it->second, perc,
-                           hashes);
+            fmt::format_to(buf, "  {:>40.40} :{:15}, {:5.1f}% {}\n", to_string(it->first), it->second, perc, hashes);
             it++;
         }
         if (it != sorted.end()) {
             auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
-            fmt::format_to(buf, "  >={:>38.38} :{:15}, {:5.1f}% {}\n", to_string(it->first), sum - header,
-                           perc, hashes);
+            fmt::format_to(buf, "  >={:>38.38} :{:15}, {:5.1f}% {}\n", to_string(it->first), sum - header, perc,
+                           hashes);
         }
         fmt::format_to(buf, "\n");
     }
