@@ -19,11 +19,12 @@ optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) 
     return nullopt;
 }
 
-void sortTimersByStartTime(vector<const CounterImpl::Timing *> &times) {
-    fast_sort(times, [](const auto *a, const auto *b) -> bool { return a->start.usec < b->start.usec; });
+void sortTimersByStartTime(vector<unique_ptr<CounterImpl::Timing>> &times) {
+    fast_sort(times, [](const auto &a, const auto &b) -> bool { return a->start.usec < b->start.usec; });
 }
 
-void checkDiagnosticTimes(vector<const CounterImpl::Timing *> times, size_t expectedSize, bool assertUniqueStartTimes) {
+void checkDiagnosticTimes(vector<unique_ptr<CounterImpl::Timing>> times, size_t expectedSize,
+                          bool assertUniqueStartTimes) {
     EXPECT_EQ(times.size(), expectedSize);
     sortTimersByStartTime(times);
 

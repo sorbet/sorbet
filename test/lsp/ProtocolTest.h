@@ -33,7 +33,7 @@ public:
 
     CounterImpl::CounterType getHistogramCount(ConstExprStr histogram) const;
 
-    std::vector<const CounterImpl::Timing *>
+    std::vector<std::unique_ptr<CounterImpl::Timing>>
     getTimings(ConstExprStr counter, std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
 };
 
