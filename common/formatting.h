@@ -3,7 +3,7 @@
 
 #include "common/common.h"
 #include "spdlog/spdlog.h"
-// break between spdlog.h and fmt.h to stop clang-format from sorting
+// spdlog.h must be included before fmt.h https://github.com/sorbet/sorbet/pull/2839
 #include "spdlog/fmt/fmt.h"
 
 namespace fmt {
