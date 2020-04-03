@@ -236,10 +236,10 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "cpp_subprocess",
-        url = "https://github.com/arun11299/cpp-subprocess/archive/6931e3d69fb36e6eae099585646e54ac644bf99c.zip",
-        sha256 = "aa06e3749687c236a311ff93a0b973582a41a9effbc0126b0e101c05f3391bdc",
+        url = "https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip",
+        sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
-        strip_prefix = "cpp-subprocess-6931e3d69fb36e6eae099585646e54ac644bf99c",
+        strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
     http_file(
