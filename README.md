@@ -5,8 +5,8 @@
 # Sorbet
 
 This repository contains Sorbet, a fast, powerful typechecker designed for Ruby.
-It aims give feedback to developers within seconds, is IDE-ready, and is gradual
-by design.
+It aims to be easy to add to existing codebases with gradual types, automatic
+suggestions, and a burgeoning repository of typings for gems.
 
 This README contains documentation specifically for contributing to Sorbet. You
 might also want to:
