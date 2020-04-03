@@ -4,6 +4,8 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/StrictLevel.h"
+#include "spdlog/spdlog.h"
+// break between spdlog.h and fmt.h to stop clang-format from sorting
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
 #include <memory>

@@ -1,4 +1,6 @@
 #include "common/JSON.h"
+#include "spdlog/spdlog.h"
+// break between spdlog.h and fmt.h to stop clang-format from sorting
 #include "spdlog/fmt/fmt.h"
 
 using namespace std;
