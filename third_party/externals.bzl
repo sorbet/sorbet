@@ -30,9 +30,9 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "e4f8bedb19a93d0dccc359a126f51158282e0b24d92e0cad9c76a9699698268d",
-        strip_prefix = "protobuf-3.11.2",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.2.zip"],
+        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+        strip_prefix = "protobuf-3.11.4",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
     )
 
     http_archive(
