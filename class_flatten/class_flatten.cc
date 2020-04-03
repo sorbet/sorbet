@@ -93,7 +93,7 @@ public:
 
             // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
             // available to the containing static-init
-            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc.offsets(), classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
