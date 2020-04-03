@@ -39,6 +39,9 @@ public:
     KeyValueStore(std::string version, std::string path, std::string flavor);
     ~KeyValueStore() noexcept(false);
 
+    // Used in tests to assert that OwnedKeyValueStore cleans up reader transactions.
+    void enforceNoOutstandingReaders() const;
+
     friend class OwnedKeyValueStore;
 };
 

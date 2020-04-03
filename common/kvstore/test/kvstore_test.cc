@@ -3,6 +3,7 @@
 #include "spdlog/spdlog.h"
 // has to go above null_sink.h; this comment prevents reordering.
 #include "absl/strings/str_split.h" // For StripAsciiWhitespace
+#include "absl/synchronization/notification.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"
@@ -112,4 +113,26 @@ TEST_F(KeyValueStoreTest, FlavorsHaveDifferentContents) {
 TEST_F(KeyValueStoreTest, CannotCreateTwoKvstores) {
     auto kvstore1 = make_unique<KeyValueStore>("1", directory, "vanilla");
     EXPECT_THROW(make_unique<KeyValueStore>("1", directory, "vanilla"), invalid_argument);
+}
+
+TEST_F(KeyValueStoreTest, LeavesNoStaleTransactions) {
+    auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+    auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
+    absl::Notification readFinished;
+    absl::Notification testFinished;
+    // Create a reader transaction.
+    // Note: We have to keep the thread alive, otherwise LMDB will clean up transactions that don't point to a live
+    // thread when we check the reader lock table.
+    auto thread = runInAThread("reader", [&owned, &readFinished, &testFinished]() {
+        owned->readString("hello");
+        readFinished.Notify();
+        testFinished.WaitForNotification();
+    });
+    readFinished.WaitForNotification();
+    // Disown KVstore to end transactions
+    kvstore = OwnedKeyValueStore::abort(move(owned));
+
+    // Thread is now ended; if it left a reader transaction, it'll appear stale in the table.
+    EXPECT_NO_THROW(kvstore->enforceNoOutstandingReaders());
+    testFinished.Notify();
 }
