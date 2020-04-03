@@ -7,6 +7,8 @@
 
 namespace sorbet {
 
+microseconds clock_gettime_coarse();
+
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args, microseconds start,

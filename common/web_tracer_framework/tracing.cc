@@ -19,7 +19,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     if (!FileOps::exists(fileName)) {
         fmt::format_to(result, "[\n");
     }
-    auto now = std::chrono::duration<double, std::micro>(chrono::steady_clock::now().time_since_epoch()).count();
+    auto now = clock_gettime_coarse();
 
     auto pid = getpid();
     fmt::format_to(result,
@@ -29,14 +29,14 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
 
     for (auto &cat : counters.counters->countersByCategory) {
         fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{{}}}}},\n",
-                       cat.first, now, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
+                       cat.first, now.usec * 1.0, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
                            return fmt::format("\"{}\":{}", e.first, e.second);
                        }));
     }
 
     for (auto &e : counters.counters->counters) {
         fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{\"value\":{}}}}},\n",
-                       e.first, now, pid, e.second);
+                       e.first, now.usec * 1.0, pid, e.second);
     }
 
     // // for some reason, emmiting all of our counters breaks flow even visualitaion. @dmitry decided to not emmit
@@ -67,9 +67,9 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
             maybeFlow = fmt::format(",\"bind_id\":{},\"flow_in\":true", e.prev.id);
         }
 
-        fmt::format_to(result,
-                       "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
-                       e.measure, e.start.usec, e.end.usec - e.start.usec, pid, e.threadId, maybeArgs, maybeFlow);
+        fmt::format_to(
+            result, "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
+            e.measure, e.start.usec * 1.0, (e.end.usec - e.start.usec) * 1.0, pid, e.threadId, maybeArgs, maybeFlow);
     }
 
     fmt::format_to(result, "\n");
