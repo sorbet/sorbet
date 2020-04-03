@@ -7,14 +7,18 @@
 extern "C" {
 #endif
 
+#if !defined(NDEBUG) || defined(FORCE_DEBUG)
+#define DEBUG_MODE
+#else
+#undef DEBUG_MODE
+#endif
+
 #ifdef __cplusplus
 namespace sorbet {
 
-#if !defined(NDEBUG) || defined(FORCE_DEBUG)
-#define DEBUG_MODE
+#ifdef DEBUG_MODE
 constexpr bool debug_mode = true;
 #else
-#undef DEBUG_MODE
 constexpr bool debug_mode = false;
 #endif
 
