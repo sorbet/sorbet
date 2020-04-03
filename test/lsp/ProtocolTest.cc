@@ -111,9 +111,10 @@ CounterStateDatabase::getTimings(ConstExprStr counter, vector<pair<ConstExprStr,
                     copiedTags = make_unique<vector<pair<char const *, char const *>>>(*timing.tags);
                 }
 
-                rv.emplace_back(make_unique<CounterImpl::Timing>(timing.id, timing.measure, timing.start, timing.end,
-                                                                 timing.threadId, move(copiedArgs), move(copiedTags),
-                                                                 timing.self, timing.prev));
+                CounterImpl::Timing copied{timing.id,        timing.measure,  timing.start,
+                                           timing.end,       timing.threadId, move(copiedArgs),
+                                           move(copiedTags), timing.self,     timing.prev};
+                rv.emplace_back(make_unique<CounterImpl::Timing>(move(copied)));
             }
         }
     }
