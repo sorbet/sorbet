@@ -45,7 +45,7 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 #define ENFORCE(x, ...)                                                                                              \
     do {                                                                                                             \
         if (::sorbet::debug_mode) {                                                                                  \
-            auto __enforceTimer = ::sorbet::Timer(*(::spdlog::default_logger_raw()), __FILE__ ":" QUOTED(__LINE__)); \
+            auto __enforceTimer = ::sorbet::Timer(*(::spdlog::default_logger_raw()), "ENFORCE: " __FILE__ ":" QUOTED(__LINE__)); \
             if (!(x)) {                                                                                              \
                 ::sorbet::Exception::failInFuzzer();                                                                 \
                 if (stopInDebugger()) {                                                                              \
