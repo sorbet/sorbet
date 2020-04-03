@@ -3,7 +3,6 @@
 #include "absl/synchronization/mutex.h"
 #include "common/common.h"
 #include <thread>
-
 namespace sorbet {
 
 class OwnedKeyValueStore;
