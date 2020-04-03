@@ -177,10 +177,10 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "com_github_msgpack_msgpack",
-        url = "https://github.com/msgpack/msgpack-c/archive/3129326432dde8d509326ae9720a33f46dd56917.zip",
-        sha256 = "bcd2760b6d33b0ad5f8ed895be8ccdb4edea3134378f0bb1b856f98f3a03f0f2",
+        url = "https://github.com/msgpack/msgpack-c/archive/7893d4d8c9ba8a8699c5c33152deaabf409250b3.zip",
+        sha256 = "72dadac3def5180a701a3b251e9f1105c2b126907dc384d933370b7df5b73951",
         build_file = "@com_stripe_ruby_typer//third_party:msgpack.BUILD",
-        strip_prefix = "msgpack-c-3129326432dde8d509326ae9720a33f46dd56917",
+        strip_prefix = "msgpack-c-7893d4d8c9ba8a8699c5c33152deaabf409250b3",
     )
 
     http_archive(
