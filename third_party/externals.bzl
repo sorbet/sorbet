@@ -11,10 +11,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "yaml_cpp",
-        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.zip",
-        sha256 = "292c8de66bfda19a2ca08a32a8c1ec39b709ac75f54e6be0735940db2dbdff76",
+        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.zip",
+        sha256 = "7c0ddc08a99655508ae110ba48726c67e4a10b290c214aed866ce4bbcbe3e84c",
         build_file = "@com_stripe_ruby_typer//third_party:yaml_cpp.BUILD",
-        strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
+        strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
     )
 
     http_archive(
