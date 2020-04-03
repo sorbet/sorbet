@@ -122,7 +122,7 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
     auto dur = microseconds{clock.usec - start.usec};
-    auto threshold = microseconds{2'000}; // 2ms
+    auto threshold = microseconds{8'000}; // 8ms
     if (!canceled && dur.usec > threshold.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto durMs = (clock.usec - start.usec) / 1'000;
