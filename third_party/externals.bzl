@@ -185,10 +185,10 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "com_github_d_bahr_crcpp",
-        url = "https://github.com/d-bahr/CRCpp/archive/534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2.zip",
-        sha256 = "c8adb9b91072e3578f0af802a4abc3c68109301dc6ef0708b34863d168e39747",
+        url = "https://github.com/d-bahr/CRCpp/archive/51fbc35ef892e98abe91a51f7320749c929d72bd.zip",
+        sha256 = "57c4c127b5aa4451556969d6929cf9465a5d5481b3442ddb878d95296caeee4b",
         build_file = "@com_stripe_ruby_typer//third_party:crcpp.BUILD",
-        strip_prefix = "CRCpp-534c1d8c5517cfbb0a0f1ff0d9ec4c8b8ffd78e2",
+        strip_prefix = "CRCpp-51fbc35ef892e98abe91a51f7320749c929d72bd",
     )
 
     http_archive(
