@@ -31,14 +31,20 @@ struct CounterImpl {
     UnorderedMap<std::string_view, const char *> strings_by_value;
     UnorderedMap<const char *, const char *> stringsByPtr;
     struct Timing {
+        Timing() = default;
+        Timing(int id, char const *measure, microseconds start, microseconds end, int threadId,
+               std::unique_ptr<std::vector<std::pair<char const *, std::string>>> args,
+               std::unique_ptr<std::vector<std::pair<char const *, char const *>>> tags, FlowId self, FlowId prev)
+            : id(id), measure(measure), start(start), end(end), threadId(threadId), args(move(args)), tags(move(tags)),
+              self(self), prev(prev) {}
         // see https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit
         // and https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit
         int id;
         char const *measure;
-        std::chrono::time_point<std::chrono::steady_clock> start, end;
+        microseconds start, end;
         int threadId;
-        std::vector<std::pair<char const *, std::string>> args;
-        std::vector<std::pair<char const *, char const *>> tags;
+        std::unique_ptr<std::vector<std::pair<char const *, std::string>>> args;
+        std::unique_ptr<std::vector<std::pair<char const *, char const *>>> tags;
         FlowId self;
         FlowId prev;
     };

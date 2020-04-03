@@ -74,15 +74,18 @@ CounterImpl::CounterType CounterStateDatabase::getHistogramCount(ConstExprStr hi
     return rv;
 }
 
-vector<CounterImpl::Timing> CounterStateDatabase::getTimings(ConstExprStr counter,
-                                                             vector<pair<ConstExprStr, ConstExprStr>> tags) const {
+vector<unique_ptr<CounterImpl::Timing>>
+CounterStateDatabase::getTimings(ConstExprStr counter, vector<pair<ConstExprStr, ConstExprStr>> tags) const {
     // Note: Timers don't have interned names.
-    vector<CounterImpl::Timing> rv;
+    vector<unique_ptr<CounterImpl::Timing>> rv;
     for (const auto &timing : counters.counters->timings) {
-        if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing.tags.size() >= tags.size()) {
+        auto timing_tags_size = timing.tags == nullptr ? 0 : timing.tags->size();
+        if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing_tags_size >= tags.size()) {
             UnorderedMap<std::string, const char *> timingTags;
-            for (const auto &tag : timing.tags) {
-                timingTags[tag.first] = tag.second;
+            if (timing.tags != nullptr) {
+                for (const auto &tag : *timing.tags) {
+                    timingTags[tag.first] = tag.second;
+                }
             }
 
             int tagsMatched = 0;
@@ -98,7 +101,19 @@ vector<CounterImpl::Timing> CounterStateDatabase::getTimings(ConstExprStr counte
             }
 
             if (tagsMatched == tags.size()) {
-                rv.push_back(timing);
+                unique_ptr<vector<pair<char const *, string>>> copiedArgs;
+                if (timing.args != nullptr) {
+                    copiedArgs = make_unique<vector<pair<char const *, string>>>(*timing.args);
+                }
+
+                unique_ptr<vector<pair<char const *, char const *>>> copiedTags;
+                if (timing.tags != nullptr) {
+                    copiedTags = make_unique<vector<pair<char const *, char const *>>>(*timing.tags);
+                }
+
+                rv.emplace_back(make_unique<CounterImpl::Timing>(timing.id, timing.measure, timing.start, timing.end,
+                                                                 timing.threadId, move(copiedArgs), move(copiedTags),
+                                                                 timing.self, timing.prev));
             }
         }
     }
