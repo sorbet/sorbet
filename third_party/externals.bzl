@@ -19,10 +19,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/a7148b718ea2fabb8387cb90aee9bf448da63e65.zip",  # v1.3.1
-        sha256 = "115ba04ec00988955a54e52791d18e7ac99d2a4a00a361dc00ca7032d0890faa",
+        url = "https://github.com/gabime/spdlog/archive/c2b47430fb210c8822177407b9e4b82d4ef7455d.zip",  # v1.3.1
+        sha256 = "08b7e0f1d7c62a56dfbac5678979967690ccd9e074acd3762a2a49d8731961e6",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-a7148b718ea2fabb8387cb90aee9bf448da63e65",
+        strip_prefix = "spdlog-c2b47430fb210c8822177407b9e4b82d4ef7455d",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
