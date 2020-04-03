@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.sig() do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).void()
   end
 
@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  <self>.sig() do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
   end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     1
   end
 
-  <self>.sig() do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
   end
 

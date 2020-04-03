@@ -57,22 +57,22 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.void()
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.returns(::Integer)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"v1" => ::Integer}).returns(::Integer)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"v2" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)

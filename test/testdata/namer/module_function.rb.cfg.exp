@@ -132,7 +132,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Funcs>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$6: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Funcs) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Funcs>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Funcs>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$6: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_0" -> "bb::<Class:Funcs>#<static-init>_2" [style="bold"];
@@ -149,7 +149,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_2" -> "bb::<Class:Funcs>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(Funcs), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$6\l<block-pre-call-temp>$20: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$21: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: T.class_of(Funcs), <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$6\l<statTemp>$19: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$20: Sorbet::Private::Static::Void = <statTemp>$19: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$21: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_3" -> "bb::<Class:Funcs>#<static-init>_6" [style="bold"];
@@ -166,7 +166,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_6" -> "bb::<Class:Funcs>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_7" [
-        label = "block[id=7, rubyBlockId=0](<selfRestore>$21: T.class_of(Funcs), <block-pre-call-temp>$20: Sorbet::Private::Static::Void)\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$20, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$21\l<block-pre-call-temp>$35: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$36: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<selfRestore>$21: T.class_of(Funcs), <block-pre-call-temp>$20: Sorbet::Private::Static::Void)\l<statTemp>$18: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$20, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$21\l<statTemp>$34: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$35: Sorbet::Private::Static::Void = <statTemp>$34: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$36: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_7" -> "bb::<Class:Funcs>#<static-init>_10" [style="bold"];
@@ -183,7 +183,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_10" -> "bb::<Class:Funcs>#<static-init>_11" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_11" [
-        label = "block[id=11, rubyBlockId=0](<selfRestore>$36: T.class_of(Funcs), <block-pre-call-temp>$35: Sorbet::Private::Static::Void)\l<statTemp>$33: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$35, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$36\l<block-pre-call-temp>$50: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$51: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=11, rubyBlockId=0](<selfRestore>$36: T.class_of(Funcs), <block-pre-call-temp>$35: Sorbet::Private::Static::Void)\l<statTemp>$33: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$35, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$36\l<statTemp>$49: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$50: Sorbet::Private::Static::Void = <statTemp>$49: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$51: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_11" -> "bb::<Class:Funcs>#<static-init>_14" [style="bold"];
@@ -200,7 +200,7 @@ subgraph "cluster_::<Class:Funcs>#<static-init>" {
     "bb::<Class:Funcs>#<static-init>_14" -> "bb::<Class:Funcs>#<static-init>_15" [style="tapered"];
 
     "bb::<Class:Funcs>#<static-init>_15" [
-        label = "block[id=15, rubyBlockId=0](<selfRestore>$51: T.class_of(Funcs), <block-pre-call-temp>$50: Sorbet::Private::Static::Void)\l<statTemp>$48: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$50, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$51\l<block-pre-call-temp>$65: Sorbet::Private::Static::Void = <self>: T.class_of(Funcs).sig()\l<selfRestore>$66: T.class_of(Funcs) = <self>\l<unconditional>\l"
+        label = "block[id=15, rubyBlockId=0](<selfRestore>$51: T.class_of(Funcs), <block-pre-call-temp>$50: Sorbet::Private::Static::Void)\l<statTemp>$48: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$50, sig>\l<self>: T.class_of(Funcs) = <selfRestore>$51\l<statTemp>$64: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$65: Sorbet::Private::Static::Void = <statTemp>$64: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$66: T.class_of(Funcs) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Funcs>#<static-init>_15" -> "bb::<Class:Funcs>#<static-init>_18" [style="bold"];

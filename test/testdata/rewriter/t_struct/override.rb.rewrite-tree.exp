@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
     end
 
-    <self>.sig() do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({:"foo" => <emptyTree>::<C Integer>}).void()
     end
 

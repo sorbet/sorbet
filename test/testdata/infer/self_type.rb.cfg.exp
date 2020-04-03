@@ -96,7 +96,7 @@ subgraph "cluster_::<Class:Parent>#<static-init>" {
     "bb::<Class:Parent>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Parent>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Parent) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Parent>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Parent>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(Parent).sig()\l<selfRestore>$6: T.class_of(Parent) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Parent) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Parent>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Parent>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$6: T.class_of(Parent) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Parent>#<static-init>_0" -> "bb::<Class:Parent>#<static-init>_2" [style="bold"];
@@ -167,7 +167,7 @@ subgraph "cluster_::<Class:Generic>#<static-init>" {
     "bb::<Class:Generic>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Generic>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<C TM>$21: <Type: Generic::TM> = alias <C TM>\l<self>: T.class_of(Generic) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Generic>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Generic>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(Generic).sig()\l<selfRestore>$6: T.class_of(Generic) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<C TM>$21: <Type: Generic::TM> = alias <C TM>\l<self>: T.class_of(Generic) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Generic>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Generic>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$6: T.class_of(Generic) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Generic>#<static-init>_0" -> "bb::<Class:Generic>#<static-init>_2" [style="bold"];
@@ -238,7 +238,7 @@ subgraph "cluster_::<Class:Array>#<static-init>" {
     "bb::<Class:Array>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Array>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Array) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Array>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Array>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(Array).sig()\l<selfRestore>$6: T.class_of(Array) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Array) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Array>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Array>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$6: T.class_of(Array) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:Array>#<static-init>_0" -> "bb::<Class:Array>#<static-init>_2" [style="bold"];
@@ -309,7 +309,7 @@ subgraph "cluster_::<Class:B>#<static-init>" {
     "bb::<Class:B>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:B>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(B) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U B>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U B>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(B).sig()\l<selfRestore>$6: T.class_of(B) = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(B) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U B>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U B>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(T::Sig::WithoutRuntime).sig()\l<selfRestore>$6: T.class_of(B) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:B>#<static-init>_0" -> "bb::<Class:B>#<static-init>_2" [style="bold"];

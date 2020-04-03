@@ -44,28 +44,28 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        <self>.sig() do ||
+        ::T::Sig::WithoutRuntime.sig() do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
         <self>.extend(::T::Sig)
