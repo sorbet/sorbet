@@ -37,10 +37,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "libprotobuf-mutator",
-        url = "https://github.com/google/libprotobuf-mutator/archive/d761b622751ae8c226db3d8daaaf4c6aab5e5243.zip",
-        sha256 = "2083e7e502530fd6cc5eea3fd36ed72968d055cf3675569854f24e4ebd08903a",
+        url = "https://github.com/google/libprotobuf-mutator/archive/68e10c13248517c5bcd531d0e02be483da83fc13.zip",
+        sha256 = "8684276b996e8d8541ed3703420f9dbcc17702bd7b13c6f3d9c13a4656597c76",
         build_file = "@com_stripe_ruby_typer//third_party:libprotobuf-mutator.BUILD",
-        strip_prefix = "libprotobuf-mutator-d761b622751ae8c226db3d8daaaf4c6aab5e5243",
+        strip_prefix = "libprotobuf-mutator-68e10c13248517c5bcd531d0e02be483da83fc13",
     )
 
     http_archive(
