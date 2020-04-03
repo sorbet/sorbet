@@ -399,6 +399,15 @@ public:
         return Send(loc, std::move(magic), core::Names::selfNew(), std::move(args), flags, std::move(block));
     }
 
+    static std::unique_ptr<Expression> DefineTopClassOrModule(core::LocOffsets loc, core::SymbolRef klass) {
+        auto magic = Constant(loc, core::Symbols::Magic());
+        Send::ARGS_store args;
+        args.emplace_back(Constant(loc, klass));
+        Send::Flags flags;
+        flags.isRewriterSynthesized = true;
+        return Send(loc, std::move(magic), core::Names::defineTopClassOrModule(), std::move(args), flags);
+    }
+
     static bool isMagicClass(ast::Expression *expr) {
         if (auto *recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol == core::Symbols::Magic();

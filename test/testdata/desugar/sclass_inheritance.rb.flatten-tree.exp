@@ -12,22 +12,22 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::MM)
           ::Sorbet::Private::Static.keep_for_ide(::MM)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::A)
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::B)
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
         begin
-          <emptyTree>
+          ::<Magic>.<define-top-class-or-module>(::C)
           ::Sorbet::Private::Static.keep_for_ide(::C)
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
@@ -46,7 +46,7 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        <emptyTree>
+        ::<Magic>.<define-top-class-or-module>(::<Class:A>)
         ::Sorbet::Private::Static.keep_for_ide(::MM)
         <emptyTree>
       end
@@ -81,7 +81,7 @@ begin
   class ::C<<C C>> < (::A)
     def self.<static-init>(<blk>)
       begin
-        <emptyTree>
+        ::<Magic>.<define-top-class-or-module>(::<Class:C>)
         <emptyTree>
       end
     end
