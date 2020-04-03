@@ -1,0 +1,23 @@
+No errors! Great job.
+Backtrace:
+  #3 0x179c666 
+  #4 0x179c5ff 
+  #5 0xa92d4f fmt::v6::internal::error_handler::on_error()
+  #6 0xa93566 
+  #7 0xab7071 fmt::v6::internal::specs_handler<>::on_error()
+  #8 0xab9235 fmt::v6::internal::numeric_specs_checker<>::check_precision()
+  #9 0xab869e fmt::v6::internal::specs_checker<>::end_precision()
+  #10 0xab7015 fmt::v6::internal::parse_precision<>()
+  #11 0xab670c fmt::v6::internal::parse_format_specs<>()
+  #12 0xa9321f fmt::v6::format_handler<>::on_format_specs()
+  #13 0xa92948 fmt::v6::internal::parse_format_string<>()
+  #14 0xa9257b fmt::v6::vformat_to<>()
+  #15 0xa92194 fmt::v6::internal::vformat_to<>()
+  #16 0xe281f7 fmt::v6::format_to<>()
+  #17 0xe26bdb sorbet::web_tracer_framework::Tracing::storeTraces()
+  #18 0xaeab27 sorbet::realmain::realmain()
+  #19 0xa8e0e2 main
+  #20 0x7fbbfcfd1830 __libc_start_main
+  #21 0xa8e029 _start
+
+terminate_handler unexpectedly returned
