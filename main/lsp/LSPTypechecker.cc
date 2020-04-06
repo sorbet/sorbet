@@ -627,10 +627,11 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     pipeline::typecheck(gs, move(resolved), config->opts, workers);
-    auto out = gs->errorQueue->drainWithQueryResponses();
+    auto errorsAndQueryResponses = gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{move(out.second)};
+    // Drops any errors discovered during the query on the floor.
+    return LSPQueryResult{move(errorsAndQueryResponses.second)};
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
