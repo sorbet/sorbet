@@ -12,4 +12,8 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v2 ---
 
+echo -n "bazel-bin/test/test_corpus_runner"
+printf ' %q' "$@"
+echo
+
 "$(rlocation com_stripe_ruby_typer/test/test_corpus_runner)" "$@"
