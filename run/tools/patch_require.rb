@@ -22,9 +22,12 @@ module Kernel
       else
         raise "unknown platform: #{RUBY_PLATFORM}"
       end
-      cext = tmpdir + '/' + root_name + suffix
+      cext = File.join(tmpdir, root_name + suffix)
       if File.exist?(cext)
-        $stderr.puts "SorbetLLVM using compiled: #{cext}"
+        # NOTE: we cross-talk to the payload through this variable. The payload doesn't know what the real path of the
+        # original file is, so we pass it through here. It's consumed in payload.c:sorbet_allocateRubyStackFrames.
+        $__sorbet_ruby_realpath = File.realpath(name)
+        $stderr.puts "SorbetLLVM using compiled: #{cext} for #{$sorbet_ruby_file}"
         return sorbet_old_require(cext)
       end
       if ENV['force_compile'] && File.exist?(name) && File.read(name).include?('# compiled: true')

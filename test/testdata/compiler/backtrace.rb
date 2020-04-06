@@ -13,8 +13,8 @@ def bar
 
   # for now (maybe?) the monkeypatching has different backtraces
   bt = bt.gsub("lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'", '')
-  bt = bt.gsub("run/tools/patch_require.rb:28:in `require'", '')
-  bt = bt.gsub(%r{.*run/tools/patch_require.rb:36:in `require'}, '')
+  bt = bt.gsub("run/tools/patch_require.rb:29:in `require'", '')
+  bt = bt.gsub(%r{.*run/tools/patch_require.rb:37:in `require'}, '')
   bt = bt.gsub("\n\n", "\n")
 
   bt

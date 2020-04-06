@@ -681,10 +681,17 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
-unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
-                                              int startline, int endline) {
+unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, int startline,
+                                              int endline) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
+
+    // NOTE: $sorbet_ruby_realpath is expected to be the path to the original ruby source, that has been resolved by
+    // `File.realpath`.
+    VALUE realpath = rb_gv_get("$__sorbet_ruby_realpath");
+    if (!RB_TYPE_P(realpath, T_STRING)) {
+        rb_raise(rb_eRuntimeError, "Invalid '$__sorbet_ruby_realpath' when loading compiled module");
+    }
 
     // ... but actually this line allocates and will not be retained by anyone else,
     // so we pin this object right here. TODO: This leaks memory

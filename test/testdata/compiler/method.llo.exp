@@ -103,8 +103,10 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.8 = private unnamed_addr constant [50 x i8] c"wrong number of arguments (given %d, expected %d)\00", align 1
 @rb_eArgError = external local_unnamed_addr global i64, align 8
 @.str.11 = private unnamed_addr constant [45 x i8] c"%s: Expected type %s, got %s with value %li\0B\00", align 1
+@.str.14 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.15 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @ruby_vm_global_method_state = external local_unnamed_addr global i64, align 8
-@.str.16 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
+@.str.18 = private unnamed_addr constant [40 x i8] c"unimplmented call with a missing method\00", align 1
 @"stackFramePrecomputed_func_Object#hello" = internal unnamed_addr global i8* null, align 8
 @rubyIdPrecomputed_hello = internal unnamed_addr global i64 0, align 8
 @str_hello = private unnamed_addr constant [6 x i8] c"hello\00", align 1
@@ -262,129 +264,151 @@ define internal fastcc void @sorbet_raiseArity(i32) unnamed_addr #5 {
 declare void @rb_exc_raise(i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind ssp uwtable
-define internal fastcc i8* @sorbet_allocateRubyStackFrames(i64, i64, i64, i32) unnamed_addr #1 {
-  %5 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %2, %struct.rb_iseq_struct* null, i32 1) #15
-  %6 = ptrtoint %struct.rb_iseq_struct* %5 to i64
-  tail call void @rb_gc_register_mark_object(i64 %6) #15
-  %7 = tail call i8** @rb_vm_get_insns_address_table() #15
-  %8 = bitcast i8** %7 to i64*
-  %9 = load i64, i64* %8, align 8, !tbaa !10
-  %10 = add i32 %3, -3
-  %11 = sext i32 %10 to i64
-  %12 = tail call i8* @ruby_xmalloc2(i64 %11, i64 8) #15
-  %13 = bitcast i8* %12 to %struct.rb_code_position_struct*
-  %14 = tail call i8* @ruby_xmalloc2(i64 %11, i64 4) #15
-  %15 = bitcast i8* %14 to i32*
-  %16 = tail call i8* @ruby_xmalloc2(i64 %11, i64 8) #15
-  %17 = bitcast i8* %16 to i64*
-  %18 = zext i32 %10 to i64
-  %min.iters.check = icmp ult i32 %10, 4
+define internal fastcc i8* @sorbet_allocateRubyStackFrames(i64, i64, i32) unnamed_addr #1 {
+  %4 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.14, i64 0, i64 0)) #15
+  %5 = and i64 %4, 7
+  %6 = icmp ne i64 %5, 0
+  %7 = and i64 %4, -9
+  %8 = icmp eq i64 %7, 0
+  %9 = or i1 %6, %8
+  br i1 %9, label %16, label %10
+
+10:                                               ; preds = %3
+  %11 = inttoptr i64 %4 to %struct.RBasic*
+  %12 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %11, i64 0, i32 0
+  %13 = load i64, i64* %12, align 8, !tbaa !4
+  %14 = and i64 %13, 31
+  %15 = icmp eq i64 %14, 5
+  br i1 %15, label %18, label %16
+
+16:                                               ; preds = %10, %3
+  %17 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
+  tail call void (i64, i8*, ...) @rb_raise(i64 %17, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.15, i64 0, i64 0)) #16
+  unreachable
+
+18:                                               ; preds = %10
+  %19 = tail call %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct* null, i64 %0, i64 %1, i64 %4, %struct.rb_iseq_struct* null, i32 1) #15
+  %20 = ptrtoint %struct.rb_iseq_struct* %19 to i64
+  tail call void @rb_gc_register_mark_object(i64 %20) #15
+  %21 = tail call i8** @rb_vm_get_insns_address_table() #15
+  %22 = bitcast i8** %21 to i64*
+  %23 = load i64, i64* %22, align 8, !tbaa !10
+  %24 = add i32 %2, -3
+  %25 = sext i32 %24 to i64
+  %26 = tail call i8* @ruby_xmalloc2(i64 %25, i64 8) #15
+  %27 = bitcast i8* %26 to %struct.rb_code_position_struct*
+  %28 = tail call i8* @ruby_xmalloc2(i64 %25, i64 4) #15
+  %29 = bitcast i8* %28 to i32*
+  %30 = tail call i8* @ruby_xmalloc2(i64 %25, i64 8) #15
+  %31 = bitcast i8* %30 to i64*
+  %32 = zext i32 %24 to i64
+  %min.iters.check = icmp ult i32 %24, 4
   br i1 %min.iters.check, label %scalar.ph.preheader, label %vector.memcheck
 
-scalar.ph.preheader:                              ; preds = %middle.block, %vector.memcheck, %4
-  %.ph = phi i64 [ 0, %vector.memcheck ], [ 0, %4 ], [ %n.vec, %middle.block ]
-  %19 = xor i64 %.ph, -1
-  %20 = add nsw i64 %19, %18
-  %xtraiter = and i64 %18, 3
+scalar.ph.preheader:                              ; preds = %middle.block, %vector.memcheck, %18
+  %.ph = phi i64 [ 0, %vector.memcheck ], [ 0, %18 ], [ %n.vec, %middle.block ]
+  %33 = xor i64 %.ph, -1
+  %34 = add nsw i64 %33, %32
+  %xtraiter = and i64 %32, 3
   %lcmp.mod = icmp eq i64 %xtraiter, 0
   br i1 %lcmp.mod, label %scalar.ph.prol.loopexit, label %scalar.ph.prol
 
 scalar.ph.prol:                                   ; preds = %scalar.ph.preheader, %scalar.ph.prol
-  %21 = phi i64 [ %27, %scalar.ph.prol ], [ %.ph, %scalar.ph.preheader ]
+  %35 = phi i64 [ %41, %scalar.ph.prol ], [ %.ph, %scalar.ph.preheader ]
   %prol.iter = phi i64 [ %prol.iter.sub, %scalar.ph.prol ], [ %xtraiter, %scalar.ph.preheader ]
-  %22 = trunc i64 %21 to i32
-  %23 = add nsw i32 %22, 4
-  %24 = getelementptr inbounds i32, i32* %15, i64 %21
-  store i32 %22, i32* %24, align 4, !tbaa !0
-  %25 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %21, i32 0
-  store i32 %23, i32* %25, align 4, !tbaa !12
-  %26 = getelementptr inbounds i64, i64* %17, i64 %21
-  store i64 %9, i64* %26, align 8, !tbaa !9
-  %27 = add nuw nsw i64 %21, 1
+  %36 = trunc i64 %35 to i32
+  %37 = add nsw i32 %36, 4
+  %38 = getelementptr inbounds i32, i32* %29, i64 %35
+  store i32 %36, i32* %38, align 4, !tbaa !0
+  %39 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %35, i32 0
+  store i32 %37, i32* %39, align 4, !tbaa !12
+  %40 = getelementptr inbounds i64, i64* %31, i64 %35
+  store i64 %23, i64* %40, align 8, !tbaa !9
+  %41 = add nuw nsw i64 %35, 1
   %prol.iter.sub = add nsw i64 %prol.iter, -1
   %prol.iter.cmp = icmp eq i64 %prol.iter.sub, 0
   br i1 %prol.iter.cmp, label %scalar.ph.prol.loopexit, label %scalar.ph.prol, !llvm.loop !14
 
 scalar.ph.prol.loopexit:                          ; preds = %scalar.ph.prol, %scalar.ph.preheader
-  %.unr = phi i64 [ %.ph, %scalar.ph.preheader ], [ %27, %scalar.ph.prol ]
-  %28 = icmp ult i64 %20, 3
-  br i1 %28, label %.loopexit, label %scalar.ph
+  %.unr = phi i64 [ %.ph, %scalar.ph.preheader ], [ %41, %scalar.ph.prol ]
+  %42 = icmp ult i64 %34, 3
+  br i1 %42, label %.loopexit, label %scalar.ph
 
-vector.memcheck:                                  ; preds = %4
-  %29 = shl nuw nsw i64 %18, 2
-  %scevgep = getelementptr i8, i8* %14, i64 %29
-  %30 = shl nuw nsw i64 %18, 3
-  %31 = add nsw i64 %30, -4
-  %scevgep1 = getelementptr i8, i8* %12, i64 %31
-  %bound0 = icmp ult i8* %14, %scevgep1
-  %bound1 = icmp ult i8* %12, %scevgep
+vector.memcheck:                                  ; preds = %18
+  %43 = shl nuw nsw i64 %32, 2
+  %scevgep = getelementptr i8, i8* %28, i64 %43
+  %44 = shl nuw nsw i64 %32, 3
+  %45 = add nsw i64 %44, -4
+  %scevgep1 = getelementptr i8, i8* %26, i64 %45
+  %bound0 = icmp ult i8* %28, %scevgep1
+  %bound1 = icmp ult i8* %26, %scevgep
   %found.conflict = and i1 %bound0, %bound1
   br i1 %found.conflict, label %scalar.ph.preheader, label %vector.ph
 
 vector.ph:                                        ; preds = %vector.memcheck
-  %n.vec = and i64 %18, 4294967292
-  %broadcast.splatinsert = insertelement <4 x i64> undef, i64 %9, i32 0
+  %n.vec = and i64 %32, 4294967292
+  %broadcast.splatinsert = insertelement <4 x i64> undef, i64 %23, i32 0
   %broadcast.splat = shufflevector <4 x i64> %broadcast.splatinsert, <4 x i64> undef, <4 x i32> zeroinitializer
-  %32 = add nsw i64 %n.vec, -4
-  %33 = lshr exact i64 %32, 2
-  %34 = add nuw nsw i64 %33, 1
-  %xtraiter4 = and i64 %34, 1
-  %35 = icmp eq i64 %32, 0
-  br i1 %35, label %middle.block.unr-lcssa, label %vector.ph.new
+  %46 = add nsw i64 %n.vec, -4
+  %47 = lshr exact i64 %46, 2
+  %48 = add nuw nsw i64 %47, 1
+  %xtraiter4 = and i64 %48, 1
+  %49 = icmp eq i64 %46, 0
+  br i1 %49, label %middle.block.unr-lcssa, label %vector.ph.new
 
 vector.ph.new:                                    ; preds = %vector.ph
-  %unroll_iter = sub nuw nsw i64 %34, %xtraiter4
+  %unroll_iter = sub nuw nsw i64 %48, %xtraiter4
   br label %vector.body
 
 vector.body:                                      ; preds = %vector.body, %vector.ph.new
   %index = phi i64 [ 0, %vector.ph.new ], [ %index.next.1, %vector.body ]
-  %vec.ind2 = phi <4 x i32> [ <i32 0, i32 1, i32 2, i32 3>, %vector.ph.new ], [ %55, %vector.body ]
+  %vec.ind2 = phi <4 x i32> [ <i32 0, i32 1, i32 2, i32 3>, %vector.ph.new ], [ %69, %vector.body ]
   %niter = phi i64 [ %unroll_iter, %vector.ph.new ], [ %niter.nsub.1, %vector.body ]
-  %36 = or i64 %index, 1
-  %37 = or i64 %index, 2
-  %38 = or i64 %index, 3
-  %39 = add <4 x i32> %vec.ind2, <i32 4, i32 4, i32 4, i32 4>
-  %40 = getelementptr inbounds i32, i32* %15, i64 %index
-  %41 = bitcast i32* %40 to <4 x i32>*
-  store <4 x i32> %vec.ind2, <4 x i32>* %41, align 4, !tbaa !0, !alias.scope !16, !noalias !19
-  %42 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %index, i32 0
-  %43 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %36, i32 0
-  %44 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %37, i32 0
-  %45 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %38, i32 0
-  %46 = extractelement <4 x i32> %39, i32 0
-  store i32 %46, i32* %42, align 4, !tbaa !12, !alias.scope !19
-  %47 = extractelement <4 x i32> %39, i32 1
-  store i32 %47, i32* %43, align 4, !tbaa !12, !alias.scope !19
-  %48 = extractelement <4 x i32> %39, i32 2
-  store i32 %48, i32* %44, align 4, !tbaa !12, !alias.scope !19
-  %49 = extractelement <4 x i32> %39, i32 3
-  store i32 %49, i32* %45, align 4, !tbaa !12, !alias.scope !19
-  %50 = getelementptr inbounds i64, i64* %17, i64 %index
-  %51 = bitcast i64* %50 to <4 x i64>*
-  store <4 x i64> %broadcast.splat, <4 x i64>* %51, align 8, !tbaa !9, !alias.scope !21
-  %index.next = or i64 %index, 4
-  %52 = or i64 %index, 5
-  %53 = or i64 %index, 6
-  %54 = or i64 %index, 7
-  %55 = add <4 x i32> %vec.ind2, <i32 8, i32 8, i32 8, i32 8>
-  %56 = getelementptr inbounds i32, i32* %15, i64 %index.next
-  %57 = bitcast i32* %56 to <4 x i32>*
-  store <4 x i32> %39, <4 x i32>* %57, align 4, !tbaa !0, !alias.scope !16, !noalias !19
-  %58 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %index.next, i32 0
-  %59 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %52, i32 0
-  %60 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %53, i32 0
-  %61 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %54, i32 0
-  %62 = extractelement <4 x i32> %55, i32 0
+  %50 = or i64 %index, 1
+  %51 = or i64 %index, 2
+  %52 = or i64 %index, 3
+  %53 = add <4 x i32> %vec.ind2, <i32 4, i32 4, i32 4, i32 4>
+  %54 = getelementptr inbounds i32, i32* %29, i64 %index
+  %55 = bitcast i32* %54 to <4 x i32>*
+  store <4 x i32> %vec.ind2, <4 x i32>* %55, align 4, !tbaa !0, !alias.scope !16, !noalias !19
+  %56 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %index, i32 0
+  %57 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %50, i32 0
+  %58 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %51, i32 0
+  %59 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %52, i32 0
+  %60 = extractelement <4 x i32> %53, i32 0
+  store i32 %60, i32* %56, align 4, !tbaa !12, !alias.scope !19
+  %61 = extractelement <4 x i32> %53, i32 1
+  store i32 %61, i32* %57, align 4, !tbaa !12, !alias.scope !19
+  %62 = extractelement <4 x i32> %53, i32 2
   store i32 %62, i32* %58, align 4, !tbaa !12, !alias.scope !19
-  %63 = extractelement <4 x i32> %55, i32 1
+  %63 = extractelement <4 x i32> %53, i32 3
   store i32 %63, i32* %59, align 4, !tbaa !12, !alias.scope !19
-  %64 = extractelement <4 x i32> %55, i32 2
-  store i32 %64, i32* %60, align 4, !tbaa !12, !alias.scope !19
-  %65 = extractelement <4 x i32> %55, i32 3
-  store i32 %65, i32* %61, align 4, !tbaa !12, !alias.scope !19
-  %66 = getelementptr inbounds i64, i64* %17, i64 %index.next
-  %67 = bitcast i64* %66 to <4 x i64>*
-  store <4 x i64> %broadcast.splat, <4 x i64>* %67, align 8, !tbaa !9, !alias.scope !21
+  %64 = getelementptr inbounds i64, i64* %31, i64 %index
+  %65 = bitcast i64* %64 to <4 x i64>*
+  store <4 x i64> %broadcast.splat, <4 x i64>* %65, align 8, !tbaa !9, !alias.scope !21
+  %index.next = or i64 %index, 4
+  %66 = or i64 %index, 5
+  %67 = or i64 %index, 6
+  %68 = or i64 %index, 7
+  %69 = add <4 x i32> %vec.ind2, <i32 8, i32 8, i32 8, i32 8>
+  %70 = getelementptr inbounds i32, i32* %29, i64 %index.next
+  %71 = bitcast i32* %70 to <4 x i32>*
+  store <4 x i32> %53, <4 x i32>* %71, align 4, !tbaa !0, !alias.scope !16, !noalias !19
+  %72 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %index.next, i32 0
+  %73 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %66, i32 0
+  %74 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %67, i32 0
+  %75 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %68, i32 0
+  %76 = extractelement <4 x i32> %69, i32 0
+  store i32 %76, i32* %72, align 4, !tbaa !12, !alias.scope !19
+  %77 = extractelement <4 x i32> %69, i32 1
+  store i32 %77, i32* %73, align 4, !tbaa !12, !alias.scope !19
+  %78 = extractelement <4 x i32> %69, i32 2
+  store i32 %78, i32* %74, align 4, !tbaa !12, !alias.scope !19
+  %79 = extractelement <4 x i32> %69, i32 3
+  store i32 %79, i32* %75, align 4, !tbaa !12, !alias.scope !19
+  %80 = getelementptr inbounds i64, i64* %31, i64 %index.next
+  %81 = bitcast i64* %80 to <4 x i64>*
+  store <4 x i64> %broadcast.splat, <4 x i64>* %81, align 8, !tbaa !9, !alias.scope !21
   %index.next.1 = add i64 %index, 8
   %niter.nsub.1 = add i64 %niter, -2
   %niter.ncmp.1 = icmp eq i64 %niter.nsub.1, 0
@@ -392,98 +416,100 @@ vector.body:                                      ; preds = %vector.body, %vecto
 
 middle.block.unr-lcssa:                           ; preds = %vector.body, %vector.ph
   %index.unr = phi i64 [ 0, %vector.ph ], [ %index.next.1, %vector.body ]
-  %vec.ind2.unr = phi <4 x i32> [ <i32 0, i32 1, i32 2, i32 3>, %vector.ph ], [ %55, %vector.body ]
+  %vec.ind2.unr = phi <4 x i32> [ <i32 0, i32 1, i32 2, i32 3>, %vector.ph ], [ %69, %vector.body ]
   %lcmp.mod5 = icmp eq i64 %xtraiter4, 0
   br i1 %lcmp.mod5, label %middle.block, label %vector.body.epil
 
 vector.body.epil:                                 ; preds = %middle.block.unr-lcssa
-  %68 = or i64 %index.unr, 1
-  %69 = or i64 %index.unr, 2
-  %70 = or i64 %index.unr, 3
-  %71 = add nsw <4 x i32> %vec.ind2.unr, <i32 4, i32 4, i32 4, i32 4>
-  %72 = getelementptr inbounds i32, i32* %15, i64 %index.unr
-  %73 = bitcast i32* %72 to <4 x i32>*
-  store <4 x i32> %vec.ind2.unr, <4 x i32>* %73, align 4, !tbaa !0, !alias.scope !16, !noalias !19
-  %74 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %index.unr, i32 0
-  %75 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %68, i32 0
-  %76 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %69, i32 0
-  %77 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %70, i32 0
-  %78 = extractelement <4 x i32> %71, i32 0
-  store i32 %78, i32* %74, align 4, !tbaa !12, !alias.scope !19
-  %79 = extractelement <4 x i32> %71, i32 1
-  store i32 %79, i32* %75, align 4, !tbaa !12, !alias.scope !19
-  %80 = extractelement <4 x i32> %71, i32 2
-  store i32 %80, i32* %76, align 4, !tbaa !12, !alias.scope !19
-  %81 = extractelement <4 x i32> %71, i32 3
-  store i32 %81, i32* %77, align 4, !tbaa !12, !alias.scope !19
-  %82 = getelementptr inbounds i64, i64* %17, i64 %index.unr
-  %83 = bitcast i64* %82 to <4 x i64>*
-  store <4 x i64> %broadcast.splat, <4 x i64>* %83, align 8, !tbaa !9, !alias.scope !21
+  %82 = or i64 %index.unr, 1
+  %83 = or i64 %index.unr, 2
+  %84 = or i64 %index.unr, 3
+  %85 = add nsw <4 x i32> %vec.ind2.unr, <i32 4, i32 4, i32 4, i32 4>
+  %86 = getelementptr inbounds i32, i32* %29, i64 %index.unr
+  %87 = bitcast i32* %86 to <4 x i32>*
+  store <4 x i32> %vec.ind2.unr, <4 x i32>* %87, align 4, !tbaa !0, !alias.scope !16, !noalias !19
+  %88 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %index.unr, i32 0
+  %89 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %82, i32 0
+  %90 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %83, i32 0
+  %91 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %84, i32 0
+  %92 = extractelement <4 x i32> %85, i32 0
+  store i32 %92, i32* %88, align 4, !tbaa !12, !alias.scope !19
+  %93 = extractelement <4 x i32> %85, i32 1
+  store i32 %93, i32* %89, align 4, !tbaa !12, !alias.scope !19
+  %94 = extractelement <4 x i32> %85, i32 2
+  store i32 %94, i32* %90, align 4, !tbaa !12, !alias.scope !19
+  %95 = extractelement <4 x i32> %85, i32 3
+  store i32 %95, i32* %91, align 4, !tbaa !12, !alias.scope !19
+  %96 = getelementptr inbounds i64, i64* %31, i64 %index.unr
+  %97 = bitcast i64* %96 to <4 x i64>*
+  store <4 x i64> %broadcast.splat, <4 x i64>* %97, align 8, !tbaa !9, !alias.scope !21
   br label %middle.block
 
 middle.block:                                     ; preds = %middle.block.unr-lcssa, %vector.body.epil
-  %cmp.n = icmp eq i64 %n.vec, %18
+  %cmp.n = icmp eq i64 %n.vec, %32
   br i1 %cmp.n, label %.loopexit, label %scalar.ph.preheader
 
 .loopexit:                                        ; preds = %scalar.ph.prol.loopexit, %scalar.ph, %middle.block
-  %84 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %5, i64 0, i32 2
-  %85 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %84, align 8, !tbaa !25
-  %86 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %85, i64 0, i32 5, i32 0
-  %87 = bitcast %struct.rb_code_position_struct** %86 to i8**
-  store i8* %12, i8** %87, align 8, !tbaa !27
-  %88 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %85, i64 0, i32 5, i32 1
-  %89 = bitcast i32** %88 to i8**
-  store i8* %14, i8** %89, align 8, !tbaa !36
-  %90 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %85, i64 0, i32 1
-  store i32 %10, i32* %90, align 4, !tbaa !37
-  %91 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %85, i64 0, i32 5, i32 2
-  store i32 %10, i32* %91, align 8, !tbaa !38
-  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %5) #15
-  %92 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %84, align 8, !tbaa !25
-  %93 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %92, i64 0, i32 2
-  %94 = bitcast i64** %93 to i8**
-  store i8* %16, i8** %94, align 8, !tbaa !39
-  %95 = bitcast %struct.rb_iseq_struct* %5 to i8*
-  ret i8* %95
+  %98 = getelementptr inbounds %struct.rb_iseq_struct, %struct.rb_iseq_struct* %19, i64 0, i32 2
+  %99 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %98, align 8, !tbaa !25
+  %100 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %99, i64 0, i32 5, i32 0
+  %101 = bitcast %struct.rb_code_position_struct** %100 to i8**
+  store i8* %26, i8** %101, align 8, !tbaa !27
+  %102 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %99, i64 0, i32 5, i32 1
+  %103 = bitcast i32** %102 to i8**
+  store i8* %28, i8** %103, align 8, !tbaa !36
+  %104 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %99, i64 0, i32 1
+  store i32 %24, i32* %104, align 4, !tbaa !37
+  %105 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %99, i64 0, i32 5, i32 2
+  store i32 %24, i32* %105, align 8, !tbaa !38
+  tail call void @rb_iseq_insns_info_encode_positions(%struct.rb_iseq_struct* %19) #15
+  %106 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %98, align 8, !tbaa !25
+  %107 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %106, i64 0, i32 2
+  %108 = bitcast i64** %107 to i8**
+  store i8* %30, i8** %108, align 8, !tbaa !39
+  %109 = bitcast %struct.rb_iseq_struct* %19 to i8*
+  ret i8* %109
 
 scalar.ph:                                        ; preds = %scalar.ph.prol.loopexit, %scalar.ph
-  %96 = phi i64 [ %120, %scalar.ph ], [ %.unr, %scalar.ph.prol.loopexit ]
-  %97 = trunc i64 %96 to i32
-  %98 = add nsw i32 %97, 4
-  %99 = getelementptr inbounds i32, i32* %15, i64 %96
-  store i32 %97, i32* %99, align 4, !tbaa !0
-  %100 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %96, i32 0
-  store i32 %98, i32* %100, align 4, !tbaa !12
-  %101 = getelementptr inbounds i64, i64* %17, i64 %96
-  %102 = add nuw nsw i64 %96, 1
-  %103 = trunc i64 %102 to i32
-  %104 = add nsw i32 %103, 4
-  %105 = getelementptr inbounds i32, i32* %15, i64 %102
-  store i32 %103, i32* %105, align 4, !tbaa !0
-  %106 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %102, i32 0
-  store i32 %104, i32* %106, align 4, !tbaa !12
-  %107 = add nuw nsw i64 %96, 2
-  %108 = trunc i64 %107 to i32
-  %109 = add nsw i32 %108, 4
-  %110 = getelementptr inbounds i32, i32* %15, i64 %107
-  store i32 %108, i32* %110, align 4, !tbaa !0
-  %111 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %107, i32 0
-  store i32 %109, i32* %111, align 4, !tbaa !12
-  %112 = add nuw nsw i64 %96, 3
-  %113 = trunc i64 %112 to i32
-  %114 = add nsw i32 %113, 4
-  %115 = getelementptr inbounds i32, i32* %15, i64 %112
-  store i32 %113, i32* %115, align 4, !tbaa !0
-  %116 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %13, i64 %112, i32 0
-  store i32 %114, i32* %116, align 4, !tbaa !12
-  %117 = insertelement <4 x i64> undef, i64 %9, i32 0
-  %118 = shufflevector <4 x i64> %117, <4 x i64> undef, <4 x i32> zeroinitializer
-  %119 = bitcast i64* %101 to <4 x i64>*
-  store <4 x i64> %118, <4 x i64>* %119, align 8, !tbaa !9
-  %120 = add nuw nsw i64 %96, 4
-  %121 = icmp eq i64 %120, %18
-  br i1 %121, label %.loopexit, label %scalar.ph, !llvm.loop !40
+  %110 = phi i64 [ %134, %scalar.ph ], [ %.unr, %scalar.ph.prol.loopexit ]
+  %111 = trunc i64 %110 to i32
+  %112 = add nsw i32 %111, 4
+  %113 = getelementptr inbounds i32, i32* %29, i64 %110
+  store i32 %111, i32* %113, align 4, !tbaa !0
+  %114 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %110, i32 0
+  store i32 %112, i32* %114, align 4, !tbaa !12
+  %115 = getelementptr inbounds i64, i64* %31, i64 %110
+  %116 = add nuw nsw i64 %110, 1
+  %117 = trunc i64 %116 to i32
+  %118 = add nsw i32 %117, 4
+  %119 = getelementptr inbounds i32, i32* %29, i64 %116
+  store i32 %117, i32* %119, align 4, !tbaa !0
+  %120 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %116, i32 0
+  store i32 %118, i32* %120, align 4, !tbaa !12
+  %121 = add nuw nsw i64 %110, 2
+  %122 = trunc i64 %121 to i32
+  %123 = add nsw i32 %122, 4
+  %124 = getelementptr inbounds i32, i32* %29, i64 %121
+  store i32 %122, i32* %124, align 4, !tbaa !0
+  %125 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %121, i32 0
+  store i32 %123, i32* %125, align 4, !tbaa !12
+  %126 = add nuw nsw i64 %110, 3
+  %127 = trunc i64 %126 to i32
+  %128 = add nsw i32 %127, 4
+  %129 = getelementptr inbounds i32, i32* %29, i64 %126
+  store i32 %127, i32* %129, align 4, !tbaa !0
+  %130 = getelementptr inbounds %struct.rb_code_position_struct, %struct.rb_code_position_struct* %27, i64 %126, i32 0
+  store i32 %128, i32* %130, align 4, !tbaa !12
+  %131 = insertelement <4 x i64> undef, i64 %23, i32 0
+  %132 = shufflevector <4 x i64> %131, <4 x i64> undef, <4 x i32> zeroinitializer
+  %133 = bitcast i64* %115 to <4 x i64>*
+  store <4 x i64> %132, <4 x i64>* %133, align 8, !tbaa !9
+  %134 = add nuw nsw i64 %110, 4
+  %135 = icmp eq i64 %134, %32
+  br i1 %135, label %.loopexit, label %scalar.ph, !llvm.loop !40
 }
+
+declare i64 @rb_gv_get(i8*) local_unnamed_addr #0
 
 declare %struct.rb_iseq_struct* @rb_iseq_new(%struct.rb_ast_body_struct*, i64, i64, i64, %struct.rb_iseq_struct*, i32) local_unnamed_addr #0
 
@@ -661,7 +687,7 @@ rb_class_of.exit.i:                               ; preds = %61, %60, %59, %53, 
 
 68:                                               ; preds = %rb_class_of.exit.i
   %69 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !9
-  tail call void (i64, i8*, ...) @rb_raise(i64 %69, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.16, i64 0, i64 0)) #16
+  tail call void (i64, i8*, ...) @rb_raise(i64 %69, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @.str.18, i64 0, i64 0)) #16
   unreachable
 
 70:                                               ; preds = %rb_class_of.exit.i
@@ -930,7 +956,7 @@ entry:
   tail call void @rb_gc_register_mark_object(i64 %2) #15
   store i64 %2, i64* @"rubyStrFrozen_test/testdata/compiler/method.rb", align 8
   %rubyStr_hello.i.i = load i64, i64* @rubyStrFrozen_hello, align 8
-  %3 = tail call fastcc i8* @sorbet_allocateRubyStackFrames(i64 %rubyStr_hello.i.i, i64 %2, i64 %2, i32 10) #15
+  %3 = tail call fastcc i8* @sorbet_allocateRubyStackFrames(i64 %rubyStr_hello.i.i, i64 %2, i32 10) #15
   store i8* %3, i8** @"stackFramePrecomputed_func_Object#hello", align 8
   %4 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_<", i64 0, i64 0), i64 1) #15
   store i64 %4, i64* @"rubyIdPrecomputed_<", align 8
@@ -945,7 +971,7 @@ entry:
   %9 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #15
   tail call void @rb_gc_register_mark_object(i64 %9) #15
   %"rubyStr_test/testdata/compiler/method.rb.i1.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/method.rb", align 8
-  %10 = tail call fastcc i8* @sorbet_allocateRubyStackFrames(i64 %9, i64 %"rubyStr_test/testdata/compiler/method.rb.i1.i", i64 %"rubyStr_test/testdata/compiler/method.rb.i1.i", i32 11) #15
+  %10 = tail call fastcc i8* @sorbet_allocateRubyStackFrames(i64 %9, i64 %"rubyStr_test/testdata/compiler/method.rb.i1.i", i32 11) #15
   store i8* %10, i8** @"stackFramePrecomputed_func_<root>.<static-init>$114", align 8
   %11 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_keep_def, i64 0, i64 0), i64 8) #15
   %12 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_sorbet, i64 0, i64 0), i64 6) #15
