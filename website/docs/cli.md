@@ -136,3 +136,25 @@ This will be the output using the `--typed-override` flag:
 foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 ...
 ```
+
+## Is there a way to get errors in JSON format?
+
+There is not, intentionally. If you're trying to consume Sorbet's output from a
+script, we recommend you either consume Sorbet via the LSP protocol, or using
+standard UNIX tools like `sed` and `awk` to extract information from the
+human-readable output.
+
+Why? Committing to a stable output format is an ongoing maintenance burden for
+the Sorbet team. We have explicitly chosen only two output formats:
+
+- The human-readable error output seen when running `srb tc` from the CLI
+  directly.
+
+- Output conforming to the [Language Server Protocol](lsp), which drives editor
+  integrations (see the `--lsp` flag).
+
+[lsp]: https://microsoft.github.io/language-server-protocol/
+
+The LSP spec is stable, versioned, typed, and easy to test whether Sorbet
+conforms to it. We don't want to be in the business of inventing competing
+editor output formats, so we explicitly only support these two.
