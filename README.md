@@ -4,10 +4,9 @@
 
 # Sorbet
 
-This repository contains Sorbet, a static typechecker for a subset of Ruby. It
-is still in early stages, but is mature enough to run on the majority of Ruby
-code at Stripe. You are welcome to try it, though, but your experience might
-still be rough.
+This repository contains Sorbet, a fast, powerful typechecker designed for Ruby.
+It aims to be easy to add to existing codebases with gradual types, and fast to
+respond with errors and suggestions.
 
 This README contains documentation specifically for contributing to Sorbet. You
 might also want to:
