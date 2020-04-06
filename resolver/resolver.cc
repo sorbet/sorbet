@@ -900,9 +900,7 @@ public:
             for (auto &job : todo) {
                 i++;
                 // Only give suggestions for the first 10, because fuzzy suggestions are expensive.
-                // Also turn off fuzzy suggestions when there's an active LSP query (respond to things
-                // like completion and go to def faster)
-                auto suggestDidYouMean = i < 10 && gs.lspQuery.isEmpty();
+                auto suggestDidYouMean = i < 10;
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 constantResolutionFailed(ctx, job, suggestDidYouMean);
             }
