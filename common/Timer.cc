@@ -11,6 +11,8 @@ microseconds clock_gettime_coarse() {
 #ifdef __linux__
     // This is faster, as measured via the benchmark above, but is not portable.
     clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
+#elif __APPLE__
+    clock_gettime(CLOCK_MONOTONIC_RAW_APPROX, &tp);
 #else
     clock_gettime(CLOCK_MONOTONIC, &tp);
 #endif
