@@ -17,6 +17,7 @@
 #include "common/common.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -57,6 +58,7 @@ namespace spd = spdlog;
 using namespace std;
 
 string singleTest;
+string webTraceFile;
 
 vector<Expectations> getInputs(string singleTest);
 
@@ -1117,6 +1119,11 @@ TEST_P(LSPTest, All) {
             HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
+
+    if (!::sorbet::test::webTraceFile.empty()) {
+        auto counters = getAndClearThreadCounters();
+        web_tracer_framework::Tracing::storeTraces(counters, ::sorbet::test::webTraceFile);
+    }
 }
 // namespace sorbet::test
 
@@ -1278,6 +1285,8 @@ int main(int argc, char *argv[]) {
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
     options.add_options()("lsp-disable-fastpath", "disable fastpath in lsp tests");
+    options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
+                                    cxxopts::value<std::string>()->default_value(""), "file");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -1291,6 +1300,8 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
+
+    sorbet::test::webTraceFile = res["web-trace-file"].as<std::string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);
     return RUN_ALL_TESTS();
