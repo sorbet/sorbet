@@ -161,7 +161,7 @@ cp "$base/{file}" package.gem
 
 # --local to avoid going to rubygmes for the gem
 # --env-shebang to not hardcode the path to ruby in the sandbox
-gem install --local --env-shebang package.gem
+run_cmd gem install --local --env-shebang package.gem
 
 """
 
