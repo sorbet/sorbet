@@ -7,73 +7,183 @@
 #include "common/JSON.h"
 #include "common/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
+#include "rapidjson/writer.h"
 #include "sorbet_version/sorbet_version.h"
-#include <chrono>
 #include <string>
 #include <unistd.h>
+
 using namespace std;
+
 namespace sorbet::web_tracer_framework {
+
+namespace {
+
+void endLine(rapidjson::StringBuffer &result, rapidjson::Writer<rapidjson::StringBuffer> &writer) {
+    // From the docs:
+    //
+    // > This function reset the writer with a new stream and default settings,
+    // > in order to make a Writer object reusable for output multiple JSONs.
+    //
+    // We're using it so we can manage writing the top-level array ourselves
+    // (one object per line, no closing ] and re-use previous file data).
+    writer.Reset(result);
+
+    result.Put(',');
+    result.Put('\n');
+}
+
+} // namespace
+
+// Super rudimentary support for outputing trace files in Google's Trace Event Format
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
-    fmt::memory_buffer result;
+    rapidjson::StringBuffer result;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(result);
+
+    auto now = clock_gettime_coarse();
+    auto pid = getpid();
 
     if (!FileOps::exists(fileName)) {
-        fmt::format_to(result, "[\n");
+        result.Put('[');
+        result.Put('\n');
     }
-    auto now = clock_gettime_coarse();
 
-    auto pid = getpid();
-    fmt::format_to(result,
-                   "{{\"name\":\"process_name\",\"ph\":\"M\",\"pid\":{},\"args\":{{\"name\":\"Sorbet v{}\"}}}},\n", pid,
-                   sorbet_full_version_string);
+    // header / meta information
+    {
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String("process_name");
+
+        writer.String("ph");
+        writer.String("M");
+
+        writer.String("pid");
+        writer.Int(pid);
+
+        writer.String("args");
+        writer.StartObject();
+        writer.String("name");
+        writer.String(fmt::format("Sorbet v{}", sorbet_full_version_string));
+        writer.EndObject();
+
+        writer.EndObject();
+        endLine(result, writer);
+    }
+
     counters.counters->canonicalize();
 
-    for (auto &cat : counters.counters->countersByCategory) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{{}}}}},\n",
-                       cat.first, now.usec * 1.0, pid, fmt::map_join(cat.second, ",", [](const auto &e) -> string {
-                           return fmt::format("\"{}\":{}", e.first, e.second);
-                       }));
+    for (auto &[category, counters] : counters.counters->countersByCategory) {
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String(category);
+
+        writer.String("ph");
+        writer.String("C");
+
+        writer.String("ts");
+        writer.String(fmt::format("{:.3f}", now.usec * 1.0));
+
+        writer.String("pid");
+        writer.Int(pid);
+
+        writer.String("args");
+        writer.StartObject();
+        for (const auto &[counterName, value] : counters) {
+            writer.String(counterName);
+            writer.String(fmt::format("{}", value));
+        }
+        writer.EndObject();
+
+        writer.EndObject();
+        endLine(result, writer);
     }
 
-    for (auto &e : counters.counters->counters) {
-        fmt::format_to(result, "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{:.3f},\"pid\":{},\"args\":{{\"value\":{}}}}},\n",
-                       e.first, now.usec * 1.0, pid, e.second);
+    for (auto &[counterName, value] : counters.counters->counters) {
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String(counterName);
+
+        writer.String("ph");
+        writer.String("C");
+
+        writer.String("ts");
+        writer.String(fmt::format("{:.3f}", now.usec * 1.0));
+
+        writer.String("pid");
+        writer.Int(pid);
+
+        writer.String("args");
+        writer.StartObject();
+        writer.String("value");
+        writer.String(fmt::format("{}", value));
+        writer.EndObject();
+
+        writer.EndObject();
+        endLine(result, writer);
     }
 
-    // // for some reason, emmiting all of our counters breaks flow even visualitaion. @dmitry decided to not emmit
-    // // histograms
-    //
-    // for (auto &hist : counters.counters->histograms) {
-    //     fmt::format_to(result,
-    //     "{{\"name\":\"{}\",\"ph\":\"C\",\"ts\":{},\"pid\":{},\"args\":{{{}}}}},\n",
-    //                    hist.first, now, pid, fmt::map_join(hist.second, ",", [](const auto &e) -> string {
-    //                        return fmt::format("\"{}\":{}", e.first, e.second);
-    //                    }));
-    // }
+    // For some reason, emitting all of our counters breaks flow event visualitaion.
+    // @dmitry decided to not emit histograms
 
-    for (const auto &e : counters.counters->timings) {
-        string maybeArgs;
-        if (e.args != nullptr && !e.args->empty()) {
-            maybeArgs = fmt::format(
-                ",\"args\":{{{}}}", fmt::map_join(*e.args, ",", [](const auto &nameValue) -> string {
-                    return fmt::format("\"{}\":\"{}\"", JSON::escape(nameValue.first), JSON::escape(nameValue.second));
-                }));
+    for (const auto &timing : counters.counters->timings) {
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String(timing.measure);
+
+        writer.String("ph");
+        writer.String("X");
+
+        writer.String("ts");
+        writer.String(fmt::format("{:.3f}", timing.start.usec * 1.0));
+
+        writer.String("dur");
+        writer.String(fmt::format("{:.3f}", (timing.end.usec - timing.start.usec) * 1.0));
+
+        writer.String("pid");
+        writer.Int(pid);
+
+        writer.String("tid");
+        writer.Int(timing.threadId);
+
+        if (timing.args != nullptr && !timing.args->empty()) {
+            writer.String("args");
+
+            writer.StartObject();
+            for (const auto &[key, value] : *timing.args) {
+                writer.String(key);
+                writer.String(value);
+            }
+            writer.EndObject();
         }
 
-        string maybeFlow;
-        if (e.self.id != 0) {
-            ENFORCE(e.prev.id == 0);
-            maybeFlow = fmt::format(",\"bind_id\":{},\"flow_out\":true", e.self.id);
-        } else if (e.prev.id != 0) {
-            maybeFlow = fmt::format(",\"bind_id\":{},\"flow_in\":true", e.prev.id);
+        if (timing.self.id != 0) {
+            ENFORCE(timing.prev.id == 0);
+
+            writer.String("bind_id");
+            writer.Int(timing.self.id);
+
+            writer.String("flow_out");
+            writer.Bool(true);
+        } else if (timing.prev.id != 0) {
+            writer.String("bind_id");
+            writer.Int(timing.prev.id);
+
+            writer.String("flow_in");
+            writer.Bool(true);
         }
 
-        fmt::format_to(
-            result, "{{\"name\":\"{}\",\"ph\":\"X\",\"ts\":{:.3f},\"dur\":{:.3f},\"pid\":{},\"tid\":{}{}{}}},\n",
-            e.measure, e.start.usec * 1.0, (e.end.usec - e.start.usec) * 1.0, pid, e.threadId, maybeArgs, maybeFlow);
+        writer.EndObject();
+        endLine(result, writer);
     }
 
-    fmt::format_to(result, "\n");
-    FileOps::append(fileName, to_string(result));
+    // Explicitly don't put matching closing ], so that we can open it up and start appending to it if it exists.
+    result.Put('\n');
+
+    FileOps::append(fileName, result.GetString());
     return true;
 }
 } // namespace sorbet::web_tracer_framework
