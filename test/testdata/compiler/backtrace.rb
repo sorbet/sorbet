@@ -6,18 +6,17 @@ def foo
 end
 
 def bar
-  bt = Thread.current.backtrace.join("\n")
-  bt = bt.gsub(/^.*com_stripe_sorbet_llvm\//, '')
-  bt = bt.gsub(/^.*sorbet_ruby\//, '')
-  bt = bt.gsub(/^.*tmp\..*:/, ':')
+  path = Dir.getwd + '/'
 
-  # for now (maybe?) the monkeypatching has different backtraces
-  bt = bt.gsub("lib/ruby/2.6.0/rubygems/core_ext/kernel_require.rb:54:in `require'", '')
-  bt = bt.gsub("run/tools/patch_require.rb:29:in `require'", '')
-  bt = bt.gsub(%r{.*run/tools/patch_require.rb:37:in `require'}, '')
-  bt = bt.gsub("\n\n", "\n")
-
-  bt
+  Thread.current.backtrace.map do |line|
+    if line.start_with?('/tmp') then
+      nil
+    else
+      line
+        .sub(path, '')
+        .sub(%r{.*run/tools/patch_require.rb:.*:}, 'run/tools/patch_require.rb:<censored>:')
+    end
+  end.compact
 end
 
 puts foo

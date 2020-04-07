@@ -102,6 +102,10 @@ info    "├─ stdout:      $stdout"
 info    "├─ stderr:      $stderr"
 success "└─ exit code:   $code"
 
+shorten_bazel() {
+  sed -e "s+_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
+}
+
 should_fail=
 
 echo ""
@@ -120,6 +124,10 @@ info "Checking stdouts match..."
 if ! diff -au "$rbout" "$stdout" > stdout.diff; then
   attn  "├─ Diff (interpreted vs compiled)"
   < stdout.diff indent_and_nest
+  info  "├─ stdout (interpreted)"
+  < "$rbout" shorten_bazel | indent_and_nest
+  info  "├─ stdout (compiled)"
+  < "$stdout" shorten_bazel | indent_and_nest
   error "└─ stdouts don't match. See above."
   should_fail=1
 else
@@ -129,10 +137,6 @@ fi
 
 echo ""
 info "Checking stderrs match..."
-
-shorten_bazel() {
-  sed -e "s+_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
-}
 
 filter_stderr() {
   sed -e '/^SorbetLLVM using compiled/d' | \
