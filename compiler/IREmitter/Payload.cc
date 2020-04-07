@@ -390,6 +390,31 @@ llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
 
+// NOTE: this function relies on `sorbet_globalConstructors` being run before anything else, and inserts the
+// initialization of the `@sorbet_realpath` global variable to its entry block.
+llvm::Value *getRealPath(CompilerState &cs, llvm::IRBuilderBase &base) {
+    auto &builder = builderCast(base);
+
+    auto name = "sorbet_realpath";
+    auto ty = llvm::Type::getInt64Ty(cs);
+    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(name, ty, [&] {
+        auto zero = llvm::ConstantAggregateZero::get(ty);
+        auto global =
+            new llvm::GlobalVariable(*cs.module, ty, false, llvm::GlobalVariable::InternalLinkage, zero, name);
+        global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        global->setAlignment(8);
+
+        // initialize the constant in `sorbet_globalConstructors`
+        llvm::IRBuilder<> globalBuilder(cs);
+        globalBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        globalBuilder.CreateStore(globalBuilder.CreateCall(cs.module->getFunction("sorbet_readRealpath"), {}), global);
+
+        return global;
+    }));
+
+    return builder.CreateLoad(globalDeclaration);
+}
+
 llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::MethodDef> &md,
                                             llvm::GlobalVariable *store) {
     std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
@@ -402,6 +427,8 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
 
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(bb);
+
+    auto realpath = getRealPath(cs, builder);
 
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs;
@@ -418,7 +445,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
     auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
     auto pos = loc.position(cs);
     auto ret = builder.CreateCall(cs.module->getFunction("sorbet_allocateRubyStackFrames"),
-                                  {recv, funcNameValue, funcNameId, filenameValue,
+                                  {recv, funcNameValue, funcNameId, filenameValue, realpath,
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
