@@ -13,5 +13,6 @@ cc_library(
         "//common",
         "//core",
         "//sorbet_version",
+        "@rapidjson",
     ],
 )
