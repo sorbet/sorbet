@@ -2628,7 +2628,7 @@ module Kernel
   sig do
     params(
         arg0: Class,
-        arg1: String,
+        arg1: T.untyped,
         arg2: T::Array[String],
     )
     .returns(T.noreturn)
@@ -2636,7 +2636,7 @@ module Kernel
   sig do
     params(
         arg0: Exception,
-        arg1: String,
+        arg1: T.untyped,
         arg2: T::Array[String],
     )
     .returns(T.noreturn)
