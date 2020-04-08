@@ -422,7 +422,7 @@ module URI
     params(
         uri: String,
     )
-    .returns(URI::HTTP)
+    .returns(URI::Generic)
   end
   def self.parse(uri); end
 
