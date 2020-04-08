@@ -728,6 +728,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :array_of_unidentified_type, T::Array[Object]
     prop :defaulted_unidentified_type, Object, default: Object.new
     prop :hash_with_unidentified_types, T::Hash[Object, Object]
+    prop :infinity_float, Float, default: Float::INFINITY
   end
 
   describe 'generated code' do
