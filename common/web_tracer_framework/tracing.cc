@@ -83,7 +83,8 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         writer.String("C");
 
         writer.String("ts");
-        writer.String(fmt::format("{:.3f}", now.usec * 1.0));
+        auto ts = fmt::format("{:.3f}", now.usec * 1.0);
+        writer.RawValue(ts.c_str(), ts.length(), rapidjson::Type::kNumberType);
 
         writer.String("pid");
         writer.Int(pid);
@@ -110,7 +111,8 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         writer.String("C");
 
         writer.String("ts");
-        writer.String(fmt::format("{:.3f}", now.usec * 1.0));
+        auto ts = fmt::format("{:.3f}", now.usec * 1.0);
+        writer.RawValue(ts.c_str(), ts.length(), rapidjson::Type::kNumberType);
 
         writer.String("pid");
         writer.Int(pid);
@@ -138,10 +140,12 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
         writer.String("X");
 
         writer.String("ts");
-        writer.String(fmt::format("{:.3f}", timing.start.usec * 1.0));
+        auto ts = fmt::format("{:.3f}", timing.start.usec * 1.0);
+        writer.RawValue(ts.c_str(), ts.length(), rapidjson::Type::kNumberType);
 
         writer.String("dur");
-        writer.String(fmt::format("{:.3f}", (timing.end.usec - timing.start.usec) * 1.0));
+        auto dur = fmt::format("{:.3f}", (timing.end.usec - timing.start.usec) * 1.0);
+        writer.RawValue(dur.c_str(), dur.length(), rapidjson::Type::kNumberType);
 
         writer.String("pid");
         writer.Int(pid);
