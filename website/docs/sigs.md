@@ -127,7 +127,7 @@ sig do
 end
 def self.main(*args, **kwargs)
   # Positional rest args become an Array in the method body:
-  T.reveal_type(rest) # => Revealed type: `T::Array[Integer]`
+  T.reveal_type(args) # => Revealed type: `T::Array[Integer]`
 
   # Keyword rest args become a Hash in the method body:
   T.reveal_type(kwargs) # => Revealed: type `T::Hash[Symbol, Float]`
