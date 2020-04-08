@@ -170,8 +170,8 @@ module T::Props
 
     private_class_method def self.validate_deserialize_handle_nil(node)
       case node.type
-      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil
-        # Primitives are safe
+      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :const
+        # Primitives and constants are safe
       when :send
         receiver, method, arg = node.children
         if receiver.nil?
