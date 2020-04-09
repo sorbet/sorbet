@@ -82,11 +82,11 @@ build:release-mac --config=release-common
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=forcedebug
-build:release-debug-linux --config=dbg
+build:release-debug-linux --config=debugsymbols
 
 build:release-debug-mac --config=release-mac
 build:release-debug-mac --config=forcedebug
-build:release-debug-mac --config=dbg
+build:release-debug-mac --config=debugsymbols
 
 build:release-sanitized-linux --copt=-O2
 build:release-sanitized-linux --config=sanitize-linux
