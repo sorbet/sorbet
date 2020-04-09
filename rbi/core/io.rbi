@@ -1788,10 +1788,11 @@ class IO < Object
         binmode: BasicObject,
         autoclose: BasicObject,
         mode: String,
+        chomp: T::Boolean
     )
     .returns(T::Array[String])
   end
-  def self.readlines(name, sep=T.unsafe(nil), limit=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
+  def self.readlines(name, sep=T.unsafe(nil), limit=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil), chomp: T.unsafe(nil)); end
 
   # Calls select(2) system call. It monitors given arrays of `IO` objects, waits
   # until one or more of `IO` objects are ready for reading, are ready for
