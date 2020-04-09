@@ -51,6 +51,19 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
       StructWithPredefinedHash.new(hash_field1: {a: 100, b: 200}, hash_field2: {a: 'foo', b: 200})
     end
   end
+
+  it 'uses the original value when value is invalid in a soft error environment' do
+    T::Configuration.call_validation_error_handler = Proc.new do
+      # no raise
+    end
+
+    hash_field1 = {a: 'foo', b: 200}
+    doc = StructWithPredefinedHash.new(hash_field1: hash_field1)
+    assert_equal('foo', doc.hash_field1[:a])
+  ensure
+    T::Configuration.call_validation_error_handler = nil
+  end
+
   it 'can initialize a struct with a prop named "class" if without_accessors is true' do
     doc = StructWithClassProp.new(class: "the_class")
     assert_equal(StructWithClassProp, doc.class)
