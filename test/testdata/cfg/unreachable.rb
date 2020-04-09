@@ -24,3 +24,10 @@ unless !a.nil?
 else
   puts '' # error: This code is unreachable
 end
+
+def pointless_type_check
+  foo = 1
+  if !foo.is_a?(Numeric)
+    puts 'Must be Numeric' # error: This code is unreachable
+  end
+end
