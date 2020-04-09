@@ -51,6 +51,22 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
         }                                                                                                         \
     } while (false);
 
+#ifdef SKIP_SLOW_ENFORCE
+constexpr bool skip_slow_enforce = true;
+#else
+constexpr bool skip_slow_enforce = false;
+#endif
+
+// Some ENFORCEs are super slow and/or don't pass on Stripe's codebase.
+// Long term we should definitely make these checks pass and maybe even make them fast,
+// but for now we provide a way to skip slow debug checks (for example, when compiling debug release builds)
+#define SLOW_ENFORCE(...)                   \
+    do {                                    \
+        if (!::sorbet::skip_slow_enforce) { \
+            ENFORCE(__VA_ARGS__);           \
+        }                                   \
+    } while (false);
+
 #define DEBUG_ONLY(X) \
     if (debug_mode) { \
         X;            \
