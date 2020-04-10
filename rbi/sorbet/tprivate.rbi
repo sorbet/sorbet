@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 # These things are things that Sorbet considers unstable internal APIs that
 # could (and do) change at any moment without notice.
