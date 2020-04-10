@@ -164,7 +164,7 @@ the method body:</p>
 <span class="hljs-keyword">end</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(*args, **kwargs)</span></span>
   <span class="hljs-comment"># Positional rest args become an Array in the method body:</span>
-  T.reveal_type(rest) <span class="hljs-comment"># =&gt; Revealed type: `T::Array[Integer]`</span>
+  T.reveal_type(args) <span class="hljs-comment"># =&gt; Revealed type: `T::Array[Integer]`</span>
 
   <span class="hljs-comment"># Keyword rest args become a Hash in the method body:</span>
   T.reveal_type(kwargs) <span class="hljs-comment"># =&gt; Revealed: type `T::Hash[Symbol, Float]`</span>
