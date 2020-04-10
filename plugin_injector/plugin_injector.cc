@@ -128,9 +128,9 @@ public:
             threadState->file = loc.file();
 
             auto linkageType = llvm::Function::InternalLinkage;
-            auto noArgs = std::vector<llvm::Type *>(0, llvm::Type::getVoidTy(lctx));
+            auto argTys = std::vector<llvm::Type *>{llvm::Type::getInt64Ty(lctx)};
             auto varArgs = false;
-            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), noArgs, varArgs);
+            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), argTys, varArgs);
             auto globalConstructors = llvm::Function::Create(ft, linkageType, "sorbet_globalConstructors", *module);
             threadState->globalConstructorsEntry = llvm::BasicBlock::Create(lctx, "entry", globalConstructors);
         } else {

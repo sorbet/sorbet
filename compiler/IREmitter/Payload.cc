@@ -390,45 +390,21 @@ llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
 
-// NOTE: this function relies on `sorbet_globalConstructors` being run before anything else, and inserts the
-// initialization of the `@sorbet_realpath` global variable to its entry block.
-llvm::Value *getRealPath(CompilerState &cs, llvm::IRBuilderBase &base) {
-    auto &builder = builderCast(base);
-
-    auto name = "sorbet_realpath";
-    auto ty = llvm::Type::getInt64Ty(cs);
-    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(name, ty, [&] {
-        auto zero = llvm::ConstantAggregateZero::get(ty);
-        auto global =
-            new llvm::GlobalVariable(*cs.module, ty, false, llvm::GlobalVariable::InternalLinkage, zero, name);
-        global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        global->setAlignment(8);
-
-        // initialize the constant in `sorbet_globalConstructors`
-        llvm::IRBuilder<> globalBuilder(cs);
-        globalBuilder.SetInsertPoint(cs.globalConstructorsEntry);
-        globalBuilder.CreateStore(globalBuilder.CreateCall(cs.module->getFunction("sorbet_readRealpath"), {}), global);
-
-        return global;
-    }));
-
-    return builder.CreateLoad(globalDeclaration);
-}
-
 llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::MethodDef> &md,
                                             llvm::GlobalVariable *store) {
-    std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
+    std::vector<llvm::Type *> argTys{llvm::Type::getInt64Ty(cs)};
+    auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), argTys, false);
     auto constr =
         llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", store->getName()}, *cs.module);
+
+    auto realpath = constr->arg_begin();
+    realpath->setName("realpath");
 
     auto bei = llvm::BasicBlock::Create(cs, "entryInitializers", constr);
     auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
 
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(bb);
-
-    auto realpath = getRealPath(cs, builder);
 
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs;
@@ -470,10 +446,15 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullv, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(8);
+
+        // The realpath is the first argument to `sorbet_globalConstructors`
+        auto realpath = cs.globalConstructorsEntry->getParent()->arg_begin();
+        realpath->setName("realpath");
+
         // create constructor
         auto constr = allocateRubyStackFramesImpl(cs, md, ret);
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
-        globalInitBuilder.CreateCall(constr, {});
+        globalInitBuilder.CreateCall(constr, {realpath});
 
         return ret;
     }));

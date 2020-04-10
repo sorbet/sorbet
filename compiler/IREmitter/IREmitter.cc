@@ -782,7 +782,10 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
                                Payload::toCString(cs, compileTimeBuildSCMRevision, builder),
                            });
 
-        builder.CreateCall(cs.module->getFunction("sorbet_globalConstructors"), {});
+        auto realpath = builder.CreateCall(cs.module->getFunction("sorbet_readRealpath"), {});
+        realpath->setName("realpath");
+
+        builder.CreateCall(cs.module->getFunction("sorbet_globalConstructors"), {realpath});
 
         core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
