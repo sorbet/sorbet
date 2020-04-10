@@ -171,7 +171,7 @@ methods from a module onto the including class:</p>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># runtime error as `bar` is not defined on A</span>
-A.foo
+A.bar
 </code></pre>
 <p>This is hard to statically analyze, as it involves looking into the body of the
 <code>self.included</code> method, which might have arbitrary computation. As a compromise,
