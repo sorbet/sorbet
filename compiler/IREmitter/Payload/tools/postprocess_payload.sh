@@ -3,16 +3,19 @@ set -euo pipefail
 
 payload="$1"
 
-# mark all our unternal functions as, well, internal :-)
-sed -i'.bak' 's/define double @sorbet_/define internal double @sorbet_/g' "$payload"
-sed -i'.bak' 's/define i64 @sorbet_/define internal i64 @sorbet_/g' "$payload"
-sed -i'.bak' 's/define i32 @sorbet_/define internal i32 @sorbet_/g' "$payload"
-sed -i'.bak' 's/define nonnull i64\* @sorbet_/define internal nonnull i64\* @sorbet_/g' "$payload"
-sed -i'.bak' 's/define %struct\.sorbet_Closure\* @sorbet_/define internal %struct\.sorbet_Closure\* @sorbet_/g' "$payload"
-sed -i'.bak' 's/define i8\* @sorbet_/define internal i8\* @sorbet_/g' "$payload"
-sed -i'.bak' 's/define i64\* @sorbet_/define internal i64\* @sorbet_/g' "$payload"
-sed -i'.bak' 's/define zeroext i1 @sorbet_/define internal zeroext i1 @sorbet_/g' "$payload"
-sed -i'.bak' 's/define void @sorbet_/define internal void @sorbet_/g' "$payload"
+# mark all our unternal functions as, well, available_externally :-)
+sed -i'.bak' 's/define double @sorbet_/define available_externally double @sorbet_/g' "$payload"
+sed -i'.bak' 's/define i64 @sorbet_/define available_externally i64 @sorbet_/g' "$payload"
+sed -i'.bak' 's/define i32 @sorbet_/define available_externally i32 @sorbet_/g' "$payload"
+sed -i'.bak' 's/define nonnull i64\* @sorbet_/define available_externally nonnull i64\* @sorbet_/g' "$payload"
+sed -i'.bak' 's/define %struct\.sorbet_Closure\* @sorbet_/define available_externally %struct\.sorbet_Closure\* @sorbet_/g' "$payload"
+
+sed -i'.bak' 's/define i8\* @sorbet_/define available_externally i8\* @sorbet_/g' "$payload"
+
+sed -i'.bak' 's/define i64\* @sorbet_/define available_externally i64\* @sorbet_/g' "$payload"
+sed -i'.bak' 's/define i64\*\* @sorbet_/define available_externally i64\*\* @sorbet_/g' "$payload"
+sed -i'.bak' 's/define zeroext i1 @sorbet_/define available_externally zeroext i1 @sorbet_/g' "$payload"
+sed -i'.bak' 's/define void @sorbet_/define available_externally void @sorbet_/g' "$payload"
 
 # mark class constants as, well, constant.
 
@@ -23,6 +26,8 @@ sed -i'.bak' 's/define void @sorbet_/define internal void @sorbet_/g' "$payload"
 ## are valid for the translation units that do not include the definition.
 
 sed -i'.bak' 's/@rb_c\(.*\) = external local_unnamed_addr global/@rb_c\1 = external local_unnamed_addr constant/' "$payload"
+sed -i'.bak' 's/@closureInfo = constant /@closureInfo = available_externally constant/' "$payload"
+
 
 # remove noise
 sed -i'.bak' '/llvm\.module\.flags/d' "$payload"
