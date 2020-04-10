@@ -20,7 +20,6 @@ public:
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
     llvm::Module *module;
-    // TODO(jez) Arguably this is another one that's only relevant for IREmitter...
     llvm::BasicBlock *globalConstructorsEntry;
 
     // Our own state
