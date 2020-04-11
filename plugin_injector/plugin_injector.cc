@@ -15,6 +15,7 @@
 #include "compiler/Names/Names.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "core/ErrorQueue.h"
+#include "main/options/options.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <cxxopts.hpp>
 #include <optional>
@@ -211,6 +212,11 @@ public:
                                             cxxopts::value<bool>());
     };
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &providedOptions) const override {
+        if (providedOptions["version"].as<bool>()) {
+            fmt::print("Sorbet compiler {}\n", sorbet_full_version_string);
+            throw realmain::options::EarlyReturnWithCode(0);
+        }
+
         optional<string> irOutputDir;
         bool forceCompiled = false;
         if (providedOptions.count("llvm-ir-folder") > 0) {
