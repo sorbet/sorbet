@@ -827,7 +827,8 @@ void readOptions(Options &opts,
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
 
-        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
+            opts.storeState.empty()) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
                           options.help({""}));
             throw EarlyReturnWithCode(1);
