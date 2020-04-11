@@ -307,7 +307,7 @@ bool shouldShow(vector<string> &wantNames, string_view name) {
     return absl::c_linear_search(wantNames, name);
 }
 
-string getCounterStatistics(vector<string> names) {
+string getCounterStatistics() {
     counterState.canonicalize();
 
     fmt::memory_buffer buf;

@@ -151,7 +151,6 @@ struct Options {
     std::vector<std::string> dslRubyExtraArgs;
     std::string storeState = "";
     bool enableCounters = false;
-    std::vector<std::string> someCounters;
     std::string errorUrlBase = "https://srb.help/";
     std::set<int> errorCodeWhiteList;
     std::set<int> errorCodeBlackList;

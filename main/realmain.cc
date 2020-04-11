@@ -578,18 +578,10 @@ int realmain(int argc, char *argv[]) {
 #ifndef SORBET_REALMAIN_MIN
     StatsD::addStandardMetrics();
 
-    if (!opts.someCounters.empty()) {
-        if (opts.enableCounters) {
-            logger->error("Don't pass both --counters and --counter");
-            return 1;
-        }
-        logger->warn("" + getCounterStatistics(opts.someCounters));
-    }
-
     if (opts.enableCounters) {
-        logger->warn("" + getCounterStatistics(Counters::ALL_COUNTERS));
+        logger->warn("" + getCounterStatistics());
     } else {
-        logger->debug("" + getCounterStatistics(Counters::ALL_COUNTERS));
+        logger->debug("" + getCounterStatistics());
     }
 
     auto counters = getAndClearThreadCounters();

@@ -49,7 +49,6 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
     EXPECT_EQ(empty.dslRubyExtraArgs.size(), opts.dslRubyExtraArgs.size());
     EXPECT_EQ(empty.storeState, opts.storeState);
     EXPECT_EQ(empty.enableCounters, opts.enableCounters);
-    EXPECT_EQ(empty.someCounters.size(), opts.someCounters.size());
     EXPECT_EQ(empty.errorUrlBase, opts.errorUrlBase);
     EXPECT_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
     EXPECT_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
