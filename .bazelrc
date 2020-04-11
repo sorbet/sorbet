@@ -77,6 +77,10 @@ build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
 build:release-common --config=versioned
 
+build:release-debug-common --config=forcedebug
+build:release-debug-common --config=debugsymbols
+build:release-debug-common --config=skipslowenforce
+
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
@@ -84,24 +88,20 @@ build:release-linux --config=lto-linux --config=release-common
 build:release-mac --config=release-common
 
 build:release-debug-linux --config=release-linux
-build:release-debug-linux --config=forcedebug
-build:release-debug-linux --config=dbg
+build:release-debug-linux --config=release-debug-common
 
 build:release-debug-mac --config=release-mac
-build:release-debug-mac --config=forcedebug
-build:release-debug-mac --config=dbg
+build:release-debug-mac --config=release-debug-common
 
 build:release-sanitized-linux --copt=-O2
 build:release-sanitized-linux --config=sanitize-linux
 build:release-sanitized-linux --define jemalloc=false
-build:release-sanitized-linux --config=debugsymbols
-build:release-sanitized-linux --config=forcedebug
+build:release-sanitized-linux --config=release-debug-common
 
 build:release-sanitized-mac --copt=-O2
-build:release-sanitized-mac --config=forcedebug
-build:release-sanitized-mac --config=debugsymbols
 build:release-sanitized-mac --config=sanitize-mac
 build:release-sanitized-mac --define jemalloc=false
+build:release-sanitized-linux --config=release-debug-common
 
 ##
 ## Configuration used to to as much testing as possible in CI
@@ -150,6 +150,13 @@ test:buildfarm-ruby --test_output=errors
 # DEBUG_MODE is set by default for all builds except --config=release.
 # Use this flag to set DEBUG_MODE even for --config=release.
 build:forcedebug --copt=-DFORCE_DEBUG
+
+# DEBUG_MODE controls whether ENFORCEs are enabled.  Some ENFORCEs are super
+# slow and/or don't pass on Stripe's codebase.  Long term we should definitely
+# make these checks pass and maybe even make them fast, but for now we provide
+# a way to skip slow debug checks (for example, when compiling debug release
+# builds)
+build:skipslowenforce --copt=-DSKIP_SLOW_ENFORCE
 
 # LTO build. Much longer compilation time. Smaller size and better perf.
 build:lto --copt=-flto=thin
