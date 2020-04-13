@@ -299,14 +299,6 @@ void CounterImpl::canonicalize() {
     this->timings = std::move(out.timings);
 }
 
-const vector<string> Counters::ALL_COUNTERS = {"<all>"};
-bool shouldShow(vector<string> &wantNames, string_view name) {
-    if (wantNames == Counters::ALL_COUNTERS) {
-        return true;
-    }
-    return absl::c_linear_search(wantNames, name);
-}
-
 string getCounterStatistics() {
     counterState.canonicalize();
 
@@ -315,9 +307,6 @@ string getCounterStatistics() {
     fmt::format_to(buf, "Counters and Histograms: \n");
 
     for (auto &cat : counterState.countersByCategory) {
-        if (!shouldShow(names, cat.first)) {
-            continue;
-        }
         CounterImpl::CounterType sum = 0;
         vector<pair<CounterImpl::CounterType, string>> sorted;
         for (auto &e : cat.second) {
@@ -340,9 +329,6 @@ string getCounterStatistics() {
     }
 
     for (auto &hist : counterState.histograms) {
-        if (!shouldShow(names, hist.first)) {
-            continue;
-        }
         CounterImpl::CounterType sum = 0;
         vector<pair<int, CounterImpl::CounterType>> sorted;
         for (auto &e : hist.second) {
@@ -391,9 +377,6 @@ string getCounterStatistics() {
             timings[e.measure].emplace_back(durationMs);
         }
         for (const auto &e : timings) {
-            if (!shouldShow(names, e.first)) {
-                continue;
-            }
             if (e.second.size() == 1) {
                 string line = fmt::format("  {:>34.34}.value :{:15.4} ms\n", e.first, e.second[0]);
                 sortedTimings.emplace_back(e.first, line);
@@ -421,10 +404,6 @@ string getCounterStatistics() {
 
         vector<pair<string, string>> sortedOther;
         for (auto &e : counterState.counters) {
-            if (!shouldShow(names, e.first)) {
-                continue;
-            }
-
             string line = fmt::format("  {:>40.40} :{:15}\n", e.first, e.second);
             sortedOther.emplace_back(e.first, line);
         }

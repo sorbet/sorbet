@@ -75,10 +75,6 @@ private:
     std::unique_ptr<CounterImpl> counters;
 };
 
-struct Counters {
-    static const std::vector<std::string> ALL_COUNTERS;
-};
-
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
