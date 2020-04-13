@@ -760,10 +760,6 @@ void readOptions(Options &opts,
             logger->info("{}", options.help(options.groups()));
             throw EarlyReturnWithCode(0);
         }
-        if (raw["version"].as<bool>()) {
-            fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
-            throw EarlyReturnWithCode(0);
-        }
         if (raw["license"].as<bool>()) {
             fmt::print(
                 "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
@@ -831,7 +827,8 @@ void readOptions(Options &opts,
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
 
-        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
+            opts.storeState.empty()) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
                           options.help({""}));
             throw EarlyReturnWithCode(1);
@@ -885,6 +882,12 @@ void readOptions(Options &opts,
             if (maybeExtension) {
                 configuredExtensions.emplace_back(move(maybeExtension));
             }
+        }
+
+        // Allow semanticExtensionProviders to print something when --version is given before we throw.
+        if (raw["version"].as<bool>()) {
+            fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
+            throw EarlyReturnWithCode(0);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());
