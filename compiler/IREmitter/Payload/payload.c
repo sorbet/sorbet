@@ -38,16 +38,16 @@ typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount
 // ****                       Internal Helper Functions
 // ****
 
-const char *sorbet_pi(ID id) {
+const char *dbg_pi(ID id) __attribute__((weak)) {
     return rb_id2name(id);
 }
 
-const char *sorbet_p(VALUE obj) {
+const char *dbg_p(VALUE obj) __attribute__((weak)) {
     char *ret = RSTRING_PTR(rb_sprintf("%" PRIsVALUE, obj));
     return ret;
 }
 
-void sorbet_stopInDebugger() {
+void stopInDebugger() {
     __asm__("int $3");
 }
 
@@ -681,7 +681,8 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
-void *sorbet_allocateRubyStackFrames(VALUE funcName, ID func, VALUE filename, VALUE realpath, int startline, int endline) {
+unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
+                                              int startline, int endline) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -719,7 +720,7 @@ void *sorbet_allocateRubyStackFrames(VALUE funcName, ID func, VALUE filename, VA
     iseq->body->iseq_encoded = iseq_encoded;
 
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
-    return (void *)iseq;
+    return (unsigned char *)iseq;
 }
 
 const VALUE sorbet_readRealpath() {
@@ -971,9 +972,10 @@ VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restr
     return sorbet_longToRubyValue(rb_array_len(recv));
 }
 
-VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
-                                         BlockFFIType blk, VALUE closure) {
+VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                VALUE closure) {
     VALUE ary = recv;
+    rb_check_arity(argc, 1, 2);
     if (argc == 2) {
         return rb_ary_aref2(ary, argv[0], argv[1]);
     }
@@ -981,6 +983,10 @@ VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VAL
 
     long beg, len;
 
+    /* special case - speeding up */
+    if (FIXNUM_P(arg)) {
+        return rb_ary_entry(ary, FIX2LONG(arg));
+    }
     /* check if idx is Range */
     switch (rb_range_beg_len(arg, &beg, &len, RARRAY_LEN(ary), 0)) {
         case Qfalse:
@@ -992,18 +998,6 @@ VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VAL
     }
     return rb_ary_entry(ary, NUM2LONG(arg));
 }
-VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                VALUE closure) {
-    VALUE ary = recv;
-    rb_check_arity(argc, 1, 2);
-    if (LIKELY(argc == 1)) {
-        VALUE arg = argv[0];
-        if (LIKELY(FIXNUM_P(arg))) {
-            return rb_ary_entry(ary, FIX2LONG(arg));
-        }
-    }
-    return sorbet_rb_array_square_br_slowpath(recv, fun, argc, argv, blk, closure);
-}
 
 VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
@@ -1014,7 +1008,7 @@ VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const res
     return Qfalse;
 }
 
-VALUE sorbet_enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
+VALUE enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
     return RARRAY_LEN(array);
 }
 
@@ -1023,7 +1017,7 @@ VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const rest
     sorbet_ensure_arity(argc, 0);
     if (blk == NULL) {
         return rb_enumeratorize_with_size(recv, ID2SYM(fun), 0, NULL,
-                                          (rb_enumerator_size_func *)sorbet_enumerator_size_func_array_length);
+                                          (rb_enumerator_size_func *)enumerator_size_func_array_length);
     }
 
     for (long idx = 0; idx < RARRAY_LEN(recv); idx++) {
@@ -1048,7 +1042,10 @@ VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *con
     return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
-VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
+VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                         VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             return rb_fix_plus_fix(recv, y);
@@ -1066,19 +1063,11 @@ VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
     return rb_num_coerce_bin(recv, y, '+');
 }
 
-VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                         VALUE closure) __attribute__((always_inline)) {
+VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
     sorbet_ensure_arity(argc, 1);
+    // optimized version from numeric.c
     VALUE y = argv[0];
-    if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            return rb_fix_plus_fix(recv, y);
-        }
-    }
-    return sorbet_rb_int_plus_slowpath(recv, y);
-}
-
-VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             return rb_fix_minus_fix(recv, y);
@@ -1093,19 +1082,6 @@ VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
         return rb_big_minus(recv, y);
     }
     return rb_num_coerce_bin(recv, y, '-');
-}
-
-VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) __attribute__((always_inline)) {
-    sorbet_ensure_arity(argc, 1);
-    // optimized version from numeric.c
-    VALUE y = argv[0];
-    if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            return rb_fix_minus_fix(recv, y);
-        }
-    }
-    return sorbet_rb_int_minus_slowpath(recv, y);
 }
 
 VALUE sorbet_rb_int_mul(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -1141,7 +1117,10 @@ VALUE sorbet_rb_int_gt(VALUE recv, ID fun, int argc, const VALUE *const restrict
     return rb_num_coerce_relop(recv, y, '>');
 }
 
-VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
+VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE y = argv[0];
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             if (FIX2LONG(recv) < FIX2LONG(y)) {
@@ -1157,21 +1136,6 @@ VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
         return rb_big_lt(recv, y);
     }
     return rb_num_coerce_relop(recv, y, '<');
-}
-
-VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure)
-    __attribute__((always_inline)) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
-    if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) < FIX2LONG(y)) {
-                return Qtrue;
-            }
-            return Qfalse;
-        }
-    }
-    return sorbet_rb_int_lt_slowpath(recv, y);
 }
 
 VALUE sorbet_rb_int_ge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -1275,11 +1239,11 @@ VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const rest
 RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
 RUBY_EXTERN rb_serial_t ruby_vm_global_method_state;
 
-rb_serial_t sorbet_getConstantEpoch() __attribute__((always_inline)) {
+rb_serial_t sorbet_getConstantEpoch() {
     return ruby_vm_global_constant_state;
 }
 
-rb_serial_t sorbet_getMethodEpoch() __attribute__((always_inline)) {
+rb_serial_t sorbet_getMethodEpoch() {
     return ruby_vm_global_method_state;
 }
 
@@ -1297,6 +1261,12 @@ struct FunctionInlineCache {
     rb_serial_t class_serial;
 };
 
+// annotated to be inlined as part of payload generation
+static _Bool _sorbet_isInlineCacheValid(VALUE recv, struct FunctionInlineCache *cache) __attribute__((always_inline)) {
+    return LIKELY(sorbet_getMethodEpoch() == cache->method_state) &&
+           LIKELY(sorbet_getClassSerial(recv) == cache->class_serial);
+}
+
 void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
     // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
     const rb_callable_method_entry_t *me;
@@ -1311,9 +1281,8 @@ void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache
 }
 
 VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
-                      struct FunctionInlineCache *cache) __attribute__((noinline)) {
-    if (UNLIKELY(sorbet_getMethodEpoch() != cache->method_state) ||
-        UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
+                      struct FunctionInlineCache *cache) {
+    if (UNLIKELY(!_sorbet_isInlineCacheValid(recv, cache))) {
         sorbet_inlineCacheInvalidated(recv, cache, func);
     }
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);

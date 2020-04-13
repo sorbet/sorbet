@@ -37,15 +37,6 @@ cc_binary(
     ],
 )
 
-filegroup(
-    name = "vm_payload_srcs",
-    srcs = [
-        "PayloadIntrinsics.c",
-        "payload.c",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 cc_library(
     name = "pseudo_lib",
     srcs = [
