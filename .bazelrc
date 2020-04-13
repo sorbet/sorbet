@@ -55,6 +55,9 @@ build --copt=-Wno-macro-redefined
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
+build:dbg --config=rubydbg
+
+build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
 build:coverage --config=forcedebug
 build:coverage --cxxopt=-Wno-pass-failed # coverage build fails vectorization
