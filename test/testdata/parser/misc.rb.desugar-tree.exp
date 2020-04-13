@@ -184,7 +184,7 @@ rescue <emptyTree>::<C E> => x
   begin
     <assignTemp>$12 = y.to_a()
     <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 0, 0)
-    x = ::T.must(<assignTemp>$13.slice(::Range.new(0, -1, false)))
+    x = <assignTemp>$13.slice(::Range.new(0, -1, false))
     <assignTemp>$12
   end
 

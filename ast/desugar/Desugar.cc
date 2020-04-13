@@ -283,10 +283,9 @@ unique_ptr<Expression> desugarMlhs(DesugarContext dctx, core::LocOffsets loc, pa
                 auto lhloc = lh->loc;
                 auto index = MK::Send3(lhloc, MK::Constant(lhloc, core::Symbols::Range()), core::Names::new_(),
                                        MK::Int(lhloc, left), MK::Int(lhloc, -right), std::move(exclusive));
-                auto slice = MK::Send1(loc, MK::Local(loc, tempExpanded), core::Names::slice(), std::move(index));
-                stats.emplace_back(MK::Assign(
-                    lhloc, std::move(lh),
-                    MK::Send1(lhloc, MK::Constant(lhloc, core::Symbols::T()), core::Names::must(), std::move(slice))));
+                stats.emplace_back(
+                    MK::Assign(lhloc, std::move(lh),
+                               MK::Send1(loc, MK::Local(loc, tempExpanded), core::Names::slice(), std::move(index))));
             }
             i = -right;
         } else {

@@ -36,13 +36,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$8 = array
           <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 1, 0)
           a = <assignTemp>$9.[](0)
-          b = ::T.must(<assignTemp>$9.slice(::Range.new(1, -1, false)))
+          b = <assignTemp>$9.slice(::Range.new(1, -1, false))
           <assignTemp>$8
         end
         begin
           <assignTemp>$10 = array
           <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 0, 1)
-          a = ::T.must(<assignTemp>$11.slice(::Range.new(0, -1, true)))
+          a = <assignTemp>$11.slice(::Range.new(0, -1, true))
           b = <assignTemp>$11.[](-1)
           <assignTemp>$10
         end
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 2, 2)
           a = <assignTemp>$13.[](0)
           b = <assignTemp>$13.[](1)
-          c = ::T.must(<assignTemp>$13.slice(::Range.new(2, -2, true)))
+          c = <assignTemp>$13.slice(::Range.new(2, -2, true))
           d = <assignTemp>$13.[](-2)
           e = <assignTemp>$13.[](-1)
           <assignTemp>$12
