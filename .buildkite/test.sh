@@ -23,6 +23,13 @@ source .buildkite/tools/setup-bazel.sh
 
 err=0
 
+# Build sorbet_ruby once with gcc, to ensure that this build will work on
+# pay-server
+echo "--- building ruby with gcc"
+./bazel build @sorbet_ruby//:ruby \
+  --crosstool_top=@bazel_tools//tools/cpp:toolchain
+
+echo "--- running tests"
 ./bazel test @com_stripe_ruby_typer//test //... --config=dbg -c opt --test_summary=terse --test_output=errors || err=$?
 
 echo "--- uploading test results"
