@@ -75,10 +75,6 @@ private:
     std::unique_ptr<CounterImpl> counters;
 };
 
-struct Counters {
-    static const std::vector<std::string> ALL_COUNTERS;
-};
-
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
@@ -106,7 +102,7 @@ void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
                std::unique_ptr<std::vector<int>> histogramBuckets);
 
 absl::flat_hash_map<long, long> getAndClearHistogram(ConstExprStr histogram);
-std::string getCounterStatistics(std::vector<std::string> names);
+std::string getCounterStatistics();
 
 } // namespace sorbet
 #endif // SORBET_COUNTERS_H

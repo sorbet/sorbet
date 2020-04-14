@@ -448,7 +448,10 @@ int realmain(int argc, char *argv[]) {
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
-#ifndef SORBET_REALMAIN_MIN
+#ifdef SORBET_REALMAIN_MIN
+        logger->warn("LSP is disabled in sorbet-orig for faster builds");
+        return 1;
+#else
         gs->errorQueue->ignoreFlushes = true;
         logger->debug("Starting sorbet version {} in LSP server mode. "
                       "Talk ‘\\r\\n’-separated JSON-RPC to me. "
@@ -489,7 +492,10 @@ int realmain(int argc, char *argv[]) {
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, indexed);
 
         if (gs->runningUnderAutogen) {
-#ifndef SORBET_REALMAIN_MIN
+#ifdef SORBET_REALMAIN_MIN
+            logger->warn("Autogen is disabled in sorbet-orig for faster builds");
+            return 1;
+#else
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
@@ -575,21 +581,18 @@ int realmain(int argc, char *argv[]) {
         }
     }
 
-#ifndef SORBET_REALMAIN_MIN
+#ifdef SORBET_REALMAIN_MIN
+    if (opts.enableCounters || !opts.statsdHost.empty() || !opts.webTraceFile.empty() || !opts.metricsFile.empty()) {
+        logger->warn("Metrics are disabled in sorbet-orig for faster builds");
+        return 1;
+    }
+#else
     StatsD::addStandardMetrics();
 
-    if (!opts.someCounters.empty()) {
-        if (opts.enableCounters) {
-            logger->error("Don't pass both --counters and --counter");
-            return 1;
-        }
-        logger->warn("" + getCounterStatistics(opts.someCounters));
-    }
-
     if (opts.enableCounters) {
-        logger->warn("" + getCounterStatistics(Counters::ALL_COUNTERS));
+        logger->warn("" + getCounterStatistics());
     } else {
-        logger->debug("" + getCounterStatistics(Counters::ALL_COUNTERS));
+        logger->debug("" + getCounterStatistics());
     }
 
     auto counters = getAndClearThreadCounters();
