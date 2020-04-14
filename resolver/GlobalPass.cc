@@ -312,7 +312,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             }
         }
         data->mixins() = std::move(newMixins);
-        data->setClassLinearizationComputed();
+        data->setClassOrModuleLinearizationComputed();
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",

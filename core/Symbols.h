@@ -130,7 +130,7 @@ public:
     void addMixin(SymbolRef sym) {
         ENFORCE(isClassOrModule());
         mixins_.emplace_back(sym);
-        unsetClassLinearizationComputed();
+        unsetClassOrModuleLinearizationComputed();
     }
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
@@ -427,27 +427,27 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
-    inline void setClassAbstract() {
+    inline void setClassOrModuleAbstract() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_ABSTRACT;
     }
 
-    inline void setClassInterface() {
+    inline void setClassOrModuleInterface() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_INTERFACE;
     }
 
-    inline void setClassLinearizationComputed() {
+    inline void setClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
 
-    inline void setClassFinal() {
+    inline void setClassOrModuleFinal() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_FINAL;
     }
 
-    inline void setClassSealed() {
+    inline void setClassOrModuleSealed() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_SEALED;
     }
@@ -631,7 +631,7 @@ private:
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 
-    inline void unsetClassLinearizationComputed() {
+    inline void unsetClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());
         flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }

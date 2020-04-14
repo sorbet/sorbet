@@ -284,11 +284,11 @@ public:
             return;
         }
         if (send->fun == core::Names::declareFinal()) {
-            klass->symbol.data(ctx)->setClassFinal();
-            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassFinal();
+            klass->symbol.data(ctx)->setClassOrModuleFinal();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
         }
         if (send->fun == core::Names::declareSealed()) {
-            klass->symbol.data(ctx)->setClassSealed();
+            klass->symbol.data(ctx)->setClassOrModuleSealed();
 
             auto classOfKlass = klass->symbol.data(ctx)->singletonClass(ctx);
             auto sealedSubclasses = ctx.state.enterMethodSymbol(core::Loc(ctx.file, send->loc), classOfKlass,
@@ -302,11 +302,11 @@ public:
             sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
         }
         if (send->fun == core::Names::declareInterface() || send->fun == core::Names::declareAbstract()) {
-            klass->symbol.data(ctx)->setClassAbstract();
-            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
+            klass->symbol.data(ctx)->setClassOrModuleAbstract();
+            klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassOrModuleAbstract();
         }
         if (send->fun == core::Names::declareInterface()) {
-            klass->symbol.data(ctx)->setClassInterface();
+            klass->symbol.data(ctx)->setClassOrModuleInterface();
             if (klass->kind == ast::ClassDef::Kind::Class) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
