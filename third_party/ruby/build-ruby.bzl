@@ -65,7 +65,7 @@ cp -aL "{src_dir}"/* "$build_dir"
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
-    if ! "$@" >> build.log 2>&1; then
+    if ! "$@" < /dev/null >> build.log 2>&1; then
         echo "command $@ failed!"
         cat build.log
         echo "build dir: $build_dir"
@@ -73,12 +73,16 @@ run_cmd() {{
     fi
 }}
 
+# This is a hack. The configure script builds up a command for compiling C
+# files that includes `-fvisibility=hidden`. To override it, our flag needs to
+# come after, so we inject a flag right before the `-o` option that comes near
+# the end of the command via OUTFLAG.
+OUTFLAG="-fvisibility=default -o" \
 CC="{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
 CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
 LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
-OUTFLAG="-fvisibility=default -o" \
 run_cmd ./configure \
         {configure_flags} \
         --enable-load-relative \
