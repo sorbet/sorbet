@@ -37,6 +37,15 @@ cc_binary(
     ],
 )
 
+filegroup(
+    name = "vm_payload_srcs",
+    srcs = [
+        "PayloadIntrinsics.c",
+        "payload.c",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "pseudo_lib",
     srcs = [
@@ -58,8 +67,7 @@ cc_library(
     linkstatic = 1,  # we are doing this only for llvm ir
     local_defines = [
         # When this variable is defined, it means we're building the payload for use within sorbet_llvm,
-        # not for the purpose of being included in libruby (though we don't do that yet).
-        # TODO(jez) Link SorbetLLVM's payload into libruby.so.
+        # not for the purpose of being included in libruby.
         "SORBET_LLVM_PAYLOAD",
     ],
     visibility = ["//visibility:public"],

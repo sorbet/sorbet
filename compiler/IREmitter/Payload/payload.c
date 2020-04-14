@@ -27,6 +27,18 @@
 // This is for the enum definition for YARV instructions
 #include "insns.inc"
 
+// SORBET_ATTRIBUTE is for specifying attributes that are used for their effects
+// on llvm optimization. Usually this is for attributes like `alwaysinline`,
+// which will cause build failures in libruby as these functions will never
+// appear to be called.
+#ifdef SORBET_LLVM_PAYLOAD
+#define SORBET_ATTRIBUTE(...) __attribute__((__VA_ARGS__))
+#else
+#define SORBET_ATTRIBUTE(...) /* empty */
+#endif
+
+#define SORBET_INLINE SORBET_ATTRIBUTE(always_inline)
+
 // Paul's and Dmitry's laptops have different attributes for this function in system libraries.
 void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
@@ -38,16 +50,16 @@ typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount
 // ****                       Internal Helper Functions
 // ****
 
-const char *dbg_pi(ID id) __attribute__((weak)) {
+const char *sorbet_dbg_pi(ID id) {
     return rb_id2name(id);
 }
 
-const char *dbg_p(VALUE obj) __attribute__((weak)) {
+const char *sorbet_dbg_p(VALUE obj) {
     char *ret = RSTRING_PTR(rb_sprintf("%" PRIsVALUE, obj));
     return ret;
 }
 
-void stopInDebugger() {
+void sorbet_stopInDebugger() {
     __asm__("int $3");
 }
 
@@ -80,8 +92,8 @@ const int sorbet_getIsReleaseBuild() __attribute__((weak)) {
 // Thus, by putting our version check first before any other code in the C extension runs, and backing
 // up the symbols our version check relies on with weak symbols, we can guarantee that the user never
 // sees a symbol resolution error from loading a shared object when they shouldn't have.
-void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision)
-    __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision) {
     if (!compile_time_is_release_build) {
         // Skipping version check: This shared object was compiled by a non-release version of SorbetLLVM
         return;
@@ -105,24 +117,30 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
 // ****                       Singletons
 // ****
 
-VALUE sorbet_rubyTrue() __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_rubyTrue() {
     return RUBY_Qtrue;
 }
 
-VALUE sorbet_rubyFalse() __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_rubyFalse() {
     return RUBY_Qfalse;
 }
 
 // use this undefined value when you have a variable that should _never_ escape to ruby.
-VALUE sorbet_rubyUndef() __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_rubyUndef() {
     return RUBY_Qundef;
 }
 
-VALUE sorbet_rubyNil() __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_rubyNil() {
     return RUBY_Qnil;
 }
 
-VALUE sorbet_rubyTopSelf() __attribute__((always_inline)) __attribute__((pure)) {
+SORBET_INLINE
+SORBET_ATTRIBUTE(pure)
+VALUE sorbet_rubyTopSelf() {
     return GET_VM()->top_self;
 }
 
@@ -130,19 +148,23 @@ VALUE sorbet_rubyTopSelf() __attribute__((always_inline)) __attribute__((pure)) 
 // ****                       Conversions between Ruby values and C values
 // ****
 
-long sorbet_rubyValueToLong(VALUE val) __attribute__((always_inline)) {
+SORBET_INLINE
+long sorbet_rubyValueToLong(VALUE val) {
     return FIX2LONG(val);
 }
 
-VALUE sorbet_longToRubyValue(long i) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_longToRubyValue(long i) {
     return LONG2FIX(i);
 }
 
-double sorbet_rubyValueToDouble(VALUE val) __attribute__((always_inline)) {
+SORBET_INLINE
+double sorbet_rubyValueToDouble(VALUE val) {
     return RFLOAT_VALUE(val);
 }
 
-VALUE sorbet_doubleToRubyValue(double u) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_doubleToRubyValue(double u) {
     return DBL2NUM(u);
 }
 
@@ -150,35 +172,43 @@ VALUE sorbet_doubleToRubyValue(double u) __attribute__((always_inline)) {
 // ****                       Integer
 // ****
 
-VALUE sorbet_Integer_plus_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_plus_Integer(VALUE a, VALUE b) {
     return sorbet_longToRubyValue(sorbet_rubyValueToLong(a) + sorbet_rubyValueToLong(b));
 }
 
-VALUE sorbet_Integer_minus_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_minus_Integer(VALUE a, VALUE b) {
     return sorbet_longToRubyValue(sorbet_rubyValueToLong(a) - sorbet_rubyValueToLong(b));
 }
 
-VALUE sorbet_Integer_less_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_less_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) < sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
-VALUE sorbet_Integer_greater_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_greater_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) > sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
-VALUE sorbet_Integer_greatereq_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_greatereq_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) >= sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
-VALUE sorbet_Integer_lesseq_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_lesseq_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) <= sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
-VALUE sorbet_Integer_eq_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_eq_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) == sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
-VALUE sorbet_Integer_neq_Integer(VALUE a, VALUE b) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_Integer_neq_Integer(VALUE a, VALUE b) {
     return (sorbet_rubyValueToLong(a) != sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
@@ -186,31 +216,37 @@ VALUE sorbet_Integer_neq_Integer(VALUE a, VALUE b) __attribute__((always_inline)
 // ****                       Operations on Strings
 // ****
 
-const char *sorbet_rubyStringToCPtr(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+const char *sorbet_rubyStringToCPtr(VALUE value) {
     return RSTRING_PTR(value);
 }
 
-long sorbet_rubyStringLength(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+long sorbet_rubyStringLength(VALUE value) {
     return RSTRING_LEN(value);
 }
 
-VALUE sorbet_cPtrToRubyString(const char *ptr, long length) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
     return rb_str_new(ptr, length);
 }
 
-VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
     VALUE ret = rb_fstring_new(ptr, length);
     rb_gc_register_mark_object(ret);
     return ret;
 }
 
-VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) {
     VALUE ret = rb_reg_new(ptr, length, options);
     rb_gc_register_mark_object(ret);
     return ret;
 }
 
-VALUE sorbet_stringPlus(VALUE str1, VALUE str2) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_stringPlus(VALUE str1, VALUE str2) {
     return rb_str_plus(str1, str2);
 }
 
@@ -218,25 +254,30 @@ VALUE sorbet_stringPlus(VALUE str1, VALUE str2) __attribute__((always_inline)) {
 // ****                       Operations on Arrays
 // ****
 
-int sorbet_rubyArrayLen(VALUE array) __attribute__((always_inline)) {
+SORBET_INLINE
+int sorbet_rubyArrayLen(VALUE array) {
     return RARRAY_LEN(array);
 }
 
-const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) __attribute__((always_inline)) {
+SORBET_INLINE
+const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) {
     // there's also a transient version of this function if we ever decide to want more speed. transient stands for that
     // we _should not_ allow to execute any code between getting these pointers and reading elements from
     return RARRAY_CONST_PTR(array);
 }
 
-VALUE sorbet_newRubyArray(long size) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_newRubyArray(long size) {
     return rb_ary_new2(size);
 }
 
-VALUE sorbet_newRubyArrayWithElems(long size, const VALUE *elems) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_newRubyArrayWithElems(long size, const VALUE *elems) {
     return rb_ary_new4(size, elems);
 }
 
-void sorbet_arrayPush(VALUE array, VALUE element) __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_arrayPush(VALUE array, VALUE element) {
     rb_ary_push(array, element);
 }
 
@@ -244,15 +285,18 @@ void sorbet_arrayPush(VALUE array, VALUE element) __attribute__((always_inline))
 // ****                       Operations on Hashes
 // ****
 
-VALUE sorbet_newRubyHash() __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_newRubyHash() {
     return rb_hash_new();
 }
 
-void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) {
     rb_hash_aset(hash, key, value);
 }
 
-VALUE sorbet_hashGet(VALUE hash, VALUE key) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_hashGet(VALUE hash, VALUE key) {
     return rb_hash_aref(hash, key);
 }
 
@@ -273,66 +317,81 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 // ****                       Operations on Ruby ID's
 // ****
 
-ID sorbet_idIntern(const char *value, long length) __attribute__((always_inline)) {
+SORBET_INLINE
+ID sorbet_idIntern(const char *value, long length) {
     return rb_intern2(value, length);
 }
 
-ID sorbet_symToID(VALUE sym) __attribute__((always_inline)) {
+SORBET_INLINE
+ID sorbet_symToID(VALUE sym) {
     return SYM2ID(sym);
 }
 
-VALUE sorbet_IDToSym(ID id) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_IDToSym(ID id) {
     return ID2SYM(id);
 }
 
-VALUE sorbet_getRubyClassOf(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_getRubyClassOf(VALUE value) {
     return CLASS_OF(value);
 }
 
-const char *sorbet_getRubyClassName(VALUE object) __attribute__((always_inline)) {
+SORBET_INLINE
+const char *sorbet_getRubyClassName(VALUE object) {
     return rb_obj_classname(object);
 }
 // ****
 // ****                       Tests
 // ****
 
-_Bool sorbet_testIsTruthy(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsTruthy(VALUE value) {
     return RB_TEST(value);
 }
 
-_Bool sorbet_testIsTrue(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsTrue(VALUE value) {
     return value == RUBY_Qtrue;
 }
 
-_Bool sorbet_testIsFalse(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsFalse(VALUE value) {
     return value == RUBY_Qfalse;
 }
 
-_Bool sorbet_testIsNil(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsNil(VALUE value) {
     return value == RUBY_Qnil;
 }
 
-_Bool sorbet_testIsUndef(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsUndef(VALUE value) {
     return value == RUBY_Qundef;
 }
 
-_Bool sorbet_testIsSymbol(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsSymbol(VALUE value) {
     return RB_SYMBOL_P(value);
 }
 
-_Bool sorbet_testIsFloat(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsFloat(VALUE value) {
     return RB_FLOAT_TYPE_P(value);
 }
 
-_Bool sorbet_testIsHash(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsHash(VALUE value) {
     return TYPE(value) == RUBY_T_HASH;
 }
 
-_Bool sorbet_testIsArray(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsArray(VALUE value) {
     return TYPE(value) == RUBY_T_ARRAY;
 }
 
-_Bool sorbet_testIsString(VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+_Bool sorbet_testIsString(VALUE value) {
     return TYPE(value) == RUBY_T_STRING;
 }
 
@@ -340,11 +399,13 @@ _Bool sorbet_testIsString(VALUE value) __attribute__((always_inline)) {
 // ****                       Variables
 // ****
 
-VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) {
     return rb_ivar_get(receiver, name);
 }
 
-VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) {
     return rb_ivar_set(receiver, name, newValue);
 }
 
@@ -356,11 +417,13 @@ void sorbet_globalVariableSet(ID name, VALUE newValue) {
     rb_gvar_set(rb_global_entry(name), newValue);
 }
 
-VALUE sorbet_classVariableGet(VALUE _class, ID name) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_classVariableGet(VALUE _class, ID name) {
     return rb_cvar_get(_class, name);
 }
 
-void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) {
     rb_cvar_set(_class, name, newValue);
 }
 
@@ -372,11 +435,13 @@ VALUE sorbet_rb_cObject() {
     return rb_cObject;
 }
 
-void sorbet_defineTopLevelConstant(const char *name, VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_defineTopLevelConstant(const char *name, VALUE value) {
     rb_define_global_const(name, value);
 }
 
-void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) {
     rb_define_const(owner, name, value);
 }
 
@@ -388,7 +453,8 @@ VALUE sorbet_getMethodBlockAsProc() {
 }
 
 // Trying to be a copy of rb_mod_const_get
-VALUE sorbet_getConstantAt(VALUE mod, ID id) __attribute__((noinline)) {
+SORBET_ATTRIBUTE(noinline)
+VALUE sorbet_getConstantAt(VALUE mod, ID id) {
     VALUE name;
     rb_encoding *enc;
     const char *pbeg, *p, *path, *pend;
@@ -469,42 +535,48 @@ VALUE sorbet_getConstantAt(VALUE mod, ID id) __attribute__((noinline)) {
 }
 // End copy of rb_mod_const_get
 
-VALUE sorbet_getConstant(const char *path, long pathLen) __attribute__((noinline)) {
+SORBET_ATTRIBUTE(noinline)
+VALUE sorbet_getConstant(const char *path, long pathLen) {
     VALUE mod = sorbet_rb_cObject();
     ID id = rb_intern2(path, pathLen);
     return sorbet_getConstantAt(mod, id);
 }
 
-void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) __attribute__((noinline)) {
+SORBET_ATTRIBUTE(noinline)
+void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) {
     ID id = rb_intern2(name, nameLen);
     return rb_const_set(mod, id, value);
 }
 
-VALUE sorbet_defineTopLevelModule(const char *name) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_defineTopLevelModule(const char *name) {
     return rb_define_module(name);
 }
 
-VALUE sorbet_defineNestedModule(VALUE owner, const char *name) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_defineNestedModule(VALUE owner, const char *name) {
     return rb_define_module_under(owner, name);
 }
 
-VALUE sorbet_defineTopClassOrModule(const char *name, VALUE super) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_defineTopClassOrModule(const char *name, VALUE super) {
     return rb_define_class(name, super);
 }
 
-VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
     return rb_define_class_under(owner, name, super);
 }
 
 // this DOES override existing methods
-void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc)
-    __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
     rb_define_method(klass, name, methodPtr, argc);
 }
 
 // this DOES override existing methods
-void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc)
-    __attribute__((always_inline)) {
+SORBET_INLINE
+void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
     rb_define_singleton_method(klass, name, methodPtr, argc);
 }
 
@@ -512,14 +584,15 @@ void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodP
 // ****                       Calls
 // ****
 
-VALUE sorbet_callBlock(VALUE array) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_callBlock(VALUE array) {
     // TODO: one day we should use rb_yield_values, as it saves an allocation, but
     // for now, do the easy thing
     return rb_yield_splat(array);
 }
 
-VALUE sorbet_callSuper(int argc, __attribute__((noescape)) const VALUE *const restrict argv)
-    __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv) {
     // Mostly an implementation of return rb_call_super(argc, argv);
     rb_execution_context_t *ec = GET_EC();
     VALUE recv = ec->cfp->self;
@@ -543,13 +616,15 @@ VALUE sorbet_callSuper(int argc, __attribute__((noescape)) const VALUE *const re
     }
 }
 
-VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
-                          VALUE proc) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
+                          VALUE proc) {
     return rb_funcall_with_block(recv, func, argc, argv, proc);
 }
 
-VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
-                           BlockFFIType blockImpl, VALUE closure) __attribute__((always_inline)) {
+SORBET_INLINE
+VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
+                           BlockFFIType blockImpl, VALUE closure) {
     return rb_block_call(recv, func, argc, argv, blockImpl, closure);
 }
 
@@ -570,8 +645,7 @@ VALUE sorbet_rb_arity_error_new(int argc, int min, int max) {
     return rb_exc_new3(rb_eArgError, err_mess);
 }
 
-void sorbet_cast_failure(VALUE value, char *castMethod, char *type) __attribute__((__cold__))
-__attribute__((__noreturn__)) {
+__attribute__((__cold__, __noreturn__)) void sorbet_cast_failure(VALUE value, char *castMethod, char *type) {
     // TODO: cargo cult more of
     // https://github.com/sorbet/sorbet/blob/b045fb1ba12756c3760fe516dc315580d93f3621/gems/sorbet-runtime/lib/types/types/base.rb#L105
     //
@@ -580,11 +654,11 @@ __attribute__((__noreturn__)) {
              rb_obj_classname(value), value);
 }
 
-void sorbet_raiseArity(int argc, int min, int max) __attribute__((__noreturn__)) {
+__attribute__((__noreturn__)) void sorbet_raiseArity(int argc, int min, int max) {
     rb_exc_raise(sorbet_rb_arity_error_new(argc, min, max));
 }
 
-void sorbet_raiseExtraKeywords(VALUE hash) __attribute__((__noreturn__)) {
+__attribute__((__noreturn__)) void sorbet_raiseExtraKeywords(VALUE hash) {
     VALUE err_mess = rb_sprintf("unknown keywords: %" PRIsVALUE, rb_hash_keys(hash));
     rb_exc_raise(rb_exc_new3(rb_eArgError, err_mess));
 }
@@ -626,7 +700,8 @@ void sorbet_Closure_mark(void *closurePtr) {
     rb_gc_mark_values(ptr->size, &ptr->closureData[0]);
 }
 
-size_t sorbet_Closure_size(const void *closurePtr) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+size_t sorbet_Closure_size(const void *closurePtr) {
     // this might be possible to make more efficient using rb_mark_tbl
     struct sorbet_Closure *ptr = (struct sorbet_Closure *)closurePtr;
     return sizeof(struct sorbet_Closure) + ptr->size * sizeof(VALUE);
@@ -681,8 +756,8 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
-unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID func, VALUE filename, VALUE realpath,
-                                              int startline, int endline) {
+void *sorbet_allocateRubyStackFrames(VALUE funcName, ID func, VALUE filename, VALUE realpath, int startline,
+                                     int endline) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -720,7 +795,7 @@ unsigned char *sorbet_allocateRubyStackFrames(VALUE recv, VALUE funcName, ID fun
     iseq->body->iseq_encoded = iseq_encoded;
 
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
-    return (unsigned char *)iseq;
+    return (void *)iseq;
 }
 
 const VALUE sorbet_readRealpath() {
@@ -791,51 +866,63 @@ VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *
 // ****                       Implementation helpers for type tests
 // ****
 
-_Bool sorbet_isa_Integer(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Integer(VALUE obj) {
     return RB_FIXNUM_P(obj);
 }
 
-_Bool sorbet_isa_TrueClass(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_TrueClass(VALUE obj) {
     return obj == RUBY_Qtrue;
 }
 
-_Bool sorbet_isa_FalseClass(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_FalseClass(VALUE obj) {
     return obj == RUBY_Qfalse;
 }
 
-_Bool sorbet_isa_NilClass(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_NilClass(VALUE obj) {
     return obj == RUBY_Qnil;
 }
 
-_Bool sorbet_isa_Symbol(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Symbol(VALUE obj) {
     return RB_SYMBOL_P(obj);
 }
 
-_Bool sorbet_isa_Float(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Float(VALUE obj) {
     return RB_FLOAT_TYPE_P(obj);
 }
 
-_Bool sorbet_isa_Untyped(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Untyped(VALUE obj) {
     return 1;
 }
 
-_Bool sorbet_isa_Hash(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Hash(VALUE obj) {
     return RB_TYPE_P(obj, T_HASH);
 }
 
-_Bool sorbet_isa_Array(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Array(VALUE obj) {
     return RB_TYPE_P(obj, T_ARRAY);
 }
 
-_Bool sorbet_isa_Regexp(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Regexp(VALUE obj) {
     return RB_TYPE_P(obj, T_REGEXP);
 }
 
-_Bool sorbet_isa_Rational(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Rational(VALUE obj) {
     return RB_TYPE_P(obj, T_RATIONAL);
 }
 
-_Bool sorbet_isa_String(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_String(VALUE obj) {
     return RB_TYPE_P(obj, T_STRING);
 }
 
@@ -845,22 +932,26 @@ _Bool sorbet_isa_Method(VALUE obj) __attribute__((const))  {
 }
 */
 
-_Bool sorbet_isa_Proc(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_Proc(VALUE obj) {
     return rb_obj_is_proc(obj) == Qtrue;
 }
 
-_Bool sorbet_isa_RootSingleton(VALUE obj) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_RootSingleton(VALUE obj) {
     return obj == sorbet_rubyTopSelf();
 }
 
-VALUE rb_obj_is_kind_of(VALUE, VALUE) __attribute__((const));
-VALUE rb_class_inherited_p(VALUE, VALUE) __attribute__((const));
+SORBET_ATTRIBUTE(const) VALUE rb_obj_is_kind_of(VALUE, VALUE);
+SORBET_ATTRIBUTE(const) VALUE rb_class_inherited_p(VALUE, VALUE);
 
-_Bool sorbet_isa(VALUE obj, VALUE class) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa(VALUE obj, VALUE class) {
     return rb_obj_is_kind_of(obj, class) == Qtrue;
 }
 
-_Bool sorbet_isa_class_of(VALUE obj, VALUE class) __attribute__((const)) {
+SORBET_ATTRIBUTE(const)
+_Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
     return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
 }
 
@@ -972,10 +1063,9 @@ VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restr
     return sorbet_longToRubyValue(rb_array_len(recv));
 }
 
-VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                VALUE closure) {
+VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                         BlockFFIType blk, VALUE closure) {
     VALUE ary = recv;
-    rb_check_arity(argc, 1, 2);
     if (argc == 2) {
         return rb_ary_aref2(ary, argv[0], argv[1]);
     }
@@ -983,10 +1073,6 @@ VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const
 
     long beg, len;
 
-    /* special case - speeding up */
-    if (FIXNUM_P(arg)) {
-        return rb_ary_entry(ary, FIX2LONG(arg));
-    }
     /* check if idx is Range */
     switch (rb_range_beg_len(arg, &beg, &len, RARRAY_LEN(ary), 0)) {
         case Qfalse:
@@ -998,6 +1084,18 @@ VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const
     }
     return rb_ary_entry(ary, NUM2LONG(arg));
 }
+VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                VALUE closure) {
+    VALUE ary = recv;
+    rb_check_arity(argc, 1, 2);
+    if (LIKELY(argc == 1)) {
+        VALUE arg = argv[0];
+        if (LIKELY(FIXNUM_P(arg))) {
+            return rb_ary_entry(ary, FIX2LONG(arg));
+        }
+    }
+    return sorbet_rb_array_square_br_slowpath(recv, fun, argc, argv, blk, closure);
+}
 
 VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
@@ -1008,7 +1106,7 @@ VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const res
     return Qfalse;
 }
 
-VALUE enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
+VALUE sorbet_enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
     return RARRAY_LEN(array);
 }
 
@@ -1017,7 +1115,7 @@ VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const rest
     sorbet_ensure_arity(argc, 0);
     if (blk == NULL) {
         return rb_enumeratorize_with_size(recv, ID2SYM(fun), 0, NULL,
-                                          (rb_enumerator_size_func *)enumerator_size_func_array_length);
+                                          (rb_enumerator_size_func *)sorbet_enumerator_size_func_array_length);
     }
 
     for (long idx = 0; idx < RARRAY_LEN(recv); idx++) {
@@ -1042,10 +1140,7 @@ VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *con
     return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
-VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                         VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
+VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             return rb_fix_plus_fix(recv, y);
@@ -1063,11 +1158,20 @@ VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restri
     return rb_num_coerce_bin(recv, y, '+');
 }
 
-VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) {
+SORBET_INLINE
+VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                         VALUE closure) {
     sorbet_ensure_arity(argc, 1);
-    // optimized version from numeric.c
     VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            return rb_fix_plus_fix(recv, y);
+        }
+    }
+    return sorbet_rb_int_plus_slowpath(recv, y);
+}
+
+VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             return rb_fix_minus_fix(recv, y);
@@ -1082,6 +1186,20 @@ VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restr
         return rb_big_minus(recv, y);
     }
     return rb_num_coerce_bin(recv, y, '-');
+}
+
+SORBET_INLINE
+VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    // optimized version from numeric.c
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            return rb_fix_minus_fix(recv, y);
+        }
+    }
+    return sorbet_rb_int_minus_slowpath(recv, y);
 }
 
 VALUE sorbet_rb_int_mul(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -1117,10 +1235,7 @@ VALUE sorbet_rb_int_gt(VALUE recv, ID fun, int argc, const VALUE *const restrict
     return rb_num_coerce_relop(recv, y, '>');
 }
 
-VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                       VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
+VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             if (FIX2LONG(recv) < FIX2LONG(y)) {
@@ -1136,6 +1251,22 @@ VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict
         return rb_big_lt(recv, y);
     }
     return rb_num_coerce_relop(recv, y, '<');
+}
+
+SORBET_INLINE
+VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                       VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE y = argv[0];
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            if (FIX2LONG(recv) < FIX2LONG(y)) {
+                return Qtrue;
+            }
+            return Qfalse;
+        }
+    }
+    return sorbet_rb_int_lt_slowpath(recv, y);
 }
 
 VALUE sorbet_rb_int_ge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
@@ -1239,10 +1370,12 @@ VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const rest
 RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
 RUBY_EXTERN rb_serial_t ruby_vm_global_method_state;
 
+SORBET_INLINE
 rb_serial_t sorbet_getConstantEpoch() {
     return ruby_vm_global_constant_state;
 }
 
+SORBET_INLINE
 rb_serial_t sorbet_getMethodEpoch() {
     return ruby_vm_global_method_state;
 }
@@ -1261,12 +1394,6 @@ struct FunctionInlineCache {
     rb_serial_t class_serial;
 };
 
-// annotated to be inlined as part of payload generation
-static _Bool _sorbet_isInlineCacheValid(VALUE recv, struct FunctionInlineCache *cache) __attribute__((always_inline)) {
-    return LIKELY(sorbet_getMethodEpoch() == cache->method_state) &&
-           LIKELY(sorbet_getClassSerial(recv) == cache->class_serial);
-}
-
 void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
     // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
     const rb_callable_method_entry_t *me;
@@ -1280,9 +1407,11 @@ void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache
     cache->class_serial = sorbet_getClassSerial(recv);
 }
 
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, __attribute__((noescape)) const VALUE *const restrict argv,
+SORBET_ATTRIBUTE(noinline)
+VALUE sorbet_callFunc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
                       struct FunctionInlineCache *cache) {
-    if (UNLIKELY(!_sorbet_isInlineCacheValid(recv, cache))) {
+    if (UNLIKELY(sorbet_getMethodEpoch() != cache->method_state) ||
+        UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
         sorbet_inlineCacheInvalidated(recv, cache, func);
     }
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);

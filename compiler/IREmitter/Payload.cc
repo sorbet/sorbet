@@ -416,12 +416,11 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
         IREmitterHelpers::isStaticInit(cs1, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
-    auto recv = Payload::getRubyConstant(cs1, sym.data(cs)->owner, builder);
     auto filename = loc.file().data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
     auto pos = loc.position(cs);
     auto ret = builder.CreateCall(cs.module->getFunction("sorbet_allocateRubyStackFrames"),
-                                  {recv, funcNameValue, funcNameId, filenameValue, realpath,
+                                  {funcNameValue, funcNameId, filenameValue, realpath,
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
                                    llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line))});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
