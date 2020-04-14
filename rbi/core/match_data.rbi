@@ -355,7 +355,7 @@ class MatchData < Object
   # ```
   sig do
     params(
-        indexes: Integer,
+        indexes: T.any(Integer, Symbol),
     )
     .returns(T::Array[String])
   end
