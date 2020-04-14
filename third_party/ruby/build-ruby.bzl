@@ -65,7 +65,7 @@ cp -aL "{src_dir}"/* "$build_dir"
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
-    if ! "$@" >> build.log 2>&1; then
+    if ! "$@" < /dev/null >> build.log 2>&1; then
         echo "command $@ failed!"
         cat build.log
         echo "build dir: $build_dir"
@@ -73,12 +73,16 @@ run_cmd() {{
     fi
 }}
 
+# This is a hack. The configure script builds up a command for compiling C
+# files that includes `-fvisibility=hidden`. To override it, our flag needs to
+# come after, so we inject a flag right before the `-o` option that comes near
+# the end of the command via OUTFLAG.
+OUTFLAG="-fvisibility=default -o" \
 CC="{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
 CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
 LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
-OUTFLAG="-fvisibility=default -o" \
 run_cmd ./configure \
         {configure_flags} \
         --enable-load-relative \
@@ -95,7 +99,7 @@ internal_incdir="$base/{internal_incdir}"
 
 mkdir -p "$internal_incdir"
 
-cp *.h "$internal_incdir"
+cp *.h *.inc "$internal_incdir"
 
 find ccan -type d | while read dir; do
   mkdir -p "$internal_incdir/$dir"
@@ -211,7 +215,6 @@ def _build_ruby_impl(ctx):
     ]
 
 _build_ruby = rule(
-    implementation = _build_ruby_impl,
     attrs = {
         "src": attr.label(),
         "deps": attr.label_list(),
@@ -235,9 +238,13 @@ _build_ruby = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
     },
-    provides = [RubyInfo, DefaultInfo],
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
     fragments = ["cpp"],
+    provides = [
+        RubyInfo,
+        DefaultInfo,
+    ],
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    implementation = _build_ruby_impl,
 )
 
 _BUILD_ARCHIVE = """#!/bin/bash
@@ -247,7 +254,12 @@ _BUILD_ARCHIVE = """#!/bin/bash
 base=$PWD
 toolchain="$base/{toolchain}"
 
-hermetic_tar "$toolchain" "{output}"
+archive="$(mktemp)"
+
+hermetic_tar "$toolchain" "${{archive}}"
+gzip -c "${{archive}}" > "{output}"
+
+rm "${{archive}}"
 """
 
 def _ruby_archive_impl(ctx):
@@ -270,11 +282,11 @@ def _ruby_archive_impl(ctx):
     return [DefaultInfo(files = depset([archive]))]
 
 _ruby_archive = rule(
-    implementation = _ruby_archive_impl,
     attrs = {
         "ruby": attr.label(),
     },
     provides = [DefaultInfo],
+    implementation = _ruby_archive_impl,
 )
 
 _BINARY_WRAPPER = """#!/bin/bash
@@ -316,15 +328,15 @@ def _ruby_binary_impl(ctx):
     return [DefaultInfo(executable = wrapper, runfiles = runfiles)]
 
 _ruby_binary = rule(
-    implementation = _ruby_binary_impl,
     attrs = {
         "ruby": attr.label(),
         "_runfiles_bash": attr.label(
             default = Label("@bazel_tools//tools/bash/runfiles"),
         ),
     },
-    provides = [DefaultInfo],
     executable = True,
+    provides = [DefaultInfo],
+    implementation = _ruby_binary_impl,
 )
 
 def _uses_headers(ctx, paths, headers):
@@ -362,16 +374,19 @@ def _ruby_headers_impl(ctx):
     return _uses_headers(ctx, paths, headers)
 
 _ruby_headers = rule(
-    implementation = _ruby_headers_impl,
     attrs = {
         "ruby": attr.label(),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
     },
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
-    provides = [DefaultInfo, CcInfo],
     fragments = ["cpp"],
+    provides = [
+        DefaultInfo,
+        CcInfo,
+    ],
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    implementation = _ruby_headers_impl,
 )
 
 def _ruby_internal_headers_impl(ctx):
@@ -384,16 +399,19 @@ def _ruby_internal_headers_impl(ctx):
     return _uses_headers(ctx, paths, headers)
 
 _ruby_internal_headers = rule(
-    implementation = _ruby_internal_headers_impl,
     attrs = {
         "ruby": attr.label(),
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
     },
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
-    provides = [DefaultInfo, CcInfo],
     fragments = ["cpp"],
+    provides = [
+        DefaultInfo,
+        CcInfo,
+    ],
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    implementation = _ruby_internal_headers_impl,
 )
 
 def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
