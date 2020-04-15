@@ -95,15 +95,19 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             return std::nullopt;
     }
 
-    if ((!name.exists() && send->args.empty()) || send->args.size() > 3) {
-        return std::nullopt;
+    if (send->args.size() >= 4) {
+        // Too many args, even if all optional args were provided.
+        return nullopt;
     }
     auto loc = send->loc;
 
     if (!name.exists()) {
+        if (send->args.empty()) {
+            return nullopt;
+        }
         auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
         if (!sym || !sym->isSymbol(ctx)) {
-            return std::nullopt;
+            return nullopt;
         }
         name = sym->asSymbol(ctx);
         ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() &&
@@ -113,6 +117,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
     if (type == nullptr) {
         if (send->args.size() == 1) {
+            // Type must have been inferred from prop method (like created_prop) or
+            // been given in second argument (either directly, or indirectly via rules)
             return nullopt;
         } else {
             type = ASTUtil::dupType(send->args[1].get());
@@ -129,13 +135,8 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             return std::nullopt;
         }
         if (send->args.size() == 3) {
-            // Three args. We need name, type, and either rules, or, for
-            // DataInterface, a foreign type, wrapped in a thunk.
-            if (auto thunk = ASTUtil::thunkBody(ctx, send->args.back().get())) {
-                foreign = std::move(thunk);
-            } else {
-                return std::nullopt;
-            }
+            // No rules, but 3 args including name and type. Also not a T::Props
+            return std::nullopt;
         }
     }
 
