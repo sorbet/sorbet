@@ -1403,26 +1403,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -1484,26 +1470,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -1811,26 +1783,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -1892,26 +1850,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -1973,36 +1917,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2084,36 +2004,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2165,26 +2061,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2246,26 +2128,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2317,26 +2185,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Array>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2398,26 +2252,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Array>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2479,36 +2319,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T::Array
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2590,36 +2406,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T::Array
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2671,26 +2463,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Array>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2752,26 +2530,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Array>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2836,39 +2600,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
-                  cnst = <C <U Array>>
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -2956,39 +2693,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
-                  cnst = <C <U Array>>
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3057,43 +2767,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
-                  cnst = <C <U Hash>>
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Symbol>>
-                  }
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3189,43 +2868,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U T>>
-                  }
-                  cnst = <C <U Hash>>
-                }
-                fun = <U []>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Symbol>>
-                  }
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3277,26 +2925,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3348,26 +2982,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3419,26 +3039,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Array>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3496,12 +3102,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3553,26 +3159,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3634,26 +3226,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3731,12 +3309,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3804,12 +3382,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3861,26 +3439,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3942,26 +3506,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4039,12 +3589,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4112,12 +3662,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4169,26 +3719,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4250,26 +3786,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4347,12 +3869,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4420,12 +3942,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4477,26 +3999,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4558,26 +4066,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4651,12 +4145,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4730,12 +4224,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U unsafe>
+            fun = <U raise>
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4787,26 +4281,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4868,26 +4348,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U String>>
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4949,36 +4415,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5060,36 +4502,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U T>>
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U String>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5290,26 +4708,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Array>>
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -5382,57 +4786,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = ConstantLit{
-                                orig = nullptr
-                                symbol = ::<root>
-                              }
-                              cnst = <C <U Chalk>>
-                            }
-                            cnst = <C <U ODM>>
-                          }
-                          cnst = <C <U Mutator>>
-                        }
-                        cnst = <C <U Private>>
-                      }
-                      cnst = <C <U ArrayMutator>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      Send{
-                        recv = ConstantLit{
-                          orig = nullptr
-                          symbol = ::T
-                        }
-                        fun = <U untyped>
-                        block = nullptr
-                        args = [
-                        ]
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -5594,26 +4953,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Array>>
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -5686,57 +5031,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = ConstantLit{
-                                orig = nullptr
-                                symbol = ::<root>
-                              }
-                              cnst = <C <U Chalk>>
-                            }
-                            cnst = <C <U ODM>>
-                          }
-                          cnst = <C <U Mutator>>
-                        }
-                        cnst = <C <U Private>>
-                      }
-                      cnst = <C <U ArrayMutator>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      Send{
-                        recv = ConstantLit{
-                          orig = nullptr
-                          symbol = ::T
-                        }
-                        fun = <U untyped>
-                        block = nullptr
-                        args = [
-                        ]
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -5894,39 +5194,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U T>>
-                      }
-                      cnst = <C <U Array>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U String>>
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -5993,51 +5266,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = ConstantLit{
-                                orig = nullptr
-                                symbol = ::<root>
-                              }
-                              cnst = <C <U Chalk>>
-                            }
-                            cnst = <C <U ODM>>
-                          }
-                          cnst = <C <U Mutator>>
-                        }
-                        cnst = <C <U Private>>
-                      }
-                      cnst = <C <U ArrayMutator>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U String>>
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -6203,43 +5437,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U T>>
-                      }
-                      cnst = <C <U Hash>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U Symbol>>
-                      }
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U String>>
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -6310,55 +5513,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = ConstantLit{
-                                orig = nullptr
-                                symbol = ::<root>
-                              }
-                              cnst = <C <U Chalk>>
-                            }
-                            cnst = <C <U ODM>>
-                          }
-                          cnst = <C <U Mutator>>
-                        }
-                        cnst = <C <U Private>>
-                      }
-                      cnst = <C <U HashMutator>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U Symbol>>
-                      }
-                      UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U String>>
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -6505,26 +5665,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <C <U Array>>
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -6597,57 +5743,12 @@ ClassDef{
               rhs = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::T
+                  symbol = ::Kernel
                 }
-                fun = <U cast>
+                fun = <U raise>
                 block = nullptr
                 args = [
-                  Send{
-                    recv = ConstantLit{
-                      orig = nullptr
-                      symbol = ::T
-                    }
-                    fun = <U unsafe>
-                    block = nullptr
-                    args = [
-                      Literal{ value = nil }
-                    ]
-                  }
-                  Send{
-                    recv = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = ConstantLit{
-                                orig = nullptr
-                                symbol = ::<root>
-                              }
-                              cnst = <C <U Chalk>>
-                            }
-                            cnst = <C <U ODM>>
-                          }
-                          cnst = <C <U Mutator>>
-                        }
-                        cnst = <C <U Private>>
-                      }
-                      cnst = <C <U ArrayMutator>>
-                    }
-                    fun = <U []>
-                    block = nullptr
-                    args = [
-                      Send{
-                        recv = ConstantLit{
-                          orig = nullptr
-                          symbol = ::T
-                        }
-                        fun = <U untyped>
-                        block = nullptr
-                        args = [
-                        ]
-                      }
-                    ]
-                  }
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                 ]
               }
             }
@@ -7059,26 +6160,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::String
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7140,26 +6227,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::String
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7211,26 +6284,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::Float
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7292,26 +6351,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::Float
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7436,26 +6481,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::String
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7517,26 +6548,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::String
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7588,26 +6605,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::Float
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7717,26 +6720,12 @@ ClassDef{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::T
+              symbol = ::Kernel
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              ConstantLit{
-                orig = nullptr
-                symbol = ::String
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
