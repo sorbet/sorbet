@@ -45,6 +45,9 @@ test_dir="${repo_root}/gems/sorbet/test/snapshot/${test_name}"
 # shellcheck disable=SC1090
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/logging.sh)"
 
+# shellcheck disable=SC1090
+source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/hermetic_tar.sh)"
+
 
 # ----- Environment setup and validation -----
 
@@ -202,7 +205,10 @@ fi
   info "├─ archiving results"
 
   # archive the test
-  tar -cz -f "$output_archive" sorbet err.log out.log
+  output="$(mktemp -d)"
+  cp -r sorbet err.log out.log "$output"
+  hermetic_tar "$output" "$output_archive"
+  rm -rf "$output"
 )
 
 # cleanup
