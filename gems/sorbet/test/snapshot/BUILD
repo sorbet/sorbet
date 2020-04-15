@@ -6,6 +6,11 @@ sh_library(
 )
 
 sh_library(
+    name = "hermetic_tar",
+    srcs = ["hermetic_tar.sh"],
+)
+
+sh_library(
     name = "validate_utils",
     srcs = ["validate_utils.sh"],
     deps = [":logging"],
@@ -26,6 +31,7 @@ sh_binary(
     # NOTE: ensure that this rule isn't caught in //...
     tags = ["manual"],
     deps = [
+        ":hermetic_tar",
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],

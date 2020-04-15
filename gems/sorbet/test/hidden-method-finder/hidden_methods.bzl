@@ -33,7 +33,7 @@ def _hidden_methods_test(test_path, ruby):
     native.genrule(
         name = "actual_{}/{}".format(ruby, test_path),
         message = "Running {} ({})".format(test_path, ruby),
-        tools = [
+        exec_tools = [
             ":hidden_methods_bazel",
         ],
         srcs = [

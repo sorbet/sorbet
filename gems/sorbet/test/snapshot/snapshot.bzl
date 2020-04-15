@@ -41,12 +41,12 @@ def _snapshot_test(test_path, ruby):
     """
 
     res = {}
-    actual = "{}/actual_{}.tar.gz".format(test_path, ruby)
+    actual = "{}/actual_{}.tar".format(test_path, ruby)
 
     native.genrule(
         name = "actual_{}/{}".format(ruby, test_path),
         message = "Running {} ({})".format(test_path, ruby),
-        tools = [
+        exec_tools = [
             ":run_one",
         ],
         srcs = [
