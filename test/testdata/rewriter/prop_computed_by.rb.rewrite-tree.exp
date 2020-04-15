@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def not_a_symbol<<C <todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
