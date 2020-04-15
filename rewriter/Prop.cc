@@ -192,7 +192,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
     } else if (rules == nullptr) {
         ret.propInfo.default_ = std::nullopt;
     } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-        ret.propInfo.default_ = ast::MK::Unsafe(ret.propInfo.loc, ast::MK::Nil(ret.propInfo.loc));
+        ret.propInfo.default_ = ast::MK::RaiseUnimplemented(ret.propInfo.loc);
     } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
         auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
         ret.propInfo.default_ = std::move(val);
@@ -251,7 +251,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                                                      ASTUtil::dupType(getType.get()));
         ret.nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, std::move(assertTypeMatches)));
     } else {
-        ret.nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::Cast(loc, std::move(getType))));
+        ret.nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -263,7 +263,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
         ret.nodes.emplace_back(
-            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Compute the `_` foreign accessor
@@ -292,7 +292,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethod, std::move(arg),
-                                                         ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+                                                         ast::MK::RaiseUnimplemented(loc)));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         ret.nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -306,7 +306,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         unique_ptr<ast::Expression> arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         ret.nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethodBang, std::move(arg2),
-                                                         ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+                                                         ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Compute the Mutator
@@ -317,8 +317,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        rhs.emplace_back(
-            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::Cast(loc, std::move(setType))));
+        rhs.emplace_back(ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
@@ -349,7 +348,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
         if (mutator.get()) {
             rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
-            rhs.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::Cast(loc, std::move(mutator))));
+            rhs.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();

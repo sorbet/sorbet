@@ -102,15 +102,15 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->show(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-        auto defSelfGetProp = ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), getName, {},
-                                                       ast::MK::Unsafe(loc, ast::MK::Nil(loc)));
+        auto defSelfGetProp =
+            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), getName, {}, ast::MK::RaiseUnimplemented(loc));
         defSelfGetProp->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfGetProp));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
         stats.emplace_back(
-            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, {}, ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, {}, ast::MK::RaiseUnimplemented(loc)));
     }
 
     return stats;

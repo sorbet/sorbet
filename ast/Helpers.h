@@ -407,6 +407,14 @@ public:
         return Send(loc, std::move(magic), core::Names::defineTopClassOrModule(), std::move(args), flags);
     }
 
+    static std::unique_ptr<ast::Send> RaiseUnimplemented(core::LocOffsets loc) {
+        auto kernel = Constant(loc, core::Symbols::Kernel());
+        auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
+        auto ret = Send1(loc, std::move(kernel), core::Names::raise(), std::move(msg));
+        ret->flags.isRewriterSynthesized = true;
+        return ret;
+    }
+
     static bool isMagicClass(ast::Expression *expr) {
         if (auto *recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol == core::Symbols::Magic();
