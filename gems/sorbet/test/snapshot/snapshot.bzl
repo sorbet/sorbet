@@ -46,7 +46,7 @@ def _snapshot_test(test_path, ruby):
     native.genrule(
         name = "actual_{}/{}".format(ruby, test_path),
         message = "Running {} ({})".format(test_path, ruby),
-        exec_tools = [
+        tools = [
             ":run_one",
         ],
         srcs = [
