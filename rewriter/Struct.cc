@@ -110,7 +110,7 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
 
         sigKeys.emplace_back(ast::MK::Symbol(symLoc, name));
         sigValues.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
-        auto argName = ast::MK::Local(symLoc, name);
+        unique_ptr<ast::Reference> argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
             argName = ast::MK::KeywordArg(symLoc, move(argName));
         }

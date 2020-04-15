@@ -33,8 +33,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
             if (auto e = ctx.beginError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Duplicate type member `{}`", lhs->cnst.data(ctx)->show(ctx));
             }
-            auto empty = ast::MK::EmptyTree();
-            expr.swap(empty);
+            expr = ast::MK::EmptyTree();
             return;
         }
 

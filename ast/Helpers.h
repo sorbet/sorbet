@@ -9,7 +9,7 @@ namespace sorbet::ast {
 
 class MK {
 public:
-    static std::unique_ptr<Expression> EmptyTree() {
+    static std::unique_ptr<ast::EmptyTree> EmptyTree() {
         return std::make_unique<ast::EmptyTree>();
     }
 
@@ -78,57 +78,57 @@ public:
         return std::make_unique<ast::Literal>(loc, tpe);
     }
 
-    static std::unique_ptr<Expression> Return(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
+    static std::unique_ptr<ast::Return> Return(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Return>(loc, std::move(expr));
     }
 
-    static std::unique_ptr<Expression> Next(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
+    static std::unique_ptr<ast::Next> Next(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Next>(loc, std::move(expr));
     }
 
-    static std::unique_ptr<Expression> Break(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
+    static std::unique_ptr<ast::Break> Break(core::LocOffsets loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Break>(loc, std::move(expr));
     }
 
-    static std::unique_ptr<Expression> Nil(core::LocOffsets loc) {
+    static std::unique_ptr<ast::Literal> Nil(core::LocOffsets loc) {
         return std::make_unique<ast::Literal>(loc, core::Types::nilClass());
     }
 
-    static std::unique_ptr<ConstantLit> Constant(core::LocOffsets loc, core::SymbolRef symbol) {
+    static std::unique_ptr<ast::ConstantLit> Constant(core::LocOffsets loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
         return std::make_unique<ConstantLit>(loc, symbol, nullptr);
     }
 
-    static std::unique_ptr<Reference> Local(core::LocOffsets loc, core::NameRef name) {
+    static std::unique_ptr<ast::UnresolvedIdent> Local(core::LocOffsets loc, core::NameRef name) {
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }
 
-    static std::unique_ptr<Reference> OptionalArg(core::LocOffsets loc, std::unique_ptr<Reference> inner,
-                                                  std::unique_ptr<Expression> default_) {
+    static std::unique_ptr<ast::OptionalArg> OptionalArg(core::LocOffsets loc, std::unique_ptr<Reference> inner,
+                                                         std::unique_ptr<Expression> default_) {
         return std::make_unique<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
     }
 
-    static std::unique_ptr<Reference> KeywordArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
+    static std::unique_ptr<ast::KeywordArg> KeywordArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::KeywordArg>(loc, std::move(inner));
     }
 
-    static std::unique_ptr<Reference> RestArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
+    static std::unique_ptr<ast::RestArg> RestArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::RestArg>(loc, std::move(inner));
     }
 
-    static std::unique_ptr<Reference> BlockArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
+    static std::unique_ptr<ast::BlockArg> BlockArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::BlockArg>(loc, std::move(inner));
     }
 
-    static std::unique_ptr<Reference> ShadowArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
+    static std::unique_ptr<ast::ShadowArg> ShadowArg(core::LocOffsets loc, std::unique_ptr<Reference> inner) {
         return std::make_unique<ast::ShadowArg>(loc, std::move(inner));
     }
 
-    static std::unique_ptr<Reference> Instance(core::LocOffsets loc, core::NameRef name) {
+    static std::unique_ptr<ast::UnresolvedIdent> Instance(core::LocOffsets loc, core::NameRef name) {
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
-    static std::unique_ptr<Expression> cpRef(Reference &name) {
+    static std::unique_ptr<ast::Reference> cpRef(Reference &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
             return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
         } else if (auto *nm = cast_tree<ast::Local>(&name)) {
@@ -166,17 +166,17 @@ public:
         return Assign(loc, Local(loc, name), std::move(rhs));
     }
 
-    static std::unique_ptr<Expression> If(core::LocOffsets loc, std::unique_ptr<Expression> cond,
-                                          std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep) {
+    static std::unique_ptr<ast::If> If(core::LocOffsets loc, std::unique_ptr<Expression> cond,
+                                       std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep) {
         return std::make_unique<ast::If>(loc, std::move(cond), std::move(thenp), std::move(elsep));
     }
 
-    static std::unique_ptr<Expression> While(core::LocOffsets loc, std::unique_ptr<Expression> cond,
+    static std::unique_ptr<ast::While> While(core::LocOffsets loc, std::unique_ptr<Expression> cond,
                                              std::unique_ptr<Expression> body) {
         return std::make_unique<ast::While>(loc, std::move(cond), std::move(body));
     }
 
-    static std::unique_ptr<Expression> Self(core::LocOffsets loc) {
+    static std::unique_ptr<ast::Local> Self(core::LocOffsets loc) {
         return std::make_unique<ast::Local>(loc, core::LocalVariable::selfVariable());
     }
 
@@ -206,11 +206,11 @@ public:
         return InsSeq(loc, std::move(stats), std::move(expr));
     }
 
-    static std::unique_ptr<Expression> True(core::LocOffsets loc) {
+    static std::unique_ptr<ast::Literal> True(core::LocOffsets loc) {
         return std::make_unique<ast::Literal>(loc, core::Types::trueClass());
     }
 
-    static std::unique_ptr<Expression> False(core::LocOffsets loc) {
+    static std::unique_ptr<ast::Literal> False(core::LocOffsets loc) {
         return std::make_unique<ast::Literal>(loc, core::Types::falseClass());
     }
 
@@ -219,19 +219,19 @@ public:
         return std::make_unique<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
-    static std::unique_ptr<Expression> Int(core::LocOffsets loc, int64_t val) {
+    static std::unique_ptr<ast::Literal> Int(core::LocOffsets loc, int64_t val) {
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
-    static std::unique_ptr<Expression> Float(core::LocOffsets loc, double val) {
+    static std::unique_ptr<ast::Literal> Float(core::LocOffsets loc, double val) {
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
-    static std::unique_ptr<Expression> Symbol(core::LocOffsets loc, core::NameRef name) {
+    static std::unique_ptr<ast::Literal> Symbol(core::LocOffsets loc, core::NameRef name) {
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
     }
 
-    static std::unique_ptr<Expression> String(core::LocOffsets loc, core::NameRef value) {
+    static std::unique_ptr<ast::Literal> String(core::LocOffsets loc, core::NameRef value) {
         return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
@@ -287,22 +287,22 @@ public:
                                  ClassDef::Kind::Module);
     }
 
-    static std::unique_ptr<Expression> Array(core::LocOffsets loc, Array::ENTRY_store entries) {
+    static std::unique_ptr<ast::Array> Array(core::LocOffsets loc, Array::ENTRY_store entries) {
         return std::make_unique<ast::Array>(loc, std::move(entries));
     }
 
-    static std::unique_ptr<Expression> Hash(core::LocOffsets loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
+    static std::unique_ptr<ast::Hash> Hash(core::LocOffsets loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
         return std::make_unique<ast::Hash>(loc, std::move(keys), std::move(values));
     }
 
-    static std::unique_ptr<Expression> Hash0(core::LocOffsets loc) {
+    static std::unique_ptr<ast::Hash> Hash0(core::LocOffsets loc) {
         Hash::ENTRY_store keys;
         Hash::ENTRY_store values;
         return Hash(loc, std::move(keys), std::move(values));
     }
 
-    static std::unique_ptr<Expression> Hash1(core::LocOffsets loc, std::unique_ptr<Expression> key,
-                                             std::unique_ptr<Expression> value) {
+    static std::unique_ptr<ast::Hash> Hash1(core::LocOffsets loc, std::unique_ptr<Expression> key,
+                                            std::unique_ptr<Expression> value) {
         Hash::ENTRY_store keys;
         Hash::ENTRY_store values;
         keys.emplace_back(std::move(key));
@@ -310,8 +310,8 @@ public:
         return Hash(loc, std::move(keys), std::move(values));
     }
 
-    static std::unique_ptr<Expression> Sig(core::LocOffsets loc, std::unique_ptr<Expression> hash,
-                                           std::unique_ptr<Expression> ret) {
+    static std::unique_ptr<ast::Send> Sig(core::LocOffsets loc, std::unique_ptr<Expression> hash,
+                                          std::unique_ptr<Expression> ret) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
@@ -321,7 +321,7 @@ public:
         return sig;
     }
 
-    static std::unique_ptr<Expression> SigVoid(core::LocOffsets loc, std::unique_ptr<Expression> hash) {
+    static std::unique_ptr<ast::Send> SigVoid(core::LocOffsets loc, std::unique_ptr<Expression> hash) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto void_ = Send0(loc, std::move(params), core::Names::void_());
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
@@ -331,7 +331,7 @@ public:
         return sig;
     }
 
-    static std::unique_ptr<Expression> Sig0(core::LocOffsets loc, std::unique_ptr<Expression> ret) {
+    static std::unique_ptr<ast::Send> Sig0(core::LocOffsets loc, std::unique_ptr<Expression> ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
         auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
@@ -340,8 +340,8 @@ public:
         return sig;
     }
 
-    static std::unique_ptr<Expression> Sig1(core::LocOffsets loc, std::unique_ptr<Expression> key,
-                                            std::unique_ptr<Expression> value, std::unique_ptr<Expression> ret) {
+    static std::unique_ptr<ast::Send> Sig1(core::LocOffsets loc, std::unique_ptr<Expression> key,
+                                           std::unique_ptr<Expression> value, std::unique_ptr<Expression> ret) {
         return Sig(loc, Hash1(loc, std::move(key), std::move(value)), std::move(ret));
     }
 
@@ -354,7 +354,7 @@ public:
         return Send2(loc, T(loc), core::Names::cast(), Unsafe(loc, Nil(loc)), std::move(type));
     }
 
-    static std::unique_ptr<Expression> T(core::LocOffsets loc) {
+    static std::unique_ptr<ast::ConstantLit> T(core::LocOffsets loc) {
         return Constant(loc, core::Symbols::T());
     }
 
