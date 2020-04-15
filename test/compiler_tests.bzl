@@ -79,7 +79,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             name = ruby_genrule,
             outs = [expected_outfile, expected_errfile, expected_exitfile],
             srcs = [sources_name],
-            exec_tools = [":generate_out_file"],
+            tools = [":generate_out_file"],
             cmd =
                 """
                 $(location :generate_out_file) \
@@ -97,7 +97,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             name = "test_{}/{}_build".format(test_name_prefix, name),
             outs = [build_archive],
             srcs = [sources_name],
-            exec_tools = [":build_extension"],
+            tools = [":build_extension"],
             cmd =
                 """
                 $(location :build_extension) $(location {}) $(locations {}) \
