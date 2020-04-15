@@ -20,7 +20,7 @@ static bool isLiteralFalse(const core::GlobalState &gs, ast::Expression *node) {
     return false;
 }
 
-static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, const unique_ptr<ast::Expression> &sig,
+static void addInstanceCounterPart(vector<unique_ptr<ast::Expression>> &sink, const unique_ptr<ast::Send> &sig,
                                    const unique_ptr<ast::MethodDef> &def) {
     sink.emplace_back(sig->deepCopy());
     auto instanceDef = def->deepCopy();
