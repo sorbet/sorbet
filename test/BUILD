@@ -29,6 +29,11 @@ sh_library(
     srcs = ["logging.sh"],
 )
 
+sh_library(
+    name = "hermetic_tar",
+    srcs = ["hermetic_tar.sh"],
+)
+
 sh_binary(
     name = "generate_out_file",
     srcs = ["generate_out_file.sh"],
@@ -47,6 +52,7 @@ sh_binary(
     srcs = ["build_extension.sh"],
     data = ["//main:sorbet"],
     deps = [
+        ":hermetic_tar",
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],

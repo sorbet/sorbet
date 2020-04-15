@@ -26,9 +26,13 @@ else
 fi
 # --- end runfiles.bash initialization --- }}}
 
-# Find logging with rlocation, as this script is run from a genrule
+# Find logging and hermetic_tar with rlocation, as this script is run from a genrule
+
 # shellcheck disable=SC1090
 source "$(rlocation com_stripe_sorbet_llvm/test/logging.sh)"
+
+# shellcheck disable=SC1090
+source "$(rlocation com_stripe_sorbet_llvm/test/hermetic_tar.sh)"
 
 # Argument Parsing #############################################################
 
@@ -103,10 +107,8 @@ fi
 
 echo
 info "Building tar archive..."
-(
-  cd "$target"
-  tar -czf "$root/$output_archive" ./*
-)
+hermetic_tar "$target" "$root/$output_archive"
+
 success "└─ done."
 echo
 

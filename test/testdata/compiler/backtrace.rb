@@ -9,14 +9,12 @@ def bar
   path = Dir.getwd + '/'
 
   Thread.current.backtrace.map do |line|
-    if line.start_with?('/tmp') then
-      nil
-    else
-      line
-        .sub(path, '')
-        .sub(%r{.*run/tools/patch_require.rb:.*:}, 'run/tools/patch_require.rb:<censored>:')
-    end
-  end.compact
+    line
+      .sub(path, '')
+      .sub(%r{.*run/tools/patch_require.rb:.*:}, 'run/tools/patch_require.rb:<censored>:')
+      .sub(%r{^.*tmp\..*:}, '<censored>') # OSX
+      .sub(%r{^/tmp.*:}, '<censored>')    # linux
+  end
 end
 
 puts foo

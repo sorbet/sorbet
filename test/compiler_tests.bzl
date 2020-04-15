@@ -46,7 +46,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
         expected_outfile = "{}.out".format(prefix)
         expected_errfile = "{}.err".format(prefix)
         expected_exitfile = "{}.exit".format(prefix)
-        build_archive = "{}.tar.gz".format(prefix)
+        build_archive = "{}.tar".format(prefix)
 
         # All of the expectations (if this test is a single file)
         if tests[name]["isMultiFile"]:
@@ -79,7 +79,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             name = ruby_genrule,
             outs = [expected_outfile, expected_errfile, expected_exitfile],
             srcs = [sources_name],
-            tools = [":generate_out_file"],
+            exec_tools = [":generate_out_file"],
             cmd =
                 """
                 $(location :generate_out_file) \
@@ -87,8 +87,8 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                         $(location {}) \
                         $(location {}) \
                         $(locations {}) \
-                        &> genrule.log \
-                    || (cat genrule.log && exit 1)
+                        2>&1 > genrule.log || \
+                        cat genrule.log
                 """.format(expected_outfile, expected_errfile, expected_exitfile, sources_name),
             tags = tags + extra_tags,
         )
@@ -97,11 +97,12 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             name = "test_{}/{}_build".format(test_name_prefix, name),
             outs = [build_archive],
             srcs = [sources_name],
-            tools = [":build_extension"],
+            exec_tools = [":build_extension"],
             cmd =
                 """
-                $(location :build_extension) $(location {}) $(locations {}) &> genrule.log \
-                    || (cat genrule.log && exit 1)
+                $(location :build_extension) $(location {}) $(locations {}) \
+                  2>&1 > genrule.log || \
+                  cat genrule.log
                 """.format(build_archive, sources_name),
             tags = tags + extra_tags,
         )
