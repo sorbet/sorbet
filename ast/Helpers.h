@@ -32,33 +32,32 @@ public:
     }
 
     static std::unique_ptr<Send> Send(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                            Send::ARGS_store args, Send::Flags flags = {},
-                                            std::unique_ptr<ast::Block> blk = nullptr) {
+                                      Send::ARGS_store args, Send::Flags flags = {},
+                                      std::unique_ptr<ast::Block> blk = nullptr) {
         auto send = std::make_unique<ast::Send>(loc, std::move(recv), fun, std::move(args), std::move(blk), flags);
         return send;
     }
 
-    static std::unique_ptr<ast::Send> Send0(core::LocOffsets loc, std::unique_ptr<Expression> recv,
-                                             core::NameRef fun) {
+    static std::unique_ptr<ast::Send> Send0(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
         Send::ARGS_store nargs;
         return Send(loc, std::move(recv), fun, std::move(nargs));
     }
 
     static std::unique_ptr<ast::Send> Send0Block(core::LocOffsets loc, std::unique_ptr<Expression> recv,
-                                                  core::NameRef fun, std::unique_ptr<ast::Block> blk) {
+                                                 core::NameRef fun, std::unique_ptr<ast::Block> blk) {
         Send::ARGS_store nargs;
         return Send(loc, std::move(recv), fun, std::move(nargs), {}, std::move(blk));
     }
 
     static std::unique_ptr<ast::Send> Send1(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                             std::unique_ptr<Expression> arg1) {
+                                            std::unique_ptr<Expression> arg1) {
         Send::ARGS_store nargs;
         nargs.emplace_back(std::move(arg1));
         return Send(loc, std::move(recv), fun, std::move(nargs));
     }
 
     static std::unique_ptr<ast::Send> Send2(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                             std::unique_ptr<Expression> arg1, std::unique_ptr<Expression> arg2) {
+                                            std::unique_ptr<Expression> arg1, std::unique_ptr<Expression> arg2) {
         Send::ARGS_store nargs;
         nargs.emplace_back(std::move(arg1));
         nargs.emplace_back(std::move(arg2));
@@ -66,8 +65,8 @@ public:
     }
 
     static std::unique_ptr<ast::Send> Send3(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                             std::unique_ptr<Expression> arg1, std::unique_ptr<Expression> arg2,
-                                             std::unique_ptr<Expression> arg3) {
+                                            std::unique_ptr<Expression> arg1, std::unique_ptr<Expression> arg2,
+                                            std::unique_ptr<Expression> arg3) {
         Send::ARGS_store nargs;
         nargs.emplace_back(std::move(arg1));
         nargs.emplace_back(std::move(arg2));
@@ -195,7 +194,7 @@ public:
     }
 
     static std::unique_ptr<ast::Send> CallWithSplat(core::LocOffsets loc, std::unique_ptr<Expression> recv,
-                                                     core::NameRef name, std::unique_ptr<Expression> args) {
+                                                    core::NameRef name, std::unique_ptr<Expression> args) {
         return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv),
                      MK::Symbol(loc, name), std::move(args));
     }
@@ -360,12 +359,12 @@ public:
     }
 
     static std::unique_ptr<ast::Send> Let(core::LocOffsets loc, std::unique_ptr<Expression> value,
-                                           std::unique_ptr<Expression> type) {
+                                          std::unique_ptr<Expression> type) {
         return Send2(loc, T(loc), core::Names::let(), std::move(value), std::move(type));
     }
 
     static std::unique_ptr<ast::Send> AssertType(core::LocOffsets loc, std::unique_ptr<Expression> value,
-                                                  std::unique_ptr<Expression> type) {
+                                                 std::unique_ptr<Expression> type) {
         return Send2(loc, T(loc), core::Names::assertType(), std::move(value), std::move(type));
     }
 
@@ -394,7 +393,7 @@ public:
     }
 
     static std::unique_ptr<ast::Send> SelfNew(core::LocOffsets loc, ast::Send::ARGS_store args, Send::Flags flags = {},
-                                               std::unique_ptr<ast::Block> block = nullptr) {
+                                              std::unique_ptr<ast::Block> block = nullptr) {
         auto magic = Constant(loc, core::Symbols::Magic());
         return Send(loc, std::move(magic), core::Names::selfNew(), std::move(args), flags, std::move(block));
     }
