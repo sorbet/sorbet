@@ -38,18 +38,12 @@ class AdvancedODM
     prop :default, String, default: ""
     prop :t_nilable, T.nilable(String)
 
-    prop :type, type: String
-    prop :object  # error: Method `prop` does not exist on `T.class_of(AdvancedODM)`
     prop :array, Array
-    prop :array_of, array: String
-    prop :array_of_explicit, Array, array: String
     prop :t_array, T::Array[String]
     prop :hash_of, T::Hash[Symbol, String]
 
     prop :const_explicit, String, immutable: true
     const :const, String
-
-    prop :no_class_arg, type: Array, immutable: true, array: String
 
     prop :enum_prop, enum: ["hello", "goodbye"]
 
@@ -90,12 +84,6 @@ def main
     T.reveal_type(AdvancedODM.new.default) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.t_nilable) # error: Revealed type: `T.nilable(String)`
 
-    T.reveal_type(AdvancedODM.new.type) # error: Revealed type: `String`
-    T.reveal_type(AdvancedODM.new.object) # error: Revealed type: `T.untyped`
-                # ^^^^^^^^^^^^^^^^^^^^^^ error: Method `object` does not exist on `AdvancedODM`
-    T.reveal_type(AdvancedODM.new.array) # error: Revealed type: `T::Array[T.untyped]`
-    T.reveal_type(AdvancedODM.new.array_of) # error: Revealed type: `T::Array[String]`
-    T.reveal_type(AdvancedODM.new.array_of_explicit) # error: Revealed type: `T::Array[T.untyped]`
     T.reveal_type(AdvancedODM.new.t_array) # error: Revealed type: `T::Array[String]`
     T.reveal_type(AdvancedODM.new.hash_of) # error: Revealed type: `T::Hash[Symbol, String]`
 
@@ -103,9 +91,6 @@ def main
     AdvancedODM.new.const_explicit = 'b' # error: Method `const_explicit=` does not exist on `AdvancedODM`
     T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
     AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
-
-    T.reveal_type(AdvancedODM.new.no_class_arg) # error: Revealed type: `T::Array[T.untyped]`
-    AdvancedODM.new.no_class_arg = ['b'] # error: Method `no_class_arg=` does not exist on `AdvancedODM`
 
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `T.untyped`
     AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
