@@ -58,6 +58,8 @@ struct NodesAndPropInfo {
 optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     PropInfo ret;
     ret.loc = send->loc;
+
+    // ----- Is this a send we care about? -----
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
@@ -98,6 +100,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         return nullopt;
     }
 
+    // ----- What's the prop's name? -----
     if (!ret.name.exists()) {
         if (send->args.empty()) {
             return nullopt;
@@ -112,6 +115,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 
+    // ----- What's the prop's type? -----
     if (ret.type == nullptr) {
         if (send->args.size() == 1) {
             // Type must have been inferred from prop method (like created_prop) or
@@ -127,6 +131,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
 
+    // ----- Does the prop have any extra options? -----
     unique_ptr<ast::Hash> rules;
     if (!send->args.empty()) {
         if (auto back = ast::cast_tree<ast::Hash>(send->args.back().get())) {
@@ -139,6 +144,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         // No rules, but 3 args including name and type. Also not a T::Props
         return std::nullopt;
     }
+
+    // ----- Parse any extra options -----
 
     if (isTNilable(ret.type.get())) {
         ret.default_ = ast::MK::Nil(ret.loc);
