@@ -29,6 +29,10 @@ class ComputingProps
   const :not_a_symbol, String, computed_by: 'not_a_symbol'
                                           # ^^^^^^^^^^^^^^ error: Value for `computed_by` must be a symbol literal
 
+  symbol_in_variable = :symbol_in_variable
+  const :symbol_in_variable, String, computed_by: symbol_in_variable
+                                                # ^^^^^^^^^^^^^^^^^^ error: Value for `computed_by` must be a symbol literal
+
   const :num_unknown_type, Integer, computed_by: :compute_num_unknown_type
                                                # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The typechecker was unable to infer the type of the asserted value
   def self.compute_num_unknown_type(inputs)
