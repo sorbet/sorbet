@@ -209,15 +209,13 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
-            if (auto *lit = ast::cast_tree<ast::Literal>(val.get())) {
-                if (lit->isSymbol(ctx)) {
-                    computedByMethodNameLoc = lit->loc;
-                    computedByMethodName = lit->asSymbol(ctx);
-                } else {
-                    // error that value is not a symbol
-                    auto typeSymbol =
-                        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Symbol());
-                    ret.nodes.emplace_back(ast::MK::Let(lit->loc, move(val), move(typeSymbol)));
+            auto lit = ast::cast_tree<ast::Literal>(val.get());
+            if (lit != nullptr && lit->isSymbol(ctx)) {
+                computedByMethodNameLoc = lit->loc;
+                computedByMethodName = lit->asSymbol(ctx);
+            } else {
+                if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::ComputedBySymbol)) {
+                    e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
                 }
             }
         }

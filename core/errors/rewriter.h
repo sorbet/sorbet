@@ -12,5 +12,6 @@ constexpr ErrorClass TEnumOutsideEnumsDo{3506, StrictLevel::False};
 constexpr ErrorClass TEnumConstNotEnumValue{3506, StrictLevel::False};
 constexpr ErrorClass BadTestEach{3507, StrictLevel::True};
 constexpr ErrorClass PropForeignStrict{3508, StrictLevel::False};
+constexpr ErrorClass ComputedBySymbol{3509, StrictLevel::False};
 } // namespace sorbet::core::errors::Rewriter
 #endif
