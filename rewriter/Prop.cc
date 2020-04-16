@@ -115,12 +115,17 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     if (ret.type == nullptr) {
         if (send->args.size() == 1) {
             // Type must have been inferred from prop method (like created_prop) or
-            // been given in second argument (either directly, or indirectly via rules)
+            // been given in second argument.
             return nullopt;
         } else {
             ret.type = ASTUtil::dupType(send->args[1].get());
+            if (ret.type == nullptr) {
+                return nullopt;
+            }
         }
     }
+
+    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
 
     unique_ptr<ast::Hash> rules;
     if (!send->args.empty()) {
@@ -130,23 +135,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             rules.reset(ast::cast_tree<ast::Hash>(back->deepCopy().release()));
         }
     }
-
-    if (rules == nullptr) {
-        if (ret.type == nullptr) {
-            // No type, and rules isn't a hash: This isn't a T::Props prop
-            return std::nullopt;
-        }
-        if (send->args.size() == 3) {
-            // No rules, but 3 args including name and type. Also not a T::Props
-            return std::nullopt;
-        }
+    if (rules == nullptr && send->args.size() >= 3) {
+        // No rules, but 3 args including name and type. Also not a T::Props
+        return std::nullopt;
     }
-
-    if (ret.type == nullptr) {
-        return nullopt;
-    }
-
-    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
 
     if (isTNilable(ret.type.get())) {
         ret.default_ = ast::MK::Nil(ret.loc);
