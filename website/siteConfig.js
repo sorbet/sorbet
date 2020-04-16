@@ -40,6 +40,11 @@ const users = [
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',
   },
+  {
+    caption: 'FactorialHR',
+    image: 'img/factorial-logo.png',
+    infoLink: 'https://www.factorialhr.com/',
+  },
 ];
 
 const siteConfig = {
