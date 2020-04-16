@@ -26,6 +26,11 @@ const users = [
     infoLink: 'https://chanzuckerberg.com/',
   },
   {
+    caption: 'FactorialHR',
+    image: 'img/factorial-logo.png',
+    infoLink: 'https://www.factorialhr.com/',
+  },
+  {
     caption: 'Gusto',
     image: 'img/gusto-logo.jpg',
     infoLink: 'https://gusto.com/',
@@ -39,11 +44,6 @@ const users = [
     caption: 'Vonage',
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',
-  },
-  {
-    caption: 'FactorialHR',
-    image: 'img/factorial-logo.png',
-    infoLink: 'https://www.factorialhr.com/',
   },
 ];
 
