@@ -16,8 +16,6 @@ public:
     static std::pair<std::unique_ptr<ast::Expression>, std::unique_ptr<ast::Expression>>
     extractHashValue(core::MutableContext ctx, ast::Hash &hash, core::NameRef name);
 
-    static void putBackHashValue(core::MutableContext ctx, ast::Hash &hash, std::unique_ptr<ast::Expression> key,
-                                 std::unique_ptr<ast::Expression> value);
     static const ast::Send *castSig(const ast::Expression *expr, core::NameRef returns);
 
     static std::unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name,

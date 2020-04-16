@@ -50,7 +50,7 @@ struct NodesAndPropInfo {
     PropInfo propInfo;
 };
 
-optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send) {
+optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     bool isImmutable = false; // Are there no setters?
     unique_ptr<ast::Expression> type;
     unique_ptr<ast::Expression> foreign;
@@ -125,10 +125,15 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         }
     }
 
-    ast::Hash *rules = nullptr;
+    unique_ptr<ast::Hash> rules;
     if (!send->args.empty()) {
-        rules = ast::cast_tree<ast::Hash>(send->args.back().get());
+        if (auto back = ast::cast_tree<ast::Hash>(send->args.back().get())) {
+            // Deep copy the rules hash so that we can destruct it at will to parse things,
+            // without having to worry about whether we stole things from the tree.
+            rules.reset(ast::cast_tree<ast::Hash>(back->deepCopy().release()));
+        }
     }
+
     if (rules == nullptr) {
         if (type == nullptr) {
             // No type, and rules isn't a hash: This isn't a T::Props prop
@@ -142,10 +147,11 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
 
     if (type == nullptr) {
         auto [key, value] = ASTUtil::extractHashValue(ctx, *rules, core::Names::type());
-        if (value.get() && !ASTUtil::dupType(value.get())) {
-            ASTUtil::putBackHashValue(ctx, *rules, move(key), move(value));
-        } else {
-            type = move(value);
+        if (value != nullptr) {
+            // dupType also checks if value is a valid type
+            if (auto rulesType = ASTUtil::dupType(value.get())) {
+                type = move(rulesType);
+            }
         }
     }
 
@@ -164,7 +170,6 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             return std::nullopt;
         }
         if (!ASTUtil::dupType(arrayType.get())) {
-            ASTUtil::putBackHashValue(ctx, *rules, move(arrayLit), move(arrayType));
             return std::nullopt;
         } else {
             type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
@@ -178,34 +183,31 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
             return std::nullopt;
         }
     }
-    ENFORCE(type != nullptr, "No obvious type AST for this prop");
-    auto getType = ASTUtil::dupType(type.get());
-    ENFORCE(getType != nullptr);
 
-    // From this point, we can't `return std::nullopt` anymore since we're going to be consuming the tree.
+    ENFORCE(ASTUtil::dupType(type.get()) != nullptr, "No obvious type AST for this prop");
 
-    NodesAndPropInfo ret;
-    ret.propInfo.name = name;
-    ret.propInfo.loc = send->loc;
-    ret.propInfo.type = ASTUtil::dupType(type.get());
+    PropInfo ret;
+    ret.name = name;
+    ret.loc = send->loc;
+    ret.type = ASTUtil::dupType(type.get());
     if (isTNilable(type.get())) {
-        ret.propInfo.default_ = ast::MK::Nil(ret.propInfo.loc);
+        ret.default_ = ast::MK::Nil(ret.loc);
     } else if (rules == nullptr) {
-        ret.propInfo.default_ = std::nullopt;
+        ret.default_ = std::nullopt;
     } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-        ret.propInfo.default_ = ast::MK::RaiseUnimplemented(ret.propInfo.loc);
+        ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
     } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
         auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
-        ret.propInfo.default_ = std::move(val);
+        ret.default_ = std::move(val);
     } else {
-        ret.propInfo.default_ = std::nullopt;
+        ret.default_ = std::nullopt;
     }
 
-    // Compute the getters
     if (rules) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             isImmutable = true;
         }
+
         // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
@@ -219,6 +221,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                 }
             }
         }
+
         if (foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             if (foreignTree != nullptr) {
@@ -236,6 +239,10 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
         }
     }
 
+    return ret;
+}
+
+optional<NodesAndPropInfo> processProp(core::MutableContext ctx) {
     ret.nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
     if (computedByMethodName.exists()) {
