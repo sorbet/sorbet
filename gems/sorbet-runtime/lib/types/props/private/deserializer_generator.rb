@@ -63,7 +63,8 @@ module T::Props
                     klass: self.class,
                     prop: #{prop.inspect},
                     value: val,
-                    error: e.message
+                    error: e.message,
+                    notify: 'djudd'
                   }
                 )
                 val
