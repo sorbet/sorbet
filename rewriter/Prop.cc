@@ -214,7 +214,7 @@ optional<NodesAndPropInfo> processProp(core::MutableContext ctx, ast::Send *send
                 computedByMethodNameLoc = lit->loc;
                 computedByMethodName = lit->asSymbol(ctx);
             } else {
-                if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::ComputedBySymbol)) {
+                if (auto e = ctx.beginError(val->loc, core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
                 }
             }

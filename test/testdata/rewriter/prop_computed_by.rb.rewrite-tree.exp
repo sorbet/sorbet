@@ -77,6 +77,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def symbol_in_variable<<C <todo sym>>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(<emptyTree>::<C Integer>)
     end
 
@@ -108,6 +116,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_self_def(<self>, :"compute_num_wrong_type")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"not_a_symbol")
+
+    symbol_in_variable = :"symbol_in_variable"
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"symbol_in_variable")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"num_unknown_type")
 
