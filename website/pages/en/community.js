@@ -157,6 +157,11 @@ class Index extends React.Component {
                   link: 'https://github.com/Shopify/rubocop-sorbet',
                   description: 'A collection of Rubocop rules for Sorbet.',
                 },
+                {
+                  title: 'pronto-sorbet',
+                  link: 'https://github.com/teamsimplepay/pronto-sorbet',
+                  description: 'Run Sorbet as a Pronto runner.',
+                },
               ]}
             />
             <p>
