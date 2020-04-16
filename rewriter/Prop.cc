@@ -39,10 +39,15 @@ bool isTStruct(ast::Expression *expr) {
 }
 
 struct PropInfo {
-    core::NameRef name;
     core::LocOffsets loc;
+    bool isImmutable = false;
+    core::NameRef name;
+    core::LocOffsets nameLoc;
     unique_ptr<ast::Expression> type;
     optional<unique_ptr<ast::Expression>> default_;
+    core::NameRef computedByMethodName;
+    core::LocOffsets computedByMethodNameLoc;
+    unique_ptr<ast::Expression> foreign;
 };
 
 struct NodesAndPropInfo {
@@ -51,44 +56,37 @@ struct NodesAndPropInfo {
 };
 
 optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
-    bool isImmutable = false; // Are there no setters?
-    unique_ptr<ast::Expression> type;
-    unique_ptr<ast::Expression> foreign;
-    core::NameRef name = core::NameRef::noName();
-    core::LocOffsets nameLoc;
-
-    core::NameRef computedByMethodName = core::NameRef::noName();
-    core::LocOffsets computedByMethodNameLoc;
-
+    PropInfo ret;
+    ret.loc = send->loc;
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
             break;
         case core::Names::const_()._id:
-            isImmutable = true;
+            ret.isImmutable = true;
             break;
         case core::Names::tokenProp()._id:
         case core::Names::timestampedTokenProp()._id:
-            name = core::Names::token();
-            nameLoc = core::LocOffsets{send->loc.beginPos() +
-                                           (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
-                                       send->loc.endPos() - 5}; // get the 'token' part of it
-            type = ast::MK::Constant(send->loc, core::Symbols::String());
+            ret.name = core::Names::token();
+            ret.nameLoc = core::LocOffsets{send->loc.beginPos() +
+                                               (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
+                                           send->loc.endPos() - 5}; // get the 'token' part of it
+            ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::createdProp()._id:
-            name = core::Names::created();
-            nameLoc =
+            ret.name = core::Names::created();
+            ret.nameLoc =
                 core::LocOffsets{send->loc.beginPos(),
                                  send->loc.endPos() - 5}; // 5 is the difference between `created_prop` and `created`
-            type = ast::MK::Constant(send->loc, core::Symbols::Float());
+            ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchantProp()._id:
-            isImmutable = true;
-            name = core::Names::merchant();
-            nameLoc =
+            ret.isImmutable = true;
+            ret.name = core::Names::merchant();
+            ret.nameLoc =
                 core::LocOffsets{send->loc.beginPos(),
                                  send->loc.endPos() - 5}; // 5 is the difference between `merchant_prop` and `merchant`
-            type = ast::MK::Constant(send->loc, core::Symbols::String());
+            ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
 
         default:
@@ -99,9 +97,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         // Too many args, even if all optional args were provided.
         return nullopt;
     }
-    auto loc = send->loc;
 
-    if (!name.exists()) {
+    if (!ret.name.exists()) {
         if (send->args.empty()) {
             return nullopt;
         }
@@ -109,19 +106,19 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (!sym || !sym->isSymbol(ctx)) {
             return nullopt;
         }
-        name = sym->asSymbol(ctx);
+        ret.name = sym->asSymbol(ctx);
         ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() &&
                 core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
-        nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
+        ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 
-    if (type == nullptr) {
+    if (ret.type == nullptr) {
         if (send->args.size() == 1) {
             // Type must have been inferred from prop method (like created_prop) or
             // been given in second argument (either directly, or indirectly via rules)
             return nullopt;
         } else {
-            type = ASTUtil::dupType(send->args[1].get());
+            ret.type = ASTUtil::dupType(send->args[1].get());
         }
     }
 
@@ -135,7 +132,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     }
 
     if (rules == nullptr) {
-        if (type == nullptr) {
+        if (ret.type == nullptr) {
             // No type, and rules isn't a hash: This isn't a T::Props prop
             return std::nullopt;
         }
@@ -145,26 +142,26 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         }
     }
 
-    if (type == nullptr) {
+    if (ret.type == nullptr) {
         auto [key, value] = ASTUtil::extractHashValue(ctx, *rules, core::Names::type());
         if (value != nullptr) {
             // dupType also checks if value is a valid type
             if (auto rulesType = ASTUtil::dupType(value.get())) {
-                type = move(rulesType);
+                ret.type = move(rulesType);
             }
         }
     }
 
-    if (type == nullptr) {
+    if (ret.type == nullptr) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::enum_())) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
-            type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
-            isImmutable = true;
+            ret.type = ast::MK::Send0(ret.loc, ast::MK::T(ret.loc), core::Names::untyped());
+            ret.isImmutable = true;
         }
     }
 
-    if (type == nullptr) {
+    if (ret.type == nullptr) {
         auto [arrayLit, arrayType] = ASTUtil::extractHashValue(ctx, *rules, core::Names::array());
         if (!arrayType.get()) {
             return std::nullopt;
@@ -172,25 +169,21 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (!ASTUtil::dupType(arrayType.get())) {
             return std::nullopt;
         } else {
-            type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
-                                  core::Names::squareBrackets(), std::move(arrayType));
+            ret.type = ast::MK::Send1(ret.loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
+                                      core::Names::squareBrackets(), std::move(arrayType));
         }
     }
 
-    if (auto *snd = ast::cast_tree<ast::Send>(type.get())) {
+    if (auto *snd = ast::cast_tree<ast::Send>(ret.type.get())) {
         if (snd->fun == core::Names::coerce()) {
             // TODO: either support T.coerce or remove it from pay-server
             return std::nullopt;
         }
     }
 
-    ENFORCE(ASTUtil::dupType(type.get()) != nullptr, "No obvious type AST for this prop");
+    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
 
-    PropInfo ret;
-    ret.name = name;
-    ret.loc = send->loc;
-    ret.type = ASTUtil::dupType(type.get());
-    if (isTNilable(type.get())) {
+    if (isTNilable(ret.type.get())) {
         ret.default_ = ast::MK::Nil(ret.loc);
     } else if (rules == nullptr) {
         ret.default_ = std::nullopt;
@@ -205,7 +198,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     if (rules) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
-            isImmutable = true;
+            ret.isImmutable = true;
         }
 
         // e.g. `const :foo, type, computed_by: :method_name`
@@ -213,8 +206,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
             auto lit = ast::cast_tree<ast::Literal>(val.get());
             if (lit != nullptr && lit->isSymbol(ctx)) {
-                computedByMethodNameLoc = lit->loc;
-                computedByMethodName = lit->asSymbol(ctx);
+                ret.computedByMethodNameLoc = lit->loc;
+                ret.computedByMethodName = lit->asSymbol(ctx);
             } else {
                 if (auto e = ctx.beginError(val->loc, core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
@@ -222,17 +215,17 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
 
-        if (foreign == nullptr) {
+        if (ret.foreign == nullptr) {
             auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
             if (foreignTree != nullptr) {
-                foreign = move(foreignTree);
-                if (auto body = ASTUtil::thunkBody(ctx, foreign.get())) {
-                    foreign = std::move(body);
+                ret.foreign = move(foreignTree);
+                if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
+                    ret.foreign = std::move(body);
                 } else {
-                    if (auto e = ctx.beginError(foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                    if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
                         e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                        e.replaceWith("Convert to lambda", core::Loc(ctx.file, foreign->loc), "-> {{{}}}",
-                                      core::Loc(ctx.file, foreign->loc).source(ctx));
+                        e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
+                                      core::Loc(ctx.file, ret.foreign->loc).source(ctx));
                     }
                 }
             }
