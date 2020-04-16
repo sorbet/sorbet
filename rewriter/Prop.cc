@@ -143,16 +143,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     }
 
     if (ret.type == nullptr) {
-        auto [key, value] = ASTUtil::extractHashValue(ctx, *rules, core::Names::type());
-        if (value != nullptr) {
-            // dupType also checks if value is a valid type
-            if (auto rulesType = ASTUtil::dupType(value.get())) {
-                ret.type = move(rulesType);
-            }
-        }
-    }
-
-    if (ret.type == nullptr) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::enum_())) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
@@ -162,23 +152,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     }
 
     if (ret.type == nullptr) {
-        auto [arrayLit, arrayType] = ASTUtil::extractHashValue(ctx, *rules, core::Names::array());
-        if (!arrayType.get()) {
-            return std::nullopt;
-        }
-        if (!ASTUtil::dupType(arrayType.get())) {
-            return std::nullopt;
-        } else {
-            ret.type = ast::MK::Send1(ret.loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
-                                      core::Names::squareBrackets(), std::move(arrayType));
-        }
-    }
-
-    if (auto *snd = ast::cast_tree<ast::Send>(ret.type.get())) {
-        if (snd->fun == core::Names::coerce()) {
-            // TODO: either support T.coerce or remove it from pay-server
-            return std::nullopt;
-        }
+        return nullopt;
     }
 
     ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
