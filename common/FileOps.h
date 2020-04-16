@@ -25,6 +25,17 @@ public:
     static bool writeIfDifferent(std::string_view filename, std::string_view text);
     static bool dirExists(std::string_view path);
     static void createDir(std::string_view path);
+
+    // This differs from createDir, as it will not raise an exception if the directory already exists. Returns true when
+    // the directory was created, and false if it already existed.
+    //
+    // NOTE: This does not create parent directories if they exist.
+    static bool ensureDir(std::string_view path);
+
+    // NOTE: this is a minimal wrapper around rmdir, and as such will raise an exception if the directory is not empty
+    // when it's removed.
+    static void removeDir(std::string_view path);
+
     static void removeFile(std::string_view path);
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.

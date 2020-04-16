@@ -72,6 +72,26 @@ void sorbet::FileOps::createDir(string_view path) {
     }
 }
 
+bool sorbet::FileOps::ensureDir(string_view path) {
+    auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (err) {
+        if (errno == EEXIST) {
+            return false;
+        }
+
+        throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, errno));
+    }
+
+    return true;
+}
+
+void sorbet::FileOps::removeDir(string_view path) {
+    auto err = rmdir(string(path).c_str());
+    if (err) {
+        throw sorbet::CreateDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
+    }
+}
+
 void sorbet::FileOps::removeFile(string_view path) {
     auto err = remove(string(path).c_str());
     if (err) {
