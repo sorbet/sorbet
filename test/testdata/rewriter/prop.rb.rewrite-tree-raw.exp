@@ -2439,15 +2439,9 @@ ClassDef{
               fun = <U returns>
               block = nullptr
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U untyped>
-                  block = nullptr
-                  args = [
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -2460,6 +2454,73 @@ ClassDef{
           flags = {rewriter}
           name = <U enum_prop><<C <U <todo sym>>>>
           args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Kernel
+            }
+            fun = <U raise>
+            block = nullptr
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::T::Sig::WithoutRuntime
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U String>>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriter}
+          name = <U enum_prop=><<C <U <todo sym>>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4675,6 +4736,21 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"enum_prop" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"enum_prop=" }
           ]
         }
 

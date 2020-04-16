@@ -216,10 +216,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params({}).returns(::T.untyped())
+      <self>.params({}).returns(<emptyTree>::<C String>)
     end
 
     def enum_prop<<C <todo sym>>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def enum_prop=<<C <todo sym>>>(arg0, &<blk>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -474,6 +482,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"const")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop=")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign")
 
