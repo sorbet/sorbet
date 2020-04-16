@@ -92,7 +92,7 @@ def main
     T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
     AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
 
-    T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `T.untyped`
+    T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
 
     T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
