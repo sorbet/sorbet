@@ -3,42 +3,20 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/testdata/rew
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
       argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
   class ::ThingsWhichUsedToBePropSyntax < ::Object () @ test/testdata/rewriter/not_prop.rb:3
-    class ::ThingsWhichUsedToBePropSyntax::Mutator < ::Object () @ test/testdata/rewriter/not_prop.rb:8
+    class ::ThingsWhichUsedToBePropSyntax::Mutator < ::Object () @ test/testdata/rewriter/not_prop.rb:7
       method ::ThingsWhichUsedToBePropSyntax::Mutator#array_of_explicit (<blk>) -> Chalk::ODM::Mutator::Private::ArrayMutator[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
       method ::ThingsWhichUsedToBePropSyntax::Mutator#array_of_explicit= (array_of_explicit, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
         argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=7:9 end=7:26}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-      method ::ThingsWhichUsedToBePropSyntax::Mutator#no_class_arg (<blk>) -> Chalk::ODM::Mutator::Private::ArrayMutator[T.untyped] @ test/testdata/rewriter/not_prop.rb:8
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-      method ::ThingsWhichUsedToBePropSyntax::Mutator#no_class_arg= (no_class_arg, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:8
-        argument no_class_arg<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=8:9 end=8:21}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
     class ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:7
       type-member(+) ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax::Mutator) @ test/testdata/rewriter/not_prop.rb:7
       method ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:7
         argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#array_of (<blk>) -> T::Array[String] @ test/testdata/rewriter/not_prop.rb:6
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#array_of= (array_of, <blk>) -> T::Array[String] @ test/testdata/rewriter/not_prop.rb:6
-      argument array_of<> -> T::Array[String] @ Loc {file=test/testdata/rewriter/not_prop.rb start=6:9 end=6:17}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
     method ::ThingsWhichUsedToBePropSyntax#array_of_explicit (<blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
     method ::ThingsWhichUsedToBePropSyntax#array_of_explicit= (array_of_explicit, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
       argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=7:9 end=7:26}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#no_class_arg (<blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:8
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#proc_type (<blk>) -> T.proc.params(arg0: Integer).void @ test/testdata/rewriter/not_prop.rb:9
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#proc_type= (proc_type, <blk>) -> T.proc.params(arg0: Integer).void @ test/testdata/rewriter/not_prop.rb:9
-      argument proc_type<> -> T.proc.params(arg0: Integer).void @ Loc {file=test/testdata/rewriter/not_prop.rb start=9:9 end=9:18}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#type (<blk>) -> String @ test/testdata/rewriter/not_prop.rb:4
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-    method ::ThingsWhichUsedToBePropSyntax#type= (type, <blk>) -> String @ test/testdata/rewriter/not_prop.rb:4
-      argument type<> -> String @ Loc {file=test/testdata/rewriter/not_prop.rb start=4:9 end=4:13}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
   class ::<Class:ThingsWhichUsedToBePropSyntax>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:3
     type-member(+) ::<Class:ThingsWhichUsedToBePropSyntax>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax) @ test/testdata/rewriter/not_prop.rb:3
