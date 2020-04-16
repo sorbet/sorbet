@@ -39,8 +39,8 @@
 # p Coverage.result  #=> {"foo.rb"=>[1, 1, 10, nil, nil, 1, 1, nil, 0, nil]}
 # ```
 module Coverage
-  sig {returns(T.untyped)}
-  def self.line_stub(); end
+  sig {params(file: T.untyped).returns(T.untyped)}
+  def self.line_stub(file); end
 
   # Returns a hash that contains filename as key and coverage array as value.
   # This is the same as `Coverage.result(stop: false, clear: false)`.
