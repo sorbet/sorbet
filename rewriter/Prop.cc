@@ -143,15 +143,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     }
 
     if (ret.type == nullptr) {
-        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::enum_())) {
-            // Handle enum: by setting the type to untyped, so that we'll parse
-            // the declaration. Don't allow assigning it from typed code by deleting setter
-            ret.type = ast::MK::Send0(ret.loc, ast::MK::T(ret.loc), core::Names::untyped());
-            ret.isImmutable = true;
-        }
-    }
-
-    if (ret.type == nullptr) {
         return nullopt;
     }
 
