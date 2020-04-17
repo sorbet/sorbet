@@ -1,0 +1,25 @@
+class ::<root> < ::Object () @ (... removed core rbi locs ..., test/testdata/rewriter/not_prop.rb:3)
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+  class ::ThingsWhichUsedToBePropSyntax < ::Object () @ test/testdata/rewriter/not_prop.rb:3
+    class ::ThingsWhichUsedToBePropSyntax::Mutator < ::Object () @ test/testdata/rewriter/not_prop.rb:7
+      method ::ThingsWhichUsedToBePropSyntax::Mutator#array_of_explicit (<blk>) -> Chalk::ODM::Mutator::Private::ArrayMutator[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
+        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+      method ::ThingsWhichUsedToBePropSyntax::Mutator#array_of_explicit= (array_of_explicit, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
+        argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=7:9 end=7:26}
+        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+    class ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:7
+      type-member(+) ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax::Mutator) @ test/testdata/rewriter/not_prop.rb:7
+      method ::ThingsWhichUsedToBePropSyntax::<Class:Mutator>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:7
+        argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+    method ::ThingsWhichUsedToBePropSyntax#array_of_explicit (<blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+    method ::ThingsWhichUsedToBePropSyntax#array_of_explicit= (array_of_explicit, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
+      argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=7:9 end=7:26}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+  class ::<Class:ThingsWhichUsedToBePropSyntax>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:3
+    type-member(+) ::<Class:ThingsWhichUsedToBePropSyntax>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax) @ test/testdata/rewriter/not_prop.rb:3
+    method ::<Class:ThingsWhichUsedToBePropSyntax>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+
