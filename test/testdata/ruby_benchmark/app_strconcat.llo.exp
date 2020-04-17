@@ -141,7 +141,7 @@ declare i64 @rb_obj_as_string_result(i64, i64) local_unnamed_addr #2
 declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #5
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_ruby_benchmark_app_strconcat() local_unnamed_addr #6 {
+define void @Init_app_strconcat() local_unnamed_addr #6 {
 entry:
   %callArgs.i = alloca [5 x i64], align 8
   %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.14, i64 0, i64 0)) #10
@@ -240,7 +240,7 @@ BB2.i:                                            ; preds = %BB2.i.backedge, %BB
   br i1 %51, label %"fastSymCallIntrinsic_Integer_<.i", label %"alternativeCallIntrinsic_Integer_<.i", !prof !35
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_ruby_benchmark_app_strconcat.cold.1(i64 %25) #11
+  tail call fastcc void @Init_app_strconcat.cold.1(i64 %25) #11
   unreachable
 
 afterSend.i:                                      ; preds = %"fastSymCallIntrinsic_Integer_<.i", %"alternativeCallIntrinsic_Integer_<.i"
@@ -403,7 +403,7 @@ declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #7
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #7
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_ruby_benchmark_app_strconcat.cold.1(i64) unnamed_addr #8 {
+define internal fastcc void @Init_app_strconcat.cold.1(i64) unnamed_addr #8 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #10
   unreachable

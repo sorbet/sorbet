@@ -353,7 +353,7 @@ codeRepl124:                                      ; preds = %BB4
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_ruby_benchmark_app_fib() local_unnamed_addr #11 {
+define void @Init_app_fib() local_unnamed_addr #11 {
 entry:
   %callArgs.i.i = alloca [2 x i64], align 8
   %callArgs.i = alloca [1 x i64], align 8
@@ -527,11 +527,11 @@ sorbet_isa_class_of.exit.i.i:                     ; preds = %98
   br i1 %103, label %codeRepl, label %"func_<root>.<static-init>$114.exit", !prof !7
 
 codeRepl:                                         ; preds = %98, %sorbet_isa_class_of.exit.i.i
-  tail call fastcc void @Init_test_testdata_ruby_benchmark_app_fib.cold.1(i64 %96) #18
+  tail call fastcc void @Init_app_fib.cold.1(i64 %96) #18
   unreachable
 
 codeRepl4:                                        ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_ruby_benchmark_app_fib.cold.2(i64 %35) #18
+  tail call fastcc void @Init_app_fib.cold.2(i64 %35) #18
   unreachable
 
 "func_<root>.<static-init>$114.exit":             ; preds = %62, %sorbet_isa_class_of.exit.i.i
@@ -679,14 +679,14 @@ newFuncRoot:
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_ruby_benchmark_app_fib.cold.1(i64) unnamed_addr #15 {
+define internal fastcc void @Init_app_fib.cold.1(i64) unnamed_addr #15 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(HasFib)", i64 0, i64 0)) #16
   unreachable
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_ruby_benchmark_app_fib.cold.2(i64) unnamed_addr #15 {
+define internal fastcc void @Init_app_fib.cold.2(i64) unnamed_addr #15 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #16
   unreachable

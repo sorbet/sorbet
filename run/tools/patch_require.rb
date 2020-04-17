@@ -9,12 +9,13 @@ module Kernel
     if File.exist?(name)
       tmpdir = ENV['llvmir']
       raise "no 'llvmir' in ENV" unless tmpdir
-      root_name = name.gsub('/', '_').gsub('.', '_').gsub('_rb', '.rb')
+      root_name = name
       if name.start_with?('./')
         root_name = root_name[2..-1]
       end
       # Our paths are terrible...
-      root_name = root_name.gsub(/.*test_testdata/, 'test_testdata')
+      root_name = root_name.gsub(%r{.*test/testdata}, 'test/testdata')
+
       if RUBY_PLATFORM == "x86_64-linux"
         suffix = '.so'
       elsif RUBY_PLATFORM == "x86_64-darwin18"
@@ -27,7 +28,7 @@ module Kernel
         # NOTE: we cross-talk to the payload through this variable. The payload doesn't know what the real path of the
         # original file is, so we pass it through here. It's consumed in payload.c:sorbet_allocateRubyStackFrames.
         $__sorbet_ruby_realpath = File.realpath(name)
-        $stderr.puts "SorbetLLVM using compiled: #{cext} for #{$sorbet_ruby_file}"
+        $stderr.puts "SorbetLLVM using compiled: #{cext} for #{$__sorbet_ruby_realpath}"
         return sorbet_old_require(cext)
       end
       if ENV['force_compile'] && File.exist?(name) && File.read(name).include?('# compiled: true')

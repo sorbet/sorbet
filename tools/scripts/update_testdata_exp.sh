@@ -38,6 +38,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         continue
     fi
 
+    dir="$(dirname "$this_base")"
     basename="$this_base"
     srcs=("$this_src")
 
@@ -54,7 +55,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 "$llvmir" \
                 "${srcs[@]}" \
                 2\> "$llvmir/update_testdata_exp.stderr"\; \
-                cat "$llvmir/*.$ext" \| grep -v \'^target triple =\' \> "$exp" \
+                cat "$llvmir/$dir/*.$ext" \| grep -v \'^target triple =\' \> "$exp" \
             >> "$COMMAND_FILE"
         fi
     done

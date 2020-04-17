@@ -3,9 +3,11 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
+#include "absl/strings/str_split.h"
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
+#include "common/FileOps.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
@@ -28,11 +30,26 @@ string objectFileName(const core::GlobalState &gs, const core::FileRef &f) {
     if (sourceFile[0] == '.' && sourceFile[1] == '/') {
         sourceFile = sourceFile.substr(2);
     }
-    absl::c_replace(sourceFile, '/', '_');
-    absl::c_replace(sourceFile, '.', '_');
-    sourceFile.replace(sourceFile.find("_rb"), 3, ".rb");
     return sourceFile;
 }
+
+void ensureOutputDir(const string_view irOutputDir, string_view fileName) {
+    string path(irOutputDir);
+
+    auto finalSlashPos = fileName.rfind('/');
+    if (finalSlashPos == string_view::npos) {
+        return;
+    }
+
+    // Trim the filename so that we only iterate directory parts below
+    fileName.remove_suffix(fileName.size() - finalSlashPos);
+
+    for (auto part : absl::StrSplit(fileName, '/')) {
+        absl::StrAppend(&path, "/", part);
+        FileOps::ensureDir(path);
+    }
+}
+
 } // namespace
 
 // Sorbet's pipeline is architected such that one thread is typechecking one file at a time.
@@ -190,6 +207,7 @@ public:
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");
             }
             string fileName = objectFileName(gs, f);
+            ensureOutputDir(irOutputDir.value(), fileName);
             compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
         }
     };
@@ -220,11 +238,19 @@ public:
         optional<string> irOutputDir;
         bool forceCompiled = false;
         if (providedOptions.count("llvm-ir-folder") > 0) {
-            irOutputDir = providedOptions["llvm-ir-folder"].as<string>();
+            auto outputDir = providedOptions["llvm-ir-folder"].as<string>();
+
+            if (!FileOps::dirExists(outputDir)) {
+                fmt::print("Missing output directory {}\n", outputDir);
+                throw realmain::options::EarlyReturnWithCode(1);
+            }
+
+            irOutputDir = outputDir;
         }
         if (providedOptions.count("force-compiled") > 0) {
             forceCompiled = providedOptions["force-compiled"].as<bool>();
         }
+
         return make_unique<LLVMSemanticExtension>(irOutputDir, forceCompiled);
     };
     virtual std::unique_ptr<SemanticExtension> defaultInstance() const override {

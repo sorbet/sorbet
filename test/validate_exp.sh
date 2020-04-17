@@ -36,14 +36,19 @@ pushd "$target" > /dev/null
 for ext in "llo"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then
-    actual=(*".$ext")
-    if [ ! -f "${actual[0]}" ]; then
-      fatal "No LLVMIR found at" "${actual[@]}"
+    actual="$target/${rb[0]}.$ext"
+    if [ ! -f "$actual" ]; then
+      fatal "No LLVMIR found at" "$actual"
     fi
     if [[ "$OSTYPE" != "darwin"* ]]; then
       diff_out="${diff_dir}/${ext}.diff"
-      if $llvm_diff_path "$exp" "${actual[@]}" > "$diff_out"; then
-        success "* $(basename "$exp")"
+      if $llvm_diff_path "$exp" "$actual" > "$diff_out" 2>&1 ; then
+        if grep "exists only in" "$diff_out" > /dev/null ; then
+          cat "$diff_out"
+          fatal "* $(basename "$exp")"
+        else
+          success "* $(basename "$exp")"
+        fi
       else
         cat "$diff_out"
         fatal "* $(basename "$exp")"

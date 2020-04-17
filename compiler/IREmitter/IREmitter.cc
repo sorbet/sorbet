@@ -759,7 +759,15 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
         if (!isRoot) {
             return;
         }
+
+        // for a path like `foo/bar/baz.rb`, we want the baseName to be just `baz`, as ruby will be looking for an init
+        // function called `Init_baz`
         auto baseName = objectName.substr(0, objectName.rfind(".rb"));
+        auto slash = baseName.rfind('/');
+        if (slash != string_view::npos) {
+            baseName.remove_prefix(slash + 1);
+        }
+
         auto linkageType = llvm::Function::ExternalLinkage;
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);

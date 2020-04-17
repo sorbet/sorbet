@@ -299,7 +299,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %59, %54, %63
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_compiler_block_arg_expand() local_unnamed_addr #7 {
+define void @Init_block_arg_expand() local_unnamed_addr #7 {
 entry:
   %0 = alloca i64, align 8
   %callArgs.i = alloca <2 x i64>, align 16
@@ -412,7 +412,7 @@ sorbet_isa_Array.exit.i:                          ; preds = %typeTestSuccess.i
   br i1 %72, label %fastSymCallIntrinsic_Array_each.i, label %alternativeCallIntrinsic_Array_each.i, !prof !44
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_compiler_block_arg_expand.cold.1(i64 %56) #12
+  tail call fastcc void @Init_block_arg_expand.cold.1(i64 %56) #12
   unreachable
 
 alternativeCallIntrinsic_Array_each.i:            ; preds = %sorbet_isa_Array.exit.i, %typeTestSuccess.i
@@ -500,7 +500,7 @@ newFuncRoot:
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_compiler_block_arg_expand.cold.1(i64) unnamed_addr #9 {
+define internal fastcc void @Init_block_arg_expand.cold.1(i64) unnamed_addr #9 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #11
   unreachable

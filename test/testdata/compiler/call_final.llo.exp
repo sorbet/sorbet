@@ -203,7 +203,7 @@ declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #8
 declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_compiler_call_final() local_unnamed_addr #9 {
+define void @Init_call_final() local_unnamed_addr #9 {
 entry:
   %callArgs.i.i = alloca [2 x i64], align 8
   %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.14, i64 0, i64 0)) #15
@@ -384,11 +384,11 @@ sorbet_isa_class_of.exit.i1.i:                    ; preds = %99
   br i1 %104, label %codeRepl, label %"func_<root>.<static-init>$114.exit", !prof !41
 
 codeRepl:                                         ; preds = %99, %sorbet_isa_class_of.exit.i1.i
-  tail call fastcc void @Init_test_testdata_compiler_call_final.cold.1(i64 %97) #17
+  tail call fastcc void @Init_call_final.cold.1(i64 %97) #17
   unreachable
 
 codeRepl5:                                        ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_compiler_call_final.cold.2(i64 %37) #17
+  tail call fastcc void @Init_call_final.cold.2(i64 %37) #17
   unreachable
 
 "func_<root>.<static-init>$114.exit":             ; preds = %63, %sorbet_isa_class_of.exit.i1.i
@@ -710,14 +710,14 @@ declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #12
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #12
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_compiler_call_final.cold.1(i64) unnamed_addr #13 {
+define internal fastcc void @Init_call_final.cold.1(i64) unnamed_addr #13 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"str_T.class_of(A)", i64 0, i64 0)) #15
   unreachable
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_compiler_call_final.cold.2(i64) unnamed_addr #13 {
+define internal fastcc void @Init_call_final.cold.2(i64) unnamed_addr #13 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #15
   unreachable

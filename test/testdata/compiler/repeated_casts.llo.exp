@@ -234,7 +234,7 @@ codeRepl:                                         ; preds = %24
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_compiler_repeated_casts() local_unnamed_addr #9 {
+define void @Init_repeated_casts() local_unnamed_addr #9 {
 entry:
   %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.14, i64 0, i64 0)) #12
   %1 = and i64 %0, 7
@@ -325,7 +325,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   br i1 %49, label %"func_<root>.<static-init>$114.exit", label %codeRepl, !prof !25
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_compiler_repeated_casts.cold.1(i64 %29) #14
+  tail call fastcc void @Init_repeated_casts.cold.1(i64 %29) #14
   unreachable
 
 "func_<root>.<static-init>$114.exit":             ; preds = %sorbet_readRealpath.exit
@@ -442,7 +442,7 @@ newFuncRoot:
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_compiler_repeated_casts.cold.1(i64) unnamed_addr #11 {
+define internal fastcc void @Init_repeated_casts.cold.1(i64) unnamed_addr #11 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #12
   unreachable

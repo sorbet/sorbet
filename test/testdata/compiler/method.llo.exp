@@ -346,7 +346,7 @@ BB2.backedge:                                     ; preds = %57, %"fastSymCallIn
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_test_testdata_compiler_method() local_unnamed_addr #9 {
+define void @Init_method() local_unnamed_addr #9 {
 entry:
   %callArgs.i = alloca [2 x i64], align 8
   %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.14, i64 0, i64 0)) #14
@@ -437,7 +437,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   br i1 %51, label %"func_<root>.<static-init>$114.exit", label %codeRepl, !prof !7
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_test_testdata_compiler_method.cold.1(i64 %30) #15
+  tail call fastcc void @Init_method.cold.1(i64 %30) #15
   unreachable
 
 "func_<root>.<static-init>$114.exit":             ; preds = %sorbet_readRealpath.exit
@@ -467,7 +467,7 @@ newFuncRoot:
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
-define internal fastcc void @Init_test_testdata_compiler_method.cold.1(i64) unnamed_addr #12 {
+define internal fastcc void @Init_method.cold.1(i64) unnamed_addr #12 {
 newFuncRoot:
   tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"str_T.class_of(<root>)", i64 0, i64 0)) #14
   unreachable
