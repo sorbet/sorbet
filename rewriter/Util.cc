@@ -172,13 +172,15 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
     return send;
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod0(loc.offsets(), loc, name, move(rhs));
+unique_ptr<ast::Expression> ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                           unique_ptr<ast::Expression> rhs) {
+    return ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, move(rhs));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkSet(core::Loc loc, core::NameRef name, core::LocOffsets argLoc,
-                                           unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod1(loc.offsets(), loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
+unique_ptr<ast::Expression> ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                           core::LocOffsets argLoc, unique_ptr<ast::Expression> rhs) {
+    return ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), name, ast::MK::Local(argLoc, core::Names::arg0()),
+                                     move(rhs));
 }
 
 unique_ptr<ast::Expression> ASTUtil::mkNilable(core::LocOffsets loc, unique_ptr<ast::Expression> type) {

@@ -223,9 +223,9 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
-        nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, std::move(insSeq)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else {
-        nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -236,8 +236,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        nodes.emplace_back(
-            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Compute the `_` foreign accessor
@@ -291,7 +290,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        rhs.emplace_back(ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
@@ -322,7 +321,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
         if (mutator.get()) {
             rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
-            rhs.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
+            rhs.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();
