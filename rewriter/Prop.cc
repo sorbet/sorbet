@@ -381,7 +381,7 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, varName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::EmptyTree());
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
 
     vector<unique_ptr<ast::Expression>> result;
     result.emplace_back(ast::MK::SigVoid(klassLoc, ast::MK::Hash(klassLoc, std::move(sigKeys), std::move(sigVals))));

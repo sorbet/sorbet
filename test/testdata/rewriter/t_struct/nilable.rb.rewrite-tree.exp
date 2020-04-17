@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def initialize<<C <todo sym>>>(foo: = <emptyTree>, &<blk>)
       begin
         @foo = ::T.let(foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-        <emptyTree>
+        <self>.super(ZSuperArgs)
       end
     end
 

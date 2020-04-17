@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         @foo = ::T.let(foo, <emptyTree>::<C Integer>)
         @bar = ::T.let(bar, <emptyTree>::<C T>::<C Boolean>)
-        <emptyTree>
+        <self>.super(ZSuperArgs)
       end
     end
 
