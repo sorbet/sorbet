@@ -244,7 +244,8 @@ different phases of adopting Sorbet in a codebase.
     figure out which are the most impactful files and methods to add type
     coverage to, and tackle those parts of a codebase first. These files might
     be files that are edited frequently, or where correctness and reliability
-    are paramount.
+    are paramount. You can also [ask Sorbet what it thinks] are the most
+    impactful methods.
 
     At this point, it's great to start adding signatures, as individual type
     annotations will help propagate type information further throughout a
@@ -257,6 +258,8 @@ different phases of adopting Sorbet in a codebase.
     method definitions in that file. The [`rubocop-sorbet`] gem has a number of
     Rubocop rules for enforcing various Sorbet conventions.
 
+[ask sorbet what it thinks]:
+  https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md
 [`rubocop-sorbet`]: https://github.com/Shopify/rubocop-sorbet
 
 ## What next?
