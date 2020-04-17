@@ -253,7 +253,8 @@ important to drive up call-site-level typedness. This is a great time to
 figure out which are the most impactful files and methods to add type
 coverage to, and tackle those parts of a codebase first. These files might
 be files that are edited frequently, or where correctness and reliability
-are paramount.</p>
+are paramount. You can also <a href="https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md">ask Sorbet what it thinks</a> are the most
+impactful methods.</p>
 <p>At this point, it’s great to start adding signatures, as individual type
 annotations will help propagate type information further throughout a
 codebase. For example, find the core abstractions in a codebase (like the
