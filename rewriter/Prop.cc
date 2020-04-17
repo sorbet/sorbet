@@ -179,18 +179,16 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
 
-        if (ret.foreign == nullptr) {
-            auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
-            if (foreignTree != nullptr) {
-                ret.foreign = move(foreignTree);
-                if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
-                    ret.foreign = std::move(body);
-                } else {
-                    if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
-                        e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                        e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
-                                      core::Loc(ctx.file, ret.foreign->loc).source(ctx));
-                    }
+        auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
+        if (foreignTree != nullptr) {
+            ret.foreign = move(foreignTree);
+            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
+                ret.foreign = std::move(body);
+            } else {
+                if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                    e.setHeader("The argument to `{}` must be a lambda", "foreign:");
+                    e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
+                                  core::Loc(ctx.file, ret.foreign->loc).source(ctx));
                 }
             }
         }
