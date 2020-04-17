@@ -201,7 +201,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret) {
+vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret, bool forTStruct) {
     vector<unique_ptr<ast::Expression>> nodes;
 
     const auto loc = ret.loc;
@@ -381,10 +381,10 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }
-    auto synthesizeInitialize = false;
+    auto forTStruct = false;
     for (auto &a : klass->ancestors) {
         if (isTStruct(a.get())) {
-            synthesizeInitialize = true;
+            forTStruct = true;
             break;
         }
     }
@@ -399,7 +399,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (!propInfo.has_value()) {
             continue;
         }
-        auto nodes = processProp(ctx, propInfo.value());
+        auto nodes = processProp(ctx, propInfo.value(), forTStruct);
         ENFORCE(!nodes.empty(), "if parseProp completed successfully, processProp must complete too");
         replaceNodes[stat.get()] = std::move(nodes);
         props.emplace_back(std::move(propInfo.value()));
@@ -407,7 +407,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     auto oldRHS = std::move(klass->rhs);
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
-    if (synthesizeInitialize) {
+    if (forTStruct) {
         // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
         for (auto &stat : mkTStructInitialize(ctx, klass->loc, props)) {
             klass->rhs.emplace_back(std::move(stat));
