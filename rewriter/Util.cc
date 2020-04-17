@@ -139,12 +139,6 @@ ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash, core::NameR
     return make_pair(nullptr, nullptr);
 }
 
-void ASTUtil::putBackHashValue(core::MutableContext ctx, ast::Hash &hash, unique_ptr<ast::Expression> key,
-                               unique_ptr<ast::Expression> value) {
-    hash.keys.emplace_back(move(key));
-    hash.values.emplace_back(move(value));
-}
-
 // This will return nullptr if the argument is not the right shape as a sig (i.e. a send to a method called `sig` with 0
 // or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
 // against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
