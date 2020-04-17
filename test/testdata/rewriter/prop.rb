@@ -45,7 +45,7 @@ class AdvancedODM
     prop :const_explicit, String, immutable: true
     const :const, String
 
-    prop :enum_prop, enum: ["hello", "goodbye"]
+    prop :enum_prop, String, enum: ["hello", "goodbye"]
 
     prop :foreign, String, foreign: ForeignClass # error: must be a lambda
     prop :foreign_lazy, String, foreign: -> {ForeignClass}
@@ -92,8 +92,8 @@ def main
     T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
     AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
 
-    T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `T.untyped`
-    AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
+    T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
+    AdvancedODM.new.enum_prop = "hello"
 
     T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
     T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`

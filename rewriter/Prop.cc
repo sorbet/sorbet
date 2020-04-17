@@ -58,6 +58,8 @@ struct NodesAndPropInfo {
 optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     PropInfo ret;
     ret.loc = send->loc;
+
+    // ----- Is this a send we care about? -----
     switch (send->fun._id) {
         case core::Names::prop()._id:
             // Nothing special
@@ -98,6 +100,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         return nullopt;
     }
 
+    // ----- What's the prop's name? -----
     if (!ret.name.exists()) {
         if (send->args.empty()) {
             return nullopt;
@@ -112,16 +115,23 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 
+    // ----- What's the prop's type? -----
     if (ret.type == nullptr) {
         if (send->args.size() == 1) {
             // Type must have been inferred from prop method (like created_prop) or
-            // been given in second argument (either directly, or indirectly via rules)
+            // been given in second argument.
             return nullopt;
         } else {
             ret.type = ASTUtil::dupType(send->args[1].get());
+            if (ret.type == nullptr) {
+                return nullopt;
+            }
         }
     }
 
+    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
+
+    // ----- Does the prop have any extra options? -----
     unique_ptr<ast::Hash> rules;
     if (!send->args.empty()) {
         if (auto back = ast::cast_tree<ast::Hash>(send->args.back().get())) {
@@ -130,32 +140,12 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             rules.reset(ast::cast_tree<ast::Hash>(back->deepCopy().release()));
         }
     }
-
-    if (rules == nullptr) {
-        if (ret.type == nullptr) {
-            // No type, and rules isn't a hash: This isn't a T::Props prop
-            return std::nullopt;
-        }
-        if (send->args.size() == 3) {
-            // No rules, but 3 args including name and type. Also not a T::Props
-            return std::nullopt;
-        }
+    if (rules == nullptr && send->args.size() >= 3) {
+        // No rules, but 3 args including name and type. Also not a T::Props
+        return std::nullopt;
     }
 
-    if (ret.type == nullptr) {
-        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::enum_())) {
-            // Handle enum: by setting the type to untyped, so that we'll parse
-            // the declaration. Don't allow assigning it from typed code by deleting setter
-            ret.type = ast::MK::Send0(ret.loc, ast::MK::T(ret.loc), core::Names::untyped());
-            ret.isImmutable = true;
-        }
-    }
-
-    if (ret.type == nullptr) {
-        return nullopt;
-    }
-
-    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
+    // ----- Parse any extra options -----
 
     if (isTNilable(ret.type.get())) {
         ret.default_ = ast::MK::Nil(ret.loc);

@@ -51,5 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.prop(:"no_class_arg", {:"type" => <emptyTree>::<C Array>, :"immutable" => true, :"array" => <emptyTree>::<C String>})
 
     <self>.prop(:"proc_type", {:"type" => <emptyTree>::<C T>.proc().params({:"x" => <emptyTree>::<C Integer>}).void()})
+
+    <self>.prop(:"enum_prop", {:"enum" => ["hello", "goodbye"]})
   end
 end

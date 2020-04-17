@@ -37,7 +37,10 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
     method <C <U AdvancedODM>><U default=> (default, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=38:5 end=38:39}
       argument default<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=38:11 end=38:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U enum_prop> (<blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=48:5 end=48:48}
+    method <C <U AdvancedODM>><U enum_prop> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=48:5 end=48:56}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U AdvancedODM>><U enum_prop=> (enum_prop, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=48:5 end=48:56}
+      argument enum_prop<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=48:11 end=48:20}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=50:5 end=50:49}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
