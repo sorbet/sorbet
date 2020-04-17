@@ -214,6 +214,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     const auto computedByMethodName = ret.computedByMethodName;
     const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
 
+    auto varName = name.addAt(ctx);
+
     nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
     if (computedByMethodName.exists()) {
@@ -228,6 +230,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
                                                      ASTUtil::dupType(getType.get()));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
+    } else if (ret.ifunset == nullptr && forTStruct) {
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, varName)));
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     }
@@ -346,6 +350,7 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
     args.reserve(props.size());
     sigKeys.reserve(props.size());
     sigVals.reserve(props.size());
+
     // add all the required props first.
     for (const auto &prop : props) {
         if (prop.default_ != nullptr) {
@@ -356,6 +361,7 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
         sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigVals.emplace_back(prop.type->deepCopy());
     }
+
     // then, add all the optional props.
     for (const auto &prop : props) {
         if (prop.default_ == nullptr) {
@@ -368,10 +374,19 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
         sigVals.emplace_back(prop.type->deepCopy());
     }
 
+    // then initialize all the instance variables in the body
+    ast::InsSeq::STATS_store stats;
+    for (const auto &prop : props) {
+        auto varName = prop.name.addAt(ctx);
+        stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, varName),
+                                           ast::MK::Local(prop.nameLoc, prop.name)));
+    }
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::EmptyTree());
+
     vector<unique_ptr<ast::Expression>> result;
     result.emplace_back(ast::MK::SigVoid(klassLoc, ast::MK::Hash(klassLoc, std::move(sigKeys), std::move(sigVals))));
     result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
-                                                 std::move(args), ast::MK::EmptyTree()));
+                                                 std::move(args), std::move(body)));
     return result;
 }
 
