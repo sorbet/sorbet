@@ -333,7 +333,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 }
 
 vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                                        vector<PropInfo> &props) {
+                                                        const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Hash::ENTRY_store sigKeys;
     ast::Hash::ENTRY_store sigVals;
@@ -341,25 +341,25 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
     sigKeys.reserve(props.size());
     sigVals.reserve(props.size());
     // add all the required props first.
-    for (auto &prop : props) {
+    for (const auto &prop : props) {
         if (prop.default_ != nullptr) {
             continue;
         }
         auto loc = prop.loc;
         args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
         sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-        sigVals.emplace_back(std::move(prop.type));
+        sigVals.emplace_back(prop.type->deepCopy());
     }
     // then, add all the optional props.
-    for (auto &prop : props) {
+    for (const auto &prop : props) {
         if (prop.default_ == nullptr) {
             continue;
         }
         auto loc = prop.loc;
         args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                               std::move(prop.default_)));
+                                               prop.default_->deepCopy()));
         sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-        sigVals.emplace_back(std::move(prop.type));
+        sigVals.emplace_back(prop.type->deepCopy());
     }
 
     vector<unique_ptr<ast::Expression>> result;
