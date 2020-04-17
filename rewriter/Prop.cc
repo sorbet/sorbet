@@ -48,6 +48,7 @@ struct PropInfo {
     core::NameRef computedByMethodName = core::NameRef::noName();
     core::LocOffsets computedByMethodNameLoc;
     unique_ptr<ast::Expression> foreign;
+    unique_ptr<ast::Expression> ifunset;
 };
 
 struct NodesAndPropInfo {
@@ -185,6 +186,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                                   core::Loc(ctx.file, ret.foreign->loc).source(ctx));
                 }
             }
+        }
+
+        auto [ifunsetKey, ifunset] = ASTUtil::extractHashValue(ctx, *rules, core::Names::ifunset());
+        if (ifunset != nullptr) {
+            ret.ifunset = std::move(ifunset);
         }
     }
 
