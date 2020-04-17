@@ -331,6 +331,44 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
     return nodes;
 }
+
+vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                                        vector<PropInfo> &props) {
+    ast::MethodDef::ARGS_store args;
+    ast::Hash::ENTRY_store sigKeys;
+    ast::Hash::ENTRY_store sigVals;
+    args.reserve(props.size());
+    sigKeys.reserve(props.size());
+    sigVals.reserve(props.size());
+    // add all the required props first.
+    for (auto &prop : props) {
+        if (prop.default_ != nullptr) {
+            continue;
+        }
+        auto loc = prop.loc;
+        args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
+        sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+        sigVals.emplace_back(std::move(prop.type));
+    }
+    // then, add all the optional props.
+    for (auto &prop : props) {
+        if (prop.default_ == nullptr) {
+            continue;
+        }
+        auto loc = prop.loc;
+        args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
+                                               std::move(prop.default_)));
+        sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+        sigVals.emplace_back(std::move(prop.type));
+    }
+
+    vector<unique_ptr<ast::Expression>> result;
+    result.emplace_back(ast::MK::SigVoid(klassLoc, ast::MK::Hash(klassLoc, std::move(sigKeys), std::move(sigVals))));
+    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
+                                                 std::move(args), ast::MK::EmptyTree()));
+    return result;
+}
+
 } // namespace
 
 void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -365,37 +403,9 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.reserve(oldRHS.size());
     if (synthesizeInitialize) {
         // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-        ast::MethodDef::ARGS_store args;
-        ast::Hash::ENTRY_store sigKeys;
-        ast::Hash::ENTRY_store sigVals;
-        args.reserve(props.size());
-        sigKeys.reserve(props.size());
-        sigVals.reserve(props.size());
-        // add all the required props first.
-        for (auto &prop : props) {
-            if (prop.default_ != nullptr) {
-                continue;
-            }
-            auto loc = prop.loc;
-            args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
-            sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-            sigVals.emplace_back(std::move(prop.type));
+        for (auto &stat : mkTStructInitialize(ctx, klass->loc, props)) {
+            klass->rhs.emplace_back(std::move(stat));
         }
-        // then, add all the optional props.
-        for (auto &prop : props) {
-            if (prop.default_ == nullptr) {
-                continue;
-            }
-            auto loc = prop.loc;
-            args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                                   std::move(prop.default_)));
-            sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-            sigVals.emplace_back(std::move(prop.type));
-        }
-        auto loc = klass->loc;
-        klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
-        klass->rhs.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
-                                                         std::move(args), ast::MK::EmptyTree()));
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
