@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class Inexact < T::InexactStruct
   prop :foo, Integer

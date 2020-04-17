@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 # We run checks to ensure that all optional arguments to a method appear after all required arguments. This means that
 # when we synthesize the initalize method for this struct, the optional foo parameter must be synthesized to come after
