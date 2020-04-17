@@ -12,7 +12,7 @@ Typing `::A#bar` would impact 100.0% callsites(2 out of 2).
 There are some fairly involved setup steps to get this working.
 
 Something less involved is asking Sorbet to directly edit a project's source
-code with sigs that might work. This involves involves less custom setup.
+code with sigs that might work. This involves less custom setup.
 
 > Most impactful has a narrow definition: the most impactful method to add a sig
 > to is the method which would increase the [call-site-level typedness][metrics]
