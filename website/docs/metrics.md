@@ -258,7 +258,8 @@ different phases of adopting Sorbet in a codebase.
     method definitions in that file. The [`rubocop-sorbet`] gem has a number of
     Rubocop rules for enforcing various Sorbet conventions.
 
-[ask Sorbet what it thinks]: https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md
+[ask sorbet what it thinks]:
+  https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md
 [`rubocop-sorbet`]: https://github.com/Shopify/rubocop-sorbet
 
 ## What next?
