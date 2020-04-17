@@ -44,7 +44,7 @@ struct PropInfo {
     core::NameRef name = core::NameRef::noName();
     core::LocOffsets nameLoc;
     unique_ptr<ast::Expression> type;
-    optional<unique_ptr<ast::Expression>> default_;
+    unique_ptr<ast::Expression> default_;
     core::NameRef computedByMethodName = core::NameRef::noName();
     core::LocOffsets computedByMethodNameLoc;
     unique_ptr<ast::Expression> foreign;
@@ -147,22 +147,16 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- Parse any extra options -----
 
-    if (isTNilable(ret.type.get())) {
-        ret.default_ = ast::MK::Nil(ret.loc);
-    } else if (rules == nullptr) {
-        ret.default_ = std::nullopt;
-    } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-        ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
-    } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
-        auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
-        ret.default_ = std::move(val);
-    } else {
-        ret.default_ = std::nullopt;
-    }
-
     if (rules) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
+        }
+
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
+            ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
+        } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
+            auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
+            ret.default_ = std::move(val);
         }
 
         // e.g. `const :foo, type, computed_by: :method_name`
@@ -192,6 +186,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 }
             }
         }
+    }
+
+    if (ret.default_ == nullptr && isTNilable(ret.type.get())) {
+        ret.default_ = ast::MK::Nil(ret.loc);
     }
 
     return ret;
@@ -375,7 +373,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         sigVals.reserve(props.size());
         // add all the required props first.
         for (auto &prop : props) {
-            if (prop.default_.has_value()) {
+            if (prop.default_ != nullptr) {
                 continue;
             }
             auto loc = prop.loc;
@@ -385,12 +383,12 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
         // then, add all the optional props.
         for (auto &prop : props) {
-            if (!prop.default_.has_value()) {
+            if (prop.default_ == nullptr) {
                 continue;
             }
             auto loc = prop.loc;
             args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                                   std::move(*(prop.default_))));
+                                                   std::move(prop.default_)));
             sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
             sigVals.emplace_back(std::move(prop.type));
         }
