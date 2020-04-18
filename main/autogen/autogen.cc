@@ -218,8 +218,9 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if ((inBlock.empty() || !inBlock.back()) && (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
-            original->fun == core::Names::extend())) {
+        if ((inBlock.empty() || !inBlock.back()) &&
+            (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
+             original->fun == core::Names::extend())) {
             ignoring.emplace_back(original.get());
         }
         inBlock.emplace_back(original->block != nullptr);
