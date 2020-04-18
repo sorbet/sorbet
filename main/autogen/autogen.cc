@@ -217,7 +217,8 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde()) {
+        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
+            original->fun == core::Names::extend()) {
             ignoring.emplace_back(original.get());
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {

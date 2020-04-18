@@ -13,8 +13,8 @@ requires: []
  defining_ref=[A]
 [def id=2]
  type=class
- defines_behavior=1
- is_empty=0
+ defines_behavior=0
+ is_empty=1
  defining_ref=[Foo]
 ## refs:
 [ref id=0]
@@ -31,13 +31,6 @@ requires: []
  resolved=[A Foo]
  loc=test/cli/print_to_file/a.rb:4
  is_defining_ref=1
-[ref id=2]
- scope=[A Foo]
- name=[X]
- nesting=[[A Foo] [A]]
- resolved=[]
- loc=test/cli/print_to_file/a.rb:6
- is_defining_ref=0
 # ParsedFile: test/cli/print_to_file/b.rb
 requires: []
 ## defs:
@@ -72,6 +65,6 @@ requires: []
  is_defining_ref=1
 --- autogen.txt end ---
 
-1da3719d4a0198a1aeb120373cbfed8e27359f6b  autogen.msgpack
+9022334ba198d9ea50ee7e05b1c299618f96fbec  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options
