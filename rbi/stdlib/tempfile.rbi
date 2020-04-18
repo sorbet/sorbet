@@ -121,15 +121,14 @@ class Tempfile < File
   # end
   # ```
   sig do
-    type_parameters(:U)
-    .params(
+    params(
       basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: Integer,
       options: T.untyped,
-      blk: T.nilable(T.proc.params(arg0: File).returns(T.type_parameter(:U))),
+      blk: T.nilable(T.proc.params(arg0: File).returns(T.untyped)),
     )
-    .returns(T.any(File, T.type_parameter(:U)))
+    .returns(T.untyped)
   end
   def self.create(basename="", tmpdir=nil, mode: 0, **options, &blk); end
 
@@ -163,15 +162,14 @@ class Tempfile < File
   # end
   # ```
   sig do
-    type_parameters(:U)
-    .params(
+    params(
       basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
       mode: Integer,
       options: T.untyped,
-      blk: T.nilable(T.proc.params(arg0: Tempfile).returns(T.type_parameter(:U))),
+      blk: T.nilable(T.proc.params(arg0: Tempfile).returns(T.untyped)),
     )
-    .returns(T.any(Tempfile, T.type_parameter(:U)))
+    .returns(T.untyped)
   end
   def self.open(basename='', tmpdir=nil, mode: 0, **options, &blk); end
 

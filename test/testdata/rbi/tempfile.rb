@@ -36,3 +36,10 @@ Tempfile.open('hello', '/tmp') do; end
 Tempfile.open('hello', '/tmp', encoding: 'ascii-8bit') do; end
 Tempfile.open('hello', '/tmp', mode: 0) do; end
 Tempfile.open('hello', '/tmp', mode: 0, encoding: 'ascii-8bit') do; end
+
+# can return any value from block
+i = Tempfile.create('hello') { 1 }
+i + 1
+
+i = Tempfile.open('hello') { 1 }
+i + 1
