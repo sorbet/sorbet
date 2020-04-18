@@ -13,9 +13,14 @@ requires: []
  defining_ref=[A]
 [def id=2]
  type=class
- defines_behavior=0
+ defines_behavior=1
  is_empty=1
  defining_ref=[Foo]
+[def id=3]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[Bar]
 ## refs:
 [ref id=0]
  scope=[]
@@ -31,6 +36,28 @@ requires: []
  resolved=[A Foo]
  loc=test/cli/print_to_file/a.rb:4
  is_defining_ref=1
+[ref id=2]
+ scope=[]
+ name=[X]
+ nesting=[]
+ resolved=[]
+ loc=test/cli/print_to_file/a.rb:5
+ is_defining_ref=0
+ parent_of=[A Foo]
+[ref id=3]
+ scope=[A]
+ name=[Bar]
+ nesting=[[A]]
+ resolved=[A Bar]
+ loc=test/cli/print_to_file/a.rb:8
+ is_defining_ref=1
+[ref id=4]
+ scope=[]
+ name=[Y]
+ nesting=[]
+ resolved=[]
+ loc=test/cli/print_to_file/a.rb:10
+ is_defining_ref=0
 # ParsedFile: test/cli/print_to_file/b.rb
 requires: []
 ## defs:
@@ -65,6 +92,6 @@ requires: []
  is_defining_ref=1
 --- autogen.txt end ---
 
-9022334ba198d9ea50ee7e05b1c299618f96fbec  autogen.msgpack
+9bf394ce4c0ccdd27fff0dc9a344a0d05db925af  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options

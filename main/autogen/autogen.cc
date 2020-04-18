@@ -31,6 +31,7 @@ class AutogenWalk {
     vector<core::NameRef> requires;
     vector<DefinitionRef> nesting;
     vector<ast::Send *> ignoring;
+    vector<bool> inBlock;
 
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
 
@@ -217,10 +218,11 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
-            original->fun == core::Names::extend()) {
+        if ((inBlock.empty() || !inBlock.back()) && (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
+            original->fun == core::Names::extend())) {
             ignoring.emplace_back(original.get());
         }
+        inBlock.emplace_back(original->block != nullptr);
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
             if (lit && lit->isString(ctx)) {
@@ -230,7 +232,8 @@ public:
         return original;
     }
     unique_ptr<ast::Send> postTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (!ignoring.empty() && ignoring.back() == original.get()) {
+        inBlock.pop_back();
+        if ((inBlock.empty() || !inBlock.back()) && !ignoring.empty() && ignoring.back() == original.get()) {
             ignoring.pop_back();
         }
         return original;
