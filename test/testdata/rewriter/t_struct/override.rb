@@ -5,7 +5,7 @@ class Override < T::Struct
 
   # The second initialize makes Sorbet think that `foo` will be `Integer`
   # (because we'll mangle rename the old method symbol),
-  # which means that we get a bad error message here unfortunatelystrict
+  # which means that we get a bad error message here unfortunately.
   prop :foo, String # error: Argument does not have asserted type `String`
 
   sig {params(foo: Integer).void}
