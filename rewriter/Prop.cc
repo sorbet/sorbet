@@ -44,7 +44,7 @@ struct PropInfo {
     core::NameRef name = core::NameRef::noName();
     core::LocOffsets nameLoc;
     unique_ptr<ast::Expression> type;
-    optional<unique_ptr<ast::Expression>> default_;
+    unique_ptr<ast::Expression> default_;
     core::NameRef computedByMethodName = core::NameRef::noName();
     core::LocOffsets computedByMethodNameLoc;
     unique_ptr<ast::Expression> foreign;
@@ -147,22 +147,16 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- Parse any extra options -----
 
-    if (isTNilable(ret.type.get())) {
-        ret.default_ = ast::MK::Nil(ret.loc);
-    } else if (rules == nullptr) {
-        ret.default_ = std::nullopt;
-    } else if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-        ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
-    } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
-        auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
-        ret.default_ = std::move(val);
-    } else {
-        ret.default_ = std::nullopt;
-    }
-
     if (rules) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
+        }
+
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
+            ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
+        } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
+            auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
+            ret.default_ = std::move(val);
         }
 
         // e.g. `const :foo, type, computed_by: :method_name`
@@ -179,21 +173,23 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
 
-        if (ret.foreign == nullptr) {
-            auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
-            if (foreignTree != nullptr) {
-                ret.foreign = move(foreignTree);
-                if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
-                    ret.foreign = std::move(body);
-                } else {
-                    if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
-                        e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                        e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
-                                      core::Loc(ctx.file, ret.foreign->loc).source(ctx));
-                    }
+        auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
+        if (foreignTree != nullptr) {
+            ret.foreign = move(foreignTree);
+            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
+                ret.foreign = std::move(body);
+            } else {
+                if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                    e.setHeader("The argument to `{}` must be a lambda", "foreign:");
+                    e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
+                                  core::Loc(ctx.file, ret.foreign->loc).source(ctx));
                 }
             }
         }
+    }
+
+    if (ret.default_ == nullptr && isTNilable(ret.type.get())) {
+        ret.default_ = ast::MK::Nil(ret.loc);
     }
 
     return ret;
@@ -225,9 +221,9 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
-        nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, std::move(insSeq)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else {
-        nodes.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -238,8 +234,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        nodes.emplace_back(
-            ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Compute the `_` foreign accessor
@@ -293,7 +288,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         rhs.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        rhs.emplace_back(ASTUtil::mkSet(core::Loc(ctx.file, loc), setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         // Maybe make a getter
         unique_ptr<ast::Expression> mutator;
@@ -324,7 +319,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
         if (mutator.get()) {
             rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
-            rhs.emplace_back(ASTUtil::mkGet(core::Loc(ctx.file, loc), name, ast::MK::RaiseUnimplemented(loc)));
+            rhs.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = core::Names::Constants::Mutator();
@@ -336,6 +331,44 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
     return nodes;
 }
+
+vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                                        const vector<PropInfo> &props) {
+    ast::MethodDef::ARGS_store args;
+    ast::Hash::ENTRY_store sigKeys;
+    ast::Hash::ENTRY_store sigVals;
+    args.reserve(props.size());
+    sigKeys.reserve(props.size());
+    sigVals.reserve(props.size());
+    // add all the required props first.
+    for (const auto &prop : props) {
+        if (prop.default_ != nullptr) {
+            continue;
+        }
+        auto loc = prop.loc;
+        args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
+        sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+        sigVals.emplace_back(prop.type->deepCopy());
+    }
+    // then, add all the optional props.
+    for (const auto &prop : props) {
+        if (prop.default_ == nullptr) {
+            continue;
+        }
+        auto loc = prop.loc;
+        args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
+                                               prop.default_->deepCopy()));
+        sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+        sigVals.emplace_back(prop.type->deepCopy());
+    }
+
+    vector<unique_ptr<ast::Expression>> result;
+    result.emplace_back(ast::MK::SigVoid(klassLoc, ast::MK::Hash(klassLoc, std::move(sigKeys), std::move(sigVals))));
+    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
+                                                 std::move(args), ast::MK::EmptyTree()));
+    return result;
+}
+
 } // namespace
 
 void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -370,37 +403,9 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.reserve(oldRHS.size());
     if (synthesizeInitialize) {
         // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-        ast::MethodDef::ARGS_store args;
-        ast::Hash::ENTRY_store sigKeys;
-        ast::Hash::ENTRY_store sigVals;
-        args.reserve(props.size());
-        sigKeys.reserve(props.size());
-        sigVals.reserve(props.size());
-        // add all the required props first.
-        for (auto &prop : props) {
-            if (prop.default_.has_value()) {
-                continue;
-            }
-            auto loc = prop.loc;
-            args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
-            sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-            sigVals.emplace_back(std::move(prop.type));
+        for (auto &stat : mkTStructInitialize(ctx, klass->loc, props)) {
+            klass->rhs.emplace_back(std::move(stat));
         }
-        // then, add all the optional props.
-        for (auto &prop : props) {
-            if (!prop.default_.has_value()) {
-                continue;
-            }
-            auto loc = prop.loc;
-            args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                                   std::move(*(prop.default_))));
-            sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-            sigVals.emplace_back(std::move(prop.type));
-        }
-        auto loc = klass->loc;
-        klass->rhs.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
-        klass->rhs.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
-                                                         std::move(args), ast::MK::EmptyTree()));
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
