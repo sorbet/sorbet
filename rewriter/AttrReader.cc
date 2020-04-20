@@ -17,7 +17,7 @@ namespace {
 
 pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Expression *name) {
     core::LocOffsets loc;
-    core::NameRef res = core::NameRef::noName();
+    core::NameRef res;
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol(ctx)) {
             res = lit->asSymbol(ctx);

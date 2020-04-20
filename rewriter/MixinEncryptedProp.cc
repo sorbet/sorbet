@@ -31,8 +31,8 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
     }
 
     bool isImmutable = false; // Are there no setters?
-    core::NameRef name = core::NameRef::noName();
-    core::NameRef enc_name = core::NameRef::noName();
+    core::NameRef name;
+    core::NameRef enc_name;
 
     if (send->fun._id != core::Names::encryptedProp()._id) {
         return empty;

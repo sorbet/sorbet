@@ -30,7 +30,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
     bool skipGetter = false;
     bool skipSetter = false;
     unique_ptr<ast::Expression> type;
-    core::NameRef name = core::NameRef::noName();
+    core::NameRef name;
 
     if (send->fun == core::Names::dslOptional()) {
         nilable = true;
