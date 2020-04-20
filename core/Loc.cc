@@ -209,6 +209,14 @@ string Loc::filePosToString(const GlobalState &gs) const {
         buf << "???";
     } else {
         auto path = gs.getPrintablePath(file().data(gs).path());
+        auto externalPrefix = "external/com_stripe_ruby_typer/"sv;
+        if (gs.censorForSnapshotTests) {
+            if (absl::StartsWith(path, externalPrefix)) {
+                // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
+                path.remove_prefix(externalPrefix.size());
+            }
+        }
+
         buf << path;
         if (exists()) {
             auto pos = position(gs);
