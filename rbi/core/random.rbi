@@ -123,6 +123,7 @@ class Random < Object
   # Both the beginning and ending values of the range must respond to subtract
   # (`-`) and add (`+`)methods, or rand will raise an
   # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  sig {returns(Float)}
   sig do
     params(
         max: T.any(Integer, T::Range[Integer]),
@@ -163,11 +164,18 @@ class Random < Object
   def self.new_seed(); end
 
   # Alias of Random::DEFAULT.rand.
+  sig {returns(Float)}
   sig do
     params(
-        max: Integer,
+        max: T.any(Integer, T::Range[Integer]),
     )
-    .returns(Numeric)
+    .returns(Integer)
+  end
+  sig do
+    params(
+        max: T.any(Float, T::Range[Float]),
+    )
+    .returns(Float)
   end
   def self.rand(max=T.unsafe(nil)); end
 
