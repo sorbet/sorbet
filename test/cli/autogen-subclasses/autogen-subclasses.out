@@ -1,4 +1,6 @@
 --- autogen-subclasses ---
+module MyMixin
+ class MyClass
 module Opus::Mixin
  class Opus::Mixed
  class Opus::MixedDescendant
