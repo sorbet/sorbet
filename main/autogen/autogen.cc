@@ -32,6 +32,21 @@ class AutogenWalk {
     vector<DefinitionRef> nesting;
     vector<ast::Send *> ignoring;
 
+
+    // Is this the direct child of a send to method `include`? (i.e. `include X::Y`)
+    // Used for determining for setting `parent_of` on constant literals that are included.
+    bool inInclude;
+    // Keep track of if the most recent scope was a class def or block. In conjunction with
+    // `inInclude` this allows us to tell when the ref should be added as a parent.
+    // class Foo
+    //   include X # <- X is a parent_of Foo
+    //   some_method do
+    //      include Y # <- Scope can't be determined here, treat Y as a reference only
+    //   end
+    // end
+    enum class ScopeType { Class, Block };
+    vector<ScopeType> scopeTypes;
+
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
 
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
@@ -65,9 +80,11 @@ public:
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
+        inInclude = false;
         if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
             return original;
         }
+        scopeTypes.emplace_back(ScopeType::Class);
 
         // cerr << "preTransformClassDef(" << original->toString(ctx) << ")\n";
 
@@ -96,16 +113,10 @@ public:
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;
+            // TODO handle parent_ref here
         }
         // Then push a scope
         nesting.emplace_back(def.id);
-
-        for (; ait != original->ancestors.end(); ++ait) {
-            *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
-        }
-        for (auto &ancst : original->singletonAncestors) {
-            ancst = ast::TreeMap::apply(ctx, *this, move(ancst));
-        }
 
         for (auto &ancst : original->ancestors) {
             auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
@@ -134,8 +145,20 @@ public:
         }
 
         nesting.pop_back();
+        scopeTypes.pop_back();
 
         return original;
+    }
+
+    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        inInclude = false;
+        scopeTypes.emplace_back(ScopeType::Block);
+        return block;
+    }
+
+    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        scopeTypes.pop_back();
+        return block;
     }
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
@@ -184,6 +207,9 @@ public:
         if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
             ref.parentKind = ClassKind::Class;
         }
+        if (inInclude && !defs.empty() && !scopeTypes.empty() && scopeTypes.back() == ScopeType::Class) {
+            ref.parent_of = nesting.back().id();
+        }
         refMap[original.get()] = ref.id;
         return original;
     }
@@ -217,10 +243,11 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
-            original->fun == core::Names::extend()) {
+        if (original->fun == core::Names::keepForIde()) {
             ignoring.emplace_back(original.get());
         }
+        inInclude = original->fun == core::Names::include();
+
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
             if (lit && lit->isString(ctx)) {
@@ -233,10 +260,12 @@ public:
         if (!ignoring.empty() && ignoring.back() == original.get()) {
             ignoring.pop_back();
         }
+        inInclude = false;
         return original;
     }
 
     ParsedFile parsedFile() {
+        ENFORCE(scopeTypes.empty());
         ParsedFile out;
         out.refs = move(refs);
         out.defs = move(defs);

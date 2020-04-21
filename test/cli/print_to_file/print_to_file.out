@@ -130,21 +130,35 @@ requires: []
  is_defining_ref=0
  parent_of=[C BarChild]
 [ref id=5]
+ scope=[]
+ name=[InMethodX]
+ nesting=[]
+ resolved=[]
+ loc=test/cli/print_to_file/c.rb:9
+ is_defining_ref=0
+[ref id=6]
  scope=[C]
  name=[TestExtend]
  nesting=[[C]]
  resolved=[C TestExtend]
  loc=test/cli/print_to_file/c.rb:13
  is_defining_ref=1
-[ref id=6]
+[ref id=7]
  scope=[]
  name=[Y]
  nesting=[]
  resolved=[]
  loc=test/cli/print_to_file/c.rb:14
  is_defining_ref=0
+[ref id=8]
+ scope=[]
+ name=[InMethodY]
+ nesting=[]
+ resolved=[]
+ loc=test/cli/print_to_file/c.rb:16
+ is_defining_ref=0
 --- autogen.txt end ---
 
-48d6cb30b600d7df4f6b42e5dd94b3d88f700622  autogen.msgpack
+cb36ff485c43f684e9f50f228b3c16db50121829  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options
