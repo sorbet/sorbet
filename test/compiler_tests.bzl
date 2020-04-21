@@ -124,6 +124,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             data = [
                 "//run:runtimeoverrides",
                 "@sorbet_ruby//:ruby",
+                "@com_stripe_ruby_typer//gems/sorbet-runtime",
                 build_archive,
                 expected_outfile,
                 expected_errfile,

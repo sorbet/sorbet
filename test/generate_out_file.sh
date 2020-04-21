@@ -46,7 +46,8 @@ rbrunfile=$(mktemp)
 ruby="$(rlocation sorbet_ruby/ruby)"
 
 # Determine the location of run/tools
-run_tools=$(dirname "$(rlocation com_stripe_sorbet_llvm/run/tools/preamble.rb)")
+run_tools=$(dirname "$(rlocation com_stripe_sorbet_llvm/run/tools/patch_require.rb)")
+sorbet_runtime=$(dirname "$(rlocation com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb)")
 
 # Main #########################################################################
 
@@ -77,7 +78,8 @@ set +e
 llvmir="$llvmir" "$ruby" \
   --disable=gems \
   --disable=did_you_mean \
-  -I "$run_tools" -rpreamble.rb -rpatch_require.rb \
+  -I "$sorbet_runtime" -rsorbet-runtime.rb \
+  -I "$run_tools" -rpatch_require.rb \
   "$rbrunfile" > "$rbout" 2> "$rberr"
 echo "$?" > "$rbexit"
 set -e
