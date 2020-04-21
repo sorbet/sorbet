@@ -15,6 +15,8 @@ module C
     some_method do
       extend ::InMethodY
     end
+
+    app.include ::ViaMethod
   end
 end
 

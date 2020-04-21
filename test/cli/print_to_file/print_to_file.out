@@ -157,6 +157,13 @@ requires: []
  resolved=[]
  loc=test/cli/print_to_file/c.rb:16
  is_defining_ref=0
+[ref id=9]
+ scope=[]
+ name=[ViaMethod]
+ nesting=[]
+ resolved=[]
+ loc=test/cli/print_to_file/c.rb:19
+ is_defining_ref=0
 # ParsedFile: test/cli/print_to_file/d.rb
 requires: []
 ## defs:
@@ -219,6 +226,6 @@ requires: []
  is_defining_ref=0
 --- autogen.txt end ---
 
-79cc8659d260cbcbffb83cb05ab7da0ba328b573  autogen.msgpack
+304d23737beec8076d49ec970a5d6b85c940b9c6  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options

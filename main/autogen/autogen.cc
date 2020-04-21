@@ -237,7 +237,8 @@ public:
         // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
         // block scope so that we a ref to the included module is still rendered.
         if (original->fun == core::Names::keepForIde() ||
-            (!inBlock && (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
+            (!inBlock && original->recv->isSelfReference() &&
+             (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
             ignoring.emplace_back(original.get());
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
