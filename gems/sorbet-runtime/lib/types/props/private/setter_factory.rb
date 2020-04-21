@@ -71,6 +71,7 @@ module T::Props
               non_nil_type,
               val,
             )
+            instance_variable_set(accessor_key, val)
           end
         end
       end
@@ -101,6 +102,7 @@ module T::Props
               non_nil_type,
               val,
             )
+            instance_variable_set(accessor_key, val)
           end
         end
       end
