@@ -32,7 +32,6 @@ class AutogenWalk {
     vector<DefinitionRef> nesting;
     vector<ast::Send *> ignoring;
 
-
     // Is this the direct child of a send to method `include`? (i.e. `include X::Y`)
     // Used for determining for setting `parent_of` on constant literals that are included.
     bool inInclude;
@@ -108,33 +107,19 @@ public:
         refs[it->second.id()].is_defining_ref = true;
         refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original->loc);
 
-        auto ait = original->ancestors.begin();
         if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
             // Handle the superclass at outer scope
+            auto ait = original->ancestors.begin();
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
-            ++ait;
-            // TODO handle parent_ref here
+
+            auto it = refMap.find(*ait);
+            if (it != refMap.end()) {
+                refs[it->second.id()].parent_of = def.id;
+                def.parent_ref = it->second;
+            }
         }
         // Then push a scope
         nesting.emplace_back(def.id);
-
-        for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-            if (cnst == nullptr || cnst->original == nullptr) {
-                // Don't include synthetic ancestors
-                continue;
-            }
-
-            auto it = refMap.find(ancst.get());
-            if (it == refMap.end()) {
-                continue;
-            }
-            if (original->kind == ast::ClassDef::Kind::Class && &ancst == &original->ancestors.front()) {
-                // superclass
-                def.parent_ref = it->second;
-            }
-            refs[it->second.id()].parent_of = def.id;
-        }
 
         return original;
     }
