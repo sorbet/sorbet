@@ -26,6 +26,7 @@ cc_library(
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",
         "UndoState.h",
+        "ErrorReporter.h",
     ],
     hdrs = [
         "LSPConfiguration.h",
@@ -116,4 +117,5 @@ cc_test(
         "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
+)
 )
