@@ -30,7 +30,10 @@ class AutogenWalk {
     vector<Reference> refs;
     vector<core::NameRef> requires;
     vector<DefinitionRef> nesting;
+
+    enum class ScopeType { Class, Block };
     vector<ast::Send *> ignoring;
+    vector<ScopeType> scopeTypes;
 
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
 
@@ -68,6 +71,7 @@ public:
         if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
             return original;
         }
+        scopeTypes.emplace_back(ScopeType::Class);
 
         // cerr << "preTransformClassDef(" << original->toString(ctx) << ")\n";
 
@@ -134,8 +138,19 @@ public:
         }
 
         nesting.pop_back();
+        scopeTypes.pop_back();
 
         return original;
+    }
+
+    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        scopeTypes.emplace_back(ScopeType::Block);
+        return block;
+    }
+
+    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        scopeTypes.pop_back();
+        return block;
     }
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
@@ -217,8 +232,12 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
-            original->fun == core::Names::extend()) {
+        bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
+        // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
+        // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
+        // block scope so that we a ref to the included module is still rendered.
+        if (original->fun == core::Names::keepForIde() ||
+            (!inBlock && (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
             ignoring.emplace_back(original.get());
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
@@ -237,6 +256,8 @@ public:
     }
 
     ParsedFile parsedFile() {
+        ENFORCE(scopeTypes.empty());
+
         ParsedFile out;
         out.refs = move(refs);
         out.defs = move(defs);
