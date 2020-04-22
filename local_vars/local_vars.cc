@@ -13,11 +13,23 @@ namespace sorbet::local_vars {
 class LocalNameInserter {
     friend class LocalVars;
 
+    struct ArgFlags {
+        bool keyword : 1;
+        bool block : 1;
+        bool repeated : 1;
+        bool shadow : 1;
+
+        // In C++20 we can replace this with bit field initialzers
+        ArgFlags() : keyword(false), block(false), repeated(false), shadow(false) {}
+    };
+    CheckSize(ArgFlags, 1, 1);
+
     struct NamedArg {
         core::NameRef name;
         core::LocalVariable local;
         core::LocOffsets loc;
         unique_ptr<ast::Reference> expr;
+        ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
@@ -36,10 +48,12 @@ class LocalNameInserter {
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
                 named.expr = ast::MK::RestArg(arg->loc, move(named.expr));
+                named.flags.repeated = true;
             },
             [&](ast::KeywordArg *kw) {
                 named = nameArg(move(kw->expr));
                 named.expr = ast::MK::KeywordArg(arg->loc, move(named.expr));
+                named.flags.keyword = true;
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
@@ -48,10 +62,12 @@ class LocalNameInserter {
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));
                 named.expr = ast::MK::BlockArg(arg->loc, move(named.expr));
+                named.flags.block = true;
             },
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(move(shadow->expr));
                 named.expr = ast::MK::ShadowArg(arg->loc, move(named.expr));
+                named.flags.shadow = true;
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;
@@ -82,8 +98,12 @@ class LocalNameInserter {
     }
 
     struct LocalFrame {
+        struct Arg {
+            core::LocalVariable arg;
+            ArgFlags flags;
+        };
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
-        vector<core::LocalVariable> args;
+        vector<Arg> args;
         std::optional<u4> oldBlockCounter = nullopt;
         u4 localId = 0;
         bool insideBlock = false;
@@ -162,7 +182,7 @@ class LocalNameInserter {
             args.emplace_back(move(named.expr));
             auto frame = scopeStack.back();
             scopeStack.back().locals[named.name] = named.local;
-            scopeStack.back().args.emplace_back(named.local);
+            scopeStack.back().args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
 
         return args;
@@ -205,7 +225,7 @@ public:
             original->args.clear();
             if (scopeStack.back().insideMethod) {
                 for (auto arg : scopeStack.back().args) {
-                    original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
+                    original->args.emplace_back(make_unique<ast::Local>(original->loc, arg.arg));
                 }
             } else {
                 if (auto e = ctx.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
