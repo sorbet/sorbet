@@ -24,6 +24,7 @@ if [ -z "$rb_file" ]; then
 fi
 
 ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
+sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib"
 
 echo
 info "Building Ruby..."
@@ -47,7 +48,8 @@ trap cleanup EXIT
 command=("${command[@]}" \
   "--disable=gems" \
   "--disable=did_you_mean" \
-  -I "run/tools" -rpreamble.rb -rpatch_require.rb \
+  -I "$sorbet_runtime" -rsorbet-runtime.rb \
+  -I "run/tools" -rpatch_require.rb \
   -e "require './$rb_file'" \
   "$@" \
   )

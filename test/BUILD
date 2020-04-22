@@ -39,6 +39,7 @@ sh_binary(
     srcs = ["generate_out_file.sh"],
     data = [
         "//run:runtimeoverrides",
+        "@com_stripe_ruby_typer//gems/sorbet-runtime",
         "@sorbet_ruby//:ruby",
     ],
     deps = [

@@ -3,7 +3,7 @@
 
 require 'set'
 require 'optparse'
-require_relative '../../../run/tools/preamble.rb'
+require_relative '../../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib'
 
 class Module
   include T::Sig
