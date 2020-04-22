@@ -60,7 +60,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\lb: T.untyped = load_arg(b)\l<blk>: T.untyped = load_arg(<blk>)\l<block-pre-call-temp>$6: Sorbet::Private::Static::Void = <self>: Bar.super(b: T.untyped, <blk>: T.untyped)\l<selfRestore>$7: Bar = <self>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\lb: T.untyped = load_arg(b)\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: Bar.super(b: T.untyped)\l<selfRestore>$6: Bar = <self>\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_2" [style="bold"];
@@ -70,19 +70,19 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: Bar, <selfRestore>$7: Bar, <block-pre-call-temp>$6: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: Bar, <selfRestore>$6: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Bar#baz_2" -> "bb::Bar#baz_5" [style="bold"];
     "bb::Bar#baz_2" -> "bb::Bar#baz_3" [style="tapered"];
 
     "bb::Bar#baz_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$7: Bar, <block-pre-call-temp>$6: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$6, super>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$5, super>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: Bar, <selfRestore>$7: Bar, <block-pre-call-temp>$6: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: Bar = loadSelf\l<blk>$8: T.untyped = load_yield_params(super)\l<blk>$9: Integer(0) = 0\la$1: T.untyped = <blk>$8: T.untyped.[](<blk>$9: Integer(0))\l<blockReturnTemp>$10: NilClass = <self>: Bar.puts(a$1: T.untyped)\l<blockReturnTemp>$13: T.noreturn = blockreturn<super> <blockReturnTemp>$10: NilClass\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Bar, <selfRestore>$6: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: Bar = loadSelf\l<blk>$7: T.untyped = load_yield_params(super)\l<blk>$8: Integer(0) = 0\la$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<blockReturnTemp>$9: NilClass = <self>: Bar.puts(a$1: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<super> <blockReturnTemp>$9: NilClass\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_5" -> "bb::Bar#baz_2" [style="bold"];
