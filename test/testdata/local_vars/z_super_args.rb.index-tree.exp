@@ -51,31 +51,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
     def takes_positional<<C <todo sym>>>(arg0, &<blk>)
-      <self>.super(arg0, <blk>)
+      <self>.super(arg0)
     end
 
     def takes_keyword<<C <todo sym>>>(arg0:, &<blk>)
-      <self>.super(arg0, <blk>)
+      <self>.super({:"arg0" => arg0})
     end
 
     def takes_two_keyword<<C <todo sym>>>(arg0:, arg1:, &<blk>)
-      <self>.super(arg0, arg1, <blk>)
+      <self>.super({:"arg0" => arg0, :"arg1" => arg1})
     end
 
     def takes_positional_then_keyword<<C <todo sym>>>(arg0, arg1:, &<blk>)
-      <self>.super(arg0, arg1, <blk>)
+      <self>.super(arg0, {:"arg1" => arg1})
     end
 
     def takes_rest<<C <todo sym>>>(*args, &<blk>)
-      <self>.super(args, <blk>)
+      <self>.super()
     end
 
     def takes_keyword_rest<<C <todo sym>>>(*args:, &<blk>)
-      <self>.super(args, <blk>)
+      <self>.super()
     end
 
     def takes_block<<C <todo sym>>>(&blk)
-      <self>.super(blk)
+      <self>.super()
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"takes_positional")
