@@ -101,7 +101,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     begin
-      <emptyTree>::<C CONST> = ::T.unsafe(nil)
+      <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
         "allows constants inside of IT"
         ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows constants inside of IT\'>")
@@ -109,7 +109,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     begin
-      <emptyTree>::<C C2> = ::T.let(::T.unsafe(nil), <emptyTree>::<C Integer>)
+      <emptyTree>::<C C2> = ::T.let(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <emptyTree>::<C Integer>)
       begin
         "allows let-ed constants inside of IT"
         ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows let-ed constants inside of IT\'>")

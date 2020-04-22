@@ -1224,9 +1224,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1291,9 +1301,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1604,9 +1624,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1671,9 +1701,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1738,9 +1778,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1825,9 +1875,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1882,9 +1942,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -1949,9 +2019,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2019,9 +2099,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2112,9 +2202,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2186,9 +2286,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2287,9 +2397,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2344,9 +2464,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2401,9 +2531,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2458,9 +2598,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2525,9 +2675,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2582,9 +2742,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2649,9 +2819,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2732,9 +2912,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2805,9 +2995,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2862,9 +3062,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -2929,9 +3139,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3012,9 +3232,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3085,9 +3315,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3142,9 +3382,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3209,9 +3459,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3292,9 +3552,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3365,9 +3635,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3422,9 +3702,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3489,9 +3779,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3568,9 +3868,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3647,9 +3957,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3704,9 +4024,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3771,9 +4101,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3838,9 +4178,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -3925,9 +4275,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -4090,9 +4450,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -4168,9 +4538,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -4331,9 +4711,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -4403,9 +4793,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -4574,9 +4974,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -4650,9 +5060,19 @@ ClassDef{
                   name = <U <blk>>
                 } }]
               rhs = Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Kernel
+                    }
+                  ]
                 }
                 fun = <U raise>
                 block = nullptr
@@ -5112,9 +5532,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5179,9 +5609,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5236,9 +5676,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5303,9 +5753,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5433,9 +5893,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5500,9 +5970,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5557,9 +6037,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5672,9 +6162,19 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Kernel
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
             fun = <U raise>
             block = nullptr
@@ -5767,38 +6267,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  ConstantLit{
-                    orig = nullptr
-                    symbol = ::String
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5873,53 +6359,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <C <U Opus>>
-                            }
-                            cnst = <C <U DB>>
-                          }
-                          cnst = <C <U Model>>
-                        }
-                        cnst = <C <U Mixins>>
-                      }
-                      cnst = <C <U Encryptable>>
-                    }
-                    cnst = <C <U EncryptedValue>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5999,38 +6456,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  ConstantLit{
-                    orig = nullptr
-                    symbol = ::String
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -6140,53 +6583,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <C <U Opus>>
-                            }
-                            cnst = <C <U DB>>
-                          }
-                          cnst = <C <U Model>>
-                        }
-                        cnst = <C <U Mixins>>
-                      }
-                      cnst = <C <U Encryptable>>
-                    }
-                    cnst = <C <U EncryptedValue>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -6246,38 +6660,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  ConstantLit{
-                    orig = nullptr
-                    symbol = ::String
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -6352,53 +6752,24 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::T
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+              }
+              fun = <U unsafe>
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Kernel
+                }
+              ]
             }
-            fun = <U cast>
+            fun = <U raise>
             block = nullptr
             args = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U unsafe>
-                block = nullptr
-                args = [
-                  Literal{ value = nil }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::T
-                }
-                fun = <U nilable>
-                block = nullptr
-                args = [
-                  UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <C <U Opus>>
-                            }
-                            cnst = <C <U DB>>
-                          }
-                          cnst = <C <U Model>>
-                        }
-                        cnst = <C <U Mixins>>
-                      }
-                      cnst = <C <U Encryptable>>
-                    }
-                    cnst = <C <U EncryptedValue>>
-                  }
-                ]
-              }
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
