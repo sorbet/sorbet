@@ -32,7 +32,7 @@ export llvmir
 "test/run_sorbet.sh" "$rb_file"
 
 ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
-sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib"
+sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb"
 
 echo
 info "Building Ruby..."
@@ -50,8 +50,8 @@ fi
 command=("${command[@]}" \
   "--disable=gems" \
   "--disable=did_you_mean" \
-  -I "$sorbet_runtime" -rsorbet-runtime.rb \
-  -I "run/tools" -rpatch_require.rb \
+  -r "$sorbet_runtime" \
+  -r "./test/patch_require.rb" \
   -e "require './$rb_file'" \
   "$@" \
   )

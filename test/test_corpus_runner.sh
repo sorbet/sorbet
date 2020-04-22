@@ -92,8 +92,8 @@ set +e
 force_compile=1 llvmir="${target}" $ruby \
   --disable=gems \
   --disable=did_you_mean \
-  -I "${root}/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib" -rsorbet-runtime.rb \
-  -I "${root}/run/tools" -rpatch_require.rb \
+  -r "${root}/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+  -r "${root}/test/patch_require.rb" \
   "$runfile" \
   1> "$stdout" 2> "$stderr"
 code=$?

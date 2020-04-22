@@ -38,7 +38,7 @@ sh_binary(
     name = "generate_out_file",
     srcs = ["generate_out_file.sh"],
     data = [
-        "//run:runtimeoverrides",
+        "patch_require.rb",
         "@com_stripe_ruby_typer//gems/sorbet-runtime",
         "@sorbet_ruby//:ruby",
     ],
