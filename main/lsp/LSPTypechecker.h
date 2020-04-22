@@ -79,12 +79,11 @@ class LSPTypechecker final {
     TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
     /**
-     * Sends diagnostics from a typecheck run to the client.
-     * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
-     * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
+     * Builds a map of files to errors that are not silenced and passes them one file at a time to
+     * ErrorReporter::PushDiagnostics
      */
-    void pushDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
-                         std::vector<std::unique_ptr<core::Error>> errors);
+    void pushAllDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
+                            std::vector<std::unique_ptr<core::Error>> errors);
 
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
