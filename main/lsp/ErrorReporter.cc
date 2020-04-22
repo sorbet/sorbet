@@ -61,7 +61,6 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
         diagnostic->severity = DiagnosticSeverity::Error;
 
         vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
-        // adding diagnostics to a vector to send to VS Code
         for (auto &section : error->sections) {
             string sectionHeader = section.header;
 
