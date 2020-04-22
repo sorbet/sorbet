@@ -31,3 +31,9 @@ class Opus::DupChild < Opus::Parent; end # Only appears once in output
 class Opus::Risk::Model::Mixins::RiskSafeMachine; end
 
 class FooSafeMachine < Opus::Risk::Model::Mixins::RiskSafeMachine; end
+
+module MyMixin; end
+class MyClass
+  X = Y
+  include MyMixin
+end
