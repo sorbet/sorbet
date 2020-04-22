@@ -5,7 +5,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<C <todo sym>>>(foo: = <emptyTree>, &<blk>)
-      <emptyTree>
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C Integer>)
+        <emptyTree>
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -13,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      @foo
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
