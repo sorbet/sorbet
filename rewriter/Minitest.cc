@@ -20,15 +20,15 @@ class ConstantMover {
 public:
     unique_ptr<ast::Expression> createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
-        auto unsafeNil = ast::MK::Unsafe(loc, ast::MK::Nil(loc));
+        auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
         if (auto send = ast::cast_tree<ast::Send>(asgn.rhs.get())) {
             if (send->fun == core::Names::let() && send->args.size() == 2) {
-                auto rhs = ast::MK::Let(loc, move(unsafeNil), send->args[1]->deepCopy());
+                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1]->deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
             }
         }
 
-        return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(unsafeNil));
+        return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(raiseUnimplemented));
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
@@ -169,7 +169,7 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
     if (canMoveIntoMethodDef(exp)) {
         return exp->deepCopy();
     } else {
-        return ast::MK::Unsafe(exp->loc, ast::MK::Nil(exp->loc));
+        return ast::MK::RaiseUnimplemented(exp->loc);
     }
 }
 

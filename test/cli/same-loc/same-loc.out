@@ -49,7 +49,7 @@ test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_
 
 test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
 
-test/cli/same-loc/same-loc.rb:4: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://srb.help/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -68,11 +68,11 @@ test/cli/same-loc/same-loc.rb:4: Method `keep_def` does not exist on `T.class_of
 
 test/cli/same-loc/same-loc.rb: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
 
-test/cli/same-loc/same-loc.rb:4: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://srb.help/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/same-loc/same-loc.rb:4: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+test/cli/same-loc/same-loc.rb:4: Method `unsafe` does not exist on `T.class_of(T)` https://srb.help/7003
      4 |  const :foo, T::Array[Foo::Baz]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

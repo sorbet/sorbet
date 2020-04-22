@@ -1473,7 +1473,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                     recv = MK::Local(loc, dctx.enclosingBlockArg);
                 } else {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
-                    recv = MK::Unsafe(loc, MK::Nil(loc));
+                    recv = MK::RaiseUnimplemented(loc);
                 }
                 unique_ptr<Expression> res = MK::Send(loc, std::move(recv), core::Names::call(), std::move(args));
                 result = std::move(res);
