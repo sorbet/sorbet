@@ -183,6 +183,7 @@ NameDef names[] = {
     {"merchant"},
     {"foreign"},
     {"ifunset"},
+    {"withoutAccessors", "without_accessors"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"Chalk", "Chalk", true},

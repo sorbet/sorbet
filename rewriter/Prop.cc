@@ -41,6 +41,7 @@ bool isTStruct(ast::Expression *expr) {
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
+    bool hasWithoutAccessors = false;
     core::NameRef name = core::NameRef::noName();
     core::LocOffsets nameLoc;
     unique_ptr<ast::Expression> type;
@@ -151,6 +152,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     if (rules) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
+        }
+
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::withoutAccessors())) {
+            ret.hasWithoutAccessors = true;
         }
 
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
@@ -342,6 +347,30 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     return nodes;
 }
 
+unique_ptr<ast::Send> ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
+    // Typed deepCopy
+    unique_ptr<ast::Send> result;
+    result.reset(ast::cast_tree<ast::Send>(send->deepCopy().release()));
+
+    if (prop.hasWithoutAccessors) {
+        return result;
+    } else {
+        auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
+        auto true_ = ast::MK::True(send->loc);
+
+        if (result->args.empty()) {
+            result->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
+        } else if (auto rules = ast::cast_tree<ast::Hash>(result->args.back().get())) {
+            rules->keys.emplace_back(std::move(withoutAccessors));
+            rules->values.emplace_back(std::move(true_));
+        } else {
+            result->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
+        }
+
+        return result;
+    }
+}
+
 vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
                                                         const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
@@ -414,8 +443,12 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (!propInfo.has_value()) {
             continue;
         }
-        auto nodes = processProp(ctx, propInfo.value(), forTStruct);
-        ENFORCE(!nodes.empty(), "if parseProp completed successfully, processProp must complete too");
+        auto processed = processProp(ctx, propInfo.value(), forTStruct);
+        ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
+
+        vector<unique_ptr<ast::Expression>> nodes;
+        nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
+        nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);
         props.emplace_back(std::move(propInfo.value()));
     }
