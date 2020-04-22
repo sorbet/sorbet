@@ -68,14 +68,6 @@ namespace sorbet::ast {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-void printTabs(stringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
-}
-
 Expression::Expression(core::LocOffsets loc) : loc(loc) {}
 
 Reference::Reference(core::LocOffsets loc) : Expression(loc) {}
@@ -287,6 +279,16 @@ EmptyTree::EmptyTree() : Expression(core::LocOffsets::none()) {
     _sanityCheck();
 }
 
+namespace {
+
+void printTabs(stringstream &to, int count) {
+    int i = 0;
+    while (i < count) {
+        to << "  ";
+        i++;
+    }
+}
+
 template <class T> void printElems(const core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
@@ -309,6 +311,8 @@ template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf
     printElems(gs, buf, args, tabs);
     buf << ")";
 }
+
+} // namespace
 
 string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
