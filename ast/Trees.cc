@@ -281,14 +281,6 @@ EmptyTree::EmptyTree() : Expression(core::LocOffsets::none()) {
 
 namespace {
 
-void printTabs(stringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
-}
-
 void printTabs(fmt::memory_buffer &to, int count) {
     int i = 0;
     while (i < count) {
@@ -296,23 +288,6 @@ void printTabs(fmt::memory_buffer &to, int count) {
         i++;
     }
 }
-
-template <class T> void printElems(const core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
-    bool first = true;
-    bool didshadow = false;
-    for (auto &a : args) {
-        if (!first) {
-            if (cast_tree<ShadowArg>(a.get()) && !didshadow) {
-                buf << "; ";
-                didshadow = true;
-            } else {
-                buf << ", ";
-            }
-        }
-        first = false;
-        buf << a->toStringWithTabs(gs, tabs + 1);
-    }
-};
 
 template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, T &args, int tabs) {
     bool first = true;
@@ -330,12 +305,6 @@ template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buff
         fmt::format_to(buf, "{}", a->toStringWithTabs(gs, tabs + 1));
     }
 };
-
-template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
-    buf << "(";
-    printElems(gs, buf, args, tabs);
-    buf << ")";
-}
 
 template <class T> void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, T &args, int tabs) {
     fmt::format_to(buf, "(");
