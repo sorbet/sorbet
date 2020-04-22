@@ -143,7 +143,7 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
 
     body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
     body.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
-                                               std::move(newArgs), ast::MK::Cast(loc, dupName(asgn->lhs.get()))));
+                                               std::move(newArgs), ast::MK::RaiseUnimplemented(loc)));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),

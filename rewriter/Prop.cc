@@ -215,9 +215,9 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_());
-        auto unsafeNil = ast::MK::Unsafe(computedByMethodNameLoc, ast::MK::Nil(computedByMethodNameLoc));
+        auto raiseUnimplemented = ast::MK::RaiseUnimplemented(computedByMethodNameLoc);
         auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass),
-                                                 computedByMethodName, std::move(unsafeNil));
+                                                 computedByMethodName, std::move(raiseUnimplemented));
         auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
                                                      ASTUtil::dupType(getType.get()));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));

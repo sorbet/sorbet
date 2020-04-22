@@ -345,15 +345,6 @@ public:
         return Sig(loc, Hash1(loc, std::move(key), std::move(value)), std::move(ret));
     }
 
-    static std::unique_ptr<ast::Send> Cast(core::LocOffsets loc, std::unique_ptr<Expression> type) {
-        if (auto *send = cast_tree<ast::Send>(type.get())) {
-            if (send->fun == core::Names::untyped()) {
-                return Unsafe(loc, Nil(loc));
-            }
-        }
-        return Send2(loc, T(loc), core::Names::cast(), Unsafe(loc, Nil(loc)), std::move(type));
-    }
-
     static std::unique_ptr<ast::ConstantLit> T(core::LocOffsets loc) {
         return Constant(loc, core::Symbols::T());
     }
@@ -410,7 +401,8 @@ public:
     static std::unique_ptr<ast::Send> RaiseUnimplemented(core::LocOffsets loc) {
         auto kernel = Constant(loc, core::Symbols::Kernel());
         auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
-        auto ret = Send1(loc, std::move(kernel), core::Names::raise(), std::move(msg));
+        // T.unsafe so that Sorbet doesn't know this unconditionally raises (avoids introducing dead code errors)
+        auto ret = Send1(loc, Unsafe(loc, std::move(kernel)), core::Names::raise(), std::move(msg));
         ret->flags.isRewriterSynthesized = true;
         return ret;
     }
