@@ -31,6 +31,7 @@ NameError: uninitialized constant BadGem::UNINITIALZED_CONSTANT
 Generating: sorbet/rbi/hidden-definitions/
 Requiring all of your code
 Naming all Modules
+Got LoadError when trying to get nested name Bundler::Thor::RakeCompat
 Generating <tmp>/reflection.rbi with X modules and Y aliases
 Printing your code's symbol table into <tmp>/from-source.json
 Printing <tmp>/reflection.rbi's symbol table into <tmp>/reflection.json

@@ -22,10 +22,10 @@ sh_binary(
     data = [
         "sorbet-typed.rev",
         "//main:sorbet",
-        "@gems//bundler",
-        "@gems//bundler:bundle",
         "@gems//gems",
+        "@ruby_2_4//:bundle",
         "@ruby_2_4//:ruby",
+        "@ruby_2_6//:bundle",
         "@ruby_2_6//:ruby",
     ],
     # NOTE: ensure that this rule isn't caught in //...

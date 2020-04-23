@@ -65,16 +65,20 @@ def _snapshot_test(test_path, ruby):
         ),
         outs = [actual],
 
+        testonly = True,
+
         # NOTE: this is manual to avoid being caught with `//...`
         tags = ["manual"],
 
         # NOTE: this redirects stdout/stderr to a log, and only outputs on
         # failure.
-        cmd =
-            """
-        $(location :run_one) {} $(location {}) {} &> genrule.log \
-                || (cat genrule.log && exit 1)
-        """.format(ruby, actual, test_path),
+        cmd = """
+        if ! $(location :run_one) {ruby} $(location {actual}) {test_path} \\
+                &> genrule.log ; then
+            cat genrule.log
+            exit 1
+        fi
+        """.format(ruby=ruby, actual=actual, test_path=test_path),
     )
 
     test_name = "test_{}/{}".format(ruby, test_path)
