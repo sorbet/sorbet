@@ -45,6 +45,12 @@ rbrunfile=$(mktemp)
 # Find ruby
 ruby="$(rlocation sorbet_ruby/ruby)"
 
+# These paths are absolute when running standalone, but relative when running
+# in the sandbox. To work around this, we pull out these dirs and use -I below
+# to modify the include path (which can take absolute or relative paths).
+sorbet_runtime_include=$(dirname "$(rlocation com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb)")
+patch_require_include=$(dirname "$(rlocation com_stripe_sorbet_llvm/test/patch_require.rb)")
+
 # Main #########################################################################
 
 info "--- Build Config ---"
@@ -74,8 +80,8 @@ set +e
 llvmir="$llvmir" "$ruby" \
   --disable=gems \
   --disable=did_you_mean \
-  -r "$(rlocation com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb)" \
-  -r "$(rlocation com_stripe_sorbet_llvm/test/patch_require.rb)" \
+  -I "$sorbet_runtime_include" -rsorbet-runtime.rb \
+  -I "$patch_require_include" -rpatch_require.rb \
   "$rbrunfile" > "$rbout" 2> "$rberr"
 echo "$?" > "$rbexit"
 set -e
