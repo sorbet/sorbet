@@ -186,6 +186,233 @@ public:
         ownerStack.pop_back();
         return method;
     }
+
+    unique_ptr<ast::Assign> fillAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+        ENFORCE(lhs);
+
+        return asgn;
+    }
+
+    unique_ptr<ast::Expression> handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
+                                                           unique_ptr<ast::Assign> asgn,
+                                                           const ast::UnresolvedConstantLit *typeName) {
+        ENFORCE(asgn->lhs.get() == typeName &&
+                asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
+        core::Variance variance = core::Variance::Invariant;
+        bool isTypeTemplate = send->fun == core::Names::typeTemplate();
+        if (!ctx.owner.data(ctx)->isClassOrModule()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                e.setHeader("Types must be defined in class or module scopes");
+            }
+            return ast::MK::EmptyTree();
+        }
+        if (ctx.owner == core::Symbols::root()) {
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                e.setHeader("`{}` cannot be used at the top-level", "type_member");
+            }
+            auto send = ast::MK::Send0Block(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
+                                            ast::MK::Block0(asgn->loc, ast::MK::Untyped(asgn->loc)));
+
+            return handleAssignment(ctx, make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
+        }
+
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
+        if (!send->args.empty()) {
+            if (send->args.size() > 2) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Too many args in type definition");
+                }
+                auto send = ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
+                                           ast::MK::Untyped(asgn->loc));
+                return handleAssignment(ctx,
+                                        make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
+            }
+
+            auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
+            if (lit != nullptr && lit->isSymbol(ctx)) {
+                core::NameRef name = lit->asSymbol(ctx);
+
+                if (name == core::Names::covariant()) {
+                    variance = core::Variance::CoVariant;
+                } else if (name == core::Names::contravariant()) {
+                    variance = core::Variance::ContraVariant;
+                } else if (name == core::Names::invariant()) {
+                    variance = core::Variance::Invariant;
+                } else {
+                    if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",
+                                    ":" + core::Names::covariant().show(ctx),
+                                    ":" + core::Names::contravariant().show(ctx));
+                    }
+                }
+            } else {
+                if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Invalid param, must be a :symbol");
+                    }
+                }
+            }
+        }
+
+        core::SymbolRef sym;
+        auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+        if (existingTypeMember.exists()) {
+            // if we already have a type member but it was constructed in a different file from the one we're looking
+            // at, then we need to raise an error
+            if (existingTypeMember.data(ctx)->loc().file() != asgn->loc.file()) {
+                if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+                    e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
+                }
+                if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
+                                                  core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
+                    e.addErrorLine(asgn->loc, "Also defined here");
+                }
+            }
+
+            // otherwise, we're looking at a type member defined in this class in the same file, which means all we need
+            // to do is find out whether there was a redefinition the first time, and in that case display the same
+            // error
+            auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
+                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                }
+            }
+            // if we have more than one type member with the same name, then we have messed up somewhere
+            ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
+                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                    }) != onSymbol.data(ctx)->typeMembers().end());
+            sym = existingTypeMember;
+        } else {
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+            if (oldSym.exists()) {
+                if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
+                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                }
+                ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
+            }
+            sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+
+            // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
+            auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+            sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
+
+            if (isTypeTemplate) {
+                auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
+                oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeName->cnst);
+                if (oldSym.exists() &&
+                    !(oldSym.data(ctx)->loc() == asgn->loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                    if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                        e.setHeader("Redefining constant `{}`", typeName->cnst.data(ctx)->show(ctx));
+                        e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
+                    }
+                    ctx.state.mangleRenameSymbol(oldSym, typeName->cnst);
+                }
+                auto alias = ctx.state.enterStaticFieldSymbol(asgn->loc, context, typeName->cnst);
+                alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
+            }
+        }
+
+        if (!send->args.empty()) {
+            auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
+            if (hash) {
+                int i = -1;
+
+                bool fixed = false;
+                bool bounded = false;
+
+                for (auto &keyExpr : hash->keys) {
+                    i++;
+                    auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    core::NameRef name;
+                    if (key != nullptr && key->isSymbol(ctx)) {
+                        switch (key->asSymbol(ctx)._id) {
+                            case core::Names::fixed()._id:
+                                sym.data(ctx)->setFixed();
+                                fixed = true;
+                                break;
+
+                            case core::Names::lower()._id:
+                            case core::Names::upper()._id:
+                                bounded = true;
+                                break;
+                        }
+                    }
+                }
+
+                // one of fixed or bounds were provided
+                if (fixed != bounded) {
+                    asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
+
+                    // Leave it in the tree for the resolver to chew on.
+                    return asgn;
+                } else if (fixed) {
+                    // both fixed and bounds were specified
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
+                    }
+                } else {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Missing required param `{}`", "fixed");
+                    }
+                }
+            }
+        }
+
+        return asgn;
+    }
+
+    unique_ptr<ast::Expression> handleAssignment(core::Context ctx, unique_ptr<ast::Assign> asgn) {
+        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        auto ret = fillAssign(ctx, std::move(asgn));
+        if (send->fun == core::Names::typeAlias()) {
+            auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get());
+            ENFORCE(id != nullptr, "fillAssign did not make lhs into a ConstantLit");
+
+            auto sym = id->symbol;
+            ENFORCE(sym.exists(), "fillAssign did not make symbol for ConstantLit");
+
+            if (sym.data(ctx)->isStaticField()) {
+                sym.data(ctx)->setTypeAlias();
+            }
+        }
+        return ret;
+    }
+
+    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+        if (lhs == nullptr) {
+            return asgn;
+        }
+
+        FoundName name;
+        name.kind = NameKind::FieldOrVariable;
+
+        // TODO: Unify typeMemberVarianceName and fieldOrVariableAssignmentIsTypeAlias?
+
+        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        if (send == nullptr) {
+            return fillAssign(ctx, std::move(asgn));
+        }
+
+        if (!send->recv->isSelfReference()) {
+            return handleAssignment(ctx, std::move(asgn));
+        }
+
+        switch (send->fun._id) {
+            case core::Names::typeTemplate()._id:
+                return handleTypeMemberDefinition(ctx, send, std::move(asgn), lhs);
+            case core::Names::typeMember()._id:
+                return handleTypeMemberDefinition(ctx, send, std::move(asgn), lhs);
+            default:
+                return fillAssign(ctx, std::move(asgn));
+        }
+    }
 };
 
 class NameInserter2 {
@@ -817,6 +1044,12 @@ public:
                 case NameKind::Method:
                     insertedNames.push_back(insertMethod(ctx.withOwner(owner), name));
                     break;
+                case NameKind::FieldOrVariable:
+                    insertedNames.push_back(insertFieldOrVariable(ctx.withOwner(owner), name));
+                    break;
+                case NameKind::TypeMemberDefinition:
+                    insertedNames.push_back(insertTypeMemberDefinition(ctx.withOwner(owner), name));
+                    break;
             }
         }
 
@@ -829,6 +1062,8 @@ public:
                 case NameKind::Class:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
+                default:
+                    Exception::raise("Found invalid modifier for kind {}", modifier.kind);
             }
         }
     }
