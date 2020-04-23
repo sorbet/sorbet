@@ -1,0 +1,37 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ForgotTStructOrTProps><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Integer>)
+    end
+
+    def bar<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+
+    <self>.const(:"bar", <emptyTree>::<C Integer>, {:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
+  end
+end
