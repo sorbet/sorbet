@@ -64,7 +64,6 @@ def _snapshot_test(test_path, ruby):
             ],
         ),
         outs = [actual],
-
         testonly = True,
 
         # NOTE: this is manual to avoid being caught with `//...`
@@ -78,7 +77,7 @@ def _snapshot_test(test_path, ruby):
             cat genrule.log
             exit 1
         fi
-        """.format(ruby=ruby, actual=actual, test_path=test_path),
+        """.format(ruby = ruby, actual = actual, test_path = test_path),
     )
 
     test_name = "test_{}/{}".format(ruby, test_path)
