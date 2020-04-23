@@ -293,7 +293,11 @@ _BINARY_WRAPPER = """#!/bin/bash
 
 {runfiles_setup}
 
-exec "$(rlocation {workspace}/toolchain/bin/{binary})" "$@"
+binary_path="$(rlocation {workspace}/toolchain/bin/{binary})"
+
+export PATH="$(dirname "$binary_path"):$PATH"
+
+exec "$binary_path" "$@"
 """
 
 def _ruby_binary_impl(ctx):
@@ -468,6 +472,18 @@ def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [],
 
     _ruby_binary(
         name = "gem",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_binary(
+        name = "bundler",
+        ruby = ":ruby-dist",
+        visibility = ["//visibility:public"],
+    )
+
+    _ruby_binary(
+        name = "bundle",
         ruby = ":ruby-dist",
         visibility = ["//visibility:public"],
     )
