@@ -2,6 +2,7 @@
 
 class ComputingProps
   extend T::Sig
+  include T::Props
 
   const :num_ok, Integer, computed_by: :compute_num_ok
   sig {params(n: Integer).returns(Integer)}

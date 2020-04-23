@@ -1,5 +1,6 @@
 # typed: true
 class Foo
+    include T::Props
     prop :int, Integer
     prop :hash, Hash
     prop :t_hash, T::Hash[T.untyped, T.untyped]
