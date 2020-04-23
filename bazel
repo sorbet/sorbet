@@ -110,25 +110,6 @@ fi
 
 
 
-BAZEL_RC_PATH=${TMPDIR}/bazel_bazel_rc_${RND_UID}
-echo "" > $BAZEL_RC_PATH
-
-if [ -f $REPO_ROOT/shared_tools/default_bazel_rc ]; then
-  cat $REPO_ROOT/shared_tools/default_bazel_rc >> $BAZEL_RC_PATH
-fi
-
-if [ -f /etc/bazelrc ]; then
-  cat /etc/bazelrc >> $BAZEL_RC_PATH
-fi
-
-if [ -f $HOME/.bazelrc ]; then
-  cat $HOME/.bazelrc >> $BAZEL_RC_PATH
-fi
-
-if [ -f $REPO_ROOT/.bazelrc ]; then
-  cat $REPO_ROOT/.bazelrc >> $BAZEL_RC_PATH
-fi
-
 IS_CACHE_WORTHY_COMMAND=false
 for var in "$@"
 do
@@ -171,7 +152,7 @@ mkdir -p $BAZEL_BIN_LOC
 export BAZEL_EXEC_PATH=$BAZEL_BIN_LOC/$BAZEL_VERSION/bin/bazel-real
 
 if [ -f "$BAZEL_EXEC_PATH" ]; then
-    exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
+    exec $BAZEL_EXEC_PATH "$@"
 fi
 
 RND_UID=$(date "+%s")
@@ -207,4 +188,4 @@ mkdir -p $BUILD_DIR
 rm -rf $BUILD_DIR
 
 cd $ORIGINAL_PWD
-exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
+exec $BAZEL_EXEC_PATH "$@"
