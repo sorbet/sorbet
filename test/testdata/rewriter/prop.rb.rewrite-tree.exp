@@ -107,6 +107,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:"foo", <emptyTree>::<C String>, {:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
@@ -391,13 +395,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:"default", <emptyTree>::<C String>, {:"default" => "", :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"default")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"default=")
 
+    <self>.prop(:"t_nilable", <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), {:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"t_nilable")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"t_nilable=")
+
+    <self>.prop(:"array", <emptyTree>::<C Array>, {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array")
 
@@ -425,6 +437,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :"array")
     end
 
+    <self>.prop(:"t_array", <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), {:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"t_array=")
@@ -450,6 +464,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
     end
+
+    <self>.prop(:"hash_of", <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
 
@@ -477,13 +493,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
     end
 
+    <self>.prop(:"const_explicit", <emptyTree>::<C String>, {:"immutable" => true, :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"const_explicit")
 
+    <self>.const(:"const", <emptyTree>::<C String>, {:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"const")
+
+    <self>.prop(:"enum_prop", <emptyTree>::<C String>, {:"enum" => ["hello", "goodbye"], :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"enum_prop=")
+
+    <self>.prop(:"foreign", <emptyTree>::<C String>, {:"foreign" => <emptyTree>::<C ForeignClass>, :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign")
 
@@ -493,6 +517,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_!")
 
+    <self>.prop(:"foreign_lazy", <emptyTree>::<C String>, {:"foreign" => <self>.lambda() do ||
+          <emptyTree>::<C ForeignClass>
+        end, :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy=")
@@ -500,6 +528,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy_")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_lazy_!")
+
+    <self>.prop(:"foreign_proc", <emptyTree>::<C String>, {:"foreign" => <self>.proc() do ||
+          <emptyTree>::<C ForeignClass>
+        end, :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc")
 
@@ -509,6 +541,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_proc_!")
 
+    <self>.prop(:"foreign_invalid", <emptyTree>::<C String>, {:"foreign" => <self>.proc() do ||
+          :"not_a_type"
+        end, :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid=")
@@ -517,9 +553,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_invalid_!")
 
+    <self>.prop(:"ifunset", <emptyTree>::<C String>, {:"ifunset" => "", :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset=")
+
+    <self>.prop(:"ifunset_nilable", <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), {:"ifunset" => "", :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"ifunset_nilable")
 
@@ -559,9 +599,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.token_prop({:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"token")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"token=")
+
+    <self>.created_prop({:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"created")
 
@@ -593,9 +639,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.timestamped_token_prop({:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"token")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"token=")
+
+    <self>.created_prop({:"immutable" => true, :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"created")
   end
@@ -608,6 +660,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def merchant<<C <todo sym>>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.merchant_prop({:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"merchant")
   end
@@ -660,6 +716,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def encrypted_bar<<C <todo sym>>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 

@@ -37,6 +37,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"default" => 3, :"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
