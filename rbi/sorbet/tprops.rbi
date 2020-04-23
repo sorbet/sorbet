@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 # The vast majority Most of the methods defined below are arguably private
 # APIs, but are actually not private because they're used by Chalk::ODM.

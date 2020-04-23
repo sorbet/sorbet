@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 # These model the runtime representations of Sorbet's type syntax.  This is
 # considered a private API and might be changed at any time without notice.
