@@ -142,6 +142,12 @@ class Index extends React.Component {
                     'A tool to generate RBIs from YARD documentation',
                 },
                 {
+                  title: 'yard-sorbet',
+                  link: 'https://github.com/dduugg/yard-sorbet',
+                  description:
+                    'A YARD plugin to parse Sorbet signatures when generating docs',
+                },
+                {
                   title: 'sorbet-progress',
                   link: 'https://github.com/jaredbeck/sorbet-progress',
                   description:
