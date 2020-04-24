@@ -221,11 +221,11 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        key: String
+        value: String
     )
     .returns(T::Boolean)
   end
-  def has_value?(key); end
+  def has_value?(value); end
 
   sig do
     params(
@@ -320,7 +320,7 @@ class Sorbet::Private::Static::ENVClass
     )
     .returns(T::Boolean)
   end
-  def value?(key); end
+  def value?(value); end
 end
 # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
 # for environment variables.
