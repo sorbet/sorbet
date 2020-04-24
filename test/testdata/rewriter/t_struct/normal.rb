@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class Normal < T::Struct
   prop :foo, Integer

@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class Root < ::T::Struct
   prop :foo, Integer

@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class Default < T::Struct
   prop :foo, Integer, default: 3

@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<C <todo sym>>>(&<blk>)
-      <emptyTree>
+      <self>.super(ZSuperArgs)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")

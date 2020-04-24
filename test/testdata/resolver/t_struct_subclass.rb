@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class IS < T::InexactStruct; end
 class Yep < IS; end

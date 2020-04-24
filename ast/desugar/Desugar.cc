@@ -1076,11 +1076,7 @@ unique_ptr<Expression> node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Nod
                 auto res = node2TreeImpl(dctx, std::move(send));
                 result = std::move(res);
             },
-            [&](parser::ZSuper *zuper) {
-                unique_ptr<Expression> res =
-                    MK::Send1(loc, MK::Self(loc), core::Names::super(), make_unique<ZSuperArgs>(zuper->loc));
-                result = std::move(res);
-            },
+            [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc); },
             [&](parser::For *for_) {
                 MethodDef::ARGS_store args;
                 bool canProvideNiceDesugar = true;

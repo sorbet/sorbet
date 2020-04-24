@@ -383,6 +383,10 @@ public:
                      std::move(arg));
     }
 
+    static std::unique_ptr<ast::Send> ZSuper(core::LocOffsets loc) {
+        return Send1(loc, Self(loc), core::Names::super(), std::make_unique<ast::ZSuperArgs>(loc));
+    }
+
     static std::unique_ptr<ast::Send> SelfNew(core::LocOffsets loc, ast::Send::ARGS_store args, Send::Flags flags = {},
                                               std::unique_ptr<ast::Block> block = nullptr) {
         auto magic = Constant(loc, core::Symbols::Magic());
