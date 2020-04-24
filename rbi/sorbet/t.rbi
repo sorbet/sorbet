@@ -65,9 +65,6 @@ module T
 
   sig {params(value: BasicObject).returns(T.noreturn)}
   def self.absurd(value); end
-
-  sig {params(klass: String).returns(T::Private::LazilyResolvedConstant)}
-  def self.lazy_resolve(klass); end
 end
 
 module T::Generic
@@ -185,4 +182,12 @@ module T::Utils::Nilable
   def self.get_type_info(prop_type); end
   def self.get_underlying_type(prop_type); end
   def self.get_underlying_type_object(prop_type); end
+end
+
+module T::LazyConstants
+  sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
+  def self.lazy_is_a?(val, klass); end
+
+  sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
+  def self.lazy_less_than(val, klass); end
 end

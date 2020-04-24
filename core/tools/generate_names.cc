@@ -134,7 +134,8 @@ NameDef names[] = {
     {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
-    {"lazyResolve", "lazy_resolve"},
+    {"lazyIsA_p", "lazy_is_a?"},
+    {"lazyLessThan", "lazy_less_than"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -431,6 +432,7 @@ NameDef names[] = {
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
+    {"LazyConstants", "LazyConstants", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

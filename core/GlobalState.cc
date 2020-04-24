@@ -332,6 +332,9 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::sigWithoutRuntime());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::LazyConstants());
+    ENFORCE(id == Symbols::T_LazyConstants());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

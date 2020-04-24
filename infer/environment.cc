@@ -397,6 +397,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
     if (send->args.empty()) {
         return;
     }
+    // TODO(jez) We should probably update this for whatever lazyResolve thing we pick
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
