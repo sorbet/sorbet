@@ -10,8 +10,6 @@ sh_binary(
     srcs = ["hidden_methods_bazel.sh"],
     data = [
         "//main:sorbet",
-        "@gems//bundler",
-        "@gems//bundler:bundle",
         "@ruby_2_4//:ruby",
         "@ruby_2_6//:ruby",
     ],

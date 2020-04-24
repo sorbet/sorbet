@@ -132,4 +132,4 @@ DEPENDENCIES
   rails (= 6.0.0.rc2)
 
 BUNDLED WITH
-   2.0.1
+   2.1.4

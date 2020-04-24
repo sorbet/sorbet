@@ -94,7 +94,7 @@ info "├─ ruby:           $(command -v ruby)"
 info "├─ ruby --version: $(ruby --version)"
 
 # Add bundler to the path
-BUNDLER_LOC="$(dirname "$(rlocation gems/bundler/bundle)")"
+BUNDLER_LOC="$(dirname "$(rlocation "${ruby_package}/bundle")")"
 PATH="$BUNDLER_LOC:$PATH"
 export PATH
 
@@ -147,7 +147,7 @@ fi
   mkdir vendor
   ln -sf "$GEMS_LOC" "vendor/cache"
 
-  ruby_loc=$(bundle exec which ruby)
+  ruby_loc=$(bundle exec which ruby | sed -e 's,toolchain/bin/,,')
   if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
     info "├─ Bundle was able to find ruby"
   else 
