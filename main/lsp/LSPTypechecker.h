@@ -3,6 +3,7 @@
 
 #include "ast/ast.h"
 #include "core/core.h"
+#include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPFileUpdates.h"
 
@@ -70,6 +71,8 @@ class LSPTypechecker final {
     std::shared_ptr<core::lsp::PreemptionTaskManager> preemptManager;
     /** Used for assertions. Indicates if `initialize` has been run. */
     bool initialized = false;
+
+    ErrorReporter errorReporter;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */

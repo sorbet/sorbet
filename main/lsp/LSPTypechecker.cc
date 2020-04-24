@@ -66,7 +66,8 @@ bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameH
 
 LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
                                shared_ptr<core::lsp::PreemptionTaskManager> preemptManager)
-    : typecheckerThreadId(this_thread::get_id()), config(move(config)), preemptManager(move(preemptManager)) {}
+    : typecheckerThreadId(this_thread::get_id()), config(move(config)), preemptManager(move(preemptManager)),
+      errorReporter(this->config) {}
 
 LSPTypechecker::~LSPTypechecker() {}
 
@@ -77,8 +78,6 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(updates.epoch == 0);
     this->initialized = true;
     indexed = move(updates.updatedFileIndexes);
-    // Initialize to all zeroes.
-    diagnosticEpochs = vector<u4>(indexed.size(), 0);
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
     auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
@@ -420,7 +419,6 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
                                         vector<std::unique_ptr<core::Error>> errors) {
     config->logger->debug("[Typechecker] Sending diagnostics for epoch {}", epoch);
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
-    ErrorReporter er(move(config));
 
     for (auto &e : errors) {
         if (e->isSilenced) {
@@ -432,7 +430,7 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
 
     // Can change this to checking only if the passed in file has errors and hasn't been updated to newer version
     for (auto &accumulated : errorsAccumulated) {
-        er.pushDiagnostics(epoch, accumulated.first, move(accumulated.second), gs);
+        errorReporter.pushDiagnostics(epoch, accumulated.first, move(accumulated.second), gs);
     }
 }
 
@@ -452,14 +450,11 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
 
     int i = -1;
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
-    ENFORCE(indexed.size() == diagnosticEpochs.size());
     for (auto &ast : updates.updatedFileIndexes) {
         i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
-            // No diagnostics sent yet; initialize new IDs to 0.
-            diagnosticEpochs.resize(id + 1, 0);
         }
         if (cancellationUndoState != nullptr) {
             // Move the evicted values before they get replaced.

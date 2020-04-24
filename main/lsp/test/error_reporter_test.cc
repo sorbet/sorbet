@@ -46,28 +46,35 @@ unique_ptr<core::GlobalState> makeGS() {
 }
 
 } // namespace
-TEST(ErrorReporterTest, AddsToDiagnosticEpochs) {
+TEST(ErrorReporterTest, FirstTimeFileWithErrors) {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
+    vector<unique_ptr<core::Error>> errors;
+    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
+        auto newEpoch = 1;
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
-        auto newEpoch = epoch + 1;
 
-        EXPECT_TRUE(er.getDiagnosticEpochs().empty()) << fmt::format("diagnosticEpochs should be empty");
+        EXPECT_TRUE(er.getFileErrorStatuses().empty()) << fmt::format("fileErrorStatuses should be empty");
 
-        er.pushDiagnostics(newEpoch, fref, {}, gs);
-        EXPECT_EQ(fref.id() + 1, er.getDiagnosticEpochs().size())
-            << fmt::format("diagnosticEpochs size should equal max file id");
-        EXPECT_EQ(newEpoch, er.getDiagnosticEpochs()[fref.id()])
-            << fmt::format("Updates file epoch in diagnosticEpochs");
+        er.pushDiagnostics(newEpoch, fref, move(errors), *gs);
+        EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size())
+            << fmt::format("fileErrorStatuses size should equal max file id");
+
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch)
+            << fmt::format("File is added to fileErrorStatuses with correct epoch");
+        EXPECT_TRUE(fileErrorStatus.hasErrors) << fmt::format("File is added with hasErrors set to false");
     }
 }
 
-TEST(ErrorReporterTest, UpdatesEpochsInDiagnosticEpochs) {
+TEST(ErrorReporterTest, FileStillHasErrors) {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
@@ -83,121 +90,83 @@ TEST(ErrorReporterTest, UpdatesEpochsInDiagnosticEpochs) {
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
 
-        EXPECT_TRUE(er.getFilesThatHaveErrors().empty());
+        EXPECT_TRUE(er.getFileErrorStatuses().empty());
 
-        er.pushDiagnostics(epoch, fref, move(errors), gs);
-        er.pushDiagnostics(newEpoch, fref, move(errors), gs);
-        EXPECT_EQ(newEpoch, er.getDiagnosticEpochs()[fref.id()])
-            << fmt::format("Updates the epoch of a file that is already in filesThatHaveErrors");
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
+                                                     "MyError", vector<core::ErrorSection>(),
+                                                     vector<core::AutocorrectSuggestion>(), false));
+        er.pushDiagnostics(newEpoch, fref, move(errors), *gs);
+
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch)
+            << fmt::format("Updates the epoch of an existing file that has errors");
     }
 }
 
-TEST(ErrorReporterTest, ThrowsWhenEpochLessThanFileDiagnosticEpoch) {
+TEST(ErrorReporterTest, FileNoLongerHasErrors) {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
+    vector<unique_ptr<core::Error>> errors;
+    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        auto epoch = 0;
+        auto newEpoch = 1;
+        auto file = make_shared<core::File>("foo/without_error", "", core::File::Type::Normal, epoch);
+        auto fref = gs->enterFile(file);
+
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(newEpoch, fref, {}, *gs);
+        ErrorStatus newErrorStatus = er.getFileErrorStatuses()[fref.id()];
+
+        EXPECT_NE(newEpoch, newErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
+        EXPECT_FALSE(newErrorStatus.hasErrors) << fmt::format("File hasErrors should be false");
+    }
+}
+
+TEST(ErrorReporterTest, EpochLessThanLastCheckedEpoch) {
+    auto gs = makeGS();
+    auto cs = makeConfig();
+    ErrorReporter er(cs);
+    vector<unique_ptr<core::Error>> errors;
+    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 1;
         auto newEpoch = 0;
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
-        er.pushDiagnostics(epoch, fref, {}, gs);
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
 
-        EXPECT_THROW(er.pushDiagnostics(newEpoch, fref, {}, gs), SorbetException)
-            << fmt::format("Passed in epoch should be greater than or equal to file diagnosticEpoch");
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
     }
 }
 
-TEST(ErrorReporterTest, ThrowsWhenEpochLessThanFileEpoch) {
+TEST(ErrorReporterTest, EpochLessThanGSFileEpoch) {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
+    vector<unique_ptr<core::Error>> errors;
+    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 1;
         auto newEpoch = 0;
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
 
-        EXPECT_THROW(er.pushDiagnostics(newEpoch, fref, {}, gs), SorbetException)
-            << fmt::format("Passed in epoch should be greater than or equal to file epoch");
-        ;
-    }
-}
-
-TEST(ErrorReporterTest, AddsToFilesThatHaveErrors) {
-    auto gs = makeGS();
-    auto cs = makeConfig();
-    ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
-                                                 "MyError", vector<core::ErrorSection>(),
-                                                 vector<core::AutocorrectSuggestion>(), false));
-    {
-        auto epoch = 0;
-        auto newEpoch = 1;
-        core::UnfreezeFileTable fileTableAccess(*gs);
-        auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
-        auto fref = gs->enterFile(file);
-
-        EXPECT_TRUE(er.getFilesThatHaveErrors().empty());
-
-        er.pushDiagnostics(newEpoch, fref, move(errors), gs);
-        EXPECT_EQ(1, er.getFilesThatHaveErrors().size());
-        EXPECT_EQ(newEpoch, er.getDiagnosticEpochs()[fref.id()]) << fmt::format("Updates the epoch");
-        EXPECT_NE(er.getFilesThatHaveErrors().find(fref), er.getFilesThatHaveErrors().end())
-            << fmt::format("Adds a file with errors to filesThatHaveErrors");
-    }
-}
-
-TEST(ErrorReporterTest, DoesNotAddFilesWithoutErrors) {
-    auto gs = makeGS();
-    auto cs = makeConfig();
-    ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
-                                                 "MyError", vector<core::ErrorSection>(),
-                                                 vector<core::AutocorrectSuggestion>(), false));
-    {
-        core::UnfreezeFileTable fileTableAccess(*gs);
-        auto epoch = 0;
-        auto newEpoch = 1;
-        auto fileWithError = make_shared<core::File>("foo/with_error", "", core::File::Type::Normal, epoch);
-        auto fileWithErrorRef = gs->enterFile(fileWithError);
-        auto fileWithoutError = make_shared<core::File>("foo/without_error", "", core::File::Type::Normal, epoch);
-        auto fileWithoutErrorRef = gs->enterFile(fileWithoutError);
-
-        er.pushDiagnostics(newEpoch, fileWithErrorRef, move(errors), gs);
-        EXPECT_EQ(1, er.getFilesThatHaveErrors().size());
-        EXPECT_NE(er.getFilesThatHaveErrors().find(fileWithErrorRef), er.getFilesThatHaveErrors().end());
-
-        er.pushDiagnostics(newEpoch, fileWithoutErrorRef, {}, gs);
-        EXPECT_EQ(1, er.getFilesThatHaveErrors().size());
-        EXPECT_EQ(er.getFilesThatHaveErrors().find(fileWithoutErrorRef), er.getFilesThatHaveErrors().end());
-    }
-}
-
-TEST(ErrorReporterTest, RemovesFilesThatNoLongerHaveErrors) {
-    auto gs = makeGS();
-    auto cs = makeConfig();
-    ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
-                                                 "MyError", vector<core::ErrorSection>(),
-                                                 vector<core::AutocorrectSuggestion>(), false));
-    {
-        core::UnfreezeFileTable fileTableAccess(*gs);
-        auto epoch = 0;
-        auto newEpoch = 1;
-        auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
-        auto fref = gs->enterFile(file);
-
-        er.pushDiagnostics(epoch, fref, move(errors), gs);
-        EXPECT_EQ(1, er.getFilesThatHaveErrors().size());
-
-        er.pushDiagnostics(newEpoch, fref, {}, gs);
-        EXPECT_TRUE(er.getFilesThatHaveErrors().empty());
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
     }
 }
 
@@ -221,7 +190,9 @@ TEST(ErrorReporterTest, ReportsErrorsToVSCode) {
             vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
-        er.pushDiagnostics(epoch, fref, move(errors), gs);
+
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+
         auto output = outputVector->getOutput();
         auto &message = output[0];
         auto &notificationMessage = message->asNotification();
@@ -242,7 +213,7 @@ TEST(ErrorReporterTest, DoesNotReportWhenNoErrors) {
         auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
-        er.pushDiagnostics(epoch, fref, move(errors), gs);
+        er.pushDiagnostics(epoch, fref, move(errors), *gs);
         auto output = outputVector->getOutput();
         EXPECT_TRUE(output.empty());
     }

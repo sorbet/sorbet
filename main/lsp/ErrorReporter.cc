@@ -8,54 +8,51 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(config) {}
 
-const vector<u4> &ErrorReporter::getDiagnosticEpochs() const {
-    return diagnosticEpochs;
-};
-
-const UnorderedSet<core::FileRef> &ErrorReporter::getFilesThatHaveErrors() const {
-    return filesThatHaveErrors;
+// Used for unit tests
+const std::vector<ErrorStatus> &ErrorReporter::getFileErrorStatuses() const {
+    return fileErrorStatuses;
 };
 
 void ErrorReporter::setMaxFileId(u4 id) {
-    ENFORCE(id >= diagnosticEpochs.size());
-    diagnosticEpochs.resize(id + 1, 0);
+    ENFORCE(id >= fileErrorStatuses.size());
+    fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
 };
 
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> errors,
-                                    std::unique_ptr<core::GlobalState> &gs) {
-    const string uri = config->fileRef2Uri(*gs, file);
-    config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
+                                    const core::GlobalState &gs) {
+    ENFORCE(file.exists());
 
-    if (file.id() >= diagnosticEpochs.size()) {
+    if (file.id() >= fileErrorStatuses.size()) {
         setMaxFileId(file.id());
     }
 
-    // Update epoch of the file that was typechecked, since we've recalculated the set of diagnostics in these
-    if (diagnosticEpochs[file.id()] < epoch) {
-        diagnosticEpochs[file.id()] = epoch;
+    ErrorStatus &fileErrorStatus = fileErrorStatuses[file.id()];
+
+    if (file.data(gs).epoch > epoch || fileErrorStatus.sentEpoch > epoch) {
+        return;
+    }
+    // If errors is empty and the file had no errors previously, break
+    if (errors.empty() && fileErrorStatus.hasErrors == false) {
+        return;
     }
 
-    ENFORCE(diagnosticEpochs[file.id()] <= epoch);
-    ENFORCE(file.data(*gs).epoch <= epoch);
+    fileErrorStatus.hasErrors = !errors.empty();
 
-    if (errors.empty()) {
-        // If errors is empty, but the file previously had errors, remove the file from filesThatHaveErrors
-        // and send the empty errors to VSCode to clear the notifications. If the file had no errors previously,
-        // break
-        if (filesThatHaveErrors.find(file) == filesThatHaveErrors.end()) {
-            return;
-        }
-        filesThatHaveErrors.erase(file);
-    } else {
-        filesThatHaveErrors.insert(file);
+    if (fileErrorStatus.hasErrors) {
+        fileErrorStatus.sentEpoch = epoch;
     }
 
+    const string uri = config->fileRef2Uri(gs, file);
+    config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
     vector<unique_ptr<Diagnostic>> diagnostics;
     for (auto &error : errors) {
-        auto range = Range::fromLoc(*gs, error->loc);
+        ENFORCE(!error->isSilenced);
+
+        auto range = Range::fromLoc(gs, error->loc);
         if (range == nullptr) {
             continue;
         }
+
         auto diagnostic = make_unique<Diagnostic>(std::move(range), error->header);
         diagnostic->code = error->what.code;
         diagnostic->severity = DiagnosticSeverity::Error;
@@ -71,7 +68,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
                 } else {
                     message = sectionHeader;
                 }
-                auto location = config->loc2Location(*gs, errorLine.loc);
+                auto location = config->loc2Location(gs, errorLine.loc);
                 if (location == nullptr) {
                     continue;
                 }
@@ -82,9 +79,9 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
                 make_unique<Location>(absl::StrCat(config->opts.errorUrlBase, error->what.code),
                                       make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
                 "Click for more information on this error."));
-            diagnostic->relatedInformation = move(relatedInformation);
-            diagnostics.push_back(move(diagnostic));
         }
+        diagnostic->relatedInformation = move(relatedInformation);
+        diagnostics.push_back(move(diagnostic));
     }
 
     auto params = make_unique<PublishDiagnosticsParams>(uri, move(diagnostics));
