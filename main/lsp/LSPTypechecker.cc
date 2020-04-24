@@ -430,7 +430,7 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
 
     // Can change this to checking only if the passed in file has errors and hasn't been updated to newer version
     for (auto &accumulated : errorsAccumulated) {
-        errorReporter.pushDiagnostics(epoch, accumulated.first, move(accumulated.second), gs);
+        errorReporter.pushDiagnostics(epoch, accumulated.first, move(accumulated.second), *gs);
     }
 }
 
