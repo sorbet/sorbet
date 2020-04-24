@@ -141,7 +141,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+        blk: T.proc.params(name: String).returns(BasicObject),
     )
     .returns(Sorbet::Private::Static::ENVClass)
   end
@@ -159,7 +159,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+        blk: T.proc.params(value: String).returns(BasicObject),
     )
     .returns(Sorbet::Private::Static::ENVClass)
   end
