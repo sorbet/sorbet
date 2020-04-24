@@ -134,6 +134,7 @@ NameDef names[] = {
     {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
+    {"lazyResolve", "lazy_resolve"},
     // end T keywords
 
     // Ruby DSL methods which we understand

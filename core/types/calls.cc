@@ -1,4 +1,5 @@
 #include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort.h"
 #include "common/typecase.h"
@@ -1093,6 +1094,80 @@ public:
         res.returnType = args.args[0]->type;
     }
 } T_revealType;
+
+class T_lazyResolve : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto loc = Loc(args.locs.file, args.locs.call);
+
+        auto literal = cast_type<LiteralType>(args.args[0]->type.get());
+        if (literal == nullptr) {
+            if (auto e = gs.beginError(loc, errors::Infer::RevealType)) {
+                e.setHeader("`{}` only accepts string literals, not dynamically computed strings", "T.lazy_resolve");
+            }
+            return;
+        }
+
+        if (literal->literalKind != LiteralType::LiteralTypeKind::String) {
+            // Infer already reported a type error via the RBI
+            return;
+        }
+
+        auto name = NameRef(gs, literal->value);
+        auto shortName = name.data(gs)->shortName(gs);
+        if (shortName.empty()) {
+            if (auto e = gs.beginError(loc, errors::Infer::RevealType)) {
+                e.setHeader("The string given to `{}` must not be empty", "T.lazy_resolve");
+            }
+            return;
+        }
+
+        auto parts = absl::StrSplit(shortName, "::");
+        core::SymbolRef current;
+        for (auto part : parts) {
+            if (!current.exists()) {
+                // First iteration
+                if (part != "") {
+                    if (auto e = gs.beginError(loc, errors::Infer::RevealType)) {
+                        e.setHeader(
+                            "The string given to `{}` must be an absolute constant reference that starts with `{}`",
+                            "T.lazy_resolve", "::");
+                    }
+                    return;
+                }
+
+                current = core::Symbols::root();
+            } else {
+                auto member = gs.lookupNameConstant(part);
+                if (!member.exists()) {
+                    if (auto e = gs.beginError(loc, errors::Infer::RevealType)) {
+                        auto prettyCurrent = current == core::Symbols::root() ? "" : current.data(gs)->show(gs);
+                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    }
+                    return;
+                }
+
+                auto newCurrent = current.data(gs)->findMember(gs, member);
+                if (!newCurrent.exists()) {
+                    if (auto e = gs.beginError(loc, errors::Infer::RevealType)) {
+                        auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(gs)->show(gs);
+                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    }
+                    return;
+                }
+                current = newCurrent;
+            }
+        }
+
+        ENFORCE(current.exists(), "Loop invariant violated");
+    }
+} T_lazyResolve;
 
 class T_nilable : public IntrinsicMethod {
 public:
@@ -2189,6 +2264,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::any(), &T_any},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::lazyResolve(), &T_lazyResolve},
 
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
 

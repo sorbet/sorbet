@@ -21,3 +21,6 @@ end
 module T::Private::Methods::CallValidation
   def self.disable_fast_path; end
 end
+
+class T::Private::LazilyResolvedConstant
+end
