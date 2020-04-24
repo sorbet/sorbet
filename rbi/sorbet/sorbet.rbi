@@ -130,6 +130,42 @@ class Sorbet::Private::Static::ENVClass
   sig {returns(T::Enumerator[Elem])}
   def delete_if(&blk); end
 
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_key(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_pair(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_value(&blk); end
+
   sig {returns(T::Boolean)}
   def empty?(); end
 
@@ -174,6 +210,22 @@ class Sorbet::Private::Static::ENVClass
   end
   sig {returns(T::Enumerator[Elem])}
   def filter!(&blk); end
+
+  sig do
+    params(
+        key: String
+    )
+    .returns(T::Boolean)
+  end
+  def has_key?(key); end
+
+  sig do
+    params(
+        key: String
+    )
+    .returns(T::Boolean)
+  end
+  def has_value?(key); end
 
   sig do
     params(
@@ -261,6 +313,14 @@ class Sorbet::Private::Static::ENVClass
     .returns(T::Hash[String, T.nilable(String)])
   end
   def update(key, &blk); end
+
+  sig do
+    params(
+        value: String
+    )
+    .returns(T::Boolean)
+  end
+  def value?(key); end
 end
 # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
 # for environment variables.
