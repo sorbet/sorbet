@@ -567,6 +567,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
+    def self.token_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
+    def self.created_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -599,7 +607,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.include(<emptyTree>::<C T>::<C Props>)
+    def self.token_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    def self.created_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"token_prop")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop")
 
     <self>.token_prop({:"without_accessors" => true})
 
@@ -612,9 +630,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"created")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"created=")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"token_prop<defaultArg>1")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop<defaultArg>1")
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
+    def self.timestamped_token_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
+    def self.created_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -639,7 +669,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.include(<emptyTree>::<C T>::<C Props>)
+    def self.timestamped_token_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    def self.created_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"timestamped_token_prop")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop")
 
     <self>.timestamped_token_prop({:"without_accessors" => true})
 
@@ -650,9 +690,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.created_prop({:"immutable" => true, :"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"created")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"timestamped_token_prop<defaultArg>1")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop<defaultArg>1")
   end
 
   class <emptyTree>::<C ShardingProp><<C <todo sym>>> < (::<todo sym>)
+    def self.merchant_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::String)
     end
@@ -661,14 +709,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.include(<emptyTree>::<C T>::<C Props>)
+    def self.merchant_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"merchant_prop")
 
     <self>.merchant_prop({:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"merchant")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"merchant_prop<defaultArg>1")
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
+    def self.encrypted_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      <emptyTree>
+    end
+
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params({}).returns(::T.nilable(::String))
     end
@@ -717,7 +775,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.include(<emptyTree>::<C T>::<C Props>)
+    def self.encrypted_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"encrypted_prop")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
@@ -730,6 +792,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"encrypted_bar")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"encrypted_prop<defaultArg>1")
   end
 
   ::Sorbet::Private::Static.keep_def(<self>, :"main")
