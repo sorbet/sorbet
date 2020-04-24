@@ -603,7 +603,7 @@ class Time < Object
   # ```
   sig do
     params(
-        utc_offset: Integer,
+        utc_offset: T.any(Integer, String),
     )
     .returns(Time)
   end
