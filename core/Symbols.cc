@@ -1050,7 +1050,6 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
         store.name = NameRef(to, mem.name.id());
     }
     result.superClassOrRebind = this->superClassOrRebind;
-    result.uniqueCounter = this->uniqueCounter;
     result.intrinsic = this->intrinsic;
     return result;
 }

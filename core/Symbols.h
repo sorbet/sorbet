@@ -559,7 +559,6 @@ public:
     }
 
     u4 flags = Flags::NONE;
-    u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
