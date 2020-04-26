@@ -559,7 +559,7 @@ public:
     }
 
     u4 flags = Flags::NONE;
-    NameRef name;         // todo: move out? it should not matter but it's important for name resolution
+    NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
     bool hasSig() const {
