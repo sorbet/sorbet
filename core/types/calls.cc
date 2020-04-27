@@ -1095,10 +1095,10 @@ public:
     }
 } T_revealType;
 
-class T_LazyConstants_lazyIsA_p : public IntrinsicMethod {
+class T_NonForcingConstants_nonForcingIsA_p : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        constexpr string_view method = "T::LazyConstants.lazy_is_a?";
+        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
         if (args.args.size() != 2) {
             return;
@@ -1188,7 +1188,7 @@ public:
             res.returnType = Types::Boolean();
         }
     }
-} T_LazyConstants_lazyIsA_p;
+} T_NonForcingConstants_nonForcingIsA_p;
 
 class T_nilable : public IntrinsicMethod {
 public:
@@ -2297,7 +2297,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::T_LazyConstants(), Intrinsic::Kind::Singleton, Names::lazyIsA_p(), &T_LazyConstants_lazyIsA_p},
+    {Symbols::T_NonForcingConstants(), Intrinsic::Kind::Singleton, Names::nonForcingIsA_p(), &T_NonForcingConstants_nonForcingIsA_p},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},

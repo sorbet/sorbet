@@ -1922,7 +1922,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send->recv.get())) {
-            if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_LazyConstants()) {
+            if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
                 return send;
             }
             switch (send->fun._id) {
@@ -1951,7 +1951,7 @@ public:
                 }
                 case core::Names::revealType()._id:
                 case core::Names::absurd()._id:
-                case core::Names::lazyIsA_p()._id: {
+                case core::Names::nonForcingIsA_p()._id: {
                     // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
 

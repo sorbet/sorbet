@@ -429,7 +429,7 @@ public:
         return SymbolRef(nullptr, 92);
     }
 
-    static SymbolRef T_LazyConstants() {
+    static SymbolRef T_NonForcingConstants() {
         return SymbolRef(nullptr, 93);
     }
 
