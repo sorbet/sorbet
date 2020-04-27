@@ -135,7 +135,6 @@ NameDef names[] = {
     {"revealType", "reveal_type"},
     {"absurd"},
     {"lazyIsA_p", "lazy_is_a?"},
-    {"lazyLessThan", "lazy_less_than"},
     // end T keywords
 
     // Ruby DSL methods which we understand

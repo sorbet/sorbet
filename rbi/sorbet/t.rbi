@@ -187,7 +187,4 @@ end
 module T::LazyConstants
   sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
   def self.lazy_is_a?(val, klass); end
-
-  sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
-  def self.lazy_less_than(val, klass); end
 end
