@@ -9,9 +9,9 @@ namespace sorbet::realmain::lsp {
 
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
-    u4 sentEpoch;
+    u4 sentEpoch = 0;
     // If true, the client believes this file has errors.
-    bool hasErrors;
+    bool hasErrors = false;
 };
 
 class ErrorReporter {
@@ -29,7 +29,7 @@ public:
      * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
      * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
      */
-    void pushDiagnostics(u4 epoch, core::FileRef file, std::vector<std::unique_ptr<core::Error>> errors,
+    void pushDiagnostics(u4 epoch, core::FileRef file, std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
 };
 }; // namespace sorbet::realmain::lsp

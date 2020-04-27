@@ -63,7 +63,7 @@ TEST(ErrorReporterTest, FirstTimeFileWithErrors) {
 
         EXPECT_TRUE(er.getFileErrorStatuses().empty()) << fmt::format("fileErrorStatuses should be empty");
 
-        er.pushDiagnostics(newEpoch, fref, move(errors), *gs);
+        er.pushDiagnostics(newEpoch, fref, errors, *gs);
         EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size())
             << fmt::format("fileErrorStatuses size should equal max file id");
 
@@ -92,11 +92,11 @@ TEST(ErrorReporterTest, FileStillHasErrors) {
 
         EXPECT_TRUE(er.getFileErrorStatuses().empty());
 
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
         errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
                                                      "MyError", vector<core::ErrorSection>(),
                                                      vector<core::AutocorrectSuggestion>(), false));
-        er.pushDiagnostics(newEpoch, fref, move(errors), *gs);
+        er.pushDiagnostics(newEpoch, fref, errors, *gs);
 
         ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
         EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch)
@@ -108,6 +108,7 @@ TEST(ErrorReporterTest, FileNoLongerHasErrors) {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
+    vector<unique_ptr<core::Error>> emptyErrorList;
     vector<unique_ptr<core::Error>> errors;
     errors.emplace_back(make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True},
                                                  "MyError", vector<core::ErrorSection>(),
@@ -119,11 +120,12 @@ TEST(ErrorReporterTest, FileNoLongerHasErrors) {
         auto file = make_shared<core::File>("foo/without_error", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
 
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
-        er.pushDiagnostics(newEpoch, fref, {}, *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+        er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
         ErrorStatus newErrorStatus = er.getFileErrorStatuses()[fref.id()];
 
-        EXPECT_NE(newEpoch, newErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
+        EXPECT_EQ(newEpoch, newErrorStatus.sentEpoch)
+            << fmt::format("Updates the epoch of a file that no longer has errors");
         EXPECT_FALSE(newErrorStatus.hasErrors) << fmt::format("File hasErrors should be false");
     }
 }
@@ -142,7 +144,7 @@ TEST(ErrorReporterTest, EpochLessThanLastCheckedEpoch) {
         auto newEpoch = 0;
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
 
         ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
         EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
@@ -163,7 +165,7 @@ TEST(ErrorReporterTest, EpochLessThanGSFileEpoch) {
         auto newEpoch = 0;
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
 
         ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
         EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch) << fmt::format("Epoch should not be updated");
@@ -191,7 +193,7 @@ TEST(ErrorReporterTest, ReportsErrorsToVSCode) {
 
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
 
         auto output = outputVector->getOutput();
         auto &message = output[0];
@@ -213,7 +215,7 @@ TEST(ErrorReporterTest, DoesNotReportWhenNoErrors) {
         auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
-        er.pushDiagnostics(epoch, fref, move(errors), *gs);
+        er.pushDiagnostics(epoch, fref, errors, *gs);
         auto output = outputVector->getOutput();
         EXPECT_TRUE(output.empty());
     }

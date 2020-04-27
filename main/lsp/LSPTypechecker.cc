@@ -420,17 +420,11 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
     config->logger->debug("[Typechecker] Sending diagnostics for epoch {}", epoch);
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
-    for (auto &e : errors) {
-        if (e->isSilenced) {
-            continue;
-        }
-        auto file = e->loc.file();
-        errorsAccumulated[file].emplace_back(std::move(e));
-    }
-
-    // Can change this to checking only if the passed in file has errors and hasn't been updated to newer version
-    for (auto &accumulated : errorsAccumulated) {
-        errorReporter.pushDiagnostics(epoch, accumulated.first, move(accumulated.second), *gs);
+    vector<unique_ptr<core::Error>> emptyErrorList;
+    for (auto &file : filesTypechecked) {
+        auto it = errorsAccumulated.find(file);
+        vector<unique_ptr<core::Error>> &errors = it == errorsAccumulated.end() ? emptyErrorList : it->second;
+        errorReporter.pushDiagnostics(epoch, it->first, errors, *gs);
     }
 }
 

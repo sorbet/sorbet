@@ -6,7 +6,7 @@
 
 namespace sorbet::realmain::lsp {
 using namespace std;
-ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(config) {}
+ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(move(config)) {}
 
 // Used for unit tests
 const std::vector<ErrorStatus> &ErrorReporter::getFileErrorStatuses() const {
@@ -18,7 +18,7 @@ void ErrorReporter::setMaxFileId(u4 id) {
     fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
 };
 
-void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> errors,
+void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
 
@@ -37,10 +37,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
     }
 
     fileErrorStatus.hasErrors = !errors.empty();
-
-    if (fileErrorStatus.hasErrors) {
-        fileErrorStatus.sentEpoch = epoch;
-    }
+    fileErrorStatus.sentEpoch = epoch;
 
     const string uri = config->fileRef2Uri(gs, file);
     config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
@@ -62,12 +59,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
             string sectionHeader = section.header;
 
             for (auto &errorLine : section.messages) {
-                string message;
-                if (errorLine.formattedMessage.length() > 0) {
-                    message = errorLine.formattedMessage;
-                } else {
-                    message = sectionHeader;
-                }
+                string message = errorLine.formattedMessage.length() > 0 ? errorLine.formattedMessage : sectionHeader;
                 auto location = config->loc2Location(gs, errorLine.loc);
                 if (location == nullptr) {
                     continue;
