@@ -1104,12 +1104,11 @@ public:
             return;
         }
 
-        // TODO(jez) Might want to point to the argument to the call, not the call itself, if we have that info.
-        auto loc = Loc(args.locs.file, args.locs.call);
+        auto stringLoc = Loc(args.locs.file, args.locs.args[1]);
 
         auto literal = cast_type<LiteralType>(args.args[1]->type.get());
         if (literal == nullptr) {
-            if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
             }
             return;
@@ -1123,7 +1122,7 @@ public:
         auto name = NameRef(gs, literal->value);
         auto shortName = name.data(gs)->shortName(gs);
         if (shortName.empty()) {
-            if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);
             }
             return;
@@ -1135,7 +1134,7 @@ public:
             if (!current.exists()) {
                 // First iteration
                 if (part != "") {
-                    if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                         e.setHeader(
                             "The string given to `{}` must be an absolute constant reference that starts with `{}`",
                             method, "::");
@@ -1147,7 +1146,7 @@ public:
             } else {
                 auto member = gs.lookupNameConstant(part);
                 if (!member.exists()) {
-                    if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                         auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(gs)->show(gs);
                         auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                         e.setHeader("Unable to resolve constant `{}`", pretty);
@@ -1157,7 +1156,7 @@ public:
 
                 auto newCurrent = current.data(gs)->findMember(gs, member);
                 if (!newCurrent.exists()) {
-                    if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                         auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(gs)->show(gs);
                         auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                         e.setHeader("Unable to resolve constant `{}`", pretty);
@@ -1171,7 +1170,7 @@ public:
         ENFORCE(current.exists(), "Loop invariant violated");
 
         if (!current.data(gs)->isClassOrModule()) {
-            if (auto e = gs.beginError(loc, errors::Infer::LazyResolve)) {
+            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
                 e.setHeader("The string given to `{}` must resolve to a class or module", method);
                 e.addErrorLine(current.data(gs)->loc(), "Resolved to this constant");
             }

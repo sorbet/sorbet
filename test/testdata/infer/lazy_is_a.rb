@@ -6,7 +6,7 @@ T::LazyConstants.lazy_is_a? # error: Not enough arguments
 
 p T::LazyConstants.lazy_is_a?(nil, nil)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: only accepts string literals
+#                                  ^^^  error: only accepts string literals
 
 T::LazyConstants.lazy_is_a?(x, '') # error: must not be empty
 
