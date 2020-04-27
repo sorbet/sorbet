@@ -32,9 +32,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
+
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+
+    <self>.prop(:"bar", <emptyTree>::<C String>, {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 

@@ -1493,6 +1493,46 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"foo" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -4298,6 +4338,50 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"default" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"default" }
+                  value = Literal{ value = "" }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -4328,6 +4412,39 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"t_nilable" }
+            Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              fun = <U nilable>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -4354,6 +4471,29 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"t_nilable=" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"array" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U Array>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -4587,6 +4727,42 @@ ClassDef{
                   localVariable = <U <self>>
                 }
                 Literal{ value = :"array" }
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"t_array" }
+            Send{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                cnst = <C <U Array>>
+              }
+              fun = <U []>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
               ]
             }
           ]
@@ -4842,6 +5018,46 @@ ClassDef{
                   localVariable = <U <self>>
                 }
                 Literal{ value = :"t_array" }
+              ]
+            }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"hash_of" }
+            Send{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                cnst = <C <U Hash>>
+              }
+              fun = <U []>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U Symbol>>
+                }
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
               ]
             }
           ]
@@ -5115,6 +5331,33 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"const_explicit" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"immutable" }
+                  value = Literal{ value = true }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -5130,6 +5373,29 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U const>
+          block = nullptr
+          args = [
+            Literal{ value = :"const" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -5141,6 +5407,38 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"const" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"enum_prop" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"enum" }
+                  value = Array{
+                    elems = [
+                      Literal{ value = "hello" }
+                      Literal{ value = "goodbye" }
+                    ]
+                  }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -5171,6 +5469,36 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"enum_prop=" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"foreign" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"foreign" }
+                  value = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U ForeignClass>>
+                  }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -5235,6 +5563,48 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"foreign_lazy" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"foreign" }
+                  value = Send{
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
+                    fun = <U lambda>
+                    block = Block {
+                      args = [
+                      ]
+                      body = UnresolvedConstantLit{
+                        scope = EmptyTree
+                        cnst = <C <U ForeignClass>>
+                      }
+                    }
+                    args = [
+                    ]
+                  }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -5291,6 +5661,48 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"foreign_lazy_!" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"foreign_proc" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"foreign" }
+                  value = Send{
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
+                    fun = <U proc>
+                    block = Block {
+                      args = [
+                      ]
+                      body = UnresolvedConstantLit{
+                        scope = EmptyTree
+                        cnst = <C <U ForeignClass>>
+                      }
+                    }
+                    args = [
+                    ]
+                  }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -5355,6 +5767,45 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"foreign_invalid" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"foreign" }
+                  value = Send{
+                    recv = Local{
+                      localVariable = <U <self>>
+                    }
+                    fun = <U proc>
+                    block = Block {
+                      args = [
+                      ]
+                      body = Literal{ value = :"not_a_type" }
+                    }
+                    args = [
+                    ]
+                  }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -5415,6 +5866,33 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"ifunset" }
+            UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U String>>
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"ifunset" }
+                  value = Literal{ value = "" }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -5441,6 +5919,43 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"ifunset=" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U prop>
+          block = nullptr
+          args = [
+            Literal{ value = :"ifunset_nilable" }
+            Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              fun = <U nilable>
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
+                }
+              ]
+            }
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"ifunset" }
+                  value = Literal{ value = "" }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -5487,6 +6002,38 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        MethodDef{
+          flags = {self}
+          name = <U token_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
+        MethodDef{
+          flags = {self}
+          name = <U created_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -5775,6 +6322,92 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token_prop" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U token_prop>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -5802,6 +6435,24 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"token=" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U created_prop>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
           ]
         }
 
@@ -5834,6 +6485,36 @@ ClassDef{
             Literal{ value = :"created=" }
           ]
         }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token_prop<defaultArg>1" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop<defaultArg>1" }
+          ]
+        }
       ]
     }
 
@@ -5848,6 +6529,38 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        MethodDef{
+          flags = {self}
+          name = <U timestamped_token_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
+        MethodDef{
+          flags = {self}
+          name = <U created_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6059,6 +6772,92 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U timestamped_token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"timestamped_token_prop" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U timestamped_token_prop>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6090,6 +6889,28 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U created_prop>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"immutable" }
+                  value = Literal{ value = true }
+                ]
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -6101,6 +6922,36 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"created" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"timestamped_token_prop<defaultArg>1" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop<defaultArg>1" }
           ]
         }
       ]
@@ -6117,6 +6968,22 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        MethodDef{
+          flags = {self}
+          name = <U merchant_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6184,6 +7051,58 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U merchant_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"merchant_prop" }
+          ]
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U merchant_prop>
+          block = nullptr
+          args = [
+            Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :"without_accessors" }
+                  value = Literal{ value = true }
+                ]
+              ]
+            }
+          ]
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6196,6 +7115,21 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"merchant" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"merchant_prop<defaultArg>1" }
           ]
         }
       ]
@@ -6212,6 +7146,22 @@ ClassDef{
           symbol = ::<todo sym>
         }]
       rhs = [
+        MethodDef{
+          flags = {self}
+          name = <U encrypted_prop><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6774,6 +7724,40 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U encrypted_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_prop" }
+          ]
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6861,6 +7845,21 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"encrypted_bar" }
+          ]
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_prop<defaultArg>1" }
           ]
         }
       ]

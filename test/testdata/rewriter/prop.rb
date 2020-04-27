@@ -22,6 +22,7 @@ end
 
 class SomeODM
     extend T::Sig
+    include T::Props
 
     prop :foo, String
 
@@ -35,6 +36,7 @@ class ForeignClass
 end
 
 class AdvancedODM
+    include T::Props
     prop :default, String, default: ""
     prop :t_nilable, T.nilable(String)
 
@@ -57,20 +59,26 @@ class AdvancedODM
 end
 
 class PropHelpers
+  def self.token_prop(opts={}); end
+  def self.created_prop(opts={}); end
   token_prop
   created_prop
 end
 
 class PropHelpers2
+  def self.timestamped_token_prop(opts={}); end
+  def self.created_prop(opts={}); end
   timestamped_token_prop
   created_prop(immutable: true)
 end
 
 class ShardingProp
+  def self.merchant_prop(opts={}); end
   merchant_prop
 end
 
 class EncryptedProp
+  def self.encrypted_prop(opts={}); end
   encrypted_prop :foo
   encrypted_prop :bar, migrating: true, immutable: true
 end
