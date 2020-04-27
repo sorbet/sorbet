@@ -2297,7 +2297,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::T_NonForcingConstants(), Intrinsic::Kind::Singleton, Names::nonForcingIsA_p(), &T_NonForcingConstants_nonForcingIsA_p},
+    {Symbols::T_NonForcingConstants(), Intrinsic::Kind::Singleton, Names::nonForcingIsA_p(),
+     &T_NonForcingConstants_nonForcingIsA_p},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
