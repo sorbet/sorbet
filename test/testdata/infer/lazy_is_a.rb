@@ -10,6 +10,10 @@ p T::LazyConstants.lazy_is_a?(nil, nil)
 
 T::LazyConstants.lazy_is_a?(x, '') # error: must not be empty
 
+T::LazyConstants.lazy_is_a?(x, '::') # error: Unable to resolve constant `::`
+T::LazyConstants.lazy_is_a?(x, ':::') # error: Unable to resolve constant `:::`
+T::LazyConstants.lazy_is_a?(x, '::::') # error: Unable to resolve constant `::`
+
 T::LazyConstants.lazy_is_a?(x, 'X') # error: must be an absolute constant reference
 
 T::LazyConstants.lazy_is_a?(x, '::DoesntExist') # error: Unable to resolve constant `::DoesntExist`
