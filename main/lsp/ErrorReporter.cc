@@ -13,31 +13,47 @@ const std::vector<ErrorStatus> &ErrorReporter::getFileErrorStatuses() const {
     return fileErrorStatuses;
 };
 
+// Used for unit tests
+const UnorderedMap<core::FileRef, ErrorStatus> &ErrorReporter::getUncommittedFileErrorStatuses() const {
+    return uncommittedFileErrorStatuses;
+};
+
 void ErrorReporter::setMaxFileId(u4 id) {
     ENFORCE(id >= fileErrorStatuses.size());
     fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
 };
 
+void ErrorReporter::commit() {
+    for (auto &uncommitted : uncommittedFileErrorStatuses) {
+        auto fileId = uncommitted.first.id();
+        if (fileId >= fileErrorStatuses.size()) {
+            setMaxFileId(fileId);
+        }
+
+        fileErrorStatuses[fileId] = uncommitted.second;
+    }
+
+    uncommittedFileErrorStatuses.clear();
+};
+
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
-
-    if (file.id() >= fileErrorStatuses.size()) {
-        setMaxFileId(file.id());
-    }
-
-    ErrorStatus &fileErrorStatus = fileErrorStatuses[file.id()];
-
-    if (file.data(gs).epoch > epoch || fileErrorStatus.sentEpoch > epoch) {
+    if (file.data(gs).epoch > epoch) {
         return;
     }
+
+    ErrorStatus fileErrorStatus = getFileErrorStatus(file);
+    if (fileErrorStatus.sentEpoch > epoch) {
+        return;
+    }
+
     // If errors is empty and the file had no errors previously, break
     if (errors.empty() && fileErrorStatus.hasErrors == false) {
         return;
     }
 
-    fileErrorStatus.hasErrors = !errors.empty();
-    fileErrorStatus.sentEpoch = epoch;
+    uncommittedFileErrorStatuses[file] = ErrorStatus{epoch, !errors.empty()};
 
     const string uri = config->fileRef2Uri(gs, file);
     config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
@@ -79,5 +95,18 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
     auto params = make_unique<PublishDiagnosticsParams>(uri, move(diagnostics));
     config->output->write(make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
+};
+
+ErrorStatus ErrorReporter::getFileErrorStatus(core::FileRef file) {
+    auto it = uncommittedFileErrorStatuses.find(file);
+    if (it != uncommittedFileErrorStatuses.end()) {
+        return it->second;
+    }
+
+    if (file.id() < fileErrorStatuses.size()) {
+        return fileErrorStatuses[file.id()];
+    }
+
+    return ErrorStatus{0, false};
 };
 } // namespace sorbet::realmain::lsp
