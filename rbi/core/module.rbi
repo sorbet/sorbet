@@ -297,7 +297,7 @@ class Module < Object
   # ```
   sig do
     params(
-        name: Symbol,
+        name: T.any(Symbol, String),
     )
     .returns(T.nilable(String))
   end
