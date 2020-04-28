@@ -93,7 +93,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
             // This is the typecheck that caused us to cancel the previous slow path. Un-commit all typechecker changes.
-            auto oldFilesWithErrors = cancellationUndoState->restore(gs, indexed, indexedFinalGS, filesThatHaveErrors);
+            auto oldFilesWithErrors = errorReporter.abort();
+            cancellationUndoState->restore(gs, indexed, indexedFinalGS);
             cancellationUndoState = nullptr;
             auto fastPathDecision = updates.canTakeFastPath;
             // Retypecheck all of the files that previously had errors.
@@ -403,6 +404,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         cancellationUndoState = nullptr;
         // Send diagnostics to client (we already committed file updates earlier).
         pushAllDiagnostics(updates.epoch, move(affectedFiles), move(out.first));
+        errorReporter.commit();
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
@@ -420,11 +422,19 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
     config->logger->debug("[Typechecker] Sending diagnostics for epoch {}", epoch);
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
+    for (auto &e : errors) {
+        if (e->isSilenced) {
+            continue;
+        }
+        auto file = e->loc.file();
+        errorsAccumulated[file].emplace_back(std::move(e));
+    }
+
     vector<unique_ptr<core::Error>> emptyErrorList;
     for (auto &file : filesTypechecked) {
         auto it = errorsAccumulated.find(file);
         vector<unique_ptr<core::Error>> &errors = it == errorsAccumulated.end() ? emptyErrorList : it->second;
-        errorReporter.pushDiagnostics(epoch, it->first, errors, *gs);
+        errorReporter.pushDiagnostics(epoch, file, errors, *gs);
     }
 }
 
@@ -433,8 +443,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     ENFORCE(!(updates.canTakeFastPath && couldBeCanceled));
     if (couldBeCanceled) {
         ENFORCE(updates.updatedGS.has_value());
-        cancellationUndoState =
-            make_unique<UndoState>(*config, move(gs), std::move(indexedFinalGS), filesThatHaveErrors);
+        cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS));
     }
 
     // Clear out state associated with old finalGS.
@@ -473,6 +482,7 @@ void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     Timer timeit(config->logger, "commitTypecheckRun");
     commitFileUpdates(run.updates, false);
     pushAllDiagnostics(run.updates.epoch, move(run.filesTypechecked), move(run.errors));
+    errorReporter.commit();
 }
 
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {

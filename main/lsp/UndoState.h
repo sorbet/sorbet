@@ -12,7 +12,6 @@ class LSPConfiguration;
  * path operations that have preempted it.
  */
 class UndoState final {
-    const LSPConfiguration &config;
     // Stores the pre-slow-path global state.
     std::unique_ptr<core::GlobalState> evictedGs;
     // Stores index trees containing data stored in `gs` that have been evicted during the slow path operation.
@@ -23,9 +22,7 @@ class UndoState final {
     std::vector<core::FileRef> evictedFilesThatHaveErrors;
 
 public:
-    UndoState(const LSPConfiguration &config, std::unique_ptr<core::GlobalState> evictedGs,
-              UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              std::vector<core::FileRef> evictedFilesThatHaveErrors);
+    UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
@@ -33,13 +30,10 @@ public:
     void recordEvictedState(ast::ParsedFile evictedIndexTree);
 
     /**
-     * Undoes the slow path changes represented by this class. and clears the client's error list for any files that
-     * were newly introduced with the canceled update. Returns a list of files that need to be retypechecked to update
-     * their error lists.
+     * Undoes the slow path changes represented by this class.
      */
-    std::vector<core::FileRef> restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
-                                       UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
-                                       std::vector<core::FileRef> &filesThatHaveErrors);
+    void restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
+                 UnorderedMap<int, ast::ParsedFile> &indexedFinalGS);
 };
 
 } // namespace sorbet::realmain::lsp

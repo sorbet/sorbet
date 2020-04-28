@@ -58,10 +58,6 @@ class LSPTypechecker final {
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
-    /** Stores the epoch in which we last sent diagnostics to the client for each file. */
-    std::vector<u4> diagnosticEpochs;
-    /** List of files that have had errors in last run*/
-    std::vector<core::FileRef> filesThatHaveErrors;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
     std::unique_ptr<UndoState> cancellationUndoState;

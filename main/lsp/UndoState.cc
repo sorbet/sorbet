@@ -8,11 +8,8 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-UndoState::UndoState(const LSPConfiguration &config, unique_ptr<core::GlobalState> evictedGs,
-                     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     vector<core::FileRef> evictedFilesThatHaveErrors)
-    : config(config), evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
-      evictedFilesThatHaveErrors(move(evictedFilesThatHaveErrors)) {}
+UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS)
+    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)) {}
 
 void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
     const auto id = evictedIndexTree.file.id();
@@ -24,42 +21,15 @@ void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
     }
 }
 
-vector<core::FileRef> UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
-                                         UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
-                                         std::vector<core::FileRef> &filesThatHaveErrors) {
+void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
+                        UnorderedMap<int, ast::ParsedFile> &indexedFinalGS) {
     // Replace evicted index trees.
     for (auto &entry : evictedIndexed) {
         indexed[entry.first] = move(entry.second);
     }
+
     indexedFinalGS = std::move(evictedIndexedFinalGS);
-
-    // Restore `filesThatHaveErrors` to its previous state both here, and on the client.
-    // We send empty error lists for files that newly have errors from the canceled slow path.
-    // If those new files still have errors, they will show up in the next typecheck operation.
-    // We specifically do this because the old GS might not have the new files introduced in the canceled slow path,
-    // and we expect `gs` to always contain all of the files that previously had errors.
-    // TODO: Update with the reverse when we switch to tombstoning files.
-    vector<string> newPathsThatHaveErrors = config.frefsToPaths(*gs, filesThatHaveErrors);
-    vector<string> oldPathsThatHaveErrors = config.frefsToPaths(*evictedGs, evictedFilesThatHaveErrors);
-    fast_sort(newPathsThatHaveErrors);
-    fast_sort(oldPathsThatHaveErrors);
-    vector<string> clearErrorsFor;
-    std::set_difference(newPathsThatHaveErrors.begin(), newPathsThatHaveErrors.end(), oldPathsThatHaveErrors.begin(),
-                        oldPathsThatHaveErrors.end(), std::inserter(clearErrorsFor, clearErrorsFor.begin()));
-    config.logger->debug("[Typechecker] Restoring empty error list for {} files", clearErrorsFor.size());
-    for (auto &file : clearErrorsFor) {
-        vector<unique_ptr<Diagnostic>> diagnostics;
-        auto params = make_unique<PublishDiagnosticsParams>(config.localName2Remote(file), move(diagnostics));
-        config.output->write(make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
-    }
-    filesThatHaveErrors = evictedFilesThatHaveErrors;
-
-    // Finally, restore the old global state.
     gs = move(evictedGs);
-    // Inform caller that we need to retypecheck all files that used to have errors.
-    // TODO(jvilk): Can probably filter using diagnostic epoch to avoid extra work.
-    return evictedFilesThatHaveErrors;
 }
 
 } // namespace sorbet::realmain::lsp
