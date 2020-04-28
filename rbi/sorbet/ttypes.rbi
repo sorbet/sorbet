@@ -102,7 +102,7 @@ end
 # --- user-defined generics ---
 
 class T::Types::TypeVariable < T::Types::Base
-  def initialize(variance); end
+  def initialize(variance, fixed); end
   def name; end
   def subtype_of_single?(type); end
   def valid?(obj); end
@@ -167,3 +167,12 @@ class T::Types::TypedEnumerator < T::Types::TypedEnumerable
   def type; end
 end
 
+class T::Types::Opaque
+  extend T::Sig
+  extend T::Generic
+
+  ConcreteType = type_template
+
+  sig(:final) {params(obj: ConcreteType).returns(T.attached_class)}
+  def self.let(obj); end
+end

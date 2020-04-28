@@ -21,7 +21,11 @@ module T::Utils
     elsif val == ::Range
       T::Range[T.untyped]
     elsif val.is_a?(Module)
-      T::Types::Simple.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      if val <= T::Types::Opaque
+        T::Types::Simple.new(T.cast(val, T.class_of(T::Types::Opaque)).concrete_type) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      else
+        T::Types::Simple.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      end
     elsif val.is_a?(::Array)
       T::Types::FixedArray.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(::Hash)

@@ -5,15 +5,16 @@ module T::Types
   # Since we do type erasure at runtime, this just validates the variance and
   # provides some syntax for the static type checker
   class TypeVariable < Base
-    attr_reader :variance
+    attr_reader :variance, :fixed
 
     VALID_VARIANCES = [:in, :out, :invariant]
 
-    def initialize(variance)
+    def initialize(variance, fixed=nil)
       if !VALID_VARIANCES.include?(variance)
         raise TypeError.new("invalid variance #{variance}")
       end
       @variance = variance
+      @fixed = fixed
     end
 
     def valid?(obj)
