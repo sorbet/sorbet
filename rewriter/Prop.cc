@@ -49,6 +49,7 @@ struct PropInfo {
     core::NameRef computedByMethodName = core::NameRef::noName();
     core::LocOffsets computedByMethodNameLoc;
     unique_ptr<ast::Expression> foreign;
+    unique_ptr<ast::Expression> enum_;
     unique_ptr<ast::Expression> ifunset;
 };
 
@@ -193,6 +194,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
 
+        auto [enumKey, enum_] = ASTUtil::extractHashValue(ctx, *rules, core::Names::enum_());
+        if (enum_ != nullptr) {
+            ret.enum_ = std::move(enum_);
+        }
+
         auto [ifunsetKey, ifunset] = ASTUtil::extractHashValue(ctx, *rules, core::Names::ifunset());
         if (ifunset != nullptr) {
             ret.ifunset = std::move(ifunset);
@@ -210,7 +216,6 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     vector<unique_ptr<ast::Expression>> nodes;
 
     const auto loc = ret.loc;
-    const auto isImmutable = ret.isImmutable;
     const auto name = ret.name;
     const auto nameLoc = ret.nameLoc;
 
@@ -219,7 +224,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     const auto computedByMethodName = ret.computedByMethodName;
     const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
 
-    auto varName = name.addAt(ctx);
+    auto ivarName = name.addAt(ctx);
 
     nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
 
@@ -236,7 +241,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (ret.ifunset == nullptr && forTStruct) {
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, varName)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     }
@@ -244,12 +249,20 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     core::NameRef setName = name.addEq(ctx);
 
     // Compute the setter
-    if (!isImmutable) {
+    if (!ret.isImmutable) {
         auto setType = ASTUtil::dupType(ret.type.get());
         nodes.emplace_back(ast::MK::Sig(
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
-        nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+
+        if (ret.enum_ == nullptr && forTStruct) {
+            // TODO(jez) Handle soft_freeze_logic when we implement non-T::Struct support
+            auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
+                                           ast::MK::Local(nameLoc, core::Names::arg0()));
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+        } else {
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        }
     }
 
     // Compute the `_` foreign accessor
@@ -406,8 +419,8 @@ vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx
     // then initialize all the instance variables in the body
     ast::InsSeq::STATS_store stats;
     for (const auto &prop : props) {
-        auto varName = prop.name.addAt(ctx);
-        stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, varName),
+        auto ivarName = prop.name.addAt(ctx);
+        stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
     auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
