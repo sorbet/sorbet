@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      @foo = arg0
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
