@@ -1922,7 +1922,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send->recv.get())) {
-            if (id->symbol != core::Symbols::T()) {
+            if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
                 return send;
             }
             switch (send->fun._id) {
@@ -1950,10 +1950,20 @@ public:
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
                 case core::Names::revealType()._id:
-                case core::Names::absurd()._id: {
+                case core::Names::absurd()._id:
+                case core::Names::nonForcingIsA_p()._id: {
                     // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
-                    auto doWhat = send->fun == core::Names::revealType() ? "reveal types" : "check exhaustiveness";
+
+                    string_view doWhat;
+                    if (send->fun == core::Names::revealType()) {
+                        doWhat = "reveal types";
+                    } else if (send->fun == core::Names::absurd()) {
+                        doWhat = "check exhaustiveness";
+                    } else {
+                        doWhat = "resolve strings to constants";
+                    }
+
                     auto fun = fmt::format("T.{}", send->fun.data(ctx)->show(ctx));
                     if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::RevealTypeInUntypedFile)) {

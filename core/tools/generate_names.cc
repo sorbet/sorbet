@@ -134,6 +134,7 @@ NameDef names[] = {
     {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
+    {"nonForcingIsA_p", "non_forcing_is_a?"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -431,6 +432,7 @@ NameDef names[] = {
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
+    {"NonForcingConstants", "NonForcingConstants", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

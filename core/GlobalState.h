@@ -107,6 +107,8 @@ public:
 
     NameRef enterNameConstant(NameRef original);
     NameRef enterNameConstant(std::string_view original);
+    NameRef lookupNameConstant(NameRef original) const;
+    NameRef lookupNameConstant(std::string_view original) const;
 
     FileRef enterFile(std::string_view path, std::string_view source);
     FileRef enterFile(const std::shared_ptr<File> &file);

@@ -332,6 +332,9 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::sigWithoutRuntime());
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
+    ENFORCE(id == Symbols::T_NonForcingConstants());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -1089,6 +1092,48 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
 NameRef GlobalState::enterNameConstant(string_view original) {
     return enterNameConstant(enterNameUTF8(original));
+}
+
+NameRef GlobalState::lookupNameConstant(NameRef original) const {
+    if (!original.exists()) {
+        return core::NameRef::noName();
+    }
+    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
+                (original.data(*this)->kind == NameKind::UNIQUE &&
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
+            "looking up a constant name over wrong name kind");
+
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto &nm2 = names[bucket.second];
+            if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
+                counterInc("names.constant.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.constant");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
+}
+
+NameRef GlobalState::lookupNameConstant(string_view original) const {
+    auto utf8 = lookupNameUTF8(original);
+    if (!utf8.exists()) {
+        return core::NameRef::noName();
+    }
+    return lookupNameConstant(utf8);
 }
 
 void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,

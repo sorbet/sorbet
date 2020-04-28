@@ -183,3 +183,8 @@ module T::Utils::Nilable
   def self.get_underlying_type(prop_type); end
   def self.get_underlying_type_object(prop_type); end
 end
+
+module T::NonForcingConstants
+  sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
+  def self.non_forcing_is_a?(val, klass); end
+end

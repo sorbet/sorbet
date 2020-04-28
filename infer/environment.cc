@@ -397,6 +397,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
     if (send->args.empty()) {
         return;
     }
+    // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
