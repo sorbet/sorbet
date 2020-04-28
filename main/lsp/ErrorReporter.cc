@@ -36,6 +36,22 @@ void ErrorReporter::commit() {
     uncommittedFileErrorStatuses.clear();
 };
 
+vector<core::FileRef> ErrorReporter::abort() {
+    vector<core::FileRef> filesToRetypecheck;
+
+    for (auto &uncommitted : uncommittedFileErrorStatuses) {
+        auto fileRef = uncommitted.first;
+        if (fileRef.id() >= fileErrorStatuses.size()) {
+            continue;
+        }
+
+        filesToRetypecheck.push_back(fileRef);
+    }
+
+    uncommittedFileErrorStatuses.clear();
+    return filesToRetypecheck;
+};
+
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());

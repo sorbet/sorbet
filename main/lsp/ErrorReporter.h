@@ -43,6 +43,11 @@ public:
      * Moves `uncommittedFileErrorStatuses` to `fileErrorStatuses` and clears `uncommittedFileErrorStatuses`
      */
     void commit();
+    /**
+     * Clears uncommittedFileErrorStatuses for any files that were newly introduced with the canceled update. Returns a
+     * list of files that need to be retypechecked to update their error lists.
+     */
+    std::vector<core::FileRef> abort();
 };
 }; // namespace sorbet::realmain::lsp
 

@@ -244,8 +244,50 @@ TEST(ErrorReporterTest, Commit) {
         EXPECT_TRUE(er.getFileErrorStatuses().empty());
 
         er.commit();
-        EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size());
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty());
+        EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size())
+            << fmt::format("File should be added to fileErrorStatuses");
+        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty())
+            << fmt::format("uncommittedFileErrorStatuses should be cleared");
+    }
+}
+
+TEST(ErrorReporterTest, Abort) {
+    auto cs = makeConfig();
+    auto gs = makeGS();
+    ErrorReporter er(cs);
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        auto epoch = 0;
+        auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
+        auto fref = gs->enterFile(file);
+        vector<unique_ptr<core::Error>> errors;
+        errors.emplace_back(
+            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+        // Commit error status for `file`
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+        er.commit();
+
+        // Add error status for `file` back to `uncommittedFileErrorStatuses`
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+
+        // Add `newFile` to `uncommittedFileErrorStatuses`
+        auto newFile = make_shared<core::File>("foo/new", "foo", core::File::Type::Normal, epoch);
+        auto newFileRef = gs->enterFile(newFile);
+        vector<unique_ptr<core::Error>> newFileErrors;
+        newFileErrors.emplace_back(make_unique<core::Error>(
+            core::Loc(newFileRef, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "NewFileError",
+            vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+        er.pushDiagnostics(epoch, newFileRef, newFileErrors, *gs);
+
+        EXPECT_EQ(2, er.getUncommittedFileErrorStatuses().size());
+
+        auto filesToRetypecheck = er.abort();
+        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty())
+            << fmt::format("uncommittedFileErrorStatuses should be cleared");
+        EXPECT_EQ(1, filesToRetypecheck.size());
+        EXPECT_EQ(fref.id(), filesToRetypecheck[0].id())
+            << fmt::format("New files should be excluded from returned list of files to be re-typechecked");
     }
 }
 } // namespace sorbet::realmain::lsp::test
