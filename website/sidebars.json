@@ -42,7 +42,8 @@
       "self-type",
       "noreturn",
       "attached-class",
-      "intersection-types"
+      "intersection-types",
+      "non-forcing-constants"
     ],
     "Experimental Features": [
       "tuples",
