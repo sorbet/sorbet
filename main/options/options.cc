@@ -806,18 +806,8 @@ void readOptions(Options &opts,
             // parse extra sfx/datadog tags
             auto stringToParse = raw["metrics-extra-tags"].as<string>();
             if (stringToParse != "") {
-                size_t pos = 0;
-                vector<string> pairs;
-                while ((pos = stringToParse.find(',')) != std::string::npos) {
-                    pairs.emplace_back(stringToParse.substr(0, pos));
-                    stringToParse.erase(0, pos + 1);
-                }
-                pairs.emplace_back(stringToParse); // last one
-                for (auto &pair : pairs) {
-                    pos = pair.find('=');
-                    auto key = pair.substr(0, pos);
-                    pair.erase(0, pos + 1); // keep only value
-                    opts.metricsExtraTags[key] = pair;
+                for (absl::string_view sp : absl::StrSplit(stringToParse, ',')) {
+                    opts.metricsExtraTags.insert(absl::StrSplit(sp, absl::MaxSplits('=', 1)));
                 }
             }
         }
