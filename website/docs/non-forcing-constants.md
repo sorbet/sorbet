@@ -5,12 +5,11 @@ sidebar_label: T::NonForcingConstants
 ---
 
 > **Note**: This is an advanced feature of Sorbet. It's more likely that you're
-> looking about how Sorbet handles `is_a?` using [Flow-Sensitive
-> Typing](flow-sensitive.md). Please read carefully before using this feature.
+> looking about how Sorbet handles `is_a?` using
+> [Flow-Sensitive Typing](flow-sensitive.md). Please read carefully before using
+> this feature.
 
-This is a variant of `is_a?` that doesn't force its class argument to be
-loaded.
-
+This is a variant of `is_a?` that doesn't force its class argument to be loaded.
 
 ```ruby
 class Outer
@@ -39,10 +38,10 @@ return `false`. If `::Outer::Nested` **has** loaded, the `is_a?` check will be
 carried out like normal.
 
 This method should **only** be used when there's a measurable performance
-benefit from using it. This method is rarely used, which means that people
-will not be familiar with it when they see it. This makes code harder to read
-and reason about. Only use this method **sparingly** and when there's proof that
-it speeds a certain code path up.
+benefit from using it. This method is rarely used, which means that people will
+not be familiar with it when they see it. This makes code harder to read and
+reason about. Only use this method **sparingly** and when there's proof that it
+speeds a certain code path up.
 
 ## Usage
 
@@ -76,5 +75,5 @@ val.is_a?(::DoesntExist) # NameError (uninitialized constant DoesntExist)
 T::NonForcingConstants.non_forcing_is_a?(val, '::DoesntExist') # => false
 ```
 
-In this case, only Sorbet's static check that the constant in the string
-literal must resolve prevents this situation.
+In this case, only Sorbet's static check that the constant in the string literal
+must resolve prevents this situation.
