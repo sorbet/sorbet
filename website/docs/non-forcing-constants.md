@@ -1,6 +1,6 @@
 ---
 id: non-forcing-constants
-title: Non-Forcing Constants with T::NonForcingConstants
+title: Non-Forcing Constants
 sidebar_label: T::NonForcingConstants
 ---
 
