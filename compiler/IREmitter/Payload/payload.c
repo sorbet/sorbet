@@ -707,7 +707,17 @@ size_t sorbet_Closure_size(const void *closurePtr) {
     return sizeof(struct sorbet_Closure) + ptr->size * sizeof(VALUE);
 }
 
-const rb_data_type_t closureInfo = {
+#ifdef SORBET_LLVM_PAYLOAD
+
+// This version is used when generating llvm from the payload, so that we are always using the function for fetching the
+// closureInfo pointer that resides in the ruby VM.
+extern const rb_data_type_t *sorbet_getClosureInfo();
+
+#else
+
+// This code is linked directly into sorbet_ruby.
+
+static const rb_data_type_t closureInfo = {
     "CompiledClosure", // this shouldn't ever be visible to users
     {
         /* mark = */ sorbet_Closure_mark,
@@ -719,9 +729,15 @@ const rb_data_type_t closureInfo = {
     /* flags = */ RUBY_TYPED_FREE_IMMEDIATELY /* deferred free */,
 };
 
+const rb_data_type_t *sorbet_getClosureInfo() {
+    return &closureInfo;
+}
+#endif
+
 VALUE sorbet_allocClosureAsValue(int elemCount) {
     struct sorbet_Closure *ptr = sorbet_Closure_alloc(elemCount);
-    return TypedData_Wrap_Struct(rb_cData, &closureInfo, ptr);
+    const rb_data_type_t *info = sorbet_getClosureInfo();
+    return TypedData_Wrap_Struct(rb_cData, info, ptr);
 }
 
 VALUE *sorbet_getClosureElem(VALUE closure, int elemId) {

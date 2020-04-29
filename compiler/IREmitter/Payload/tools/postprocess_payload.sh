@@ -26,7 +26,6 @@ sed -i'.bak' 's/define void @sorbet_/define available_externally void @sorbet_/g
 ## are valid for the translation units that do not include the definition.
 
 sed -i'.bak' 's/@rb_c\(.*\) = external local_unnamed_addr global/@rb_c\1 = external local_unnamed_addr constant/' "$payload"
-sed -i'.bak' 's/@closureInfo = constant /@closureInfo = available_externally constant/' "$payload"
 
 
 # remove noise
