@@ -326,6 +326,9 @@ int realmain(int argc, char *argv[]) {
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
+#ifndef SORBET_REALMAIN_MIN
+    StatsD::addExtraTags(opts.metricsExtraTags);
+#endif
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }

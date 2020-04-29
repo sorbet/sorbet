@@ -168,6 +168,7 @@ struct Options {
     std::string metricsPrefix = "ruby_typer.unknown.";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
+    std::map<std::string, std::string> metricsExtraTags; // be super carful with cardinality here
 
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions;

@@ -464,6 +464,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value(empty.metricsSha), "sha1");
     options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
+    options.add_options("dev")("metrics-extra-tags", "Extra tags to report, comma separated",
+                               cxxopts::value<string>()->default_value(""), "key1=value1,key2=value2");
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
@@ -800,6 +802,25 @@ void readOptions(Options &opts,
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
+        {
+            // parse extra sfx/datadog tags
+            auto stringToParse = raw["metrics-extra-tags"].as<string>();
+            if (stringToParse != "") {
+                size_t pos = 0;
+                vector<string> pairs;
+                while ((pos = stringToParse.find(',')) != std::string::npos) {
+                    pairs.emplace_back(stringToParse.substr(0, pos));
+                    stringToParse.erase(0, pos + 1);
+                }
+                pairs.emplace_back(stringToParse); // last one
+                for (auto &pair : pairs) {
+                    pos = pair.find('=');
+                    auto key = pair.substr(0, pos);
+                    pair.erase(0, pos + 1); // keep only value
+                    opts.metricsExtraTags[key] = pair;
+                }
+            }
+        }
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {

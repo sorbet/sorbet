@@ -17,6 +17,21 @@ using namespace std;
 
 namespace sorbet {
 
+namespace {
+map<string, string> extraGlobalTags;
+}
+void StatsD::addExtraTags(const map<string, string> &tags) {
+    if (!extraGlobalTags.empty()) {
+        bool isSame =
+            tags.size() == extraGlobalTags.size() && std::equal(tags.begin(), tags.end(), extraGlobalTags.begin(),
+                                                                [](auto a, auto b) { return a.first == b.first; });
+        if (!isSame) {
+            Exception::raise("re setting statsD global tags not supported");
+        }
+    }
+    extraGlobalTags = tags;
+}
+
 class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
@@ -34,6 +49,9 @@ class StatsdClientWrapper {
     }
 
     void addMetric(string_view name, size_t value, string_view type, vector<pair<const char *, const char *>> tags) {
+        for (const auto &[key, value] : extraGlobalTags) {
+            tags.emplace_back(key.c_str(), value.c_str());
+        }
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
         auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type,
                                    tags.empty() ? "" : "|#", fmt::map_join(tags, ",", [&](const auto &tag) -> string {
