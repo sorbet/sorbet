@@ -17,7 +17,6 @@ class ErrorReporter {
     const std::shared_ptr<const LSPConfiguration> config;
     // Maps from file ref ID to its error status.
     std::vector<ErrorStatus> fileErrorStatuses;
-    UnorderedMap<core::FileRef, ErrorStatus> uncommittedFileErrorStatuses;
     void setMaxFileId(u4 id);
     ErrorStatus getFileErrorStatus(core::FileRef file);
 
@@ -27,27 +26,14 @@ public:
      * Used for unit tests
      */
     const std::vector<ErrorStatus> &getFileErrorStatuses() const;
-    /**
-     * Used for unit tests
-     */
-    const UnorderedMap<core::FileRef, ErrorStatus> &getUncommittedFileErrorStatuses() const;
-
+    std::vector<core::FileRef> filesUpdatedSince(u4 epoch);
     /**
      * Sends diagnostics from a typecheck run of a single file to the client.
      * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
      * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
      */
-    void pushDiagnostics(u4 epoch, core::FileRef file, std::vector<std::unique_ptr<core::Error>> &errors,
+    void pushDiagnostics(u4 epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
-    /**
-     * Moves `uncommittedFileErrorStatuses` to `fileErrorStatuses` and clears `uncommittedFileErrorStatuses`
-     */
-    void commit();
-    /**
-     * Clears uncommittedFileErrorStatuses for any files that were newly introduced with the canceled update. Returns a
-     * list of files that need to be retypechecked to update their error lists.
-     */
-    std::vector<core::FileRef> abort();
 };
 }; // namespace sorbet::realmain::lsp
 

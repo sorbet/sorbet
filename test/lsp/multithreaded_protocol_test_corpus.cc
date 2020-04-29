@@ -622,6 +622,46 @@ TEST_P(ProtocolTest, CanceledRequestsDontReportLatencyMetrics) {
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 0, /* assertUniqueStartTimes */ false);
 }
 
+TEST_P(ProtocolTest, ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSlowPath) {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Create new file
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
+
+    // Slow path: no errors
+    sendAsync(*changeFile(
+        "foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef str\n1\nend\nend", 2, true, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        ASSERT_TRUE(status.has_value());
+        ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path [preempt]: Change return type and introduce an error
+    sendAsync(*changeFile(
+        "foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef str\n'hi'\nend\nend\n", 3));
+
+    // Wait for typechecking of fast path so it and subsequent slow path change aren't combined
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        ASSERT_TRUE(status.has_value());
+        ASSERT_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Slow path: error will be resolved
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(String)}\ndef "
+                          "str\n'hi'\nend\nsig{returns(Integer)}\ndef int\n1\nend\nend",
+                          4, false, 0));
+
+    // // Send a no-op to clear out the pipeline.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
 // Run these tests in multi-threaded mode.
 INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{true}));
 

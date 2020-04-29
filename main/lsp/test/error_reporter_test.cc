@@ -61,14 +61,13 @@ TEST(ErrorReporterTest, FirstTimeFileWithErrors) {
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
 
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty())
-            << fmt::format("uncomittedFileErrorStatuses should be empty");
+        EXPECT_TRUE(er.getFileErrorStatuses().empty()) << fmt::format("uncomittedFileErrorStatuses should be empty");
 
         er.pushDiagnostics(newEpoch, fref, errors, *gs);
-        EXPECT_EQ(1, er.getUncommittedFileErrorStatuses().size())
+        EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size())
             << fmt::format("uncomittedFileErrorStatuses size should equal max file id");
 
-        ErrorStatus fileErrorStatus = er.getUncommittedFileErrorStatuses().find(fref)->second;
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
         EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch)
             << fmt::format("File is added to uncomittedFileErrorStatuses with correct epoch");
         EXPECT_TRUE(fileErrorStatus.hasErrors) << fmt::format("File is added with hasErrors set to false");
@@ -96,9 +95,8 @@ TEST(ErrorReporterTest, FileStillHasErrors) {
                                                      vector<core::AutocorrectSuggestion>(), false));
         er.pushDiagnostics(newEpoch, fref, errors, *gs);
 
-        ErrorStatus uncommittedFileErrorStatus = er.getUncommittedFileErrorStatuses().find(fref)->second;
-        EXPECT_EQ(newEpoch, uncommittedFileErrorStatus.sentEpoch)
-            << fmt::format("Adds file to uncommittedFileErrorStatuses with new epoch");
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch) << fmt::format("Adds file to fileErrorStatuses with new epoch");
     }
 }
 
@@ -119,13 +117,12 @@ TEST(ErrorReporterTest, FileNoLongerHasErrors) {
         auto fref = gs->enterFile(file);
 
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        er.commit();
         er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
-        ErrorStatus uncommittedFileErrorStatus = er.getUncommittedFileErrorStatuses().find(fref)->second;
-        EXPECT_EQ(newEpoch, uncommittedFileErrorStatus.sentEpoch)
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_EQ(newEpoch, fileErrorStatus.sentEpoch)
             << fmt::format("Updates the epoch of a file that no longer has errors");
-        EXPECT_FALSE(uncommittedFileErrorStatus.hasErrors) << fmt::format("File hasErrors should be false");
+        EXPECT_FALSE(fileErrorStatus.hasErrors) << fmt::format("File hasErrors should be false");
     }
 }
 
@@ -145,11 +142,11 @@ TEST(ErrorReporterTest, EpochLessThanLastCheckedEpoch) {
         auto fref = gs->enterFile(file);
 
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        er.commit();
-
         er.pushDiagnostics(newEpoch, fref, errors, *gs);
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty()) << fmt::format(
-            "File should not be added to uncommittedFileErrorStatuses if new epoch is less than previous epoch");
+
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch)
+            << fmt::format("Does not update the epoch if new epoch is less than the previously checked epoch");
     }
 }
 
@@ -168,11 +165,11 @@ TEST(ErrorReporterTest, EpochLessThanGSFileEpoch) {
         auto file = make_shared<core::File>("foo/bar", "", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        er.commit();
-
         er.pushDiagnostics(newEpoch, fref, errors, *gs);
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty()) << fmt::format(
-            "File should not be added to uncommittedFileErrorStatuses if new epoch is less than file epoch");
+
+        ErrorStatus fileErrorStatus = er.getFileErrorStatuses()[fref.id()];
+        EXPECT_NE(newEpoch, fileErrorStatus.sentEpoch)
+            << fmt::format("Does not update the epoch if new epoch is less than file epoch");
     }
 }
 
@@ -217,7 +214,6 @@ TEST(ErrorReporterTest, DoesNotReportWhenNoErrors) {
         auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        er.commit();
 
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
         er.pushDiagnostics(newEpoch, fref, errors, *gs);
@@ -226,7 +222,7 @@ TEST(ErrorReporterTest, DoesNotReportWhenNoErrors) {
     }
 }
 
-TEST(ErrorReporterTest, Commit) {
+TEST(ErrorReporterTest, filesUpdatedSince) {
     auto cs = makeConfig();
     auto gs = makeGS();
     ErrorReporter er(cs);
@@ -237,57 +233,14 @@ TEST(ErrorReporterTest, Commit) {
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
+        auto requestedEpoch = 3;
         auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
 
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        EXPECT_TRUE(er.getFileErrorStatuses().empty());
-
-        er.commit();
-        EXPECT_EQ(fref.id() + 1, er.getFileErrorStatuses().size())
-            << fmt::format("File should be added to fileErrorStatuses");
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty())
-            << fmt::format("uncommittedFileErrorStatuses should be cleared");
-    }
-}
-
-TEST(ErrorReporterTest, Abort) {
-    auto cs = makeConfig();
-    auto gs = makeGS();
-    ErrorReporter er(cs);
-    {
-        core::UnfreezeFileTable fileTableAccess(*gs);
-        auto epoch = 0;
-        auto file = make_shared<core::File>("foo/bar", "foo", core::File::Type::Normal, epoch);
-        auto fref = gs->enterFile(file);
-        vector<unique_ptr<core::Error>> errors;
-        errors.emplace_back(
-            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
-                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
-        // Commit error status for `file`
-        er.pushDiagnostics(epoch, fref, errors, *gs);
-        er.commit();
-
-        // Add error status for `file` back to `uncommittedFileErrorStatuses`
-        er.pushDiagnostics(epoch, fref, errors, *gs);
-
-        // Add `newFile` to `uncommittedFileErrorStatuses`
-        auto newFile = make_shared<core::File>("foo/new", "foo", core::File::Type::Normal, epoch);
-        auto newFileRef = gs->enterFile(newFile);
-        vector<unique_ptr<core::Error>> newFileErrors;
-        newFileErrors.emplace_back(make_unique<core::Error>(
-            core::Loc(newFileRef, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "NewFileError",
-            vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
-        er.pushDiagnostics(epoch, newFileRef, newFileErrors, *gs);
-
-        EXPECT_EQ(2, er.getUncommittedFileErrorStatuses().size());
-
-        auto filesToRetypecheck = er.abort();
-        EXPECT_TRUE(er.getUncommittedFileErrorStatuses().empty())
-            << fmt::format("uncommittedFileErrorStatuses should be cleared");
-        EXPECT_EQ(1, filesToRetypecheck.size());
-        EXPECT_EQ(fref.id(), filesToRetypecheck[0].id())
-            << fmt::format("New files should be excluded from returned list of files to be re-typechecked");
+        EXPECT_TRUE(er.filesUpdatedSince(requestedEpoch).empty()) << fmt::format("fileErrorStatuses should be cleared");
+        er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
+        EXPECT_EQ(1, er.filesUpdatedSince(requestedEpoch).size());
     }
 }
 } // namespace sorbet::realmain::lsp::test

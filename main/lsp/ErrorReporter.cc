@@ -13,46 +13,17 @@ const std::vector<ErrorStatus> &ErrorReporter::getFileErrorStatuses() const {
     return fileErrorStatuses;
 };
 
-// Used for unit tests
-const UnorderedMap<core::FileRef, ErrorStatus> &ErrorReporter::getUncommittedFileErrorStatuses() const {
-    return uncommittedFileErrorStatuses;
-};
-
-void ErrorReporter::setMaxFileId(u4 id) {
-    ENFORCE(id >= fileErrorStatuses.size());
-    fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
-};
-
-void ErrorReporter::commit() {
-    for (auto &uncommitted : uncommittedFileErrorStatuses) {
-        auto fileId = uncommitted.first.id();
-        if (fileId >= fileErrorStatuses.size()) {
-            setMaxFileId(fileId);
+vector<core::FileRef> ErrorReporter::filesUpdatedSince(u4 epoch) {
+    vector<core::FileRef> filesUpdatedSince;
+    for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
+        if (fileErrorStatuses[i].sentEpoch >= epoch) {
+            filesUpdatedSince.push_back(core::FileRef(i));
         }
-
-        fileErrorStatuses[fileId] = uncommitted.second;
     }
+    return filesUpdatedSince;
+}
 
-    uncommittedFileErrorStatuses.clear();
-};
-
-vector<core::FileRef> ErrorReporter::abort() {
-    vector<core::FileRef> filesToRetypecheck;
-
-    for (auto &uncommitted : uncommittedFileErrorStatuses) {
-        auto fileRef = uncommitted.first;
-        if (fileRef.id() >= fileErrorStatuses.size()) {
-            continue;
-        }
-
-        filesToRetypecheck.push_back(fileRef);
-    }
-
-    uncommittedFileErrorStatuses.clear();
-    return filesToRetypecheck;
-};
-
-void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_ptr<core::Error>> &errors,
+void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
     if (file.data(gs).epoch > epoch) {
@@ -69,7 +40,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
         return;
     }
 
-    uncommittedFileErrorStatuses[file] = ErrorStatus{epoch, !errors.empty()};
+    fileErrorStatuses[file.id()] = ErrorStatus{epoch, !errors.empty()};
 
     const string uri = config->fileRef2Uri(gs, file);
     config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
@@ -114,15 +85,14 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, vector<unique_
 };
 
 ErrorStatus ErrorReporter::getFileErrorStatus(core::FileRef file) {
-    auto it = uncommittedFileErrorStatuses.find(file);
-    if (it != uncommittedFileErrorStatuses.end()) {
-        return it->second;
+    if (file.id() >= fileErrorStatuses.size()) {
+        setMaxFileId(file.id());
     }
+    return fileErrorStatuses[file.id()];
+};
 
-    if (file.id() < fileErrorStatuses.size()) {
-        return fileErrorStatuses[file.id()];
-    }
-
-    return ErrorStatus{0, false};
+void ErrorReporter::setMaxFileId(u4 id) {
+    ENFORCE(id >= fileErrorStatuses.size());
+    fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
 };
 } // namespace sorbet::realmain::lsp

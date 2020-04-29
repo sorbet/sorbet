@@ -22,7 +22,11 @@ class UndoState final {
     std::vector<core::FileRef> evictedFilesThatHaveErrors;
 
 public:
-    UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS);
+    // Epoch of the running slow path
+    const u4 epoch;
+
+    UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
+              u4 epoch);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
