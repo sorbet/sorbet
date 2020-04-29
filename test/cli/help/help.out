@@ -212,5 +212,8 @@ Usage:
                                 none)
       --metrics-repo repo       Repo to report in metrics export (default:
                                 none)
+      --metrics-extra-tags key1=value1,key2=value2
+                                Extra tags to report, comma separated
+                                (default: "")
 
 --------------------------------------------------------------------------
