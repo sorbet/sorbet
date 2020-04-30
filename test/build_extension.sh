@@ -77,36 +77,16 @@ echo
 info "Using Sorbet to generate llvm-ir-folder..."
 llvm_ir_folder_flag="--llvm-ir-folder=$target"
 info "├─ Using $llvm_ir_folder_flag"
-if ! $sorbet --silence-dev-message --no-error-count "$llvm_ir_folder_flag" \
-  "${ruby_source[@]}" > "$output" 2>&1; then
-  info "├─ console output:"
-  < "$output" indent_and_nest
-  fatal $'└─ sorbet command failed. See above.\n'
-else
-  success "└─ done."
-fi
-
-echo
-info "Ensuring non-empty LLVM IR output..."
-if [ -z "$(ls -A "$target")" ]; then
-  if ! grep -q '# typed:' "${ruby_source[@]}"; then
-    attn "├─ No '# typed: ...' sigil(s) in input files"
-  fi
-
-  if ! grep -q '# compiled:' "${ruby_source[@]}"; then
-    attn "├─ No '# compiled: ...' sigil(s) in input files"
-  fi
-
-  info   "├─ console output:"
-  < "$output" indent_and_nest
-
-  fatal $'└─ empty LLVM IR output. See above.\n'
-else
-  success "└─ done."
-fi
+set +e
+$sorbet --silence-dev-message --no-error-count \
+  "$llvm_ir_folder_flag" "${ruby_source[@]}" > "$output" 2>&1
+echo "$?" > "$target/sorbet.exit"
+set -e
+success "└─ done."
 
 echo
 info "Building tar archive..."
+cp "$output" "$target/sorbet.outerr"
 hermetic_tar "$target" "$root/$output_archive"
 
 success "└─ done."

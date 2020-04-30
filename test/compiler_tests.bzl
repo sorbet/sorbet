@@ -29,11 +29,12 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                     "sentinel": path,
                     "isMultiFile": "__" in path,
                     "disabled": "disabled" in path,
+                    "too_slow": "too_slow" in path,
                 }
                 tests[test_name] = data
 
     enabled_tests = []
-    disabled_tests = []
+    too_slow_tests = []
     for name in tests.keys():
         test_name = "test_{}/{}".format(test_name_prefix, name)
         validate_exp = "validate_exp_{}/{}".format(test_name_prefix, name)
@@ -69,9 +70,9 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
             visibility = ["//visibility:public"],
         )
 
-        # Mark all rules as manual if the test is disabled
+        # Mark the too_slow tests as manual
         extra_tags = []
-        if tests[name]["disabled"]:
+        if tests[name]["too_slow"]:
             extra_tags = ["manual"]
 
         ruby_genrule = "test_{}/{}_gen_output".format(test_name_prefix, name)
@@ -119,6 +120,7 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
                 "--expected_exit_code=$(location {})".format(expected_exitfile),
                 "--build_archive=$(location {})".format(build_archive),
                 "--ruby=$(location @sorbet_ruby//:ruby)",
+                "--expect-fail={}".format(tests[name]["disabled"]),
                 "$(locations {})".format(sources_name),
             ] + extra_args,
             data = [
@@ -156,9 +158,8 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
 
             defined_tests.append(validate_exp)
 
-        # determine if we need to mark this as a manual test
-        if tests[name]["disabled"]:
-            disabled_tests.extend(defined_tests)
+        if tests[name]["too_slow"]:
+            too_slow_tests.extend(defined_tests)
         else:
             enabled_tests.extend(defined_tests)
 
@@ -169,6 +170,6 @@ def compiler_tests(suite_name, all_paths, test_name_prefix = "PosTests", extra_a
 
     native.test_suite(
         name = "{}_disabled".format(suite_name),
-        tests = disabled_tests,
+        tests = too_slow_tests,
         tags = ["manual"],
     )

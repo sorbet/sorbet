@@ -18,7 +18,13 @@ rbexit=${3/--expected_exit_code=/}
 rbcode=$(< "$rbexit")
 build_archive=${4/--build_archive=/}
 ruby=${5/--ruby=/}
-shift 5
+expect_fail=
+case "${6/--expect-fail=/}" in
+  True) expect_fail=1;;
+  False) ;; #ok
+  *) fatal "Expected --expect-fail=(True|False), got $6" ;;
+esac
+shift 6
 
 # sources make up the remaining argumenets
 rbmain=$1
@@ -69,6 +75,21 @@ indent_and_nest() {
   sed -e 's/^/       │/'
 }
 
+something_failed() {
+  if [ -n "$expect_fail" ]; then
+    echo ""
+    success "Disabled test failed as expected."
+    info    "To make this failing test fail the build, move it out of the disabled folder."
+    echo ""
+    exit 0
+  else
+    echo ""
+    error "Test failed."
+    echo ""
+    exit 1
+  fi
+}
+
 echo    ""
 info    "Unpacking compiled artifact (.so/.bundle, .ll, .llo)..."
 info    "├─ from:        bazel-out/k8-opt/bin/${build_archive}"
@@ -76,6 +97,33 @@ tar -xf "${build_archive}" -C "${target}"
 info    "├─ contents:"
 find "$target" -type f | indent_and_nest
 success "└─ done."
+
+echo      ""
+echo      "Checking unpacked archive..."
+if [ "$(< "$target/sorbet.exit")" -ne 0 ]; then
+  error  "├─ Sorbet failed when generating archive:"
+  < "$target/sorbet.outerr" indent_and_nest
+  error  "└─ output is above."
+
+  something_failed
+fi
+if [ -z "$(ls -A "$target")" ]; then
+  if ! grep -q '# typed:' "${rb[@]}"; then
+    attn "├─ No '# typed: ...' sigil(s) in input files"
+  fi
+
+  if ! grep -q '# compiled:' "${rb[@]}"; then
+    attn "├─ No '# compiled: ...' sigil(s) in input files"
+  fi
+
+  info   "├─ console output:"
+  < "$target/sorbet.outerr" indent_and_nest
+
+  error  '└─ empty LLVM IR output. See above.'
+
+  something_failed
+fi
+success  "└─ done."
 
 # NOTE: running the test could be split out into its own genrule, the test just
 # needs to validate that the output matches.
@@ -107,7 +155,7 @@ shorten_bazel() {
   sed -e "s+_bazel_$USER/[^ ]*com_stripe_sorbet_llvm/+bazel/.../com_stripe_sorbet_llvm/+"
 }
 
-should_fail=
+something_failed=
 
 echo ""
 info "Checking return codes match..."
@@ -115,7 +163,7 @@ if [[ "$code" != "$rbcode" ]]; then
   error "├─ return codes don't match."
   error "├─ Ruby:     ${rbcode}"
   error "└─ Compiled: ${code}"
-  should_fail=1
+  something_failed=1
 else
   success "└─ codes match."
 fi
@@ -130,7 +178,7 @@ if ! diff -au "$rbout" "$stdout" > stdout.diff; then
   info  "├─ stdout (compiled)"
   < "$stdout" shorten_bazel | indent_and_nest
   error "└─ stdouts don't match. See above."
-  should_fail=1
+  something_failed=1
 else
   success "└─ stdouts match."
 fi
@@ -158,25 +206,37 @@ else
     attn  "├─ Full compiled output (except bazel paths shortened):"
     < "$stderr" shorten_bazel | indent_and_nest
     error "└─ stderrs don't match. See above."
-    should_fail=1
+    something_failed=1
   else
     success "└─ stderrs match."
   fi
 fi
 
-if [ -z "$should_fail" ]; then
-  echo ""
-  success "Test passed."
-  info    "├─ stdout (interpretted):"
-  < "$rbout" indent_and_nest
-  info    "├─ stderr (interpretted):"
-  < "$rberr" shorten_bazel | indent_and_nest
-  success "└─ 🎉"
-
-  echo ""
+if [ -n "$something_failed" ]; then
+  something_failed
 else
-  echo ""
-  error "Test failed."
-  echo ""
-  exit 1
+  if [ -z "$expect_fail" ]; then
+    echo ""
+    success "Test passed."
+    info    "├─ stdout (interpretted):"
+    < "$rbout" indent_and_nest
+    info    "├─ stderr (interpretted):"
+    < "$rberr" shorten_bazel | indent_and_nest
+    success "└─ 🎉"
+
+    echo ""
+  else
+    echo   ""
+    error  "Disabled test did not fail."
+    info   "This could mean that a recent change has made this test start passing."
+    info   "If that's the case, great! Please move this test out of the disabled folder to catch future regressions."
+    info   "├─ stdout (interpretted):"
+    < "$rbout" indent_and_nest
+    info   "├─ stderr (interpretted):"
+    < "$rberr" shorten_bazel | indent_and_nest
+    error "└─ ❌"
+
+    echo ""
+    exit 1
+  fi
 fi
