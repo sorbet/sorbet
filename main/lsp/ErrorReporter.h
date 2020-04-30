@@ -1,7 +1,6 @@
 #ifndef RUBY_TYPER_LSP_ERRORREPORTER_H
 #define RUBY_TYPER_LSP_ERRORREPORTER_H
 
-#include "ast/ast.h"
 #include "core/core.h"
 #include "main/lsp/LSPConfiguration.h"
 
