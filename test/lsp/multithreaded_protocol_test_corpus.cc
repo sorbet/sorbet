@@ -662,6 +662,39 @@ TEST_P(ProtocolTest, ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSl
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
+TEST_P(ProtocolTest, ErrorIntroducedInSlowPathCorrectedByFastPathPreemption) {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Create two files without errors
+    assertDiagnostics(
+        send(*openFile("foo.rb",
+                       "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(Integer)}\ndef self.foo\n1\nend\nend")),
+        {});
+    assertDiagnostics(
+        send(*openFile(
+            "bar.rb",
+            "# typed: true\nmodule Bar\nextend T::Sig\nsig {returns(Integer)}\ndef self.bar\nFoo.foo\nend\nend")),
+        {});
+
+    // Slow path: adds a new method and introduces an error to bar.rb
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(String)}\ndef self.foo\n1\nend\nsig "
+                          "{returns(Integer)}\ndef "
+                          "self.str\n'hi'\nend\nend",
+                          2, false, 1));
+
+    // Fast path [preempt]: Corrects the error to bar.rb above
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(Integer)}\ndef self.foo\n1\nend\nsig "
+                          "{returns(String)}\ndef "
+                          "self.str\n'hi'\nend\nend",
+                          3));
+
+    // // Send a no-op to clear out the pipeline.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
 // Run these tests in multi-threaded mode.
 INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{true}));
 

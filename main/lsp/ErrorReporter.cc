@@ -8,15 +8,11 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(move(config)) {}
 
-// Used for unit tests
-const std::vector<ErrorStatus> &ErrorReporter::getFileErrorStatuses() const {
-    return fileErrorStatuses;
-};
-
 vector<core::FileRef> ErrorReporter::filesUpdatedSince(u4 epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
-        if (fileErrorStatuses[i].sentEpoch >= epoch) {
+        ErrorStatus fileErrorStatus = fileErrorStatuses[i];
+        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.hasErrors) {
             filesUpdatedSince.push_back(core::FileRef(i));
         }
     }
@@ -26,21 +22,20 @@ vector<core::FileRef> ErrorReporter::filesUpdatedSince(u4 epoch) {
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
-    if (file.data(gs).epoch > epoch) {
+
+    ErrorStatus &fileErrorStatus = getFileErrorStatus(file);
+    if (fileErrorStatus.lastReportedEpoch > epoch) {
         return;
     }
 
-    ErrorStatus fileErrorStatus = getFileErrorStatus(file);
-    if (fileErrorStatus.sentEpoch > epoch) {
-        return;
-    }
+    fileErrorStatus.lastReportedEpoch = epoch;
 
     // If errors is empty and the file had no errors previously, break
     if (errors.empty() && fileErrorStatus.hasErrors == false) {
         return;
     }
 
-    fileErrorStatuses[file.id()] = ErrorStatus{epoch, !errors.empty()};
+    fileErrorStatus.hasErrors = !errors.empty();
 
     const string uri = config->fileRef2Uri(gs, file);
     config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
@@ -69,12 +64,12 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
                 }
                 relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(std::move(location), message));
             }
-            // Add link to error documentation.
-            relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-                make_unique<Location>(absl::StrCat(config->opts.errorUrlBase, error->what.code),
-                                      make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-                "Click for more information on this error."));
         }
+        // Add link to error documentation.
+        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+            make_unique<Location>(absl::StrCat(config->opts.errorUrlBase, error->what.code),
+                                  make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
+            "Click for more information on this error."));
         diagnostic->relatedInformation = move(relatedInformation);
         diagnostics.push_back(move(diagnostic));
     }
@@ -84,7 +79,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
 };
 
-ErrorStatus ErrorReporter::getFileErrorStatus(core::FileRef file) {
+ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     if (file.id() >= fileErrorStatuses.size()) {
         setMaxFileId(file.id());
     }
