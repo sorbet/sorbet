@@ -1,14 +1,14 @@
 #include "main/lsp/ErrorReporter.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
-
 namespace sorbet::realmain::lsp {
 using namespace std;
 ErrorReporter::ErrorReporter(shared_ptr<const LSPConfiguration> config) : config(move(config)) {}
 
-vector<core::FileRef> ErrorReporter::filesUpdatedSince(u4 epoch) {
+vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
         ErrorStatus fileErrorStatus = fileErrorStatuses[i];
@@ -81,13 +81,8 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
 
 ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     if (file.id() >= fileErrorStatuses.size()) {
-        setMaxFileId(file.id());
+        fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, false});
     }
     return fileErrorStatuses[file.id()];
-};
-
-void ErrorReporter::setMaxFileId(u4 id) {
-    ENFORCE(id >= fileErrorStatuses.size());
-    fileErrorStatuses.resize(id + 1, ErrorStatus{0, false});
 };
 } // namespace sorbet::realmain::lsp

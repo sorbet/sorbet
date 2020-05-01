@@ -2,10 +2,9 @@
 #define RUBY_TYPER_LSP_ERRORREPORTER_H
 
 #include "core/core.h"
-#include "main/lsp/LSPConfiguration.h"
 
 namespace sorbet::realmain::lsp {
-
+class LSPConfiguration;
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
     u4 lastReportedEpoch = 0;
@@ -21,7 +20,7 @@ class ErrorReporter {
 
 public:
     ErrorReporter(std::shared_ptr<const LSPConfiguration> config);
-    std::vector<core::FileRef> filesUpdatedSince(u4 epoch);
+    std::vector<core::FileRef> filesWithErrorsSince(u4 epoch);
     /**
      * Sends diagnostics from a typecheck run of a single file to the client.
      * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting

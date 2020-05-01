@@ -6,6 +6,7 @@
 #include "core/Loc.h"
 #include "core/Unfreeze.h"
 #include "main/lsp/ErrorReporter.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
@@ -70,8 +71,7 @@ TEST(ErrorReporterTest, NotifiesVSCodeWhenFileHasErrors) {
         auto &notificationMessage = message->asNotification();
         auto &publishDiagnosticParams = get<unique_ptr<PublishDiagnosticsParams>>(notificationMessage.params);
 
-        EXPECT_EQ(publishDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref))
-            << fmt::format("Reports file with errors to VS code");
+        EXPECT_EQ(publishDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref)) << "Reports file with errors to VS code";
         EXPECT_EQ(1, publishDiagnosticParams->diagnostics.size());
     }
 }
@@ -104,7 +104,7 @@ TEST(ErrorReporterTest, ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors) {
             get<unique_ptr<PublishDiagnosticsParams>>(latestMessage->asNotification().params);
 
         EXPECT_EQ(latestDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref))
-            << fmt::format("Sends empty errors to VS code when file previously had errors");
+            << "Sends empty errors to VS code when file previously had errors";
         EXPECT_TRUE(latestDiagnosticParams->diagnostics.empty());
     }
 }
@@ -161,7 +161,7 @@ TEST(ErrorReporterTest, ErrorReporterIgnoresErrorsFromOldEpochs) {
         EXPECT_TRUE(output.empty());
     }
 }
-TEST(ErrorReporterTest, filesUpdatedSince) {
+TEST(ErrorReporterTest, filesWithErrorsSince) {
     auto cs = makeConfig();
     auto gs = makeGS();
     ErrorReporter er(cs);
@@ -180,12 +180,15 @@ TEST(ErrorReporterTest, filesUpdatedSince) {
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        EXPECT_TRUE(er.filesUpdatedSince(requestedEpoch).empty())
-            << fmt::format("Only returns files with lastReportedEpoch >= sent epoch");
+        EXPECT_TRUE(er.filesWithErrorsSince(requestedEpoch).empty())
+            << "Only returns files with lastReportedEpoch >= sent epoch";
 
         er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
         er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
-        EXPECT_EQ(1, er.filesUpdatedSince(requestedEpoch).size()) << fmt::format("Only returns files with errors");
+
+        auto filesWithErrorsSince = er.filesWithErrorsSince(requestedEpoch);
+        EXPECT_EQ(1, filesWithErrorsSince.size()) << "Only returns files with errors";
+        EXPECT_EQ(fref, filesWithErrorsSince[0]);
     }
 }
 } // namespace sorbet::realmain::lsp::test

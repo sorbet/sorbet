@@ -98,7 +98,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
             // Prune the new files from list of files to be re-typechecked
             vector<core::FileRef> oldFilesWithErrors;
             u4 maxFileId = gs->getFiles().size();
-            for (auto &file : errorReporter.filesUpdatedSince(cancellationUndoState->epoch)) {
+            for (auto &file : errorReporter.filesWithErrorsSince(cancellationUndoState->epoch)) {
                 if (file.id() < maxFileId) {
                     oldFilesWithErrors.push_back(file);
                 }
