@@ -1707,14 +1707,14 @@ private:
                             auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
                             if (info.flags.isKeyword) {
                                 keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                                keywordArgVals.emplace_back(make_unique<ast::Local>(local->loc, local->localVariable));
+                                keywordArgVals.emplace_back(local->deepCopy());
                             } else if (info.flags.isRepeated || info.flags.isBlock) {
                                 // Explicitly skip for now.
                                 // Involves synthesizing a call to callWithSplat, callWithBlock, or
                                 // callWithSplatAndBlock
                             } else {
                                 ENFORCE(keywordArgKeys.empty());
-                                args.emplace_back(make_unique<ast::Local>(local->loc, local->localVariable));
+                                args.emplace_back(local->deepCopy());
                             }
                         }
                     }
