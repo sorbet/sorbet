@@ -3,6 +3,7 @@
 
 #include "ast/ast.h"
 #include "core/core.h"
+#include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPFileUpdates.h"
 
@@ -57,10 +58,6 @@ class LSPTypechecker final {
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
-    /** Stores the epoch in which we last sent diagnostics to the client for each file. */
-    std::vector<u4> diagnosticEpochs;
-    /** List of files that have had errors in last run*/
-    std::vector<core::FileRef> filesThatHaveErrors;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
     std::unique_ptr<UndoState> cancellationUndoState;
@@ -71,6 +68,8 @@ class LSPTypechecker final {
     /** Used for assertions. Indicates if `initialize` has been run. */
     bool initialized = false;
 
+    ErrorReporter errorReporter;
+
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
@@ -79,12 +78,11 @@ class LSPTypechecker final {
     TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
     /**
-     * Sends diagnostics from a typecheck run to the client.
-     * `epoch` specifies the epoch of the file updates that produced these diagnostics. Used to prevent emitting
-     * outdated diagnostics from a slow path run if they had already been re-typechecked on the fast path.
+     * Builds a map of files to errors that are not silenced and passes them one file at a time to
+     * ErrorReporter::PushDiagnostics
      */
-    void pushDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
-                         std::vector<std::unique_ptr<core::Error>> errors);
+    void pushAllDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
+                            std::vector<std::unique_ptr<core::Error>> errors);
 
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
