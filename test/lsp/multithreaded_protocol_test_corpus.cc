@@ -668,10 +668,13 @@ TEST_P(ProtocolTest, ErrorIntroducedInSlowPathCorrectedByFastPathPreemption) {
     assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
 
     // Create two files without errors
+    cerr << "Creating foo.rb";
     assertDiagnostics(
         send(*openFile("foo.rb",
                        "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(Integer)}\ndef self.foo\n1\nend\nend")),
         {});
+
+    cerr << "Creating bar.rb";
     assertDiagnostics(
         send(*openFile(
             "bar.rb",
@@ -679,12 +682,14 @@ TEST_P(ProtocolTest, ErrorIntroducedInSlowPathCorrectedByFastPathPreemption) {
         {});
 
     // Slow path: adds a new method and introduces an error to bar.rb
+    cerr << "Making slow path change to foo.rb";
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(String)}\ndef self.foo\n1\nend\nsig "
                           "{returns(Integer)}\ndef "
                           "self.str\n'hi'\nend\nend",
                           2, false, 1));
 
+    cerr << "Making fast path change to foo.rb";
     // Fast path [preempt]: Corrects the error to bar.rb above
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nmodule Foo\nextend T::Sig\nsig {returns(Integer)}\ndef self.foo\n1\nend\nsig "
