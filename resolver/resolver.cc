@@ -1703,19 +1703,25 @@ private:
                     auto argIdx = -1;
                     for (auto &arg : mdef->args) {
                         ++argIdx;
-                        if (auto local = ast::cast_tree<ast::Local>(arg.get())) {
-                            auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
-                            if (info.flags.isKeyword) {
-                                keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                                keywordArgVals.emplace_back(local->deepCopy());
-                            } else if (info.flags.isRepeated || info.flags.isBlock) {
-                                // Explicitly skip for now.
-                                // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                                // callWithSplatAndBlock
-                            } else {
-                                ENFORCE(keywordArgKeys.empty());
-                                args.emplace_back(local->deepCopy());
-                            }
+
+                        auto *mbLocal = arg.get();
+                        if (auto *opt = ast::cast_tree<ast::OptionalArg>(mbLocal)) {
+                            mbLocal = opt->expr.get();
+                        }
+
+                        auto *local = ast::cast_tree<ast::Local>(mbLocal);
+
+                        auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
+                        if (info.flags.isKeyword) {
+                            keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                            keywordArgVals.emplace_back(local->deepCopy());
+                        } else if (info.flags.isRepeated || info.flags.isBlock) {
+                            // Explicitly skip for now.
+                            // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                            // callWithSplatAndBlock
+                        } else {
+                            ENFORCE(keywordArgKeys.empty());
+                            args.emplace_back(local->deepCopy());
                         }
                     }
 
