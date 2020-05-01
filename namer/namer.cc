@@ -127,13 +127,18 @@ class NameFinder {
 
     // Returns an entry into foundNames that represents the given name.
     u4 squashNames(core::Context ctx, u4 owner, const unique_ptr<ast::Expression> &node) {
+        FoundName name;
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
             // Already defined. Insert a foundname so we can reference it.
             // TODO(jvilk): Have a variant that is 'defined symbol'? How often do we hit this?
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
 
-            return sym.data(ctx)->owner;
+            foundNames
+                .push_back()
+
+                    return sym.data(ctx)
+                ->owner;
         }
         if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
         }
