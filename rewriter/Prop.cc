@@ -432,6 +432,63 @@ vector<unique_ptr<ast::Expression>> mkTypedInitialize(core::MutableContext ctx, 
     return result;
 }
 
+vector<unique_ptr<ast::Expression>> mkUntypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                                        const vector<PropInfo> &props) {
+    auto untypedHash =
+        ast::MK::Send2(klassLoc, ast::MK::Constant(klassLoc, core::Symbols::T_Hash()), core::Names::squareBrackets(),
+                       ast::MK::Constant(klassLoc, core::Symbols::Symbol()), ast::MK::Untyped(klassLoc));
+
+    auto opts = ast::MK::Local(klassLoc, core::Names::opts());
+
+    ast::InsSeq::STATS_store stats;
+    for (const auto &prop : props) {
+        // This is pretty gross but it's sort of required. mkUntypedInitialize is called when we don't know the super
+        // class syntactically (i.e., it's not T::Struct directly). This means it's more likely than not that this class
+        // is using T::Props::WeakConstructor, not T::Props::Constructor, which means that required props can be omitted
+        // from the constructor and be provided by assignment later (This only exists for legacy compatibility with
+        // Stripe's ODM library. When T::Struct and the T::Props DSL was factored out of Stripe's ODM library, the
+        // explicit choice was made to fix this in T::Struct, so that all required props are required in the constructor
+        // too).
+        //
+        // To be able to declare the underlying instance variables so that these props can be used in `# typed: strict`
+        // files, we have to cheat a little bit and only initialize the instance variables inside an `if`:
+        //
+        // sig {params(opts: T::Hash[Symbol, T.untyped]).void}
+        // def initialize(opts = {})
+        //   if foo = opts[:foo]
+        //     @foo = T.let(foo, Integer)
+        //   end
+        // end
+        //
+        // This goes against the spirit of why instance variables must be initialized in the constructor (the
+        // constructor is the only code that always runs, so Sorbet can assume that they're initialized).
+        auto local = ast::MK::Local(prop.nameLoc, prop.name);
+        auto hashGet = ast::MK::Send1(prop.loc, opts->deepCopy(), core::Names::squareBrackets(),
+                                      ast::MK::Symbol(prop.nameLoc, prop.name));
+        auto cond = ast::MK::Assign(prop.loc, local->deepCopy(), std::move(hashGet));
+
+        auto ivarName = prop.name.addAt(ctx);
+        auto let = ast::MK::Let(prop.nameLoc, std::move(local), ASTUtil::dupType(prop.type.get()));
+        auto then = ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName), std::move(let));
+
+        auto else_ = ast::MK::EmptyTree();
+
+        stats.emplace_back(ast::MK::If(prop.loc, std::move(cond), std::move(then), std::move(else_)));
+    }
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
+
+    ast::MethodDef::ARGS_store args;
+    args.emplace_back(ast::MK::OptionalArg(klassLoc, std::move(opts), ast::MK::Hash0(klassLoc)));
+
+    vector<unique_ptr<ast::Expression>> result;
+    result.emplace_back(ast::MK::SigVoid(
+        klassLoc, ast::MK::Hash1(klassLoc, ast::MK::Symbol(klassLoc, core::Names::opts()), std::move(untypedHash))));
+    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
+                                                 std::move(args), std::move(body)));
+
+    return result;
+}
+
 } // namespace
 
 void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -474,6 +531,17 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         for (auto &stat : mkTypedInitialize(ctx, klass->loc, props)) {
             klass->rhs.emplace_back(std::move(stat));
         }
+    } else if (klass->kind == ast::ClassDef::Kind::Class) {
+        // For non-direct T::Struct subclasses, seeing no props more likely than not means that this isn't even a
+        // descendant of T::Props::WeakConstructor, so we should skip making an initialize
+        if (!props.empty()) {
+            for (auto &stat : mkUntypedInitialize(ctx, klass->loc, props)) {
+                klass->rhs.emplace_back(std::move(stat));
+            }
+        }
+    } else {
+        // For modules (not classes) that define props, we can't make an initialize, so
+        // it won't be possible to make such files `# typed: strict`.
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
