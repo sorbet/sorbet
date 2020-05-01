@@ -786,6 +786,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             }
 
             for (auto &codeAction : receivedCodeActions) {
+                // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
+                // Source, the other is a Quickfix. This logic strips out the quickfix.
                 if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
                     continue;
                 }
