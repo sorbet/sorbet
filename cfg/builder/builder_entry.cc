@@ -15,10 +15,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->file = md.declLoc.file();
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
-    if (res->symbol.data(ctx)->isAbstract()) {
-        res->basicBlocks.clear();
-        return res;
-    }
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, core::LocalVariable> aliases;
     UnorderedMap<core::NameRef, core::LocalVariable> discoveredUndeclaredFields;
