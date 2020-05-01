@@ -374,23 +374,23 @@ codeRepl4:                                        ; preds = %sorbet_readRealpath
 "func_<root>.<static-init>$114.exit":             ; preds = %58, %sorbet_isa_class_of.exit.i.i
   %101 = getelementptr inbounds i64, i64* %89, i64 3
   store i64* %101, i64** %84, align 8, !tbaa !6
-  %102 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
-  %103 = tail call i64 @sorbet_getConstantEpoch()
-  %needTakeSlowPath9 = icmp eq i64 %102, %103
-  br i1 %needTakeSlowPath9, label %105, label %104, !prof !36
+  %102 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i.i, i64 0, i64 0
+  %103 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
+  %104 = tail call i64 @sorbet_getConstantEpoch()
+  %needTakeSlowPath9 = icmp eq i64 %103, %104
+  br i1 %needTakeSlowPath9, label %106, label %105, !prof !36
 
-104:                                              ; preds = %"func_<root>.<static-init>$114.exit"
+105:                                              ; preds = %"func_<root>.<static-init>$114.exit"
   tail call void @"const_recompute_T::Sig::WithoutRuntime"() #14
-  br label %105
+  br label %106
 
-105:                                              ; preds = %"func_<root>.<static-init>$114.exit", %104
-  %106 = load i64, i64* @"guarded_const_T::Sig::WithoutRuntime", align 8
-  %107 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
-  %108 = tail call i64 @sorbet_getConstantEpoch()
-  %guardUpdated10 = icmp eq i64 %107, %108
+106:                                              ; preds = %"func_<root>.<static-init>$114.exit", %105
+  %107 = load i64, i64* @"guarded_const_T::Sig::WithoutRuntime", align 8
+  %108 = load i64, i64* @"guard_epoch_T::Sig::WithoutRuntime", align 8
+  %109 = tail call i64 @sorbet_getConstantEpoch()
+  %guardUpdated10 = icmp eq i64 %108, %109
   tail call void @llvm.assume(i1 %guardUpdated10)
-  %109 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i.i, i64 0, i64 0
-  %110 = call i64 @rb_block_call(i64 %106, i64 %rubyId_sig.i.i, i32 0, i64* nonnull %109, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_A.<static-init>L62$block_1" to i64 (...)*), i64 %67) #14
+  %110 = call i64 @rb_block_call(i64 %107, i64 %rubyId_sig.i.i, i32 0, i64* nonnull %102, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_A.<static-init>L62$block_1" to i64 (...)*), i64 %67) #14
   %111 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %70, align 8, !tbaa !38
   %112 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %111, i64 0, i32 1, i64 0
   %113 = load i64, i64* %112, align 8
@@ -405,21 +405,21 @@ codeRepl4:                                        ; preds = %sorbet_readRealpath
   %needTakeSlowPath11 = icmp eq i64 %117, %118
   br i1 %needTakeSlowPath11, label %120, label %119, !prof !36
 
-119:                                              ; preds = %105
+119:                                              ; preds = %106
   call void @"const_recompute_T::Sig"() #14
   br label %120
 
-120:                                              ; preds = %105, %119
+120:                                              ; preds = %106, %119
   %121 = load i64, i64* @"guarded_const_T::Sig", align 8
   %122 = load i64, i64* @"guard_epoch_T::Sig", align 8
   %123 = call i64 @sorbet_getConstantEpoch()
   %guardUpdated12 = icmp eq i64 %122, %123
   call void @llvm.assume(i1 %guardUpdated12)
-  store i64 %121, i64* %109, align 8
+  store i64 %121, i64* %102, align 8
   %124 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %70, align 8, !tbaa !38
   %125 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %124, i64 0, i32 1, i64 0
   %126 = load i64, i64* %125, align 8
-  %call_via_vm_extend.i.i = call i64 @sorbet_callFunc(i64 %126, i64 %rubyId_extend.i.i, i32 1, i64* nonnull %109, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_extend) #14
+  %call_via_vm_extend.i.i = call i64 @sorbet_callFunc(i64 %126, i64 %rubyId_extend.i.i, i32 1, i64* nonnull %102, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_extend) #14
   %127 = getelementptr inbounds i64, i64* %89, i64 4
   store i64* %127, i64** %84, align 8, !tbaa !6
   %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_foo.i.i1) #14

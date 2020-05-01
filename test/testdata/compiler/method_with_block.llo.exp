@@ -838,11 +838,11 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %76, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_baz, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#baz" to i64 (...)*), i32 -1) #14
   %80 = getelementptr inbounds i64, i64* %67, i64 17
   store i64* %80, i64** %62, align 8, !tbaa !5
-  %81 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
-  %82 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %81, i64 0, i32 1, i64 0
-  %83 = load i64, i64* %82, align 8
-  %84 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  %85 = call i64 @rb_block_call(i64 %83, i64 %rubyId_foo.i, i32 0, i64* nonnull %84, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_1" to i64 (...)*), i64 %45) #14
+  %81 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  %82 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
+  %83 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %82, i64 0, i32 1, i64 0
+  %84 = load i64, i64* %83, align 8
+  %85 = call i64 @rb_block_call(i64 %84, i64 %rubyId_foo.i, i32 0, i64* nonnull %81, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_1" to i64 (...)*), i64 %45) #14
   %86 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %87 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %86, i64 0, i32 1, i64 0
   %88 = load i64, i64* %87, align 8
@@ -855,7 +855,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %92 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %93 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %92, i64 0, i32 1, i64 0
   %94 = load i64, i64* %93, align 8
-  %95 = call i64 @rb_block_call(i64 %94, i64 %rubyId_boo.i, i32 0, i64* nonnull %84, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_2" to i64 (...)*), i64 %45) #14
+  %95 = call i64 @rb_block_call(i64 %94, i64 %rubyId_boo.i, i32 0, i64* nonnull %81, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_2" to i64 (...)*), i64 %45) #14
   %96 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %97 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %96, i64 0, i32 1, i64 0
   %98 = load i64, i64* %97, align 8
@@ -868,7 +868,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %102 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %103 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %102, i64 0, i32 1, i64 0
   %104 = load i64, i64* %103, align 8
-  %105 = call i64 @rb_block_call(i64 %104, i64 %rubyId_bar.i, i32 0, i64* nonnull %84, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_3" to i64 (...)*), i64 %45) #14
+  %105 = call i64 @rb_block_call(i64 %104, i64 %rubyId_bar.i, i32 0, i64* nonnull %81, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_3" to i64 (...)*), i64 %45) #14
   %106 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %107 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %106, i64 0, i32 1, i64 0
   %108 = load i64, i64* %107, align 8
@@ -881,7 +881,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %112 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %48, align 8, !tbaa !27
   %113 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %112, i64 0, i32 1, i64 0
   %114 = load i64, i64* %113, align 8
-  %115 = call i64 @rb_block_call(i64 %114, i64 %rubyId_baz.i, i32 0, i64* nonnull %84, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_4" to i64 (...)*), i64 %45) #14
+  %115 = call i64 @rb_block_call(i64 %114, i64 %rubyId_baz.i, i32 0, i64* nonnull %81, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$114$block_4" to i64 (...)*), i64 %45) #14
   store i64* %111, i64** %62, align 8, !tbaa !5
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %40)
   ret void

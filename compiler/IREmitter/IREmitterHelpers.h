@@ -1,6 +1,7 @@
 #ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
 #include "IREmitter.h"
+#include "cfg/CFG.h"
 #include "compiler/Core/ForwardDeclarations.h"
 #include "core/core.h"
 #include <string_view>
@@ -64,6 +65,10 @@ public:
     static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
+
+    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                                         const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                         const InlinedVector<cfg::VariableUseSite, 2> &args);
 
     static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,

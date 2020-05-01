@@ -261,7 +261,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone
   %50 = and i64 %el2.sroa.0.0, 1
   %51 = icmp eq i64 %50, 0
-  br i1 %51, label %codeRepl61, label %typeTestSuccess36, !prof !7
+  br i1 %51, label %codeRepl62, label %typeTestSuccess36, !prof !7
 
 codeRepl:                                         ; preds = %fillFromDefaultBlockDone
   tail call fastcc void @"func_<root>.<static-init>$114$block_1.cold.1"(i64 %el1.sroa.0.1) #12
@@ -272,7 +272,7 @@ typeTestSuccess36:                                ; preds = %typeTestSuccess
   %53 = icmp eq i64 %52, 0
   br i1 %53, label %63, label %54, !prof !28
 
-codeRepl61:                                       ; preds = %typeTestSuccess
+codeRepl62:                                       ; preds = %typeTestSuccess
   tail call void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #11
   unreachable
 
