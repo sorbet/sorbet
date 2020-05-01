@@ -343,7 +343,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -678,7 +677,6 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
-        opts.lspQuickFixEnabled = opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspDocumentHighlightEnabled =

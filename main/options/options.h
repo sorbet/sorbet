@@ -194,7 +194,6 @@ struct Options {
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
-    bool lspQuickFixEnabled = false;
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;

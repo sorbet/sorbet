@@ -50,7 +50,6 @@ public:
     enum class LSPExperimentalFeature {
         DocumentSymbol = 6,
         SignatureHelp = 7,
-        QuickFix = 8,
         DocumentHighlight = 9,
     };
 

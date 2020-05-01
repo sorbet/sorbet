@@ -34,12 +34,6 @@ vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, co
 unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
-    if (!config.opts.lspQuickFixEnabled) {
-        response->error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
-        return response;
-    }
-
     vector<unique_ptr<CodeAction>> result;
 
     const core::GlobalState &gs = typechecker.state();
