@@ -30,7 +30,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
 
     if (opts.lspQuickFixEnabled) {
         auto codeActionProvider = make_unique<CodeActionOptions>();
-        codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
+        codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::Source};
         serverCap->codeActionProvider = move(codeActionProvider);
     }
 

@@ -768,7 +768,30 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
 
             UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
             auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+            unique_ptr<CodeAction> sourceLevelCodeAction;
+            // One code action should be a 'source' level code action. Remove it.
+            if (!receivedCodeActions.empty()) {
+                for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
+                    if ((*it)->kind == CodeActionKind::Source) {
+                        EXPECT_EQ(sourceLevelCodeAction, nullptr) << "Received multiple source-level code actions";
+                        sourceLevelCodeAction = move(*it);
+                        // Remove from vector and continue
+                        it = receivedCodeActions.erase(it);
+                    } else {
+                        it++;
+                    }
+                }
+                EXPECT_NE(sourceLevelCodeAction, nullptr)
+                    << "Expected one source-level code action for code action request";
+            }
+
             for (auto &codeAction : receivedCodeActions) {
+                // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
+                // Source, the other is a Quickfix. This logic strips out the quickfix.
+                if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
+                    continue;
+                }
+
                 bool codeActionTitleUnique =
                     receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
                 EXPECT_TRUE(codeActionTitleUnique) << "Found code action with duplicate title: " << codeAction->title;
