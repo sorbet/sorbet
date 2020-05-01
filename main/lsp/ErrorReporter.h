@@ -15,7 +15,6 @@ class ErrorReporter {
     const std::shared_ptr<const LSPConfiguration> config;
     // Maps from file ref ID to its error status.
     std::vector<ErrorStatus> fileErrorStatuses;
-    void setMaxFileId(u4 id);
     ErrorStatus &getFileErrorStatus(core::FileRef file);
 
 public:
