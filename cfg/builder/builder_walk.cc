@@ -514,7 +514,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 // `rescueEndTemp` which can jump into the rescue handlers.
                 auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, bodyRubyBlockId);
-                auto exceptionValue = cctx.newTemporary(core::Names::rescueStartTemp());
+                auto exceptionValue = cctx.newTemporary(core::Names::exceptionValue());
                 synthesizeExpr(rescueHeaderBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
                 conditionalJump(rescueHeaderBlock, exceptionValue, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
 
@@ -530,7 +530,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto shouldEnsureBlock = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
                 unconditionalJump(elseBody, shouldEnsureBlock, cctx.inWhat, a->loc);
                 synthesizeExpr(shouldEnsureBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
-                conditionalJump(shouldEnsureBlock, exceptionValue, rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
+                conditionalJump(shouldEnsureBlock, exceptionValue, rescueHandlersBlock, ensureBody, cctx.inWhat,
+                                a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);

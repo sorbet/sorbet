@@ -69,7 +69,7 @@ NameDef names[] = {
     {"hashTemp", "<hashTemp>"},
     {"arrayTemp", "<arrayTemp>"},
     {"rescueTemp", "<rescueTemp>"},
-    {"rescueStartTemp", "<rescueStartTemp>"},
+    {"exceptionValue", "<exceptionValue>"},
     {"gotoDeadTemp", "<gotoDeadTemp>"},
     {"exceptionClassTemp", "<exceptionClassTemp>"},
     {"isaCheckTemp", "<isaCheckTemp>"},
