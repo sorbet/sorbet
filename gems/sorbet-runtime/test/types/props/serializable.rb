@@ -473,16 +473,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   class CustomType
     extend T::Props::CustomType
 
-    def self.instance?(value)
-      value.is_a?(String)
-    end
+    attr_accessor :value
 
     def self.deserialize(value)
-      value.clone.freeze
+      result = new
+      result.value = value.clone.freeze
+      result
     end
 
     def self.serialize(instance)
-      instance
+      instance.value
     end
   end
 
@@ -720,7 +720,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :hash_of_substruct, T::Hash[String, MySerializable]
     prop :custom_type, CustomType
     prop :nilable_custom_type, T.nilable(CustomType)
-    prop :default_custom_type, CustomType, default: ''
+    prop :default_custom_type, CustomType, default: CustomType.new
     prop :array_of_custom_type, T::Array[CustomType]
     prop :hash_of_custom_type_to_substruct, T::Hash[CustomType, MySerializable]
     prop :unidentified_type, Object

@@ -128,8 +128,7 @@ module T::Props
       private_class_method def self.handle_custom_type(varname, type, mode)
         case mode
         when Serialize
-          type_name = T.must(module_name(type))
-          "T::Props::CustomType.checked_serialize(#{type_name}, #{varname})"
+          "T::Props::CustomType.checked_serialize(#{varname})"
         when Deserialize
           type_name = T.must(module_name(type))
           "#{type_name}.deserialize(#{varname})"
