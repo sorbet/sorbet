@@ -496,9 +496,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
 
             [&](ast::Rescue *a) {
-                auto rescueStartBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                unconditionalJump(current, rescueStartBlock, cctx.inWhat, a->loc);
-                cctx.rescueScope = rescueStartBlock;
+                auto bodyRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto handlersRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto ensureRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto elseRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a->loc);
+                cctx.rescueScope = rescueHeaderBlock;
 
                 // We have a simplified view of the control flow here but in
                 // practise it has been reasonable on our codebase.
@@ -506,36 +510,36 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 // throw, instead we model only never running anything in the
                 // body, or running the whole thing. To do this we  have a magic
                 // Unanalyzable variable at the top of the body using
-                // `rescueStartTemp` and one at the end of the else using
+                // `exceptionValue` and one at the end of the else using
                 // `rescueEndTemp` which can jump into the rescue handlers.
-                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                auto rescueStartTemp = cctx.newTemporary(core::Names::rescueStartTemp());
-                synthesizeExpr(rescueStartBlock, rescueStartTemp, what->loc, make_unique<Unanalyzable>());
-                conditionalJump(rescueStartBlock, rescueStartTemp, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, bodyRubyBlockId);
+                auto exceptionValue = cctx.newTemporary(core::Names::rescueStartTemp());
+                synthesizeExpr(rescueHeaderBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
+                conditionalJump(rescueHeaderBlock, exceptionValue, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
-                auto elseBody = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                // TODO: Do we need to insert a sentinel to distinguish 'else' from body?
+                auto elseBody = cctx.inWhat.freshBlock(cctx.loops, elseRubyBlockId);
                 unconditionalJump(bodyBlock, elseBody, cctx.inWhat, a->loc);
 
                 elseBody = walk(cctx, a->else_.get(), elseBody);
-                auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
 
-                auto shouldEnsureBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                auto shouldEnsureBlock = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
                 unconditionalJump(elseBody, shouldEnsureBlock, cctx.inWhat, a->loc);
-                auto rescueEndTemp = cctx.newTemporary(core::Names::rescueEndTemp());
-                synthesizeExpr(shouldEnsureBlock, rescueEndTemp, what->loc, make_unique<Unanalyzable>());
-                conditionalJump(shouldEnsureBlock, rescueEndTemp, rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
+                synthesizeExpr(shouldEnsureBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
+                conditionalJump(shouldEnsureBlock, exceptionValue, rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
-                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
                     ENFORCE(local != nullptr, "rescue case var not a local?");
                     rescueHandlersBlock->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
-                                                            make_unique<Unanalyzable>());
+                                                            make_unique<Ident>(exceptionValue));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
@@ -559,7 +563,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                                                                   core::Names::isA_p(), loc, args,
                                                                                   argLocs, isPrivateOk));
 
-                        auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                        auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
                         rescueHandlersBlock = otherHandlerBlock;
                     }
