@@ -18,24 +18,24 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3, rubyBlockId=0](<self>: Object)\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<self>: Object, <rescueStartTemp>$4: T.untyped)\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$7: T.untyped = <rescueStartTemp>$4: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4, rubyBlockId=0]()\l<returnTemp>$5: Integer(1) = 1\l<statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=1]()\l<returnTemp>$5: Integer(1) = 1\l<statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8, rubyBlockId=0]()\l<returnTemp>$9: Integer(2) = 2\l<statTemp>$3: T.noreturn = return <returnTemp>$9: Integer(2)\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]()\l<returnTemp>$8: Integer(2) = 2\l<statTemp>$3: T.noreturn = return <returnTemp>$8: Integer(2)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_9" [
-        label = "block[id=9, rubyBlockId=0](<self>: Object)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=2](<self>: Object)\l<gotoDeadTemp>$9: TrueClass(true) = true\l<gotoDeadTemp>$9: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];

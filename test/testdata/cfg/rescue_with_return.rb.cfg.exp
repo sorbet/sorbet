@@ -18,26 +18,26 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_3" [
-        label = "block[id=3, rubyBlockId=0]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$7: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<rescueStartTemp>$3: T.untyped)\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = <rescueStartTemp>$3: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
     ];
 
     "bb::Object#a_3" -> "bb::Object#a_6" [style="bold"];
     "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_4" [
-        label = "block[id=4, rubyBlockId=0]()\l<returnTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=1]()\l<returnTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_6" [
-        label = "block[id=6, rubyBlockId=0](<gotoDeadTemp>$8: NilClass)\l<gotoDeadTemp>$8: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$7: NilClass)\l<gotoDeadTemp>$7: NilClass\l"
     ];
 
     "bb::Object#a_6" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_6" -> "bb::Object#a_10" [style="tapered"];
 
     "bb::Object#a_9" [
-        label = "block[id=9, rubyBlockId=0]()\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=2]()\l<gotoDeadTemp>$7: TrueClass(true) = true\l<gotoDeadTemp>$7: TrueClass(true)\l"
     ];
 
     "bb::Object#a_9" -> "bb::Object#a_1" [style="bold"];

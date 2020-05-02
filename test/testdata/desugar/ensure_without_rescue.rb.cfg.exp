@@ -18,19 +18,19 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3, rubyBlockId=0](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$6: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$5: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_4" [
-        label = "block[id=4, rubyBlockId=0](<self>: Object)\l<returnMethodTemp>$2: T.untyped = <self>: Object.a()\l<rescueEndTemp>$5: T.untyped = <unanalyzable>\l<rescueEndTemp>$5: T.untyped\l"
+        label = "block[id=4, rubyBlockId=1](<self>: Object)\l<returnMethodTemp>$2: T.untyped = <self>: Object.a()\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
 
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=0](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$6: T.nilable(TrueClass))\l<throwAwayTemp>$7: T.untyped = <self>: Object.b()\l<gotoDeadTemp>$6: T.nilable(TrueClass)\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$5: T.nilable(TrueClass))\l<throwAwayTemp>$6: T.untyped = <self>: Object.b()\l<gotoDeadTemp>$5: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
