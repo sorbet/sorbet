@@ -80,12 +80,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, cfg);
-    if (!cfg->basicBlocks.empty()) {
-        ENFORCE(!cfg->symbol.data(ctx)->isAbstract());
-    } else {
-        ENFORCE(cfg->symbol.data(ctx)->isAbstract());
-        return cfg;
-    }
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {

@@ -1692,6 +1692,49 @@ private:
                                         "as abstract using `abstract!` or `interface!`");
                         }
                     }
+
+                    // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+                    // behavior of the runtime.
+                    ast::Send::ARGS_store args;
+
+                    ast::Hash::ENTRY_store keywordArgKeys;
+                    ast::Hash::ENTRY_store keywordArgVals;
+
+                    auto argIdx = -1;
+                    for (auto &arg : mdef->args) {
+                        ++argIdx;
+
+                        auto *mbLocal = arg.get();
+                        if (auto *opt = ast::cast_tree<ast::OptionalArg>(mbLocal)) {
+                            mbLocal = opt->expr.get();
+                        }
+
+                        auto *local = ast::cast_tree<ast::Local>(mbLocal);
+
+                        auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
+                        if (info.flags.isKeyword) {
+                            keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                            keywordArgVals.emplace_back(local->deepCopy());
+                        } else if (info.flags.isRepeated || info.flags.isBlock) {
+                            // Explicitly skip for now.
+                            // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                            // callWithSplatAndBlock
+                        } else {
+                            ENFORCE(keywordArgKeys.empty());
+                            args.emplace_back(local->deepCopy());
+                        }
+                    }
+
+                    if (!keywordArgKeys.empty()) {
+                        args.emplace_back(
+                            ast::MK::Hash(mdef->loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
+                    }
+
+                    auto self = ast::MK::Self(mdef->loc);
+                    mdef->rhs = ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), std::move(args));
+
+                    stopInDebugger();
+
                 } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
                     if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");
