@@ -1,9 +1,13 @@
 cc_library(
     name = "spdlog",
-    srcs = [],
+    srcs = glob([
+        "src/**/*.cpp",
+    ]),
+    defines = [
+        "SPDLOG_COMPILED_LIB",
+    ],
     hdrs = glob([
         "include/spdlog/**/*.h",
-        "include/spdlog/**/*.cc",
     ]),
     copts = [
         "-Iexternal/spdlog/",
