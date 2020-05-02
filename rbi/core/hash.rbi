@@ -425,7 +425,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(T::Enumerator[K])}
   def each_key(&blk); end
 
   # Calls *block* once for each key in *hsh*, passing the key-value pair as
@@ -474,7 +474,7 @@ class Hash < Object
     )
     .returns(T::Hash[K, V])
   end
-  sig {returns(T::Enumerator[[K, V]])}
+  sig {returns(T::Enumerator[V])}
   def each_value(&blk); end
 
   # Returns `true` if *hsh* contains no key-value pairs.
