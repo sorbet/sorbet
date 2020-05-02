@@ -24,7 +24,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ModuleMethods = cast(<self>: NilClass, ModuleMethods);\lfinal_attempt: T.untyped = load_arg(final_attempt)\lfoo: T.untyped = load_arg(foo)\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: ModuleMethods = cast(<self>: NilClass, ModuleMethods);\lfinal_attempt: T.untyped = load_arg(final_attempt)\lfoo: T.untyped = load_arg(foo)\l<exceptionValue>$4: T.untyped = <unanalyzable>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3, rubyBlockId=2](<rescueStartTemp>$4: T.untyped, final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <rescueStartTemp>$4\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<exceptionValue>$4: T.untyped, final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <exceptionValue>$4\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_8" [style="bold"];
@@ -50,7 +50,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_6" -> "bb::ModuleMethods#instrumented_request_10" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_7" [
-        label = "block[id=7, rubyBlockId=3](final_attempt: T.untyped, foo: T.untyped)\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
+        label = "block[id=7, rubyBlockId=3](final_attempt: T.untyped, foo: T.untyped)\l<exceptionValue>$4: T.untyped = <unanalyzable>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];

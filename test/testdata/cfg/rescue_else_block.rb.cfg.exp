@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<exceptionValue>$3: T.untyped = <unanalyzable>\l<exceptionValue>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.nilable(Integer), <rescueStartTemp>$3: T.untyped)\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = <rescueStartTemp>$3: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: T.untyped)\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_9" [style="bold"];
@@ -44,7 +44,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_9" -> "bb::Object#foo_13" [style="tapered"];
 
     "bb::Object#foo_10" [
-        label = "block[id=10, rubyBlockId=3](<returnMethodTemp>$2: Integer(3))\l<rescueStartTemp>$3: T.untyped = <unanalyzable>\l<rescueStartTemp>$3: T.untyped\l"
+        label = "block[id=10, rubyBlockId=3](<returnMethodTemp>$2: Integer(3))\l<exceptionValue>$3: T.untyped = <unanalyzable>\l<exceptionValue>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_3" [style="bold"];
