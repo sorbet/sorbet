@@ -142,15 +142,15 @@ public:
 };
 CheckSize(Literal, 32, 8);
 
-class Unanalyzable : public Instruction {
+class GetCurrentException : public Instruction {
 public:
-    Unanalyzable() {
-        categoryCounterInc("cfg", "unanalyzable");
+    GetCurrentException() {
+        categoryCounterInc("cfg", "GetCurrentException");
     };
     virtual std::string toString(const core::GlobalState &gs) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 };
-CheckSize(Unanalyzable, 16, 8);
+CheckSize(GetCurrentException, 16, 8);
 
 class LoadArg final : public Instruction {
 public:
