@@ -152,18 +152,6 @@ public:
 };
 CheckSize(Unanalyzable, 16, 8);
 
-class NotSupported final : public Unanalyzable {
-public:
-    std::string why;
-
-    NotSupported(std::string_view why) : why(why) {
-        categoryCounterInc("cfg", "notsupported");
-    };
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-};
-CheckSize(NotSupported, 40, 8);
-
 class LoadArg final : public Instruction {
 public:
     core::SymbolRef method;

@@ -176,12 +176,6 @@ string Unanalyzable::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("Unanalyzable {{}}", spacesForTabLevel(tabs));
 }
 
-string NotSupported::toString(const core::GlobalState &gs) const {
-    return fmt::format("NotSupported({})", why);
-}
-
-string NotSupported::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("NotSupported {{\n{0}&nbsp;why = {1},\n{0}}}", spacesForTabLevel(tabs), why);
 }
 
 string Cast::toString(const core::GlobalState &gs) const {
