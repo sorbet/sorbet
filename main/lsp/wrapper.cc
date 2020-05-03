@@ -160,14 +160,10 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::DocumentHighlight);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
-    enableExperimentalFeature(LSPExperimentalFeature::QuickFix);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
     switch (feature) {
-        case LSPExperimentalFeature::QuickFix:
-            opts->lspQuickFixEnabled = true;
-            break;
         case LSPExperimentalFeature::DocumentHighlight:
             opts->lspDocumentHighlightEnabled = true;
             break;

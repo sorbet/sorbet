@@ -52,6 +52,10 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         diagnostic->code = error->what.code;
         diagnostic->severity = DiagnosticSeverity::Error;
 
+        if (!error->autocorrects.empty()) {
+            diagnostic->message += " (fix available)";
+        }
+
         vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
         for (auto &section : error->sections) {
             string sectionHeader = section.header;
