@@ -5,6 +5,7 @@
 #include <csignal>
 #include <cstdio>
 #include <cstring>
+#include <fnctl.h>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
