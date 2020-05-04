@@ -20,17 +20,10 @@ module T::Props
       end
       def self.build_setter_proc(klass, prop, rules)
         # Our nil check works differently than a simple T.nilable for various
-        # reasons (including the `raise_on_nil_write` setting, the existence
-        # of defaults & factories, and the fact that we allow `T.nilable(Foo)`
-        # where Foo < T::Props::CustomType as a prop type even though calling
-        # `valid?` on it won't work as expected), so unwrap any T.nilable and
-        # do a check manually. (Note this hack does not fix custom types as
-        # collection elements.)
+        # reasons (including the `raise_on_nil_write` setting and the existence
+        # of defaults & factories), so unwrap any T.nilable and do a check
+        # manually.
         non_nil_type = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
-        if non_nil_type.is_a?(T::Types::Simple) && non_nil_type.raw_type.singleton_class < T::Props::CustomType
-          non_nil_type = non_nil_type.raw_type
-        end
-
         accessor_key = rules.fetch(:accessor_key)
         validate = rules[:setter_validate]
 
@@ -51,7 +44,7 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
+          non_nil_type: T::Types::Base,
           klass: T.all(Module, T::Props::ClassMethods),
           validate: T.nilable(ValidateProc)
         )
@@ -80,7 +73,7 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: T.any(T::Types::Base, T.all(T::Props::CustomType, Module)),
+          non_nil_type: T::Types::Base,
           klass: T.all(Module, T::Props::ClassMethods),
           validate: T.nilable(ValidateProc),
         )

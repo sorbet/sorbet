@@ -12,7 +12,7 @@ class T::Props::Decorator
 
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
   DecoratedInstance = T.type_alias {Object} # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
+  PropType = T.type_alias {T::Types::Base}
   PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 
   class NoRulesError < StandardError; end
@@ -335,10 +335,7 @@ class T::Props::Decorator
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
     end
-    type_object = type
-    if !(type_object.singleton_class < T::Props::CustomType)
-      type_object = smart_coerce(type_object, array: rules[:array], enum: rules[:enum])
-    end
+    type_object = smart_coerce(type, array: rules[:array], enum: rules[:enum])
 
     prop_validate_definition!(name, cls, rules, type_object)
 

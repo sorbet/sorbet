@@ -28,7 +28,7 @@ module T::Props::TypeValidation
     def prop_validate_definition!(name, _cls, rules, type)
       super
 
-      if !rules[:DEPRECATED_underspecified_type] && !(type.singleton_class <= T::Props::CustomType)
+      if !rules[:DEPRECATED_underspecified_type]
         validate_type(type, field_name: name)
       elsif rules[:DEPRECATED_underspecified_type] && find_invalid_subtype(type).nil?
         raise ArgumentError.new("DEPRECATED_underspecified_type set unnecessarily for #{@class.name}.#{name} - #{type} is a valid type")

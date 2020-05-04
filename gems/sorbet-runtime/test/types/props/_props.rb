@@ -256,16 +256,20 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   class MyCustomType
     extend T::Props::CustomType
 
-    def self.instance?(value)
-      value.is_a?(String)
+    attr_accessor :value
+
+    def initialize(value)
+      @value = value
     end
 
     def self.deserialize(value)
-      value.clone.freeze
+      result = new
+      result.value = value.clone.freeze
+      result
     end
 
     def self.serialize(instance)
-      instance
+      instance.value
     end
   end
 
@@ -283,26 +287,24 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
 
     it 'work when plain' do
-      @obj.custom = "foo"
-      assert_equal("foo", @obj.custom)
+      @obj.custom = MyCustomType.new("foo")
+      assert_equal("foo", @obj.custom.value)
     end
 
     it 'work when nilable' do
       @obj.nilable_custom = nil
       assert_nil(@obj.nilable_custom)
 
-      @obj.nilable_custom = "foo"
-      assert_equal("foo", @obj.nilable_custom)
+      @obj.nilable_custom = MyCustomType.new("foo")
+      assert_equal("foo", @obj.nilable_custom.value)
     end
 
     it 'work as collection element' do
-      skip "this isn't supported"
-
       @obj.collection_custom = []
       assert_empty(@obj.collection_custom)
 
-      @obj.collection_custom = ["foo"]
-      assert_equal(["foo"], @obj.collection_custom)
+      @obj.collection_custom = [MyCustomType.new("foo")]
+      assert_equal(["foo"], @obj.collection_custom.map(&:value))
     end
   end
 
