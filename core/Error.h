@@ -92,17 +92,16 @@ public:
  * Used to batch errors in an RAII fashion:
  *
  * {
- *   ErrorRegion errs(gs);
+ *   ErrorRegion errs(fref);
  *   runNamer();
  * }
  */
 class ErrorRegion {
 public:
-    ErrorRegion(const GlobalState &gs, FileRef f) : gs(gs), f(f){};
+    ErrorRegion(FileRef f) : f(f){};
     ~ErrorRegion();
 
 private:
-    const GlobalState &gs;
     FileRef f;
 };
 

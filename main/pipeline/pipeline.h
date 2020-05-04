@@ -40,7 +40,8 @@ typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> w
           WorkerPool &workers, bool cancelable = false,
           std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt);
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                             const core::GlobalState &gs);
 
 // Computes file hashes for the given files, and stores them in the files. If supplied, attempts to retrieve hashes from
 // the key-value store. Returns 'true' if it had to compute any file hashes.

@@ -105,9 +105,7 @@ string Error::toString(const GlobalState &gs) const {
     return buf.str();
 }
 
-ErrorRegion::~ErrorRegion() {
-    gs.errorQueue->markFileForFlushing(this->f);
-}
+ErrorRegion::~ErrorRegion() {}
 
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
     : gs(gs), state(willBuild ? State::WillBuild : State::Unreported), loc(loc), what(what) {

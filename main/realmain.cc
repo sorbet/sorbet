@@ -513,7 +513,7 @@ int realmain(int argc, char *argv[]) {
                 vector<core::ErrorRegion> errs;
                 for (auto &tree : indexed) {
                     auto file = tree.file;
-                    errs.emplace_back(*gs, file);
+                    errs.emplace_back(file);
                 }
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
                 autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
