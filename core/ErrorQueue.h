@@ -49,6 +49,9 @@ public:
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;
+
+    /** Checks if the queue contains any flushes for a given file */
+    bool hasFlushesFor(core::FileRef file) const;
 };
 
 } // namespace core

@@ -186,4 +186,16 @@ bool ErrorQueue::queueIsEmptyApprox() const {
     return this->queue.sizeEstimate() == 0;
 }
 
+bool ErrorQueue::hasFlushesFor(core::FileRef file) const {
+    auto it = collected.find(file);
+    if (it != collected.end()) {
+        for (auto &msg : it->second) {
+            if (msg.kind == core::ErrorQueueMessage::Kind::Flush) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 } // namespace sorbet::core
