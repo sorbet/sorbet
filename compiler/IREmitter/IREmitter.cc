@@ -556,7 +556,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                                 cs.trace("UnsupportedLiteral");
                         }
                     },
-                    [&](cfg::Unanalyzable *i) {
+                    [&](cfg::GetCurrentException *i) {
                         cs.failCompilation(core::Loc(cs.file, bind.loc),
                                            "exceptions are not supported in compiled mode");
                     },
