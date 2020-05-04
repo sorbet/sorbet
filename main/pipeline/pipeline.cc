@@ -138,7 +138,6 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     unique_ptr<ast::Expression> ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
-        core::ErrorRegion errs(file);
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
@@ -155,7 +154,6 @@ unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef fil
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-    core::ErrorRegion errs(file);
     return rewriter::Rewriter::run(ctx, move(ast));
 }
 
@@ -250,7 +248,6 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             {
                 Timer timeit(gs.tracer(), "plugins_text");
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                core::ErrorRegion errs(file);
 
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
@@ -307,7 +304,6 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
-            core::ErrorRegion errs((sorbet::core::FileRef()));
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
@@ -363,7 +359,6 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
             fnd->second < opts.forceMaxStrict) {
-            core::ErrorRegion errs(file);
             if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
                 e.setHeader("Useless override of strictness level");
             }
@@ -504,7 +499,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                     Timer timeit(cgs->tracer(), "substituteTrees");
                     for (auto &tree : threadResult.res.trees) {
                         auto file = tree.file;
-                        core::ErrorRegion errs(file);
                         if (!file.data(*ret.gs).cached) {
                             core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
                             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
@@ -616,7 +610,6 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         for (auto &tree : firstPass.trees) {
             auto file = tree.file;
             core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root(), file);
-            core::ErrorRegion errs(file);
             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
         }
     }
@@ -709,7 +702,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
         CFGCollectorAndTyper collector(opts);
         {
-            core::ErrorRegion errs(f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
@@ -862,11 +854,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(gs->tracer(), "resolving");
-            vector<core::ErrorRegion> errs;
-            for (auto &tree : what) {
-                auto file = tree.file;
-                errs.emplace_back(file);
-            }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);

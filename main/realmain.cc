@@ -510,11 +510,6 @@ int realmain(int argc, char *argv[]) {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
 
-                vector<core::ErrorRegion> errs;
-                for (auto &tree : indexed) {
-                    auto file = tree.file;
-                    errs.emplace_back(file);
-                }
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
                 autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
             }

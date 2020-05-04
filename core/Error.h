@@ -88,23 +88,6 @@ public:
     }
 };
 
-/*
- * Used to batch errors in an RAII fashion:
- *
- * {
- *   ErrorRegion errs(fref);
- *   runNamer();
- * }
- */
-class ErrorRegion {
-public:
-    ErrorRegion(FileRef f) : f(f){};
-    ~ErrorRegion();
-
-private:
-    FileRef f;
-};
-
 class ErrorBuilder {
     // An ErrorBuilder can be in three states:
     //
