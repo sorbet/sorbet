@@ -1035,7 +1035,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
-            [&](cfg::Unanalyzable *i) {
+            [&](cfg::GetCurrentException *i) {
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },

@@ -69,8 +69,7 @@ NameDef names[] = {
     {"hashTemp", "<hashTemp>"},
     {"arrayTemp", "<arrayTemp>"},
     {"rescueTemp", "<rescueTemp>"},
-    {"rescueStartTemp", "<rescueStartTemp>"},
-    {"rescueEndTemp", "<rescueEndTemp>"},
+    {"exceptionValue", "<exceptionValue>"},
     {"gotoDeadTemp", "<gotoDeadTemp>"},
     {"exceptionClassTemp", "<exceptionClassTemp>"},
     {"isaCheckTemp", "<isaCheckTemp>"},
@@ -79,7 +78,6 @@ NameDef names[] = {
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
-    {"tConstTemp", "<tConstTemp>"},
     // end CFG temporaries
 
     {"include"},

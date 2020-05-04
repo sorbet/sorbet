@@ -168,20 +168,12 @@ string LoadYieldParams::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("LoadYieldParams {{ link = {0} }}", this->link->fun.showRaw(gs));
 }
 
-string Unanalyzable::toString(const core::GlobalState &gs) const {
+string GetCurrentException::toString(const core::GlobalState &gs) const {
     return "<unanalyzable>";
 }
 
-string Unanalyzable::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("Unanalyzable {{}}", spacesForTabLevel(tabs));
-}
-
-string NotSupported::toString(const core::GlobalState &gs) const {
-    return fmt::format("NotSupported({})", why);
-}
-
-string NotSupported::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("NotSupported {{\n{0}&nbsp;why = {1},\n{0}}}", spacesForTabLevel(tabs), why);
+string GetCurrentException::showRaw(const core::GlobalState &gs, int tabs) const {
+    return fmt::format("GetCurrentException {{}}", spacesForTabLevel(tabs));
 }
 
 string Cast::toString(const core::GlobalState &gs) const {
