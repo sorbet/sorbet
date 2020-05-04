@@ -623,6 +623,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
   - `toString` is "internal representation" (like Rust `Debug` trait)
 - `gems/sorbet/` (`srb init`)
 - `gems/sorbet-runtime/`
+- `bazel build //foo --copt=-ftime-trace --spawn_strategy=standalone`
+  - generates <chrome://tracing> profiles for clang
 
 <!-- -- Links -------------------------------------------------------------- -->
 

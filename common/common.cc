@@ -14,6 +14,8 @@
 #include <memory>
 #include <vector>
 
+#include <sys/stat.h>
+
 using namespace std;
 
 namespace {
