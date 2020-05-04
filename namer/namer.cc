@@ -92,6 +92,9 @@ class NameFinder {
     // will define the `owner` symbol.
     // The u4 is actually index + 1 so we reserve 0 for the root owner.
     vector<u4> ownerStack;
+    // Maps known symbols to entries in `foundNames`.
+    // TODO: Measure effectiveness?
+    UnorderedMap<core::SymbolRef, u4> symToNameEntry;
 
     void findClassModifiers(core::Context ctx, u4 classSymbolId, unique_ptr<ast::Expression> &line) {
         auto *send = ast::cast_tree<ast::Send>(line.get());
@@ -125,7 +128,7 @@ class NameFinder {
         return ownerStack.back();
     }
 
-    // Returns an entry into foundNames that represents the given name.
+    // Returns index to foundNames containing the given name. Recursively inserts definitions for its owners.
     u4 squashNames(core::Context ctx, u4 owner, const unique_ptr<ast::Expression> &node) {
         FoundName name;
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
@@ -133,6 +136,11 @@ class NameFinder {
             // TODO(jvilk): Have a variant that is 'defined symbol'? How often do we hit this?
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
+            auto it = symToNameEntry.find(sym);
+            if (it == symToNameEntry.end()) {
+            } else {
+                return
+            }
 
             foundNames
                 .push_back()
@@ -143,7 +151,7 @@ class NameFinder {
         if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
         }
         // class owner is `owner`
-        return core::SymbolRef();
+        return owner;
     }
 
 public:
