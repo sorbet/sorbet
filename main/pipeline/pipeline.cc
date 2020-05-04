@@ -669,8 +669,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
-    ENFORCE(!gs.errorQueue->hasFlushesFor(f));
-
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     resolved = class_flatten::runOne(ctx, move(resolved));
@@ -719,8 +717,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
     }
-    // mark file for flushing at this point, since all the errors have already been produced
-    gs.errorQueue->markFileForFlushing(f);
     return result;
 }
 
@@ -910,6 +906,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
                                       optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+    ENFORCE(gs->errorQueue->filesFlushedCount == 0);
+
     vector<ast::ParsedFile> typecheck_result;
     const auto &epochManager = *gs->epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1060,6 +1058,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
+        gs->errorQueue->filesFlushedCount = 0;
         return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }

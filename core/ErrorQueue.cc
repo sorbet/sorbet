@@ -36,7 +36,9 @@ ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
     : owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
 ErrorQueue::~ErrorQueue() {
-    flushErrors(true);
+    if (owner == this_thread::get_id()) {
+        flushErrors(true);
+    }
 }
 
 pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
@@ -151,6 +153,7 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainFlushed() {
 }
 
 void ErrorQueue::markFileForFlushing(core::FileRef file) {
+    filesFlushedCount++;
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Flush;
     msg.whatFile = file;
@@ -188,18 +191,5 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
 
 bool ErrorQueue::queueIsEmptyApprox() const {
     return this->queue.sizeEstimate() == 0;
-}
-
-bool ErrorQueue::hasFlushesFor(core::FileRef file) const {
-    auto it = collected.find(file);
-    if (it != collected.end()) {
-        for (auto &msg : it->second) {
-            if (msg.kind == core::ErrorQueueMessage::Kind::Flush) {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 } // namespace sorbet::core
