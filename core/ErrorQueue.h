@@ -30,6 +30,7 @@ public:
     bool ignoreFlushes{false};
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);
+    ~ErrorQueue();
 
     /** register a new error to be reported */
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);
