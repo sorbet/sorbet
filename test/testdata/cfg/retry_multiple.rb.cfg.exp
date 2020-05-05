@@ -37,19 +37,19 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
 
     "bb::Object#main_5" [
-        label = "block[id=5, rubyBlockId=0](<self>: Object, try: Integer(0))\l<statTemp>$9: Integer(0) = try\l<statTemp>$10: Integer(1) = 1\ltry: Integer = <statTemp>$9: Integer(0).+(<statTemp>$10: Integer(1))\l<statTemp>$13: T.class_of(A) = alias <C A>\l<statTemp>$12: A = <statTemp>$13: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$12: A)\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Object, try: Integer(0))\l<statTemp>$9: Integer(0) = try\l<statTemp>$10: Integer(1) = 1\ltry: Integer = <statTemp>$9: Integer(0).+(<statTemp>$10: Integer(1))\l<statTemp>$13: T.class_of(A) = alias <C A>\l<statTemp>$12: A = <statTemp>$13: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$12: A)\l<unconditional>\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_13" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <self>: Object, try: Integer(0))\l<statTemp>$16: Integer(6) = 6\l<ifTemp>$14: T::Boolean = try: Integer(0).<(<statTemp>$16: Integer(6))\l<ifTemp>$14: T::Boolean\l"
+        label = "block[id=6, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, try: Integer(0))\l<statTemp>$16: Integer(6) = 6\l<ifTemp>$14: T::Boolean = try: Integer(0).<(<statTemp>$16: Integer(6))\l<ifTemp>$14: T::Boolean\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_7" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_13" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7, rubyBlockId=0](<self>: Object, try: Integer(0))\l<statTemp>$18: Integer(0) = try\l<statTemp>$19: Integer(1) = 1\ltry: Integer = <statTemp>$18: Integer(0).+(<statTemp>$19: Integer(1))\l<statTemp>$22: T.class_of(B) = alias <C B>\l<statTemp>$21: B = <statTemp>$22: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$21: B)\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=1](<self>: Object, try: Integer(0))\l<statTemp>$18: Integer(0) = try\l<statTemp>$19: Integer(1) = 1\ltry: Integer = <statTemp>$18: Integer(0).+(<statTemp>$19: Integer(1))\l<statTemp>$22: T.class_of(B) = alias <C B>\l<statTemp>$21: B = <statTemp>$22: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$21: B)\l<unconditional>\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_13" [style="bold"];

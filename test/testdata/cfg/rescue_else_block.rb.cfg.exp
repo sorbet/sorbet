@@ -32,7 +32,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_4" -> "bb::Object#foo_10" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6, rubyBlockId=0]()\l<returnMethodTemp>$2: Integer(3) = 3\l<unconditional>\l"
+        label = "block[id=6, rubyBlockId=4]()\l<returnMethodTemp>$2: Integer(3) = 3\l<unconditional>\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_10" [style="bold"];
