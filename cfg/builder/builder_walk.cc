@@ -129,17 +129,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         typecase(
             what,
             [&](ast::While *a) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, cctx.rubyBlockId);
+                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current->rubyBlockId);
                 // breakNotCalledBlock is only entered if break is not called in
                 // the loop body
-                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
+                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 unconditionalJump(current, headerBlock, cctx.inWhat, a->loc);
 
                 core::LocalVariable condSym = cctx.newTemporary(core::Names::whileTemp());
                 auto headerEnd = walk(cctx.withTarget(condSym).withLoopScope(headerBlock, continueBlock), a->cond.get(),
                                       headerBlock);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, cctx.rubyBlockId);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current->rubyBlockId);
                 conditionalJump(headerEnd, condSym, bodyBlock, breakNotCalledBlock, cctx.inWhat, a->cond->loc);
                 // finishHeader
                 core::LocalVariable bodySym = cctx.newTemporary(core::Names::statTemp());
@@ -185,8 +185,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable ifSym = cctx.newTemporary(core::Names::ifTemp());
                 ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
-                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
+                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a->cond->loc);
 
                 auto thenEnd = walk(cctx, a->thenp.get(), thenBlock);
@@ -197,7 +197,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     } else if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = thenEnd;
                     } else {
-                        ret = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                        ret = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                         unconditionalJump(thenEnd, ret, cctx.inWhat, a->loc);
                         unconditionalJump(elseEnd, ret, cctx.inWhat, a->loc);
                     }
@@ -333,8 +333,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, newRubyBlockId);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
-                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
-                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
+                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, newRubyBlockId);
 
                     core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
@@ -382,8 +382,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto blockLast = walk(cctx.withTarget(blockrv)
                                               .withBlockBreakTarget(cctx.target)
                                               .withLoopScope(headerBlock, postBlock, true)
-                                              .withSendAndBlockLink(link)
-                                              .withRubyBlockId(newRubyBlockId),
+                                              .withSendAndBlockLink(link),
                                           s->block->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
@@ -500,7 +499,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto handlersRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
                 auto ensureRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
                 auto elseRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a->loc);
                 cctx.rescueScope = rescueHeaderBlock;
 
@@ -586,7 +585,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
-                ret = cctx.inWhat.freshBlock(cctx.loops, cctx.rubyBlockId);
+                ret = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
