@@ -250,7 +250,9 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
             auto assign = ast::MK::Assign(loc, arg2->deepCopy(), std::move(ivarGet));
 
             auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_());
-            auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator());
+            // TODO(jez) This is probably going to silence a lot of legitimate errors.
+            auto unsafeClass = ast::MK::Unsafe(loc, std::move(class_));
+            auto decorator = ast::MK::Send0(loc, std::move(unsafeClass), core::Names::decorator());
             auto propGetLogic = ast::MK::Send3(loc, std::move(decorator), core::Names::propGetLogic(),
                                                ast::MK::Self(loc), ast::MK::Symbol(nameLoc, name), std::move(arg2));
             auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
