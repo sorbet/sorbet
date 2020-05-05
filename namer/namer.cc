@@ -21,57 +21,203 @@ using namespace std;
 namespace sorbet::namer {
 
 namespace {
-enum class NameKind : u1 { Class, Method, FieldOrVariable, TypeMemberDefinition, DefinedSymbol };
+class FoundName;
+class FoundNames;
+class FoundNameRef final {
+    u4 _id;
 
-struct FoundName {
-    NameKind kind;
-    u4 owner;
+public:
+    FoundNameRef() : _id(0){};
+
+    FoundNameRef(u4 id) : _id(id) {}
+
+    FoundNameRef(const FoundNameRef &nm) = default;
+
+    FoundNameRef(FoundNameRef &&nm) = default;
+
+    FoundNameRef &operator=(const FoundNameRef &rhs) = default;
+
+    bool operator==(const FoundNameRef &rhs) const {
+        return _id == rhs._id;
+    }
+
+    bool operator!=(const FoundNameRef &rhs) const {
+        return !(rhs == *this);
+    }
+
+    const FoundName &data(const FoundNames &foundNames) const;
+
+    FoundName &data(FoundNames &foundNames) const;
+
+    core::SymbolRef symbol(const vector<core::SymbolRef> &definedSymbols) const {
+        if (_id >= definedSymbols.size()) {
+            Exception::raise("Tried to get symbol for found name before it was defined.");
+        }
+        return definedSymbols[_id];
+    }
+};
+
+struct FoundRoot final {};
+
+struct FoundClassRef final {
+    FoundNameRef owner;
+    core::NameRef name;
+    core::Loc loc;
+};
+
+struct FoundClassDef final {
+    FoundNameRef classRef;
     core::Loc loc;
     core::Loc declLoc;
-    core::NameRef name;
-
-    // DefinedSymbol-only item.
-    core::SymbolRef definedSymbol;
-
-    // TODO(jvilk): Should I use a union? If combined in a class I could create safe accessors.
-
-    /** nestable items (Class, FieldOrVariable) */
-    core::SymbolRef squashedOwner; // If exists, then the class or field is owned by this symbol, not `owner`.
-
-    /** FieldOrVariable-only fields */
-    bool fieldOrVariableAssignmentIsTypeAlias = false;
-
-    /** TypeMemberDefinition-only fields */
-    core::NameRef typeMemberVarianceName; // Name of the variant, if any.
-    bool typeMemberIsFixed = false;
-    bool typeMemberIsTypeTemplate = false;
-    bool typeMemberTooManyArgs = false;
-
-    /** class-only fields */
     ast::ClassDef::Kind classKind;
+};
 
-    /** method-only fields */
-    ast::MethodDef::Flags methodFlags;
-    // By design, data from parsed args are moved into ARGS_INFO.
-    mutable vector<ast::ParsedArg> methodParsedArgs;
+struct FoundSymbol final {
+    core::SymbolRef definedSymbol;
+};
+
+struct FoundFieldOrVariableDef final {
+    FoundNameRef owner;
+    core::NameRef name;
+    core::Loc asgnLoc;
+    core::Loc lhsLoc;
+    bool isTypeAlias = false;
+};
+
+struct FoundTypeMemberDef final {
+    FoundNameRef owner;
+    core::NameRef name;
+    core::Loc sendLoc;
+    core::Loc asgnLoc;
+    core::Loc nameLoc;
+    core::NameRef varianceName;
+    bool isFixed = false;
+    bool isTypeTemplete = false;
+    bool tooManyArgs = false;
+};
+
+struct FoundMethodDef final {
+    FoundNameRef owner;
+    core::NameRef name;
+    core::Loc loc;
+    core::Loc declLoc;
+    ast::MethodDef::Flags flags;
+    // TODO: Uh, don't do this.
+    unique_ptr<vector<ast::ParsedArg>> parsedArgs;
+};
+
+enum class NameKind : u1 { Root, Class, ClassRef, Method, FieldOrVariable, TypeMemberDefinition, Symbol };
+
+class FoundName final {
+    friend class FoundNames;
+    FoundName(FoundRoot &&root) : kind(NameKind::Root), root(move(root)) {}
+
+public:
+    const NameKind kind;
+    union {
+        FoundRoot root;
+        FoundClassDef klass;
+        FoundClassRef klassRef;
+        FoundSymbol symbol;
+        FoundFieldOrVariableDef fieldOrVariable;
+        FoundTypeMemberDef typeDefinition;
+        FoundMethodDef method;
+    };
+
+    FoundName() = delete;
+
+    FoundName(FoundClassDef &&klass) : kind(NameKind::Class), klass(move(klass)) {}
+
+    FoundName(FoundClassRef &&klassRef) : kind(NameKind::ClassRef), klassRef(move(klassRef)) {}
+
+    FoundName(FoundSymbol &&symbol) : kind(NameKind::Symbol), symbol(move(symbol)) {}
+
+    FoundName(FoundFieldOrVariableDef &&fieldOrVariable)
+        : kind(NameKind::FieldOrVariable), fieldOrVariable(move(fieldOrVariable)) {}
+
+    FoundName(FoundTypeMemberDef &&typeDefinition)
+        : kind(NameKind::TypeMemberDefinition), typeDefinition(move(typeDefinition)) {}
+
+    FoundName(FoundMethodDef &&method) : kind(NameKind::Method), method(move(method)){};
+
+    // TODO: Make this defaultable.
+    FoundName(FoundName &&other) = default;
+
+    FoundName(const FoundName &other) = delete;
+
+    core::SymbolRef owner(core::Context ctx, const FoundNames &foundNames,
+                          const vector<core::SymbolRef> &insertedNames) const {
+        switch (kind) {
+            case NameKind::Root:
+                return core::Symbols::root();
+            case NameKind::Class:
+                return klass.classRef.data(foundNames).owner(ctx, foundNames, insertedNames);
+            case NameKind::ClassRef:
+                return klassRef.owner.symbol(insertedNames);
+            case NameKind::Method:
+                return method.owner.symbol(insertedNames);
+            case NameKind::FieldOrVariable:
+                return fieldOrVariable.owner.symbol(insertedNames);
+            case NameKind::TypeMemberDefinition:
+                return typeDefinition.owner.symbol(insertedNames);
+            case NameKind::Symbol:
+                return symbol.definedSymbol.data(ctx)->owner;
+        }
+    }
+
+    ~FoundName() noexcept {};
 };
 
 struct Modifier {
     NameKind kind;
-    u4 owner;
+    FoundNameRef owner;
     core::Loc loc;
     // The name of the modification.
     core::NameRef name;
-    // For class modifiers: Points to the symbol that is getting modified.
-    u4 classSymbol;
     // For methods: The name of the method being modified.
     core::NameRef methodName;
 };
 
-struct FoundNames {
-    vector<FoundName> names;
-    vector<Modifier> modifiers;
+class FoundNames final {
+    vector<FoundName> _names;
+    vector<Modifier> _modifiers;
+
+public:
+    FoundNames() : _names() {
+        // 0th ID is always root.
+        _names.emplace_back(FoundName(FoundRoot{}));
+    };
+    ~FoundNames() = default;
+
+    FoundNameRef addName(FoundName &&name) {
+        _names.push_back(move(name));
+        return FoundNameRef(_names.size());
+    }
+
+    void addModifier(Modifier &&mod) {
+        _modifiers.push_back(move(mod));
+    }
+
+    const vector<FoundName> &names() const {
+        return _names;
+    }
+
+    const vector<Modifier> &modifiers() const {
+        return _modifiers;
+    }
+
+    friend FoundNameRef;
 };
+
+const FoundName &FoundNameRef::data(const FoundNames &foundNames) const {
+    ENFORCE(_id < foundNames._names.size());
+    return foundNames._names[_id];
+}
+
+FoundName &FoundNameRef::data(FoundNames &foundNames) const {
+    ENFORCE(_id < foundNames._names.size());
+    return foundNames._names[_id];
+}
 
 struct NameFinderResult {
     ast::ParsedFile tree;
@@ -85,18 +231,14 @@ struct NameFinderResult {
  * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
  */
 class NameFinder {
-    vector<FoundName> foundNames;
-    vector<Modifier> modifiers;
+    FoundNames foundNames;
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
     // Instead, we track the owner manually as an index into `foundNames`; the item at that index
     // will define the `owner` symbol.
     // The u4 is actually index + 1 so we reserve 0 for the root owner.
-    vector<u4> ownerStack;
-    // Maps known symbols to entries in `foundNames`.
-    // TODO: Measure effectiveness?
-    UnorderedMap<core::SymbolRef, u4> symToNameEntry;
+    vector<FoundNameRef> ownerStack;
 
-    void findClassModifiers(core::Context ctx, u4 classSymbolId, unique_ptr<ast::Expression> &line) {
+    void findClassModifiers(core::Context ctx, FoundNameRef klass, unique_ptr<ast::Expression> &line) {
         auto *send = ast::cast_tree<ast::Send>(line.get());
         if (send == nullptr) {
             return;
@@ -109,11 +251,10 @@ class NameFinder {
             case core::Names::declareAbstract()._id: {
                 Modifier mod;
                 mod.kind = NameKind::Class;
-                mod.owner = getOwner();
+                mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
-                mod.classSymbol = classSymbolId;
-                modifiers.push_back(move(mod));
+                foundNames.addModifier(move(mod));
                 break;
             }
             default:
@@ -121,98 +262,92 @@ class NameFinder {
         }
     }
 
-    u4 getOwner() {
+    FoundNameRef getOwner() {
         if (ownerStack.empty()) {
-            return 0;
+            return FoundNameRef();
         }
         return ownerStack.back();
     }
 
     // Returns index to foundNames containing the given name. Recursively inserts definitions for its owners.
-    u4 squashNames(core::Context ctx, u4 owner, const unique_ptr<ast::Expression> &node) {
-        FoundName name;
+    FoundNameRef squashNames(core::Context ctx, FoundNameRef owner, const unique_ptr<ast::Expression> &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
             // Already defined. Insert a foundname so we can reference it.
             // TODO(jvilk): Have a variant that is 'defined symbol'? How often do we hit this?
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
-            auto it = symToNameEntry.find(sym);
-            if (it == symToNameEntry.end()) {
-            } else {
-                return
-            }
-
-            foundNames
-                .push_back()
-
-                    return sym.data(ctx)
-                ->owner;
+            FoundSymbol found;
+            found.definedSymbol = sym;
+            return foundNames.addName(move(found));
+        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
+            FoundClassRef found;
+            found.owner = squashNames(ctx, owner, constLit->scope);
+            found.name = constLit->cnst;
+            found.loc = constLit->loc;
+            // TODO: Unknown loc / declLoc / classKind
+            return foundNames.addName(move(found));
+        } else {
+            // `class <<self`, `::Foo`, `self::Foo`
+            return owner;
         }
-        if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
-        }
-        // class owner is `owner`
-        return owner;
     }
 
 public:
     FoundNames getAndClearFoundNames() {
-        FoundNames names{move(foundNames), move(modifiers)};
         ownerStack.clear();
-        return names;
+        return move(foundNames);
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        FoundName foundClass;
-        foundClass.kind = NameKind::Class;
-        foundClass.classKind = klass->kind;
-        foundClass.owner = getOwner();
-        foundClass.loc = klass->loc;
-        foundClass.declLoc = klass->declLoc;
+        FoundClassDef found;
+        found.classKind = klass->kind;
+        found.loc = klass->loc;
+        found.declLoc = klass->declLoc;
 
+        auto owner = getOwner();
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
-            foundClass.name = ident->name;
+            FoundClassRef foundRef;
+            foundRef.owner = getOwner();
+            foundRef.name = ident->name;
+            foundRef.loc = ident->loc;
+            found.classRef = foundNames.addName(move(found));
         } else {
             if (klass->symbol == core::Symbols::todo()) {
-                foundClass.squashedOwner = squashOwner(ctx, klass->name);
-                if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(klass->name.get())) {
-                    foundClass.name = constLit->cnst;
-                    // TODO: Do we need constLit->loc?
-                }
+                found.classRef = squashNames(ctx, owner, klass->name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
-                foundClass.squashedOwner = klass->symbol;
+                FoundSymbol foundSym;
+                foundSym.definedSymbol = klass->symbol;
+                found.classRef = foundNames.addName(move(foundSym));
             }
         }
-        foundNames.push_back(move(foundClass));
-        ownerStack.push_back(foundNames.size());
+        ownerStack.push_back(foundNames.addName(move(found)));
         return klass;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        u4 classSymbolId = ownerStack.back();
+        FoundNameRef klassName = ownerStack.back();
         ownerStack.pop_back();
 
         for (auto &exp : klass->rhs) {
-            findClassModifiers(ctx, classSymbolId, exp);
+            findClassModifiers(ctx, klassName, exp);
         }
 
         return klass;
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> method) {
-        FoundName foundMethod;
-        foundMethod.kind = NameKind::Method;
+        FoundMethodDef foundMethod;
         foundMethod.owner = getOwner();
+        foundMethod.name = method->name;
         foundMethod.loc = method->loc;
         foundMethod.declLoc = method->declLoc;
-        foundMethod.methodFlags = method->flags;
-        foundMethod.name = method->name;
-        foundMethod.methodParsedArgs = ast::ArgParsing::parseArgs(method->args);
-        foundNames.push_back(move(foundMethod));
-        ownerStack.push_back(foundNames.size());
+        foundMethod.flags = method->flags;
+        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method->args);
+        ownerStack.push_back(foundNames.addName(move(foundMethod)));
         return method;
     }
 
@@ -221,44 +356,43 @@ public:
         return method;
     }
 
-    FoundName fillAssign(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
+    FoundNameRef fillAssign(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
 
-        FoundName found;
-        found.kind = NameKind::FieldOrVariable;
+        FoundFieldOrVariableDef found;
+        found.owner = squashNames(ctx, getOwner(), lhs->scope);
         found.name = lhs->cnst;
-        found.owner = getOwner();
-        found.loc = lhs->loc;
-        found.declLoc = asgn->loc;
-        found.squashedOwner = squashOwner(ctx, lhs->scope);
-        return found;
+        found.asgnLoc = asgn->loc;
+        found.lhsLoc = lhs->loc;
+        return foundNames.addName(move(found));
     }
 
-    FoundName handleTypeMemberDefinition(core::Context ctx, const ast::Send *send, const unique_ptr<ast::Assign> &asgn,
-                                         const ast::UnresolvedConstantLit *typeName) {
+    FoundNameRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
+                                            const unique_ptr<ast::Assign> &asgn,
+                                            const ast::UnresolvedConstantLit *typeName) {
         ENFORCE(asgn->lhs.get() == typeName &&
                 asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
 
-        FoundName found;
-        found.kind = NameKind::TypeMemberDefinition;
+        FoundTypeMemberDef found;
         found.owner = getOwner();
-        found.loc = send->loc;
-        found.declLoc = asgn->loc;
+        found.sendLoc = send->loc;
+        found.asgnLoc = asgn->loc;
+        found.nameLoc = typeName->loc;
         found.name = typeName->cnst;
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
-        found.typeMemberVarianceName = core::Names::empty();
-        found.typeMemberIsTypeTemplate = send->fun == core::Names::typeTemplate();
+        found.varianceName = core::Names::empty();
+        found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
         if (!send->args.empty()) {
             if (send->args.size() > 2) {
                 // Defer error until next phase.
-                found.typeMemberTooManyArgs = true;
+                found.tooManyArgs = true;
             }
 
             auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
             if (lit != nullptr && lit->isSymbol(ctx)) {
-                found.typeMemberVarianceName = lit->asSymbol(ctx);
+                found.varianceName = lit->asSymbol(ctx);
             }
 
             auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
@@ -269,21 +403,23 @@ public:
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
                             case core::Names::fixed()._id:
-                                found.typeMemberIsFixed = true;
+                                found.isFixed = true;
                                 break;
                         }
                     }
                 }
             }
         }
-        return found;
+        return foundNames.addName(move(found));
     }
 
-    FoundName handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
+    FoundNameRef handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-        auto found = fillAssign(ctx, asgn);
-        found.fieldOrVariableAssignmentIsTypeAlias = send->fun == core::Names::typeAlias();
-        return found;
+        auto foundRef = fillAssign(ctx, asgn);
+        auto &found = foundRef.data(foundNames);
+        ENFORCE(found.kind == NameKind::FieldOrVariable);
+        found.fieldOrVariable.isTypeAlias = send->fun == core::Names::typeAlias();
+        return foundRef;
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
@@ -292,27 +428,24 @@ public:
             return asgn;
         }
 
-        FoundName found;
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send == nullptr) {
-            found = fillAssign(ctx, asgn);
+            fillAssign(ctx, asgn);
         } else if (!send->recv->isSelfReference()) {
-            found = handleAssignment(ctx, asgn);
+            handleAssignment(ctx, asgn);
         } else {
             switch (send->fun._id) {
                 case core::Names::typeTemplate()._id:
-                    found = handleTypeMemberDefinition(ctx, send, asgn, lhs);
+                    handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
                 case core::Names::typeMember()._id:
-                    found = handleTypeMemberDefinition(ctx, send, asgn, lhs);
+                    handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
                 default:
-                    found = fillAssign(ctx, asgn);
+                    fillAssign(ctx, asgn);
                     break;
             }
         }
-        foundNames.push_back(move(found));
-
         return asgn;
     }
 };
@@ -321,17 +454,8 @@ public:
  * Defines symbols for all of the names found via NameFinder. Single threaded.
  */
 class NameDefiner {
-    const FoundNames names;
-    vector<core::SymbolRef> insertedNames;
-
-    core::SymbolRef getOwner(u4 id) {
-        if (id == 0) {
-            return core::Symbols::root();
-        }
-        const u4 idx = id - 1;
-        ENFORCE(idx < insertedNames.size());
-        return insertedNames[idx];
-    }
+    const FoundNames foundNames;
+    vector<core::SymbolRef> insertedNames{core::Symbols::root()};
 
     core::SymbolRef methodOwner(core::MutableContext ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
@@ -527,10 +651,10 @@ class NameDefiner {
         }
     }
 
-    core::SymbolRef getMethod(core::MutableContext ctx, const FoundName &method) {
+    core::SymbolRef getMethod(core::MutableContext ctx, const FoundMethodDef &method) {
         core::SymbolRef owner = methodOwner(ctx);
 
-        if (method.methodFlags.isSelfMethod) {
+        if (method.flags.isSelfMethod) {
             if (owner.data(ctx)->isClassOrModule()) {
                 owner = owner.data(ctx)->singletonClass(ctx);
             }
@@ -555,7 +679,7 @@ class NameDefiner {
         // running in incremental mode, then `sym` wouldn't exist yet (we would be about to create it!) and `currentSym`
         // would be `def f()`, because we have not yet progressed far enough in the file to see any other definition of
         // `f`.
-        auto &parsedArgs = method.methodParsedArgs;
+        auto &parsedArgs = method.parsedArgs;
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         auto currentSym = ctx.state.lookupMethodSymbol(owner, method.name);
 
@@ -588,15 +712,14 @@ class NameDefiner {
         sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
         defineArgs(ctx.withOwner(sym), move(parsedArgs));
         sym.data(ctx)->addLoc(ctx, method.declLoc);
-        if (method.methodFlags.isRewriterSynthesized) {
+        if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->setRewriterSynthesized();
         }
         ctx.state.tracer().debug("Defining method {}", sym.toString(ctx));
         return sym;
     }
 
-    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundName &name) {
-        ENFORCE(name.kind == NameKind::Method);
+    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethodDef &name) {
         auto symbol = getMethod(ctx, name);
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
@@ -634,21 +757,27 @@ class NameDefiner {
         }
     }
 
-    core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundName &klass) {
-        if (klass.name == core::Names::singleton()) {
-            ENFORCE(klass.classKind == ast::ClassDef::Kind::Class);
-            return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
-        }
-
-        auto symbol = klass.squashedOwner;
-        if (symbol != core::Symbols::root()) {
-            if (!symbol.exists()) {
-                symbol = ctx.owner.data(ctx)->enclosingClass(ctx);
+    core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClassDef &klass) {
+        const FoundName &klassRef = klass.classRef.data(foundNames);
+        core::SymbolRef symbol;
+        switch (klassRef.kind) {
+            case NameKind::ClassRef: {
+                const FoundClassRef &ref = klassRef.klassRef;
+                if (ref.name == core::Names::singleton()) {
+                    ENFORCE(klass.classKind == ast::ClassDef::Kind::Class);
+                    return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
+                } else {
+                    symbol = getOrCreateClassMember(ctx, ref.owner.symbol(insertedNames), ref.name, ref.loc);
+                }
+                break;
             }
-            if (klass.name.exists()) {
-                symbol = getOrCreateClassMember(ctx, symbol, klass.name, klass.declLoc);
-            }
+            case NameKind::Symbol:
+                symbol = klassRef.symbol.definedSymbol;
+                break;
+            default:
+                Exception::raise("Invalid FoundClassDef.");
         }
+        ENFORCE(symbol.exists());
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
         if (!symbol.data(ctx)->isClassOrModule()) {
@@ -696,8 +825,7 @@ class NameDefiner {
         return symbol;
     }
 
-    core::SymbolRef insertClass(core::MutableContext ctx, const FoundName &klass) {
-        ENFORCE(klass.kind == NameKind::Class);
+    core::SymbolRef insertClass(core::MutableContext ctx, const FoundClassDef &klass) {
         auto symbol = getClassSymbol(ctx, klass);
 
         if (klass.classKind == ast::ClassDef::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
@@ -730,7 +858,7 @@ class NameDefiner {
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
         ENFORCE(mod.kind == NameKind::Class);
         const auto fun = mod.name;
-        const auto symbol = getOwner(mod.classSymbol);
+        const auto symbol = mod.owner.symbol(insertedNames);
         auto symbolData = symbol.data(ctx);
         if (fun == core::Names::declareFinal()) {
             symbolData->setClassFinal();
@@ -784,23 +912,24 @@ class NameDefiner {
         return owner;
     }
 
-    core::SymbolRef insertFieldOrVariable(core::MutableContext ctx, const FoundName &fieldOrVariable) {
-        ENFORCE(fieldOrVariable.kind == NameKind::FieldOrVariable);
+    core::SymbolRef insertFieldOrVariable(core::MutableContext ctx, const FoundFieldOrVariableDef &fieldOrVariable) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
-            if (auto e = ctx.state.beginError(fieldOrVariable.loc, core::errors::Namer::DynamicConstantAssignment)) {
+            if (auto e =
+                    ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
 
-        auto owner = fieldOrVariable.squashedOwner;
+        auto owner = fieldOrVariable.owner.symbol(insertedNames);
+        // TODO: ???
         if (!owner.exists()) {
             owner = contextClass(ctx.state, ctx.owner);
         }
-        auto scope = getOrCreateClassMember(ctx, owner, fieldOrVariable.name, fieldOrVariable.declLoc);
+        auto scope = getOrCreateClassMember(ctx, owner, fieldOrVariable.name, fieldOrVariable.lhsLoc);
         if (!scope.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(fieldOrVariable.loc, core::errors::Namer::InvalidClassOwner)) {
+            if (auto e = ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = fieldOrVariable.name.data(ctx)->show(ctx);
                 auto scopeName = scope.data(ctx)->show(ctx);
                 e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
@@ -810,7 +939,7 @@ class NameDefiner {
             // Mangle this one out of the way, and re-enter a symbol with this name as a class.
             auto scopeName = scope.data(ctx)->name;
             ctx.state.mangleRenameSymbol(scope, scopeName);
-            scope = ctx.state.enterClassSymbol(fieldOrVariable.declLoc, scope.data(ctx)->owner, scopeName);
+            scope = ctx.state.enterClassSymbol(fieldOrVariable.lhsLoc, scope.data(ctx)->owner, scopeName);
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -818,7 +947,7 @@ class NameDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, fieldOrVariable.name);
         auto name = sym.exists() ? sym.data(ctx)->name : fieldOrVariable.name;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(fieldOrVariable.loc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", fieldOrVariable.name.data(ctx)->show(ctx));
                 e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
             }
@@ -831,13 +960,13 @@ class NameDefiner {
             if (renamedSym.exists()) {
                 if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(fieldOrVariable.loc, "Previous definition");
+                    e.addErrorLine(fieldOrVariable.asgnLoc, "Previous definition");
                 }
             }
         }
-        sym = ctx.state.enterStaticFieldSymbol(fieldOrVariable.declLoc, scope, name);
+        sym = ctx.state.enterStaticFieldSymbol(fieldOrVariable.lhsLoc, scope, name);
 
-        if (fieldOrVariable.fieldOrVariableAssignmentIsTypeAlias && sym.data(ctx)->isStaticField()) {
+        if (fieldOrVariable.isTypeAlias && sym.data(ctx)->isStaticField()) {
             sym.data(ctx)->setTypeAlias();
         }
 
@@ -845,33 +974,29 @@ class NameDefiner {
         return sym;
     }
 
-    core::SymbolRef insertTypeMemberDefinition(core::MutableContext ctx, const FoundName &typeMember) {
-        ENFORCE(typeMember.kind == NameKind::TypeMemberDefinition);
-
-        if (typeMember.typeMemberTooManyArgs) {
-            if (auto e = ctx.state.beginError(typeMember.loc, core::errors::Namer::InvalidTypeDefinition)) {
+    core::SymbolRef insertTypeMemberDefinition(core::MutableContext ctx, const FoundTypeMemberDef &typeMember) {
+        if (typeMember.tooManyArgs) {
+            if (auto e = ctx.state.beginError(typeMember.sendLoc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Too many args in type definition");
             }
-            FoundName assignment;
-            assignment.kind = NameKind::FieldOrVariable;
-            assignment.name = typeMember.name;
-            assignment.loc = typeMember.loc;
-            assignment.declLoc = typeMember.declLoc;
-            assignment.owner = typeMember.owner;
-            // TODO: Important? We don't gather this for type member definition.
-            assignment.squashedOwner = typeMember.squashedOwner;
-            assignment.fieldOrVariableAssignmentIsTypeAlias = true;
-            return insertFieldOrVariable(ctx, assignment);
+            FoundFieldOrVariableDef fieldOrVariable;
+            fieldOrVariable.owner = typeMember.owner;
+            fieldOrVariable.name = typeMember.name;
+            fieldOrVariable.asgnLoc = typeMember.asgnLoc;
+            fieldOrVariable.lhsLoc = typeMember.asgnLoc;
+            fieldOrVariable.owner = typeMember.owner;
+            fieldOrVariable.isTypeAlias = true;
+            return insertFieldOrVariable(ctx, fieldOrVariable);
         }
 
         core::Variance variance = core::Variance::Invariant;
-        const bool isTypeTemplate = typeMember.typeMemberIsTypeTemplate;
+        const bool isTypeTemplate = typeMember.isTypeTemplete;
 
         ENFORCE(ctx.owner != core::Symbols::root());
 
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
 
-        core::NameRef name = typeMember.typeMemberVarianceName;
+        core::NameRef name = typeMember.varianceName;
 
         if (name == core::Names::covariant()) {
             variance = core::Variance::CoVariant;
@@ -886,15 +1011,15 @@ class NameDefiner {
         if (existingTypeMember.exists()) {
             // if we already have a type member but it was constructed in a different file from the one we're looking
             // at, then we need to raise an error
-            if (existingTypeMember.data(ctx)->loc().file() != typeMember.loc.file()) {
-                if (auto e = ctx.state.beginError(typeMember.loc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (existingTypeMember.data(ctx)->loc().file() != typeMember.asgnLoc.file()) {
+                if (auto e = ctx.state.beginError(typeMember.asgnLoc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
-                    e.addErrorLine(typeMember.loc, "Also defined here");
+                    e.addErrorLine(typeMember.asgnLoc, "Also defined here");
                 }
             }
 
@@ -903,7 +1028,7 @@ class NameDefiner {
             // error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeMember.declLoc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
@@ -916,13 +1041,13 @@ class NameDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeMember.loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
-            sym = ctx.state.enterTypeMember(typeMember.loc, onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(typeMember.nameLoc, onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -932,21 +1057,22 @@ class NameDefiner {
                 auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() &&
-                    !(oldSym.data(ctx)->loc() == typeMember.loc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    if (auto e = ctx.state.beginError(typeMember.loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    !(oldSym.data(ctx)->loc() == typeMember.asgnLoc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                    if (auto e =
+                            ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
                         e.setHeader("Redefining constant `{}`", typeMember.name.data(ctx)->show(ctx));
                         e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                     }
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
-                auto alias = ctx.state.enterStaticFieldSymbol(typeMember.loc, context, typeMember.name);
+                auto alias = ctx.state.enterStaticFieldSymbol(typeMember.asgnLoc, context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
             }
 
             ctx.state.tracer().debug("Defining type member {}", sym.toString(ctx));
         }
 
-        if (typeMember.typeMemberIsFixed) {
+        if (typeMember.isFixed) {
             sym.data(ctx)->setFixed();
         }
 
@@ -959,31 +1085,41 @@ class NameDefiner {
     }
 
 public:
-    NameDefiner(FoundNames names) : names(move(names)) {
-        insertedNames.reserve(names.names.size());
+    NameDefiner(FoundNames foundNames) : foundNames(move(foundNames)) {
+        insertedNames.reserve(this->foundNames.names().size());
     }
 
     void run(core::MutableContext ctx) {
-        for (const auto &name : names.names) {
-            const auto owner = getOwner(name.owner);
+        for (const auto &name : foundNames.names()) {
+            const auto owner = name.owner(ctx, foundNames, insertedNames);
             switch (name.kind) {
+                case NameKind::Root:
+                    insertName(core::Symbols::root());
+                    break;
+                case NameKind::ClassRef:
+                    insertName(getOrCreateClassMember(ctx, name.klassRef.owner.symbol(insertedNames),
+                                                      name.klassRef.name, name.klassRef.loc));
+                    break;
+                case NameKind::Symbol:
+                    insertName(name.symbol.definedSymbol);
+                    break;
                 case NameKind::Class:
-                    insertName(insertClass(ctx.withOwner(owner), name));
+                    insertName(insertClass(ctx.withOwner(owner), name.klass));
                     break;
                 case NameKind::Method:
-                    insertName(insertMethod(ctx.withOwner(owner), name));
+                    insertName(insertMethod(ctx.withOwner(owner), name.method));
                     break;
                 case NameKind::FieldOrVariable:
-                    insertName(insertFieldOrVariable(ctx.withOwner(owner), name));
+                    insertName(insertFieldOrVariable(ctx.withOwner(owner), name.fieldOrVariable));
                     break;
                 case NameKind::TypeMemberDefinition:
-                    insertName(insertTypeMemberDefinition(ctx.withOwner(owner), name));
+                    insertName(insertTypeMemberDefinition(ctx.withOwner(owner), name.typeDefinition));
                     break;
             }
         }
 
-        for (const auto &modifier : names.modifiers) {
-            const auto owner = getOwner(modifier.owner);
+        for (const auto &modifier : foundNames.modifiers()) {
+            const auto owner = modifier.owner.symbol(insertedNames);
             switch (modifier.kind) {
                 case NameKind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
