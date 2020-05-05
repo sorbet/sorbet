@@ -513,6 +513,10 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
+            // Flush all errors if the error queue had a critical error
+            if (ret.gs->hadCriticalError()) {
+                ret.gs->errorQueue->flushErrors(true);
+            }
         }
     }
     return ret;
@@ -739,6 +743,10 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         what = namer::Namer::run(gs, move(what));
+        // Flush all errors if the error queue had a critical error
+        if (gs.hadCriticalError()) {
+            gs.errorQueue->flushErrors(true);
+        }
     }
     return what;
 }
@@ -885,6 +893,11 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
 
+    // Flush all errors if the error queue had a critical error
+    if (gs->hadCriticalError()) {
+        gs->errorQueue->flushErrors(true);
+    }
+
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
@@ -905,7 +918,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
                                       optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
-    // Only typecheck should flush errors to the client, otherwise we will drop errors in LSP mode.
+    // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
+    // drop errors in LSP mode.
     ENFORCE(gs->errorQueue->filesFlushedCount == 0);
 
     vector<ast::ParsedFile> typecheck_result;
