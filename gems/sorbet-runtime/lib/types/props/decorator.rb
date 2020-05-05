@@ -605,14 +605,6 @@ class T::Props::Decorator
       end
       loaded_foreign
     end
-
-    @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|
-      T::Configuration.soft_assert_handler(
-        "Using deprecated 'model.#{prop_name}_record' foreign key syntax. You should replace this with 'model.#{prop_name}_'",
-        notify: 'vasi'
-      )
-      send(fk_method, allow_direct_mutation: allow_direct_mutation)
-    end
   end
 
   # checked(:never) - Rules hash is expensive to check
