@@ -920,7 +920,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                       optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
-    ENFORCE(gs->errorQueue->filesFlushedCount == 0);
+    ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
 
     vector<ast::ParsedFile> typecheck_result;
     const auto &epochManager = *gs->epochManager;
