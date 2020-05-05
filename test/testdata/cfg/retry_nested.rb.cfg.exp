@@ -35,7 +35,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_5" [
-        label = "block[id=5, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<exceptionValue>$8: T.untyped = <unanalyzable>\l<exceptionValue>$8: T.untyped\l"
+        label = "block[id=5, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<exceptionValue>$8: T.untyped = <unanalyzable>\l<exceptionValue>$8: T.untyped\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
@@ -56,19 +56,19 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_7" -> "bb::Object#main_9" [style="tapered"];
 
     "bb::Object#main_8" [
-        label = "block[id=8, rubyBlockId=0](<self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$13: Integer(0) = try\l<statTemp>$14: Integer(1) = 1\ltry: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))\l<statTemp>$17: T.class_of(A) = alias <C A>\l<statTemp>$16: A = <statTemp>$17: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$16: A)\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$13: Integer(0) = try\l<statTemp>$14: Integer(1) = 1\ltry: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))\l<statTemp>$17: T.class_of(A) = alias <C A>\l<statTemp>$16: A = <statTemp>$17: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$16: A)\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_16" [style="bold"];
     "bb::Object#main_9" [
-        label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$20: Integer(6) = 6\l<ifTemp>$18: T::Boolean = try: Integer(0).<(<statTemp>$20: Integer(6))\l<ifTemp>$18: T::Boolean\l"
+        label = "block[id=9, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$20: Integer(6) = 6\l<ifTemp>$18: T::Boolean = try: Integer(0).<(<statTemp>$20: Integer(6))\l<ifTemp>$18: T::Boolean\l"
     ];
 
     "bb::Object#main_9" -> "bb::Object#main_10" [style="bold"];
     "bb::Object#main_9" -> "bb::Object#main_16" [style="tapered"];
 
     "bb::Object#main_10" [
-        label = "block[id=10, rubyBlockId=0](<self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$22: Integer(0) = try\l<statTemp>$23: Integer(1) = 1\ltry: Integer = <statTemp>$22: Integer(0).+(<statTemp>$23: Integer(1))\l<statTemp>$26: T.class_of(B) = alias <C B>\l<statTemp>$25: B = <statTemp>$26: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$25: B)\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$33: NilClass, try: Integer(0))\l<statTemp>$22: Integer(0) = try\l<statTemp>$23: Integer(1) = 1\ltry: Integer = <statTemp>$22: Integer(0).+(<statTemp>$23: Integer(1))\l<statTemp>$26: T.class_of(B) = alias <C B>\l<statTemp>$25: B = <statTemp>$26: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$25: B)\l<unconditional>\l"
     ];
 
     "bb::Object#main_10" -> "bb::Object#main_16" [style="bold"];

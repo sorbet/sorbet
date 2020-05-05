@@ -37,7 +37,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_4" -> "bb::Object#main_10" [style="tapered"];
 
     "bb::Object#main_5" [
-        label = "block[id=5, rubyBlockId=0](<self>: Object, try: Integer(0))\l<statTemp>$9: Integer(0) = try\l<statTemp>$10: Integer(1) = 1\ltry: Integer = <statTemp>$9: Integer(0).+(<statTemp>$10: Integer(1))\l<statTemp>$12: String(\"e\") = \"e\"\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$12: String(\"e\"))\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Object, try: Integer(0))\l<statTemp>$9: Integer(0) = try\l<statTemp>$10: Integer(1) = 1\ltry: Integer = <statTemp>$9: Integer(0).+(<statTemp>$10: Integer(1))\l<statTemp>$12: String(\"e\") = \"e\"\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$12: String(\"e\"))\l<unconditional>\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_10" [style="bold"];
