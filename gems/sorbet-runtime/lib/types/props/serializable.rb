@@ -25,7 +25,7 @@ module T::Props::Serializable
         :generate_serialize_source
       )
       if msg
-        raise T::Props::InvalidValueError.new(msg)
+        raise TypeError.new(msg)
       else
         raise
       end
@@ -62,7 +62,7 @@ module T::Props::Serializable
         :generate_deserialize_source
       )
       if msg
-        raise T::Props::InvalidValueError.new(msg)
+        raise TypeError.new(msg)
       else
         raise
       end
@@ -138,7 +138,7 @@ module T::Props::Serializable
         prop: prop, class: self.class.name, id: self.class.decorator.get_id(self)
       )
     else
-      raise T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
+      raise TypeError.new("#{self.class.name}.#{prop} not set for non-optional prop")
     end
   end
 
