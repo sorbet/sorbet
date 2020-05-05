@@ -178,7 +178,7 @@ debugging is
 --config=dbg --config=sanitize
 ```
 
-In tools/bazel.rc you can find out what all these options (and others) mean.
+In `.bazelrc` you can find out what all these options (and others) mean.
 
 ### Common Compilation Errors
 
