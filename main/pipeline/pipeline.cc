@@ -664,8 +664,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     return ret;
 }
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
-                             const core::GlobalState &gs) {
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
     ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
@@ -906,6 +905,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
                                       optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+    // Only typecheck should flush errors to the client, otherwise we will drop errors in LSP mode.
     ENFORCE(gs->errorQueue->filesFlushedCount == 0);
 
     vector<ast::ParsedFile> typecheck_result;
@@ -966,7 +966,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                     core::FileRef file = job.file;
                                     try {
                                         core::Context ctx(igs, core::Symbols::root(), file);
-                                        threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, igs));
+                                        threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
                                         igs.tracer().error("Exception typing file: {} (backtrace is above)",
@@ -1058,7 +1058,9 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
+        // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
         gs->errorQueue->filesFlushedCount = 0;
+
         return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }

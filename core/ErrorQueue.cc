@@ -153,7 +153,7 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainFlushed() {
 }
 
 void ErrorQueue::markFileForFlushing(core::FileRef file) {
-    filesFlushedCount++;
+    filesFlushedCount.fetch_add(1);
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Flush;
     msg.whatFile = file;
