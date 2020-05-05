@@ -1223,26 +1223,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@foo" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"foo" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -1663,26 +1691,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@default" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"default" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -1817,26 +1873,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@t_nilable" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"t_nilable" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -1981,26 +2065,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@array" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"array" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2138,26 +2250,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@t_array" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"t_array" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2325,26 +2465,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@hash_of" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"hash_of" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2503,26 +2671,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@const_explicit" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"const_explicit" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2570,26 +2766,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@const" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"const" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2637,26 +2861,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@enum_prop" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"enum_prop" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2781,26 +3033,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@foreign" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"foreign" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3101,26 +3381,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@foreign_lazy" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"foreign_lazy" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3421,26 +3729,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@foreign_proc" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"foreign_proc" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3741,26 +4077,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@foreign_invalid" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"foreign_invalid" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6078,26 +6442,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@token" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"token" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6222,26 +6614,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@created" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"created" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6605,26 +7025,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@token" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"token" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6749,26 +7197,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@created" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"created" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -7028,26 +7504,54 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
+                }
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U instance_variable_get>
+                  block = nullptr
+                  args = [
+                    Literal{ value = :"@merchant" }
+                  ]
+                }
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Send{
+                recv = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = <U decorator>
+                block = nullptr
+                args = [
+                ]
+              }
+              fun = <U prop_get_logic>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Local{
+                  localVariable = <U <self>>
+                }
+                Literal{ value = :"merchant" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg2>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
