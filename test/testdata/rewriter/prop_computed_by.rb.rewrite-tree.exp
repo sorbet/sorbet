@@ -75,7 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def not_a_symbol<<C <todo sym>>>(&<blk>)
       begin
         arg2 = <self>.instance_variable_get(:"@not_a_symbol")
-        <self>.class().decorator().prop_get_logic(<self>, :"not_a_symbol", arg2)
+        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"not_a_symbol", arg2)
       end
     end
 
@@ -86,7 +86,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def symbol_in_variable<<C <todo sym>>>(&<blk>)
       begin
         arg2 = <self>.instance_variable_get(:"@symbol_in_variable")
-        <self>.class().decorator().prop_get_logic(<self>, :"symbol_in_variable", arg2)
+        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"symbol_in_variable", arg2)
       end
     end
 

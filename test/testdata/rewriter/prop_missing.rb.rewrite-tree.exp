@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<<C <todo sym>>>(&<blk>)
       begin
         arg2 = <self>.instance_variable_get(:"@foo")
-        <self>.class().decorator().prop_get_logic(<self>, :"foo", arg2)
+        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foo", arg2)
       end
     end
 
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def bar<<C <todo sym>>>(&<blk>)
       begin
         arg2 = <self>.instance_variable_get(:"@bar")
-        <self>.class().decorator().prop_get_logic(<self>, :"bar", arg2)
+        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"bar", arg2)
       end
     end
 
