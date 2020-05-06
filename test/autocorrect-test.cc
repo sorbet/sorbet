@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "common/common.h"
@@ -15,7 +16,7 @@ namespace spd = spdlog;
 
 namespace sorbet {
 
-TEST(ErrorTest, AutocorrectTest) { // NOLINT
+TEST_CASE("AutocorrectTest") {
     auto logger = spd::stderr_color_mt("autocorrect-test");
     auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
@@ -38,7 +39,7 @@ TEST(ErrorTest, AutocorrectTest) { // NOLINT
     autocorrects.emplace_back(
         core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 2, 2), "end"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
-    ASSERT_EQ("start1middle2end3", result[file]);
+    REQUIRE_EQ("start1middle2end3", result[file]);
 
     sources[file] = "12345";
     autocorrects.emplace_back(
@@ -46,7 +47,7 @@ TEST(ErrorTest, AutocorrectTest) { // NOLINT
     autocorrects.emplace_back(
         core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 3), "middle"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
-    ASSERT_EQ("1middle45", result[file]);
+    REQUIRE_EQ("1middle45", result[file]);
 
     sources[file] = "123";
     autocorrects.emplace_back(
@@ -54,7 +55,7 @@ TEST(ErrorTest, AutocorrectTest) { // NOLINT
     autocorrects.emplace_back(
         core::AutocorrectSuggestion{"", {core::AutocorrectSuggestion::Edit{core::Loc(file, 1, 2), "same"}}});
     result = core::AutocorrectSuggestion::apply(move(autocorrects), sources);
-    ASSERT_EQ("1same3", result[file]);
+    REQUIRE_EQ("1same3", result[file]);
 }
 
 } // namespace sorbet

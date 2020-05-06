@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "common/concurrency/WorkerPool.h"
@@ -77,12 +78,12 @@ unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
 }
 
 optional<const SorbetWorkspaceEditParams *> getUpdates(TaskQueueState &state, int i) {
-    EXPECT_LT(i, state.pendingTasks.size());
+    CHECK_LT(i, state.pendingTasks.size());
     if (i >= state.pendingTasks.size()) {
         return nullopt;
     }
     auto &task = state.pendingTasks[i];
-    EXPECT_TRUE(task->method == LSPMethod::SorbetWorkspaceEdit);
+    CHECK(task->method == LSPMethod::SorbetWorkspaceEdit);
     if (auto *editTask = dynamic_cast<SorbetWorkspaceEditTask *>(task.get())) {
         return &editTask->getParams();
     } else {
@@ -116,14 +117,14 @@ public:
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
         // This should never drain error queue items from the preempted task.
         gs.errorQueue->drainWithQueryResponses();
-        EXPECT_TRUE(gs.errorQueue->ignoreFlushes);
+        CHECK(gs.errorQueue->ignoreFlushes);
         runCount++;
     }
 };
 
 } // namespace
 
-TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
+TEST_CASE("IgnoresWatchmanUpdatesFromOpenFiles") {
     auto opts = makeOptions("");
     auto mtx = make_shared<absl::Mutex>();
     auto state = make_shared<TaskQueueState>();
@@ -134,17 +135,17 @@ TEST(LSPPreprocessor, IgnoresWatchmanUpdatesFromOpenFiles) { // NOLINT
     preprocessor.preprocessAndEnqueue(makeOpen("foo.rb", fileContents, 1));
     preprocessor.preprocessAndEnqueue(makeWatchman({"foo.rb"}));
 
-    ASSERT_EQ(1, state->pendingTasks.size());
+    REQUIRE_EQ(1, state->pendingTasks.size());
 
     const auto updates = getUpdates(*state, 0).value();
     // Version didn't change because it ignored the watchman update.
-    EXPECT_EQ(updates->mergeCount, 0);
-    ASSERT_EQ(updates->updates.size(), 1);
-    EXPECT_EQ(updates->updates[0]->source(), fileContents);
+    CHECK_EQ(updates->mergeCount, 0);
+    REQUIRE_EQ(updates->updates.size(), 1);
+    CHECK_EQ(updates->updates[0]->source(), fileContents);
 }
 
 // When deepCopying initialGS for typechecking, it should always have all previous updates applied to it.
-TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
+TEST_CASE("ClonesTypecheckingGSAtCorrectLogicalTime") {
     string fileV1 = "# typed: true";
     // V1 => V2: Slow path
     string fileV2 = "# typed: true\ndef foo; end";
@@ -164,7 +165,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     {
         const auto updates = getUpdates(*state, 0).value();
         // Should have the newest version of the update.
-        EXPECT_EQ(fileV2, updates->updates[0]->source());
+        CHECK_EQ(fileV2, updates->updates[0]->source());
     }
 
     // Append another edit that will get merged with the existing edit.
@@ -174,7 +175,7 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     {
         // Should have the newest version of the update.
         const auto updates = getUpdates(*state, 0).value();
-        EXPECT_EQ(fileV3, updates->updates[0]->source());
+        CHECK_EQ(fileV3, updates->updates[0]->source());
     }
 
     // Append another edit that will get merged with the existing edit.
@@ -182,11 +183,11 @@ TEST(LSPPreprocessor, ClonesTypecheckingGSAtCorrectLogicalTime) { // NOLINT
     preprocessor.preprocessAndEnqueue(makeChange("foo.rb", fileV4, 4));
     {
         const auto updates = getUpdates(*state, 0).value();
-        EXPECT_EQ(fileV4, updates->updates[0]->source());
+        CHECK_EQ(fileV4, updates->updates[0]->source());
     }
 }
 
-TEST(LSPPreprocessor, PauseAndResume) { // NOLINT
+TEST_CASE("PauseAndResume") {
     auto mtx = make_shared<absl::Mutex>();
     auto state = make_shared<TaskQueueState>();
     auto preprocessor = makePreprocessor(mtx, state);
@@ -195,26 +196,26 @@ TEST(LSPPreprocessor, PauseAndResume) { // NOLINT
         auto msg = make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, JSONNullObject()));
         preprocessor.preprocessAndEnqueue(move(msg));
     }
-    EXPECT_TRUE(state->paused);
+    CHECK(state->paused);
     {
         auto msg =
             make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, JSONNullObject()));
         preprocessor.preprocessAndEnqueue(move(msg));
     }
-    EXPECT_FALSE(state->paused);
+    CHECK_FALSE(state->paused);
 }
 
-TEST(LSPPreprocessor, Exit) { // NOLINT
+TEST_CASE("Exit") {
     auto mtx = make_shared<absl::Mutex>();
     auto state = make_shared<TaskQueueState>();
     auto preprocessor = makePreprocessor(mtx, state);
     auto msg = make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()));
     preprocessor.preprocessAndEnqueue(move(msg));
-    EXPECT_TRUE(state->terminate);
-    EXPECT_EQ(state->errorCode, 0);
+    CHECK(state->terminate);
+    CHECK_EQ(state->errorCode, 0);
 }
 
-TEST(LSPPreprocessor, Initialized) { // NOLINT
+TEST_CASE("Initialized") {
     auto mtx = make_shared<absl::Mutex>();
     auto state = make_shared<TaskQueueState>();
     auto options = makeOptions("");
@@ -223,25 +224,25 @@ TEST(LSPPreprocessor, Initialized) { // NOLINT
     auto output = dynamic_pointer_cast<LSPOutputToVector>(config->output);
 
     // Sending a request prior to initialization should cause an error.
-    EXPECT_FALSE(config->isInitialized());
+    CHECK_FALSE(config->isInitialized());
     preprocessor.preprocessAndEnqueue(makeHoverReq(1, "foo.rb", 1, 1));
     auto errorMsgs = output->getOutput();
-    ASSERT_EQ(1, errorMsgs.size());
-    ASSERT_TRUE(errorMsgs[0]->isResponse());
-    ASSERT_TRUE(errorMsgs[0]->asResponse().error.has_value());
+    REQUIRE_EQ(1, errorMsgs.size());
+    REQUIRE(errorMsgs[0]->isResponse());
+    REQUIRE(errorMsgs[0]->asResponse().error.has_value());
 
     auto msg = make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>()));
     preprocessor.preprocessAndEnqueue(move(msg));
-    EXPECT_TRUE(config->isInitialized());
+    CHECK(config->isInitialized());
 
-    ASSERT_EQ(1, state->pendingTasks.size());
-    EXPECT_EQ(state->pendingTasks[0]->method, LSPMethod::Initialized);
+    REQUIRE_EQ(1, state->pendingTasks.size());
+    CHECK_EQ(state->pendingTasks[0]->method, LSPMethod::Initialized);
 }
 
 // When a request in the queue is canceled, the preprocessor should merge any edits that happen immediately before and
 // after the canceled request.
-TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
+TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
     auto mtx = make_shared<absl::Mutex>();
     auto state = make_shared<TaskQueueState>();
     auto preprocessor = makePreprocessor(mtx, state);
@@ -271,8 +272,8 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
     vector<pair<int, string>> messageContents = {{0, fileV1}, {2, fileV2}, {4, fileV3}, {6, fileV4}};
     for (auto &[messageId, contents] : messageContents) {
         auto updates = getUpdates(*state, messageId).value();
-        EXPECT_EQ("foo.rb", updates->updates[0]->path());
-        EXPECT_EQ(contents, updates->updates[0]->source());
+        CHECK_EQ("foo.rb", updates->updates[0]->path());
+        CHECK_EQ(contents, updates->updates[0]->source());
     }
 
     // Cancel hover requests, and ensure that initialGS has the proper value of foo.rb
@@ -287,10 +288,10 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         // Cancel a hover.
         preprocessor.preprocessAndEnqueue(makeCancel(hoverId));
         // Check that the next edit was merged into the first edit.
-        ASSERT_EQ(state->pendingTasks[0]->method, LSPMethod::SorbetWorkspaceEdit);
+        REQUIRE_EQ(state->pendingTasks[0]->method, LSPMethod::SorbetWorkspaceEdit);
         auto updates = getUpdates(*state, 0).value();
-        EXPECT_EQ(updates->mergeCount, i);
-        EXPECT_EQ(fooContents, updates->updates[0]->source());
+        CHECK_EQ(updates->mergeCount, i);
+        CHECK_EQ(fooContents, updates->updates[0]->source());
     }
 
     // Push a new edit that takes the slow path.
@@ -301,12 +302,12 @@ TEST(LSPPreprocessor, MergesFileUpdatesProperlyAfterCancelation) { // NOLINT
         // updates is const, so copy the vector.
         vector<shared_ptr<core::File>> updatesCopy = updates->updates;
         fast_sort(updatesCopy, [](auto &a, auto &b) -> bool { return a->path().compare(b->path()) < 0; });
-        EXPECT_EQ(barV1, updatesCopy[0]->source());
-        EXPECT_EQ(fileV5, updatesCopy[1]->source());
+        CHECK_EQ(barV1, updatesCopy[0]->source());
+        CHECK_EQ(fileV5, updatesCopy[1]->source());
     }
 }
 
-TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
+TEST_CASE("PreemptionTasksWorkAsExpected") {
     auto gs = makeGS();
     // Note: needs to be > 0 otherwise an enforce triggers.
     gs->lspTypecheckCount++;
@@ -318,36 +319,36 @@ TEST(PreemptionTasks, PreemptionTasksWorkAsExpected) {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    EXPECT_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs));
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs));
 
     auto task = make_shared<CountingTask>(preemptManager, *gs);
     // Should fail because a slow path is not running, so there's nothing to preempt.
-    EXPECT_FALSE(preemptManager->trySchedulePreemptionTask(task));
+    CHECK_FALSE(preemptManager->trySchedulePreemptionTask(task));
     // No slow path running, so we cannot cancel it.
-    EXPECT_FALSE(gs->epochManager->tryCancelSlowPath(3));
+    CHECK_FALSE(gs->epochManager->tryCancelSlowPath(3));
 
     // Signify to GlobalState that a slow path is beginning.
     gs->epochManager->startCommitEpoch(2);
-    EXPECT_FALSE(gs->epochManager->wasTypecheckingCanceled());
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
 
     // Preempting should work now.
-    EXPECT_TRUE(preemptManager->trySchedulePreemptionTask(task));
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    EXPECT_TRUE(preemptManager->tryRunScheduledPreemptionTask(*gs));
-    EXPECT_EQ(1, task->runCount);
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs));
+    CHECK_EQ(1, task->runCount);
 
     // Our error should still be there.
     auto errors = gs->errorQueue->drainAllErrors();
-    ASSERT_EQ(1, errors.size());
-    EXPECT_EQ("MyError", errors[0]->header);
+    REQUIRE_EQ(1, errors.size());
+    CHECK_EQ("MyError", errors[0]->header);
 
     // We can cancel the slow path.
-    EXPECT_TRUE(gs->epochManager->tryCancelSlowPath(3));
-    EXPECT_TRUE(gs->epochManager->wasTypecheckingCanceled());
+    CHECK(gs->epochManager->tryCancelSlowPath(3));
+    CHECK(gs->epochManager->wasTypecheckingCanceled());
 
     // We should not be able to schedule further tasks after cancelation.
-    EXPECT_FALSE(preemptManager->trySchedulePreemptionTask(task));
+    CHECK_FALSE(preemptManager->trySchedulePreemptionTask(task));
 }
 
 } // namespace sorbet::realmain::lsp::test

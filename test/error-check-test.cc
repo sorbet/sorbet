@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "ast/ast.h"
@@ -20,14 +21,15 @@ auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
-TEST(ErrorTest, RawCheck) { // NOLINT
+TEST_CASE("RawCheck") {
     try {
         ENFORCE(false, "intentional failure");
+        CHECK(false);
     } catch (SorbetException &) {
     }
 }
 
-TEST(ErrorTest, ParserCheck) { // NOLINT
+TEST_CASE("ParserCheck") {
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nt(gs);
@@ -43,7 +45,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     } catch (SorbetException &) {
     }
 
-    EXPECT_EQ(0, errorQueue->drainAllErrors().size());
+    CHECK_EQ(0, errorQueue->drainAllErrors().size());
 }
 
 } // namespace sorbet

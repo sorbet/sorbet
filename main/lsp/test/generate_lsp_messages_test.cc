@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 
 #include "common/common.h"
 #include "common/sort.h"
@@ -39,80 +40,82 @@ template <typename T> void parseTest(const string &jsonStr, ParseTestLambda<T> l
 const string SAMPLE_RANGE = "{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2, \"character\": 3}}";
 
 // N.B.: Also tests integer fields.
-TEST(GenerateLSPMessagesTest, Object) {
+TEST_CASE("Object") {
     parseTest<Range>(SAMPLE_RANGE, [](auto &range) -> void {
-        ASSERT_EQ(range->start->line, 0);
-        ASSERT_EQ(range->start->character, 1);
-        ASSERT_EQ(range->end->line, 2);
-        ASSERT_EQ(range->end->character, 3);
+        REQUIRE_EQ(range->start->line, 0);
+        REQUIRE_EQ(range->start->character, 1);
+        REQUIRE_EQ(range->end->line, 2);
+        REQUIRE_EQ(range->end->character, 3);
     });
 
     // Throws when missing a field.
-    ASSERT_THROW(fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
-                 MissingFieldError);
+    REQUIRE_THROWS_AS(fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2}}"),
+                      MissingFieldError);
     // Throws when not an object.
-    ASSERT_THROW(fromJSON<Range>("4"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<Range>("4"), JSONTypeError);
     // Throws when field does not contain a number
-    ASSERT_THROW(
+    REQUIRE_THROWS_AS(
         fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": true}, \"end\": {\"line\": 2, \"character\": 3}}"),
         JSONTypeError);
     // Throws when field contains a double, not an int.
-    ASSERT_THROW(
+    REQUIRE_THROWS_AS(
         fromJSON<Range>("{\"start\": {\"line\": 0, \"character\": 1.1}, \"end\": {\"line\": 2, \"character\": 3}}"),
         JSONTypeError);
 
     // Serialization: Throws if sub-objects are not initialized.
     auto badRange = make_unique<Range>(nullptr, nullptr);
-    ASSERT_THROW(badRange->toJSON(), NullPtrError);
+    REQUIRE_THROWS_AS(badRange->toJSON(), NullPtrError);
 }
 
-TEST(GenerateLSPMessagesTest, StringField) {
+TEST_CASE("StringField") {
     const string expectedText = "Hello World!";
     parseTest<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": \"{}\"}}", SAMPLE_RANGE, expectedText),
-                        [&expectedText](auto &textEdit) -> void { ASSERT_EQ(textEdit->newText, expectedText); });
+                        [&expectedText](auto &textEdit) -> void { REQUIRE_EQ(textEdit->newText, expectedText); });
 
     // Throws when not a string
-    ASSERT_THROW(fromJSON<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": 4.0}}", SAMPLE_RANGE)),
+                      JSONTypeError);
 }
 
-TEST(GenerateLSPMessagesTest, StringEnumField) {
+TEST_CASE("StringEnumField") {
     const string markupKind = "markdown";
-    parseTest<MarkupContent>(fmt::format("{{\"kind\": \"{}\", \"value\": \"Markup stuff\"}}", markupKind),
-                             [](auto &markupContent) -> void { ASSERT_EQ(markupContent->kind, MarkupKind::Markdown); });
+    parseTest<MarkupContent>(
+        fmt::format("{{\"kind\": \"{}\", \"value\": \"Markup stuff\"}}", markupKind),
+        [](auto &markupContent) -> void { REQUIRE_EQ(markupContent->kind, MarkupKind::Markdown); });
 
     // Throws when not a valid enum.
-    ASSERT_THROW(fromJSON<MarkupContent>("{\"kind\": \"foobar\", \"value\": \"Hello\"}"), InvalidStringEnumError);
+    REQUIRE_THROWS_AS(fromJSON<MarkupContent>("{\"kind\": \"foobar\", \"value\": \"Hello\"}"), InvalidStringEnumError);
     // Throws when not a string.
-    ASSERT_THROW(fromJSON<MarkupContent>("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<MarkupContent>("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
 
     // Create a C++ object with an invalid enum value and try to serialize.
     auto markupContent = make_unique<MarkupContent>((MarkupKind)1000, "hello");
-    ASSERT_THROW(markupContent->toJSON(), InvalidEnumValueError);
+    REQUIRE_THROWS_AS(markupContent->toJSON(), InvalidEnumValueError);
 }
 
-TEST(GenerateLSPMessagesTest, NullField) {
+TEST_CASE("NullField") {
     parseTest<VersionedTextDocumentIdentifier>(
         "{\"uri\": \"file://foo\", \"version\": null}", [](auto &versionedTextDocumentIdentifier) -> void {
             auto nullValue = get_if<JSONNullObject>(&(versionedTextDocumentIdentifier->version));
             // Should not be null; should point to an instance of JSONNullObject.
-            ASSERT_NE(nullValue, nullptr);
+            REQUIRE_NE(nullValue, nullptr);
         });
 }
 
 // N.B.: Also covers testing boolean types, which are treated as optional almost everywhere in the spec.
-TEST(GenerateLSPMessagesTest, OptionalField) {
+TEST_CASE("OptionalField") {
     parseTest<CreateOrRenameFileOptions>("{\"overwrite\": true}", [](auto &createOrRenameFileOptions) -> void {
-        ASSERT_TRUE(createOrRenameFileOptions->overwrite.has_value());
-        ASSERT_FALSE(createOrRenameFileOptions->ignoreIfExists.has_value());
-        ASSERT_TRUE(*(createOrRenameFileOptions->overwrite));
+        REQUIRE(createOrRenameFileOptions->overwrite.has_value());
+        REQUIRE_FALSE(createOrRenameFileOptions->ignoreIfExists.has_value());
+        REQUIRE(*(createOrRenameFileOptions->overwrite));
     });
 
     parseTest<CreateOrRenameFileOptions>("{}", [](auto &createOrRenameFileOptions) -> void {
-        ASSERT_FALSE(createOrRenameFileOptions->overwrite.has_value());
+        REQUIRE_FALSE(createOrRenameFileOptions->overwrite.has_value());
     });
 
     // Throws when not the correct type.
-    ASSERT_THROW(fromJSON<CreateOrRenameFileOptions>("{\"overwrite\": 4}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<CreateOrRenameFileOptions>("{\"overwrite\": 4}"), JSONTypeError);
 }
 
 struct ExceptionThrower {
@@ -121,39 +124,39 @@ struct ExceptionThrower {
     }
 };
 
-TEST(GenerateLSPMessagesTest, DoubleField) {
+TEST_CASE("DoubleField") {
     // Doubles can be ints or doubles.
     parseTest<Color>("{\"red\": 0, \"green\": 1.1, \"blue\": 2.0, \"alpha\": 3}", [](auto &color) -> void {
-        ASSERT_EQ(0.0, color->red);
-        ASSERT_EQ(1.1, color->green);
-        ASSERT_EQ(2.0, color->blue);
-        ASSERT_EQ(3.0, color->alpha);
+        REQUIRE_EQ(0.0, color->red);
+        REQUIRE_EQ(1.1, color->green);
+        REQUIRE_EQ(2.0, color->blue);
+        REQUIRE_EQ(3.0, color->alpha);
     });
 }
 
-TEST(GenerateLSPMessagesTest, VariantField) {
+TEST_CASE("VariantField") {
     parseTest<CancelParams>("{\"id\": 4}", [](auto &cancelParamsNumber) -> void {
         auto numberId = get_if<int>(&cancelParamsNumber->id);
-        ASSERT_NE(numberId, nullptr);
-        ASSERT_EQ(*numberId, 4);
-        ASSERT_EQ(get_if<std::string>(&cancelParamsNumber->id), nullptr);
+        REQUIRE_NE(numberId, nullptr);
+        REQUIRE_EQ(*numberId, 4);
+        REQUIRE_EQ(get_if<std::string>(&cancelParamsNumber->id), nullptr);
     });
 
     parseTest<CancelParams>("{\"id\": \"iamanid\"}", [](auto &cancelParamsString) -> void {
         auto stringId = get_if<std::string>(&cancelParamsString->id);
-        ASSERT_NE(stringId, nullptr);
-        ASSERT_EQ(*stringId, "iamanid");
-        ASSERT_EQ(get_if<int>(&cancelParamsString->id), nullptr);
+        REQUIRE_NE(stringId, nullptr);
+        REQUIRE_EQ(*stringId, "iamanid");
+        REQUIRE_EQ(get_if<int>(&cancelParamsString->id), nullptr);
     });
 
     // Throws when missing.
-    ASSERT_THROW(fromJSON<CancelParams>("{}"), MissingFieldError);
+    REQUIRE_THROWS_AS(fromJSON<CancelParams>("{}"), MissingFieldError);
 
     // Throws when not the correct type.
-    ASSERT_THROW(fromJSON<CancelParams>("{\"id\": true}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<CancelParams>("{\"id\": true}"), JSONTypeError);
 
     // Int types cannot be doubles.
-    ASSERT_THROW(fromJSON<CancelParams>("{\"id\": 4.1}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<CancelParams>("{\"id\": 4.1}"), JSONTypeError);
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
@@ -162,59 +165,59 @@ TEST(GenerateLSPMessagesTest, VariantField) {
         cancelParams->id.emplace<int>(ExceptionThrower());
     } catch (runtime_error e) {
     }
-    ASSERT_THROW(cancelParams->toJSON(), MissingVariantValueError);
+    REQUIRE_THROWS_AS(cancelParams->toJSON(), MissingVariantValueError);
 }
 
-TEST(GenerateLSPMessagesTest, StringConstant) {
+TEST_CASE("StringConstant") {
     parseTest<CreateFile>("{\"kind\": \"create\", \"uri\": \"file://foo\"}",
-                          [](auto &createFile) -> void { ASSERT_EQ(createFile->kind, "create"); });
+                          [](auto &createFile) -> void { REQUIRE_EQ(createFile->kind, "create"); });
 
     // Throws when not the correct constant.
-    ASSERT_THROW(fromJSON<CreateFile>("{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
+    REQUIRE_THROWS_AS(fromJSON<CreateFile>("{\"kind\": \"delete\", \"uri\": \"file://foo\"}"), JSONConstantError);
     // Throws when not a string.
-    ASSERT_THROW(fromJSON<CreateFile>("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<CreateFile>("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
 
     // Throws during serialization if not set to proper constant value.
     auto createFile = make_unique<CreateFile>("delete", "file://foo");
-    ASSERT_THROW(createFile->toJSON(), InvalidConstantValueError);
+    REQUIRE_THROWS_AS(createFile->toJSON(), InvalidConstantValueError);
 }
 
-TEST(GenerateLSPMessagesTest, JSONArray) {
+TEST_CASE("JSONArray") {
     parseTest<SymbolKindOptions>("{\"valueSet\": [1,2,3,4,5,6]}", [](auto &symbolKindOptions) -> void {
         auto &valueSetOptional = symbolKindOptions->valueSet;
-        ASSERT_TRUE(valueSetOptional.has_value());
+        REQUIRE(valueSetOptional.has_value());
         auto &valueSetUniquePtr = *valueSetOptional;
         int start = 1;
         for (const SymbolKind &value : valueSetUniquePtr) {
-            ASSERT_EQ((const int &)value, start);
+            REQUIRE_EQ((const int &)value, start);
             start += 1;
         }
     });
 
     // Throws when not an array.
-    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": {}}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<SymbolKindOptions>("{\"valueSet\": {}}"), JSONTypeError);
 
     // Throws when a member of array has an invalid type.
-    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,true,4]}"), JSONTypeError);
 }
 
-TEST(GenerateLSPMessagesTest, IntEnums) {
+TEST_CASE("IntEnums") {
     parseTest<SymbolKindOptions>(
         fmt::format("{{\"valueSet\": [{},{}]}}", (int)SymbolKind::Namespace, (int)SymbolKind::Null),
         [](auto &symbolKindOptions) -> void {
             auto &valueSetOptional = symbolKindOptions->valueSet;
-            ASSERT_TRUE(valueSetOptional.has_value());
+            REQUIRE(valueSetOptional.has_value());
             auto &valueSet = *valueSetOptional;
-            ASSERT_EQ(valueSet.size(), 2);
-            ASSERT_EQ(valueSet.at(0), SymbolKind::Namespace);
-            ASSERT_EQ(valueSet.at(1), SymbolKind::Null);
+            REQUIRE_EQ(valueSet.size(), 2);
+            REQUIRE_EQ(valueSet.at(0), SymbolKind::Namespace);
+            REQUIRE_EQ(valueSet.at(1), SymbolKind::Null);
         });
 
     // Throws if enum is out of valid range.
-    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
+    REQUIRE_THROWS_AS(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2,-1,10]}"), InvalidEnumValueError);
 
     // Throws if enum is not the right type.
-    ASSERT_THROW(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2.1]}"), JSONTypeError);
+    REQUIRE_THROWS_AS(fromJSON<SymbolKindOptions>("{\"valueSet\": [1,2.1]}"), JSONTypeError);
 
     // Throws during serialization if enum is out of valid range.
     auto symbolKind = make_unique<SymbolKindOptions>();
@@ -222,11 +225,11 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
     symbols.push_back(SymbolKind::Namespace);
     symbols.push_back((SymbolKind)-1);
     symbolKind->valueSet = make_optional<std::vector<SymbolKind>>(std::move(symbols));
-    ASSERT_THROW(symbolKind->toJSON(), InvalidEnumValueError);
+    REQUIRE_THROWS_AS(symbolKind->toJSON(), InvalidEnumValueError);
 }
 
 // Ensures that LSPMessage parses ResultMessage/ResultMessageWithError/RequestMessage/NotificationMessage properly.
-TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
+TEST_CASE("DifferentLSPMessageTypes") {
     auto request = make_unique<RequestMessage>("2.0", 1, LSPMethod::Shutdown, make_optional<JSONNullObject>());
     auto response = make_unique<ResponseMessage>("2.0", 1, LSPMethod::Shutdown);
     response->result = JSONNullObject();
@@ -236,10 +239,10 @@ TEST(GenerateLSPMessagesTest, DifferentLSPMessageTypes) {
 
     // For each, serialize as a JSON document to force LSPMessage to re-deserialize it.
     // Checks that LSPMessage recognizes each as the correct type of message.
-    ASSERT_TRUE(LSPMessage(request->toJSON()).isRequest());
-    ASSERT_TRUE(LSPMessage(response->toJSON()).isResponse());
-    ASSERT_TRUE(LSPMessage(responseWithError->toJSON()).isResponse());
-    ASSERT_TRUE(LSPMessage(notification->toJSON()).isNotification());
+    REQUIRE(LSPMessage(request->toJSON()).isRequest());
+    REQUIRE(LSPMessage(response->toJSON()).isResponse());
+    REQUIRE(LSPMessage(responseWithError->toJSON()).isResponse());
+    REQUIRE(LSPMessage(notification->toJSON()).isNotification());
 }
 
 string makeRequestMessage(LSPMethod method, optional<string_view> params) {
@@ -248,64 +251,65 @@ string makeRequestMessage(LSPMethod method, optional<string_view> params) {
 }
 
 // Serialize and deserialize various valid discriminated union values.
-TEST(GenerateLSPMessagesTest, DiscriminatedUnionValidValues) {
+TEST_CASE("DiscriminatedUnionValidValues") {
     // Shutdown supports `null` and `nullopt`, but nothing else.
     parseTest<RequestMessage>(makeRequestMessage(LSPMethod::Shutdown, "null"), [](auto &msg) -> void {
-        ASSERT_EQ(msg->method, LSPMethod::Shutdown);
-        ASSERT_NO_THROW({
+        REQUIRE_EQ(msg->method, LSPMethod::Shutdown);
+        REQUIRE_NOTHROW({
             auto maybeNull = get<optional<JSONNullObject>>(msg->params);
             // Null in an optional field is actually treated as a missing field for emacs compatibility.
-            ASSERT_FALSE(maybeNull);
+            REQUIRE_FALSE(maybeNull);
         });
     });
     parseTest<RequestMessage>(makeRequestMessage(LSPMethod::Shutdown, nullopt), [](auto &msg) -> void {
-        ASSERT_EQ(msg->method, LSPMethod::Shutdown);
-        ASSERT_NO_THROW({
+        REQUIRE_EQ(msg->method, LSPMethod::Shutdown);
+        REQUIRE_NOTHROW({
             auto maybeNull = get<optional<JSONNullObject>>(msg->params);
-            ASSERT_FALSE(maybeNull);
+            REQUIRE_FALSE(maybeNull);
         });
     });
 }
 
 // Verify that serialization/deserialization code throws an exception when a discriminated union has an invalid
 // parameter for the given discriminant
-TEST(GenerateLSPMessagesTest, DiscriminatedUnionInvalidValues) {
+TEST_CASE("DiscriminatedUnionInvalidValues") {
     // Shutdown can't have a SorbetErrorParam.
-    EXPECT_THROW(RequestMessage("2.0", 1, LSPMethod::Shutdown, make_unique<SorbetErrorParams>(1, "")).toJSON(),
-                 InvalidDiscriminatedUnionValueError);
+    REQUIRE_THROWS_AS(RequestMessage("2.0", 1, LSPMethod::Shutdown, make_unique<SorbetErrorParams>(1, "")).toJSON(),
+                      InvalidDiscriminatedUnionValueError);
     // Shutdown can't have a string param.
-    EXPECT_THROW(LSPMessage(makeRequestMessage(LSPMethod::Shutdown, "{\"code\": 1, \"message\": \"\"}")),
-                 JSONTypeError);
+    REQUIRE_THROWS_AS(LSPMessage(makeRequestMessage(LSPMethod::Shutdown, "{\"code\": 1, \"message\": \"\"}")),
+                      JSONTypeError);
     // TextDocumentDocumentSymbol must have a parameter.
-    EXPECT_THROW(LSPMessage(makeRequestMessage(LSPMethod::TextDocumentDocumentSymbol, "null")), JSONTypeError);
+    REQUIRE_THROWS_AS(LSPMessage(makeRequestMessage(LSPMethod::TextDocumentDocumentSymbol, "null")), JSONTypeError);
 }
 
 // Verify that serialization/deserialization code throws an exception when a discriminated union has an invalid
 // discriminant
-TEST(GenerateLSPMessagesTest, DiscriminatedUnionInvalidDiscriminant) {
+TEST_CASE("DiscriminatedUnionInvalidDiscriminant") {
     // DidOpen is a notification.
-    EXPECT_THROW(LSPMessage(makeRequestMessage(LSPMethod::TextDocumentDidOpen, "null")), InvalidDiscriminantValueError);
-    EXPECT_THROW(RequestMessage("2.0", 1, LSPMethod::TextDocumentDidOpen, JSONNullObject()).toJSON(),
-                 InvalidDiscriminantValueError);
+    REQUIRE_THROWS_AS(LSPMessage(makeRequestMessage(LSPMethod::TextDocumentDidOpen, "null")),
+                      InvalidDiscriminantValueError);
+    REQUIRE_THROWS_AS(RequestMessage("2.0", 1, LSPMethod::TextDocumentDidOpen, JSONNullObject()).toJSON(),
+                      InvalidDiscriminantValueError);
 }
 
-TEST(GenerateLSPMessagesTest, RenamedFieldsWorkProperly) {
+TEST_CASE("RenamedFieldsWorkProperly") {
     parseTest<WatchmanQueryResponse>("{\"version\": \"versionstring\", \"clock\": \"clockvalue\", "
                                      "\"is_fresh_instance\": true, \"files\": [\"foo.rb\"]}",
                                      [](auto &watchmanQueryResponse) -> void {
-                                         ASSERT_EQ(watchmanQueryResponse->version, "versionstring");
-                                         ASSERT_EQ(watchmanQueryResponse->clock, "clockvalue");
-                                         ASSERT_TRUE(watchmanQueryResponse->isFreshInstance);
-                                         ASSERT_EQ(watchmanQueryResponse->files.size(), 1);
-                                         ASSERT_EQ(watchmanQueryResponse->files.at(0), "foo.rb");
+                                         REQUIRE_EQ(watchmanQueryResponse->version, "versionstring");
+                                         REQUIRE_EQ(watchmanQueryResponse->clock, "clockvalue");
+                                         REQUIRE(watchmanQueryResponse->isFreshInstance);
+                                         REQUIRE_EQ(watchmanQueryResponse->files.size(), 1);
+                                         REQUIRE_EQ(watchmanQueryResponse->files.at(0), "foo.rb");
                                      });
 }
 
-TEST(GenerateLSPMessagesTest, AcceptsNullOnOptionalFields) {
-    parseTest<ConfigurationItem>("{\"scopeUri\": null}", [](auto &item) -> void { ASSERT_FALSE(item->scopeUri); });
+TEST_CASE("AcceptsNullOnOptionalFields") {
+    parseTest<ConfigurationItem>("{\"scopeUri\": null}", [](auto &item) -> void { REQUIRE_FALSE(item->scopeUri); });
 }
 
-TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMerge) {
+TEST_CASE("SorbetWorkspaceEditParamsMerge") {
     SorbetWorkspaceEditParams oldEdit;
     oldEdit.mergeCount = 10;
     oldEdit.sorbetCancellationExpected = true;
@@ -321,18 +325,18 @@ TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMerge) {
     // Merge merges the new edit into the old edit.
     oldEdit.merge(newEdit);
 
-    EXPECT_EQ(13, oldEdit.mergeCount);
-    EXPECT_TRUE(oldEdit.sorbetCancellationExpected);
-    EXPECT_EQ(5, oldEdit.epoch);
-    ASSERT_EQ(2, oldEdit.updates.size());
+    REQUIRE_EQ(13, oldEdit.mergeCount);
+    REQUIRE(oldEdit.sorbetCancellationExpected);
+    REQUIRE_EQ(5, oldEdit.epoch);
+    REQUIRE_EQ(2, oldEdit.updates.size());
 
     fast_sort(oldEdit.updates, [](auto &a, auto &b) -> bool { return a->path().compare(b->path()) < 0; });
 
-    ASSERT_EQ("bar.rb", oldEdit.updates.at(0)->path());
-    ASSERT_EQ("foo.rb", oldEdit.updates.at(1)->path());
+    REQUIRE_EQ("bar.rb", oldEdit.updates.at(0)->path());
+    REQUIRE_EQ("foo.rb", oldEdit.updates.at(1)->path());
 }
 
-TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMergeTakesNewerEdit) {
+TEST_CASE("SorbetWorkspaceEditParamsMergeTakesNewerEdit") {
     SorbetWorkspaceEditParams oldEdit;
     oldEdit.mergeCount = 10;
     oldEdit.sorbetCancellationExpected = false;
@@ -348,12 +352,12 @@ TEST(GenerateLSPMessagesTest, SorbetWorkspaceEditParamsMergeTakesNewerEdit) {
     // Merge merges the new edit into the old edit.
     oldEdit.merge(newEdit);
 
-    EXPECT_EQ(11, oldEdit.mergeCount);
-    EXPECT_TRUE(oldEdit.sorbetCancellationExpected);
-    EXPECT_EQ(5, oldEdit.epoch);
-    ASSERT_EQ(1, oldEdit.updates.size());
+    REQUIRE_EQ(11, oldEdit.mergeCount);
+    REQUIRE(oldEdit.sorbetCancellationExpected);
+    REQUIRE_EQ(5, oldEdit.epoch);
+    REQUIRE_EQ(1, oldEdit.updates.size());
 
-    ASSERT_EQ("foo.rb", oldEdit.updates.at(0)->path());
-    ASSERT_EQ("bar", oldEdit.updates.at(0)->source());
+    REQUIRE_EQ("foo.rb", oldEdit.updates.at(0)->path());
+    REQUIRE_EQ("bar", oldEdit.updates.at(0)->source());
 }
 } // namespace sorbet::realmain::lsp::test

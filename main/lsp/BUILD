@@ -102,7 +102,6 @@ cc_test(
     name = "error_reporter_test",
     size = "small",
     srcs = ["test/error_reporter_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -112,8 +111,7 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -121,7 +119,6 @@ cc_test(
     name = "generate_lsp_messages_test",
     size = "small",
     srcs = ["test/generate_lsp_messages_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -131,8 +128,7 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -140,7 +136,6 @@ cc_test(
     name = "lsp_file_updates_test",
     size = "small",
     srcs = ["test/lsp_file_updates_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -150,8 +145,7 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -159,7 +153,6 @@ cc_test(
     name = "lsp_preprocessor_test",
     size = "small",
     srcs = ["test/lsp_preprocessor_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -169,8 +162,7 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -178,7 +170,6 @@ cc_test(
     name = "lsp_test",
     size = "small",
     srcs = ["test/lsp_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -188,7 +179,6 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )

@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "common/common.h"
 #include "core/Error.h"
@@ -20,7 +21,7 @@ using namespace std;
 auto logger = spd::stderr_color_mt("parser_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-TEST(ParserTest, SimpleParse) { // NOLINT
+TEST_CASE("SimpleParse") { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
@@ -39,7 +40,7 @@ struct DedentTest {
     string_view out;
 };
 
-TEST(ParserTest, TestDedent) { // NOLINT
+TEST_CASE("TestDedent") { // NOLINT
     vector<DedentTest> cases = {
         {2, "    hi"sv, "  hi"sv},
         {10, "  \t    hi"sv, "  hi"sv},
@@ -48,6 +49,6 @@ TEST(ParserTest, TestDedent) { // NOLINT
     for (auto &tc : cases) {
         sorbet::parser::Dedenter dedent(tc.level);
         string got = dedent.dedent(tc.in);
-        EXPECT_EQ(got, tc.out);
+        CHECK_EQ(got, tc.out);
     }
 }

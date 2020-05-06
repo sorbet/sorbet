@@ -50,7 +50,6 @@ cc_test(
     name = "common_test",
     size = "small",
     srcs = glob(["test/*.cc"]),
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -58,7 +57,6 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":common",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )

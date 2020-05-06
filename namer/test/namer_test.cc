@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "ast/ast.h"
@@ -19,22 +20,9 @@ using namespace std;
 
 namespace sorbet::namer::test {
 
+namespace {
 auto logger = spd::stderr_color_mt("namer_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
-
-class NamerFixture : public ::testing::Test {
-public:
-    void SetUp() override {
-        gsPtr = make_unique<core::GlobalState>(errorQueue);
-        gsPtr->initEmpty();
-    }
-    core::GlobalState &getGs() {
-        return *gsPtr;
-    }
-
-private:
-    unique_ptr<core::GlobalState> gsPtr;
-};
 
 static string_view testClass_str = "Test"sv;
 
@@ -60,92 +48,95 @@ vector<ast::ParsedFile> runNamer(core::GlobalState &gs, ast::ParsedFile tree) {
     return namer::Namer::run(gs, move(v));
 }
 
-TEST_F(NamerFixture, HelloWorld) { // NOLINT
-    auto &gs = getGs();
-    auto tree = hello_world(gs);
-    {
-        auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+} // namespace
+
+TEST_CASE("namer tests") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    SUBCASE("HelloWorld") {
+        auto tree = hello_world(gs);
+        {
+            auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            runNamer(gs, move(localTree));
+        }
+
+        const auto &objectScope = core::Symbols::Object().data(gs);
+        REQUIRE_EQ(core::Symbols::root(), objectScope->owner);
+
+        REQUIRE_EQ(4, objectScope->members().size());
+        auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world"));
+        const auto &symbol = methodSym.data(gs);
+        REQUIRE_EQ(core::Symbols::Object(), symbol->owner);
+        REQUIRE_EQ(1, symbol->arguments().size());
+    }
+
+    SUBCASE("Idempotent") { // NOLINT
+        auto baseSymbols = gs.symbolsUsed();
+        auto baseNames = gs.namesUsed();
+
+        auto tree = hello_world(gs);
+        ast::ParsedFile treeCopy{tree.tree->deepCopy(), tree.file};
+        vector<ast::ParsedFile> trees;
+        {
+            auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            trees = runNamer(gs, move(localTree));
+        }
+        auto helloWorldMethod = 1;
+        auto staticInit = 1;
+        auto extraSymbols = helloWorldMethod + staticInit;
+
+        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
+        REQUIRE_EQ(baseNames + 2, gs.namesUsed());
+
+        // Run it again and get the same numbers
+        auto localTree = sorbet::local_vars::LocalVars::run(gs, move(treeCopy));
         runNamer(gs, move(localTree));
+
+        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
+        REQUIRE_EQ(baseNames + 2, gs.namesUsed());
     }
 
-    const auto &objectScope = core::Symbols::Object().data(gs);
-    ASSERT_EQ(core::Symbols::root(), objectScope->owner);
+    SUBCASE("NameClass") { // NOLINT
+        auto tree = getTree(gs, "class Test; class Foo; end; end");
+        {
+            auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            runNamer(gs, move(localTree));
+        }
+        const auto &rootScope =
+            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
 
-    ASSERT_EQ(4, objectScope->members().size());
-    auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world"));
-    const auto &symbol = methodSym.data(gs);
-    ASSERT_EQ(core::Symbols::Object(), symbol->owner);
-    ASSERT_EQ(1, symbol->arguments().size());
-}
-
-TEST_F(NamerFixture, Idempotent) { // NOLINT
-    auto &gs = getGs();
-    auto baseSymbols = gs.symbolsUsed();
-    auto baseNames = gs.namesUsed();
-
-    auto tree = hello_world(gs);
-    ast::ParsedFile treeCopy{tree.tree->deepCopy(), tree.file};
-    vector<ast::ParsedFile> trees;
-    {
-        auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        trees = runNamer(gs, move(localTree));
+        REQUIRE_EQ(3, rootScope->members().size());
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        const auto &fooInfo = fooSym.data(gs);
+        REQUIRE_EQ(1, fooInfo->members().size());
     }
-    auto helloWorldMethod = 1;
-    auto staticInit = 1;
-    auto extraSymbols = helloWorldMethod + staticInit;
 
-    ASSERT_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
-    ASSERT_EQ(baseNames + 2, gs.namesUsed());
+    SUBCASE("InsideClass") { // NOLINT
+        auto tree = getTree(gs, "class Test; class Foo; def bar; end; end; end");
+        {
+            auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            runNamer(gs, move(localTree));
+        }
+        const auto &rootScope =
+            core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
 
-    // Run it again and get the same numbers
-    auto localTree = sorbet::local_vars::LocalVars::run(gs, move(treeCopy));
-    runNamer(gs, move(localTree));
+        REQUIRE_EQ(3, rootScope->members().size());
+        auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
+        const auto &fooInfo = fooSym.data(gs);
+        REQUIRE_EQ(2, fooInfo->members().size());
 
-    ASSERT_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
-    ASSERT_EQ(baseNames + 2, gs.namesUsed());
-}
-
-TEST_F(NamerFixture, NameClass) { // NOLINT
-    auto &gs = getGs();
-    auto tree = getTree(gs, "class Test; class Foo; end; end");
-    {
-        auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        runNamer(gs, move(localTree));
+        auto barSym = fooInfo->members().at(gs.enterNameUTF8("bar"));
+        REQUIRE_EQ(fooSym, barSym.data(gs)->owner);
     }
-    const auto &rootScope =
-        core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
-
-    ASSERT_EQ(3, rootScope->members().size());
-    auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
-    const auto &fooInfo = fooSym.data(gs);
-    ASSERT_EQ(1, fooInfo->members().size());
-}
-
-TEST_F(NamerFixture, InsideClass) { // NOLINT
-    auto &gs = getGs();
-    auto tree = getTree(gs, "class Test; class Foo; def bar; end; end; end");
-    {
-        auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        runNamer(gs, move(localTree));
-    }
-    const auto &rootScope =
-        core::Symbols::root().data(gs)->findMember(gs, gs.enterNameConstant(testClass_str)).data(gs);
-
-    ASSERT_EQ(3, rootScope->members().size());
-    auto fooSym = rootScope->members().at(gs.enterNameConstant("Foo"));
-    const auto &fooInfo = fooSym.data(gs);
-    ASSERT_EQ(2, fooInfo->members().size());
-
-    auto barSym = fooInfo->members().at(gs.enterNameUTF8("bar"));
-    ASSERT_EQ(fooSym, barSym.data(gs)->owner);
 }
 
 } // namespace sorbet::namer::test

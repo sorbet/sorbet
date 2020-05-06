@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "common/kvstore/KeyValueStore.h"
 #include "core/Error.h"
@@ -47,7 +48,7 @@ unique_ptr<core::GlobalState> makeGS() {
 }
 
 } // namespace
-TEST(ErrorReporterTest, NotifiesVSCodeWhenFileHasErrors) {
+TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
@@ -65,18 +66,19 @@ TEST(ErrorReporterTest, NotifiesVSCodeWhenFileHasErrors) {
         er.pushDiagnostics(epoch, fref, errors, *gs);
 
         auto output = outputVector->getOutput();
-        EXPECT_EQ(1, output.size());
+        CHECK_EQ(1, output.size());
 
         auto &message = output.back();
         auto &notificationMessage = message->asNotification();
         auto &publishDiagnosticParams = get<unique_ptr<PublishDiagnosticsParams>>(notificationMessage.params);
 
-        EXPECT_EQ(publishDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref)) << "Reports file with errors to VS code";
-        EXPECT_EQ(1, publishDiagnosticParams->diagnostics.size());
+        INFO("Reports file with errors to VS code");
+        CHECK_EQ(publishDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref));
+        CHECK_EQ(1, publishDiagnosticParams->diagnostics.size());
     }
 }
 
-TEST(ErrorReporterTest, ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors) {
+TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
@@ -97,19 +99,19 @@ TEST(ErrorReporterTest, ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors) {
 
         er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
         auto output = outputVector->getOutput();
-        EXPECT_EQ(2, output.size());
+        CHECK_EQ(2, output.size());
 
         auto &latestMessage = output.back();
         auto &latestDiagnosticParams =
             get<unique_ptr<PublishDiagnosticsParams>>(latestMessage->asNotification().params);
 
-        EXPECT_EQ(latestDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref))
-            << "Sends empty errors to VS code when file previously had errors";
-        EXPECT_TRUE(latestDiagnosticParams->diagnostics.empty());
+        INFO("Sends empty errors to VS code when file previously had errors");
+        CHECK_EQ(latestDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref));
+        CHECK(latestDiagnosticParams->diagnostics.empty());
     }
 }
 
-TEST(ErrorReporterTest, DoesNotReportToVSCodeWhenFileNeverHadErrors) {
+TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
@@ -127,11 +129,11 @@ TEST(ErrorReporterTest, DoesNotReportToVSCodeWhenFileNeverHadErrors) {
         er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
         auto output = outputVector->getOutput();
-        EXPECT_TRUE(output.empty());
+        CHECK(output.empty());
     }
 }
 
-TEST(ErrorReporterTest, ErrorReporterIgnoresErrorsFromOldEpochs) {
+TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
@@ -158,10 +160,10 @@ TEST(ErrorReporterTest, ErrorReporterIgnoresErrorsFromOldEpochs) {
 
         // We expect that no errors are reported to VS Code
         auto output = outputVector->getOutput();
-        EXPECT_TRUE(output.empty());
+        CHECK(output.empty());
     }
 }
-TEST(ErrorReporterTest, filesWithErrorsSince) {
+TEST_CASE("filesWithErrorsSince") {
     auto cs = makeConfig();
     auto gs = makeGS();
     ErrorReporter er(cs);
@@ -180,15 +182,16 @@ TEST(ErrorReporterTest, filesWithErrorsSince) {
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
         er.pushDiagnostics(epoch, fref, errors, *gs);
-        EXPECT_TRUE(er.filesWithErrorsSince(requestedEpoch).empty())
-            << "Only returns files with lastReportedEpoch >= sent epoch";
+        INFO("Only returns files with lastReportedEpoch >= sent epoch");
+        CHECK(er.filesWithErrorsSince(requestedEpoch).empty());
 
         er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
         er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
 
         auto filesWithErrorsSince = er.filesWithErrorsSince(requestedEpoch);
-        EXPECT_EQ(1, filesWithErrorsSince.size()) << "Only returns files with errors";
-        EXPECT_EQ(fref, filesWithErrorsSince[0]);
+        INFO("Only returns files with errors");
+        CHECK_EQ(1, filesWithErrorsSince.size());
+        CHECK_EQ(fref, filesWithErrorsSince[0]);
     }
 }
 } // namespace sorbet::realmain::lsp::test

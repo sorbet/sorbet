@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "spdlog/spdlog.h"
 // has to go above null_sink.h; this comment prevents reordering.
@@ -6,7 +7,7 @@
 #include "spdlog/sinks/null_sink.h"
 
 // Default constructor of options should produce the same default option values as readOptions.
-TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
+TEST_CASE("DefaultConstructorMatchesReadOptions") {
     std::vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
     std::vector<std::unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     sorbet::realmain::options::Options empty;
@@ -19,58 +20,58 @@ TEST(OptionsTest, DefaultConstructorMatchesReadOptions) {
 
     // Check that both options objects have same field values.
     // NOTE: Add your field here if you add a new field to Options.
-    EXPECT_EQ(empty.stdoutHUPHack, opts.stdoutHUPHack);
-    EXPECT_EQ(empty.forceMinStrict, opts.forceMinStrict);
-    EXPECT_EQ(empty.forceMaxStrict, opts.forceMaxStrict);
-    EXPECT_EQ(empty.showProgress, opts.showProgress);
-    EXPECT_EQ(empty.suggestTyped, opts.suggestTyped);
-    EXPECT_EQ(empty.silenceErrors, opts.silenceErrors);
-    EXPECT_EQ(empty.silenceDevMessage, opts.silenceDevMessage);
-    EXPECT_EQ(empty.suggestSig, opts.suggestSig);
-    EXPECT_EQ(empty.supressNonCriticalErrors, opts.supressNonCriticalErrors);
-    EXPECT_EQ(empty.runLSP, opts.runLSP);
-    EXPECT_EQ(empty.disableWatchman, opts.disableWatchman);
-    EXPECT_EQ(empty.watchmanPath, opts.watchmanPath);
-    EXPECT_EQ(empty.stressIncrementalResolver, opts.stressIncrementalResolver);
-    EXPECT_EQ(empty.noErrorCount, opts.noErrorCount);
-    EXPECT_EQ(empty.autocorrect, opts.autocorrect);
-    EXPECT_EQ(empty.waitForDebugger, opts.waitForDebugger);
-    EXPECT_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
-    EXPECT_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
-    EXPECT_EQ(empty.threads, opts.threads);
-    EXPECT_EQ(empty.logLevel, opts.logLevel);
-    EXPECT_EQ(empty.autogenVersion, opts.autogenVersion);
-    EXPECT_EQ(empty.typedSource, opts.typedSource);
-    EXPECT_EQ(empty.cacheDir, opts.cacheDir);
-    EXPECT_EQ(empty.configatronDirs.size(), opts.configatronDirs.size());
-    EXPECT_EQ(empty.configatronFiles.size(), opts.configatronFiles.size());
-    EXPECT_EQ(empty.strictnessOverrides.size(), opts.strictnessOverrides.size());
-    EXPECT_EQ(empty.dslPluginTriggers.size(), opts.dslPluginTriggers.size());
-    EXPECT_EQ(empty.dslRubyExtraArgs.size(), opts.dslRubyExtraArgs.size());
-    EXPECT_EQ(empty.storeState, opts.storeState);
-    EXPECT_EQ(empty.enableCounters, opts.enableCounters);
-    EXPECT_EQ(empty.errorUrlBase, opts.errorUrlBase);
-    EXPECT_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
-    EXPECT_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
-    EXPECT_EQ(empty.pathPrefix, opts.pathPrefix);
-    EXPECT_EQ(empty.reserveMemKiB, opts.reserveMemKiB);
-    EXPECT_EQ(empty.statsdHost, opts.statsdHost);
-    EXPECT_EQ(empty.statsdPrefix, opts.statsdPrefix);
-    EXPECT_EQ(empty.statsdPort, opts.statsdPort);
-    EXPECT_EQ(empty.metricsFile, opts.metricsFile);
-    EXPECT_EQ(empty.metricsRepo, opts.metricsRepo);
-    EXPECT_EQ(empty.metricsPrefix, opts.metricsPrefix);
-    EXPECT_EQ(empty.metricsBranch, opts.metricsBranch);
-    EXPECT_EQ(empty.metricsSha, opts.metricsSha);
-    EXPECT_EQ(empty.rawInputFileNames.size(), opts.rawInputFileNames.size());
-    EXPECT_EQ(empty.rawInputDirNames.size(), opts.rawInputDirNames.size());
-    EXPECT_EQ(empty.absoluteIgnorePatterns.size(), opts.absoluteIgnorePatterns.size());
-    EXPECT_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
-    EXPECT_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
-    EXPECT_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
-    EXPECT_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
-    EXPECT_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
-    EXPECT_EQ(empty.inlineInput, opts.inlineInput);
-    EXPECT_EQ(empty.debugLogFile, opts.debugLogFile);
-    EXPECT_EQ(empty.webTraceFile, opts.webTraceFile);
+    CHECK_EQ(empty.stdoutHUPHack, opts.stdoutHUPHack);
+    CHECK_EQ(empty.forceMinStrict, opts.forceMinStrict);
+    CHECK_EQ(empty.forceMaxStrict, opts.forceMaxStrict);
+    CHECK_EQ(empty.showProgress, opts.showProgress);
+    CHECK_EQ(empty.suggestTyped, opts.suggestTyped);
+    CHECK_EQ(empty.silenceErrors, opts.silenceErrors);
+    CHECK_EQ(empty.silenceDevMessage, opts.silenceDevMessage);
+    CHECK_EQ(empty.suggestSig, opts.suggestSig);
+    CHECK_EQ(empty.supressNonCriticalErrors, opts.supressNonCriticalErrors);
+    CHECK_EQ(empty.runLSP, opts.runLSP);
+    CHECK_EQ(empty.disableWatchman, opts.disableWatchman);
+    CHECK_EQ(empty.watchmanPath, opts.watchmanPath);
+    CHECK_EQ(empty.stressIncrementalResolver, opts.stressIncrementalResolver);
+    CHECK_EQ(empty.noErrorCount, opts.noErrorCount);
+    CHECK_EQ(empty.autocorrect, opts.autocorrect);
+    CHECK_EQ(empty.waitForDebugger, opts.waitForDebugger);
+    CHECK_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
+    CHECK_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
+    CHECK_EQ(empty.threads, opts.threads);
+    CHECK_EQ(empty.logLevel, opts.logLevel);
+    CHECK_EQ(empty.autogenVersion, opts.autogenVersion);
+    CHECK_EQ(empty.typedSource, opts.typedSource);
+    CHECK_EQ(empty.cacheDir, opts.cacheDir);
+    CHECK_EQ(empty.configatronDirs.size(), opts.configatronDirs.size());
+    CHECK_EQ(empty.configatronFiles.size(), opts.configatronFiles.size());
+    CHECK_EQ(empty.strictnessOverrides.size(), opts.strictnessOverrides.size());
+    CHECK_EQ(empty.dslPluginTriggers.size(), opts.dslPluginTriggers.size());
+    CHECK_EQ(empty.dslRubyExtraArgs.size(), opts.dslRubyExtraArgs.size());
+    CHECK_EQ(empty.storeState, opts.storeState);
+    CHECK_EQ(empty.enableCounters, opts.enableCounters);
+    CHECK_EQ(empty.errorUrlBase, opts.errorUrlBase);
+    CHECK_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
+    CHECK_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
+    CHECK_EQ(empty.pathPrefix, opts.pathPrefix);
+    CHECK_EQ(empty.reserveMemKiB, opts.reserveMemKiB);
+    CHECK_EQ(empty.statsdHost, opts.statsdHost);
+    CHECK_EQ(empty.statsdPrefix, opts.statsdPrefix);
+    CHECK_EQ(empty.statsdPort, opts.statsdPort);
+    CHECK_EQ(empty.metricsFile, opts.metricsFile);
+    CHECK_EQ(empty.metricsRepo, opts.metricsRepo);
+    CHECK_EQ(empty.metricsPrefix, opts.metricsPrefix);
+    CHECK_EQ(empty.metricsBranch, opts.metricsBranch);
+    CHECK_EQ(empty.metricsSha, opts.metricsSha);
+    CHECK_EQ(empty.rawInputFileNames.size(), opts.rawInputFileNames.size());
+    CHECK_EQ(empty.rawInputDirNames.size(), opts.rawInputDirNames.size());
+    CHECK_EQ(empty.absoluteIgnorePatterns.size(), opts.absoluteIgnorePatterns.size());
+    CHECK_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
+    CHECK_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
+    CHECK_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
+    CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
+    CHECK_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
+    CHECK_EQ(empty.inlineInput, opts.inlineInput);
+    CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
+    CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
 }

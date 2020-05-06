@@ -30,7 +30,6 @@ cc_test(
     srcs = glob([
         "test/*.cc",
     ]),
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -42,7 +41,6 @@ cc_test(
         "//local_vars",
         "//parser",
         "//rewriter",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )

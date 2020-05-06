@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "main/lsp/lsp.h"
@@ -106,77 +107,77 @@ const string file_string = "# typed: true\n"
                            "end\n";
 string_view file = string_view(file_string);
 
-TEST(FindDocumentationTest, OneLineDocumentation) { // NOLINT
+TEST_CASE("OneLineDocumentation") {
     int position = file.find("abcde");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is an instance method with a standard line documentation");
+    REQUIRE_EQ(*b, "This is an instance method with a standard line documentation");
 }
 
-TEST(FindDocumentationTest, MultiLineDocumentation) { // NOLINT
+TEST_CASE("MultiLineDocumentation") {
     int position = file.find("multidoc_instance");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is a multiline documented instance method.\nAll of the lines should be displayed in the "
-                  "docs.\nIncluding this one.");
+    REQUIRE_EQ(*b, "This is a multiline documented instance method.\nAll of the lines should be displayed in the "
+                   "docs.\nIncluding this one.");
 }
-TEST(FindDocumentationTest, SeparatedDocumentation) { // NOLINT
+TEST_CASE("SeparatedDocumentation") {
     int position = file.find("nodocs");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_TRUE(!b);
+    REQUIRE(!b);
 }
-TEST(FindDocumentationTest, TopOfFile) { // NOLINT
+TEST_CASE("TopOfFile") {
     int position = file.find("B");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "this is a class.");
+    REQUIRE_EQ(*b, "this is a class.");
 }
-TEST(FindDocumentationTest, DifferentIndentation) { // NOLINT
+TEST_CASE("DifferentIndentation") {
     int position = file.find("weirdindent");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "weird indentation\nis in this documentation.");
+    REQUIRE_EQ(*b, "weird indentation\nis in this documentation.");
 }
-TEST(FindDocumentationTest, Constant) { // NOLINT
+TEST_CASE("Constant") {
     int position = file.find("ZZZZZZ");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is the documentation for a constant.\nThis is the second line for a constant.");
+    REQUIRE_EQ(*b, "This is the documentation for a constant.\nThis is the second line for a constant.");
 }
-TEST(FindDocumentationTest, OneLineSig) { // NOLINT
+TEST_CASE("OneLineSig") {
     int position = file.find("one_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is a method with documentation above its\none-line sig block.");
+    REQUIRE_EQ(*b, "This is a method with documentation above its\none-line sig block.");
 }
-TEST(FindDocumentationTest, MultiLineSig) { // NOLINT
+TEST_CASE("MultiLineSig") {
     int position = file.find("multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "This is a method with documentation above its\nmulti-line sig block.");
+    REQUIRE_EQ(*b, "This is a method with documentation above its\nmulti-line sig block.");
 }
-TEST(FindDocumentationTest, BrokenMultiLineSig) { // NOLINT
+TEST_CASE("BrokenMultiLineSig") {
     int position = file.find("broken_multi_line_sig_block");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_TRUE(!b);
+    REQUIRE(!b);
 }
-TEST(FindDocumentationTest, ConsecutiveMethodsOneLineSig) { // NOLINT
+TEST_CASE("ConsecutiveMethodsOneLineSig") {
     int position = file.find("consecutive_method_1");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_TRUE(!b);
+    REQUIRE(!b);
 }
-TEST(FindDocumentationTest, ConsecutiveMethodsMultiLineSig) { // NOLINT
+TEST_CASE("ConsecutiveMethodsMultiLineSig") {
     int position = file.find("consecutive_method_2");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_TRUE(!b);
+    REQUIRE(!b);
 }
-TEST(FindDocumentationTest, ConsecutiveMethodsBlockShorthandSig) { // NOLINT
+TEST_CASE("ConsecutiveMethodsBlockShorthandSig") {
     int position = file.find("consecutive_method_3");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_TRUE(!b);
+    REQUIRE(!b);
 }
-TEST(FindDocumentationTest, EnsureOneWhitespace) { // NOLINT
+TEST_CASE("EnsureOneWhitespace") {
     int position = file.find("ensure_one_whitespace");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "First line\nSecond line");
+    REQUIRE_EQ(*b, "First line\nSecond line");
 }
-TEST(FindDocumentationTest, ExtraNewLinesForYarddoc) { // NOLINT
+TEST_CASE("ExtraNewLinesForYarddoc") {
     int position = file.find("extra_newlines_for_yarddoc");
     optional<string> b = findDocumentation(file, position);
-    ASSERT_EQ(*b, "First line\nSecond line\n\n@param x this is x\n\n@param y this is y");
+    REQUIRE_EQ(*b, "First line\nSecond line\n\n@param x this is x\n\n@param y this is y");
 }
 
 } // namespace sorbet::realmain::lsp::test

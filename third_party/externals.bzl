@@ -10,6 +10,14 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "doctest",
+        urls = _github_public_urls("onqtam/doctest/archive/7d42bd0fab6c44010c8aed9338bd02bea5feba41.zip"),
+        sha256 = "b33c8e954d15a146bb744ca29f4ca204b955530f52b2f8a895746a99cee4f2df",
+        build_file = "@com_stripe_ruby_typer//third_party:doctest.BUILD",
+        strip_prefix = "doctest-7d42bd0fab6c44010c8aed9338bd02bea5feba41",
+    )
+
+    http_archive(
         name = "yaml_cpp",
         urls = _github_public_urls("jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.zip"),
         sha256 = "7c0ddc08a99655508ae110ba48726c67e4a10b290c214aed866ce4bbcbe3e84c",

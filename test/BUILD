@@ -57,7 +57,6 @@ cc_test(
     name = "hello-test",
     size = "small",
     srcs = ["hello-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -71,9 +70,8 @@ cc_test(
         "//core/serialize",
         "//parser",
         "//payload",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
         "@cxxopts",
+        "@doctest",
     ],
 )
 
@@ -81,7 +79,6 @@ cc_test(
     name = "error-check-test",
     size = "small",
     srcs = ["error-check-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -93,8 +90,7 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -102,7 +98,6 @@ cc_test(
     name = "autocorrect-test",
     size = "small",
     srcs = ["autocorrect-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -111,8 +106,7 @@ cc_test(
     deps = [
         "//common",
         "//core",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
