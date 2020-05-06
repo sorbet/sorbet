@@ -304,7 +304,6 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (ret.ifunset == nullptr) {
         if (knownNonModel(syntacticSuperClass)) {
-            unique_ptr<ast::Expression> getterBody;
             if (wantTypedInitialize(syntacticSuperClass)) {
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
             } else {
@@ -332,9 +331,18 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
             ASTUtil::dupType(setType.get())));
 
         if (ret.enum_ == nullptr && knownNonDocument(syntacticSuperClass)) {
-            auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
-                                           ast::MK::Local(nameLoc, core::Names::arg0()));
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+            if (wantTypedInitialize(syntacticSuperClass)) {
+                auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
+                                               ast::MK::Local(nameLoc, core::Names::arg0()));
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+            } else {
+                // need to hide the instance variable access, because there wasn't a typed constructor to declare it
+                auto castSelf = ast::MK::Cast(loc, ast::MK::Self(loc), ast::MK::Constant(loc, core::Symbols::Kernel()));
+                auto ivarSet =
+                    ast::MK::Send2(loc, std::move(castSelf), core::Names::instanceVariableSet(),
+                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+            }
         } else {
             // Chalk::ODM::Document classes have special handling for soft freeze
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));

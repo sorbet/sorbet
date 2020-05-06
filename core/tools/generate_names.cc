@@ -184,6 +184,7 @@ NameDef names[] = {
     {"ifunset"},
     {"withoutAccessors", "without_accessors"},
     {"instanceVariableGet", "instance_variable_get"},
+    {"instanceVariableSet", "instance_variable_set"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
