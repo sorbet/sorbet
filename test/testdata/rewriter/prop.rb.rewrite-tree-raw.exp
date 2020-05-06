@@ -1231,8 +1231,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -1245,22 +1255,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -1709,8 +1719,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -1723,22 +1743,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -1901,8 +1921,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -1915,22 +1945,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2103,8 +2133,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2117,22 +2157,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2298,8 +2338,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2312,22 +2362,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2523,8 +2573,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2537,22 +2597,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2739,8 +2799,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2753,22 +2823,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2844,8 +2914,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2858,22 +2938,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -2949,8 +3029,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -2963,22 +3053,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -3131,8 +3221,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -3145,22 +3245,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -3489,8 +3589,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -3503,22 +3613,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -3847,8 +3957,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -3861,22 +3981,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -4205,8 +4325,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -4219,22 +4349,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -6580,8 +6710,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -6594,22 +6734,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -6762,8 +6902,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -6776,22 +6926,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -7183,8 +7333,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -7197,22 +7357,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -7365,8 +7525,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -7379,22 +7549,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>
@@ -7682,8 +7852,18 @@ ClassDef{
                   name = <U arg2>
                 }
                 rhs = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
+                        localVariable = <U <self>>
+                      }
+                    ]
                   }
                   fun = <U instance_variable_get>
                   block = nullptr
@@ -7696,22 +7876,22 @@ ClassDef{
             expr = Send{
               recv = Send{
                 recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = Local{
+                  recv = Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = ::T
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    args = [
+                      Local{
                         localVariable = <U <self>>
                       }
-                      fun = <U class>
-                      block = nullptr
-                      args = [
-                      ]
-                    }
+                    ]
+                  }
+                  fun = <U class>
+                  block = nullptr
+                  args = [
                   ]
                 }
                 fun = <U decorator>

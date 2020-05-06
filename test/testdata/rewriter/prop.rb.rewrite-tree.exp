@@ -79,8 +79,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foo<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@foo")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foo", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@foo")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"foo", arg2)
       end
     end
 
@@ -132,8 +132,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def default<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@default")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"default", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@default")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"default", arg2)
       end
     end
 
@@ -151,8 +151,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def t_nilable<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@t_nilable")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"t_nilable", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@t_nilable")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"t_nilable", arg2)
       end
     end
 
@@ -170,8 +170,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def array<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@array")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"array", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@array")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"array", arg2)
       end
     end
 
@@ -189,8 +189,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def t_array<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@t_array")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"t_array", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@t_array")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"t_array", arg2)
       end
     end
 
@@ -208,8 +208,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def hash_of<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@hash_of")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"hash_of", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@hash_of")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"hash_of", arg2)
       end
     end
 
@@ -227,8 +227,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def const_explicit<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@const_explicit")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"const_explicit", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@const_explicit")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"const_explicit", arg2)
       end
     end
 
@@ -238,8 +238,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def const<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@const")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"const", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@const")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"const", arg2)
       end
     end
 
@@ -249,8 +249,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def enum_prop<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@enum_prop")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"enum_prop", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@enum_prop")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"enum_prop", arg2)
       end
     end
 
@@ -268,8 +268,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@foreign")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foreign", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@foreign")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"foreign", arg2)
       end
     end
 
@@ -303,8 +303,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_lazy<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@foreign_lazy")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foreign_lazy", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@foreign_lazy")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"foreign_lazy", arg2)
       end
     end
 
@@ -338,8 +338,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_proc<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@foreign_proc")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foreign_proc", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@foreign_proc")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"foreign_proc", arg2)
       end
     end
 
@@ -373,8 +373,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def foreign_invalid<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@foreign_invalid")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"foreign_invalid", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@foreign_invalid")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"foreign_invalid", arg2)
       end
     end
 
@@ -620,8 +620,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def token<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@token")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"token", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@token")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"token", arg2)
       end
     end
 
@@ -639,8 +639,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def created<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@created")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"created", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@created")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"created", arg2)
       end
     end
 
@@ -696,8 +696,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def token<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@token")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"token", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@token")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"token", arg2)
       end
     end
 
@@ -715,8 +715,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def created<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@created")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"created", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@created")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"created", arg2)
       end
     end
 
@@ -758,8 +758,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def merchant<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@merchant")
-        ::T.unsafe(<self>.class()).decorator().prop_get_logic(<self>, :"merchant", arg2)
+        arg2 = ::T.unsafe(<self>).instance_variable_get(:"@merchant")
+        ::T.unsafe(<self>).class().decorator().prop_get_logic(<self>, :"merchant", arg2)
       end
     end
 
