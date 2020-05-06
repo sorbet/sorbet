@@ -29,7 +29,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->referencesProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
-    codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::Source};
+    codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};
     serverCap->codeActionProvider = move(codeActionProvider);
 
     if (opts.lspSignatureHelpEnabled) {
