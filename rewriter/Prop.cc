@@ -304,7 +304,16 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (ret.ifunset == nullptr) {
         if (knownNonModel(syntacticSuperClass)) {
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
+            unique_ptr<ast::Expression> getterBody;
+            if (wantTypedInitialize(syntacticSuperClass)) {
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
+            } else {
+                // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
+                auto castSelf = ast::MK::Cast(loc, ast::MK::Self(loc), ast::MK::Constant(loc, core::Symbols::Kernel()));
+                auto ivarGet = ast::MK::Send1(loc, std::move(castSelf), core::Names::instanceVariableGet(),
+                                              ast::MK::Symbol(nameLoc, ivarName));
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet)));
+            }
         } else {
             // Models have a custom decorator, which means we have to forward the prop get to it.
             nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));

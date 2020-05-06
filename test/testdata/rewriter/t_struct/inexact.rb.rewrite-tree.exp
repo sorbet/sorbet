@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
-      @foo
+      ::T.cast(<self>, ::Kernel).instance_variable_get(:"@foo")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
-      @bar
+      ::T.cast(<self>, ::Kernel).instance_variable_get(:"@bar")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
