@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method<<C <todo sym>>>(&<blk>)
-      ::T.cast(<self>, ::Kernel).instance_variable_get(:"@my_parent_method")
+      ::T.unsafe(<self>).instance_variable_get(:"@my_parent_method")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
