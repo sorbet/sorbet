@@ -772,7 +772,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             // One code action should be a 'source' level code action. Remove it.
             if (!receivedCodeActions.empty()) {
                 for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
-                    if ((*it)->kind == CodeActionKind::Source) {
+                    if ((*it)->kind == CodeActionKind::SourceFixAllSorbet) {
                         EXPECT_EQ(sourceLevelCodeAction, nullptr) << "Received multiple source-level code actions";
                         sourceLevelCodeAction = move(*it);
                         // Remove from vector and continue

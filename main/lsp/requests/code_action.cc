@@ -90,7 +90,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     if (!allEdits.empty()) {
         // Make a source autocorrect that appears in the "source" menu, and an autocorrect that appears in the
         // quickfix dropdown if there are other quickfixes at this location.
-        vector<CodeActionKind> kinds = {CodeActionKind::Source};
+        vector<CodeActionKind> kinds = {CodeActionKind::SourceFixAllSorbet};
         if (!result.empty()) {
             kinds.push_back(CodeActionKind::Quickfix);
         }
