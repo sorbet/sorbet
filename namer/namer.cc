@@ -36,7 +36,7 @@ enum class NameKind : u1 {
     Method = 3,
     FieldOrVariable = 4,
     TypeMember = 5,
-    Symbol = 6
+    Symbol = 6,
 };
 
 class FoundNameRef final {
@@ -344,7 +344,6 @@ class NameFinder {
     FoundNameRef squashNames(core::Context ctx, FoundNameRef owner, const unique_ptr<ast::Expression> &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
             // Already defined. Insert a foundname so we can reference it.
-            // TODO(jvilk): Have a variant that is 'defined symbol'? How often do we hit this?
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
             return foundNames->addSymbol(sym);
@@ -353,7 +352,6 @@ class NameFinder {
             found.owner = squashNames(ctx, owner, constLit->scope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
-            // TODO: Unknown loc / declLoc / classKind
             return foundNames->addClassRef(move(found));
         } else {
             // `class <<self`, `::Foo`, `self::Foo`
@@ -364,13 +362,35 @@ class NameFinder {
 public:
     unique_ptr<FoundNames> getAndClearFoundNames() {
         ownerStack.clear();
-        cerr << "Class refs: " << foundNames->klassRefs().size() << "\n";
-        cerr << "Class defs: " << foundNames->klasses().size() << "\n";
-        cerr << "Symbols:  " << foundNames->symbols().size() << "\n";
+        // cerr << "Class refs: " << foundNames->klassRefs().size() << "\n";
+        // cerr << "Class defs: " << foundNames->klasses().size() << "\n";
+        // cerr << "Symbols:  " << foundNames->symbols().size() << "\n";
         auto rv = move(foundNames);
         foundNames = make_unique<FoundNames>();
         ENFORCE(foundNames->klassRefs().empty());
         return rv;
+    }
+
+    FoundNameRef enclosingClass(core::Context ctx, FoundNameRef ref) {
+        FoundNameRef current = ref;
+        while (true) {
+            switch (current.kind()) {
+                case NameKind::Class:
+                case NameKind::ClassRef:
+                    return current;
+                case NameKind::Symbol:
+                    return foundNames->addSymbol(current.symbol(*foundNames).data(ctx)->enclosingClass(ctx));
+                case NameKind::Method:
+                    current = current.method(*foundNames).owner;
+                    break;
+                case NameKind::Root:
+                    return foundNames->addSymbol(core::Symbols::root().data(ctx)->enclosingClass(ctx));
+                default:
+                    // Only a class, classref, or method can be an owner.
+                    ENFORCE(false);
+                    break;
+            }
+        }
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
@@ -389,7 +409,7 @@ public:
             found.classRef = foundNames->addClassRef(move(foundRef));
         } else {
             if (klass->symbol == core::Symbols::todo()) {
-                found.classRef = squashNames(ctx, owner, klass->name);
+                found.classRef = squashNames(ctx, enclosingClass(ctx, owner), klass->name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
@@ -628,22 +648,25 @@ class NameDefiner {
     }
 
     core::SymbolRef defineClass(core::MutableContext ctx, const FoundClassRef &classRef) {
-        auto owner = getSymbol(classRef.owner);
         auto name = classRef.name;
         auto loc = classRef.loc;
-        core::SymbolRef existing = owner.data(ctx)->findMember(ctx, name);
+        if (name == core::Names::singleton()) {
+            return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
+        }
+
+        core::SymbolRef existing = ctx.owner.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
-            if (!owner.data(ctx)->isClassOrModule()) {
+            if (!ctx.owner.data(ctx)->isClassOrModule()) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
                     auto memberName = name.data(ctx)->show(ctx);
-                    auto ownerName = owner.data(ctx)->show(ctx);
+                    auto ownerName = ctx.owner.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", memberName,
                                 ownerName, ownerName);
-                    e.addErrorLine(owner.data(ctx)->loc(), "`{}` defined here", ownerName);
+                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "`{}` defined here", ownerName);
                 }
-                return owner;
+                return ctx.owner;
             }
-            existing = ctx.state.enterClassSymbol(loc, owner, name);
+            existing = ctx.state.enterClassSymbol(loc, ctx.owner, name);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
         return existing;
@@ -914,14 +937,10 @@ class NameDefiner {
     }
 
     core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
-        if (klass.classRef.kind() == NameKind::ClassRef &&
-            klass.classRef.klassRef(*foundNames).name == core::Names::singleton()) {
-            ENFORCE(klass.classKind == ast::ClassDef::Kind::Class);
-            return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
-        }
-
         core::SymbolRef symbol = getSymbol(klass.classRef);
         ENFORCE(symbol.exists());
+        ENFORCE(klass.classKind != ast::ClassDef::Kind::Class ||
+                symbol != ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx));
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
         if (!symbol.data(ctx)->isClassOrModule()) {
@@ -1437,6 +1456,9 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+        // NameDefiner should have forced this class's singleton class into existence.
+        ENFORCE(klass->symbol.data(ctx)->lookupSingletonClass(ctx).exists());
+
         for (auto &exp : klass->rhs) {
             addAncestor(ctx, klass, exp);
         }
