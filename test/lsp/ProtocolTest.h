@@ -1,7 +1,7 @@
 #ifndef TEST_LSP_PROTOCOLTEST_H
 #define TEST_LSP_PROTOCOLTEST_H
 
-#include "gtest/gtest.h"
+#include "doctest.h"
 // ^ Violates linting rules, so include first.
 #include "common/Counters.h"
 #include "common/Counters_impl.h"
@@ -37,17 +37,13 @@ public:
     getTimings(ConstExprStr counter, std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
 };
 
-struct ProtocolTestConfig {
-    bool useMultithreading = false;
-    // Should the test use kvstore?
-    bool useCache = false;
-};
-
 /**
  * If parameter is 'true', LSP is configured in multithreaded mode.
  */
-class ProtocolTest : public testing::TestWithParam<ProtocolTestConfig> {
+class ProtocolTest {
 protected:
+    const bool useMultithreading;
+    const bool useCache;
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
     std::string rootUri;
@@ -64,11 +60,9 @@ protected:
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    ~ProtocolTest() override = default;
+    ProtocolTest(bool useMultithreading = false, bool useCache = false);
 
-    void SetUp() override;
-
-    void TearDown() override;
+    ~ProtocolTest();
 
     /** Reset lspWrapper and other internal state. */
     void resetState();

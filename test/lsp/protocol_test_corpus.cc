@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 // ^ Violates linting rules, so include first.
 #include "ProtocolTest.h"
 #include "absl/strings/match.h"
@@ -11,7 +12,7 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
-TEST_P(ProtocolTest, AddFile) {
+TEST_CASE_FIXTURE(ProtocolTest, "AddFile") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
@@ -35,7 +36,7 @@ TEST_P(ProtocolTest, AddFile) {
 }
 
 // Write to the same file twice. Sorbet should only return errors from the second version.
-TEST_P(ProtocolTest, AddFileJoiningRequests) {
+TEST_CASE_FIXTURE(ProtocolTest, "AddFileJoiningRequests") {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
@@ -45,7 +46,7 @@ TEST_P(ProtocolTest, AddFileJoiningRequests) {
 }
 
 // Cancels requests before they are processed, and ensures that they are actually not processed.
-TEST_P(ProtocolTest, Cancellation) {
+TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(
         send(*openFile("foo.rb",
@@ -69,38 +70,43 @@ TEST_P(ProtocolTest, Cancellation) {
     UnorderedSet<int> requestIds = {lastDefId, lastDefId - 1, lastDefId - 2};
     auto errors = send(move(requests));
 
-    ASSERT_EQ(errors.size(), 3) << "Expected three cancellation responses in response to three cancellation requests.";
+    INFO("Expected three cancellation responses in response to three cancellation requests.");
+    REQUIRE_EQ(errors.size(), 3);
 
     for (auto &errorMsg : errors) {
-        ASSERT_TRUE(errorMsg->isResponse())
-            << fmt::format("Expected cancellation response, received:\n{}", errorMsg->toJSON());
+        {
+            INFO(fmt::format("Expected cancellation response, received:\n{}", errorMsg->toJSON()));
+            REQUIRE(errorMsg->isResponse());
+        }
         auto idIt = requestIds.find((*errorMsg->id()).asInt());
-        ASSERT_NE(idIt, requestIds.end())
-            << fmt::format("Received cancellation response for invalid request id: {}", (*errorMsg->id()).asInt());
+        {
+            INFO(fmt::format("Received cancellation response for invalid request id: {}", (*errorMsg->id()).asInt()));
+            REQUIRE_NE(idIt, requestIds.end());
+        }
         requestIds.erase(idIt);
-        ASSERT_NO_FATAL_FAILURE(assertResponseError(-32800, "cancel", *errorMsg));
+        assertResponseError(-32800, "cancel", *errorMsg);
     }
-    ASSERT_EQ(requestIds.size(), 0);
+    REQUIRE_EQ(requestIds.size(), 0);
 }
 
 // Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
-TEST_P(ProtocolTest, DefinitionError) {
+TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
-    ASSERT_EQ(defResponses.size(), 1) << "Expected a single response to a definition request to an untyped document.";
-
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(nextId - 1, *defResponses.at(0)));
+    INFO("Expected a single response to a definition request to an untyped document.");
+    REQUIRE_EQ(defResponses.size(), 1);
+    assertResponseMessage(nextId - 1, *defResponses.at(0));
 
     auto &respMsg = defResponses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result);
+    REQUIRE(respMsg.result);
     auto &result = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*(respMsg.result));
     auto &array = get<vector<unique_ptr<Location>>>(result);
-    ASSERT_EQ(array.size(), 0);
+    REQUIRE_EQ(array.size(), 0);
 }
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
-TEST_P(ProtocolTest, MergeDidChangeAfterCancellation) {
+TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
@@ -136,21 +142,22 @@ TEST_P(ProtocolTest, MergeDidChangeAfterCancellation) {
     int diagnosticCount = 0;
     for (auto &msg : msgs) {
         if (msg->isResponse()) {
-            ASSERT_NO_FATAL_FAILURE(assertResponseError(-32800, "cancel", *msg));
+            assertResponseError(-32800, "cancel", *msg);
             cancelRequestCount++;
         } else if (msg->isNotification() && msg->method() == LSPMethod::TextDocumentPublishDiagnostics) {
             diagnosticCount++;
         } else {
-            ADD_FAILURE() << fmt::format("Unexpected response:\n{}", msg->toJSON());
+            FAIL_CHECK(fmt::format("Unexpected response:\n{}", msg->toJSON()));
         }
     }
     assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
-    EXPECT_EQ(cancelRequestCount, 3) << "Expected three cancellation messages.";
-    EXPECT_EQ(diagnosticCount, 1) << "Expected a diagnostic error for foo.rb";
+    CHECK_EQ(cancelRequestCount, 3);
+    // Expected a diagnostic error for foo.rb
+    CHECK_EQ(diagnosticCount, 1);
 }
 
 // Applies all consecutive file changes at once.
-TEST_P(ProtocolTest, MergesDidChangesAcrossFiles) {
+TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossFiles") {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
@@ -177,14 +184,15 @@ TEST_P(ProtocolTest, MergesDidChangesAcrossFiles) {
     requests.push_back(closeFile("bat.rb"));
 
     auto msgs = send(move(requests));
-    EXPECT_EQ(msgs.size(), 4) << "Expected only 4 diagnostic responses to the merged file changes";
+    INFO("Expected only 4 diagnostic responses to the merged file changes");
+    CHECK_EQ(msgs.size(), 4);
     assertDiagnostics(move(msgs), {{"bar.rb", 3, "Expected `Integer`"},
                                    {"baz.rb", 3, "Expected `Integer`"},
                                    {"bat.rb", 3, "Expected `Integer`"},
                                    {"foo.rb", 7, "Method `blah` does not exist"}});
 }
 
-TEST_P(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
+TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // Invalid: Returns false.
@@ -205,17 +213,18 @@ TEST_P(ProtocolTest, MergesDidChangesAcrossDelayableRequests) {
                                   4));
 
     auto msgs = send(move(requests));
-    ASSERT_GT(msgs.size(), 0);
-    EXPECT_TRUE(msgs.at(0)->isNotification());
-    EXPECT_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);
+    REQUIRE_GT(msgs.size(), 0);
+    CHECK(msgs.at(0)->isNotification());
+    CHECK_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);
     assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
 
-    ASSERT_EQ(msgs.size(), 3) << "Expected a diagnostic error, followed by two document symbol responses.";
-    EXPECT_TRUE(msgs.at(1)->isResponse());
-    EXPECT_TRUE(msgs.at(2)->isResponse());
+    INFO("Expected a diagnostic error, followed by two document symbol responses.");
+    REQUIRE_EQ(msgs.size(), 3);
+    CHECK(msgs.at(1)->isResponse());
+    CHECK(msgs.at(2)->isResponse());
 }
 
-TEST_P(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
+TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableRequests") {
     assertDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
@@ -229,32 +238,32 @@ TEST_P(ProtocolTest, DoesNotMergeFileChangesAcrossNonDelayableRequests) {
 
     auto msgs = send(move(requests));
     // [diagnostics, documentsymbol, diagnostics]
-    EXPECT_EQ(msgs.size(), 3);
+    CHECK_EQ(msgs.size(), 3);
     if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(0)->asNotification())) {
-        EXPECT_TRUE((*diagnosticParams)->uri.find("foo.rb") != string::npos);
+        CHECK((*diagnosticParams)->uri.find("foo.rb") != string::npos);
         auto &diagnostics = (*diagnosticParams)->diagnostics;
-        EXPECT_EQ(diagnostics.size(), 1);
-        EXPECT_TRUE(diagnostics.at(0)->message.find("Returning value") != string::npos);
+        CHECK_EQ(diagnostics.size(), 1);
+        CHECK(diagnostics.at(0)->message.find("Returning value") != string::npos);
     }
-    EXPECT_TRUE(msgs.at(1)->isResponse());
+    CHECK(msgs.at(1)->isResponse());
     if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(2)->asNotification())) {
-        EXPECT_TRUE((*diagnosticParams)->uri.find("foo.rb") != string::npos);
+        CHECK((*diagnosticParams)->uri.find("foo.rb") != string::npos);
         auto &diagnostics = (*diagnosticParams)->diagnostics;
-        EXPECT_EQ(diagnostics.size(), 1);
-        EXPECT_TRUE(diagnostics.at(0)->message.find("Method `blah` does not exist") != string::npos);
+        CHECK_EQ(diagnostics.size(), 1);
+        CHECK(diagnostics.at(0)->message.find("Method `blah` does not exist") != string::npos);
     }
 }
 
-TEST_P(ProtocolTest, NotInitialized) {
+TEST_CASE_FIXTURE(ProtocolTest, "NotInitialized") {
     // Don't use `getDefinition`; it only works post-initialization.
     auto msgs = send(*makeDefinitionRequest(nextId++, "foo.rb", 12, 24));
-    ASSERT_EQ(msgs.size(), 1);
+    REQUIRE_EQ(msgs.size(), 1);
     auto &msg1 = msgs.at(0);
-    ASSERT_NO_FATAL_FAILURE(assertResponseError(-32002, "not initialize", *msg1));
+    assertResponseError(-32002, "not initialize", *msg1);
 }
 
 // There's a different code path that checks for workspace edits before initialization occurs.
-TEST_P(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
+TEST_CASE_FIXTURE(ProtocolTest, "WorkspaceEditIgnoredWhenNotInitialized") {
     // Purposefully send a vector of requests to trigger merging, which should turn this into a WorkspaceEdit.
     vector<unique_ptr<LSPMessage>> toSend;
     // Avoid using `openFile`, as it only works post-initialization.
@@ -265,17 +274,18 @@ TEST_P(ProtocolTest, WorkspaceEditIgnoredWhenNotInitialized) {
     assertDiagnostics(initializeLSP(), {});
 }
 
-TEST_P(ProtocolTest, InitializeAndShutdown) {
+TEST_CASE_FIXTURE(ProtocolTest, "InitializeAndShutdown") {
     assertDiagnostics(initializeLSP(), {});
     auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Shutdown, JSONNullObject())));
-    ASSERT_EQ(resp.size(), 1) << "Expected a single response to shutdown request.";
+    INFO("Expected a single response to shutdown request.");
+    REQUIRE_EQ(resp.size(), 1);
     auto &r = resp.at(0)->asResponse();
-    ASSERT_EQ(r.requestMethod, LSPMethod::Shutdown);
+    REQUIRE_EQ(r.requestMethod, LSPMethod::Shutdown);
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()))), {});
 }
 
 // Some clients send an empty string for the root uri.
-TEST_P(ProtocolTest, EmptyRootUriInitialization) {
+TEST_CASE_FIXTURE(ProtocolTest, "EmptyRootUriInitialization") {
     // Manually reset rootUri before initializing.
     rootUri = "";
     assertDiagnostics(initializeLSP(), {});
@@ -287,29 +297,32 @@ TEST_P(ProtocolTest, EmptyRootUriInitialization) {
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
     // Check the response for the expected URI.
-    EXPECT_EQ(diagnostics.size(), 1);
+    CHECK_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+    assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg);
     // Will fail test if this does not parse.
     if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-        EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        CHECK_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
     }
 }
 
 // Root path is technically optional since it's deprecated.
-TEST_P(ProtocolTest, MissingRootPathInitialization) {
+TEST_CASE_FIXTURE(ProtocolTest, "MissingRootPathInitialization") {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
     const bool supportsMarkdown = true;
     auto params =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
                                     makeInitializeParams(nullopt, JSONNullObject(), supportsMarkdown, nullopt));
-    auto responses = send(LSPMessage(move(params)));
-    ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
-    auto &respMsg = responses.at(0);
-    EXPECT_TRUE(respMsg->isResponse());
-    auto &resp = respMsg->asResponse();
-    EXPECT_EQ(resp.requestMethod, LSPMethod::Initialize);
+    {
+        auto responses = send(LSPMessage(move(params)));
+        INFO("Expected only a single response to the initialize request.");
+        REQUIRE_EQ(responses.size(), 1);
+        auto &respMsg = responses.at(0);
+        CHECK(respMsg->isResponse());
+        auto &resp = respMsg->asResponse();
+        CHECK_EQ(resp.requestMethod, LSPMethod::Initialize);
+    }
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
                                                                        make_unique<InitializedParams>()))),
                       {});
@@ -321,29 +334,32 @@ TEST_P(ProtocolTest, MissingRootPathInitialization) {
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
     // Check the response for the expected URI.
-    EXPECT_EQ(diagnostics.size(), 1);
+    CHECK_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+    assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg);
     // Will fail test if this does not parse.
     if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-        EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        CHECK_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
     }
 }
 
 // Monaco sends null for the root URI.
-TEST_P(ProtocolTest, MonacoInitialization) {
+TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
     // Null is functionally equivalent to an empty rootUri. Manually reset rootUri before initializing.
     rootUri = "";
     const bool supportsMarkdown = true;
     auto params = make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::Initialize,
         makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown, nullopt));
-    auto responses = send(LSPMessage(move(params)));
-    ASSERT_EQ(responses.size(), 1) << "Expected only a single response to the initialize request.";
-    auto &respMsg = responses.at(0);
-    EXPECT_TRUE(respMsg->isResponse());
-    auto &resp = respMsg->asResponse();
-    EXPECT_EQ(resp.requestMethod, LSPMethod::Initialize);
+    {
+        auto responses = send(LSPMessage(move(params)));
+        INFO("Expected only a single response to the initialize request");
+        REQUIRE_EQ(responses.size(), 1);
+        auto &respMsg = responses.at(0);
+        CHECK(respMsg->isResponse());
+        auto &resp = respMsg->asResponse();
+        CHECK_EQ(resp.requestMethod, LSPMethod::Initialize);
+    }
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
                                                                        make_unique<InitializedParams>()))),
                       {});
@@ -355,16 +371,16 @@ TEST_P(ProtocolTest, MonacoInitialization) {
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
     // Check the response for the expected URI.
-    EXPECT_EQ(diagnostics.size(), 1);
+    CHECK_EQ(diagnostics.size(), 1);
     auto &msg = diagnostics.at(0);
-    ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+    assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg);
     // Will fail test if this does not parse.
     if (auto diagnosticParams = getPublishDiagnosticParams(msg->asNotification())) {
-        EXPECT_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
+        CHECK_EQ((*diagnosticParams)->uri, "memory://yolo1.rb");
     }
 }
 
-TEST_P(ProtocolTest, CompletionOnNonClass) {
+TEST_CASE_FIXTURE(ProtocolTest, "CompletionOnNonClass") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
 
@@ -380,7 +396,7 @@ TEST_P(ProtocolTest, CompletionOnNonClass) {
 }
 
 // Ensures that unrecognized notifications are ignored.
-TEST_P(ProtocolTest, IgnoresUnrecognizedNotifications) {
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresUnrecognizedNotifications") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
                               "didChangeConfiguration\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}"),
@@ -388,51 +404,51 @@ TEST_P(ProtocolTest, IgnoresUnrecognizedNotifications) {
 }
 
 // Ensures that notifications that have an improper params shape are handled gracefully / not responded to.
-TEST_P(ProtocolTest, IgnoresNotificationsThatDontTypecheck) {
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresNotificationsThatDontTypecheck") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{}})"), {});
 }
 
 // Ensures that unrecognized requests are responded to.
-TEST_P(ProtocolTest, RejectsUnrecognizedRequests) {
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
     assertDiagnostics(initializeLSP(), {});
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
                              "didChangeConfiguration\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
-    ASSERT_EQ(responses.size(), 1);
+    REQUIRE_EQ(responses.size(), 1);
     auto &response = responses.at(0);
-    ASSERT_TRUE(response->isResponse());
+    REQUIRE(response->isResponse());
     auto &r = response->asResponse();
-    ASSERT_FALSE(r.result);
-    ASSERT_TRUE(r.error);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
     auto &error = *r.error;
-    ASSERT_NE(error->message.find("Unsupported LSP method"), std::string::npos);
-    ASSERT_EQ(error->code, (int)LSPErrorCodes::MethodNotFound);
+    REQUIRE_NE(error->message.find("Unsupported LSP method"), std::string::npos);
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::MethodNotFound);
 }
 
 // Ensures that requests that have an improper params shape are responded to with an error.
-TEST_P(ProtocolTest, RejectsRequestsThatDontTypecheck) {
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     assertDiagnostics(initializeLSP(), {});
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
                              "hover\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
-    ASSERT_EQ(responses.size(), 1);
+    REQUIRE_EQ(responses.size(), 1);
     auto &response = responses.at(0);
-    ASSERT_TRUE(response->isResponse());
+    REQUIRE(response->isResponse());
     auto &r = response->asResponse();
-    ASSERT_FALSE(r.result);
-    ASSERT_TRUE(r.error);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
     auto &error = *r.error;
-    ASSERT_NE(error->message.find("Unable to deserialize LSP request"), std::string::npos);
-    ASSERT_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), std::string::npos);
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
 // Ensures that the server ignores invalid JSON.
-TEST_P(ProtocolTest, SilentlyIgnoresInvalidJSONMessages) {
+TEST_CASE_FIXTURE(ProtocolTest, "SilentlyIgnoresInvalidJSONMessages") {
     assertDiagnostics(initializeLSP(), {});
     assertDiagnostics(sendRaw("{"), {});
 }
 
 // If a client doesn't support markdown, send hover as plaintext.
-TEST_P(ProtocolTest, RespectsHoverTextLimitations) {
+TEST_CASE_FIXTURE(ProtocolTest, "RespectsHoverTextLimitations") {
     assertDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
 
     assertDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
@@ -441,18 +457,19 @@ TEST_P(ProtocolTest, RespectsHoverTextLimitations) {
         "2.0", nextId++, LSPMethod::TextDocumentHover,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(getUri("foobar.rb")),
                                                 make_unique<Position>(1, 0)))));
-    ASSERT_EQ(hoverResponses.size(), 1);
+    REQUIRE_EQ(hoverResponses.size(), 1);
     auto &hoverResponse = hoverResponses.at(0);
-    ASSERT_TRUE(hoverResponse->isResponse());
+    REQUIRE(hoverResponse->isResponse());
     auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*hoverResponse->asResponse().result);
     auto &hover = get<unique_ptr<Hover>>(hoverResult);
     auto &contents = hover->contents;
-    ASSERT_EQ(contents->kind, MarkupKind::Plaintext);
-    ASSERT_EQ(contents->value, "Integer(1)");
+    REQUIRE_EQ(contents->kind, MarkupKind::Plaintext);
+    REQUIRE_EQ(contents->value, "Integer(1)");
 }
 
-// Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on them.
-TEST_P(ProtocolTest, SorbetURIsWork) {
+// Tests that Sorbet returns sorbet: URIs for payload references & files not on client, and that readFile works on
+// them.
+TEST_CASE_FIXTURE(ProtocolTest, "SorbetURIsWork") {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -463,26 +480,26 @@ TEST_P(ProtocolTest, SorbetURIsWork) {
     assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
 
     auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
-    ASSERT_EQ(selectDefinitions.size(), 1);
+    REQUIRE_EQ(selectDefinitions.size(), 1);
     auto &selectLoc = selectDefinitions.at(0);
-    ASSERT_TRUE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
-    ASSERT_FALSE(readFile(selectLoc->uri).empty());
+    REQUIRE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
+    REQUIRE_FALSE(readFile(selectLoc->uri).empty());
 
     auto myMethodDefinitions = getDefinitions("folder/foo.rb", 2, 5);
-    ASSERT_EQ(myMethodDefinitions.size(), 1);
+    REQUIRE_EQ(myMethodDefinitions.size(), 1);
     auto &myMethodDefLoc = myMethodDefinitions.at(0);
-    ASSERT_EQ(myMethodDefLoc->uri, "sorbet:folder/foo.rb");
-    ASSERT_EQ(readFile(myMethodDefLoc->uri), fileContents);
+    REQUIRE_EQ(myMethodDefLoc->uri, "sorbet:folder/foo.rb");
+    REQUIRE_EQ(readFile(myMethodDefLoc->uri), fileContents);
 
     // VS Code replaces : in https with something URL-escaped; test that we handle this use-case.
     auto arrayRBI = readFile(selectLoc->uri);
     auto arrayRBIURLEncodeColon =
         readFile(absl::StrReplaceAll(selectLoc->uri, {{"https://github.com/", "https%3A//github.com/"}}));
-    ASSERT_EQ(arrayRBI, arrayRBIURLEncodeColon);
+    REQUIRE_EQ(arrayRBI, arrayRBIURLEncodeColon);
 }
 
 // Tests that Sorbet URIs are not typechecked.
-TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
+TEST_CASE_FIXTURE(ProtocolTest, "DoesNotTypecheckSorbetURIs") {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -495,9 +512,9 @@ TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     send(*openFile("folder/foo.rb", fileContents));
 
     auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
-    ASSERT_EQ(selectDefinitions.size(), 1);
+    REQUIRE_EQ(selectDefinitions.size(), 1);
     auto &selectLoc = selectDefinitions.at(0);
-    ASSERT_TRUE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
+    REQUIRE(absl::StartsWith(selectLoc->uri, "sorbet:https://github.com/"));
     auto contents = readFile(selectLoc->uri);
 
     // Test that opening and closing one of these files doesn't cause a slow path.
@@ -505,11 +522,11 @@ TEST_P(ProtocolTest, DoesNotTypecheckSorbetURIs) {
     openClose.push_back(makeOpen(selectLoc->uri, contents, 1));
     openClose.push_back(makeClose(selectLoc->uri));
     auto responses = send(move(openClose));
-    ASSERT_EQ(0, responses.size());
+    REQUIRE_EQ(0, responses.size());
 }
 
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
-TEST_P(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
+TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     const bool supportsMarkdown = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -525,8 +542,5 @@ TEST_P(ProtocolTest, DoesNotCrashOnNonWorkspaceURIs) {
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
-
-// Run these tests in single-threaded mode.
-INSTANTIATE_TEST_SUITE_P(SingleThreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{false}));
 
 } // namespace sorbet::test::lsp

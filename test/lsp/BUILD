@@ -14,7 +14,6 @@ cc_test(
         "ProtocolTest.h",
         "protocol_test_corpus.cc",
     ],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -25,8 +24,7 @@ cc_test(
         "//main/lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -38,7 +36,6 @@ cc_test(
         "ProtocolTest.h",
         "cache_protocol_test_corpus.cc",
     ],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -49,8 +46,7 @@ cc_test(
         "//main/lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -62,7 +58,6 @@ cc_test(
         "ProtocolTest.h",
         "multithreaded_protocol_test_corpus.cc",
     ],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -73,8 +68,7 @@ cc_test(
         "//main/lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 
@@ -86,7 +80,6 @@ cc_test(
         "ProtocolTest.h",
         "watchman_test_corpus.cc",
     ],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -97,8 +90,7 @@ cc_test(
         "//main/lsp",
         "//payload",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
     ],
 )
 

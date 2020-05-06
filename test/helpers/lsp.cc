@@ -1,5 +1,4 @@
-#include "gtest/gtest.h"
-#include <cxxopts.hpp>
+#include "doctest.h"
 // has to go first as it violates requirements
 
 #include "absl/strings/match.h"
@@ -18,9 +17,9 @@ string filePathToUri(const LSPConfiguration &config, string_view filePath) {
 string uriToFilePath(const LSPConfiguration &config, string_view uri) {
     string_view prefixUrl = config.getClientConfig().rootUri;
     if (!config.isUriInWorkspace(uri)) {
-        ADD_FAILURE() << fmt::format(
+        FAIL_CHECK(fmt::format(
             "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
-            uri, prefixUrl);
+            uri, prefixUrl));
         return "";
     }
     return string(uri.substr(prefixUrl.length() + 1));
@@ -179,81 +178,83 @@ unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // Properties checked in the same order they are described in the LSP spec.
-    EXPECT_TRUE(capabilities.textDocumentSync.has_value());
+    CHECK(capabilities.textDocumentSync.has_value());
     auto &textDocumentSync = *(capabilities.textDocumentSync);
     auto textDocumentSyncValue = get<TextDocumentSyncKind>(textDocumentSync);
-    EXPECT_EQ(TextDocumentSyncKind::Full, textDocumentSyncValue);
+    CHECK_EQ(TextDocumentSyncKind::Full, textDocumentSyncValue);
 
-    EXPECT_TRUE(capabilities.hoverProvider.value_or(false));
+    CHECK(capabilities.hoverProvider.value_or(false));
 
-    EXPECT_TRUE(capabilities.completionProvider.has_value());
+    CHECK(capabilities.completionProvider.has_value());
     if (capabilities.completionProvider.has_value()) {
         auto &completionProvider = *(capabilities.completionProvider);
         auto triggerCharacters = completionProvider->triggerCharacters.value_or(vector<string>({}));
-        EXPECT_EQ(1, triggerCharacters.size());
+        CHECK_EQ(1, triggerCharacters.size());
         if (triggerCharacters.size() == 1) {
-            EXPECT_EQ(".", triggerCharacters.at(0));
+            CHECK_EQ(".", triggerCharacters.at(0));
         }
     }
 
-    EXPECT_TRUE(capabilities.signatureHelpProvider.has_value());
+    CHECK(capabilities.signatureHelpProvider.has_value());
     if (capabilities.signatureHelpProvider.has_value()) {
         auto &sigHelpProvider = *(capabilities.signatureHelpProvider);
         auto sigHelpTriggerChars = sigHelpProvider->triggerCharacters.value_or(vector<string>({}));
-        EXPECT_EQ(2, sigHelpTriggerChars.size());
+        CHECK_EQ(2, sigHelpTriggerChars.size());
         UnorderedSet<string> sigHelpTriggerSet(sigHelpTriggerChars.begin(), sigHelpTriggerChars.end());
-        EXPECT_NE(sigHelpTriggerSet.end(), sigHelpTriggerSet.find("("));
-        EXPECT_NE(sigHelpTriggerSet.end(), sigHelpTriggerSet.find(","));
+        CHECK_NE(sigHelpTriggerSet.end(), sigHelpTriggerSet.find("("));
+        CHECK_NE(sigHelpTriggerSet.end(), sigHelpTriggerSet.find(","));
     }
 
     // We don't support all possible features. Make sure we don't make any false claims.
-    EXPECT_TRUE(capabilities.definitionProvider.value_or(false));
-    EXPECT_TRUE(capabilities.typeDefinitionProvider.value_or(false));
-    EXPECT_FALSE(capabilities.implementationProvider.has_value());
-    EXPECT_TRUE(capabilities.referencesProvider.value_or(false));
-    EXPECT_TRUE(capabilities.documentHighlightProvider.has_value());
-    EXPECT_TRUE(capabilities.documentSymbolProvider.value_or(false));
-    EXPECT_TRUE(capabilities.workspaceSymbolProvider.value_or(false));
-    EXPECT_TRUE(capabilities.codeActionProvider.has_value());
-    EXPECT_FALSE(capabilities.codeLensProvider.has_value());
-    EXPECT_FALSE(capabilities.documentFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities.documentRangeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
-    EXPECT_FALSE(capabilities.renameProvider.has_value());
-    EXPECT_FALSE(capabilities.documentLinkProvider.has_value());
-    EXPECT_FALSE(capabilities.executeCommandProvider.has_value());
-    EXPECT_FALSE(capabilities.workspace.has_value());
+    CHECK(capabilities.definitionProvider.value_or(false));
+    CHECK(capabilities.typeDefinitionProvider.value_or(false));
+    CHECK_FALSE(capabilities.implementationProvider.has_value());
+    CHECK(capabilities.referencesProvider.value_or(false));
+    CHECK(capabilities.documentHighlightProvider.has_value());
+    CHECK(capabilities.documentSymbolProvider.value_or(false));
+    CHECK(capabilities.workspaceSymbolProvider.value_or(false));
+    CHECK(capabilities.codeActionProvider.has_value());
+    CHECK_FALSE(capabilities.codeLensProvider.has_value());
+    CHECK_FALSE(capabilities.documentFormattingProvider.has_value());
+    CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
+    CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
+    CHECK_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
+    CHECK_FALSE(capabilities.renameProvider.has_value());
+    CHECK_FALSE(capabilities.documentLinkProvider.has_value());
+    CHECK_FALSE(capabilities.executeCommandProvider.has_value());
+    CHECK_FALSE(capabilities.workspace.has_value());
 }
 
 void assertResponseMessage(int expectedId, const LSPMessage &response) {
-    ASSERT_TRUE(response.isResponse()) << fmt::format(
-        "Expected a response message, but received the following notification instead: {}", response.toJSON());
+    REQUIRE_MESSAGE(response.isResponse(),
+                    fmt::format("Expected a response message, but received the following notification instead: {}",
+                                response.toJSON()));
 
     auto &respMsg = response.asResponse();
     auto idIntPtr = get_if<int>(&respMsg.id);
-    ASSERT_NE(nullptr, idIntPtr) << "Response message lacks an integer ID field.";
-    ASSERT_EQ(expectedId, *idIntPtr) << "Response message's ID does not match expected value.";
+    REQUIRE_MESSAGE(idIntPtr != nullptr, "Response message lacks an integer ID field.");
+    INFO("Response message's ID does not match expected value.");
+    REQUIRE_EQ(expectedId, *idIntPtr);
 }
 
 void assertResponseError(int code, string_view msg, const LSPMessage &response) {
-    ASSERT_TRUE(response.isResponse()) << fmt::format(
-        "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
+    REQUIRE(response.isResponse()) << fmt::format("Expected a response message with error `{}: {}`, but received:\n{}",
+                                                  code, msg, response.toJSON());
     auto &r = response.asResponse();
     auto &maybeError = r.error;
-    ASSERT_TRUE(maybeError.has_value()) << fmt::format("Expected a response message with an error, but received:\n{}",
-                                                       response.toJSON());
+    REQUIRE(maybeError.has_value()) << fmt::format("Expected a response message with an error, but received:\n{}",
+                                                   response.toJSON());
     auto &error = *maybeError;
-    ASSERT_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
-                                                error->toJSON());
-    ASSERT_NE(error->message.find(msg), string::npos) << fmt::format(
+    REQUIRE_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
+                                                 error->toJSON());
+    REQUIRE_NE(error->message.find(msg), string::npos) << fmt::format(
         "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
 }
 
 void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response) {
-    ASSERT_TRUE(response.isNotification()) << fmt::format(
+    REQUIRE(response.isNotification()) << fmt::format(
         "Expected a notification, but received the following response message instead: {}", response.toJSON());
-    ASSERT_EQ(expectedMethod, response.method())
+    REQUIRE_EQ(expectedMethod, response.method())
         << fmt::format("Unexpected method on notification message: expected {} but received {}.",
                        convertLSPMethodToString(expectedMethod), convertLSPMethodToString(response.method()));
 }
@@ -314,15 +315,15 @@ vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view r
         auto responses = getLSPResponsesFor(lspWrapper, move(message));
 
         // Should just have an 'initialize' response.
-        EXPECT_EQ(1, responses.size());
+        CHECK_EQ(1, responses.size());
         if (responses.size() != 1) {
             return {};
         }
 
         assertResponseMessage(0, *responses.at(0));
         auto &respMsg = responses.at(0)->asResponse();
-        EXPECT_FALSE(respMsg.error.has_value());
-        EXPECT_TRUE(respMsg.result.has_value());
+        CHECK_FALSE(respMsg.error.has_value());
+        CHECK(respMsg.result.has_value());
 
         if (respMsg.result.has_value()) {
             auto &result = *respMsg.result;

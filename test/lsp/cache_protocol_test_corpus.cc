@@ -1,5 +1,6 @@
-#include "gtest/gtest.h"
-// ^ Violates linting rules, so include first.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
+// has to go first as it violates our requirements
 #include "ProtocolTest.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
@@ -34,9 +35,15 @@ int wait_for_child_fork(int pid) {
         return -2;
     }
 }
+
+class CacheProtocolTest : public ProtocolTest {
+public:
+    CacheProtocolTest() : ProtocolTest(/* use multithreading */ true, /* use caching */ true) {}
+};
+
 } // namespace
 
-TEST_P(ProtocolTest, LSPUsesCache) {
+TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     // Write a file to disk.
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
@@ -71,10 +78,10 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         lspWrapper = nullptr;
 
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
-        EXPECT_EQ(kvstore->read(updatedKey), nullptr);
+        CHECK_EQ(kvstore->read(updatedKey), nullptr);
 
         auto contents = kvstore->read(key);
-        ASSERT_NE(contents, nullptr);
+        REQUIRE_NE(contents, nullptr);
 
         auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("null", sink);
@@ -82,13 +89,13 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        EXPECT_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasModified());
 
         auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, contents);
-        EXPECT_TRUE(cachedFile.file->cached);
-        EXPECT_EQ(cachedFile.file->path(), filePath);
-        EXPECT_EQ(cachedFile.file->source(), fileContents);
-        EXPECT_NE(cachedFile.file->getFileHash(), nullptr);
+        CHECK(cachedFile.file->cached);
+        CHECK_EQ(cachedFile.file->path(), filePath);
+        CHECK_EQ(cachedFile.file->source(), fileContents);
+        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
     }
 
     // LSP should read from the cache when files on disk match. There should be no cache misses this time since disk
@@ -101,8 +108,8 @@ TEST_P(ProtocolTest, LSPUsesCache) {
                           {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
 
         auto counters = getCounters();
-        EXPECT_EQ(counters.getCounter("types.input.files.kvstore.miss"), 0);
-        EXPECT_GT(counters.getCounter("types.input.files.kvstore.hit"), 0);
+        CHECK_EQ(counters.getCounter("types.input.files.kvstore.miss"), 0);
+        CHECK_GT(counters.getCounter("types.input.files.kvstore.hit"), 0);
     }
 
     // LSP should not use the cached file when a file on disk changes.
@@ -113,7 +120,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         assertDiagnostics(initializeLSP(), {});
 
         auto counters = getCounters();
-        EXPECT_EQ(counters.getCounter("types.input.files.kvstore.miss"), 1);
+        CHECK_EQ(counters.getCounter("types.input.files.kvstore.miss"), 1);
     }
 
     // LSP should update the cache when seeing an updated file during initialization.
@@ -124,7 +131,7 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         lspWrapper = nullptr;
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
         auto updatedFileData = kvstore->read(updatedKey);
-        ASSERT_NE(updatedFileData, nullptr);
+        REQUIRE_NE(updatedFileData, nullptr);
 
         auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("null", sink);
@@ -132,14 +139,14 @@ TEST_P(ProtocolTest, LSPUsesCache) {
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, updatedFileData);
-        EXPECT_TRUE(cachedFile.file->cached);
-        EXPECT_EQ(cachedFile.file->path(), filePath);
-        EXPECT_EQ(cachedFile.file->source(), updatedFileContents);
-        EXPECT_NE(cachedFile.file->getFileHash(), nullptr);
+        CHECK(cachedFile.file->cached);
+        CHECK_EQ(cachedFile.file->path(), filePath);
+        CHECK_EQ(cachedFile.file->source(), updatedFileContents);
+        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
     }
 }
 
-TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
+TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
     // Write a file to disk.
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
@@ -172,25 +179,25 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
         auto contents = kvstore->read(key);
-        ASSERT_NE(contents, nullptr);
+        REQUIRE_NE(contents, nullptr);
 
         auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*nullLogger, *nullLogger)));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        EXPECT_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasModified());
 
         auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, contents);
-        EXPECT_TRUE(cachedFile.file->cached);
-        EXPECT_EQ(cachedFile.file->path(), filePath);
-        EXPECT_EQ(cachedFile.file->source(), fileContents);
-        EXPECT_NE(cachedFile.file->getFileHash(), nullptr);
+        CHECK(cachedFile.file->cached);
+        CHECK_EQ(cachedFile.file->path(), filePath);
+        CHECK_EQ(cachedFile.file->source(), fileContents);
+        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
     }
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.
     {
-        // Note: I had trouble getting signals to work in CI. Even in a loop where the parent process sent a signal to
-        // the child, the child never received the signal. So, I'm using a file to communicate instead.
+        // Note: I had trouble getting signals to work in CI. Even in a loop where the parent process sent a signal
+        // to the child, the child never received the signal. So, I'm using a file to communicate instead.
         auto signalFile = cacheDir + "/signal_file";
         // Fork before grabbing DB lock.
         const int child_pid = fork();
@@ -209,12 +216,19 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
             // File was updated, so no cache hits.
             auto counters = getCounters();
-            EXPECT_GT(counters.getCounter("types.input.files.kvstore.miss"), 0);
-            EXPECT_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
-            EXPECT_EQ(counters.getCounter("cache.committed"), 1);
+            const u4 kvstoreMissCount = counters.getCounter("types.input.files.kvstore.miss");
+            const u4 kvstoreHitCount = counters.getCounter("types.input.files.kvstore.hit");
+            const u4 cacheCommitted = counters.getCounter("cache.committed");
+            CHECK_GT(kvstoreMissCount, 0);
+            CHECK_EQ(kvstoreHitCount, 0);
+            CHECK_EQ(cacheCommitted, 1);
 
             // Exit explicitly here to stop fork from running the rest of the test suite.
-            exit(testing::Test::HasFailure());
+            if (kvstoreMissCount > 0 && kvstoreHitCount == 0 && cacheCommitted == 1) {
+                exit(0);
+            } else {
+                exit(-1);
+            }
         } else {
             resetState();
 
@@ -222,7 +236,7 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
             FileOps::write(signalFile, " ");
 
             // Wait for child process to finish mutating the cache.
-            EXPECT_EQ(0, wait_for_child_fork(child_pid));
+            CHECK_EQ(0, wait_for_child_fork(child_pid));
 
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
@@ -231,12 +245,9 @@ TEST_P(ProtocolTest, LSPDoesNotUseCacheIfModified) {
 
             // We should not use the cache since it has been dirtied.
             auto counters = getCounters();
-            EXPECT_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
-            EXPECT_EQ(counters.getCounter("cache.committed"), 0);
+            CHECK_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
+            CHECK_EQ(counters.getCounter("cache.committed"), 0);
         }
     }
 }
-
-// Run these tests in multi-threaded mode with caching
-INSTANTIATE_TEST_SUITE_P(MultithreadedProtocolTests, ProtocolTest, testing::Values(ProtocolTestConfig{true, true}));
 } // namespace sorbet::test::lsp
