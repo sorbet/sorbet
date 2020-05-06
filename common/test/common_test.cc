@@ -15,7 +15,7 @@ TEST(CommonTest, Levenstein) { // NOLINT
 
 class EnsureDirTest : public ::testing::Test {
 protected:
-    EnsureDirTest() {
+    void SetUp() override {
         if (FileOps::dirExists("common_test_dir")) {
             FileOps::removeDir("common_test_dir");
         }
@@ -26,7 +26,7 @@ protected:
     }
 };
 
-TEST(EnsureDirTest, Test) { // NOLINT
+TEST_F(EnsureDirTest, Test) { // NOLINT
     EXPECT_TRUE(FileOps::ensureDir("common_test_dir"));
     EXPECT_FALSE(FileOps::ensureDir("common_test_dir"));
 }
