@@ -980,7 +980,9 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                     core::FileRef file = job.file;
                                     try {
                                         core::Context ctx(igs, core::Symbols::root(), file);
-                                        threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                                        auto parsedFile = typecheckOne(ctx, move(job), opts);
+                                        igs.errorQueue->markFileForFlushing(file);
+                                        threadResult.trees.emplace_back(move(parsedFile));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
                                         igs.tracer().error("Exception typing file: {} (backtrace is above)",
