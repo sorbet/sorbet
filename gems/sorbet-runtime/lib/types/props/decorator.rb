@@ -623,8 +623,8 @@ class T::Props::Decorator
       :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
     )
 
-    if prop_cls != String
-      raise ArgumentError.new("`foreign` can only be used with a prop type of String")
+    if !(prop_cls <= String)
+      raise ArgumentError.new("`foreign` can only be used with a prop type of String, but property `#{prop_name}` uses `#{prop_cls}`")
     end
 
     if foreign.is_a?(Array)
