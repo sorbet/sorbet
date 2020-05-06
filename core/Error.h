@@ -88,6 +88,24 @@ public:
     }
 };
 
+/*
+ * Used to batch errors in an RAII fashion:
+ *
+ * {
+ *   ErrorRegion errs(gs);
+ *   runNamer();
+ * }
+ */
+class ErrorRegion {
+public:
+    ErrorRegion(const GlobalState &gs, FileRef f) : gs(gs), f(f){};
+    ~ErrorRegion();
+
+private:
+    const GlobalState &gs;
+    FileRef f;
+};
+
 class ErrorBuilder {
     // An ErrorBuilder can be in three states:
     //
