@@ -163,6 +163,32 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
         end
       end
     end
+
+    it 'allows foreign props that are Strings' do
+      Class.new do
+        include T::Props
+        prop :foo, String, foreign: -> {Class} # boom: =
+      end 
+    end
+
+    it 'allows foreign props that are String subclasses' do
+      class InheritsString < String
+      end
+
+      Class.new do
+        include T::Props
+        prop :foo, InheritsString, foreign: -> {Class} # boom: =
+      end 
+    end
+
+    it 'disallows foreign props that are not Strings' do
+      assert_raises(ArgumentError) do
+        Class.new do
+          include T::Props
+          prop :foo, Integer, foreign: -> {Class} # boom: =
+        end
+      end
+    end
   end
 
   class StructHash < T::Struct
