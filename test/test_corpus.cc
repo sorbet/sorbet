@@ -239,10 +239,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<ast::ParsedFile> trees;
     ExpectationHandler handler(test, errorQueue);
 
-    vector<core::ErrorRegion> errs;
     for (auto file : files) {
-        errs.emplace_back(*gs, file);
-
         if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(*gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
@@ -593,10 +590,7 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     vector<ast::ParsedFile> trees;
     map<string, string> got;
 
-    vector<core::ErrorRegion> errs;
     for (auto file : files) {
-        errs.emplace_back(gs, file);
-
         if (FileOps::getFileName(file.data(gs).path()) != whitelistedTypedNoneTest &&
             file.data(gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";

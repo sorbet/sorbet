@@ -138,7 +138,6 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     unique_ptr<ast::Expression> ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
-        core::ErrorRegion errs(gs, file);
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(ctx, move(parseTree));
     }
@@ -155,7 +154,6 @@ unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef fil
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-    core::ErrorRegion errs(gs, file);
     return rewriter::Rewriter::run(ctx, move(ast));
 }
 
@@ -250,7 +248,6 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const 
             {
                 Timer timeit(gs.tracer(), "plugins_text");
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                core::ErrorRegion errs(gs, file);
 
                 auto [pluginTree, pluginFiles] = plugin::SubprocessTextPlugin::run(ctx, move(tree));
                 tree = move(pluginTree);
@@ -307,7 +304,6 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
-            core::ErrorRegion errs(gs, sorbet::core::FileRef());
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
@@ -363,7 +359,6 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     if (fnd != opts.strictnessOverrides.end()) {
         if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
             fnd->second < opts.forceMaxStrict) {
-            core::ErrorRegion errs(gs, file);
             if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
                 e.setHeader("Useless override of strictness level");
             }
@@ -504,7 +499,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                     Timer timeit(cgs->tracer(), "substituteTrees");
                     for (auto &tree : threadResult.res.trees) {
                         auto file = tree.file;
-                        core::ErrorRegion errs(*ret.gs, file);
                         if (!file.data(*ret.gs).cached) {
                             core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
                             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
@@ -519,7 +513,10 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
-            ret.gs->errorQueue->flushErrors();
+            // Flush all errors if the error queue had a critical error
+            if (ret.gs->hadCriticalError()) {
+                ret.gs->errorQueue->flushErrors(true);
+            }
         }
     }
     return ret;
@@ -617,7 +614,6 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         for (auto &tree : firstPass.trees) {
             auto file = tree.file;
             core::MutableContext ctx(*suppliedFilesAndPluginFiles.gs, core::Symbols::root(), file);
-            core::ErrorRegion errs(*suppliedFilesAndPluginFiles.gs, file);
             tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
         }
     }
@@ -707,7 +703,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
         CFGCollectorAndTyper collector(opts);
         {
-            core::ErrorRegion errs(ctx, f);
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
@@ -748,7 +743,10 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         what = namer::Namer::run(gs, move(what));
-        gs.errorQueue->flushErrors();
+        // Flush all errors if the error queue had a critical error
+        if (gs.hadCriticalError()) {
+            gs.errorQueue->flushErrors(true);
+        }
     }
     return what;
 }
@@ -859,11 +857,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(gs->tracer(), "resolving");
-            vector<core::ErrorRegion> errs;
-            for (auto &tree : what) {
-                auto file = tree.file;
-                errs.emplace_back(*gs, file);
-            }
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
@@ -900,7 +893,11 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
 
-    gs->errorQueue->flushErrors();
+    // Flush all errors if the error queue had a critical error
+    if (gs->hadCriticalError()) {
+        gs->errorQueue->flushErrors(true);
+    }
+
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
@@ -921,6 +918,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
                                       optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+    // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
+    // drop errors in LSP mode.
+    ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
+
     vector<ast::ParsedFile> typecheck_result;
     const auto &epochManager = *gs->epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1071,6 +1072,9 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
             plugin::Plugins::dumpPluginGeneratedFiles(*gs, opts.print.PluginGeneratedCode);
         }
 #endif
+        // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
+        gs->errorQueue->filesFlushedCount = 0;
+
         return ast::ParsedFilesOrCancelled(move(typecheck_result));
     }
 }

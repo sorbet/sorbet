@@ -35,6 +35,12 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
     : owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
+ErrorQueue::~ErrorQueue() {
+    if (owner == this_thread::get_id()) {
+        flushErrors(true);
+    }
+}
+
 pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
 ErrorQueue::drainWithQueryResponses() {
     checkOwned();
@@ -147,6 +153,7 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainFlushed() {
 }
 
 void ErrorQueue::markFileForFlushing(core::FileRef file) {
+    filesFlushedCount.fetch_add(1);
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Flush;
     msg.whatFile = file;
@@ -185,5 +192,4 @@ vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
 bool ErrorQueue::queueIsEmptyApprox() const {
     return this->queue.sizeEstimate() == 0;
 }
-
 } // namespace sorbet::core
