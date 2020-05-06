@@ -12,20 +12,20 @@ using namespace std;
 namespace sorbet::rewriter {
 namespace {
 
-// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
-// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
-// users, but we don't know that information in the Rewriter passes.
-bool isT(ast::Expression *expr) {
-    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    auto scope = t->scope.get();
+bool isRootScope(ast::Expression *scope) {
     if (ast::isa_tree<ast::EmptyTree>(scope)) {
         return true;
     }
     auto root = ast::cast_tree<ast::ConstantLit>(scope);
     return root != nullptr && root->symbol == core::Symbols::root();
+}
+
+// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
+// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
+// users, but we don't know that information in the Rewriter passes.
+bool isT(ast::Expression *expr) {
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return t != nullptr && t->cnst == core::Names::Constants::T() && isRootScope(t->scope.get());
 }
 
 bool isTNilable(ast::Expression *expr) {
@@ -36,6 +36,67 @@ bool isTNilable(ast::Expression *expr) {
 bool isTStruct(ast::Expression *expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope.get());
+}
+
+bool isTInexactStruct(ast::Expression *expr) {
+    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope.get());
+}
+
+bool isChalkODMDocument(ast::Expression *expr) {
+    auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
+        return false;
+    }
+    auto *odm = ast::cast_tree<ast::UnresolvedConstantLit>(document->scope.get());
+    if (odm == nullptr || odm->cnst != core::Names::Constants::ODM()) {
+        return false;
+    }
+    auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope.get());
+    if (chalk == nullptr || chalk->cnst != core::Names::Constants::Chalk()) {
+        return false;
+    }
+    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && isRootScope(chalk->scope.get());
+}
+
+enum class SyntacticSuperClass {
+    Unknown,
+    TStruct,
+    TInexactStruct,
+    ChalkODMDocument,
+};
+
+bool knownNonModel(SyntacticSuperClass syntacticSuperClass) {
+    switch (syntacticSuperClass) {
+        case SyntacticSuperClass::TStruct:
+        case SyntacticSuperClass::TInexactStruct:
+        case SyntacticSuperClass::ChalkODMDocument:
+            return true;
+        case SyntacticSuperClass::Unknown:
+            return false;
+    }
+}
+
+bool knownNonDocument(SyntacticSuperClass syntacticSuperClass) {
+    switch (syntacticSuperClass) {
+        case SyntacticSuperClass::TStruct:
+        case SyntacticSuperClass::TInexactStruct:
+            return true;
+        case SyntacticSuperClass::ChalkODMDocument:
+        case SyntacticSuperClass::Unknown:
+            return false;
+    }
+}
+
+bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
+    switch (syntacticSuperClass) {
+        case SyntacticSuperClass::TStruct:
+            return true;
+        case SyntacticSuperClass::TInexactStruct:
+        case SyntacticSuperClass::ChalkODMDocument:
+        case SyntacticSuperClass::Unknown:
+            return false;
+    }
 }
 
 struct PropInfo {
@@ -212,7 +273,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret, bool forTStruct) {
+vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret,
+                                                SyntacticSuperClass syntacticSuperClass) {
     vector<unique_ptr<ast::Expression>> nodes;
 
     const auto loc = ret.loc;
@@ -240,8 +302,13 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
                                                      ASTUtil::dupType(getType.get()));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
-    } else if (ret.ifunset == nullptr && forTStruct) {
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
+    } else if (ret.ifunset == nullptr) {
+        if (knownNonModel(syntacticSuperClass)) {
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
+        } else {
+            // Models have a custom decorator, which means we have to forward the prop get to it.
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+        }
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     }
@@ -255,12 +322,12 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
 
-        if (ret.enum_ == nullptr && forTStruct) {
-            // TODO(jez) Handle soft_freeze_logic when we implement non-T::Struct support
+        if (ret.enum_ == nullptr && knownNonDocument(syntacticSuperClass)) {
             auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
                                            ast::MK::Local(nameLoc, core::Names::arg0()));
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
         } else {
+            // Chalk::ODM::Document classes have special handling for soft freeze
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
         }
     }
@@ -438,11 +505,15 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.runningUnderAutogen) {
         return;
     }
-    auto forTStruct = false;
-    for (auto &a : klass->ancestors) {
-        if (isTStruct(a.get())) {
-            forTStruct = true;
-            break;
+    auto syntacticSuperClass = SyntacticSuperClass::Unknown;
+    if (!klass->ancestors.empty()) {
+        auto superClass = klass->ancestors[0].get();
+        if (isTStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TStruct;
+        } else if (isTInexactStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TInexactStruct;
+        } else if (isChalkODMDocument(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::ChalkODMDocument;
         }
     }
     UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
@@ -456,7 +527,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (!propInfo.has_value()) {
             continue;
         }
-        auto processed = processProp(ctx, propInfo.value(), forTStruct);
+        auto processed = processProp(ctx, propInfo.value(), syntacticSuperClass);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
         vector<unique_ptr<ast::Expression>> nodes;
@@ -469,7 +540,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-    if (forTStruct) {
+    if (wantTypedInitialize(syntacticSuperClass)) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
         for (auto &stat : mkTypedInitialize(ctx, klass->loc, props)) {
             klass->rhs.emplace_back(std::move(stat));
