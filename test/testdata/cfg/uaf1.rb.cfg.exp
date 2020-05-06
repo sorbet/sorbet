@@ -56,8 +56,8 @@ subgraph "cluster_::A#initialize" {
         label = "block[id=7, rubyBlockId=3](<blockReturnTemp>$9: T.nilable(Integer), <self>: A, <selfRestore>$6: A, <exceptionValue>$10: T.untyped, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\lse$1: T.untyped = <exceptionValue>$10\l<exceptionClassTemp>$11: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$12: T.untyped = se$1: T.untyped.is_a?(<exceptionClassTemp>$11: T.class_of(StandardError))\l<isaCheckTemp>$12: T.untyped\l"
     ];
 
-    "bb::A#initialize_7" -> "bb::A#initialize_12" [style="bold"];
-    "bb::A#initialize_7" -> "bb::A#initialize_13" [style="tapered"];
+    "bb::A#initialize_7" -> "bb::A#initialize_11" [style="bold"];
+    "bb::A#initialize_7" -> "bb::A#initialize_12" [style="tapered"];
 
     "bb::A#initialize_8" [
         label = "block[id=8, rubyBlockId=2](<self>: A, <selfRestore>$6: A, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<blockReturnTemp>$9: Integer(1) = 1\l<exceptionValue>$10: T.untyped = <unanalyzable>\l<exceptionValue>$10: T.untyped\l"
@@ -71,27 +71,27 @@ subgraph "cluster_::A#initialize" {
     ];
 
     "bb::A#initialize_10" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_10" -> "bb::A#initialize_14" [style="tapered"];
+    "bb::A#initialize_10" -> "bb::A#initialize_13" [style="tapered"];
+
+    "bb::A#initialize_11" [
+        label = "block[id=11, rubyBlockId=3](<self>: A, <selfRestore>$6: A, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<blockReturnTemp>$9: Integer(2) = 2\l<gotoDeadTemp>$13: NilClass\l"
+    ];
+
+    "bb::A#initialize_11" -> "bb::A#initialize_1" [style="bold"];
+    "bb::A#initialize_11" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_12" [
-        label = "block[id=12, rubyBlockId=3](<self>: A, <selfRestore>$6: A, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<blockReturnTemp>$9: Integer(2) = 2\l<gotoDeadTemp>$13: NilClass\l"
+        label = "block[id=12, rubyBlockId=3](<blockReturnTemp>$9: T.nilable(Integer), <self>: A, <selfRestore>$6: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
     ];
 
     "bb::A#initialize_12" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_12" -> "bb::A#initialize_14" [style="tapered"];
+    "bb::A#initialize_12" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_13" [
-        label = "block[id=13, rubyBlockId=3](<blockReturnTemp>$9: T.nilable(Integer), <self>: A, <selfRestore>$6: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
+        label = "block[id=13, rubyBlockId=1](<blockReturnTemp>$9: Integer, <self>: A, <selfRestore>$6: A, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<blockReturnTemp>$15: T.noreturn = blockreturn<map> <blockReturnTemp>$9: Integer\l<unconditional>\l"
     ];
 
-    "bb::A#initialize_13" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_13" -> "bb::A#initialize_14" [style="tapered"];
-
-    "bb::A#initialize_14" [
-        label = "block[id=14, rubyBlockId=1](<blockReturnTemp>$9: Integer, <self>: A, <selfRestore>$6: A, <gotoDeadTemp>$13: NilClass, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<blockReturnTemp>$15: T.noreturn = blockreturn<map> <blockReturnTemp>$9: Integer\l<unconditional>\l"
-    ];
-
-    "bb::A#initialize_14" -> "bb::A#initialize_2" [style="bold"];
+    "bb::A#initialize_13" -> "bb::A#initialize_2" [style="bold"];
 }
 
 subgraph "cluster_::<Class:A>#<static-init>" {
