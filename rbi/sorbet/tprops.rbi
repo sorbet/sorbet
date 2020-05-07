@@ -62,6 +62,7 @@ class T::Props::Decorator
   def model_inherited(child); end
   def plugin(mod); end
   def prop_defined(name, cls, rules = {}); end
+  def prop_get_logic(instance, prop, value); end
   def prop_get(instance, prop, rules = {}); end
   def prop_get_if_set(instance, prop, rules = {}); end
   alias_method :get, :prop_get_if_set
