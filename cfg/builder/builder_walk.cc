@@ -519,18 +519,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
-                // TODO: Do we need to insert a sentinel to distinguish 'else' from body?
+
+                // else is only executed if body didn't raise an exception
                 auto elseBody = cctx.inWhat.freshBlock(cctx.loops, elseRubyBlockId);
-                unconditionalJump(bodyBlock, elseBody, cctx.inWhat, a->loc);
+                synthesizeExpr(bodyBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
+                conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat, a->loc);
 
                 elseBody = walk(cctx, a->else_.get(), elseBody);
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
-
-                auto shouldEnsureBlock = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
-                unconditionalJump(elseBody, shouldEnsureBlock, cctx.inWhat, a->loc);
-                synthesizeExpr(shouldEnsureBlock, exceptionValue, what->loc, make_unique<GetCurrentException>());
-                conditionalJump(shouldEnsureBlock, exceptionValue, rescueHandlersBlock, ensureBody, cctx.inWhat,
-                                a->loc);
+                unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);

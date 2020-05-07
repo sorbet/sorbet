@@ -1,0 +1,38 @@
+digraph "reassign_dead_block_bug.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$3: Integer(2) = 2\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <statTemp>$3: Integer(2).times()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\lx$1 = 10\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_2" [
+        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(<root>), <block-pre-call-temp>$4: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_5" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_3" [style="tapered"];
+
+    "bb::<Class:<root>>#<static-init>_3" [
+        label = "block[id=3, rubyBlockId=0](<self>: T.class_of(<root>), <block-pre-call-temp>$4: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: Integer = Solve<<block-pre-call-temp>$4, times>\l<self>: T.class_of(<root>) = <self>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_3" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_5" [
+        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(<root>))\louterLoops: 1\l<self>: T.class_of(<root>) = loadSelf\lx$1: Integer(1) = 1\l<returnTemp>$11: Integer(1) = 1\l<statTemp>$10: T.noreturn = return <returnTemp>$11: Integer(1)\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
+}
+

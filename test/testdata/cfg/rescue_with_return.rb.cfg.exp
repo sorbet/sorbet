@@ -13,7 +13,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_0" -> "bb::Object#a_4" [style="tapered"];
 
     "bb::Object#a_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<exceptionValue>$3 = <unanalyzable>\l<unconditional>\l"
     ];
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
@@ -22,7 +22,7 @@ subgraph "cluster_::Object#a" {
     ];
 
     "bb::Object#a_3" -> "bb::Object#a_6" [style="bold"];
-    "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
+    "bb::Object#a_3" -> "bb::Object#a_8" [style="tapered"];
 
     "bb::Object#a_4" [
         label = "block[id=4, rubyBlockId=1]()\l<returnTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$4: Integer(1)\l<unconditional>\l"
@@ -34,20 +34,20 @@ subgraph "cluster_::Object#a" {
     ];
 
     "bb::Object#a_6" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_6" -> "bb::Object#a_10" [style="tapered"];
+    "bb::Object#a_6" -> "bb::Object#a_9" [style="tapered"];
+
+    "bb::Object#a_8" [
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$7: TrueClass(true) = true\l<gotoDeadTemp>$7: TrueClass(true)\l"
+    ];
+
+    "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_8" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_9" [
-        label = "block[id=9, rubyBlockId=2]()\l<gotoDeadTemp>$7: TrueClass(true) = true\l<gotoDeadTemp>$7: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#a_9" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_9" -> "bb::Object#a_10" [style="tapered"];
-
-    "bb::Object#a_10" [
-        label = "block[id=10, rubyBlockId=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
-    ];
-
-    "bb::Object#a_10" -> "bb::Object#a_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:<root>>#<static-init>" {

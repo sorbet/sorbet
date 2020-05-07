@@ -13,7 +13,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_0" -> "bb::Object#a_4" [style="tapered"];
 
     "bb::Object#a_1" [
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0]()\l<exceptionValue>$4 = <unanalyzable>\l<unconditional>\l"
     ];
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
@@ -21,33 +21,33 @@ subgraph "cluster_::Object#a" {
         label = "block[id=3, rubyBlockId=2](<exceptionValue>$4: T.untyped)\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$7: T.untyped = <exceptionValue>$4: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
     ];
 
-    "bb::Object#a_3" -> "bb::Object#a_8" [style="bold"];
-    "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
+    "bb::Object#a_3" -> "bb::Object#a_7" [style="bold"];
+    "bb::Object#a_3" -> "bb::Object#a_8" [style="tapered"];
 
     "bb::Object#a_4" [
         label = "block[id=4, rubyBlockId=1]()\l<returnTemp>$5: Integer(1) = 1\l<statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_7" [
+        label = "block[id=7, rubyBlockId=2]()\la: Integer(2) = 2\l<gotoDeadTemp>$8: NilClass\l"
+    ];
+
+    "bb::Object#a_7" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_7" -> "bb::Object#a_9" [style="tapered"];
+
     "bb::Object#a_8" [
-        label = "block[id=8, rubyBlockId=2]()\la: Integer(2) = 2\l<gotoDeadTemp>$8: NilClass\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
     ];
 
     "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_8" -> "bb::Object#a_10" [style="tapered"];
+    "bb::Object#a_8" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_9" [
-        label = "block[id=9, rubyBlockId=2]()\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=0](a: Integer(2))\l<statTemp>$11: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$11: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#a_9" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_9" -> "bb::Object#a_10" [style="tapered"];
-
-    "bb::Object#a_10" [
-        label = "block[id=10, rubyBlockId=0](a: Integer(2))\l<statTemp>$11: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$11: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
-    ];
-
-    "bb::Object#a_10" -> "bb::Object#a_1" [style="bold"];
 }
 
 subgraph "cluster_::<Class:<root>>#<static-init>" {
