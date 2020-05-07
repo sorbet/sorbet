@@ -100,7 +100,7 @@ module T::Props
         if val.is_a?(Hash)
           msg += "\nIf you want to store a structured Hash, consider using a T::Struct as your type."
         end
-        raise T::Props::InvalidValueError.new(msg)
+        raise TypeError.new(msg)
       end
       val
     end

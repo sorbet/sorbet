@@ -283,6 +283,10 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (const auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+
         for (const core::LocalVariable what : RnW.reads[bb->id]) {
             const auto minIt = cfg.minLoops.find(what);
             int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
@@ -293,6 +297,10 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
         }
     }
     for (const auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
             const auto minIt = cfg.minLoops.find(what);

@@ -18,7 +18,6 @@ class NameRef;
 class Symbol;
 class SymbolRef;
 class GlobalSubstitution;
-class ErrorRegion;
 class ErrorQueue;
 struct GlobalStateHash;
 
@@ -40,7 +39,6 @@ class GlobalState final {
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
-    friend ErrorRegion;
     friend ErrorBuilder;
     friend serialize::Serializer;
     friend serialize::SerializerImpl;

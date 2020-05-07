@@ -119,6 +119,21 @@ class T::Props::Decorator
   end
   alias_method :set, :prop_set
 
+  # Only Models have any custom get logic but we need to call this on
+  # non-Models since we don't know at code gen time what we have.
+  sig do
+    params(
+      instance: DecoratedInstance,
+      prop: Symbol,
+      value: T.untyped
+    )
+    .returns(T.untyped)
+    .checked(:never)
+  end
+  def prop_get_logic(instance, prop, value)
+    value
+  end
+
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
   #

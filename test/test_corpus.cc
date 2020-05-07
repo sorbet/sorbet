@@ -239,10 +239,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<ast::ParsedFile> trees;
     ExpectationHandler handler(test, errorQueue);
 
-    vector<core::ErrorRegion> errs;
     for (auto file : files) {
-        errs.emplace_back(*gs, file);
-
         if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(*gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
@@ -593,10 +590,7 @@ TEST_P(WhitequarkParserTest, PerPhaseTest) { // NOLINT
     vector<ast::ParsedFile> trees;
     map<string, string> got;
 
-    vector<core::ErrorRegion> errs;
     for (auto file : files) {
-        errs.emplace_back(gs, file);
-
         if (FileOps::getFileName(file.data(gs).path()) != whitelistedTypedNoneTest &&
             file.data(gs).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
@@ -772,7 +766,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, Unorder
             // One code action should be a 'source' level code action. Remove it.
             if (!receivedCodeActions.empty()) {
                 for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
-                    if ((*it)->kind == CodeActionKind::Source) {
+                    if ((*it)->kind == CodeActionKind::SourceFixAllSorbet) {
                         EXPECT_EQ(sourceLevelCodeAction, nullptr) << "Received multiple source-level code actions";
                         sourceLevelCodeAction = move(*it);
                         // Remove from vector and continue

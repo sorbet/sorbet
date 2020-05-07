@@ -540,6 +540,17 @@ public:
                 result = std::move(node);
             },
 
+            [&](XString *d) {
+                for (auto &p : d->nodes) {
+                    if (auto *s = parser::cast_node<String>(p.get())) {
+                        std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
+                        unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
+                        p.swap(newstr);
+                    }
+                }
+                result = std::move(node);
+            },
+
             [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
 
         return result;

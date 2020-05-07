@@ -384,8 +384,8 @@ unique_ptr<ast::Send> ensureWithoutAccessors(const PropInfo &prop, const ast::Se
     }
 }
 
-vector<unique_ptr<ast::Expression>> mkTStructInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                                        const vector<PropInfo> &props) {
+vector<unique_ptr<ast::Expression>> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                                      const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Hash::ENTRY_store sigKeys;
     ast::Hash::ENTRY_store sigVals;
@@ -468,9 +468,10 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     auto oldRHS = std::move(klass->rhs);
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
+    // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
     if (forTStruct) {
-        // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-        for (auto &stat : mkTStructInitialize(ctx, klass->loc, props)) {
+        // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
+        for (auto &stat : mkTypedInitialize(ctx, klass->loc, props)) {
             klass->rhs.emplace_back(std::move(stat));
         }
     }

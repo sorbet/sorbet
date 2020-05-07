@@ -1177,16 +1177,10 @@ public:
             return;
         }
 
-        auto resolvedType = current.data(gs)->externalType(gs);
-        if (args.args[0]->type->isUntyped()) {
-            res.returnType = Types::Boolean();
-        } else if (Types::isSubType(gs, args.args[0]->type, resolvedType)) {
-            res.returnType = Types::trueClass();
-        } else if (Types::glb(gs, args.args[0]->type, resolvedType)->isBottom()) {
-            res.returnType = Types::falseClass();
-        } else {
-            res.returnType = Types::Boolean();
-        }
+        // The generated code relies on being able to generate calls non_forcing_is_a? unconditionally.
+        // If we were do to something smarter here with the returnType, infer would report dead code
+        // errors when it could prove that the check was always false, so we always return T::Boolean.
+        // (Well, it's implicit from the sig.)
     }
 } T_NonForcingConstants_nonForcingIsA_p;
 

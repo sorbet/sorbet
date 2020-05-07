@@ -36,15 +36,15 @@ end
 
 p ::Outer::N::Inner
 x = T::NonForcingConstants.non_forcing_is_a?(Outer::Nested::Inner.new, '::Outer::N::Inner')
-T.reveal_type(x) # error: Revealed type: `TrueClass`
+T.reveal_type(x) # error: Revealed type: `T::Boolean`
 
 # Prints first symbol to not resolve when name doesn't exist
 T::NonForcingConstants.non_forcing_is_a?(x, '::Integer::DoesntExist::After') # error: Unable to resolve constant `::Integer::DoesntExist`
 # Prints first symbol to not resolve when name exists but symbol doesn't
 T::NonForcingConstants.non_forcing_is_a?(x, '::Integer::String::After') # error: Unable to resolve constant `::Integer::String`
 
-T.reveal_type(T::NonForcingConstants.non_forcing_is_a?('', '::String')) # error: Revealed type: `TrueClass`
-T.reveal_type(T::NonForcingConstants.non_forcing_is_a?(0, '::String')) # error: Revealed type: `FalseClass`
+T.reveal_type(T::NonForcingConstants.non_forcing_is_a?('', '::String')) # error: Revealed type: `T::Boolean`
+T.reveal_type(T::NonForcingConstants.non_forcing_is_a?(0, '::String')) # error: Revealed type: `T::Boolean`
 
 i_or_s = T.let(0, T.any(Integer, String))
 T.reveal_type(T::NonForcingConstants.non_forcing_is_a?(i_or_s, '::String')) # error: Revealed type: `T::Boolean`
