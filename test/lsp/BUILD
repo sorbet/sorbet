@@ -25,6 +25,7 @@ cc_test(
         "//payload",
         "//test/helpers",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -47,6 +48,7 @@ cc_test(
         "//payload",
         "//test/helpers",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -69,6 +71,7 @@ cc_test(
         "//payload",
         "//test/helpers",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -91,6 +94,7 @@ cc_test(
         "//payload",
         "//test/helpers",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 

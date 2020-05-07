@@ -40,5 +40,6 @@ cc_test(
     deps = [
         "kvstore",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

@@ -30,5 +30,6 @@ cc_test(
     deps = [
         ":serialize",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

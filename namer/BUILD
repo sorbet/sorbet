@@ -42,5 +42,6 @@ cc_test(
         "//parser",
         "//rewriter",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

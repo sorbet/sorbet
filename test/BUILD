@@ -72,6 +72,7 @@ cc_test(
         "//payload",
         "@cxxopts",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -91,6 +92,7 @@ cc_test(
         "//core",
         "//parser",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -107,6 +109,7 @@ cc_test(
         "//common",
         "//core",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 

@@ -1,5 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-
 #include "doctest.h"
 // violates our requirements, thus has to go first
 #include "common/FileOps.h"

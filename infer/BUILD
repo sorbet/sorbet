@@ -46,5 +46,6 @@ cc_test(
         "//resolver",
         "//rewriter",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

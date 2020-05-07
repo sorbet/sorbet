@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 // has to go first as it violates our requirements
 #include "ProtocolTest.h"

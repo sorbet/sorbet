@@ -83,5 +83,6 @@ cc_test(
     deps = [
         ":parser",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

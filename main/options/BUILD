@@ -36,5 +36,6 @@ cc_test(
         "//core",
         "//main/options",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

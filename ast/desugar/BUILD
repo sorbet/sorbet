@@ -38,5 +38,6 @@ cc_test(
     deps = [
         "//ast/desugar",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

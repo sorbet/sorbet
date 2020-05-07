@@ -58,5 +58,6 @@ cc_test(
     deps = [
         ":common",
         "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
