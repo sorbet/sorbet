@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 // ^ Include first because it violates linting rules.
 
 #include "absl/strings/match.h"
@@ -73,11 +73,14 @@ bool rangeIsSubset(const Range &a, const Range &b) {
 string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
     int numLeadingSpaces = range.start->character;
     if (numLeadingSpaces < 0) {
-        ADD_FAILURE() << fmt::format("Invalid range: {} < 0", range.start->character);
+        FAIL_CHECK(fmt::format("Invalid range: {} < 0", range.start->character));
         return "";
     }
     string sourceLineNumber = fmt::format("{}", range.start->line + 1);
-    EXPECT_EQ(range.start->line, range.end->line) << "Multi-line ranges are not supported at this time.";
+    {
+        INFO("Multi-line ranges are not supported at this time.");
+        CHECK_EQ(range.start->line, range.end->line);
+    }
     if (range.start->line != range.end->line) {
         return string(comment);
     }
@@ -96,7 +99,10 @@ string_view getLine(const LSPConfiguration &config,
                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const Location &loc) {
     auto filename = uriToFilePath(config, loc.uri);
     auto foundFile = sourceFileContents.find(filename);
-    EXPECT_NE(sourceFileContents.end(), foundFile) << fmt::format("Unable to find file `{}`", filename);
+    {
+        INFO(fmt::format("Unable to find file `{}`", filename));
+        CHECK_NE(sourceFileContents.end(), foundFile);
+    }
     auto &file = foundFile->second;
     return file->getLine(loc.range->start->line + 1);
 }
@@ -125,31 +131,32 @@ void assertLocationsMatch(const LSPConfiguration &config,
             if (cmp < 0) {
                 // Expected location is *before* actual location.
                 auto expectedFilePath = uriToFilePath(config, expectedLocation->uri);
-                ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1)
-                    << fmt::format("Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
-                                   "did not report reference at:\n{}",
-                                   symbol,
-                                   prettyPrintRangeComment(
-                                       locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                                   prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation),
-                                                           *expectedLocation->range, ""));
+                ADD_FAIL_CHECK_AT(
+                    expectedFilePath.c_str(), expectedLocation->range->start->line + 1,
+                    fmt::format("Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                                "did not report reference at:\n{}",
+                                symbol,
+                                prettyPrintRangeComment(locSourceLine,
+                                                        *RangeAssertion::makeRange(line, character, character + 1), ""),
+                                prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation),
+                                                        *expectedLocation->range, "")));
                 expectedLocationsIt++;
             } else if (cmp > 0) {
                 // Expected location is *after* actual location
                 auto actualFilePath = uriToFilePath(config, actualLocation->uri);
-                ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1)
-                    << fmt::format("Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-                                   "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
-                                   symbol,
-                                   prettyPrintRangeComment(
-                                       locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                                   prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation),
-                                                           *actualLocation->range, ""));
+                ADD_FAIL_CHECK_AT(
+                    actualFilePath.c_str(), actualLocation->range->start->line + 1,
+                    fmt::format("Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
+                                "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
+                                symbol,
+                                prettyPrintRangeComment(locSourceLine,
+                                                        *RangeAssertion::makeRange(line, character, character + 1), ""),
+                                prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation),
+                                                        *actualLocation->range, "")));
                 actualLocationsIt++;
             } else {
                 // Should never happen.
-                ADD_FAILURE()
-                    << "Error in test runner: identical locations weren't reported as subsets of one another.";
+                FAIL_CHECK("Error in test runner: identical locations weren't reported as subsets of one another.");
                 expectedLocationsIt++;
                 actualLocationsIt++;
             }
@@ -159,25 +166,30 @@ void assertLocationsMatch(const LSPConfiguration &config,
     while (expectedLocationsIt != allLocs.end()) {
         auto expectedLocation = (*expectedLocationsIt)->getLocation(config);
         auto expectedFilePath = uriToFilePath(config, expectedLocation->uri);
-        ADD_FAILURE_AT(expectedFilePath.c_str(), expectedLocation->range->start->line + 1) << fmt::format(
-            "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
-            "did not report reference at:\n{}",
-            symbol,
-            prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation), *expectedLocation->range,
-                                    ""));
+        ADD_FAIL_CHECK_AT(
+            expectedFilePath.c_str(), expectedLocation->range->start->line + 1,
+            fmt::format(
+                "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                "did not report reference at:\n{}",
+                symbol,
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation),
+                                        *expectedLocation->range, "")));
         expectedLocationsIt++;
     }
 
     while (actualLocationsIt != locations.end()) {
         auto &actualLocation = *actualLocationsIt;
         auto actualFilePath = uriToFilePath(config, actualLocation->uri);
-        ADD_FAILURE_AT(actualFilePath.c_str(), actualLocation->range->start->line + 1) << fmt::format(
-            "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-            "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
-            symbol,
-            prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation), *actualLocation->range, ""));
+        ADD_FAIL_CHECK_AT(
+            actualFilePath.c_str(), actualLocation->range->start->line + 1,
+            fmt::format(
+                "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
+                "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
+                symbol,
+                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(getLine(config, sourceFileContents, *actualLocation), *actualLocation->range,
+                                        "")));
         actualLocationsIt++;
     }
 }
@@ -251,10 +263,11 @@ string ErrorAssertion::toString() const {
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
     // The error message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
-        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
-            "{}Expected error of form:\n{}\nFound error:\n{}", errorPrefix,
-            prettyPrintRangeComment(sourceLine, *range, toString()),
-            prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected error of form:\n{}\nFound error:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                              fmt::format("error: {}", diagnostic.message))));
         return false;
     }
     return true;
@@ -308,11 +321,13 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
             if (numCarets != 0) {
                 // Position assertion assertions.
                 if (lineNum == 0) {
-                    ADD_FAILURE_AT(filename.c_str(), lineNum + 1) << fmt::format(
-                        "Invalid assertion comment found on line 1, before any code:\n{}\nAssertion comments that "
-                        "point to "
-                        "specific character ranges with carets (^) should come after the code they point to.",
-                        line);
+                    ADD_FAIL_CHECK_AT(
+                        filename.c_str(), lineNum + 1,
+                        fmt::format(
+                            "Invalid assertion comment found on line 1, before any code:\n{}\nAssertion comments that "
+                            "point to "
+                            "specific character ranges with carets (^) should come after the code they point to.",
+                            line));
                     // Ignore erroneous comment.
                     continue;
                 }
@@ -347,13 +362,14 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                 assertions.push_back(
                     findConstructor->second(filename, range, lineNum, assertionContents, assertionType));
             } else if (ignoredAssertionLabels.find(assertionType) == ignoredAssertionLabels.end()) {
-                ADD_FAILURE_AT(filename.c_str(), lineNum + 1)
-                    << fmt::format("Found unrecognized assertion of type `{}`. Expected one of {{{}}}.\nIf this is a "
-                                   "regular comment that just happens to be formatted like an assertion comment, you "
-                                   "can add the label to `ignoredAssertionLabels`.",
-                                   assertionType,
-                                   fmt::map_join(assertionConstructors.begin(), assertionConstructors.end(), ", ",
-                                                 [](const auto &entry) -> string { return entry.first; }));
+                ADD_FAIL_CHECK_AT(
+                    filename.c_str(), lineNum + 1,
+                    fmt::format("Found unrecognized assertion of type `{}`. Expected one of {{{}}}.\nIf this is a "
+                                "regular comment that just happens to be formatted like an assertion comment, you "
+                                "can add the label to `ignoredAssertionLabels`.",
+                                assertionType,
+                                fmt::map_join(assertionConstructors.begin(), assertionConstructors.end(), ", ",
+                                              [](const auto &entry) -> string { return entry.first; })));
             }
         } else {
             lastSourceLineNum = lineNum;
@@ -392,11 +408,14 @@ unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
 pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
     int version = 1;
     vector<string_view> split = absl::StrSplit(assertionContents, ' ');
-    EXPECT_GE(split.size(), 0);
-    EXPECT_LT(split.size(), 3) << fmt::format(
-        "Invalid usage and def assertion; multiple words found:\n{}\nUsage and def assertions should be "
-        "of the form:\n# [^*] [usage | def | type | type-def]: symbolname [version?]",
-        assertionContents);
+    CHECK_GE(split.size(), 0);
+    {
+        INFO(fmt::format(
+            "Invalid usage and def assertion; multiple words found:\n{}\nUsage and def assertions should be "
+            "of the form:\n# [^*] [usage | def | type | type-def]: symbolname [version?]",
+            assertionContents));
+        CHECK_LT(split.size(), 3);
+    }
     if (split.size() == 2) {
         string_view versionString = split[1];
         version = stoi(string(versionString));
@@ -447,41 +466,49 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
 
     const int id = nextId++;
     auto responses = getLSPResponsesFor(lspWrapper, makeDefinitionRequest(id, queryLoc.uri, line, character));
-    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    {
+        INFO("Unexpected number of responses to a `textDocument/definition` request.");
+        REQUIRE_EQ(1, responses.size());
+    }
+    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
 
     auto &respMsg = responses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result.has_value());
-    ASSERT_FALSE(respMsg.error.has_value());
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
     auto &locations = extractLocations(respMsg);
 
     if (this->symbol == NOTHING_LABEL) {
         // Special case: Nothing should be defined here.
         for (auto &location : locations) {
-            ADD_FAILURE_AT(filename.c_str(), line + 1) << fmt::format(
-                "Sorbet returned a definition for a location that we expected no definition for. For "
-                "location:\n{}\nFound definition:\n{}",
-                prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, ""));
+            ADD_FAIL_CHECK_AT(
+                filename.c_str(), line + 1,
+                fmt::format(
+                    "Sorbet returned a definition for a location that we expected no definition for. For "
+                    "location:\n{}\nFound definition:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, "")));
         }
         return;
     }
 
     if (locations.empty()) {
-        ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
-            "Sorbet did not find a definition for location that references symbol `{}`.\nExpected definition "
-            "of:\n{}\nTo be:\n{}",
-            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            prettyPrintRangeComment(defSourceLine, *range, ""));
+        ADD_FAIL_CHECK_AT(
+            locFilename.c_str(), line + 1,
+            fmt::format(
+                "Sorbet did not find a definition for location that references symbol `{}`.\nExpected definition "
+                "of:\n{}\nTo be:\n{}",
+                symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                prettyPrintRangeComment(defSourceLine, *range, "")));
         return;
     } else if (locations.size() > 1) {
-        ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
-            "Sorbet unexpectedly returned multiple locations for definition of symbol `{}`.\nFor "
-            "location:\n{}\nSorbet returned the following definition locations:\n{}",
-            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            fmt::map_join(locations, "\n", [&config, &sourceFileContents](const auto &arg) -> string {
-                return prettyPrintRangeComment(getLine(config, sourceFileContents, *arg), *arg->range, "");
-            }));
+        ADD_FAIL_CHECK_AT(
+            locFilename.c_str(), line + 1,
+            fmt::format("Sorbet unexpectedly returned multiple locations for definition of symbol `{}`.\nFor "
+                        "location:\n{}\nSorbet returned the following definition locations:\n{}",
+                        symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                        fmt::map_join(locations, "\n", [&config, &sourceFileContents](const auto &arg) -> string {
+                            return prettyPrintRangeComment(getLine(config, sourceFileContents, *arg), *arg->range, "");
+                        })));
         return;
     }
 
@@ -496,11 +523,12 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
                 prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, "");
         }
 
-        ADD_FAILURE_AT(filename.c_str(), line + 1)
-            << fmt::format("Sorbet did not return the expected definition for location. Expected "
-                           "definition of:\n{}\nTo be:\n{}\nBut was:\n{}",
-                           prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                           prettyPrintRangeComment(defSourceLine, *range, ""), foundLocationString);
+        ADD_FAIL_CHECK_AT(
+            filename.c_str(), line + 1,
+            fmt::format("Sorbet did not return the expected definition for location. Expected "
+                        "definition of:\n{}\nTo be:\n{}\nBut was:\n{}",
+                        prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                        prettyPrintRangeComment(defSourceLine, *range, ""), foundLocationString));
     }
 }
 
@@ -523,25 +551,28 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
                                            "2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
     if (responses.size() != 1) {
-        EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
+        INFO("Unexpected number of responses to a `textDocument/references` request.");
+        CHECK_EQ(1, responses.size());
         return;
     }
 
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result.has_value());
-    ASSERT_FALSE(respMsg.error.has_value());
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
     auto &locations = extractLocations(respMsg);
     if (symbol == NOTHING_LABEL) {
         // Special case: This location should not report usages of anything.
         for (auto &foundLocation : locations) {
             auto actualFilePath = uriToFilePath(config, foundLocation->uri);
-            ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
-                "Sorbet returned references for a location that should not report references.\nGiven location "
-                "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
-                prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
-                                        ""));
+            ADD_FAIL_CHECK_AT(
+                actualFilePath.c_str(), foundLocation->range->start->line + 1,
+                fmt::format(
+                    "Sorbet returned references for a location that should not report references.\nGiven location "
+                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
+                                            "")));
         }
         return;
     }
@@ -568,15 +599,15 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
 
     auto responses = getLSPResponsesFor(lspWrapper, move(request));
     if (responses.size() != 1) {
-        EXPECT_EQ(1, responses.size())
-            << "Unexpected number of responses to a `textDocument/documentHighlight` request.";
+        INFO("Unexpected number of responses to a `textDocument/documentHighlight` request.");
+        CHECK_EQ(1, responses.size());
         return;
     }
 
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result.has_value());
-    ASSERT_FALSE(respMsg.error.has_value());
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
     auto &highlights = extractDocumentHighlights(respMsg);
 
     // Convert highlights to locations, used by common test functions across assertions involving multiple files.
@@ -590,12 +621,15 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
         // Special case: This location should not report usages of anything.
         for (auto &foundLocation : locations) {
             auto actualFilePath = uriToFilePath(config, foundLocation->uri);
-            ADD_FAILURE_AT(actualFilePath.c_str(), foundLocation->range->start->line + 1) << fmt::format(
-                "Sorbet returned references for a highlight that should not report references.\nGiven location "
-                "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
-                prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
-                                        ""));
+            ADD_FAIL_CHECK_AT(
+                actualFilePath.c_str(), foundLocation->range->start->line + 1,
+                fmt::format(
+                    "Sorbet returned references for a highlight that should not report references.\nGiven location "
+                    "at:\n{}\nSorbet reported an unexpected reference at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1),
+                                            ""),
+                    prettyPrintRangeComment(getLine(config, sourceFileContents, *foundLocation), *foundLocation->range,
+                                            "")));
         }
         return;
     }
@@ -648,12 +682,12 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(queryLoc.uri)),
                                                 make_unique<Position>(line, character))));
     auto responses = getLSPResponsesFor(lspWrapper, move(request));
-    ASSERT_EQ(1, responses.size());
+    REQUIRE_EQ(1, responses.size());
 
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result.has_value());
-    ASSERT_FALSE(respMsg.error.has_value());
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
 
     auto &locations = extractLocations(respMsg);
 
@@ -661,21 +695,26 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
         // can't add type-def for NOTHING_LABEL
         for (auto &location : locations) {
             auto filePath = uriToFilePath(config, location->uri);
-            ADD_FAILURE_AT(filePath.c_str(), location->range->start->line + 1) << fmt::format(
-                "Sorbet returned references for a location that should not report references.\nGiven go to type def "
-                "here:\n{}\nSorbet reported an unexpected definition at:\n{}",
-                prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-                prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, ""));
+            ADD_FAIL_CHECK_AT(
+                filePath.c_str(), location->range->start->line + 1,
+                fmt::format(
+                    "Sorbet returned references for a location that should not report references.\nGiven go to "
+                    "type "
+                    "def "
+                    "here:\n{}\nSorbet reported an unexpected definition at:\n{}",
+                    prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                    prettyPrintRangeComment(getLine(config, sourceFileContents, *location), *location->range, "")));
         }
         return;
     }
 
     if (typeDefs.empty()) {
-        ADD_FAILURE_AT(locFilename.c_str(), line + 1) << fmt::format(
-            "There are no 'type-def: {0}' assertions for this 'type: {0}' assertion:\n{1}\n"
-            "To assert that there are no results, use the {2} label",
-            symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
-            NOTHING_LABEL);
+        ADD_FAIL_CHECK_AT(
+            locFilename.c_str(), line + 1,
+            fmt::format("There are no 'type-def: {0}' assertions for this 'type: {0}' assertion:\n{1}\n"
+                        "To assert that there are no results, use the {2} label",
+                        symbol, prettyPrintRangeComment(locSourceLine, *makeRange(line, character, character + 1), ""),
+                        NOTHING_LABEL));
         return;
     }
 
@@ -704,31 +743,35 @@ void reportMissingError(const string &filename, const ErrorAssertion &assertion,
                         string_view errorPrefix, bool missingDuplicate = false) {
     auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
     auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
-    ADD_FAILURE_AT(filename.c_str(), assertion.range->start->line + 1)
-        << fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
-                       prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()), messagePostfix);
+    ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
+                      fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
+                                  prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()),
+                                  messagePostfix));
 }
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
-    ADD_FAILURE_AT(filename.c_str(), diagnostic.range->start->line + 1) << fmt::format(
-        "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
-        "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is expected.",
-        errorPrefix,
-        prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message)));
+    ADD_FAIL_CHECK_AT(
+        filename.c_str(), diagnostic.range->start->line + 1,
+        fmt::format(
+            "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
+            "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
+            "expected.",
+            errorPrefix,
+            prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message))));
 }
 
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
                      int line) {
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
-        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+        FAIL_CHECK(fmt::format("Unable to find referenced source file `{}`", filename));
         return "";
     }
 
     auto &file = it->second;
     if (line >= file->lineCount()) {
-        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
+        ADD_FAIL_CHECK_AT(filename.c_str(), line + 1, "Invalid line number for range.");
         return "";
     } else {
         // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
@@ -869,8 +912,10 @@ shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view 
 
 optional<bool> BooleanPropertyAssertion::getValue(string_view type,
                                                   const vector<shared_ptr<RangeAssertion>> &assertions) {
-    EXPECT_NE(assertionConstructors.find(string(type)), assertionConstructors.end())
-        << "Unrecognized boolean property assertion: " << type;
+    {
+        INFO("Unrecognized boolean property assertion: " << type);
+        CHECK_NE(assertionConstructors.find(string(type)), assertionConstructors.end());
+    }
     for (auto &assertion : assertions) {
         if (auto boolAssertion = dynamic_pointer_cast<BooleanPropertyAssertion>(assertion)) {
             if (boolAssertion->assertionType == type) {
@@ -916,8 +961,8 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
                               string_view errorPrefix) {
     string updateFile = fmt::format("{}.{}.rbupdate", filename.substr(0, -3), updateVersion);
     if (!info.fastPath) {
-        ADD_FAILURE_AT(updateFile.c_str(), assertionLine)
-            << errorPrefix << "Expected file update to take fast path, but it took the slow path.";
+        ADD_FAIL_CHECK_AT(updateFile.c_str(), assertionLine,
+                          errorPrefix << "Expected file update to take fast path, but it took the slow path.");
     }
     if (expectedFiles.has_value()) {
         vector<string> expectedFilePaths;
@@ -929,8 +974,9 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
         set_difference(expectedFilePaths.begin(), expectedFilePaths.end(), info.filesTypechecked.begin(),
                        info.filesTypechecked.end(), back_inserter(unTypecheckedFiles));
         for (auto &f : unTypecheckedFiles) {
-            ADD_FAILURE_AT(updateFile.c_str(), assertionLine)
-                << errorPrefix << fmt::format("Expected file update to cause {} to also be typechecked.", f);
+            ADD_FAIL_CHECK_AT(updateFile.c_str(), assertionLine,
+                              errorPrefix
+                                  << fmt::format("Expected file update to cause {} to also be typechecked.", f));
         }
     }
 }
@@ -990,21 +1036,22 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto id = nextId++;
     auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
     auto responses = getLSPResponsesFor(wrapper, move(msg));
-    ASSERT_EQ(responses.size(), 1);
+    REQUIRE_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
-    ASSERT_TRUE(responseMsg->isResponse());
+    REQUIRE(responseMsg->isResponse());
     auto &response = responseMsg->asResponse();
-    ASSERT_TRUE(response.result.has_value());
+    REQUIRE(response.result.has_value());
     auto &hoverResponse = get<variant<JSONNullObject, unique_ptr<Hover>>>(*response.result);
     auto hoverContents = hoverToString(hoverResponse);
 
     // Match a full line. Makes it possible to disambiguate `String` and `T.nilable(String)`.
     if (!containsLine(hoverContents, this->message)) {
         auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
-        ADD_FAILURE_AT(filename.c_str(), range->start->line + 1)
-            << fmt::format("{}Expected hover contents:\n{}\nFound hover contents:\n{}", errorPrefix,
-                           prettyPrintRangeComment(sourceLine, *range, toString()),
-                           prettyPrintRangeComment(sourceLine, *range, fmt::format("hover: {}", hoverContents)));
+        ADD_FAIL_CHECK_AT(
+            filename.c_str(), range->start->line + 1,
+            fmt::format("{}Expected hover contents:\n{}\nFound hover contents:\n{}", errorPrefix,
+                        prettyPrintRangeComment(sourceLine, *range, toString()),
+                        prettyPrintRangeComment(sourceLine, *range, fmt::format("hover: {}", hoverContents))));
     }
 }
 
@@ -1034,7 +1081,10 @@ void CompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &ass
 void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                 LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
-    ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
+    {
+        INFO("doTextDocumentCompletion failed; see error above.");
+        REQUIRE_NE(completionList, nullptr);
+    }
 
     string actualMessage =
         completionList->items.empty()
@@ -1047,18 +1097,20 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
         auto prefix = this->message.substr(0, this->message.size() - 5);
         if (!absl::StartsWith(actualMessage, prefix)) {
             auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
-            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
-                "{}Expected partial completion contents:\n{}\nFound incompatible completion contents:\n{}", errorPrefix,
-                prettyPrintRangeComment(sourceLine, *range, toString()),
-                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+            ADD_FAIL_CHECK_AT(
+                filename.c_str(), range->start->line + 1,
+                fmt::format("{}Expected partial completion contents:\n{}\nFound incompatible completion contents:\n{}",
+                            errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
+                            prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage))));
         }
     } else {
         if (this->message != actualMessage) {
             auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
-            ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
-                "{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
-                prettyPrintRangeComment(sourceLine, *range, toString()),
-                prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage)));
+            ADD_FAIL_CHECK_AT(
+                filename.c_str(), range->start->line + 1,
+                fmt::format("{}Expected completion contents:\n{}\nFound completion contents:\n{}", errorPrefix,
+                            prettyPrintRangeComment(sourceLine, *range, toString()),
+                            prettyPrintRangeComment(sourceLine, *range, fmt::format("completion: {}", actualMessage))));
         }
     }
 }
@@ -1080,9 +1132,10 @@ shared_ptr<ApplyCompletionAssertion> ApplyCompletionAssertion::make(string_view 
         return make_shared<ApplyCompletionAssertion>(filename, range, assertionLine, version, index);
     }
 
-    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-        << fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] <index>'. Found '{}'",
-                       assertionContents);
+    ADD_FAIL_CHECK_AT(
+        string(filename).c_str(), assertionLine + 1,
+        fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] <index>'. Found '{}'",
+                    assertionContents));
 
     return nullptr;
 }
@@ -1104,16 +1157,22 @@ void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>>
 void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
-    ASSERT_NE(completionList, nullptr) << "doTextDocumentCompletion failed; see error above.";
+    {
+        INFO("doTextDocumentCompletion failed; see error above.");
+        REQUIRE_NE(completionList, nullptr);
+    }
 
     auto &items = completionList->items;
-    ASSERT_LE(0, this->index);
-    ASSERT_LT(this->index, items.size());
+    REQUIRE_LE(0, this->index);
+    REQUIRE_LT(this->index, items.size());
 
     auto &completionItem = items[this->index];
 
     auto it = sourceFileContents.find(this->filename);
-    ASSERT_NE(it, sourceFileContents.end()) << fmt::format("Unable to find source file `{}`", this->filename);
+    {
+        INFO(fmt::format("Unable to find source file `{}`", this->filename));
+        REQUIRE_NE(it, sourceFileContents.end());
+    }
     auto &file = it->second;
 
     auto expectedUpdatedFilePath =
@@ -1123,18 +1182,22 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
     try {
         expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
     } catch (FileNotFoundException e) {
-        ADD_FAILURE_AT(filename.c_str(), this->assertionLine + 1) << fmt::format(
-            "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
+        ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
+                          fmt::format("Missing {} which should contain test file after applying code actions.",
+                                      expectedUpdatedFilePath));
         return;
     }
 
-    ASSERT_NE(completionItem->textEdit, nullopt);
+    REQUIRE_NE(completionItem->textEdit, nullopt);
     auto &textEdit = completionItem->textEdit.value();
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText);
 
-    EXPECT_EQ(expectedEditedFileContents, actualEditedFileContents) << fmt::format(
-        "The expected (rbedited) file contents for this completion did not match the actual file contents post-edit",
-        expectedUpdatedFilePath);
+    {
+        INFO(fmt::format("The expected (rbedited) file contents for this completion did not match the actual file "
+                         "contents post-edit",
+                         expectedUpdatedFilePath));
+        CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+    }
 }
 
 string ApplyCompletionAssertion::toString() const {
@@ -1154,9 +1217,9 @@ shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view 
         return make_shared<ApplyCodeActionAssertion>(filename, range, assertionLine, title, version);
     }
 
-    ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-        << fmt::format("Found improperly formatted apply-code-action assertion. Expected apply-code-action "
-                       "[version] code-action-title.");
+    ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                      fmt::format("Found improperly formatted apply-code-action assertion. Expected apply-code-action "
+                                  "[version] code-action-title."));
     return nullptr;
 }
 ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -1173,7 +1236,10 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto filename = uriToFilePath(config, c->textDocument->uri);
         auto it = sourceFileContents.find(filename);
-        ASSERT_NE(it, sourceFileContents.end()) << fmt::format("Unable to find referenced source file `{}`", filename);
+        {
+            INFO(fmt::format("Unable to find referenced source file `{}`", filename));
+            REQUIRE_NE(it, sourceFileContents.end());
+        }
         auto &file = it->second;
 
         auto expectedUpdatedFilePath =
@@ -1182,8 +1248,9 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         try {
             expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
         } catch (FileNotFoundException e) {
-            ADD_FAILURE_AT(filename.c_str(), assertionLine + 1) << fmt::format(
-                "Missing {} which should contain test file after applying code actions.", expectedUpdatedFilePath);
+            ADD_FAIL_CHECK_AT(filename.c_str(), assertionLine + 1,
+                              fmt::format("Missing {} which should contain test file after applying code actions.",
+                                          expectedUpdatedFilePath));
             return;
         }
 
@@ -1192,10 +1259,10 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         // First, sort the edits by increasing starting location and verify that none overlap.
         fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
         for (u4 i = 1; i < c->edits.size(); i++) {
-            ASSERT_LT(c->edits[i - 1]->range->end->cmp(*c->edits[i]->range->start), 0)
-                << fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
-                               "overlapping autocomplete edits, and it's likely that this is a bug.",
-                               c->edits[i - 1]->toJSON(), c->edits[i]->toJSON());
+            INFO(fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
+                             "overlapping autocomplete edits, and it's likely that this is a bug.",
+                             c->edits[i - 1]->toJSON(), c->edits[i]->toJSON()));
+            REQUIRE_LT(c->edits[i - 1]->range->end->cmp(*c->edits[i]->range->start), 0);
         }
 
         // Now, apply the edits in the reverse order so that the indices don't change.
@@ -1203,9 +1270,10 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         for (auto &e : c->edits) {
             actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText);
         }
-        EXPECT_EQ(actualEditedFileContents, expectedEditedFileContents) << fmt::format(
+        INFO(fmt::format(
             "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
-            expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
+            expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents));
+        CHECK_EQ(actualEditedFileContents, expectedEditedFileContents);
     }
 }
 
@@ -1230,9 +1298,11 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
     smatch topMatches;
     string assertionContentsString = string(assertionContents);
     if (!regex_match(assertionContentsString, topMatches, contentsRegex)) {
-        ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
-            "Improperly formatted assertion. Expected 'symbol-search: \"<query>\"[, ...options]*'. Found '{}'",
-            assertionContents);
+        ADD_FAIL_CHECK_AT(
+            string(filename).c_str(), assertionLine + 1,
+            fmt::format(
+                "Improperly formatted assertion. Expected 'symbol-search: \"<query>\"[, ...options]*'. Found '{}'",
+                assertionContents));
         return nullptr;
     }
     auto query = topMatches[1].str();
@@ -1256,8 +1326,9 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
     while (remainingOptions.has_value()) {
         smatch matches;
         if (!regex_match(*remainingOptions, matches, optionsRegex)) {
-            ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1) << fmt::format(
-                "Improperly formatted assertion. Could not parse '{}' for symbol-search.", *remainingOptions);
+            ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                              fmt::format("Improperly formatted assertion. Could not parse '{}' for symbol-search.",
+                                          *remainingOptions));
             return nullptr;
         }
         auto optionName = matches[1].str();
@@ -1277,41 +1348,42 @@ shared_ptr<SymbolSearchAssertion> SymbolSearchAssertion::make(string_view filena
 
         if (optionName == "name") {
             if (!valueStringContents.has_value()) {
-                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `name = \"str\"`, got `{} = {}` in:\n{}\n",
-                                   optionName, optionValue, assertionContents);
+                ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                                  fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                              "Expected `name = \"str\"`, got `{} = {}` in:\n{}\n",
+                                              optionName, optionValue, assertionContents));
             }
             name = valueStringContents;
         } else if (optionName == "container") {
             if (!valueStringContents.has_value()) {
-                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `container = \"str\"`, got `{} = {}` in:\n{}\n",
-                                   optionName, optionValue, assertionContents);
+                ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                                  fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                              "Expected `container = \"str\"`, got `{} = {}` in:\n{}\n",
+                                              optionName, optionValue, assertionContents));
             }
             container = valueStringContents;
         } else if (optionName == "rank") {
             if (!valueAsInt.has_value()) {
-                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `rank = integer`, got `{} = {}` in:\n{}\n",
-                                   optionName, optionValue, assertionContents);
+                ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                                  fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                              "Expected `rank = integer`, got `{} = {}` in:\n{}\n",
+                                              optionName, optionValue, assertionContents));
             }
             rank = valueAsInt;
         } else if (optionName == "uri") {
             if (!valueStringContents.has_value()) {
-                ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-                    << fmt::format("Improperly formatted `symbol-search` assertion.\n"
-                                   "Expected `uri = \"substr\"`, got `{} = {}` in:\n{}\n",
-                                   optionName, optionValue, assertionContents);
+                ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                                  fmt::format("Improperly formatted `symbol-search` assertion.\n"
+                                              "Expected `uri = \"substr\"`, got `{} = {}` in:\n{}\n",
+                                              optionName, optionValue, assertionContents));
             }
             uri = valueStringContents;
         } else {
-            ADD_FAILURE_AT(string(filename).c_str(), assertionLine + 1)
-                << fmt::format("Improperly formatted `symbol-search` assertion for query {}.\n"
-                               "Valid args are name, container, rank, and uri, could not parse `{} = {}` in:\n{}\n",
-                               query, optionName, optionValue, assertionContents);
+            ADD_FAIL_CHECK_AT(
+                string(filename).c_str(), assertionLine + 1,
+                fmt::format("Improperly formatted `symbol-search` assertion for query {}.\n"
+                            "Valid args are name, container, rank, and uri, could not parse `{} = {}` in:\n{}\n",
+                            query, optionName, optionValue, assertionContents));
         }
     }
     return make_shared<SymbolSearchAssertion>(filename, range, assertionLine, query, name, container, rank, uri);
@@ -1349,13 +1421,13 @@ void addFailureAtLocationWithSource(const Location &location,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                     const LSPConfiguration &config, std::string_view message) {
     if (!config.isUriInWorkspace(location.uri)) {
-        ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
-            << fmt::format("{}\n(source unavailable for {})\n", message, location.uri);
+        ADD_FAIL_CHECK_AT(location.uri.c_str(), location.range->start->line + 1,
+                          fmt::format("{}\n(source unavailable for {})\n", message, location.uri));
         return;
     }
     auto sourceLine = getLine(config, sourceFileContents, location);
-    ADD_FAILURE_AT(location.uri.c_str(), location.range->start->line + 1)
-        << fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location.range, ""));
+    ADD_FAIL_CHECK_AT(location.uri.c_str(), location.range->start->line + 1,
+                      fmt::format("{}\n{}\n", message, prettyPrintRangeComment(sourceLine, *location.range, "")));
 }
 
 void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
@@ -1425,10 +1497,10 @@ void matchSymbolsToAssertions(string_view query, const vector<shared_ptr<SymbolS
 
     if (!unmatchedAssertions.empty() || !unmatchedSymbols.empty()) {
         auto numFailures = unmatchedAssertions.size() + unmatchedSymbols.size();
-        ADD_FAILURE() << fmt::format("{}`workspace/symbol` query \"{}\" {}: {}, {}\n", errorPrefix, query,
-                                     pluralized_count("failure", numFailures),
-                                     pluralized_count("unsatisfied expectation", unmatchedAssertions.size()),
-                                     pluralized_count("unexpected result", unmatchedSymbols.size()));
+        FAIL_CHECK(fmt::format("{}`workspace/symbol` query \"{}\" {}: {}, {}\n", errorPrefix, query,
+                               pluralized_count("failure", numFailures),
+                               pluralized_count("unsatisfied expectation", unmatchedAssertions.size()),
+                               pluralized_count("unexpected result", unmatchedSymbols.size())));
     }
 }
 
@@ -1446,13 +1518,13 @@ void checkSymbolsReturnedInRankOrder(string_view query,
                 auto &leftSymbol = left->first;
                 auto &rightSymbol = right.first;
                 if (*leftAssertion->rank > *rightAssertion->rank) {
-                    ADD_FAILURE() << fmt::format(
+                    FAIL_CHECK(fmt::format(
                         "Symbols not returned in ascending `rank` order for query `{}`:\n"
                         "Symbol for assertion #1 ({} {}) should appear *after* symbol for assertion #2 ({} {}).\n"
                         "Assertion #1: {}\nAssertion #2: {}\nSymbol #1:\n{}\nSymbol #2:\n{}\n",
                         query, leftSymbol.containerName.value_or(""), leftSymbol.name,
                         rightSymbol.containerName.value_or(""), rightSymbol.name, leftAssertion->toString(),
-                        rightAssertion->toString(), leftSymbol.toJSON(true), rightSymbol.toJSON(true));
+                        rightAssertion->toString(), leftSymbol.toJSON(true), rightSymbol.toJSON(true)));
                 }
             }
         }
@@ -1467,11 +1539,14 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
 
     // Request results from LSP
     auto responses = getLSPResponsesFor(lspWrapper, makeWorkspaceSymbolRequest(id, query));
-    ASSERT_EQ(1, responses.size()) << "Unexpected number of responses to a `workspace/symbol` request.";
-    ASSERT_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    {
+        INFO("Unexpected number of responses to a `workspace/symbol` request.");
+        REQUIRE_EQ(1, responses.size());
+    }
+    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
     auto &respMsg = responses.at(0)->asResponse();
-    ASSERT_TRUE(respMsg.result.has_value());
-    ASSERT_FALSE(respMsg.error.has_value());
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
     auto &result = *(respMsg.result);
     // symbolAssertionMatches maintains the ordering from the LSP results and
     // stores the pairing of symbols <=> assertions.
@@ -1483,9 +1558,9 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
         }
         constexpr int MAX_RESULTS = 50; // see MAX_RESULTS in workspace_symbols.cc
         if (symbolInfos->size() > MAX_RESULTS) {
-            ADD_FAILURE() << fmt::format(
+            FAIL_CHECK(fmt::format(
                 "Too many results for `workspace/symbol` request for `{}`. [Expected no more than {}, got {}].", query,
-                MAX_RESULTS, symbolInfos->size());
+                MAX_RESULTS, symbolInfos->size()));
         }
     }
     matchSymbolsToAssertions(query, assertions, symbolAssertionMatches, sourceFileContents, lspWrapper.config(),

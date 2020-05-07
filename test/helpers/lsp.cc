@@ -238,31 +238,41 @@ void assertResponseMessage(int expectedId, const LSPMessage &response) {
 }
 
 void assertResponseError(int code, string_view msg, const LSPMessage &response) {
-    REQUIRE(response.isResponse()) << fmt::format("Expected a response message with error `{}: {}`, but received:\n{}",
-                                                  code, msg, response.toJSON());
+    REQUIRE_MESSAGE(response.isResponse(),
+                    fmt::format("Expected a response message with error `{}: {}`, but received:\n{}", code, msg,
+                                response.toJSON()));
     auto &r = response.asResponse();
     auto &maybeError = r.error;
-    REQUIRE(maybeError.has_value()) << fmt::format("Expected a response message with an error, but received:\n{}",
-                                                   response.toJSON());
+    REQUIRE_MESSAGE(maybeError.has_value(),
+                    fmt::format("Expected a response message with an error, but received:\n{}", response.toJSON()));
     auto &error = *maybeError;
-    REQUIRE_EQ(error->code, code) << fmt::format("Response message contains error with unexpected code:\n{}",
-                                                 error->toJSON());
-    REQUIRE_NE(error->message.find(msg), string::npos) << fmt::format(
-        "Expected a response message with error `{}: {}`, but received:\n{}", code, msg, response.toJSON());
+    {
+        INFO(fmt::format("Response message contains error with unexpected code:\n{}", error->toJSON()));
+        REQUIRE_EQ(error->code, code);
+    }
+
+    {
+        INFO(fmt::format("Expected a response message with error `{}: {}`, but received:\n{}", code, msg,
+                         response.toJSON()));
+        REQUIRE_NE(error->message.find(msg), string::npos);
+    }
 }
 
 void assertNotificationMessage(LSPMethod expectedMethod, const LSPMessage &response) {
-    REQUIRE(response.isNotification()) << fmt::format(
-        "Expected a notification, but received the following response message instead: {}", response.toJSON());
-    REQUIRE_EQ(expectedMethod, response.method())
-        << fmt::format("Unexpected method on notification message: expected {} but received {}.",
-                       convertLSPMethodToString(expectedMethod), convertLSPMethodToString(response.method()));
+    REQUIRE_MESSAGE(response.isNotification(),
+                    fmt::format("Expected a notification, but received the following response message instead: {}",
+                                response.toJSON()));
+    {
+        INFO(fmt::format("Unexpected method on notification message: expected {} but received {}.",
+                         convertLSPMethodToString(expectedMethod), convertLSPMethodToString(response.method())));
+        REQUIRE_EQ(expectedMethod, response.method());
+    }
 }
 
 optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const NotificationMessage &notifMsg) {
     auto publishDiagnosticParams = get_if<unique_ptr<PublishDiagnosticsParams>>(&notifMsg.params);
     if (!publishDiagnosticParams || !*publishDiagnosticParams) {
-        ADD_FAILURE() << "textDocument/publishDiagnostics message is missing parameters.";
+        FAIL_CHECK("textDocument/publishDiagnostics message is missing parameters.");
         return nullopt;
     }
     return (*publishDiagnosticParams).get();
@@ -277,16 +287,16 @@ unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, cons
         make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion, move(pos)));
     auto responses = getLSPResponsesFor(lspWrapper, move(msg));
     if (responses.size() != 1) {
-        ADD_FAILURE() << "Expected to get 1 response";
+        FAIL_CHECK("Expected to get 1 response");
         return nullptr;
     }
     auto &responseMsg = responses.at(0);
     if (!responseMsg->isResponse()) {
-        ADD_FAILURE() << "Expected response to actually be a response.";
+        FAIL_CHECK("Expected response to actually be a response.");
     }
     auto &response = responseMsg->asResponse();
     if (!response.result.has_value()) {
-        ADD_FAILURE() << "Expected result to have a value.";
+        FAIL_CHECK("Expected result to have a value.");
     }
 
     auto completionList = move(get<unique_ptr<CompletionList>>(*response.result));
@@ -392,7 +402,7 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
             if (!msg) {
                 // We should be guaranteed to receive the fence response, so if this happens something is seriously
                 // wrong.
-                ADD_FAILURE() << "MultithreadedLSPWrapper::read() timed out; the language server might be hung.";
+                FAIL_CHECK("MultithreadedLSPWrapper::read() timed out; the language server might be hung.");
                 break;
             }
 
@@ -404,7 +414,7 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
         }
         return responses;
     } else {
-        ADD_FAILURE() << "LSPWrapper is neither a single nor a multi threaded LSP wrapper; should be impossible!";
+        FAIL_CHECK("LSPWrapper is neither a single nor a multi threaded LSP wrapper; should be impossible!");
         return {};
     }
 }
