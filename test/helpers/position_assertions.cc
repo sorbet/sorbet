@@ -470,7 +470,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         INFO("Unexpected number of responses to a `textDocument/definition` request.");
         REQUIRE_EQ(1, responses.size());
     }
-    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    assertResponseMessage(id, *responses.at(0));
 
     auto &respMsg = responses.at(0)->asResponse();
     REQUIRE(respMsg.result.has_value());
@@ -556,7 +556,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         return;
     }
 
-    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    assertResponseMessage(id, *responses.at(0));
     auto &respMsg = responses.at(0)->asResponse();
     REQUIRE(respMsg.result.has_value());
     REQUIRE_FALSE(respMsg.error.has_value());
@@ -604,7 +604,7 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
         return;
     }
 
-    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    assertResponseMessage(id, *responses.at(0));
     auto &respMsg = responses.at(0)->asResponse();
     REQUIRE(respMsg.result.has_value());
     REQUIRE_FALSE(respMsg.error.has_value());
@@ -684,7 +684,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
     auto responses = getLSPResponsesFor(lspWrapper, move(request));
     REQUIRE_EQ(1, responses.size());
 
-    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    assertResponseMessage(id, *responses.at(0));
     auto &respMsg = responses.at(0)->asResponse();
     REQUIRE(respMsg.result.has_value());
     REQUIRE_FALSE(respMsg.error.has_value());
@@ -1543,7 +1543,7 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
         INFO("Unexpected number of responses to a `workspace/symbol` request.");
         REQUIRE_EQ(1, responses.size());
     }
-    REQUIRE_NO_FATAL_FAILURE(assertResponseMessage(id, *responses.at(0)));
+    assertResponseMessage(id, *responses.at(0));
     auto &respMsg = responses.at(0)->asResponse();
     REQUIRE(respMsg.result.has_value());
     REQUIRE_FALSE(respMsg.error.has_value());
