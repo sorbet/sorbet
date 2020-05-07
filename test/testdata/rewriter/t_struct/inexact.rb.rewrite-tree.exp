@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(<self>).instance_variable_get(:"@foo")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(<self>).instance_variable_set(:"@foo", arg0)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(<self>).instance_variable_get(:"@bar")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(<self>).instance_variable_set(:"@bar", arg0)
     end
 
     <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
@@ -50,4 +50,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C Inexact>.new({:"foo" => 3, :"bar" => "hey"})
 
   <emptyTree>::<C Inexact>.new({:"foo" => false, :"quz" => [1, 2, 5]})
+
+  class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Inexact>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({}).returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Symbol>}).returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.prop(:"qux", <emptyTree>::<C Symbol>, {:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"qux")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"qux=")
+  end
 end

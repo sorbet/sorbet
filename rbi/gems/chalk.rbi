@@ -33,6 +33,11 @@ class Chalk::ODM::Mutator::Private::DocumentMutator
 end
 
 class Chalk::ODM::Document
+  include T::Props
+  include T::Props::Serializable
+  include T::Props::WeakConstructor
+  extend T::Helpers
+  abstract!
 end
 
 class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
