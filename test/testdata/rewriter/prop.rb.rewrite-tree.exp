@@ -660,6 +660,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       {}
     end
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
     ::Sorbet::Private::Static.keep_self_def(<self>, :"token_prop")
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop")
@@ -728,6 +730,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       {}
     end
 
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
     ::Sorbet::Private::Static.keep_self_def(<self>, :"timestamped_token_prop")
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"created_prop")
@@ -766,6 +770,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.merchant_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
       {}
     end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"merchant_prop")
 
@@ -832,6 +838,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.encrypted_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
       {}
     end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"encrypted_prop")
 

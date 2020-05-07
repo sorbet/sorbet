@@ -6781,6 +6781,23 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -7287,6 +7304,23 @@ ClassDef{
         }
 
         Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = ::Sorbet::Private::Static
@@ -7572,6 +7606,23 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
         }
 
         Send{
@@ -8245,6 +8296,23 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U include>
+          block = nullptr
+          args = [
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              cnst = <C <U Props>>
+            }
+          ]
         }
 
         Send{
