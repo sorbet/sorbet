@@ -40,7 +40,7 @@ class Chalk::ODM::Document
   abstract!
 end
 
-class Chalk::ODM::DocumentDecoratorHelper
+module Chalk::ODM::DocumentDecoratorHelper
   def self.soft_freeze_logic(instance, prop)
   end
 end
