@@ -352,20 +352,24 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-        } else if (ret.enum_ == nullptr && knownNonDocument(propContext.syntacticSuperClass)) {
-            if (wantTypedInitialize(propContext.syntacticSuperClass)) {
-                auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
-                                               ast::MK::Local(nameLoc, core::Names::arg0()));
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+        } else if (ret.enum_ == nullptr) {
+            if (knownNonDocument(propContext.syntacticSuperClass)) {
+                if (wantTypedInitialize(propContext.syntacticSuperClass)) {
+                    auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
+                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
+                    nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+                } else {
+                    // need to hide the instance variable access, because there wasn't a typed constructor to declare it
+                    auto ivarSet = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
+                                                  ast::MK::Symbol(nameLoc, ivarName),
+                                                  ast::MK::Local(nameLoc, core::Names::arg0()));
+                    nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+                }
             } else {
-                // need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                auto ivarSet =
-                    ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
-                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+                // Chalk::ODM::Document classes have special handling for soft freeze
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
             }
         } else {
-            // Chalk::ODM::Document classes have special handling for soft freeze
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
         }
     }
