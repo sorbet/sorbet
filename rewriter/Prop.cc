@@ -96,6 +96,11 @@ bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
     }
 }
 
+struct PropContext {
+    SyntacticSuperClass syntacticSuperClass = SyntacticSuperClass::Unknown;
+    ast::ClassDef::Kind classDefKind;
+};
+
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
@@ -271,7 +276,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 }
 
 vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret,
-                                                SyntacticSuperClass syntacticSuperClass) {
+                                                PropContext propContext) {
     vector<unique_ptr<ast::Expression>> nodes;
 
     const auto loc = ret.loc;
@@ -300,8 +305,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (ret.ifunset == nullptr) {
-        if (knownNonModel(syntacticSuperClass)) {
-            if (wantTypedInitialize(syntacticSuperClass)) {
+        if (knownNonModel(propContext.syntacticSuperClass)) {
+            if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
             } else {
                 // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
@@ -327,8 +332,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
             ASTUtil::dupType(setType.get())));
 
-        if (ret.enum_ == nullptr && knownNonDocument(syntacticSuperClass)) {
-            if (wantTypedInitialize(syntacticSuperClass)) {
+        if (ret.enum_ == nullptr && knownNonDocument(propContext.syntacticSuperClass)) {
+            if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                 auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
                                                ast::MK::Local(nameLoc, core::Names::arg0()));
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
@@ -530,6 +535,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             syntacticSuperClass = SyntacticSuperClass::ChalkODMDocument;
         }
     }
+    auto propContext = PropContext{syntacticSuperClass, klass->kind};
     UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
@@ -541,7 +547,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (!propInfo.has_value()) {
             continue;
         }
-        auto processed = processProp(ctx, propInfo.value(), syntacticSuperClass);
+        auto processed = processProp(ctx, propInfo.value(), propContext);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
         vector<unique_ptr<ast::Expression>> nodes;
