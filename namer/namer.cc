@@ -919,20 +919,21 @@ class NameDefiner {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.methodName);
-
-        switch (mod.name._id) {
-            case core::Names::private_()._id:
-            case core::Names::privateClassMethod()._id:
-                method.data(ctx)->setPrivate();
-                break;
-            case core::Names::protected_()._id:
-                method.data(ctx)->setProtected();
-                break;
-            case core::Names::public_()._id:
-                method.data(ctx)->setPublic();
-                break;
-            default:
-                break;
+        if (method.exists()) {
+            switch (mod.name._id) {
+                case core::Names::private_()._id:
+                case core::Names::privateClassMethod()._id:
+                    method.data(ctx)->setPrivate();
+                    break;
+                case core::Names::protected_()._id:
+                    method.data(ctx)->setProtected();
+                    break;
+                case core::Names::public_()._id:
+                    method.data(ctx)->setPublic();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
