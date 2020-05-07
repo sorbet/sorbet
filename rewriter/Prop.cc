@@ -367,7 +367,15 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
                 }
             } else {
                 // Chalk::ODM::Document classes have special handling for soft freeze
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+                auto docDecoHelper = ast::MK::Constant(loc, core::Symbols::Chalk_ODM_DocumentDecoratorHelper());
+                auto softFreezeLogic = ast::MK::Send2(loc, std::move(docDecoHelper), core::Names::softFreezeLogic(),
+                                                      ast::MK::Self(loc), ast::MK::Symbol(loc, name));
+                // need to hide the instance variable access, because there wasn't a typed constructor to declare it
+                auto ivarSet =
+                    ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
+                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
+                auto insSeq = ast::MK::InsSeq1(loc, std::move(softFreezeLogic), std::move(ivarSet));
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));
             }
         } else {
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
