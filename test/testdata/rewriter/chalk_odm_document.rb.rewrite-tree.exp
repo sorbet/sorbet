@@ -29,7 +29,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@my_child_method")
+        <self>.class().decorator().prop_get_logic(<self>, :"my_child_method", arg2)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||

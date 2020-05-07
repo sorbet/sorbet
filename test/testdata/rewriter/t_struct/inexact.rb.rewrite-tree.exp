@@ -57,7 +57,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@qux")
+        <self>.class().decorator().prop_get_logic(<self>, :"qux", arg2)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
