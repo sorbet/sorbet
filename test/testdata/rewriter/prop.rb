@@ -59,6 +59,7 @@ class AdvancedODM
 end
 
 class PropHelpers
+  include T::Props
   def self.token_prop(opts={}); end
   def self.created_prop(opts={}); end
   token_prop
@@ -66,6 +67,7 @@ class PropHelpers
 end
 
 class PropHelpers2
+  include T::Props
   def self.timestamped_token_prop(opts={}); end
   def self.created_prop(opts={}); end
   timestamped_token_prop
@@ -73,11 +75,13 @@ class PropHelpers2
 end
 
 class ShardingProp
+  include T::Props
   def self.merchant_prop(opts={}); end
   merchant_prop
 end
 
 class EncryptedProp
+  include T::Props
   def self.encrypted_prop(opts={}); end
   encrypted_prop :foo
   encrypted_prop :bar, migrating: true, immutable: true
