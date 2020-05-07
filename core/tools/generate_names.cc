@@ -185,6 +185,8 @@ NameDef names[] = {
     {"withoutAccessors", "without_accessors"},
     {"instanceVariableGet", "instance_variable_get"},
     {"instanceVariableSet", "instance_variable_set"},
+    {"decorator"},
+    {"propGetLogic", "prop_get_logic"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
