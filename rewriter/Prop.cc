@@ -319,7 +319,22 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
             }
         } else {
             // Models have a custom decorator, which means we have to forward the prop get to it.
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+            // If this is actually a T::InexactStruct or Chalk::ODM::Document sub-sub-class, this implementation is
+            // correct but does extra work.
+
+            auto arg2 = ast::MK::Local(loc, core::Names::arg2());
+
+            auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
+                                          ast::MK::Symbol(nameLoc, ivarName));
+            auto assign = ast::MK::Assign(loc, arg2->deepCopy(), std::move(ivarGet));
+
+            auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_());
+            auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator());
+            auto propGetLogic = ast::MK::Send3(loc, std::move(decorator), core::Names::propGetLogic(),
+                                               ast::MK::Self(loc), ast::MK::Symbol(nameLoc, name), std::move(arg2));
+
+            auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
         }
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));

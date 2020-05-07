@@ -73,7 +73,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def not_a_symbol<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@not_a_symbol")
+        <self>.class().decorator().prop_get_logic(<self>, :"not_a_symbol", arg2)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -81,7 +84,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def symbol_in_variable<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@symbol_in_variable")
+        <self>.class().decorator().prop_get_logic(<self>, :"symbol_in_variable", arg2)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
