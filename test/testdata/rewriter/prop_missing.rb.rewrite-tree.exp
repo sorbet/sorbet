@@ -16,7 +16,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foo")
+        <self>.instance_variable_set(:"@foo", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||

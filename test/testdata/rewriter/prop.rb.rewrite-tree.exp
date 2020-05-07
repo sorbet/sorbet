@@ -89,7 +89,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foo")
+        <self>.instance_variable_set(:"@foo", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -142,7 +145,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def default=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"default")
+        <self>.instance_variable_set(:"@default", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -161,7 +167,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_nilable=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"t_nilable")
+        <self>.instance_variable_set(:"@t_nilable", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -180,7 +189,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"array")
+        <self>.instance_variable_set(:"@array", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -199,7 +211,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def t_array=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"t_array")
+        <self>.instance_variable_set(:"@t_array", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -218,7 +233,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def hash_of=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"hash_of")
+        <self>.instance_variable_set(:"@hash_of", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -278,7 +296,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foreign")
+        <self>.instance_variable_set(:"@foreign", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -313,7 +334,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foreign_lazy")
+        <self>.instance_variable_set(:"@foreign_lazy", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -348,7 +372,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foreign_proc")
+        <self>.instance_variable_set(:"@foreign_proc", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -383,7 +410,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"foreign_invalid")
+        <self>.instance_variable_set(:"@foreign_invalid", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -415,7 +445,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"ifunset")
+        <self>.instance_variable_set(:"@ifunset", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -431,7 +464,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset_nilable=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"ifunset_nilable")
+        <self>.instance_variable_set(:"@ifunset_nilable", arg0)
+      end
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -630,7 +666,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"token")
+        <self>.instance_variable_set(:"@token", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -649,7 +688,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def created=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"created")
+        <self>.instance_variable_set(:"@created", arg0)
+      end
     end
 
     def self.token_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
@@ -708,7 +750,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def token=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"token")
+        <self>.instance_variable_set(:"@token", arg0)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||

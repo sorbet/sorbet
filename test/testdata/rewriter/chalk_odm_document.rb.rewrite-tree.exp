@@ -13,7 +13,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_parent_method")
+        <self>.instance_variable_set(:"@my_parent_method", arg0)
+      end
     end
 
     <self>.prop(:"my_parent_method", <emptyTree>::<C String>, {:"without_accessors" => true})
@@ -40,7 +43,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_child_method")
+        <self>.instance_variable_set(:"@my_child_method", arg0)
+      end
     end
 
     <self>.prop(:"my_child_method", <emptyTree>::<C Integer>, {:"without_accessors" => true})
