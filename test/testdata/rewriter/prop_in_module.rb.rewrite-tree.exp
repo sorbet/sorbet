@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
     end
 
-    def foo<<C <todo sym>>>(&<blk>)
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -22,6 +22,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
   end
+
+  class <emptyTree>::<C MyClass><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C BagOfProps>)
+  end
+
+  my_class = <emptyTree>::<C MyClass>.new()
+
+  <self>.p(my_class.foo=("hello"))
+
+  <self>.p(my_class.foo())
 end
