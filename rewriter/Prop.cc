@@ -336,7 +336,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
         if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
         } else if (ret.enum_ == nullptr && knownNonDocument(propContext.syntacticSuperClass)) {
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                 auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
