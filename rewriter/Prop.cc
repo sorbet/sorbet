@@ -53,9 +53,6 @@ bool isChalkODMDocument(ast::Expression *expr) {
         return false;
     }
     auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope.get());
-    if (chalk == nullptr || chalk->cnst != core::Names::Constants::Chalk()) {
-        return false;
-    }
     return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && isRootScope(chalk->scope.get());
 }
 
