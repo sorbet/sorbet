@@ -139,6 +139,7 @@ void CFG::sanityCheck(core::Context ctx) {
             ENFORCE(bb->bexit.cond.variable == core::LocalVariable::unconditional());
         } else {
             ENFORCE(bb->bexit.cond.variable.exists());
+            ENFORCE(bb->bexit.cond.variable != core::LocalVariable::unconditional());
         }
     }
 }
