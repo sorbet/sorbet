@@ -93,18 +93,7 @@ public:
     const FoundTypeMember &typeMember(const FoundNames &foundNames) const;
 
     core::SymbolRef symbol(const FoundNames &foundNames) const;
-
-    // TODO: need?
-    bool operator==(const FoundNameRef &rhs) const {
-        return _id == rhs._id;
-    }
-
-    bool operator!=(const FoundNameRef &rhs) const {
-        return !(rhs == *this);
-    }
 };
-
-enum class OwnerKind { INHERITED, SYMBOL, CLASS_REF };
 
 struct FoundClassRef final {
     core::NameRef name;
@@ -133,7 +122,6 @@ struct FoundFieldOrVariable final {
 struct FoundTypeMember final {
     FoundNameRef owner;
     core::NameRef name;
-    core::Loc sendLoc;
     core::Loc asgnLoc;
     core::Loc nameLoc;
     core::NameRef varianceName;
@@ -569,7 +557,6 @@ public:
 
         FoundTypeMember found;
         found.owner = getOwner();
-        found.sendLoc = send->loc;
         found.asgnLoc = asgn->loc;
         found.nameLoc = typeName->loc;
         found.name = typeName->cnst;
