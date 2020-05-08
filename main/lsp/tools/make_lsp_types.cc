@@ -1270,6 +1270,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 makeField("clock", JSONString),
                                                 makeField("is_fresh_instance", "isFreshInstance", JSONBool),
                                                 makeField("files", makeArray(JSONString)),
+                                                makeField("root", JSONString),
                                             },
                                             classTypes);
 

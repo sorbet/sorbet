@@ -113,43 +113,40 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
     auto typecheckThread = typecheckerCoord.startTypecheckerThread();
 
-    unique_ptr<watchman::WatchmanProcess> watchmanProcess;
+    std::vector<unique_ptr<watchman::WatchmanProcess>> watchmanProcesses;
     const auto &opts = config->opts;
     auto &logger = config->logger;
     if (!opts.disableWatchman) {
-        if (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty()) {
-            logger->error("Watchman support currently only works when Sorbet is run with a single input directory. If "
-                          "Watchman is not needed, run Sorbet with `--disable-watchman`.");
-            throw options::EarlyReturnWithCode(1);
-        }
-
-        // The lambda below intentionally does not capture `this`.
-        watchmanProcess = make_unique<watchman::WatchmanProcess>(
-            logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}),
-            [&messageQueueMutex, &messageQueue, logger = logger,
-             &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
-                auto notifMsg =
-                    make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
-                auto msg = make_unique<LSPMessage>(move(notifMsg));
-                // Don't start enqueueing requests until LSP is initialized.
-                initializedNotification.WaitForNotification();
-                {
-                    absl::MutexLock lck(&messageQueueMutex);
-                    tagNewRequest(*logger, *msg);
-                    messageQueue.counters = mergeCounters(move(messageQueue.counters));
-                    messageQueue.pendingRequests.push_back(move(msg));
-                }
-            },
-            [&messageQueue, &messageQueueMutex, logger = logger](int watchmanExitCode) {
-                {
-                    absl::MutexLock lck(&messageQueueMutex);
-                    if (!messageQueue.terminate) {
-                        messageQueue.terminate = true;
-                        messageQueue.errorCode = watchmanExitCode;
+        watchmanProcesses.reserve(opts.rawInputDirNames.size());
+        for (auto inputDir : opts.rawInputDirNames) {
+            // The lambda below intentionally does not capture `this`.
+            watchmanProcesses.push_back(make_unique<watchman::WatchmanProcess>(
+                logger, opts.watchmanPath, inputDir, vector<string>({"rb", "rbi"}),
+                [&messageQueueMutex, &messageQueue, logger = logger,
+                 &initializedNotification](std::unique_ptr<WatchmanQueryResponse> response) {
+                    auto notifMsg =
+                        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
+                    auto msg = make_unique<LSPMessage>(move(notifMsg));
+                    // Don't start enqueueing requests until LSP is initialized.
+                    initializedNotification.WaitForNotification();
+                    {
+                        absl::MutexLock lck(&messageQueueMutex);
+                        tagNewRequest(*logger, *msg);
+                        messageQueue.counters = mergeCounters(move(messageQueue.counters));
+                        messageQueue.pendingRequests.push_back(move(msg));
                     }
-                    logger->debug("Watchman terminating");
-                }
-            });
+                },
+                [&messageQueue, &messageQueueMutex, logger = logger](int watchmanExitCode) {
+                    {
+                        absl::MutexLock lck(&messageQueueMutex);
+                        if (!messageQueue.terminate) {
+                            messageQueue.terminate = true;
+                            messageQueue.errorCode = watchmanExitCode;
+                        }
+                        logger->debug("Watchman terminating");
+                    }
+                }));
+        }
     }
 
     auto readerThread =

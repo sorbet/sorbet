@@ -294,13 +294,15 @@ TEST_CASE("DiscriminatedUnionInvalidDiscriminant") {
 
 TEST_CASE("RenamedFieldsWorkProperly") {
     parseTest<WatchmanQueryResponse>("{\"version\": \"versionstring\", \"clock\": \"clockvalue\", "
-                                     "\"is_fresh_instance\": true, \"files\": [\"foo.rb\"]}",
+                                     "\"is_fresh_instance\": true, \"files\": [\"foo.rb\"], "
+                                     "\"root\":\"/home/user/workdir\"}",
                                      [](auto &watchmanQueryResponse) -> void {
                                          REQUIRE_EQ(watchmanQueryResponse->version, "versionstring");
                                          REQUIRE_EQ(watchmanQueryResponse->clock, "clockvalue");
                                          REQUIRE(watchmanQueryResponse->isFreshInstance);
                                          REQUIRE_EQ(watchmanQueryResponse->files.size(), 1);
                                          REQUIRE_EQ(watchmanQueryResponse->files.at(0), "foo.rb");
+                                         REQUIRE_EQ(watchmanQueryResponse->root, "/home/user/workdir");
                                      });
 }
 
