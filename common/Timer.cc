@@ -2,6 +2,8 @@
 using namespace std;
 namespace sorbet {
 
+namespace {
+
 // We are using <time.h> instead of similar APIs from the C++ <chrono> library,
 // because this was measured to make timers noticably faster.
 //
@@ -17,27 +19,26 @@ clockid_t clock_monotonic_coarse() {
 #endif
 }
 
-microseconds clock_gettime_coarse() {
+microseconds get_clock_threshold_coarse() {
+    timespec tp;
+    clock_getres(clock_monotonic_coarse(), &tp);
+    auto usec = 2 * (tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L);
+    if (usec < 1'000) { // 1ms
+        return {1'000};
+    } else {
+        return {usec};
+    }
+}
+
+// Don't want to have to measure the resolution of the clock every time we ask for the time.
+const microseconds clock_threshold_coarse = get_clock_threshold_coarse();
+
+} // namespace
+
+microseconds Timer::clock_gettime_coarse() {
     timespec tp;
     clock_gettime(clock_monotonic_coarse(), &tp);
     return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
-}
-
-microseconds clock_threshold_coarse() {
-    static microseconds threshold;
-    if (threshold.usec == 0) {
-        // Don't want to have to measure the resolution of the clock every time we ask for the time.
-        timespec tp;
-        clock_getres(clock_monotonic_coarse(), &tp);
-        auto usec = 2 * (tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L);
-        if (usec < 1'000) { // 1ms
-            threshold = {1'000};
-        } else {
-            threshold = {usec};
-        }
-    }
-
-    return threshold;
 }
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
@@ -143,8 +144,7 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
     auto dur = microseconds{clock.usec - start.usec};
-    auto threshold = clock_threshold_coarse();
-    if (!canceled && dur.usec > threshold.usec) {
+    if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto durMs = (clock.usec - start.usec) / 1'000;
         log.debug("{}: {}ms", this->name.str, durMs);
