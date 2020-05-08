@@ -27,7 +27,7 @@ CFG::CFG() {
     freshBlock(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond.variable = core::LocalVariable::noVariable();
+    deadBlock()->bexit.cond.variable = core::LocalVariable::unconditional();
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
@@ -90,7 +90,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockDead.insert(bind.bind.variable);
             }
         }
-        if (bb->bexit.cond.variable.exists()) {
+        ENFORCE(bb->bexit.cond.variable.exists());
+        if (bb->bexit.cond.variable != core::LocalVariable::unconditional()) {
             blockReads.insert(bb->bexit.cond.variable);
             blockReadsAndWrites.insert(bb->bexit.cond.variable);
         }
@@ -135,7 +136,7 @@ void CFG::sanityCheck(core::Context ctx) {
         ENFORCE(thenCount == 1, "bb id={}; then has {} back edges", bb->id, thenCount);
         ENFORCE(elseCount == 1, "bb id={}; else has {} back edges", bb->id, elseCount);
         if (bb->bexit.thenb == bb->bexit.elseb) {
-            ENFORCE(!bb->bexit.cond.variable.exists());
+            ENFORCE(bb->bexit.cond.variable == core::LocalVariable::unconditional());
         } else {
             ENFORCE(bb->bexit.cond.variable.exists());
         }
@@ -221,11 +222,7 @@ string BasicBlock::toString(const core::GlobalState &gs) const {
     for (const Binding &exp : this->exprs) {
         fmt::format_to(buf, "{} = {}\n", exp.bind.toString(gs), exp.value->toString(gs));
     }
-    if (this->bexit.cond.variable.exists()) {
-        fmt::format_to(buf, "{}", this->bexit.cond.toString(gs));
-    } else {
-        fmt::format_to(buf, "<unconditional>");
-    }
+    fmt::format_to(buf, "{}", this->bexit.cond.toString(gs));
     return to_string(buf);
 }
 
@@ -243,11 +240,7 @@ string BasicBlock::showRaw(core::Context ctx) const {
         fmt::format_to(buf, "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n", exp.bind.showRaw(ctx, 1),
                        exp.value->showRaw(ctx, 1));
     }
-    if (this->bexit.cond.variable.exists()) {
-        fmt::format_to(buf, "{}", this->bexit.cond.showRaw(ctx));
-    } else {
-        fmt::format_to(buf, "<unconditional>");
-    }
+    fmt::format_to(buf, "{}", this->bexit.cond.showRaw(ctx));
     return to_string(buf);
 }
 

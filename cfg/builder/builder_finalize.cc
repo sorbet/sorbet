@@ -46,7 +46,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
-                bb->bexit.cond = core::LocalVariable::noVariable();
+                bb->bexit.cond = core::LocalVariable::unconditional();
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
@@ -213,7 +213,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 current[bind.bind.variable] = i->what;
             }
         }
-        if (bb->bexit.cond.variable.exists()) {
+        if (bb->bexit.cond.variable != core::LocalVariable::unconditional()) {
             bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond.variable, current);
         }
     }
