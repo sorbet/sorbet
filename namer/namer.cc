@@ -97,7 +97,7 @@ public:
 
 struct FoundClassRef final {
     core::NameRef name;
-    core::Loc loc;
+    core::LocOffsets loc;
     // If !owner.exists(), owner is determined by reference site.
     FoundNameRef owner;
 };
@@ -105,7 +105,7 @@ struct FoundClassRef final {
 struct FoundClass final {
     FoundNameRef owner;
     FoundNameRef klass;
-    core::Loc loc;
+    core::LocOffsets loc;
     core::Loc declLoc;
     ast::ClassDef::Kind classKind;
 };
@@ -114,16 +114,16 @@ struct FoundFieldOrVariable final {
     FoundNameRef owner;
     FoundNameRef klass;
     core::NameRef name;
-    core::Loc asgnLoc;
-    core::Loc lhsLoc;
+    core::LocOffsets asgnLoc;
+    core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
 };
 
 struct FoundTypeMember final {
     FoundNameRef owner;
     core::NameRef name;
-    core::Loc asgnLoc;
-    core::Loc nameLoc;
+    core::LocOffsets asgnLoc;
+    core::LocOffsets nameLoc;
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
@@ -133,7 +133,7 @@ struct FoundTypeMember final {
 struct FoundMethod final {
     FoundNameRef owner;
     core::NameRef name;
-    core::Loc loc;
+    core::LocOffsets loc;
     core::Loc declLoc;
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
@@ -142,7 +142,7 @@ struct FoundMethod final {
 struct Modifier {
     NameKind kind;
     FoundNameRef owner;
-    core::Loc loc;
+    core::LocOffsets loc;
     // The name of the modification.
     core::NameRef name;
     // For methods: The name of the method being modified.
@@ -691,7 +691,7 @@ class NameDefiner {
         core::SymbolRef existing = ctx.owner.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
                     auto memberName = name.data(ctx)->show(ctx);
                     auto ownerName = ctx.owner.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", memberName,
@@ -700,7 +700,7 @@ class NameDefiner {
                 }
                 return ctx.owner;
             }
-            existing = ctx.state.enterClassSymbol(loc, ctx.owner, name);
+            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), ctx.owner, name);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
         return existing;
@@ -709,7 +709,7 @@ class NameDefiner {
     void defineArg(core::MutableContext ctx, int pos, const ast::ParsedArg &parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
-            ctx.owner.data(ctx)->arguments()[pos].loc = parsedArg.loc;
+            ctx.owner.data(ctx)->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
             return;
         }
 
@@ -723,7 +723,7 @@ class NameDefiner {
         }
         // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(parsedArg.loc, ctx.owner, name);
+        auto &argInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
@@ -988,7 +988,8 @@ class NameDefiner {
                 return klassSymbol;
             }
 
-            if (auto e = ctx.state.beginError(klass.loc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e =
+                    ctx.state.beginError(core::Loc(ctx.file, klass.loc), core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", symbol.data(ctx)->show(ctx));
                 e.addErrorLine(symbol.data(ctx)->loc(), "Previous definition");
             }
@@ -1017,7 +1018,8 @@ class NameDefiner {
             symbol.data(ctx)->setIsModule(isModule);
             auto renamed = ctx.state.findRenamedSymbol(symbol.data(ctx)->owner, symbol);
             if (renamed.exists()) {
-                if (auto e = ctx.state.beginError(klass.loc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.loc),
+                                                  core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", symbol.data(ctx)->show(ctx));
                     e.addErrorLine(renamed.data(ctx)->loc(), "Previous definition");
                 }
@@ -1046,9 +1048,9 @@ class NameDefiner {
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
-            ctx.state.staticInitForFile(klass.loc);
+            ctx.state.staticInitForFile(core::Loc(ctx.file, klass.loc));
         } else {
-            ctx.state.staticInitForClass(symbol, klass.loc);
+            ctx.state.staticInitForClass(symbol, core::Loc(ctx.file, klass.loc));
         }
 
         ctx.state.tracer().debug("Inserting class {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx), symbol._id,
@@ -1062,14 +1064,15 @@ class NameDefiner {
         const auto fun = mod.name;
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
-            symbolData->setClassFinal();
-            symbolData->singletonClass(ctx).data(ctx)->setClassFinal();
+            symbolData->setClassOrModuleFinal();
+            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
         }
         if (fun == core::Names::declareSealed()) {
-            symbolData->setClassSealed();
+            symbolData->setClassOrModuleSealed();
 
             auto classOfKlass = symbolData->singletonClass(ctx);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(mod.loc, classOfKlass, core::Names::sealedSubclasses());
+            auto sealedSubclasses = ctx.state.enterMethodSymbol(core::Loc(ctx.file, mod.loc), classOfKlass,
+                                                                core::Names::sealedSubclasses());
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -1079,15 +1082,15 @@ class NameDefiner {
             sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
-            symbolData->setClassAbstract();
-            symbolData->singletonClass(ctx).data(ctx)->setClassAbstract();
+            symbolData->setClassOrModuleAbstract();
+            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleAbstract();
         }
         if (fun == core::Names::declareInterface()) {
-            symbolData->setClassInterface();
+            symbolData->setClassOrModuleInterface();
             if (!symbolData->isClassOrModuleModule()) {
-                if (auto e = ctx.state.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, mod.loc), core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
-                    e.replaceWith("Change `interface!` to `abstract!`", mod.loc, "abstract!");
+                    e.replaceWith("Change `interface!` to `abstract!`", core::Loc(ctx.file, mod.loc), "abstract!");
                 }
             }
         }
@@ -1097,15 +1100,16 @@ class NameDefiner {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
-            if (auto e =
-                    ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::DynamicConstantAssignment)) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+                                              core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
 
         auto scope = squashNames(ctx, fieldOrVariable.klass, contextClass(ctx, ctx.owner));
         if (!scope.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::InvalidClassOwner)) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+                                              core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = fieldOrVariable.name.data(ctx)->show(ctx);
                 auto scopeName = scope.data(ctx)->show(ctx);
                 e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
@@ -1115,7 +1119,8 @@ class NameDefiner {
             // Mangle this one out of the way, and re-enter a symbol with this name as a class.
             auto scopeName = scope.data(ctx)->name;
             ctx.state.mangleRenameSymbol(scope, scopeName);
-            scope = ctx.state.enterClassSymbol(fieldOrVariable.lhsLoc, scope.data(ctx)->owner, scopeName);
+            scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, fieldOrVariable.lhsLoc), scope.data(ctx)->owner,
+                                               scopeName);
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -1123,7 +1128,8 @@ class NameDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, fieldOrVariable.name);
         auto name = sym.exists() ? sym.data(ctx)->name : fieldOrVariable.name;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(fieldOrVariable.asgnLoc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+                                              core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", fieldOrVariable.name.data(ctx)->show(ctx));
                 e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
             }
@@ -1136,11 +1142,11 @@ class NameDefiner {
             if (renamedSym.exists()) {
                 if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(fieldOrVariable.asgnLoc, "Previous definition");
+                    e.addErrorLine(core::Loc(ctx.file, fieldOrVariable.asgnLoc), "Previous definition");
                 }
             }
         }
-        sym = ctx.state.enterStaticFieldSymbol(fieldOrVariable.lhsLoc, scope, name);
+        sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, fieldOrVariable.lhsLoc), scope, name);
 
         if (fieldOrVariable.isTypeAlias && sym.data(ctx)->isStaticField()) {
             sym.data(ctx)->setTypeAlias();
@@ -1183,15 +1189,16 @@ class NameDefiner {
         if (existingTypeMember.exists()) {
             // if we already have a type member but it was constructed in a different file from the one we're
             // looking at, then we need to raise an error
-            if (existingTypeMember.data(ctx)->loc().file() != typeMember.asgnLoc.file()) {
-                if (auto e = ctx.state.beginError(typeMember.asgnLoc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.asgnLoc),
+                                                  core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
-                    e.addErrorLine(typeMember.asgnLoc, "Also defined here");
+                    e.addErrorLine(core::Loc(ctx.file, typeMember.asgnLoc), "Also defined here");
                 }
             }
 
@@ -1200,7 +1207,8 @@ class NameDefiner {
             // same error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
+                                                  core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
@@ -1213,13 +1221,15 @@ class NameDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
+                                                  core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
                     e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
-            sym = ctx.state.enterTypeMember(typeMember.asgnLoc, onSymbol, typeMember.name, variance);
+            sym =
+                ctx.state.enterTypeMember(core::Loc(ctx.file, typeMember.asgnLoc), onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -1228,16 +1238,17 @@ class NameDefiner {
             if (isTypeTemplate) {
                 auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
-                if (oldSym.exists() &&
-                    !(oldSym.data(ctx)->loc() == typeMember.asgnLoc || oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    if (auto e =
-                            ctx.state.beginError(typeMember.nameLoc, core::errors::Namer::ModuleKindRedefinition)) {
+                if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
+                                         oldSym.data(ctx)->loc().isTombStoned(ctx))) {
+                    if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
+                                                      core::errors::Namer::ModuleKindRedefinition)) {
                         e.setHeader("Redefining constant `{}`", typeMember.name.data(ctx)->show(ctx));
                         e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
                     }
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
-                auto alias = ctx.state.enterStaticFieldSymbol(typeMember.asgnLoc, context, typeMember.name);
+                auto alias =
+                    ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, typeMember.asgnLoc), context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
             }
 
@@ -1340,7 +1351,7 @@ class NameInserter {
         auto newOwner = squashNames(ctx, owner, constLit->scope);
         core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
         if (!existing.exists() && !newOwner.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(node->loc, core::errors::Namer::InvalidClassOwner)) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, node->loc), core::errors::Namer::InvalidClassOwner)) {
                 auto constLitName = constLit->cnst.data(ctx)->show(ctx);
                 auto newOwnerName = newOwner.data(ctx)->show(ctx);
                 e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
@@ -1613,7 +1624,8 @@ public:
 
         if (!send->args.empty()) {
             if (send->args.size() > 2) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, send->loc),
+                                                  core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
                 auto send = ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
@@ -1709,14 +1721,14 @@ vector<NameFinderResult> findNames(const core::GlobalState &gs, vector<ast::Pars
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("findNames", [gs, fileq, resultq]() {
+    workers.multiplexJob("findNames", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findNamesWorker");
         NameFinder finder;
         vector<NameFinderResult> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                ctx.state.tracer().debug("findNames: {}", job.file.data(ctx).path());
+                gs.tracer().debug("findNames: {}", job.file.data(gs).path());
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
                 NameFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
@@ -1731,9 +1743,9 @@ vector<NameFinderResult> findNames(const core::GlobalState &gs, vector<ast::Pars
 
     {
         vector<NameFinderResult> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer());
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer())) {
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 allFoundNames.insert(allFoundNames.end(), make_move_iterator(threadResult.begin()),
                                      make_move_iterator(threadResult.end()));
@@ -1750,7 +1762,7 @@ vector<ast::ParsedFile> defineNames(core::GlobalState &gs, vector<NameFinderResu
     vector<ast::ParsedFile> output;
     output.reserve(allFoundNames.size());
     for (auto &fileFoundNames : allFoundNames) {
-        ctx.state.tracer().debug("defineNames: {}", fileFoundNames.tree.file.data(ctx).path());
+        gs.tracer().debug("defineNames: {}", fileFoundNames.tree.file.data(gs).path());
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundNames.tree.file);
         NameDefiner nameDefiner(move(fileFoundNames.names));
         output.push_back(move(fileFoundNames.tree));
@@ -1759,7 +1771,7 @@ vector<ast::ParsedFile> defineNames(core::GlobalState &gs, vector<NameFinderResu
     return output;
 }
 
-vector<ast::ParsedFile> insertNames(const core::GlobalStare &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+vector<ast::ParsedFile> insertNames(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.insertNames");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -1767,14 +1779,14 @@ vector<ast::ParsedFile> insertNames(const core::GlobalStare &gs, vector<ast::Par
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("insertNames", [gs, fileq, resultq]() {
-        Timer timeit(ctx.state.tracer(), "naming.insertNamesWorker");
+    workers.multiplexJob("insertNames", [&gs, fileq, resultq]() {
+        Timer timeit(gs.tracer(), "naming.insertNamesWorker");
         NameInserter inserter;
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                ctx.state.tracer().debug("insertNames: {}", job.file.data(ctx).path());
+                gs.tracer().debug("insertNames: {}", job.file.data(gs).path());
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));
@@ -1788,9 +1800,9 @@ vector<ast::ParsedFile> insertNames(const core::GlobalStare &gs, vector<ast::Par
 
     {
         vector<ast::ParsedFile> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer());
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), ctx.state.tracer())) {
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
                              make_move_iterator(threadResult.end()));
