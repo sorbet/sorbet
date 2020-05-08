@@ -1,5 +1,6 @@
 # typed: true
 
+LOG_HEADER = 'Hello!'
 str = <<~DESC
         This\n\is a regular line
         So\nis this
