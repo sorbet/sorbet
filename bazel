@@ -16,12 +16,16 @@ fi
 old_pwd="$PWD"
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+if [[ "$PWD" = */tools ]]; then
+  cd ..
+fi
+repo_root="$PWD"
+
 if ! [ -f WORKSPACE ]; then
   echo >&2 "Didn't find the workspace"
   exit 1
 fi
 
-repo_root="$PWD"
 cd "$old_pwd"
 
 workspace_contents=$(< "$repo_root/WORKSPACE")
