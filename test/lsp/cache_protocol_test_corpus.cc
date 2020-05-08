@@ -14,6 +14,7 @@
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/lsp.h"
+#include <sys/wait.h>
 
 namespace sorbet::test::lsp {
 using namespace std;
