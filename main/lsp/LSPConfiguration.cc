@@ -16,10 +16,6 @@ constexpr string_view httpsScheme = "https"sv;
 namespace {
 
 string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger> &logger) {
-    if (opts.rawInputDirNames.size() != 1) {
-        logger->error("Sorbet's language server requires a single input directory.");
-        throw options::EarlyReturnWithCode(1);
-    }
     return opts.rawInputDirNames.at(0);
 }
 
@@ -35,7 +31,12 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    const shared_ptr<spdlog::logger> &logger, bool skipConfigatron, bool disableFastPath)
     : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), skipConfigatron(skipConfigatron),
-      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
+      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {
+    if (opts.rawInputDirNames.size() == 0) {
+        logger->error("Sorbet's language server requires at least one input directory.");
+        throw options::EarlyReturnWithCode(1);
+    }
+}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {
