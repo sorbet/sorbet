@@ -48,5 +48,3 @@ YAML = Psych # :nodoc:
 # Psych is maintained by Aaron Patterson on github: https://github.com/ruby/psych
 #
 # Syck can also be found on github: https://github.com/ruby/syck
-module YAML
-end
