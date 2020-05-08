@@ -311,14 +311,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (s->block != nullptr) {
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                    vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(cctx.ctx, s->block->args);
+                    vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(s->block->args);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgs) {
                         auto &target = argFlags.emplace_back();
-                        target.isKeyword = e.keyword;
-                        target.isRepeated = e.repeated;
-                        target.isDefault = e.default_ != nullptr;
-                        target.isShadow = e.shadow;
+                        target.isKeyword = e.flags.isKeyword;
+                        target.isRepeated = e.flags.isRepeated;
+                        target.isDefault = e.flags.isDefault;
+                        target.isShadow = e.flags.isShadow;
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s->fun, move(argFlags), newRubyBlockId);
                     auto send =
@@ -347,7 +347,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         auto &arg = blockArgs[i];
                         core::LocalVariable argLoc = arg.local;
 
-                        if (arg.repeated) {
+                        if (arg.flags.isRepeated) {
                             if (i != 0) {
                                 // Mixing positional and rest args in blocks is
                                 // not currently supported; drop in an untyped.

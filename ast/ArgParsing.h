@@ -5,17 +5,15 @@ namespace sorbet::ast {
 struct ParsedArg {
     core::LocOffsets loc;
     core::LocalVariable local;
-    std::unique_ptr<ast::Expression> default_;
-    bool keyword = false;
-    bool block = false;
-    bool repeated = false;
-    bool shadow = false;
+    core::ArgInfo::ArgFlags flags;
 };
 class ArgParsing {
 public:
-    static ParsedArg parseArg(core::Context ctx, std::unique_ptr<ast::Reference> arg);
-    static std::vector<ParsedArg> parseArgs(core::Context ctx, ast::MethodDef::ARGS_store &args);
-    static std::vector<u4> hashArgs(core::Context ctx, std::vector<ParsedArg> &args);
+    static std::vector<ParsedArg> parseArgs(const ast::MethodDef::ARGS_store &args);
+    static std::vector<u4> hashArgs(core::Context ctx, const std::vector<ParsedArg> &args);
+    // Returns the default argument value for the given argument, or nullptr if not specified. Mutates arg.
+    static std::unique_ptr<ast::Expression> getDefault(const ParsedArg &parsedArg,
+                                                       std::unique_ptr<ast::Expression> arg);
 };
 }; // namespace sorbet::ast
 
