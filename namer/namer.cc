@@ -162,7 +162,7 @@ struct Modifier {
 };
 
 class FoundNames final {
-    vector<FoundNameRef> _defineOrder;
+    vector<FoundNameRef> _definitions;
     vector<FoundClassRef> _klassRefs;
     vector<FoundClass> _klasses;
     vector<FoundMethod> _methods;
@@ -170,6 +170,11 @@ class FoundNames final {
     vector<FoundTypeMember> _typeMembers;
     vector<core::SymbolRef> _symbols;
     vector<Modifier> _modifiers;
+
+    FoundNameRef addDefinition(FoundNameRef ref) {
+        _definitions.push_back(ref);
+        return ref;
+    }
 
 public:
     FoundNames() = default;
@@ -180,9 +185,7 @@ public:
     FoundNameRef addClass(FoundClass &&klass) {
         const u4 idx = _klasses.size();
         _klasses.push_back(move(klass));
-        auto nameRef = FoundNameRef(NameKind::Class, idx);
-        _defineOrder.push_back(nameRef);
-        return nameRef;
+        return addDefinition(FoundNameRef(NameKind::Class, idx));
     }
 
     FoundNameRef addClassRef(FoundClassRef &&klassRef) {
@@ -194,21 +197,19 @@ public:
     FoundNameRef addMethod(FoundMethod &&method) {
         const u4 idx = _methods.size();
         _methods.push_back(move(method));
-        auto nameRef = FoundNameRef(NameKind::Method, idx);
-        _defineOrder.push_back(nameRef);
-        return nameRef;
+        return addDefinition(FoundNameRef(NameKind::Method, idx));
     }
 
     FoundNameRef addFieldOrVariable(FoundFieldOrVariable &&fieldOrVariable) {
         const u4 idx = _fieldOrVariables.size();
         _fieldOrVariables.push_back(move(fieldOrVariable));
-        return FoundNameRef(NameKind::FieldOrVariable, idx);
+        return addDefinition(FoundNameRef(NameKind::FieldOrVariable, idx));
     }
 
     FoundNameRef addTypeMember(FoundTypeMember &&typeMember) {
         const u4 idx = _typeMembers.size();
         _typeMembers.push_back(move(typeMember));
-        return FoundNameRef(NameKind::TypeMember, idx);
+        return addDefinition(FoundNameRef(NameKind::TypeMember, idx));
     }
 
     FoundNameRef addSymbol(core::SymbolRef symbol) {
@@ -221,8 +222,8 @@ public:
         _modifiers.push_back(move(mod));
     }
 
-    const vector<FoundNameRef> &toDefine() const {
-        return _defineOrder;
+    const vector<FoundNameRef> &definitions() const {
+        return _definitions;
     }
 
     const vector<FoundClass> &klasses() const {
@@ -1107,7 +1108,6 @@ class NameDefiner {
 
     core::SymbolRef insertFieldOrVariable(core::MutableContext ctx, const FoundFieldOrVariable &fieldOrVariable) {
         // forbid dynamic constant definition
-        // TODO: Does this check break w/ our overloading of `owner`?
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
             if (auto e =
@@ -1163,7 +1163,7 @@ class NameDefiner {
         return sym;
     }
 
-    core::SymbolRef insertTypeMemberDefinition(core::MutableContext ctx, const FoundTypeMember &typeMember) {
+    core::SymbolRef insertTypeMember(core::MutableContext ctx, const FoundTypeMember &typeMember) {
         if (typeMember.tooManyArgs) {
             FoundFieldOrVariable fieldOrVariable;
             fieldOrVariable.owner = typeMember.owner;
@@ -1271,7 +1271,7 @@ public:
         definedClasses.reserve(foundNames->klasses().size());
         definedMethods.reserve(foundNames->methods().size());
 
-        for (auto &ref : foundNames->toDefine()) {
+        for (auto &ref : foundNames->definitions()) {
             switch (ref.kind()) {
                 case NameKind::Class: {
                     const auto &klass = ref.klass(*foundNames);
@@ -1285,21 +1285,23 @@ public:
                     definedMethods.push_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
+                case NameKind::FieldOrVariable: {
+                    const auto &fieldOrVariable = ref.fieldOrVariable(*foundNames);
+                    insertFieldOrVariable(ctx.withOwner(getOwnerSymbol(fieldOrVariable.owner)), fieldOrVariable);
+                    break;
+                }
+                case NameKind::TypeMember: {
+                    const auto &typeMember = ref.typeMember(*foundNames);
+                    insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
+                    break;
+                }
                 default:
                     ENFORCE(false);
                     break;
             }
         }
 
-        for (auto &fieldOrVariable : foundNames->fieldOrVariables()) {
-            insertFieldOrVariable(ctx.withOwner(getOwnerSymbol(fieldOrVariable.owner)), fieldOrVariable);
-        }
-
-        for (auto &typeMember : foundNames->typeMembers()) {
-            insertTypeMemberDefinition(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
-        }
-
-        // TODO: Could these go on class/methods directly?
+        // TODO: Split up?
         for (const auto &modifier : foundNames->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
