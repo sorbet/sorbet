@@ -21,3 +21,11 @@ cc_library(
     local_defines = ["DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN"],
     visibility = ["//visibility:public"],
 )
+
+cc_library(
+    name = "doctest_custom_main",
+    srcs = glob(["doctest/**/*.h"]) + ["dummy-main.cc"],
+    testonly = True,
+    local_defines = ["DOCTEST_CONFIG_IMPLEMENT"],
+    visibility = ["//visibility:public"],
+)

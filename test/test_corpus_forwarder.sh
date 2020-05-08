@@ -16,4 +16,4 @@ echo -n "bazel-bin/test/test_corpus_runner"
 printf ' %q' "$@"
 echo
 
-"$(rlocation com_stripe_ruby_typer/test/test_corpus_runner)" "$@"
+exec "$(rlocation com_stripe_ruby_typer/test/cli_test_runner)" "$@"

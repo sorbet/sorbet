@@ -36,6 +36,110 @@ cc_binary(
 )
 
 cc_binary(
+    name = "cli_test_runner",
+    testonly = 1,
+    srcs = [
+        "cli_test_runner.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast/desugar",
+        "//ast/treemap",
+        "//cfg",
+        "//cfg/builder",
+        "//class_flatten",
+        "//core",
+        "//definition_validator",
+        "//infer",
+        "//local_vars",
+        "//main/autogen",
+        "//main/lsp",
+        "//main/pipeline/semantic_extension:none",
+        "//namer",
+        "//payload",
+        "//resolver",
+        "//rewriter",
+        "//test/helpers",
+        "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
+    ],
+)
+
+cc_binary(
+    name = "lsp_test_runner",
+    testonly = 1,
+    srcs = [
+        "lsp_test_runner.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast/desugar",
+        "//ast/treemap",
+        "//cfg",
+        "//cfg/builder",
+        "//class_flatten",
+        "//core",
+        "//definition_validator",
+        "//infer",
+        "//local_vars",
+        "//main/autogen",
+        "//main/lsp",
+        "//main/pipeline/semantic_extension:none",
+        "//namer",
+        "//payload",
+        "//resolver",
+        "//rewriter",
+        "//test/helpers",
+        "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
+    ],
+)
+
+cc_binary(
+    name = "parser_test_runner",
+    testonly = 1,
+    srcs = [
+        "parser_test_runner.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast/desugar",
+        "//ast/treemap",
+        "//cfg",
+        "//cfg/builder",
+        "//class_flatten",
+        "//core",
+        "//definition_validator",
+        "//infer",
+        "//local_vars",
+        "//main/autogen",
+        "//main/pipeline/semantic_extension:none",
+        "//namer",
+        "//payload",
+        "//resolver",
+        "//rewriter",
+        "//test/helpers",
+        "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
+    ],
+)
+
+cc_binary(
     name = "print_document_symbols",
     testonly = 1,
     srcs = [
