@@ -1232,7 +1232,7 @@ class NameDefiner {
                 }
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
-            sym = ctx.state.enterTypeMember(typeMember.nameLoc, onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(typeMember.asgnLoc, onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
