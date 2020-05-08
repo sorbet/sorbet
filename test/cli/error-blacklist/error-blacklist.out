@@ -1,6 +1,6 @@
 test/cli/error-blacklist/error-blacklist.rb:3: Expected `Integer` but found `String("1")` for argument `arg0` https://srb.help/7002
      3 |1 + "1"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
