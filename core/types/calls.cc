@@ -141,6 +141,22 @@ bool isSetter(const GlobalState &gs, NameRef fun) {
     return false;
 }
 
+u4 locSize(core::Loc loc) {
+    return loc.endPos() - loc.beginPos();
+}
+
+// Find the smallest applicable arg loc that falls within the callLoc. Returns the call site's loc if none found.
+// Used to ignore origins that are not relevant to call site.
+core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTpe) {
+    core::Loc chosen = callLoc;
+    for (auto loc : argTpe.origins) {
+        if (callLoc.contains(loc) && locSize(loc) < locSize(chosen)) {
+            chosen = loc;
+        }
+    }
+    return chosen;
+}
+
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
                                const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, bool mayBeSetter = false) {
@@ -154,7 +170,8 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible)) {
         return nullptr;
     }
-    if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
+
+    if (auto e = gs.beginError(smallestLocWithin(callLoc, argTpe), errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(gs, method.data(gs)->name)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
                         expectedType->show(gs));

@@ -65,7 +65,7 @@ class TestArgs
 
     # We error on each incorrect argument
     repeated("hi", "there") # error: Expected `Integer` but found `String("hi")` for argument `x`
-  # ^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String("there")` for argument `x`
+  #                ^^^^^^^ error: Expected `Integer` but found `String("there")` for argument `x`
   end
 
   sig do
