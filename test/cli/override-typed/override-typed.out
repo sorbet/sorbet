@@ -1,6 +1,6 @@
 test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      1 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
@@ -11,7 +11,7 @@ test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `Strin
 Errors: 1
 ./test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      1 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
@@ -22,7 +22,7 @@ Errors: 1
 Errors: 1
 test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      1 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
