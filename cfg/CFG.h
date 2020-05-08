@@ -29,7 +29,7 @@ public:
     BasicBlock *elseb;
     core::LocOffsets loc;
     bool isCondSet() {
-        return cond.variable._name.id() >= 0;
+        return cond.variable._name.isInitialized();
     }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };

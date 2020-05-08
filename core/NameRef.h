@@ -44,7 +44,7 @@ public:
     friend GlobalState;
     friend Name;
 
-    NameRef() : _id(0){};
+    NameRef() : _id(-1){};
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
     // constructing a well-known name, whose ID is stable across all
@@ -78,13 +78,22 @@ public:
 
     const NameData data(const GlobalState &gs) const;
 
+    // Returns the `-1` NameRef, used to indicate that a NameRef hasn't been written to (initialized)
+    static NameRef uninitialized() {
+        return NameRef(WellKnown{}, -1);
+    }
+
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {
         return NameRef(WellKnown{}, 0);
     }
 
+    inline bool isInitialized() const {
+        return _id != -1;
+    }
+
     inline bool exists() const {
-        return _id != 0;
+        return _id > 0;
     }
 
     NameRef addEq(GlobalState &gs) const;
