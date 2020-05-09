@@ -1,41 +1,4 @@
 cc_binary(
-    name = "test_corpus_runner",
-    testonly = 1,
-    srcs = [
-        "LSPTest.cc",
-        "LSPTest.h",
-        "test_corpus.cc",
-    ],
-    copts = ["-Iexternal/gtest/include"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//ast/desugar",
-        "//ast/treemap",
-        "//cfg",
-        "//cfg/builder",
-        "//class_flatten",
-        "//core",
-        "//definition_validator",
-        "//infer",
-        "//local_vars",
-        "//main/autogen",
-        "//main/lsp",
-        "//main/pipeline/semantic_extension:none",
-        "//namer",
-        "//payload",
-        "//resolver",
-        "//rewriter",
-        "//test/helpers",
-        "@com_google_googletest//:gtest",
-        "@cxxopts",
-    ],
-)
-
-cc_binary(
     name = "cli_test_runner",
     testonly = 1,
     srcs = [
