@@ -12,6 +12,51 @@ def dropExtension(p):
     "TODO: handle multiple . in name"
     return p.partition(".")[0]
 
+_TEST_SCRIPT = """#!/usr/bin/env bash
+exec {runner} --single_test="{test}"
+"""
+
+def _exp_test_impl(ctx):
+    ctx.actions.write(
+        output = ctx.outputs.executable,
+        content = _TEST_SCRIPT.format(
+            runner = ctx.executable.runner.short_path,
+            test = ctx.file.test.path,
+        )
+    )
+
+    runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data)
+
+    return [DefaultInfo(runfiles = runfiles)]
+
+exp_test = rule(
+    implementation = _exp_test_impl,
+    test = True,
+    attrs = {
+
+        "test": attr.label(
+            allow_single_file = True,
+        ),
+
+        "data": attr.label_list(
+            allow_files = True,
+        ),
+
+        "runner": attr.label(
+            default = ":cli_test_runner",
+            executable = True,
+            cfg = "host",
+            allow_files = True,
+        ),
+    },
+)
+
+_TEST_RUNNERS = {
+    "PosTests": ":cli_test_runner",
+    "LspTests": ":lsp_test_runner",
+    "WhitequarkParserTests": ":parser_test_runner",
+}
+
 def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_args = [], tags = []):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
 
@@ -57,12 +102,10 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             data += native.glob(["{}.*.rbupdate".format(prefix)])
             data += native.glob(["{}.*.rbedited".format(prefix)])
 
-        native.sh_test(
+        exp_test(
             name = "test_{}/{}".format(test_name_prefix, name),
-            srcs = ["test_corpus_forwarder.sh"],
-            deps = ["@bazel_tools//tools/bash/runfiles"],
-            args = ["--single_test=$(location {})".format(sentinel)] + extra_args,
             data = data,
+            test = sentinel,
             size = "small",
             tags = tags + extra_tags,
         )
