@@ -1,8 +1,8 @@
 cc_library(
     name = "doctest",
     hdrs = glob(["doctest/**/*.h"]),
-    strip_include_prefix = "doctest",
     defines = ["DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL"],
+    strip_include_prefix = "doctest",
     visibility = ["//visibility:public"],
 )
 
@@ -16,16 +16,16 @@ genrule(
 
 cc_library(
     name = "doctest_main",
-    srcs = glob(["doctest/**/*.h"]) + ["dummy-main.cc"],
     testonly = True,
+    srcs = glob(["doctest/**/*.h"]) + ["dummy-main.cc"],
     local_defines = ["DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN"],
     visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "doctest_custom_main",
-    srcs = glob(["doctest/**/*.h"]) + ["dummy-main.cc"],
     testonly = True,
+    srcs = glob(["doctest/**/*.h"]) + ["dummy-main.cc"],
     local_defines = ["DOCTEST_CONFIG_IMPLEMENT"],
     visibility = ["//visibility:public"],
 )

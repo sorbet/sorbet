@@ -3,25 +3,14 @@
 // has to go first as it violates our requirements
 
 #include "absl/strings/match.h"
-#include "ast/ast.h"
-#include "ast/desugar/Desugar.h"
-#include "ast/treemap/treemap.h"
-#include "cfg/CFG.h"
-#include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "common/web_tracer_framework/tracing.h"
-#include "core/Error.h"
 #include "test/helpers/expectations.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
-#include <memory>
-#include <string>
-#include <sys/types.h>
-#include <vector>
 
 namespace sorbet::test {
 namespace spd = spdlog;
