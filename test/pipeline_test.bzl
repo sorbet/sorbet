@@ -13,6 +13,7 @@ def dropExtension(p):
     return p.partition(".")[0]
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
+set -x
 exec {runner} --single_test="{test}"
 """
 
@@ -43,7 +44,6 @@ exp_test = rule(
         ),
 
         "runner": attr.label(
-            default = ":cli_test_runner",
             executable = True,
             cfg = "host",
             allow_files = True,
@@ -53,7 +53,7 @@ exp_test = rule(
 
 _TEST_RUNNERS = {
     "PosTests": ":cli_test_runner",
-    "LspTests": ":lsp_test_runner",
+    "LSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
 }
 
@@ -76,6 +76,10 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
                     "disabled": "disabled" in path,
                 }
                 tests[test_name] = data
+
+    runner = _TEST_RUNNERS.get(test_name_prefix)
+    if None == runner:
+        fail(msg = "Unknown pipeline test type: {}".format(test_name_prefix))
 
     enabled_tests = []
     disabled_tests = []
@@ -104,6 +108,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
 
         exp_test(
             name = "test_{}/{}".format(test_name_prefix, name),
+            runner = runner,
             data = data,
             test = sentinel,
             size = "small",
