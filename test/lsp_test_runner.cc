@@ -274,7 +274,7 @@ TEST_CASE("LSPTest") {
     std::vector<std::shared_ptr<RangeAssertion>> assertions;
 
     /** Test expectations. Stored here for convenience. */
-    Expectations test;
+    Expectations test = Expectations::getExpectations(singleTest);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
