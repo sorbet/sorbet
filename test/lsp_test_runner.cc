@@ -270,11 +270,11 @@ TEST_CASE("LSPTest") {
     UnorderedSet<std::string> filenames;
     std::unique_ptr<LSPWrapper> lspWrapper;
 
-    /** All test assertions ordered by (filename, range, message). */
-    std::vector<std::shared_ptr<RangeAssertion>> assertions;
-
-    /** Test expectations. Stored here for convenience. */
+    /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);
+
+    /** All test assertions ordered by (filename, range, message). */
+    std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
