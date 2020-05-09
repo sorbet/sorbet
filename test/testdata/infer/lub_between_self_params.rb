@@ -5,8 +5,8 @@
 				   V = type_member
            def explain_for(which)
              self["explain_#{which}"] || self[:"explain_#{which}"]
-#            ^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `QueryProfile::V` but found `String` for argument `arg0`
-#                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `QueryProfile::V` but found `Symbol` for argument `arg0`
+#                 ^^^^^^^^^^^^^^^^^^ error: Expected `QueryProfile::V` but found `String` for argument `arg0`
+#                                             ^^^^^^^^^^^^^^^^^^^ error: Expected `QueryProfile::V` but found `Symbol` for argument `arg0`
            end
          end
 
@@ -23,7 +23,7 @@ class Child < Parent
   A = type_member
   def foo(which)
     self["foo"] || self["bar"]
-#   ^^^^^^^^^^^ error: Expected `Child::A` but found `String("foo")` for argument `k`
+#        ^^^^^ error: Expected `Child::A` but found `String("foo")` for argument `k`
 #                       ^^^^^ error: This code is unreachable
   end
 end

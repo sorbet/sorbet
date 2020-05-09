@@ -2,7 +2,7 @@ test/cli/override-typed-bad/override-typed-bad.rb: Useless override of strictnes
 
 test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      2 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
@@ -14,7 +14,7 @@ Errors: 2
 ----
 test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      2 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^
@@ -26,7 +26,7 @@ Errors: 1
 ----
 test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      2 |1 + "s"
-        ^^^^^^^
+            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148: Method `Integer#+` has specified `arg0` as `Integer`
      148 |        arg0: Integer,
                   ^^^^

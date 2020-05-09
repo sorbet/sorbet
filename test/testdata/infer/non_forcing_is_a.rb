@@ -5,7 +5,7 @@ x = T.unsafe(nil)
 T::NonForcingConstants.non_forcing_is_a? # error: Not enough arguments
 
 p T::NonForcingConstants.non_forcing_is_a?(nil, nil)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String`
+#                                               ^^^ error: Expected `String`
 #                                               ^^^  error: only accepts string literals
 
 T::NonForcingConstants.non_forcing_is_a?(x, '') # error: must not be empty

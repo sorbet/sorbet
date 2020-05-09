@@ -22,7 +22,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
-            ^^^^^^^^^^
+                ^^^^^
     test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
@@ -76,7 +76,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
-            ^^^^^^^^^^
+                ^^^^^
     test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
@@ -130,7 +130,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
 
 test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for argument `arg` https://srb.help/7002
     .. |    foo("foo")
-            ^^^^^^^^^^
+                ^^^^^
     test/cli/errors/errors.rb:12: Method `ComplexError#foo` has specified `arg` as `Integer`
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^

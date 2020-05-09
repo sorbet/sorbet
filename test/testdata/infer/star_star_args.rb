@@ -38,12 +38,12 @@ class Main
         one_kwarg(foo: "bad", a: "bad") # error: Expected `Integer` but found `String("bad")` for argument `foo`
         one_kwarg(foo: 1, a: 1) # error: Expected `String` but found `Integer(1)` for argument `args`
         one_kwarg(foo: "bad", a: 1) # error: Expected `Integer` but found `String("bad")` for argument `foo`
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `Integer(1)` for argument `args`
+      #           ^^^^^^^^^^^^^^^^ error: Expected `String` but found `Integer(1)` for argument `args`
         with_type
         with_type(a: 1)
         with_type(a: "bad") # error: Expected `Integer` but found `String("bad")` for argument `args`
         with_type(a: "bad", b: "bad2") # error: Expected `Integer` but found `String("bad")` for argument `args`
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String("bad2")` for argument `args`
+      #           ^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String("bad2")` for argument `args`
 
         # This should assign `z`, instead of assigning `x={z: :foo}`,
         # which would happen with `y={}`

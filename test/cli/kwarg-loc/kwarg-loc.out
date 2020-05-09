@@ -1,12 +1,10 @@
-kwarg-loc.rb:16: Expected `Integer` but found `String("1")` for argument `d` https://srb.help/7002
-    16 |foo(
+kwarg-loc.rb:17: Expected `Integer` but found `String("1")` for argument `d` https://srb.help/7002
     17 |  a: 1,
     18 |  b: 1,
     19 |  c: 1,
     20 |  d: "1",
     21 |  e: 1,
     22 |  f: 1,
-    23 |)
     kwarg-loc.rb:8: Method `Object#foo` has specified `d` as `Integer`
      8 |    d: Integer,
             ^
@@ -19,15 +17,9 @@ kwarg-loc.rb:16: Expected `Integer` but found `String("1")` for argument `d` htt
     21 |  e: 1,
     22 |  f: 1,
 
-kwarg-loc.rb:38: Expected `Integer` but found `String("1")` for argument `d` https://srb.help/7002
-    38 |bar(
-    39 |  1,
-    40 |  1,
-    41 |  1,
+kwarg-loc.rb:42: Expected `Integer` but found `String("1")` for argument `d` https://srb.help/7002
     42 |  "1",
-    43 |  1,
-    44 |  1,
-    45 |)
+          ^^^
     kwarg-loc.rb:30: Method `Object#bar` has specified `d` as `Integer`
     30 |    d: Integer,
             ^

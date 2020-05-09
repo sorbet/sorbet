@@ -35,7 +35,7 @@ bc.foo(Complex(0, 1))
 bc.foo(-Complex(0, 1))
 bc.foo(Complex(0, -1))
  bc.foo(-1)
-#^^^^^^^^^^ error: Expected `Complex` but found `Integer(-1)` for argument `x`
+#       ^^ error: Expected `Complex` but found `Integer(-1)` for argument `x`
 
 MyBasicClass.new.bar
 
@@ -46,4 +46,4 @@ kc.foo(Complex(0, 1))
 kc.foo(-Complex(0, 1))
 kc.foo(Complex(0, -1))
  kc.foo(-1)
-#^^^^^^^^^^ error: Expected `Complex` but found `Integer(-1)` for argument `x`
+#       ^^ error: Expected `Complex` but found `Integer(-1)` for argument `x`
