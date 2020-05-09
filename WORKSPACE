@@ -10,6 +10,7 @@ llvm_toolchain(
     name = "llvm_toolchain",
     absolute_paths = True,
     llvm_mirror_prefixes = [
+        "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
         "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
         "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
     ],
