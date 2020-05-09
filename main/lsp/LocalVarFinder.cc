@@ -29,7 +29,7 @@ unique_ptr<ast::MethodDef> LocalVarFinder::preTransformMethodDef(core::Context c
     auto currentMethod = methodDef->symbol;
 
     if (currentMethod == this->targetMethod) {
-        auto parsedArgs = ast::ArgParsing::parseArgs(ctx, methodDef->args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(methodDef->args);
         for (const auto &parsedArg : parsedArgs) {
             this->result_.emplace_back(parsedArg.local);
         }

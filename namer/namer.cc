@@ -74,12 +74,14 @@ class NameInserter {
         return existing;
     }
 
-    unique_ptr<ast::Expression> arg2Symbol(core::MutableContext ctx, int pos, ast::ParsedArg parsedArg) {
+    unique_ptr<ast::Expression> arg2Symbol(core::MutableContext ctx, int pos, unique_ptr<ast::Expression> arg,
+                                           ast::ParsedArg parsedArg) {
         if (pos < ctx.owner.data(ctx)->arguments().size()) {
             // TODO: check that flags match;
             unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
-            if (parsedArg.default_) {
-                localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
+            if (parsedArg.flags.isDefault) {
+                localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr),
+                                                 ast::ArgParsing::getDefault(parsedArg, move(arg)));
             }
 
             ctx.owner.data(ctx)->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
@@ -87,9 +89,9 @@ class NameInserter {
         }
 
         core::NameRef name;
-        if (parsedArg.keyword) {
+        if (parsedArg.flags.isKeyword) {
             name = parsedArg.local._name;
-        } else if (parsedArg.block) {
+        } else if (parsedArg.flags.isBlock) {
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
@@ -113,19 +115,11 @@ class NameInserter {
         ENFORCE(ctx.owner.data(ctx)->arguments().size() >= pos + 1);
         unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
 
-        if (parsedArg.default_) {
-            argInfo.flags.isDefault = true;
-            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr), move(parsedArg.default_));
-        }
+        argInfo.flags = parsedArg.flags;
 
-        if (parsedArg.keyword) {
-            argInfo.flags.isKeyword = true;
-        }
-        if (parsedArg.block) {
-            argInfo.flags.isBlock = true;
-        }
-        if (parsedArg.repeated) {
-            argInfo.flags.isRepeated = true;
+        if (parsedArg.flags.isDefault) {
+            localExpr =
+                ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
         }
 
         return move(localExpr);
@@ -399,7 +393,9 @@ public:
         return ast::MK::InsSeq(loc.offsets(), std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, vector<ast::ParsedArg> parsedArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &oldArgs,
+                                          vector<ast::ParsedArg> parsedArgs) {
+        ENFORCE(oldArgs.size() == parsedArgs.size());
         ast::MethodDef::ARGS_store args;
         bool inShadows = false;
         bool intrinsic = isIntrinsic(ctx, ctx.owner);
@@ -418,19 +414,19 @@ public:
             i++;
             auto localVariable = arg.local;
 
-            if (arg.shadow) {
+            if (arg.flags.isShadow) {
                 inShadows = true;
                 auto localExpr = make_unique<ast::Local>(arg.loc, localVariable);
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
 
-                if (swapArgs && arg.block) {
+                if (swapArgs && arg.flags.isBlock) {
                     // see commnent on if (swapArgs) above
                     ctx.owner.data(ctx)->arguments().emplace_back(move(swappedArg));
                 }
 
-                auto expr = arg2Symbol(ctx, i, move(arg));
+                auto expr = arg2Symbol(ctx, i, move(oldArgs[i]), move(arg));
                 args.emplace_back(move(expr));
                 ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
             }
@@ -518,8 +514,9 @@ public:
             auto &methodArg = parsedArgs[i];
             auto &symArg = sym.data(ctx)->arguments()[i];
 
-            if (symArg.flags.isKeyword != methodArg.keyword || symArg.flags.isBlock != methodArg.block ||
-                symArg.flags.isRepeated != methodArg.repeated ||
+            if (symArg.flags.isKeyword != methodArg.flags.isKeyword ||
+                symArg.flags.isBlock != methodArg.flags.isBlock ||
+                symArg.flags.isRepeated != methodArg.flags.isRepeated ||
                 (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
                 return false;
             }
@@ -557,10 +554,10 @@ public:
             auto &methodArg = parsedArgs[i];
             auto &symArg = sym.data(ctx)->arguments()[i];
 
-            if (symArg.flags.isKeyword != methodArg.keyword) {
+            if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.keyword ? "keyword" : "non-keyword");
+                                methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
                         sym.data(ctx)->loc(),
                         "The corresponding argument `{}` in the previous definition was {}a keyword argument",
@@ -576,11 +573,11 @@ public:
             // with the "without matching argument count" error above. So, as long as we have maintained the intended
             // invariants around methods and arguments, we do not need to ever issue an error about non-matching
             // isBlock-ness.
-            ENFORCE(symArg.flags.isBlock == methodArg.block);
-            if (symArg.flags.isRepeated != methodArg.repeated) {
+            ENFORCE(symArg.flags.isBlock == methodArg.flags.isBlock);
+            if (symArg.flags.isRepeated != methodArg.flags.isRepeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.repeated ? "splat" : "non-splat");
+                                methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
                     e.addErrorLine(sym.data(ctx)->loc(),
                                    "The corresponding argument `{}` in the previous definition was {}a splat argument",
                                    symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
@@ -609,7 +606,7 @@ public:
         }
         ENFORCE(owner.data(ctx)->isClassOrModule());
 
-        auto parsedArgs = ast::ArgParsing::parseArgs(ctx, method->args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(method->args);
 
         // There are three symbols in play here, because there's:
         //
@@ -652,14 +649,14 @@ public:
             }
             sym.data(ctx)->addLoc(ctx, method->declLoc);
             method->symbol = sym;
-            method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
+            method->args = fillInArgs(ctx.withOwner(method->symbol), method->args, move(parsedArgs));
             return method;
         }
 
         // we'll only get this far if we're not in incremental mode, so enter a new symbol and fill in the data
         // appropriately
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
-        method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs));
+        method->args = fillInArgs(ctx.withOwner(method->symbol), method->args, move(parsedArgs));
         method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
         if (method->flags.isRewriterSynthesized) {
             method->symbol.data(ctx)->setRewriterSynthesized();
