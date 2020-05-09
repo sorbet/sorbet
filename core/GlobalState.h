@@ -73,20 +73,20 @@ public:
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
-    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);
     }
-    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
     }
-    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
     }
     SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, std::vector<u4> methodHash) const;
-    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
