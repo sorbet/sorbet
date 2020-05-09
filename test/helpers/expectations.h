@@ -16,6 +16,8 @@ struct Expectations {
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
     // expectations type => file => expectations for file
     UnorderedMap<std::string, UnorderedMap<std::string, std::string>> expectations;
+
+    static Expectations getExpectations(std::string singleTest);
 };
 } // namespace sorbet::test
 
