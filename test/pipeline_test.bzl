@@ -23,7 +23,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
-        )
+        ),
     )
 
     runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data)
@@ -34,15 +34,12 @@ exp_test = rule(
     implementation = _exp_test_impl,
     test = True,
     attrs = {
-
         "test": attr.label(
             allow_single_file = True,
         ),
-
         "data": attr.label_list(
             allow_files = True,
         ),
-
         "runner": attr.label(
             executable = True,
             cfg = "host",

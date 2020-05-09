@@ -45,7 +45,6 @@
 #include <sys/types.h>
 #include <vector>
 
-
 namespace sorbet::test {
 namespace spd = spdlog;
 using namespace std;
@@ -144,7 +143,8 @@ TEST_CASE("WhitequarkParserTest") {
     for (auto &gotPhase : got) {
         auto expectation = test.expectations.find(gotPhase.first);
         REQUIRE_MESSAGE(expectation != test.expectations.end(), "missing expectation for " << gotPhase.first);
-        REQUIRE_MESSAGE(expectation->second.size() == 1, "found unexpected multiple expectations of type " << gotPhase.first);
+        REQUIRE_MESSAGE(expectation->second.size() == 1,
+                        "found unexpected multiple expectations of type " << gotPhase.first);
 
         auto checker = test.folder + expectation->second.begin()->second;
         auto expect = FileOps::read(checker.c_str());
