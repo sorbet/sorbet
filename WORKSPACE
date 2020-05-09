@@ -9,6 +9,11 @@ load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 llvm_toolchain(
     name = "llvm_toolchain",
     absolute_paths = True,
+    llvm_mirror_prefixes = [
+        "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
+        "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+    ],
     llvm_version = "9.0.0",
 )
 
@@ -68,6 +73,8 @@ gemfile_lock_deps(
         ]
     ],
 )
+
+BAZEL_VERSION = "2.2.0"
 
 BAZEL_INSTALLER_VERSION_linux_SHA = "6dfcd3b3d7a8811f53a1776c285cf533bc12c33d1eaf49b6105e9699df26ef57"
 

@@ -5,7 +5,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@foo")
+        <self>.class().decorator().prop_get_logic(<self>, :"foo", arg2)
+      end
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
@@ -21,7 +24,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:"@bar")
+        <self>.class().decorator().prop_get_logic(<self>, :"bar", arg2)
+      end
     end
 
     <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
