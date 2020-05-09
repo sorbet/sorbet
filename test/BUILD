@@ -104,6 +104,7 @@ cc_binary(
         "//main/lsp",
         "//payload",
         "//test/helpers",
+        "@doctest//:doctest_custom_main",
     ],
 )
 
