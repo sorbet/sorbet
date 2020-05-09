@@ -1157,7 +1157,8 @@ class NameDefiner {
     }
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const FoundTypeMember &typeMember) {
-        if (typeMember.tooManyArgs) {
+        // TODO: Move to finder pass?
+        if (typeMember.tooManyArgs || ctx.owner == core::Symbols::root()) {
             FoundFieldOrVariable fieldOrVariable;
             fieldOrVariable.owner = typeMember.owner;
             fieldOrVariable.name = typeMember.name;
@@ -1169,8 +1170,6 @@ class NameDefiner {
 
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
-
-        ENFORCE(ctx.owner != core::Symbols::root());
 
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
 
