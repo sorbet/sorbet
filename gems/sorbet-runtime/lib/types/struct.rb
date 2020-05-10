@@ -2,9 +2,19 @@
 # typed: true
 
 class T::InexactStruct
+  extend T::Sig
+
   include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
+
+  sig {params(other: Object).returns(T::Boolean)}
+  def ==(other)
+    return true if self.equal?(other)
+    return false unless other.is_a?(self.class)
+
+    self.class.props.all? { |prop, _| self.send(prop) == other.send(prop) }
+  end
 end
 
 class T::Struct < T::InexactStruct
