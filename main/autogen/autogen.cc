@@ -35,7 +35,7 @@ class AutogenWalk {
     vector<ast::Send *> ignoring;
     vector<ScopeType> scopeTypes;
 
-    UnorderedMap<ast::Expression *, ReferenceRef> refMap;
+    UnorderedMap<void *, ReferenceRef> refMap;
 
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
@@ -50,8 +50,9 @@ class AutogenWalk {
     vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
         vector<core::NameRef> out;
         while (cnst != nullptr && cnst->original != nullptr) {
-            out.emplace_back(cnst->original->cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
+            auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original);
+            out.emplace_back(original.cnst);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         reverse(out.begin(), out.end());
         return out;
@@ -67,9 +68,11 @@ public:
         nesting.emplace_back(def.id);
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
-            return original;
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
         }
         scopeTypes.emplace_back(ScopeType::Class);
 
@@ -77,26 +80,26 @@ public:
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        if (original->kind == ast::ClassDef::Kind::Class) {
+        if (original.kind == ast::ClassDef::Kind::Class) {
             def.type = Definition::Type::Class;
         } else {
             def.type = Definition::Type::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs,
-                                      [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
-        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
+        def.is_empty =
+            absl::c_all_of(original.rhs, [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
+        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
-        original->name = ast::TreeMap::apply(ctx, *this, move(original->name));
-        auto it = refMap.find(original->name.get());
+        original.name = ast::TreeMap::apply(ctx, *this, move(original.name));
+        auto it = refMap.find(original.name.get());
         ENFORCE(it != refMap.end());
         def.defining_ref = it->second;
         refs[it->second.id()].is_defining_ref = true;
-        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original->loc);
+        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original.loc);
 
-        auto ait = original->ancestors.begin();
-        if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
+        auto ait = original.ancestors.begin();
+        if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;
@@ -104,15 +107,15 @@ public:
         // Then push a scope
         nesting.emplace_back(def.id);
 
-        for (; ait != original->ancestors.end(); ++ait) {
+        for (; ait != original.ancestors.end(); ++ait) {
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
         }
-        for (auto &ancst : original->singletonAncestors) {
+        for (auto &ancst : original.singletonAncestors) {
             ancst = ast::TreeMap::apply(ctx, *this, move(ancst));
         }
 
-        for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+        for (auto &ancst : original.ancestors) {
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst);
             if (cnst == nullptr || cnst->original == nullptr) {
                 // Don't include synthetic ancestors
                 continue;
@@ -122,40 +125,43 @@ public:
             if (it == refMap.end()) {
                 continue;
             }
-            if (original->kind == ast::ClassDef::Kind::Class && &ancst == &original->ancestors.front()) {
+            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
                 // superclass
                 def.parent_ref = it->second;
             }
             refs[it->second.id()].parent_of = def.id;
         }
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
-            return original;
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
         }
 
         nesting.pop_back();
         scopeTypes.pop_back();
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr block) {
         scopeTypes.emplace_back(ScopeType::Block);
         return block;
     }
 
-    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr block) {
         scopeTypes.pop_back();
         return block;
     }
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
         while (cnst != nullptr && cnst->original != nullptr) {
-            cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
+            auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         if (cnst && cnst->symbol == core::Symbols::root()) {
             return true;
@@ -163,17 +169,19 @@ public:
         return false;
     }
 
-    unique_ptr<ast::Expression> postTransformConstantLit(core::Context ctx, unique_ptr<ast::ConstantLit> original) {
+    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::ConstantLit>(tree);
+
         if (!ignoring.empty()) {
-            return original;
+            return tree;
         }
         if (original->original == nullptr) {
-            return original;
+            return tree;
         }
 
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
-        if (isCBaseConstant(original.get())) {
+        if (isCBaseConstant(original)) {
             ref.scope = nesting.front();
         } else {
             ref.nesting = nesting;
@@ -186,7 +194,7 @@ public:
         // This will get overridden if this loc is_defining_ref at the point
         // where we set that flag.
         ref.definitionLoc = core::Loc(ctx.file, original->loc);
-        ref.name = constantName(ctx, original.get());
+        ref.name = constantName(ctx, original);
         auto sym = original->symbol;
         if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = symbolName(ctx, sym);
@@ -199,39 +207,43 @@ public:
         if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
             ref.parentKind = ClassKind::Class;
         }
-        refMap[original.get()] = ref.id;
-        return original;
+        refMap[tree.get()] = ref.id;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> original) {
-        auto *lhs = ast::cast_tree<ast::ConstantLit>(original->lhs.get());
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::ref_tree<ast::Assign>(tree);
+
+        auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
-            return original;
+            return tree;
         }
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
+        auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
         if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
             def.type = Definition::Type::Alias;
-            ENFORCE(refMap.count(rhs));
-            def.aliased_ref = refMap[rhs];
+            ENFORCE(refMap.count(original.rhs.get()));
+            def.aliased_ref = refMap[original.rhs.get()];
         } else {
             def.type = Definition::Type::Casgn;
         }
-        ENFORCE(refMap.count(lhs));
-        auto &ref = refs[refMap[lhs].id()];
+        ENFORCE(refMap.count(original.lhs.get()));
+        auto &ref = refs[refMap[original.lhs.get()].id()];
         def.defining_ref = ref.id;
         ref.is_defining_ref = true;
-        ref.definitionLoc = core::Loc(ctx.file, original->loc);
+        ref.definitionLoc = core::Loc(ctx.file, original.loc);
 
         def.defines_behavior = true;
         def.is_empty = false;
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::Send>(tree);
+
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
         // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
         // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
@@ -239,21 +251,22 @@ public:
         if (original->fun == core::Names::keepForIde() ||
             (!inBlock && original->recv->isSelfReference() &&
              (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
-            ignoring.emplace_back(original.get());
+            ignoring.emplace_back(original);
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
+            auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));
             }
         }
-        return original;
+        return tree;
     }
-    unique_ptr<ast::Send> postTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (!ignoring.empty() && ignoring.back() == original.get()) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::Send>(tree);
+        if (!ignoring.empty() && ignoring.back() == original) {
             ignoring.pop_back();
         }
-        return original;
+        return tree;
     }
 
     ParsedFile parsedFile() {

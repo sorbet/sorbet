@@ -30,8 +30,8 @@ namespace sorbet::rewriter {
  */
 class Mattr final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, const ast::Send *send,
-                                                             ast::ClassDef::Kind classDefKind);
+    static std::vector<ast::TreePtr> run(core::MutableContext ctx, const ast::Send *send,
+                                         ast::ClassDef::Kind classDefKind);
 
     Mattr() = delete;
 };

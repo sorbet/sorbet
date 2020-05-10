@@ -7,7 +7,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isTSigWithoutRuntime(ast::Expression *expr) {
+bool isTSigWithoutRuntime(ast::TreePtr &expr) {
     if (auto *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
         return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
     } else {
@@ -15,12 +15,12 @@ bool isTSigWithoutRuntime(ast::Expression *expr) {
         if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {
             return false;
         }
-        auto *sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope.get());
+        auto *sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope);
         if (sig == nullptr || sig->cnst != core::Names::Constants::Sig()) {
             return false;
         }
-        auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope.get());
-        return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope.get());
+        auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope);
+        return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
     }
 }
 
@@ -32,7 +32,7 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
         return false;
     }
 
-    if (!(send->recv->isSelfReference() || isTSigWithoutRuntime(send->recv.get()))) {
+    if (!(send->recv->isSelfReference() || isTSigWithoutRuntime(send->recv))) {
         return false;
     }
 

@@ -11,14 +11,14 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<unique_ptr<ast::Expression>> Private::run(core::MutableContext ctx, ast::Send *send) {
-    vector<unique_ptr<ast::Expression>> empty;
+vector<ast::TreePtr> Private::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::TreePtr> empty;
 
     if (send->args.size() != 1) {
         return empty;
     }
 
-    auto mdef = ast::cast_tree<ast::MethodDef>(send->args[0].get());
+    auto mdef = ast::cast_tree<ast::MethodDef>(send->args[0]);
     if (mdef == nullptr) {
         return empty;
     }

@@ -54,11 +54,13 @@ string singleTest;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->symbol.data(ctx)->isOverloaded()) {
-            return m;
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &m = ast::ref_tree<ast::MethodDef>(tree);
+
+        if (m.symbol.data(ctx)->isOverloaded()) {
+            return tree;
         }
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
         auto symbol = cfg->symbol;
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         if (cfg) {
@@ -67,7 +69,7 @@ public:
             }
         }
         cfgs.push_back(move(cfg));
-        return m;
+        return tree;
     }
 };
 

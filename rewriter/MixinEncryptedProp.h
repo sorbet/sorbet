@@ -38,7 +38,7 @@ namespace sorbet::rewriter {
  */
 class MixinEncryptedProp final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Send *send);
+    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Send *send);
 
     MixinEncryptedProp() = delete;
 };

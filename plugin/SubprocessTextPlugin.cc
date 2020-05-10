@@ -13,24 +13,26 @@ struct Namespace {
     Type type;
     InlinedVector<core::NameRef, 3> components;
 
-    Namespace(const unique_ptr<ast::ClassDef> &klass) {
+    Namespace(ast::TreePtr &tree) {
+        auto *klass = ast::cast_tree<ast::ClassDef>(tree);
         type = (klass->kind == ast::ClassDef::Kind::Module ? Namespace::Type::Module : Namespace::Type::Class);
-        fillComponents(klass->name.get());
+        fillComponents(klass->name);
     }
     ~Namespace() = default;
     Namespace(Namespace &&) = default;
 
 private:
-    void fillComponents(ast::Expression *constant) {
-        while (constant) {
-            if (auto unresolved = ast::cast_tree<ast::UnresolvedConstantLit>(constant)) {
+    void fillComponents(ast::TreePtr &constant) {
+        auto *cursor = &constant;
+        while (cursor) {
+            if (auto unresolved = ast::cast_tree<ast::UnresolvedConstantLit>(*cursor)) {
                 components.push_back(unresolved->cnst);
-                constant = unresolved->scope.get();
-            } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(constant)) {
+                cursor = &unresolved->scope;
+            } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(*cursor)) {
                 ENFORCE(ident->name == core::Names::singleton());
                 components.push_back(core::Names::singleton());
                 break;
-            } else if (auto constLit = ast::cast_tree<ast::ConstantLit>(constant)) {
+            } else if (auto constLit = ast::cast_tree<ast::ConstantLit>(*cursor)) {
                 ENFORCE(constLit->symbol == core::Symbols::root());
                 components.push_back(core::Names::Constants::Root());
                 break;
@@ -47,13 +49,14 @@ struct SpawningWalker {
 
     SpawningWalker() {}
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto *klass = ast::cast_tree<ast::ClassDef>(tree);
         if (klass->symbol == core::Symbols::root()) {
-            return klass;
+            return tree;
         }
-        nesting.emplace_back(klass);
+        nesting.emplace_back(tree);
         for (auto &statement : klass->rhs) {
-            auto send = ast::cast_tree<ast::Send>(statement.get());
+            auto send = ast::cast_tree<ast::Send>(statement);
             if (!send) {
                 continue;
             }
@@ -117,19 +120,18 @@ struct SpawningWalker {
                 }
             }
         }
-        return klass;
+        return tree;
     }
 
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        if (klass->symbol != core::Symbols::root()) {
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr klass) {
+        if (ast::cast_tree<ast::ClassDef>(klass)->symbol != core::Symbols::root()) {
             nesting.pop_back();
         }
         return klass;
     }
 };
 
-pair<unique_ptr<ast::Expression>, vector<shared_ptr<core::File>>>
-SubprocessTextPlugin::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
+pair<ast::TreePtr, vector<shared_ptr<core::File>>> SubprocessTextPlugin::run(core::Context ctx, ast::TreePtr tree) {
     if (!ctx.state.hasAnyDslPlugin()) {
         vector<shared_ptr<core::File>> empty;
         return {move(tree), empty};

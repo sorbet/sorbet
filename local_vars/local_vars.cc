@@ -35,13 +35,13 @@ class LocalNameInserter {
         core::NameRef name;
         core::LocalVariable local;
         core::LocOffsets loc;
-        unique_ptr<ast::Reference> expr;
+        ast::TreePtr expr;
         ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(unique_ptr<ast::Reference> arg) {
+    NamedArg nameArg(ast::TreePtr arg) {
         NamedArg named;
 
         typecase(
@@ -50,7 +50,7 @@ class LocalNameInserter {
                 named.name = nm->name;
                 named.local = enterLocal(named.name);
                 named.loc = arg->loc;
-                named.expr = make_unique<ast::Local>(arg->loc, named.local);
+                named.expr = ast::make_tree<ast::Local>(arg->loc, named.local);
             },
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
@@ -80,7 +80,7 @@ class LocalNameInserter {
                 named.name = local->localVariable._name;
                 named.local = enterLocal(named.name);
                 named.loc = arg->loc;
-                named.expr = make_unique<ast::Local>(local->loc, named.local);
+                named.expr = ast::make_tree<ast::Local>(local->loc, named.local);
             });
 
         return named;
@@ -90,13 +90,11 @@ class LocalNameInserter {
         vector<NamedArg> namedArgs;
         UnorderedSet<core::NameRef> nameSet;
         for (auto &arg : methodArgs) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
+            auto *refExp = ast::cast_tree<ast::Reference>(arg);
             if (!refExp) {
                 Exception::raise("Must be a reference!");
             }
-            unique_ptr<ast::Reference> refExpImpl(refExp);
-            arg.release();
-            auto named = nameArg(move(refExpImpl));
+            auto named = nameArg(move(arg));
             nameSet.insert(named.name);
             namedArgs.emplace_back(move(named));
         }
@@ -205,41 +203,43 @@ class LocalNameInserter {
     }
 
 public:
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
+    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         enterClass();
-        return klass;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
+    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         exitScope();
-        return klass;
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
+    ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         enterMethod();
 
-        method->args = fillInArgs(nameArgs(ctx, method->args));
-        return method;
+        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        method.args = fillInArgs(nameArgs(ctx, method.args));
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
+    ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         exitScope();
-        return method;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
-        if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
-            original->args.clear();
+    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto &original = ast::ref_tree<ast::Send>(tree);
+        if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+            original.args.clear();
             if (scopeStack.back().insideMethod) {
                 ast::Hash::ENTRY_store keywordArgKeys;
                 ast::Hash::ENTRY_store keywordArgVals;
                 for (auto arg : scopeStack.back().args) {
                     if (arg.flags.isPositional()) {
                         ENFORCE(keywordArgKeys.empty(), "Saw positional arg after keyword arg");
-                        original->args.emplace_back(make_unique<ast::Local>(original->loc, arg.arg));
+                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
                     } else if (arg.flags.isKeyword()) {
-                        keywordArgKeys.emplace_back(ast::MK::Symbol(original->loc, arg.arg._name));
-                        keywordArgVals.emplace_back(make_unique<ast::Local>(original->loc, arg.arg));
+                        keywordArgKeys.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
+                        keywordArgVals.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
                     } else if (arg.flags.repeated || arg.flags.block) {
                         // Explicitly skip for now.
                         // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
@@ -250,20 +250,21 @@ public:
                     }
                 }
                 if (!keywordArgKeys.empty()) {
-                    original->args.emplace_back(
-                        ast::MK::Hash(original->loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
+                    original.args.emplace_back(
+                        ast::MK::Hash(original.loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
                 }
             } else {
-                if (auto e = ctx.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
+                if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
                     e.setHeader("`{}` outside of method", "super");
                 }
             }
         }
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
+    ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr tree) {
+        auto &blk = ast::ref_tree<ast::Block>(tree);
         auto outerArgs = scopeStack.back().args;
         auto &frame = enterBlock();
         frame.args = std::move(outerArgs);
@@ -276,28 +277,28 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk->args = fillInArgs(nameArgs(ctx, blk->args));
+        blk.args = fillInArgs(nameArgs(ctx, blk.args));
 
-        return blk;
+        return tree;
     }
 
-    unique_ptr<ast::Block> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
+    ast::TreePtr postTransformBlock(core::MutableContext ctx, ast::TreePtr tree) {
         exitScope();
-        return blk;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
-                                                             unique_ptr<ast::UnresolvedIdent> nm) {
-        if (nm->kind == ast::UnresolvedIdent::Kind::Local) {
+    ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
+        auto &nm = ast::ref_tree<ast::UnresolvedIdent>(tree);
+        if (nm.kind == ast::UnresolvedIdent::Kind::Local) {
             auto &frame = scopeStack.back();
-            core::LocalVariable &cur = frame.locals[nm->name];
+            core::LocalVariable &cur = frame.locals[nm.name];
             if (!cur.exists()) {
-                cur = enterLocal(nm->name);
-                frame.locals[nm->name] = cur;
+                cur = enterLocal(nm.name);
+                frame.locals[nm.name] = cur;
             }
-            return make_unique<ast::Local>(nm->loc, cur);
+            return ast::make_tree<ast::Local>(nm.loc, cur);
         } else {
-            return nm;
+            return tree;
         }
     }
 

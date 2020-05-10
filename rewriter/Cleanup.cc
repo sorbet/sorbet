@@ -12,33 +12,37 @@ namespace sorbet::rewriter {
 // pass, specifically by removing EmptyTree nodes in places where they can be safely removed (i.e. as part of longer
 // sequences of expressions where they are not a return value)
 struct CleanupWalk {
-    unique_ptr<ast::Expression> postTransformInsSeq(core::Context ctx, unique_ptr<ast::InsSeq> insSeq) {
+    ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
+        auto &insSeq = ast::ref_tree<ast::InsSeq>(tree);
+
         ast::InsSeq::STATS_store newStore;
-        for (auto &m : insSeq->stats) {
-            if (!ast::isa_tree<ast::EmptyTree>(m.get())) {
+        for (auto &m : insSeq.stats) {
+            if (!ast::isa_tree<ast::EmptyTree>(m)) {
                 newStore.emplace_back(move(m));
             }
         }
         if (newStore.empty()) {
-            return move(insSeq->expr);
+            return move(insSeq.expr);
         }
-        insSeq->stats = std::move(newStore);
-        return insSeq;
+        insSeq.stats = std::move(newStore);
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &classDef = ast::ref_tree<ast::ClassDef>(tree);
+
         ast::ClassDef::RHS_store newStore;
-        for (auto &m : classDef->rhs) {
-            if (!ast::isa_tree<ast::EmptyTree>(m.get())) {
+        for (auto &m : classDef.rhs) {
+            if (!ast::isa_tree<ast::EmptyTree>(m)) {
                 newStore.emplace_back(move(m));
             }
         }
-        classDef->rhs = std::move(newStore);
-        return classDef;
+        classDef.rhs = std::move(newStore);
+        return tree;
     }
 };
 
-unique_ptr<ast::Expression> Cleanup::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
+ast::TreePtr Cleanup::run(core::Context ctx, ast::TreePtr tree) {
     CleanupWalk cleanup;
     return ast::TreeMap::apply(ctx, cleanup, std::move(tree));
 }
