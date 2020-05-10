@@ -25,7 +25,7 @@ compilation_database(
         "//test:lsp_test_runner",
         "//test:hello-test",
         "//test:error-check-test",
-        "//test:cli_test_runner",
+        "//test:pipeline_test_runner",
         "//test:backtrace-test-raise",
         "//test:backtrace-test-error",
         "//test:autocorrect-test",
