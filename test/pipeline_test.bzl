@@ -49,7 +49,7 @@ exp_test = rule(
 )
 
 _TEST_RUNNERS = {
-    "PosTests": ":cli_test_runner",
+    "PosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
 }
@@ -94,7 +94,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
         else:
             enabled_tests.append(test_name)
 
-        data = ["cli_test_runner"]
+        data = []
         if tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
         else:

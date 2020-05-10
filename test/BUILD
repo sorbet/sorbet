@@ -1,8 +1,8 @@
 cc_binary(
-    name = "cli_test_runner",
+    name = "pipeline_test_runner",
     testonly = 1,
     srcs = [
-        "cli_test_runner.cc",
+        "pipeline_test_runner.cc",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
