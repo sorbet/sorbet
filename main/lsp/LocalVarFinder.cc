@@ -6,30 +6,33 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-unique_ptr<ast::Assign> LocalVarFinder::postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> assign) {
+ast::TreePtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::TreePtr tree) {
     ENFORCE(!methodStack.empty());
 
-    auto *local = ast::cast_tree<ast::Local>(assign->lhs.get());
+    auto &assign = ast::ref_tree<ast::Assign>(tree);
+
+    auto *local = ast::cast_tree<ast::Local>(assign.lhs);
     if (local == nullptr) {
-        return assign;
+        return tree;
     }
 
     if (methodStack.back() == this->targetMethod) {
         this->result_.emplace_back(local->localVariable);
     }
 
-    return assign;
+    return tree;
 }
 
-unique_ptr<ast::MethodDef> LocalVarFinder::preTransformMethodDef(core::Context ctx,
-                                                                 unique_ptr<ast::MethodDef> methodDef) {
-    ENFORCE(methodDef->symbol.exists());
-    ENFORCE(methodDef->symbol != core::Symbols::todo());
+ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
 
-    auto currentMethod = methodDef->symbol;
+    ENFORCE(methodDef.symbol.exists());
+    ENFORCE(methodDef.symbol != core::Symbols::todo());
+
+    auto currentMethod = methodDef.symbol;
 
     if (currentMethod == this->targetMethod) {
-        auto parsedArgs = ast::ArgParsing::parseArgs(methodDef->args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(methodDef.args);
         for (const auto &parsedArg : parsedArgs) {
             this->result_.emplace_back(parsedArg.local);
         }
@@ -37,31 +40,30 @@ unique_ptr<ast::MethodDef> LocalVarFinder::preTransformMethodDef(core::Context c
 
     this->methodStack.emplace_back(currentMethod);
 
-    return methodDef;
+    return tree;
 }
 
-unique_ptr<ast::MethodDef> LocalVarFinder::postTransformMethodDef(core::Context ctx,
-                                                                  unique_ptr<ast::MethodDef> methodDef) {
+ast::TreePtr LocalVarFinder::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
     this->methodStack.pop_back();
-    return methodDef;
+    return tree;
 }
 
-unique_ptr<ast::ClassDef> LocalVarFinder::preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-    ENFORCE(classDef->symbol.exists());
-    ENFORCE(classDef->symbol != core::Symbols::todo());
+ast::TreePtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    auto &classDef = ast::ref_tree<ast::ClassDef>(tree);
+    ENFORCE(classDef.symbol.exists());
+    ENFORCE(classDef.symbol != core::Symbols::todo());
 
-    auto currentMethod = classDef->symbol == core::Symbols::root()
-                             ? ctx.state.lookupStaticInitForFile(classDef->declLoc)
-                             : ctx.state.lookupStaticInitForClass(classDef->symbol);
+    auto currentMethod = classDef.symbol == core::Symbols::root() ? ctx.state.lookupStaticInitForFile(classDef.declLoc)
+                                                                  : ctx.state.lookupStaticInitForClass(classDef.symbol);
 
     this->methodStack.emplace_back(currentMethod);
 
-    return classDef;
+    return tree;
 }
 
-unique_ptr<ast::ClassDef> LocalVarFinder::postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+ast::TreePtr LocalVarFinder::postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
     this->methodStack.pop_back();
-    return classDef;
+    return tree;
 }
 
 const vector<core::LocalVariable> &LocalVarFinder::result() const {

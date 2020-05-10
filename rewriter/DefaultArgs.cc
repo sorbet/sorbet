@@ -8,28 +8,33 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Expression> expr, ast::Expression *param) {
-    auto sig = ast::cast_tree<ast::Send>(expr.get());
+namespace {
+
+ast::TreePtr mangleSig(core::Context ctx, ast::TreePtr expr, ast::TreePtr &param) {
+    auto sig = ast::cast_tree<ast::Send>(expr);
     ENFORCE(sig);
     ENFORCE(sig->fun == core::Names::sig());
 
-    if (auto kw = ast::cast_tree<ast::KeywordArg>(param)) {
-        param = kw->expr.get();
+    ast::UnresolvedIdent *ident = nullptr;
+    if (auto *kw = ast::cast_tree<ast::KeywordArg>(param)) {
+        ident = ast::cast_tree<ast::UnresolvedIdent>(kw->expr);
+    } else {
+        ident = ast::cast_tree<ast::UnresolvedIdent>(param);
     }
 
-    auto ident = ast::cast_tree<ast::UnresolvedIdent>(param);
     if (!ident) {
         return ast::MK::EmptyTree();
     }
     auto name = ident->name;
 
-    unique_ptr<ast::Expression> retType;
+    ast::TreePtr retType;
 
     if (sig->block == nullptr) {
         return ast::MK::EmptyTree();
     }
 
-    auto send = ast::cast_tree<ast::Send>(sig->block->body.get());
+    auto &sigBlock = ast::ref_tree<ast::Block>(sig->block);
+    auto send = ast::cast_tree<ast::Send>(sigBlock.body);
     if (!send) {
         return ast::MK::EmptyTree();
     }
@@ -40,7 +45,7 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
                 if (send->args.size() != 1) {
                     return ast::MK::EmptyTree();
                 }
-                auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
                 if (!hash) {
                     return ast::MK::EmptyTree();
                 }
@@ -48,7 +53,7 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
                 for (auto &key : hash->keys) {
                     i++;
                     auto &value = hash->values[i];
-                    auto lit = ast::cast_tree<ast::Literal>(key.get());
+                    auto lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol(ctx)) {
                         auto symName = lit->asSymbol(ctx);
                         if (name == symName) {
@@ -71,11 +76,11 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
                 send->fun = core::Names::void_();
             }
         }
-        auto recv = ast::cast_tree<ast::Send>(send->recv.get());
+        auto recv = ast::cast_tree<ast::Send>(send->recv);
         send = recv;
     }
 
-    send = ast::cast_tree<ast::Send>(sig->block->body.get());
+    send = ast::cast_tree<ast::Send>(sigBlock.body);
     while (send != nullptr) {
         switch (send->fun._id) {
             case core::Names::returns()._id: {
@@ -96,28 +101,30 @@ unique_ptr<ast::Expression> mangleSig(core::Context ctx, unique_ptr<ast::Express
             }
         }
 
-        auto recv = ast::cast_tree<ast::Send>(send->recv.get());
+        auto recv = ast::cast_tree<ast::Send>(send->recv);
         send = recv;
     }
     return expr;
 }
 
-static std::unique_ptr<ast::Reference> dupRef(ast::Reference *arg) {
-    unique_ptr<ast::Reference> newArg;
+ast::TreePtr dupRef(ast::TreePtr &arg) {
+    ast::TreePtr newArg = nullptr;
     typecase(
-        arg, [&](ast::UnresolvedIdent *nm) { newArg = ast::MK::Local(arg->loc, nm->name); },
-        [&](ast::RestArg *rest) { newArg = ast::MK::RestArg(arg->loc, dupRef(rest->expr.get())); },
-        [&](ast::KeywordArg *kw) { newArg = ast::MK::KeywordArg(arg->loc, dupRef(kw->expr.get())); },
+        *arg, [&](ast::UnresolvedIdent *nm) { newArg = ast::MK::Local(arg->loc, nm->name); },
+        [&](ast::RestArg *rest) { newArg = ast::MK::RestArg(arg->loc, dupRef(rest->expr)); },
+        [&](ast::KeywordArg *kw) { newArg = ast::MK::KeywordArg(arg->loc, dupRef(kw->expr)); },
         [&](ast::OptionalArg *opt) {
-            newArg = ast::MK::OptionalArg(arg->loc, dupRef(opt->expr.get()), ast::MK::EmptyTree());
+            newArg = ast::MK::OptionalArg(arg->loc, dupRef(opt->expr), ast::MK::EmptyTree());
         },
-        [&](ast::BlockArg *blk) { newArg = ast::MK::BlockArg(arg->loc, dupRef(blk->expr.get())); },
-        [&](ast::ShadowArg *shadow) { newArg = ast::MK::ShadowArg(arg->loc, dupRef(shadow->expr.get())); });
+        [&](ast::BlockArg *blk) { newArg = ast::MK::BlockArg(arg->loc, dupRef(blk->expr)); },
+        [&](ast::ShadowArg *shadow) { newArg = ast::MK::ShadowArg(arg->loc, dupRef(shadow->expr)); });
     return newArg;
 }
 
+} // namespace
+
 void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    vector<unique_ptr<ast::Expression>> newMethods;
+    vector<ast::TreePtr> newMethods;
     ast::Send *lastSig = nullptr;
     bool isOverload = false;
 
@@ -148,25 +155,24 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 auto uniqueNum = 1;
                 for (auto &methodArg : mdef->args) {
                     ++i;
-                    auto arg = ast::cast_tree<ast::OptionalArg>(methodArg.get());
+                    auto arg = ast::cast_tree<ast::OptionalArg>(methodArg);
                     if (!arg) {
                         continue;
                     }
 
-                    ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(arg->expr.get()) ||
-                            ast::isa_tree<ast::KeywordArg>(arg->expr.get()));
+                    ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(arg->expr) ||
+                            ast::isa_tree<ast::KeywordArg>(arg->expr));
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::DefaultArg, mdef->name, uniqueNum++);
                     ast::MethodDef::ARGS_store args;
                     for (auto &arg : mdef->args) {
-                        auto ref = ast::cast_tree<ast::Reference>(arg.get());
-                        args.emplace_back(dupRef(ref));
+                        args.emplace_back(dupRef(arg));
                     }
                     auto loc = arg->default_->loc;
                     auto rhs = move(arg->default_);
                     arg->default_ = ast::MK::EmptyTree();
 
                     if (lastSig) {
-                        auto sig = mangleSig(ctx, lastSig->deepCopy(), arg->expr.get());
+                        auto sig = mangleSig(ctx, lastSig->deepCopy(), arg->expr);
                         if (sig == nullptr) {
                             continue;
                         }
@@ -174,7 +180,10 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     }
                     auto defaultArgDef =
                         ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, std::move(args), std::move(rhs));
-                    defaultArgDef->flags.isSelfMethod = mdef->flags.isSelfMethod;
+                    {
+                        auto &defaultDef = ast::ref_tree<ast::MethodDef>(defaultArgDef);
+                        defaultDef.flags.isSelfMethod = mdef->flags.isSelfMethod;
+                    }
                     newMethods.emplace_back(move(defaultArgDef));
                 }
                 lastSig = nullptr;

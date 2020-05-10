@@ -16,7 +16,7 @@ namespace sorbet::rewriter {
  */
 class Regexp final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Assign *asgn);
+    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Assign *asgn);
 
     Regexp() = delete;
 };

@@ -11,13 +11,13 @@ using namespace std;
 
 namespace sorbet::rewriter {
 optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) {
-    if (auto propLit = ast::cast_tree<ast::Literal>(send.args.front().get())) {
+    if (auto propLit = ast::cast_tree<ast::Literal>(send.args.front())) {
         if (propLit->isSymbol(ctx)) {
             return propLit->asSymbol(ctx);
         }
     }
     if (send.args.size() >= 2) {
-        if (auto propLit = ast::cast_tree<ast::Literal>(send.args[1].get())) {
+        if (auto propLit = ast::cast_tree<ast::Literal>(send.args[1])) {
             if (propLit->isSymbol(ctx)) {
                 return propLit->asSymbol(ctx);
             }
@@ -26,7 +26,7 @@ optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) 
     return nullopt;
 }
 
-ast::Send *asFlatfileDo(ast::Expression *stat) {
+ast::Send *asFlatfileDo(ast::TreePtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
     if (send != nullptr && send->block != nullptr && send->fun == core::Names::flatfile()) {
         return send;
@@ -35,9 +35,8 @@ ast::Send *asFlatfileDo(ast::Expression *stat) {
     }
 }
 
-void handleFieldDefinition(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
-                           vector<unique_ptr<ast::Expression>> &methods) {
-    if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
+void handleFieldDefinition(core::MutableContext ctx, ast::TreePtr &stat, vector<ast::TreePtr> &methods) {
+    if (auto send = ast::cast_tree<ast::Send>(stat)) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
              send->fun != core::Names::pattern()) ||
             !send->recv->isSelfReference() || send->args.size() < 1) {
@@ -65,16 +64,17 @@ void Flatfiles::run(core::MutableContext ctx, ast::ClassDef *klass) {
         return;
     }
 
-    vector<unique_ptr<ast::Expression>> methods;
+    vector<ast::TreePtr> methods;
     for (auto &stat : klass->rhs) {
-        if (auto flatfileBlock = asFlatfileDo(stat.get())) {
-            if (auto insSeq = ast::cast_tree<ast::InsSeq>(flatfileBlock->block->body.get())) {
+        if (auto flatfileBlock = asFlatfileDo(stat)) {
+            auto &block = ast::ref_tree<ast::Block>(flatfileBlock->block);
+            if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
                 for (auto &stat : insSeq->stats) {
                     handleFieldDefinition(ctx, stat, methods);
                 }
                 handleFieldDefinition(ctx, insSeq->expr, methods);
             } else {
-                handleFieldDefinition(ctx, flatfileBlock->block->body, methods);
+                handleFieldDefinition(ctx, block.body, methods);
             }
         }
     }

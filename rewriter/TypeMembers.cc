@@ -14,17 +14,17 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     UnorderedSet<core::NameRef> typeMembers;
 
     for (auto &expr : cdef->rhs) {
-        auto assn = ast::cast_tree<ast::Assign>(expr.get());
+        auto assn = ast::cast_tree<ast::Assign>(expr);
         if (!assn) {
             continue;
         }
 
-        auto rhs = ast::cast_tree<ast::Send>(assn->rhs.get());
+        auto rhs = ast::cast_tree<ast::Send>(assn->rhs);
         if (!rhs || !rhs->recv->isSelfReference() || rhs->fun != core::Names::typeMember()) {
             continue;
         }
 
-        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(assn->lhs.get());
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(assn->lhs);
         if (!lhs) {
             continue;
         }

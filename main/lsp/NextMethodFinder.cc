@@ -5,31 +5,31 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-unique_ptr<ast::MethodDef> NextMethodFinder::preTransformMethodDef(core::Context ctx,
-                                                                   unique_ptr<ast::MethodDef> methodDef) {
-    ENFORCE(methodDef->symbol.exists());
-    ENFORCE(methodDef->symbol != core::Symbols::todo());
+ast::TreePtr NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+    ENFORCE(methodDef.symbol.exists());
+    ENFORCE(methodDef.symbol != core::Symbols::todo());
 
-    auto currentMethod = methodDef->symbol;
+    auto currentMethod = methodDef.symbol;
 
     auto &currentMethodLocs = currentMethod.data(ctx)->locs();
     auto inFileOfQuery = [&](const auto &loc) { return loc.file() == this->queryLoc.file(); };
     auto maybeCurrentLoc = absl::c_find_if(currentMethodLocs, inFileOfQuery);
     if (maybeCurrentLoc == currentMethodLocs.end()) {
-        return methodDef;
+        return tree;
     }
 
     auto currentLoc = *maybeCurrentLoc;
     if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
-        return methodDef;
+        return tree;
     }
 
     ENFORCE(currentLoc.file() == this->queryLoc.file());
 
     if (currentLoc.beginPos() < queryLoc.beginPos()) {
         // Current method is before query, not after.
-        return methodDef;
+        return tree;
     }
 
     // Current method starts at or after query loc. Starting 'at' is fine, because it can happen in cases like this:
@@ -44,15 +44,15 @@ unique_ptr<ast::MethodDef> NextMethodFinder::preTransformMethodDef(core::Context
         if (currentLoc.beginPos() < resultLoc.beginPos()) {
             // Found a method defined after the query but earlier than previous result: overwrite previous result
             this->result_ = currentMethod;
-            return methodDef;
+            return tree;
         } else {
             // We've already found an earlier result, so the current is not the first
-            return methodDef;
+            return tree;
         }
     } else {
         // Haven't found a result yet, so this one is the best so far.
         this->result_ = currentMethod;
-        return methodDef;
+        return tree;
     }
 }
 

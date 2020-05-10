@@ -15,21 +15,21 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (cdef->ancestors.size() != 1) {
         return;
     }
-    auto send = ast::cast_tree<ast::Send>(cdef->ancestors[0].get());
+    auto send = ast::cast_tree<ast::Send>(cdef->ancestors[0]);
     if (!send) {
         return;
     }
     if (send->fun != core::Names::squareBrackets()) {
         return;
     }
-    auto name = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
+    auto name = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
     if (!name) {
         return;
     }
     if (name->cnst != core::Names::Constants::Migration()) {
         return;
     }
-    auto name2 = ast::cast_tree<ast::UnresolvedConstantLit>(name->scope.get());
+    auto name2 = ast::cast_tree<ast::UnresolvedConstantLit>(name->scope);
     if (!name2) {
         return;
     }
@@ -39,7 +39,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (send->args.size() != 1) {
         return;
     }
-    auto arg = ast::cast_tree<ast::Literal>(send->args[0].get());
+    auto arg = ast::cast_tree<ast::Literal>(send->args[0]);
     if (!arg) {
         return;
     }

@@ -340,8 +340,8 @@ class SymbolFinder {
     // Instead, we track the owner manually via FoundDefinitionRefs.
     vector<FoundDefinitionRef> ownerStack;
 
-    void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, unique_ptr<ast::Expression> &line) {
-        auto *send = ast::cast_tree<ast::Send>(line.get());
+    void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::TreePtr &line) {
+        auto *send = ast::cast_tree<ast::Send>(line);
         if (send == nullptr) {
             return;
         }
@@ -372,13 +372,13 @@ class SymbolFinder {
     }
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
-    FoundDefinitionRef squashNames(core::Context ctx, const unique_ptr<ast::Expression> &node) {
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
+    FoundDefinitionRef squashNames(core::Context ctx, const ast::TreePtr &node) {
+        if (auto *id = ast::cast_tree_const<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
-        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
+        } else if (auto constLit = ast::cast_tree_const<ast::UnresolvedConstantLit>(node)) {
             FoundClassRef found;
             found.owner = squashNames(ctx, constLit->scope);
             found.name = constLit->cnst;
@@ -399,91 +399,97 @@ public:
         return rv;
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+
         FoundClass found;
         found.owner = getOwner();
-        found.classKind = klass->kind;
-        found.loc = klass->loc;
-        found.declLoc = klass->declLoc;
+        found.classKind = klass.kind;
+        found.loc = klass.loc;
+        found.declLoc = klass.declLoc;
 
-        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
+        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             FoundClassRef foundRef;
             foundRef.name = ident->name;
             foundRef.loc = ident->loc;
             found.klass = foundDefs->addClassRef(move(foundRef));
         } else {
-            if (klass->symbol == core::Symbols::todo()) {
-                found.klass = squashNames(ctx, klass->name);
+            if (klass.symbol == core::Symbols::todo()) {
+                found.klass = squashNames(ctx, klass.name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(klass->symbol == core::Symbols::root());
-                found.klass = foundDefs->addSymbol(klass->symbol);
+                ENFORCE(klass.symbol == core::Symbols::root());
+                found.klass = foundDefs->addSymbol(klass.symbol);
             }
         }
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
-        return klass;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+
         FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
 
-        for (auto &exp : klass->rhs) {
+        for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
         }
 
-        return klass;
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> method) {
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &method = ast::ref_tree<ast::MethodDef>(tree);
         FoundMethod foundMethod;
         foundMethod.owner = getOwner();
-        foundMethod.name = method->name;
-        foundMethod.loc = method->loc;
-        foundMethod.declLoc = method->declLoc;
-        foundMethod.flags = method->flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method->args);
+        foundMethod.name = method.name;
+        foundMethod.loc = method.loc;
+        foundMethod.declLoc = method.declLoc;
+        foundMethod.flags = method.flags;
+        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
-        return method;
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> method) {
+    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         ownerStack.pop_back();
-        return method;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->args.size() == 1) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::ref_tree<ast::Send>(tree);
+
+        if (original.args.size() == 1) {
             // Common case: Send is not to a modifier.
-            switch (original->fun._id) {
+            switch (original.fun._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
                 case core::Names::protected_()._id:
                 case core::Names::public_()._id:
                     break;
                 default:
-                    return original;
+                    return tree;
             }
 
             Modifier methodModifier;
             methodModifier.kind = DefinitionKind::Method;
             methodModifier.owner = getOwner();
-            methodModifier.loc = original->loc;
-            methodModifier.name = original->fun;
-            methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original->args[0].get());
+            methodModifier.loc = original.loc;
+            methodModifier.name = original.fun;
+            methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original.args[0]);
             if (methodModifier.methodName.exists()) {
                 foundDefs->addModifier(move(methodModifier));
             }
         }
-        return original;
+        return tree;
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const unique_ptr<ast::Send> &original,
-                                            ast::Expression *expr) {
+    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::Send &original, ast::TreePtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol(ctx)) {
@@ -495,7 +501,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
             if (recv == nullptr) {
                 return core::NameRef::noName();
             }
@@ -508,35 +514,34 @@ public:
                 return core::NameRef::noName();
             }
 
-            return unwrapLiteralToMethodName(ctx, original, send->args[1].get());
+            return unwrapLiteralToMethodName(ctx, original, send->args[1]);
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
         }
     }
 
-    FoundDefinitionRef fillAssign(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
-        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
-        ENFORCE(lhs);
+    FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
+        auto &lhs = ast::ref_tree_const<ast::UnresolvedConstantLit>(asgn.lhs);
 
         FoundStaticField found;
         found.owner = getOwner();
-        found.klass = squashNames(ctx, lhs->scope);
-        found.name = lhs->cnst;
-        found.asgnLoc = asgn->loc;
-        found.lhsLoc = lhs->loc;
+        found.klass = squashNames(ctx, lhs.scope);
+        found.name = lhs.cnst;
+        found.asgnLoc = asgn.loc;
+        found.lhsLoc = lhs.loc;
         return foundDefs->addStaticField(move(found));
     }
 
-    FoundDefinitionRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
-                                                  const unique_ptr<ast::Assign> &asgn,
+    FoundDefinitionRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send, const ast::Assign &asgn,
                                                   const ast::UnresolvedConstantLit *typeName) {
-        ENFORCE(asgn->lhs.get() == typeName &&
-                asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
+        ENFORCE(ast::cast_tree_const<ast::UnresolvedConstantLit>(asgn.lhs) == typeName &&
+                ast::cast_tree_const<ast::Send>(asgn.rhs) ==
+                    send); // this method assumes that `asgn` owns `send` and `typeName`
 
         FoundTypeMember found;
         found.owner = getOwner();
-        found.asgnLoc = asgn->loc;
+        found.asgnLoc = asgn.loc;
         found.nameLoc = typeName->loc;
         found.name = typeName->cnst;
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
@@ -549,22 +554,21 @@ public:
             staticField.owner = found.owner;
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
-            staticField.lhsLoc = asgn->lhs->loc;
+            staticField.lhsLoc = asgn.lhs->loc;
             staticField.isTypeAlias = true;
             return foundDefs->addStaticField(move(staticField));
         }
 
         if (!send->args.empty()) {
-            auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
+            auto *lit = ast::cast_tree_const<ast::Literal>(send->args[0]);
             if (lit != nullptr && lit->isSymbol(ctx)) {
                 found.varianceName = lit->asSymbol(ctx);
                 found.litLoc = lit->loc;
             }
 
-            auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
-            if (hash) {
+            if (auto *hash = ast::cast_tree_const<ast::Hash>(send->args.back())) {
                 for (auto &keyExpr : hash->keys) {
-                    auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    auto key = ast::cast_tree_const<ast::Literal>(keyExpr);
                     core::NameRef name;
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
@@ -579,22 +583,24 @@ public:
         return foundDefs->addTypeMember(move(found));
     }
 
-    FoundDefinitionRef handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
-        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+    FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
+        auto &send = ast::ref_tree_const<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = send->fun == core::Names::typeAlias();
+        staticField.isTypeAlias = send.fun == core::Names::typeAlias();
         return foundRef;
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
-        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
-            return asgn;
+            return tree;
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
         } else if (!send->recv->isSelfReference()) {
@@ -612,7 +618,7 @@ public:
                     break;
             }
         }
-        return asgn;
+        return tree;
     }
 };
 
@@ -1303,20 +1309,20 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
-        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get());
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
-            if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
+            if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
                 return id->symbol.data(ctx)->dealias(ctx);
             }
-            if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
+            if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
                     if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
                 }
                 // emitted via `class << self` blocks
-            } else if (ast::isa_tree<ast::EmptyTree>(node.get())) {
+            } else if (ast::isa_tree<ast::EmptyTree>(node)) {
                 // ::Foo
             } else if (node->isSelfReference()) {
                 // self::Foo
@@ -1334,24 +1340,21 @@ class TreeSymbolizer {
         // NameInserter should have created this symbol.
         ENFORCE(existing.exists());
 
-        node.release();
-        unique_ptr<ast::UnresolvedConstantLit> constTmp(constLit);
-        node = make_unique<ast::ConstantLit>(constLit->loc, existing, std::move(constTmp));
+        node = ast::make_tree<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
     }
 
-    unique_ptr<ast::Expression> arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg,
-                                           std::unique_ptr<ast::Expression> arg) {
-        unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(parsedArg.loc, parsedArg.local);
+    ast::TreePtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::TreePtr arg) {
+        ast::TreePtr localExpr = ast::make_tree<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
                 ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
         }
-        return move(localExpr);
+        return localExpr;
     }
 
-    void addAncestor(core::Context ctx, unique_ptr<ast::ClassDef> &klass, const unique_ptr<ast::Expression> &node) {
-        auto send = ast::cast_tree<ast::Send>(node.get());
+    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::TreePtr &node) {
+        auto send = ast::cast_tree<ast::Send>(node);
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
             return;
@@ -1359,9 +1362,9 @@ class TreeSymbolizer {
 
         ast::ClassDef::ANCESTORS_store *dest;
         if (send->fun == core::Names::include()) {
-            dest = &klass->ancestors;
+            dest = &klass.ancestors;
         } else if (send->fun == core::Names::extend()) {
-            dest = &klass->singletonAncestors;
+            dest = &klass.singletonAncestors;
         } else {
             return;
         }
@@ -1387,14 +1390,14 @@ class TreeSymbolizer {
         for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
             // Reverse order is intentional: that's how Ruby does it.
             auto &arg = *it;
-            if (ast::isa_tree<ast::EmptyTree>(arg.get())) {
+            if (ast::isa_tree<ast::EmptyTree>(arg)) {
                 continue;
             }
             if (arg->isSelfReference()) {
                 dest->emplace_back(arg->deepCopy());
                 continue;
             }
-            if (isValidAncestor(arg.get())) {
+            if (isValidAncestor(arg)) {
                 dest->emplace_back(arg->deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
@@ -1405,67 +1408,71 @@ class TreeSymbolizer {
         }
     }
 
-    bool isValidAncestor(ast::Expression *exp) {
+    bool isValidAncestor(ast::TreePtr &exp) {
         if (ast::isa_tree<ast::EmptyTree>(exp) || exp->isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope.get());
+            return isValidAncestor(lit->scope);
         }
         return false;
     }
 
 public:
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+
+        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
-            klass->symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
-            ENFORCE(klass->symbol.exists());
+            klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
+            ENFORCE(klass.symbol.exists());
         } else {
-            if (klass->symbol == core::Symbols::todo()) {
-                klass->symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass->name);
+            if (klass.symbol == core::Symbols::todo()) {
+                klass.symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(klass->symbol == core::Symbols::root());
+                ENFORCE(klass.symbol == core::Symbols::root());
             }
-            if (!klass->symbol.data(ctx)->isClassOrModule()) {
+            if (!klass.symbol.data(ctx)->isClassOrModule()) {
                 auto klassSymbol =
-                    ctx.state.lookupClassSymbol(klass->symbol.data(ctx)->owner, klass->symbol.data(ctx)->name);
+                    ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
                 ENFORCE(klassSymbol.exists());
-                klass->symbol = klassSymbol;
+                klass.symbol = klassSymbol;
             }
         }
-        return klass;
+        return tree;
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
-    bool shouldLeaveAncestorForIDE(const unique_ptr<ast::Expression> &anc) {
+    bool shouldLeaveAncestorForIDE(const ast::TreePtr &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc.get()) || anc->isSelfReference()) {
+        if (ast::isa_tree<ast::EmptyTree>(anc) || anc->isSelfReference()) {
             return false;
         }
-        auto rcl = ast::cast_tree<ast::ConstantLit>(anc.get());
+        auto rcl = ast::cast_tree_const<ast::ConstantLit>(anc);
         if (rcl && rcl->symbol == core::Symbols::todo()) {
             return false;
         }
         return true;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        // NameDefiner should have forced this class's singleton class into existence.
-        ENFORCE(klass->symbol.data(ctx)->lookupSingletonClass(ctx).exists());
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
 
-        for (auto &exp : klass->rhs) {
+        // NameDefiner should have forced this class's singleton class into existence.
+        ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
+
+        for (auto &exp : klass.rhs) {
             addAncestor(ctx, klass, exp);
         }
 
-        if (!klass->ancestors.empty()) {
+        if (!klass.ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
-            for (auto &anc : klass->ancestors) {
-                if (!isValidAncestor(anc.get())) {
+            for (auto &anc : klass.ancestors) {
+                if (!isValidAncestor(anc)) {
                     if (auto e = ctx.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
@@ -1474,31 +1481,31 @@ public:
             }
         }
         ast::InsSeq::STATS_store ideSeqs;
-        if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
+        if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.name->deepCopy()));
         }
-        if (klass->kind == ast::ClassDef::Kind::Class && !klass->ancestors.empty() &&
-            shouldLeaveAncestorForIDE(klass->ancestors.front())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
+        if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
+            shouldLeaveAncestorForIDE(klass.ancestors.front())) {
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front()->deepCopy()));
         }
 
-        if (klass->symbol != core::Symbols::root() && !klass->declLoc.file().data(ctx).isRBI() &&
+        if (klass.symbol != core::Symbols::root() && !klass.declLoc.file().data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
-            auto prevLoc = classBehaviorLocs.find(klass->symbol);
+            auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass->symbol] = klass->declLoc;
-            } else if (prevLoc->second.file() != klass->declLoc.file()) {
-                if (auto e = ctx.state.beginError(klass->declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
-                    e.setHeader("`{}` has behavior defined in multiple files", klass->symbol.data(ctx)->show(ctx));
+                classBehaviorLocs[klass.symbol] = klass.declLoc;
+            } else if (prevLoc->second.file() != klass.declLoc.file()) {
+                if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                    e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.data(ctx)->show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
             }
         }
 
         ast::InsSeq::STATS_store retSeqs;
-        auto loc = klass->declLoc;
-        retSeqs.emplace_back(std::move(klass));
+        auto loc = klass.declLoc;
+        retSeqs.emplace_back(std::move(tree));
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
@@ -1514,7 +1521,7 @@ public:
             auto localVariable = arg.local;
 
             if (arg.flags.isShadow) {
-                auto localExpr = make_unique<ast::Local>(arg.loc, localVariable);
+                auto localExpr = ast::make_tree<ast::Local>(arg.loc, localVariable);
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(i < oldArgs.size());
@@ -1526,47 +1533,50 @@ public:
         return args;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> method) {
-        core::SymbolRef owner = methodOwner(ctx, method->flags);
-        auto parsedArgs = ast::ArgParsing::parseArgs(method->args);
-        auto sym =
-            ctx.state.lookupMethodSymbolWithHash(owner, method->name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+
+        core::SymbolRef owner = methodOwner(ctx, method.flags);
+        auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
+        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         ENFORCE(sym.exists());
-        method->symbol = sym;
-        method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs), std::move(method->args));
-        return method;
+        method.symbol = sym;
+        method.args = fillInArgs(ctx.withOwner(method.symbol), move(parsedArgs), std::move(method.args));
+
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> method) {
-        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), "{}: {} != {}",
-                method->name.showRaw(ctx), method->args.size(), method->symbol.data(ctx)->arguments().size());
-        return method;
+    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments().size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments().size());
+        return tree;
     }
 
-    unique_ptr<ast::Assign> handleAssignment(core::Context ctx, unique_ptr<ast::Assign> asgn) {
-        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
-        ENFORCE(lhs);
+    ast::TreePtr handleAssignment(core::Context ctx, ast::TreePtr tree) {
+        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &lhs = ast::ref_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs->scope);
+        core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!scope.data(ctx)->isClassOrModule()) {
             auto scopeName = scope.data(ctx)->name;
             scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scopeName);
         }
 
-        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs->cnst);
+        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
-        auto loc = lhs->loc;
-        unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
-        asgn->lhs.release();
-        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU));
-        return asgn;
+        auto loc = lhs.loc;
+        asgn.lhs = ast::make_tree<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
+
+        return tree;
     }
 
-    unique_ptr<ast::Expression> handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
-                                                           unique_ptr<ast::Assign> asgn,
-                                                           const ast::UnresolvedConstantLit *typeName) {
-        ENFORCE(asgn->lhs.get() == typeName &&
-                asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
+    ast::TreePtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::TreePtr tree,
+                                            const ast::UnresolvedConstantLit *typeName) {
+        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+
+        ENFORCE(asgn.lhs.get() == typeName &&
+                asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
         if (!ctx.owner.data(ctx)->isClassOrModule()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
@@ -1577,10 +1587,10 @@ public:
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
-            auto send = ast::MK::Send0Block(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
-                                            ast::MK::Block0(asgn->loc, ast::MK::Untyped(asgn->loc)));
+            auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
+                                            ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
-            return handleAssignment(ctx, make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
+            return handleAssignment(ctx, ast::make_tree<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
         if (!send->args.empty()) {
@@ -1589,10 +1599,10 @@ public:
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
-                auto send = ast::MK::Send1(asgn->loc, ast::MK::T(asgn->loc), core::Names::typeAlias(),
-                                           ast::MK::Untyped(asgn->loc));
+                auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
+                                           ast::MK::Untyped(asgn.loc));
                 return handleAssignment(ctx,
-                                        make_unique<ast::Assign>(asgn->loc, std::move(asgn->lhs), std::move(send)));
+                                        ast::make_tree<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }
 
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
@@ -1600,14 +1610,13 @@ public:
             ENFORCE(onSymbol.exists());
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
             ENFORCE(sym.exists());
-            auto lit = ast::cast_tree<ast::Literal>(send->args.front().get());
-            auto hash = ast::cast_tree<ast::Hash>(send->args.back().get());
-            if (hash) {
+            auto lit = ast::cast_tree<ast::Literal>(send->args.front());
+            if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
                 bool fixed = false;
                 bool bounded = false;
 
                 for (auto &keyExpr : hash->keys) {
-                    auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    auto key = ast::cast_tree<ast::Literal>(keyExpr);
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
                             case core::Names::fixed()._id:
@@ -1624,10 +1633,10 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
+                    asgn.lhs = ast::MK::Constant(asgn.lhs->loc, sym);
 
                     // Leave it in the tree for the resolver to chew on.
-                    return asgn;
+                    return tree;
                 } else if (fixed) {
                     // both fixed and bounds were specified
                     if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
@@ -1645,31 +1654,33 @@ public:
             }
         }
 
-        return asgn;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> asgn) {
-        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
-            return asgn;
+            return tree;
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
-            return handleAssignment(ctx, std::move(asgn));
+            return handleAssignment(ctx, std::move(tree));
         }
 
         if (!send->recv->isSelfReference()) {
-            return handleAssignment(ctx, std::move(asgn));
+            return handleAssignment(ctx, std::move(tree));
         }
 
         switch (send->fun._id) {
             case core::Names::typeTemplate()._id:
-                return handleTypeMemberDefinition(ctx, send, std::move(asgn), lhs);
+                return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             case core::Names::typeMember()._id:
-                return handleTypeMemberDefinition(ctx, send, std::move(asgn), lhs);
+                return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:
-                return handleAssignment(ctx, std::move(asgn));
+                return handleAssignment(ctx, std::move(tree));
         }
     }
 

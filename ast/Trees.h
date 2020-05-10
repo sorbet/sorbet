@@ -28,6 +28,66 @@
 
 namespace sorbet::ast {
 
+class Expression;
+
+class TreePtr {
+private:
+    std::unique_ptr<Expression> ptr;
+
+public:
+    constexpr TreePtr() noexcept : ptr(nullptr) {}
+
+    explicit TreePtr(Expression *ptr) noexcept : ptr(ptr) {}
+
+    TreePtr(std::nullptr_t) noexcept : TreePtr() {}
+
+    TreePtr(const TreePtr &) = delete;
+    TreePtr &operator=(const TreePtr &) = delete;
+
+    TreePtr(TreePtr &&other) noexcept : ptr(std::move(other.ptr)) {}
+
+    TreePtr &operator=(TreePtr &&other) noexcept {
+        this->ptr = std::move(other.ptr);
+        return *this;
+    }
+
+    Expression *release() noexcept {
+        return ptr.release();
+    }
+
+    void reset(Expression *expr = nullptr) noexcept {
+        ptr.reset(expr);
+    }
+
+    Expression *get() const noexcept {
+        return ptr.get();
+    }
+
+    Expression *operator->() const noexcept {
+        return ptr.get();
+    }
+
+    Expression *operator*() const noexcept {
+        return ptr.get();
+    }
+
+    explicit operator bool() const noexcept {
+        return get() != nullptr;
+    }
+
+    bool operator==(const TreePtr &other) const noexcept {
+        return get() == other.get();
+    }
+
+    bool operator!=(const TreePtr &other) const noexcept {
+        return get() != other.get();
+    }
+};
+
+template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
+    return TreePtr(new E(std::forward<Args>(args)...));
+}
+
 class Expression {
 public:
     Expression(core::LocOffsets loc);
@@ -38,21 +98,21 @@ public:
     }
     virtual std::string nodeName() = 0;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
-    std::unique_ptr<Expression> deepCopy() const;
+    TreePtr deepCopy() const;
     virtual void _sanityCheck() = 0;
     const core::LocOffsets loc;
 
     class DeepCopyError {};
 
     // This function should be private but it makes it hard to access from template methods in TreeCopy.cc
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const = 0;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const = 0;
 
     bool isSelfReference() const;
 };
 CheckSize(Expression, 16, 8);
 
 struct ParsedFile {
-    std::unique_ptr<ast::Expression> tree;
+    TreePtr tree;
     core::FileRef file;
 };
 
@@ -73,21 +133,28 @@ public:
     std::vector<ParsedFile> &result();
 };
 
-template <class To> To *cast_tree(Expression *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
-    return fast_cast<Expression, To>(what);
+template <class To> To *cast_tree(TreePtr &what) {
+    return fast_cast<Expression, To>(what.get());
 }
 
 // A variant of cast_tree that preserves the const-ness (if const in, then const out)
-template <class To> const To *cast_tree_const(const Expression *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
-    return fast_cast<Expression, To>(const_cast<Expression *>(what));
+template <class To> To const *cast_tree_const(const TreePtr &what) {
+    return fast_cast<Expression, To>(const_cast<Expression *>(what.get()));
 }
 
-template <class To> bool isa_tree(Expression *what) {
-    return cast_tree<To>(what) != nullptr;
+template <class To> bool isa_tree(const TreePtr &what) {
+    return cast_tree_const<To>(what) != nullptr;
+}
+
+template <class To> To &ref_tree(TreePtr &what) {
+    ENFORCE(what != nullptr);
+    ENFORCE(isa_tree<To>(what), "ref_tree failed!");
+    return *reinterpret_cast<To *>(what.get());
+}
+
+template <class To> const To &ref_tree_const(const TreePtr &what) {
+    ENFORCE(isa_tree<To>(what), "ref_tree failed!");
+    return *reinterpret_cast<To *>(what.get());
 }
 
 class Reference : public Expression {
@@ -113,25 +180,25 @@ public:
     };
     Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
-    using RHS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT>;
+    using RHS_store = InlinedVector<TreePtr, EXPECTED_RHS_COUNT>;
 
     RHS_store rhs;
-    std::unique_ptr<Expression> name;
+    TreePtr name;
     // For unresolved names. Once they are typeAlias to Symbols they go into the Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
-    using ANCESTORS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT>;
+    using ANCESTORS_store = InlinedVector<TreePtr, EXPECTED_ANCESTORS_COUNT>;
 
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
-    ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
-             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
+    ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, TreePtr name, ANCESTORS_store ancestors,
+             RHS_store rhs, ClassDef::Kind kind);
 
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -140,9 +207,9 @@ CheckSize(ClassDef, 136, 8);
 
 class MethodDef final : public Declaration {
 public:
-    std::unique_ptr<Expression> rhs;
+    TreePtr rhs;
 
-    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    using ARGS_store = InlinedVector<TreePtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
     ARGS_store args;
 
     core::NameRef name;
@@ -159,11 +226,11 @@ public:
     Flags flags;
 
     MethodDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-              std::unique_ptr<Expression> rhs, Flags flags);
+              TreePtr rhs, Flags flags);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -172,16 +239,15 @@ CheckSize(MethodDef, 72, 8);
 
 class If final : public Expression {
 public:
-    std::unique_ptr<Expression> cond;
-    std::unique_ptr<Expression> thenp;
-    std::unique_ptr<Expression> elsep;
+    TreePtr cond;
+    TreePtr thenp;
+    TreePtr elsep;
 
-    If(core::LocOffsets loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp,
-       std::unique_ptr<Expression> elsep);
+    If(core::LocOffsets loc, TreePtr cond, TreePtr thenp, TreePtr elsep);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -190,14 +256,14 @@ CheckSize(If, 40, 8);
 
 class While final : public Expression {
 public:
-    std::unique_ptr<Expression> cond;
-    std::unique_ptr<Expression> body;
+    TreePtr cond;
+    TreePtr body;
 
-    While(core::LocOffsets loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> body);
+    While(core::LocOffsets loc, TreePtr cond, TreePtr body);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -206,13 +272,13 @@ CheckSize(While, 32, 8);
 
 class Break final : public Expression {
 public:
-    std::unique_ptr<Expression> expr;
+    TreePtr expr;
 
-    Break(core::LocOffsets loc, std::unique_ptr<Expression> expr);
+    Break(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -225,7 +291,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -234,13 +300,13 @@ CheckSize(Retry, 16, 8);
 
 class Next final : public Expression {
 public:
-    std::unique_ptr<Expression> expr;
+    TreePtr expr;
 
-    Next(core::LocOffsets loc, std::unique_ptr<Expression> expr);
+    Next(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -249,13 +315,13 @@ CheckSize(Next, 24, 8);
 
 class Return final : public Expression {
 public:
-    std::unique_ptr<Expression> expr;
+    TreePtr expr;
 
-    Return(core::LocOffsets loc, std::unique_ptr<Expression> expr);
+    Return(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -265,21 +331,20 @@ CheckSize(Return, 24, 8);
 class RescueCase final : public Expression {
 public:
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
-    using EXCEPTION_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT>;
+    using EXCEPTION_store = InlinedVector<TreePtr, EXPECTED_EXCEPTION_COUNT>;
 
     EXCEPTION_store exceptions;
 
     // If present, var is always an UnresolvedIdent[kind=Local] up until the
     // namer, at which point it is a Local.
-    std::unique_ptr<Expression> var;
-    std::unique_ptr<Expression> body;
+    TreePtr var;
+    TreePtr body;
 
-    RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, std::unique_ptr<Expression> var,
-               std::unique_ptr<Expression> body);
+    RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, TreePtr var, TreePtr body);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -289,19 +354,18 @@ CheckSize(RescueCase, 56, 8);
 class Rescue final : public Expression {
 public:
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
-    using RESCUE_CASE_store = InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT>;
+    using RESCUE_CASE_store = InlinedVector<TreePtr, EXPECTED_RESCUE_CASE_COUNT>;
 
-    std::unique_ptr<Expression> body;
+    TreePtr body;
     RESCUE_CASE_store rescueCases;
-    std::unique_ptr<Expression> else_;
-    std::unique_ptr<Expression> ensure;
+    TreePtr else_;
+    TreePtr ensure;
 
-    Rescue(core::LocOffsets loc, std::unique_ptr<Expression> body, RESCUE_CASE_store rescueCases,
-           std::unique_ptr<Expression> else_, std::unique_ptr<Expression> ensure);
+    Rescue(core::LocOffsets loc, TreePtr body, RESCUE_CASE_store rescueCases, TreePtr else_, TreePtr ensure);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -316,7 +380,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -338,7 +402,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -347,13 +411,13 @@ CheckSize(UnresolvedIdent, 24, 8);
 
 class RestArg final : public Reference {
 public:
-    std::unique_ptr<Reference> expr;
+    TreePtr expr;
 
-    RestArg(core::LocOffsets loc, std::unique_ptr<Reference> arg);
+    RestArg(core::LocOffsets loc, TreePtr arg);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -362,13 +426,13 @@ CheckSize(RestArg, 24, 8);
 
 class KeywordArg final : public Reference {
 public:
-    std::unique_ptr<Reference> expr;
+    TreePtr expr;
 
-    KeywordArg(core::LocOffsets loc, std::unique_ptr<Reference> expr);
+    KeywordArg(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -377,14 +441,14 @@ CheckSize(KeywordArg, 24, 8);
 
 class OptionalArg final : public Reference {
 public:
-    std::unique_ptr<Reference> expr;
-    std::unique_ptr<Expression> default_;
+    TreePtr expr;
+    TreePtr default_;
 
-    OptionalArg(core::LocOffsets loc, std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
+    OptionalArg(core::LocOffsets loc, TreePtr expr, TreePtr default_);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -393,13 +457,13 @@ CheckSize(OptionalArg, 32, 8);
 
 class BlockArg final : public Reference {
 public:
-    std::unique_ptr<Reference> expr;
+    TreePtr expr;
 
-    BlockArg(core::LocOffsets loc, std::unique_ptr<Reference> expr);
+    BlockArg(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -408,13 +472,13 @@ CheckSize(BlockArg, 24, 8);
 
 class ShadowArg final : public Reference {
 public:
-    std::unique_ptr<Reference> expr;
+    TreePtr expr;
 
-    ShadowArg(core::LocOffsets loc, std::unique_ptr<Reference> expr);
+    ShadowArg(core::LocOffsets loc, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -423,14 +487,14 @@ CheckSize(ShadowArg, 24, 8);
 
 class Assign final : public Expression {
 public:
-    std::unique_ptr<Expression> lhs;
-    std::unique_ptr<Expression> rhs;
+    TreePtr lhs;
+    TreePtr rhs;
 
-    Assign(core::LocOffsets loc, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
+    Assign(core::LocOffsets loc, TreePtr lhs, TreePtr rhs);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -454,19 +518,19 @@ public:
 
     Flags flags;
 
-    std::unique_ptr<Expression> recv;
+    TreePtr recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
+    using ARGS_store = InlinedVector<TreePtr, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
-    std::unique_ptr<Block> block; // null if no block passed
+    TreePtr block; // null if no block passed
 
-    Send(core::LocOffsets loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
-         std::unique_ptr<Block> block = nullptr, Flags flags = {});
+    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, ARGS_store args, TreePtr block = nullptr,
+         Flags flags = {});
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -479,13 +543,13 @@ public:
     core::NameRef cast;
 
     core::TypePtr type;
-    std::unique_ptr<Expression> arg;
+    TreePtr arg;
 
-    Cast(core::LocOffsets loc, core::TypePtr ty, std::unique_ptr<Expression> arg, core::NameRef cast);
+    Cast(core::LocOffsets loc, core::TypePtr ty, TreePtr arg, core::NameRef cast);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -495,7 +559,7 @@ CheckSize(Cast, 48, 8);
 class Hash final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
-    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
+    using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store keys;
     ENTRY_store values;
@@ -505,7 +569,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -515,7 +579,7 @@ CheckSize(Hash, 64, 8);
 class Array final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
-    using ENTRY_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT>;
+    using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store elems;
 
@@ -524,7 +588,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -546,7 +610,7 @@ public:
     core::NameRef asSymbol(const core::GlobalState &gs) const;
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -556,13 +620,13 @@ CheckSize(Literal, 32, 8);
 class UnresolvedConstantLit final : public Expression {
 public:
     core::NameRef cnst;
-    std::unique_ptr<Expression> scope;
+    TreePtr scope;
 
-    UnresolvedConstantLit(core::LocOffsets loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
+    UnresolvedConstantLit(core::LocOffsets loc, TreePtr scope, core::NameRef cnst);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -576,13 +640,13 @@ public:
     // will be set to whatever nesting scope we estimate the constant could have been defined in.
     using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
     ResolutionScopes resolutionScopes;
-    std::unique_ptr<UnresolvedConstantLit> original;
+    TreePtr original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, TreePtr original);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>>
     fullUnresolvedPath(const core::GlobalState &gs) const;
 
@@ -598,7 +662,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -608,13 +672,13 @@ CheckSize(ZSuperArgs, 16, 8);
 class Block final : public Expression {
 public:
     MethodDef::ARGS_store args;
-    std::unique_ptr<Expression> body;
+    TreePtr body;
 
-    Block(core::LocOffsets loc, MethodDef::ARGS_store args, std::unique_ptr<Expression> body);
+    Block(core::LocOffsets loc, MethodDef::ARGS_store args, TreePtr body);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
     virtual void _sanityCheck();
 };
 CheckSize(Block, 48, 8);
@@ -622,18 +686,18 @@ CheckSize(Block, 48, 8);
 class InsSeq final : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
-    using STATS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT>;
+    using STATS_store = InlinedVector<TreePtr, EXPECTED_STATS_COUNT>;
     // Statements
     STATS_store stats;
 
     // The distinguished final expression (determines return value)
-    std::unique_ptr<Expression> expr;
+    TreePtr expr;
 
-    InsSeq(core::LocOffsets locOffsets, STATS_store stats, std::unique_ptr<Expression> expr);
+    InsSeq(core::LocOffsets locOffsets, STATS_store stats, TreePtr expr);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -646,7 +710,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+    virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();

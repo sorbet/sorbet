@@ -24,7 +24,7 @@ namespace sorbet::rewriter {
  */
 class Struct final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx, ast::Assign *asgn);
+    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Assign *asgn);
 
     Struct() = delete;
 };
