@@ -40,7 +40,7 @@ bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
 
-    auto now = clock_gettime_coarse();
+    auto now = Timer::clock_gettime_coarse();
     auto pid = getpid();
 
     if (!FileOps::exists(fileName)) {

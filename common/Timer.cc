@@ -2,20 +2,42 @@
 using namespace std;
 namespace sorbet {
 
-// We are using clock_gettime instead of similar APIs from the C++ <chrono> library,
+namespace {
+
+// We are using <time.h> instead of similar APIs from the C++ <chrono> library,
 // because this was measured to make timers noticably faster.
 //
 // https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
-microseconds clock_gettime_coarse() {
-    timespec tp;
+clockid_t clock_monotonic_coarse() {
 #ifdef __linux__
     // This is faster, as measured via the benchmark above, but is not portable.
-    clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
+    return CLOCK_MONOTONIC_COARSE;
 #elif __APPLE__
-    clock_gettime(CLOCK_MONOTONIC_RAW_APPROX, &tp);
+    return CLOCK_MONOTONIC_RAW_APPROX;
 #else
-    clock_gettime(CLOCK_MONOTONIC, &tp);
+    return CLOCK_MONOTONIC;
 #endif
+}
+
+microseconds get_clock_threshold_coarse() {
+    timespec tp;
+    clock_getres(clock_monotonic_coarse(), &tp);
+    auto usec = 2 * (tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L);
+    if (usec < 1'000) { // 1ms
+        return {1'000};
+    } else {
+        return {usec};
+    }
+}
+
+// Don't want to have to measure the resolution of the clock every time we ask for the time.
+const microseconds clock_threshold_coarse = get_clock_threshold_coarse();
+
+} // namespace
+
+microseconds Timer::clock_gettime_coarse() {
+    timespec tp;
+    clock_gettime(clock_monotonic_coarse(), &tp);
     return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
 }
 
@@ -122,8 +144,7 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
     auto dur = microseconds{clock.usec - start.usec};
-    auto threshold = microseconds{2'000}; // 2ms
-    if (!canceled && dur.usec > threshold.usec) {
+    if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto durMs = (clock.usec - start.usec) / 1'000;
         log.debug("{}: {}ms", this->name.str, durMs);
