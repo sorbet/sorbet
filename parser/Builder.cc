@@ -51,7 +51,9 @@ string Dedenter::dedent(string_view str) {
                     break;
                 }
                 default:
-                    Exception::raise("unexpected whitespace: '{}'", std::to_string(ch));
+                    // String does not have anymore whitespace left to remove.
+                    out.push_back(ch);
+                    spacesToRemove = 0;
             }
         } else {
             out.push_back(ch);

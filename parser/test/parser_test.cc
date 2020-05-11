@@ -44,6 +44,7 @@ TEST(ParserTest, TestDedent) { // NOLINT
         {2, "    hi"sv, "  hi"sv},
         {10, "  \t    hi"sv, "  hi"sv},
         {2, "  a\n   b\n  c\n"sv, "a\n   b\n  c\n"sv},
+        {4, "  a\n   b\n  c\n"sv, "a\n   b\n  c\n"sv},
     };
     for (auto &tc : cases) {
         sorbet::parser::Dedenter dedent(tc.level);
