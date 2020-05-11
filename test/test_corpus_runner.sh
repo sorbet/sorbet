@@ -99,7 +99,7 @@ find "$target" -type f | indent_and_nest
 success "└─ done."
 
 echo      ""
-echo      "Checking unpacked archive..."
+info      "Checking unpacked archive..."
 if [ "$(< "$target/sorbet.exit")" -ne 0 ]; then
   error  "├─ Sorbet failed when generating archive:"
   < "$target/sorbet.outerr" indent_and_nest
