@@ -187,6 +187,7 @@ NameDef names[] = {
     {"instanceVariableSet", "instance_variable_set"},
     {"decorator"},
     {"propGetLogic", "prop_get_logic"},
+    {"softFreezeLogic", "soft_freeze_logic"},
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
@@ -199,6 +200,7 @@ NameDef names[] = {
     {"HashMutator", "HashMutator", true},
     {"ArrayMutator", "ArrayMutator", true},
     {"DocumentMutator", "DocumentMutator", true},
+    {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
 
     {"prefix"},
     {"to"},

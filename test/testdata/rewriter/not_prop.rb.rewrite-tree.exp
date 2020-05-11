@@ -16,7 +16,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"array_of_explicit")
+        <self>.instance_variable_set(:"@array_of_explicit", arg0)
+      end
     end
 
     <self>.prop(:"type", {:"type" => <emptyTree>::<C String>})

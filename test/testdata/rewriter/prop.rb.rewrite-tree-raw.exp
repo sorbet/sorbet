@@ -1328,26 +1328,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"foo" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@foo" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -1796,26 +1807,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"default" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@default" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -1998,26 +2020,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"t_nilable" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@t_nilable" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2170,26 +2203,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"array" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@array" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2381,26 +2425,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"t_array" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@t_array" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -2604,26 +2659,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"hash_of" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@hash_of" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3138,26 +3204,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"foreign" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@foreign" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3486,26 +3563,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"foreign_lazy" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@foreign_lazy" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3834,26 +3922,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"foreign_proc" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@foreign_proc" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -4182,26 +4281,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"foreign_invalid" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@foreign_invalid" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -4504,26 +4614,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"ifunset" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@ifunset" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -4678,26 +4799,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"ifunset_nilable" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@ifunset_nilable" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6547,26 +6679,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"token" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@token" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6719,26 +6862,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"created" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@created" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -7147,26 +7301,37 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
+          rhs = InsSeq{
+            stats = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                }
+                fun = <U soft_freeze_logic>
+                block = nullptr
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :"token" }
+                ]
               }
-              fun = <U unsafe>
+            ],
+            expr = Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U instance_variable_set>
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Kernel
+                Literal{ value = :"@token" }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U arg0>
                 }
               ]
             }
-            fun = <U raise>
-            block = nullptr
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 

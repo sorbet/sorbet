@@ -68,7 +68,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"qux")
+        <self>.instance_variable_set(:"@qux", arg0)
+      end
     end
 
     <self>.prop(:"qux", <emptyTree>::<C Symbol>, {:"without_accessors" => true})

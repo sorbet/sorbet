@@ -40,6 +40,11 @@ class Chalk::ODM::Document
   abstract!
 end
 
+module Chalk::ODM::DocumentDecoratorHelper
+  def self.soft_freeze_logic(instance, prop)
+  end
+end
+
 class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
   sig {params(options: T::Hash[T.untyped, T.untyped]).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
   def initialize(options)

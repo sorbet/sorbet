@@ -335,6 +335,12 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
     ENFORCE(id == Symbols::T_NonForcingConstants());
 
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), Names::Constants::ODM());
+    ENFORCE(id == Symbols::Chalk_ODM());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
+    ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
