@@ -1,12 +1,9 @@
 cc_binary(
-    name = "test_corpus_runner",
+    name = "pipeline_test_runner",
     testonly = 1,
     srcs = [
-        "LSPTest.cc",
-        "LSPTest.h",
-        "test_corpus.cc",
+        "pipeline_test_runner.cc",
     ],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -30,8 +27,65 @@ cc_binary(
         "//resolver",
         "//rewriter",
         "//test/helpers",
-        "@com_google_googletest//:gtest",
         "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
+    ],
+)
+
+cc_binary(
+    name = "lsp_test_runner",
+    testonly = 1,
+    srcs = [
+        "lsp_test_runner.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//common",
+        "//main/lsp",
+        "//payload",
+        "//test/helpers",
+        "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
+    ],
+)
+
+cc_binary(
+    name = "parser_test_runner",
+    testonly = 1,
+    srcs = [
+        "parser_test_runner.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast/desugar",
+        "//ast/treemap",
+        "//cfg",
+        "//cfg/builder",
+        "//class_flatten",
+        "//core",
+        "//definition_validator",
+        "//infer",
+        "//local_vars",
+        "//main/autogen",
+        "//main/pipeline/semantic_extension:none",
+        "//namer",
+        "//payload",
+        "//resolver",
+        "//rewriter",
+        "//test/helpers",
+        "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_custom_main",
     ],
 )
 
@@ -50,6 +104,7 @@ cc_binary(
         "//main/lsp",
         "//payload",
         "//test/helpers",
+        "@doctest//:doctest_custom_main",
     ],
 )
 
@@ -57,7 +112,6 @@ cc_test(
     name = "hello-test",
     size = "small",
     srcs = ["hello-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -71,9 +125,9 @@ cc_test(
         "//core/serialize",
         "//parser",
         "//payload",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
         "@cxxopts",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -81,7 +135,6 @@ cc_test(
     name = "error-check-test",
     size = "small",
     srcs = ["error-check-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -93,8 +146,8 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 
@@ -102,7 +155,6 @@ cc_test(
     name = "autocorrect-test",
     size = "small",
     srcs = ["autocorrect-test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -111,8 +163,8 @@ cc_test(
     deps = [
         "//common",
         "//core",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
 

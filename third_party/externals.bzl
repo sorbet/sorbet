@@ -3,10 +3,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
     http_archive(
-        name = "com_google_googletest",
-        urls = _github_public_urls("google/googletest/archive/90a443f9c2437ca8a682a1ac625eba64e1d74a8a.zip"),
-        sha256 = "6fb9a49ad77656c860cfdafbb3148a91f076a3a8bda9c6d8809075c832549dd4",
-        strip_prefix = "googletest-90a443f9c2437ca8a682a1ac625eba64e1d74a8a",
+        name = "doctest",
+        urls = _github_public_urls("onqtam/doctest/archive/7d42bd0fab6c44010c8aed9338bd02bea5feba41.zip"),
+        sha256 = "b33c8e954d15a146bb744ca29f4ca204b955530f52b2f8a895746a99cee4f2df",
+        build_file = "@com_stripe_ruby_typer//third_party:doctest.BUILD",
+        strip_prefix = "doctest-7d42bd0fab6c44010c8aed9338bd02bea5feba41",
     )
 
     http_archive(

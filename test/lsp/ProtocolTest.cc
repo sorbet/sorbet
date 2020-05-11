@@ -20,7 +20,7 @@ bool isTypecheckRun(const LSPMessage &msg) {
 } // namespace
 
 CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
-    EXPECT_FALSE(this->counters.hasNullCounters());
+    CHECK_FALSE(this->counters.hasNullCounters());
     // Combines counters with the same name but different char* pointers.
     this->counters.counters->canonicalize();
 }
@@ -125,10 +125,9 @@ void ProtocolTest::resetState() {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
-    auto config = GetParam();
     auto opts = make_shared<realmain::options::Options>();
     opts->disableWatchman = true;
-    if (config.useCache) {
+    if (useCache) {
         // Only recreate the cacheDir if we haven't created one before.
         if (cacheDir.empty()) {
             cacheDir = absl::StripAsciiWhitespace(exec("mktemp -d"));
@@ -136,7 +135,7 @@ void ProtocolTest::resetState() {
         opts->cacheDir = cacheDir;
     }
 
-    if (config.useMultithreading) {
+    if (useMultithreading) {
         lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
     } else {
         lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
@@ -145,13 +144,13 @@ void ProtocolTest::resetState() {
     lspWrapper->enableAllExperimentalFeatures();
 }
 
-void ProtocolTest::SetUp() {
-    rootPath = "/Users/jvilk/stripe/pay-server";
-    rootUri = fmt::format("file://{}", rootPath);
+ProtocolTest::ProtocolTest(bool useMultithreading, bool useCache)
+    : useMultithreading(useMultithreading), useCache(useCache), rootPath("/Users/jvilk/stripe/pay-server"),
+      rootUri(fmt::format("file://{}", rootPath)) {
     resetState();
 }
 
-void ProtocolTest::TearDown() {
+ProtocolTest::~ProtocolTest() {
     if (!cacheDir.empty()) {
         // Shut down lspwrapper before cleaning up database on disk.
         lspWrapper = nullptr;
@@ -284,7 +283,7 @@ unique_ptr<LSPMessage> ProtocolTest::readAsync() {
     if (msg) {
         updateDiagnostics(*msg);
     } else {
-        ADD_FAILURE() << "Timeout waiting for LSP response.";
+        FAIL_CHECK("Timeout waiting for LSP response.");
     }
     return msg;
 }
@@ -311,10 +310,10 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
 std::string ProtocolTest::readFile(std::string_view uri) {
     auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
-    EXPECT_EQ(readFileResponses.size(), 1);
+    CHECK_EQ(readFileResponses.size(), 1);
     if (readFileResponses.size() == 1) {
         auto &readFileResponse = readFileResponses.at(0);
-        EXPECT_TRUE(readFileResponse->isResponse());
+        CHECK(readFileResponse->isResponse());
         auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
         return readFileResult->text;
     }
@@ -323,10 +322,10 @@ std::string ProtocolTest::readFile(std::string_view uri) {
 
 vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
     auto defResponses = send(*getDefinition(uri, line, character));
-    EXPECT_EQ(defResponses.size(), 1);
+    CHECK_EQ(defResponses.size(), 1);
     if (defResponses.size() == 1) {
         auto &defResponse = defResponses.at(0);
-        EXPECT_TRUE(defResponse->isResponse());
+        CHECK(defResponse->isResponse());
         auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
         return move(get<vector<unique_ptr<Location>>>(defResult));
     }
@@ -337,7 +336,7 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
         if (!isTypecheckRun(*msg) && !isSorbetFence(*msg)) {
-            ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+            assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg);
         }
     }
 
@@ -355,9 +354,9 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
 const CounterStateDatabase ProtocolTest::getCounters() {
     auto results = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
                                                        "2.0", nextId++, LSPMethod::GETCOUNTERS, nullopt)));
-    EXPECT_EQ(results.size(), 1);
+    CHECK_EQ(results.size(), 1);
     auto &result = results.at(0);
-    EXPECT_TRUE(result->isResponse());
+    CHECK(result->isResponse());
     auto &response = result->asResponse();
     auto &counters = get<unique_ptr<SorbetCounters>>(response.result.value());
     return CounterStateDatabase(move(counters->counters));

@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -23,7 +23,7 @@ struct Offset2PosTest {
     u4 col;
 };
 
-TEST(ASTTest, TestOffset2Pos) { // NOLINT
+TEST_CASE("TestOffset2Pos") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
@@ -39,18 +39,18 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
     int i = 0;
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
-        SCOPED_TRACE(name);
+        INFO(name);
         FileRef f = gs.enterFile(move(name), tc.src);
 
         auto detail = Loc::offset2Pos(f.data(gs), tc.off);
 
-        EXPECT_EQ(tc.col, detail.column);
-        EXPECT_EQ(tc.line, detail.line);
+        CHECK_EQ(tc.col, detail.column);
+        CHECK_EQ(tc.line, detail.line);
         i++;
     }
 }
 
-TEST(ASTTest, Errors) { // NOLINT
+TEST_CASE("Errors") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
@@ -58,16 +58,16 @@ TEST(ASTTest, Errors) { // NOLINT
     if (auto e = gs.beginError(Loc{f, 0, 3}, errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
     }
-    ASSERT_TRUE(gs.hadCriticalError());
+    REQUIRE(gs.hadCriticalError());
     auto errors = errorQueue->drainAllErrors();
-    ASSERT_EQ(1, errors.size());
+    REQUIRE_EQ(1, errors.size());
 }
 
-TEST(ASTTest, SymbolRef) { // NOLINT
+TEST_CASE("SymbolRef") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     SymbolRef ref = Symbols::Object();
-    EXPECT_EQ(ref, ref.data(gs)->ref(gs));
+    CHECK_EQ(ref, ref.data(gs)->ref(gs));
 }
 
 struct FileIsTypedCase {
@@ -75,7 +75,7 @@ struct FileIsTypedCase {
     StrictLevel strict;
 };
 
-TEST(CoreTest, FileIsTyped) { // NOLINT
+TEST_CASE("FileIsTyped") { // NOLINT
     vector<FileIsTypedCase> cases = {
         {"", StrictLevel::None},
         {"# typed: true", StrictLevel::True},
@@ -96,11 +96,11 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"\n# @typed\n", StrictLevel::None},
     };
     for (auto &tc : cases) {
-        EXPECT_EQ(tc.strict, File::fileSigil(tc.src));
+        CHECK_EQ(tc.strict, File::fileSigil(tc.src));
     }
 }
 
-TEST(CoreTest, Substitute) { // NOLINT
+TEST_CASE("Substitute") { // NOLINT
     GlobalState gs1(errorQueue);
     gs1.initEmpty();
 
@@ -124,12 +124,12 @@ TEST(CoreTest, Substitute) { // NOLINT
 
     GlobalSubstitution subst(gs1, gs2);
 
-    EXPECT_EQ(subst.substitute(foo1), foo2);
-    EXPECT_EQ(subst.substitute(bar1), bar2);
+    CHECK_EQ(subst.substitute(foo1), foo2);
+    CHECK_EQ(subst.substitute(bar1), bar2);
 
     auto other2 = subst.substitute(other1);
-    ASSERT_TRUE(other2.exists());
-    ASSERT_TRUE(other2.data(gs2)->kind == NameKind::UTF8);
-    ASSERT_EQ("<U other>", other2.showRaw(gs2));
+    REQUIRE(other2.exists());
+    REQUIRE(other2.data(gs2)->kind == NameKind::UTF8);
+    REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 } // namespace sorbet::core

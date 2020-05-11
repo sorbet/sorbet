@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 // has to go first as it violates our requirements
 
 #include "ast/ast.h"
@@ -38,7 +38,7 @@ void addFile(LSPFileUpdates &updates, core::FileRef fref, std::string path, std:
 
 } // namespace
 
-TEST(LSPFileUpdatesTest, MergeOlderVersions) {
+TEST_CASE("MergeOlderVersions") {
     LSPFileUpdates oldUpdates;
     oldUpdates.editCount = 6;
     oldUpdates.epoch = 10;
@@ -49,11 +49,11 @@ TEST(LSPFileUpdatesTest, MergeOlderVersions) {
 
     newUpdates.mergeOlder(oldUpdates);
 
-    EXPECT_EQ(10, newUpdates.editCount);
-    EXPECT_EQ(14, newUpdates.epoch);
+    CHECK_EQ(10, newUpdates.editCount);
+    CHECK_EQ(14, newUpdates.epoch);
 }
 
-TEST(LSPFileUpdatesTest, MergeOlderCancellationExpected) {
+TEST_CASE("MergeOlderCancellationExpected") {
     LSPFileUpdates oldUpdates;
     oldUpdates.cancellationExpected = true;
 
@@ -61,18 +61,18 @@ TEST(LSPFileUpdatesTest, MergeOlderCancellationExpected) {
     newUpdates.cancellationExpected = false;
 
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_TRUE(newUpdates.cancellationExpected);
+    CHECK(newUpdates.cancellationExpected);
 
     oldUpdates.cancellationExpected = false;
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_TRUE(newUpdates.cancellationExpected);
+    CHECK(newUpdates.cancellationExpected);
 
     newUpdates.cancellationExpected = false;
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_FALSE(newUpdates.cancellationExpected);
+    CHECK_FALSE(newUpdates.cancellationExpected);
 }
 
-TEST(LSPFileUpdatesTest, MergeOlderHasNewFiles) {
+TEST_CASE("MergeOlderHasNewFiles") {
     LSPFileUpdates oldUpdates;
     oldUpdates.hasNewFiles = true;
 
@@ -80,18 +80,18 @@ TEST(LSPFileUpdatesTest, MergeOlderHasNewFiles) {
     newUpdates.hasNewFiles = false;
 
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_TRUE(newUpdates.hasNewFiles);
+    CHECK(newUpdates.hasNewFiles);
 
     oldUpdates.hasNewFiles = false;
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_TRUE(newUpdates.hasNewFiles);
+    CHECK(newUpdates.hasNewFiles);
 
     newUpdates.hasNewFiles = false;
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_FALSE(newUpdates.hasNewFiles);
+    CHECK_FALSE(newUpdates.hasNewFiles);
 }
 
-TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
+TEST_CASE("MergeUpdatedFiles") {
     LSPFileUpdates oldUpdates;
     oldUpdates.editCount = 6;
     oldUpdates.epoch = 10;
@@ -105,42 +105,42 @@ TEST(LSPFileUpdatesTest, MergeUpdatedFiles) {
     addFile(newUpdates, core::FileRef(3), "baz.rb", " ");
 
     newUpdates.mergeOlder(oldUpdates);
-    ASSERT_EQ(3, newUpdates.updatedFiles.size());
-    ASSERT_EQ(3, newUpdates.updatedFileIndexes.size());
+    REQUIRE_EQ(3, newUpdates.updatedFiles.size());
+    REQUIRE_EQ(3, newUpdates.updatedFileIndexes.size());
 
     UnorderedMap<string, int> fileIndexes;
     int i = -1;
     for (auto &f : newUpdates.updatedFiles) {
         i++;
         auto path = string(f->path());
-        EXPECT_FALSE(fileIndexes.contains(path));
+        CHECK_FALSE(fileIndexes.contains(path));
         fileIndexes[move(path)] = i;
     }
     {
-        ASSERT_TRUE(fileIndexes.contains("bar.rb"));
+        REQUIRE(fileIndexes.contains("bar.rb"));
         int i = fileIndexes["bar.rb"];
-        EXPECT_EQ("newcontents", newUpdates.updatedFiles[i]->source());
-        EXPECT_EQ(2, newUpdates.updatedFileIndexes[i].file.id());
-        EXPECT_NE(oldUpdates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
-                  newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
+        CHECK_EQ("newcontents", newUpdates.updatedFiles[i]->source());
+        CHECK_EQ(2, newUpdates.updatedFileIndexes[i].file.id());
+        CHECK_NE(oldUpdates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
+                 newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
     }
 
     {
-        ASSERT_TRUE(fileIndexes.contains("foo.rb"));
+        REQUIRE(fileIndexes.contains("foo.rb"));
         int i = fileIndexes["foo.rb"];
-        EXPECT_EQ("foo", newUpdates.updatedFiles[i]->source());
-        EXPECT_EQ(1, newUpdates.updatedFileIndexes[i].file.id());
-        EXPECT_EQ(oldUpdates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
-                  newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
+        CHECK_EQ("foo", newUpdates.updatedFiles[i]->source());
+        CHECK_EQ(1, newUpdates.updatedFileIndexes[i].file.id());
+        CHECK_EQ(oldUpdates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
+                 newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
     }
 
     {
-        ASSERT_TRUE(fileIndexes.contains("baz.rb"));
-        EXPECT_EQ(" ", newUpdates.updatedFiles[fileIndexes["baz.rb"]]->source());
+        REQUIRE(fileIndexes.contains("baz.rb"));
+        CHECK_EQ(" ", newUpdates.updatedFiles[fileIndexes["baz.rb"]]->source());
     }
 }
 
-TEST(LSPFileUpdatesTest, Copy) {
+TEST_CASE("Copy") {
     LSPFileUpdates updates;
     updates.editCount = 10;
     updates.epoch = 10;
@@ -152,31 +152,31 @@ TEST(LSPFileUpdatesTest, Copy) {
     addFile(updates, core::FileRef(2), "bar.rb", "bar");
 
     LSPFileUpdates copy = updates.copy();
-    EXPECT_EQ(10, copy.epoch);
-    EXPECT_EQ(10, copy.editCount);
-    EXPECT_TRUE(copy.cancellationExpected);
-    EXPECT_TRUE(copy.canTakeFastPath);
-    EXPECT_TRUE(copy.hasNewFiles);
-    EXPECT_FALSE(copy.updatedGS.has_value());
+    CHECK_EQ(10, copy.epoch);
+    CHECK_EQ(10, copy.editCount);
+    CHECK(copy.cancellationExpected);
+    CHECK(copy.canTakeFastPath);
+    CHECK(copy.hasNewFiles);
+    CHECK_FALSE(copy.updatedGS.has_value());
 
-    ASSERT_EQ(2, copy.updatedFiles.size());
-    ASSERT_EQ(2, copy.updatedFileIndexes.size());
+    REQUIRE_EQ(2, copy.updatedFiles.size());
+    REQUIRE_EQ(2, copy.updatedFileIndexes.size());
 
-    EXPECT_EQ("foo.rb", copy.updatedFiles[0]->path());
-    EXPECT_EQ("foo", copy.updatedFiles[0]->source());
-    EXPECT_EQ("bar.rb", copy.updatedFiles[1]->path());
-    EXPECT_EQ("bar", copy.updatedFiles[1]->source());
+    CHECK_EQ("foo.rb", copy.updatedFiles[0]->path());
+    CHECK_EQ("foo", copy.updatedFiles[0]->source());
+    CHECK_EQ("bar.rb", copy.updatedFiles[1]->path());
+    CHECK_EQ("bar", copy.updatedFiles[1]->source());
 
-    EXPECT_EQ(1, copy.updatedFileIndexes[0].file.id());
-    EXPECT_EQ(2, copy.updatedFileIndexes[1].file.id());
+    CHECK_EQ(1, copy.updatedFileIndexes[0].file.id());
+    CHECK_EQ(2, copy.updatedFileIndexes[1].file.id());
 
-    EXPECT_EQ(updates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
-              copy.updatedFiles[0]->getFileHash()->definitions.hierarchyHash);
-    EXPECT_EQ(updates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
-              copy.updatedFiles[1]->getFileHash()->definitions.hierarchyHash);
+    CHECK_EQ(updates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
+             copy.updatedFiles[0]->getFileHash()->definitions.hierarchyHash);
+    CHECK_EQ(updates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
+             copy.updatedFiles[1]->getFileHash()->definitions.hierarchyHash);
 }
 
-TEST(LSPFileUpdatesTest, MergeOlderPreemptionExpected) {
+TEST_CASE("MergeOlderPreemptionExpected") {
     LSPFileUpdates oldUpdates;
     oldUpdates.preemptionsExpected = 2;
 
@@ -184,7 +184,7 @@ TEST(LSPFileUpdatesTest, MergeOlderPreemptionExpected) {
     newUpdates.preemptionsExpected = 5;
 
     newUpdates.mergeOlder(oldUpdates);
-    EXPECT_EQ(7, newUpdates.preemptionsExpected);
+    CHECK_EQ(7, newUpdates.preemptionsExpected);
 }
 
 } // namespace sorbet::realmain::lsp::test

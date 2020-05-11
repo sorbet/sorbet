@@ -103,5 +103,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    return sorbet::test::printDocumentSymbols(argv[1]);
+    return sorbet::realmain::lsp::printDocumentSymbols(argv[1]);
 }

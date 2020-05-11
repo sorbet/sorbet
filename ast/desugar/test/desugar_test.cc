@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -21,7 +21,7 @@ namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("desugar_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-TEST(DesugarTest, SimpleDesugar) { // NOLINT
+TEST_CASE("SimpleDesugar") { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);

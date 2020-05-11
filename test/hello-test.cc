@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 #include <cxxopts.hpp>
 // has to go first as it violates our requirements
 
@@ -25,21 +25,21 @@ auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
-TEST(HelloTest, GetGreet) { // NOLINT
-    EXPECT_EQ("Hello Bazel", "Hello Bazel");
-}
-
 namespace spd = spdlog;
 
-TEST(HelloTest, GetSpdlog) { // NOLINT
+TEST_CASE("GetGreet") {
+    CHECK_EQ("Hello Bazel", "Hello Bazel");
+}
+
+TEST_CASE("GetSpdlog") {
     logger->info("Welcome to spdlog!");
 }
 
-TEST(HelloTest, GetCXXopts) { // NOLINT
+TEST_CASE("GetCXXopts") {
     cxxopts::Options options("MyProgram", "One line description of MyProgram");
 }
 
-TEST(PreOrderTreeMap, CountTrees) { // NOLINT
+TEST_CASE("CountTrees") {
     class Counter {
     public:
         int count = 0;
@@ -171,10 +171,10 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), loc.file());
 
     auto r = ast::TreeMap::apply(ctx, c, std::move(tree));
-    EXPECT_EQ(c.count, 3);
+    CHECK_EQ(c.count, 3);
 }
 
-TEST(PayloadTests, CloneSubstitutePayload) {
+TEST_CASE("CloneSubstitutePayload") {
     auto logger = spd::stderr_color_mt("ClonePayload");
     auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
@@ -191,8 +191,8 @@ TEST(PayloadTests, CloneSubstitutePayload) {
     }
 
     sorbet::core::GlobalSubstitution subst(*c1, *c2);
-    ASSERT_EQ("<U test new name>", subst.substitute(n1).showRaw(*c2));
-    ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
-    ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
+    REQUIRE_EQ("<U test new name>", subst.substitute(n1).showRaw(*c2));
+    REQUIRE_EQ(c1->symbolsUsed(), c2->symbolsUsed());
+    REQUIRE_EQ(c1->symbolsUsed(), gs.symbolsUsed());
 }
 } // namespace sorbet
