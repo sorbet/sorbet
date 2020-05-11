@@ -25,7 +25,8 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     for (auto &bb : cfg->basicBlocks) {
-        if (bb->bexit.cond.variable != core::LocalVariable::noVariable() &&
+        ENFORCE(bb->bexit.cond.variable.exists());
+        if (bb->bexit.cond.variable != core::LocalVariable::unconditional() &&
             bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
             used_vars.insert(bb->bexit.cond.variable);
         }
@@ -507,7 +508,9 @@ void Environment::setTypeAndOrigin(core::LocalVariable symbol, const core::TypeA
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
                                          const UnorderedMap<core::LocalVariable, VariableState> &filter) {
-    if (!env.bb->bexit.cond.variable.exists() || env.bb->bexit.cond.variable == core::LocalVariable::blockCall()) {
+    ENFORCE(env.bb->bexit.cond.variable.exists());
+    if (env.bb->bexit.cond.variable == core::LocalVariable::unconditional() ||
+        env.bb->bexit.cond.variable == core::LocalVariable::blockCall()) {
         return env;
     }
     copy.cloneFrom(env);

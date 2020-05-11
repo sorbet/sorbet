@@ -33,7 +33,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocO
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::LocalVariable::noVariable();
+        from->bexit.cond = core::LocalVariable::unconditional();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         from->bexit.loc = loc;
@@ -47,7 +47,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::LocalVariable::noVariable();
+        from->bexit.cond = core::LocalVariable::unconditional();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         from->bexit.loc = loc;

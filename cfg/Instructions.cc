@@ -196,14 +196,15 @@ string TAbsurd::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs) const {
-    if (this->type) {
+    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
+        return this->variable.toString(gs);
+    } else {
         return fmt::format("{}: {}", this->variable.toString(gs), this->type->show(gs));
     }
-    return this->variable.toString(gs);
 }
 
 string VariableUseSite::showRaw(const core::GlobalState &gs, int tabs) const {
-    if (this->type == nullptr) {
+    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
         return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs));
     } else {
         return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",

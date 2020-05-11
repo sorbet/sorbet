@@ -44,7 +44,7 @@ public:
     friend GlobalState;
     friend Name;
 
-    NameRef() : _id(-1){};
+    NameRef() : _id(0){};
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
     // constructing a well-known name, whose ID is stable across all
