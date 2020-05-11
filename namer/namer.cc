@@ -29,7 +29,7 @@ class FoundNames;
 
 struct FoundClassRef;
 struct FoundClass;
-struct FoundFieldOrVariable;
+struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
 
@@ -39,7 +39,7 @@ enum class NameKind : u1 {
     Class = 2,
     ClassRef = 3,
     Method = 4,
-    FieldOrVariable = 5,
+    StaticField = 5,
     TypeMember = 6,
     Symbol = 7,
 };
@@ -86,8 +86,8 @@ public:
     FoundMethod &method(FoundNames &foundNames);
     const FoundMethod &method(const FoundNames &foundNames) const;
 
-    FoundFieldOrVariable &fieldOrVariable(FoundNames &foundNames);
-    const FoundFieldOrVariable &fieldOrVariable(const FoundNames &foundNames) const;
+    FoundStaticField &staticField(FoundNames &foundNames);
+    const FoundStaticField &staticField(const FoundNames &foundNames) const;
 
     FoundTypeMember &typeMember(FoundNames &foundNames);
     const FoundTypeMember &typeMember(const FoundNames &foundNames) const;
@@ -110,7 +110,7 @@ struct FoundClass final {
     ast::ClassDef::Kind classKind;
 };
 
-struct FoundFieldOrVariable final {
+struct FoundStaticField final {
     FoundNameRef owner;
     FoundNameRef klass;
     core::NameRef name;
@@ -150,13 +150,23 @@ struct Modifier {
 };
 
 class FoundNames final {
+    // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.
+    // Used to determine the order in which symbols are defined in SymbolDefiner.
     vector<FoundNameRef> _definitions;
+    // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
+    // Symbols for classes that are referenced from but not present in the given file.
     vector<FoundClassRef> _klassRefs;
+    // Contains all classes defined in the file.
     vector<FoundClass> _klasses;
+    // Contains all methods defined in the file.
     vector<FoundMethod> _methods;
-    vector<FoundFieldOrVariable> _fieldOrVariables;
+    // Contains all static fields defined in the file.
+    vector<FoundStaticField> _staticFields;
+    // Contains all type members defined in the file.
     vector<FoundTypeMember> _typeMembers;
+    // Contains all symbol references in the file.
     vector<core::SymbolRef> _symbols;
+    // Contains all method and class modifiers (e.g. private/public/protected).
     vector<Modifier> _modifiers;
 
     FoundNameRef addDefinition(FoundNameRef ref) {
@@ -188,10 +198,10 @@ public:
         return addDefinition(FoundNameRef(NameKind::Method, idx));
     }
 
-    FoundNameRef addFieldOrVariable(FoundFieldOrVariable &&fieldOrVariable) {
-        const u4 idx = _fieldOrVariables.size();
-        _fieldOrVariables.push_back(move(fieldOrVariable));
-        return addDefinition(FoundNameRef(NameKind::FieldOrVariable, idx));
+    FoundNameRef addStaticField(FoundStaticField &&staticField) {
+        const u4 idx = _staticFields.size();
+        _staticFields.push_back(move(staticField));
+        return addDefinition(FoundNameRef(NameKind::StaticField, idx));
     }
 
     FoundNameRef addTypeMember(FoundTypeMember &&typeMember) {
@@ -226,8 +236,8 @@ public:
         return _methods;
     }
 
-    const vector<FoundFieldOrVariable> &fieldOrVariables() const {
-        return _fieldOrVariables;
+    const vector<FoundStaticField> &staticFields() const {
+        return _staticFields;
     }
 
     const vector<FoundTypeMember> &typeMembers() const {
@@ -278,15 +288,15 @@ const FoundMethod &FoundNameRef::method(const FoundNames &foundNames) const {
     return foundNames._methods[idx()];
 }
 
-FoundFieldOrVariable &FoundNameRef::fieldOrVariable(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::FieldOrVariable);
-    ENFORCE(foundNames._fieldOrVariables.size() > idx());
-    return foundNames._fieldOrVariables[idx()];
+FoundStaticField &FoundNameRef::staticField(FoundNames &foundNames) {
+    ENFORCE(kind() == NameKind::StaticField);
+    ENFORCE(foundNames._staticFields.size() > idx());
+    return foundNames._staticFields[idx()];
 }
-const FoundFieldOrVariable &FoundNameRef::fieldOrVariable(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::FieldOrVariable);
-    ENFORCE(foundNames._fieldOrVariables.size() > idx());
-    return foundNames._fieldOrVariables[idx()];
+const FoundStaticField &FoundNameRef::staticField(const FoundNames &foundNames) const {
+    ENFORCE(kind() == NameKind::StaticField);
+    ENFORCE(foundNames._staticFields.size() > idx());
+    return foundNames._staticFields[idx()];
 }
 
 FoundTypeMember &FoundNameRef::typeMember(FoundNames &foundNames) {
@@ -349,12 +359,12 @@ core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat
 }
 
 /**
- * Used with TreeMap to locate all of the class and method symbols defined in the tree.
+ * Used with TreeMap to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
  * Does not report any errors, which lets us cache its output.
  * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
  */
-class NameFinder {
+class SymbolFinder {
     unique_ptr<FoundNames> foundNames = make_unique<FoundNames>();
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
     // Instead, we track the owner manually as an index into `foundNames`; the item at that index
@@ -540,13 +550,13 @@ public:
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
 
-        FoundFieldOrVariable found;
+        FoundStaticField found;
         found.owner = getOwner();
         found.klass = squashNames(ctx, lhs->scope);
         found.name = lhs->cnst;
         found.asgnLoc = asgn->loc;
         found.lhsLoc = lhs->loc;
-        return foundNames->addFieldOrVariable(move(found));
+        return foundNames->addStaticField(move(found));
     }
 
     FoundNameRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
@@ -596,9 +606,9 @@ public:
     FoundNameRef handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         auto foundRef = fillAssign(ctx, asgn);
-        ENFORCE(foundRef.kind() == NameKind::FieldOrVariable);
-        auto &fieldOrVariable = foundRef.fieldOrVariable(*foundNames);
-        fieldOrVariable.isTypeAlias = send->fun == core::Names::typeAlias();
+        ENFORCE(foundRef.kind() == NameKind::StaticField);
+        auto &staticField = foundRef.staticField(*foundNames);
+        staticField.isTypeAlias = send->fun == core::Names::typeAlias();
         return foundRef;
     }
 
@@ -631,9 +641,9 @@ public:
 };
 
 /**
- * Defines symbols for all of the names found via NameFinder. Single threaded.
+ * Defines symbols for all of the names found via SymbolFinder. Single threaded.
  */
-class NameDefiner {
+class SymbolDefiner {
     unique_ptr<const FoundNames> foundNames;
     vector<core::SymbolRef> definedClasses;
     vector<core::SymbolRef> definedMethods;
@@ -1096,21 +1106,21 @@ class NameDefiner {
         }
     }
 
-    core::SymbolRef insertFieldOrVariable(core::MutableContext ctx, const FoundFieldOrVariable &fieldOrVariable) {
+    core::SymbolRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
                                               core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
 
-        auto scope = squashNames(ctx, fieldOrVariable.klass, contextClass(ctx, ctx.owner));
+        auto scope = squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner));
         if (!scope.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
                                               core::errors::Namer::InvalidClassOwner)) {
-                auto constLitName = fieldOrVariable.name.data(ctx)->show(ctx);
+                auto constLitName = staticField.name.data(ctx)->show(ctx);
                 auto scopeName = scope.data(ctx)->show(ctx);
                 e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
                             scopeName);
@@ -1119,18 +1129,18 @@ class NameDefiner {
             // Mangle this one out of the way, and re-enter a symbol with this name as a class.
             auto scopeName = scope.data(ctx)->name;
             ctx.state.mangleRenameSymbol(scope, scopeName);
-            scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, fieldOrVariable.lhsLoc), scope.data(ctx)->owner,
-                                               scopeName);
+            scope =
+                ctx.state.enterClassSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope.data(ctx)->owner, scopeName);
             scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
-        auto sym = ctx.state.lookupStaticFieldSymbol(scope, fieldOrVariable.name);
-        auto currSym = ctx.state.lookupSymbol(scope, fieldOrVariable.name);
-        auto name = sym.exists() ? sym.data(ctx)->name : fieldOrVariable.name;
+        auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
+        auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
+        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, fieldOrVariable.asgnLoc),
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
                                               core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("Redefining constant `{}`", fieldOrVariable.name.data(ctx)->show(ctx));
+                e.setHeader("Redefining constant `{}`", staticField.name.data(ctx)->show(ctx));
                 e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
             }
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
@@ -1142,13 +1152,13 @@ class NameDefiner {
             if (renamedSym.exists()) {
                 if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, fieldOrVariable.asgnLoc), "Previous definition");
+                    e.addErrorLine(core::Loc(ctx.file, staticField.asgnLoc), "Previous definition");
                 }
             }
         }
-        sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, fieldOrVariable.lhsLoc), scope, name);
+        sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
 
-        if (fieldOrVariable.isTypeAlias && sym.data(ctx)->isStaticField()) {
+        if (staticField.isTypeAlias && sym.data(ctx)->isStaticField()) {
             sym.data(ctx)->setTypeAlias();
         }
 
@@ -1159,13 +1169,13 @@ class NameDefiner {
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const FoundTypeMember &typeMember) {
         // TODO: Move to finder pass?
         if (typeMember.tooManyArgs || ctx.owner == core::Symbols::root()) {
-            FoundFieldOrVariable fieldOrVariable;
-            fieldOrVariable.owner = typeMember.owner;
-            fieldOrVariable.name = typeMember.name;
-            fieldOrVariable.asgnLoc = typeMember.asgnLoc;
-            fieldOrVariable.lhsLoc = typeMember.asgnLoc;
-            fieldOrVariable.isTypeAlias = true;
-            return insertFieldOrVariable(ctx, fieldOrVariable);
+            FoundStaticField staticField;
+            staticField.owner = typeMember.owner;
+            staticField.name = typeMember.name;
+            staticField.asgnLoc = typeMember.asgnLoc;
+            staticField.lhsLoc = typeMember.asgnLoc;
+            staticField.isTypeAlias = true;
+            return insertStaticField(ctx, staticField);
         }
 
         core::Variance variance = core::Variance::Invariant;
@@ -1262,7 +1272,7 @@ class NameDefiner {
     }
 
 public:
-    NameDefiner(unique_ptr<const FoundNames> foundNames) : foundNames(move(foundNames)) {}
+    SymbolDefiner(unique_ptr<const FoundNames> foundNames) : foundNames(move(foundNames)) {}
 
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundNames->klasses().size());
@@ -1282,9 +1292,9 @@ public:
                     definedMethods.push_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
-                case NameKind::FieldOrVariable: {
-                    const auto &fieldOrVariable = ref.fieldOrVariable(*foundNames);
-                    insertFieldOrVariable(ctx.withOwner(getOwnerSymbol(fieldOrVariable.owner)), fieldOrVariable);
+                case NameKind::StaticField: {
+                    const auto &staticField = ref.staticField(*foundNames);
+                    insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
                     break;
                 }
                 case NameKind::TypeMember: {
@@ -1316,9 +1326,9 @@ public:
 };
 
 /**
- * Inserts newly created names into a tree.
+ * Inserts newly created symbols (from SymbolDefiner) into a tree.
  */
-class NameInserter {
+class TreeSymbolizer {
     friend class Namer;
 
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
@@ -1710,8 +1720,8 @@ private:
     UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
 
-vector<NameFinderResult> findNames(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "naming.findNames");
+vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "naming.findSymbols");
     auto resultq = make_shared<BlockingBoundedQueue<vector<NameFinderResult>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     vector<NameFinderResult> allFoundNames;
@@ -1720,14 +1730,14 @@ vector<NameFinderResult> findNames(const core::GlobalState &gs, vector<ast::Pars
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("findNames", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.findNamesWorker");
-        NameFinder finder;
+    workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
+        Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
+        SymbolFinder finder;
         vector<NameFinderResult> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                gs.tracer().debug("findNames: {}", job.file.data(gs).path());
+                gs.tracer().debug("findSymbols: {}", job.file.data(gs).path());
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
                 NameFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
@@ -1756,36 +1766,37 @@ vector<NameFinderResult> findNames(const core::GlobalState &gs, vector<ast::Pars
     return allFoundNames;
 }
 
-vector<ast::ParsedFile> defineNames(core::GlobalState &gs, vector<NameFinderResult> allFoundNames) {
-    Timer timeit(gs.tracer(), "naming.defineNames");
+vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<NameFinderResult> allFoundNames) {
+    Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundNames.size());
     for (auto &fileFoundNames : allFoundNames) {
         gs.tracer().debug("defineNames: {}", fileFoundNames.tree.file.data(gs).path());
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundNames.tree.file);
-        NameDefiner nameDefiner(move(fileFoundNames.names));
+        SymbolDefiner symbolDefiner(move(fileFoundNames.names));
         output.push_back(move(fileFoundNames.tree));
-        nameDefiner.run(ctx);
+        symbolDefiner.run(ctx);
     }
     return output;
 }
 
-vector<ast::ParsedFile> insertNames(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "naming.insertNames");
+vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                       WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     for (auto &tree : trees) {
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("insertNames", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.insertNamesWorker");
-        NameInserter inserter;
+    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+        Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
+        TreeSymbolizer inserter;
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                gs.tracer().debug("insertNames: {}", job.file.data(gs).path());
+                gs.tracer().debug("symbolizeTrees: {}", job.file.data(gs).path());
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));
@@ -1815,9 +1826,9 @@ vector<ast::ParsedFile> insertNames(const core::GlobalState &gs, vector<ast::Par
 } // namespace
 
 vector<ast::ParsedFile> Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    auto foundNames = findNames(gs, move(trees), workers);
-    trees = defineNames(gs, move(foundNames));
-    trees = insertNames(gs, move(trees), workers);
+    auto foundNames = findSymbols(gs, move(trees), workers);
+    trees = defineSymbols(gs, move(foundNames));
+    trees = symbolizeTrees(gs, move(trees), workers);
     return trees;
 }
 
