@@ -273,14 +273,6 @@ package(default_visibility = ["//visibility:public"])
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
-    http_archive(
-        name = "zlib_static",
-        url = "https://zlib.net/zlib-1.2.11.tar.gz",
-        sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
-        strip_prefix = "zlib-1.2.11",
-        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
-    )
-
     native.new_local_repository(
         name = "system_ssl_darwin",
         path = "/usr/local/opt/openssl",
