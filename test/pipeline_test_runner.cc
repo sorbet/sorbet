@@ -125,7 +125,7 @@ public:
             auto checker = test.folder + expectation->second.begin()->second;
             auto expect = FileOps::read(checker);
 
-            { CHECK_EQ_DIFF(expect, gotPhase.second, fmt::format("{}Mismatch on: {}", prefix, checker)); }
+            CHECK_EQ_DIFF(expect, gotPhase.second, fmt::format("{}Mismatch on: {}", prefix, checker));
             if (expect == gotPhase.second) {
                 MESSAGE(gotPhase.first << " OK");
             }
