@@ -246,12 +246,11 @@ https://github.com/chanzuckerberg/sorbet-rails#initial-setup
 bundle exec srb rbi suggest-typed
 </span></code></pre>
 <h2><a class="anchor" aria-hidden="true" id="what-platforms-does-sorbet-support"></a><a href="#what-platforms-does-sorbet-support" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What platforms does Sorbet support?</h2>
-<p>The <code>sorbet</code> and <code>sorbet-runtime</code> gems are currently only tested on Ruby 2.4. We
-expect it to work on Ruby 2.3 through 2.6.</p>
-<p>The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
+<p>The <code>sorbet</code> and <code>sorbet-runtime</code> gems are currently only tested on Ruby 2.5
+andd Ruby 2.6. Ruby 2.7 should mostly work, but feel free to open issues for it.</p>
+<p>The static checker is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
 Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
-distributions where <code>glibc</code>, <code>git</code> and <code>bash</code> are present. We use static linking
-on both platforms, so it should not depend on system libraries.</p>
+distributions where <code>glibc</code>, <code>git</code> and <code>bash</code> are present.</p>
 <p>If you are using one of the official minimal Ruby Docker images you will need to
 install the extra dependencies yourself:</p>
 <pre><code class="hljs css language-Dockerfile"><span class="hljs-keyword">FROM</span> ruby:<span class="hljs-number">2.6</span>-alpine
