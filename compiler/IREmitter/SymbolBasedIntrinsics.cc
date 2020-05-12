@@ -293,7 +293,6 @@ static const vector<CallCMethod> knownCMethodsInstance{
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::T_Hash(), "[]", "sorbet_T_Hash_squarebr", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::T_Array(), "[]", "sorbet_T_Array_squarebr", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::T(), "untyped", "sorbet_T_untyped", Intrinsics::HandleBlock::Unhandled},
 };
 
