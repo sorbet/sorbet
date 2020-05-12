@@ -252,13 +252,12 @@ bundle exec srb rbi suggest-typed
 
 ## What platforms does Sorbet support?
 
-The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.4. We
-expect it to work on Ruby 2.3 through 2.6.
+The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.5
+andd Ruby 2.6. Ruby 2.7 should mostly work, but feel free to open issues for it.
 
-The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
+The static checker is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
 Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
-distributions where `glibc`, `git` and `bash` are present. We use static linking
-on both platforms, so it should not depend on system libraries.
+distributions where `glibc`, `git` and `bash` are present.
 
 If you are using one of the official minimal Ruby Docker images you will need to
 install the extra dependencies yourself:
