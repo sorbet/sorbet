@@ -659,7 +659,7 @@ class SymbolDefiner {
             case NameKind::ClassRef: {
                 auto &klassRef = name.klassRef(*foundNames);
                 auto newOwner = squashNames(ctx, klassRef.owner, defaultOwner);
-                return defineStubClass(ctx.withOwner(newOwner), klassRef);
+                return defineStubClass(ctx.withOwner(newOwner), klassRef, defaultOwner);
             }
             default:
                 Exception::raise("Invalid name reference");
@@ -691,7 +691,8 @@ class SymbolDefiner {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
-    core::SymbolRef defineStubClass(core::MutableContext ctx, const FoundClassRef &classRef) {
+    core::SymbolRef defineStubClass(core::MutableContext ctx, const FoundClassRef &classRef,
+                                    core::SymbolRef defaultStub) {
         auto name = classRef.name;
         auto loc = classRef.loc;
         if (name == core::Names::singleton()) {
@@ -701,14 +702,7 @@ class SymbolDefiner {
         core::SymbolRef existing = ctx.owner.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-                    auto memberName = name.data(ctx)->show(ctx);
-                    auto ownerName = ctx.owner.data(ctx)->show(ctx);
-                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", memberName,
-                                ownerName, ownerName);
-                    e.addErrorLine(ctx.owner.data(ctx)->loc(), "`{}` defined here", ownerName);
-                }
-                return ctx.owner;
+                return defaultStub;
             }
             existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), ctx.owner, name);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
