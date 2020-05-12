@@ -871,10 +871,6 @@ class SymbolDefiner {
     core::SymbolRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
         core::SymbolRef owner = methodOwner(ctx, method.flags);
 
-        if (method.name._id == 10) {
-            owner = core::SymbolRef(owner);
-        }
-
         // There are three symbols in play here, because there's:
         //
         // - sym, the symbol which, if it exists, is the 'correct' symbol for the method in question, as it matches
@@ -979,10 +975,6 @@ class SymbolDefiner {
     core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
         ENFORCE(symbol.exists());
-
-        if (symbol._id == 50) {
-            symbol = core::SymbolRef(symbol);
-        }
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
         if (!symbol.data(ctx)->isClassOrModule()) {
