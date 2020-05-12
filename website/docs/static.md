@@ -65,6 +65,7 @@ Each strictness level reports all errors at lower levels, plus new errors:
   [explicitly annotated types](type-annotations.md). This is analogous to
   TypeScript's `noImplicitAny` flag.
 
+<a class="anchor" aria-hidden="true" id="typed-strong"></a>
 - At `# typed: strong`, Sorbet no longer allows [`T.untyped`](untyped.md) as the
   intermediate result of any method call. This effectively means that Sorbet
   knew the type statically for 100% of calls within a file. Currently, this
