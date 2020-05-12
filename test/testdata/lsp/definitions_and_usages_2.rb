@@ -3,7 +3,7 @@ module Bar
      # ^ def: Bar
   CONST = 2
   # ^ def: CONST
-  
+
   class Steel
       # ^ def: Steel
     def meth(y)
@@ -19,7 +19,7 @@ module Bar
     end
   end
 end
-                
+
 local = 131
 # ^ def: local
 localer = local + 2
