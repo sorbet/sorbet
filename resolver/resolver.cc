@@ -1732,9 +1732,6 @@ private:
 
                     auto self = ast::MK::Self(mdef->loc);
                     mdef->rhs = ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), std::move(args));
-
-                    stopInDebugger();
-
                 } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
                     if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");
