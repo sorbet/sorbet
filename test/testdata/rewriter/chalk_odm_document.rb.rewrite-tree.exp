@@ -14,11 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def my_parent_method=<<C <todo sym>>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_parent_method")
-        else
-          <emptyTree>
-        end
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_parent_method")
         <self>.instance_variable_set(:"@my_parent_method", arg0)
       end
     end
@@ -48,11 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def my_child_method=<<C <todo sym>>>(arg0, &<blk>)
       begin
-        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_child_method")
-        else
-          <emptyTree>
-        end
+        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_child_method")
         <self>.instance_variable_set(:"@my_child_method", arg0)
       end
     end
