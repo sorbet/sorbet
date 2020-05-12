@@ -70,7 +70,7 @@ LSPPreprocessor makePreprocessor(shared_ptr<absl::Mutex> taskQueueMutex, shared_
 }
 
 unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
-    auto params = make_unique<WatchmanQueryResponse>("", "", false, files);
+    auto params = make_unique<WatchmanQueryResponse>("", "", false, files, "");
     auto msg = make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(params)));
     return msg;

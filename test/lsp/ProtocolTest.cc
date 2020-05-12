@@ -215,8 +215,9 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
 }
 
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
-    auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
-                                                make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths));
+    auto req =
+        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
+                                         make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths, ""));
     return make_unique<LSPMessage>(move(req));
 }
 
