@@ -23,8 +23,8 @@ sh_binary(
         "sorbet-typed.rev",
         "//main:sorbet",
         "@gems//gems",
-        "@ruby_2_4//:bundle",
-        "@ruby_2_4//:ruby",
+        "@ruby_2_5//:bundle",
+        "@ruby_2_5//:ruby",
         "@ruby_2_6//:bundle",
         "@ruby_2_6//:ruby",
     ],
@@ -38,7 +38,7 @@ sh_binary(
 )
 
 snapshot_tests(
-    ruby = "ruby_2_4",
+    ruby = "ruby_2_5",
     tests = glob(
         [
             "partial/*",
@@ -89,7 +89,7 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":snapshot-ruby_2_4",
+        ":snapshot-ruby_2_5",
         ":snapshot-ruby_2_6",
     ],
 )
@@ -100,7 +100,7 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":update-ruby_2_4",
+        ":update-ruby_2_5",
         ":update-ruby_2_6",
     ],
 )

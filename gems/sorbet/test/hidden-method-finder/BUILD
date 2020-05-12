@@ -10,7 +10,7 @@ sh_binary(
     srcs = ["hidden_methods_bazel.sh"],
     data = [
         "//main:sorbet",
-        "@ruby_2_4//:ruby",
+        "@ruby_2_5//:ruby",
         "@ruby_2_6//:ruby",
     ],
     tags = ["manual"],
@@ -21,7 +21,7 @@ sh_binary(
 )
 
 hidden_methods_tests(
-    ruby = "ruby_2_4",
+    ruby = "ruby_2_5",
     tests = [
         "simple",
         "thorough",
@@ -40,7 +40,7 @@ test_suite(
     name = "hidden-method-finder",
     tags = ["manual"],
     tests = [
-        ":hidden-methods-ruby_2_4",
+        ":hidden-methods-ruby_2_5",
         ":hidden-methods-ruby_2_6",
     ],
 )
