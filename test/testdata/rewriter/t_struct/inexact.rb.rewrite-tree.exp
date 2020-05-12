@@ -69,7 +69,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def qux=<<C <todo sym>>>(arg0, &<blk>)
       begin
-        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"qux")
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"qux")
+        else
+          <emptyTree>
+        end
         <self>.instance_variable_set(:"@qux", arg0)
       end
     end
