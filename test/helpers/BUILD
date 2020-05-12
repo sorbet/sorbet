@@ -16,5 +16,6 @@ cc_library(
         "//core",
         "//main/lsp",
         "@doctest",
+        "@dtl",
     ],
 )

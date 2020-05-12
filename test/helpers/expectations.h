@@ -19,6 +19,10 @@ struct Expectations {
 
     static Expectations getExpectations(std::string singleTest);
 };
+
+// A variant of CHECK_EQ that prints a diff on failure.
+void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::string_view errorMessage);
+
 } // namespace sorbet::test
 
 #endif // TEST_HELPERS_EXPECTATIONS_H
