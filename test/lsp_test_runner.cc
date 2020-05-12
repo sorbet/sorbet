@@ -261,8 +261,8 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
     // Simple string comparison, just like other *.exp files.
-    INFO("Mismatch on: " << expectedSymbolsPath);
-    CHECK_EQ(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse));
+    CHECK_EQ_DIFF(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse),
+                  "Mismatch on: " + expectedSymbolsPath);
 }
 
 TEST_CASE("LSPTest") {
