@@ -172,7 +172,7 @@ void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::stri
 
     vector<string> expectedLines = absl::StrSplit(expected, '\n');
     vector<string> actualLines = absl::StrSplit(actual, '\n');
-    dtl::Diff<string, vector<string>> diff(actualLines, expectedLines);
+    dtl::Diff<string, vector<string>> diff(expectedLines, actualLines);
     diff.compose();
     diff.composeUnifiedHunks();
 
