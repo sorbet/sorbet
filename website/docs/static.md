@@ -66,13 +66,14 @@ Each strictness level reports all errors at lower levels, plus new errors:
   TypeScript's `noImplicitAny` flag.
 
 <a class="anchor" aria-hidden="true" id="typed-strong"></a>
+
 - At `# typed: strong`, Sorbet no longer allows [`T.untyped`](untyped.md) as the
   intermediate result of any method call. This effectively means that Sorbet
   knew the type statically for 100% of calls within a file. Currently, this
   sigil is rarely used—usually the only files that are `# typed: strong` are RBI
   files and files with empty class definitions. Most Ruby files that actually do
   interesting things will have errors in `# typed: strong`. Support for
-  `typed: strong` files is minimal, as sorbet changes regularly and new features
+  `typed: strong` files is minimal, as Sorbet changes regularly and new features
   often bring new `T.untyped` intermediate values.
 
 To recap: adding one of these comments to the top of a Ruby file controls which
