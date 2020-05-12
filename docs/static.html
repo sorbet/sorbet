@@ -119,12 +119,17 @@ etc.</p></li>
 <a href="/docs/sigs">sigs</a>, and all constants and instance variables must have
 <a href="/docs/type-annotations">explicitly annotated types</a>. This is analogous to
 TypeScript’s <code>noImplicitAny</code> flag.</p></li>
-<li><p>At <code># typed: strong</code>, Sorbet no longer allows <a href="/docs/untyped"><code>T.untyped</code></a> as the
+</ul>
+<p><a class="anchor" aria-hidden="true" id="typed-strong"></a></p>
+<ul>
+<li>At <code># typed: strong</code>, Sorbet no longer allows <a href="/docs/untyped"><code>T.untyped</code></a> as the
 intermediate result of any method call. This effectively means that Sorbet
 knew the type statically for 100% of calls within a file. Currently, this
 sigil is rarely used—usually the only files that are <code># typed: strong</code> are RBI
 files and files with empty class definitions. Most Ruby files that actually do
-interesting things will have errors in <code># typed: strong</code>.</p></li>
+interesting things will have errors in <code># typed: strong</code>. Support for
+<code>typed: strong</code> files is minimal, as Sorbet changes regularly and new features
+often bring new <code>T.untyped</code> intermediate values.</li>
 </ul>
 <p>To recap: adding one of these comments to the top of a Ruby file controls which
 errors <code>srb</code> reports or silences in that file. The strictness level only affects
