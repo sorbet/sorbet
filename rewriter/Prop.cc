@@ -367,14 +367,21 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
                 }
             } else {
                 // Chalk::ODM::Document classes have special handling for soft freeze
+                auto doc = ast::MK::String(loc, core::Names::Chalk_ODM_Document());
+                auto nonForcingCnst = ast::MK::Constant(loc, core::Symbols::T_NonForcingConstants());
+                auto nonForcingIsA = ast::MK::Send2(loc, std::move(nonForcingCnst), core::Names::nonForcingIsA_p(),
+                                                    ast::MK::Self(loc), std::move(doc));
                 auto docDecoHelper = ast::MK::Constant(loc, core::Symbols::Chalk_ODM_DocumentDecoratorHelper());
                 auto softFreezeLogic = ast::MK::Send2(loc, std::move(docDecoHelper), core::Names::softFreezeLogic(),
                                                       ast::MK::Self(loc), ast::MK::Symbol(loc, name));
+                auto softFreezeIf =
+                    ast::MK::If(loc, std::move(nonForcingIsA), std::move(softFreezeLogic), ast::MK::EmptyTree());
+
                 // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarSet =
                     ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(),
                                    ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
-                auto insSeq = ast::MK::InsSeq1(loc, std::move(softFreezeLogic), std::move(ivarSet));
+                auto insSeq = ast::MK::InsSeq1(loc, std::move(softFreezeIf), std::move(ivarSet));
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));
             }
         } else {
