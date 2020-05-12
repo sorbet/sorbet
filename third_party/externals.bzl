@@ -11,6 +11,14 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "dtl",
+        urls = _github_public_urls("cubicdaiya/dtl/archive/v1.19.tar.gz"),
+        sha256 = "f47b99dd11e5d771ad32a8dc960db4ab2fbe349fb0346fa0795f53c846a99c5d",
+        build_file = "@com_stripe_ruby_typer//third_party:dtl.BUILD",
+        strip_prefix = "dtl-1.19",
+    )
+
+    http_archive(
         name = "yaml_cpp",
         urls = _github_public_urls("jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.zip"),
         sha256 = "7c0ddc08a99655508ae110ba48726c67e4a10b290c214aed866ce4bbcbe3e84c",

@@ -125,10 +125,7 @@ public:
             auto checker = test.folder + expectation->second.begin()->second;
             auto expect = FileOps::read(checker);
 
-            {
-                INFO(prefix << "Mismatch on: " << checker);
-                CHECK_EQ(expect, gotPhase.second);
-            }
+            CHECK_EQ_DIFF(expect, gotPhase.second, fmt::format("{}Mismatch on: {}", prefix, checker));
             if (expect == gotPhase.second) {
                 MESSAGE(gotPhase.first << " OK");
             }
@@ -396,14 +393,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (test.expectations.contains("symbol-table")) {
         string table = gs->toString() + '\n';
-        INFO("symbol-table should not be mutated by CFG+inference");
-        CHECK_EQ(handler.got["symbol-table"], table);
+        CHECK_EQ_DIFF(handler.got["symbol-table"], table, "symbol-table should not be mutated by CFG+inference");
     }
 
     if (test.expectations.contains("symbol-table-raw")) {
         string table = gs->showRaw() + '\n';
-        INFO("symbol-table-raw should not be mutated by CFG+inference");
-        CHECK_EQ(handler.got["symbol-table-raw"], table);
+        CHECK_EQ_DIFF(handler.got["symbol-table-raw"], table,
+                      "symbol-table-raw should not be mutated by CFG+inference");
     }
 
     // Check warnings and errors

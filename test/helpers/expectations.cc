@@ -1,7 +1,13 @@
-#include "test/helpers/expectations.h"
+#include "doctest.h"
+// Include first as it uses poisoned things
+
 #include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/sort.h"
+#include "dtl/dtl.hpp"
+#include "test/helpers/expectations.h"
+#include <sstream>
 
 using namespace std;
 
@@ -119,6 +125,7 @@ vector<Expectations> listDir(const char *name) {
 
     return result;
 }
+
 } // namespace
 
 Expectations Expectations::getExpectations(std::string singleTest) {
@@ -156,4 +163,22 @@ Expectations Expectations::getExpectations(std::string singleTest) {
 
     return result.front();
 }
+
+// A variant of CHECK_EQ that prints a diff on failure.
+void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::string_view errorMessage) {
+    if (expected == actual) {
+        return;
+    }
+
+    vector<string> expectedLines = absl::StrSplit(expected, '\n');
+    vector<string> actualLines = absl::StrSplit(actual, '\n');
+    dtl::Diff<string, vector<string>> diff(expectedLines, actualLines);
+    diff.compose();
+    diff.composeUnifiedHunks();
+
+    stringstream ss;
+    diff.printUnifiedFormat(ss);
+    FAIL_CHECK(fmt::format("{}\n{}", errorMessage, ss.str()));
+}
+
 } // namespace sorbet::test
