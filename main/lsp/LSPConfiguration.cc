@@ -1,8 +1,10 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "main/lsp/json_types.h"
+#include <filesystem>
 
 using namespace std;
 
@@ -14,10 +16,6 @@ constexpr string_view httpsScheme = "https"sv;
 } // namespace
 
 namespace {
-
-string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger> &logger) {
-    return opts.rawInputDirNames.at(0);
-}
 
 MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
     if (find(formats.begin(), formats.end(), MarkupKind::Markdown) != formats.end()) {
@@ -31,7 +29,7 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    const shared_ptr<spdlog::logger> &logger, bool skipConfigatron, bool disableFastPath)
     : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), skipConfigatron(skipConfigatron),
-      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {
+      disableFastPath(disableFastPath) {
     if (opts.rawInputDirNames.size() == 0) {
         logger->error("Sorbet's language server requires at least one input directory.");
         throw options::EarlyReturnWithCode(1);
@@ -52,6 +50,7 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         } else {
             rootUri = *rootUriString;
         }
+        workspaceRootPath = string(absl::StripPrefix(rootUri, "file://"));
     }
 
     if (params.capabilities->textDocument) {
@@ -111,31 +110,41 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
-    ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
-    string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
-        relativeUri = relativeUri.substr(1);
+
+    string absLocalPath;
+    if (absl::StartsWith(filePath, "/"sv)) {
+        absLocalPath = filePath;
+    } else {
+        absLocalPath = (std::filesystem::path(clientConfig->workspaceRootPath) / filePath).lexically_normal();
     }
 
-    // Special case: Root uri is '' (happens in Monaco)
-    if (clientConfig->rootUri.length() == 0) {
-        return string(relativeUri);
-    }
+    if (absl::StartsWith(absLocalPath, clientConfig->workspaceRootPath)) {
+        string_view relativeUri = filePath.substr(clientConfig->workspaceRootPath.length());
+        if (relativeUri.at(0) == '/') {
+            relativeUri = relativeUri.substr(1);
+        }
 
-    // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
-    if (clientConfig->enableSorbetURIs &&
-        FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
-        return absl::StrCat(sorbetScheme, relativeUri);
+        // Special case: Root uri is '' (happens in Monaco)
+        if (clientConfig->rootUri.length() == 0) {
+            return string(relativeUri);
+        }
+
+        // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
+        if (clientConfig->enableSorbetURIs &&
+            FileOps::isFileIgnored(clientConfig->workspaceRootPath, absLocalPath, opts.lspDirsMissingFromClient, {})) {
+            return absl::StrCat(sorbetScheme, relativeUri);
+        }
+        return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
     }
-    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
+    return absl::StrCat("file://", absLocalPath);
 }
 
 string LSPConfiguration::remoteName2Local(string_view uri) const {
     assertHasClientConfig();
     if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
-        logger->error("Unrecognized URI received from client: {}", uri);
-        return string(uri);
+        // return a fully qualified uri for the file if the uri is outside the workspace
+        return string(absl::StripPrefix(uri, "file://"));
     }
 
     const bool isSorbetURI = this->isSorbetUri(uri);
@@ -152,8 +161,8 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
     if (isHttps) {
         // URL decode the :
         return absl::StrReplaceAll(path, {{"%3A", ":"}});
-    } else if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", path);
+    } else if (clientConfig->workspaceRootPath.length() > 0) {
+        return absl::StrCat(clientConfig->workspaceRootPath, "/", path);
     } else {
         // Special case: Folder is '' (current directory)
         return path;
@@ -162,9 +171,6 @@ string LSPConfiguration::remoteName2Local(string_view uri) const {
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
     assertHasClientConfig();
-    if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
-        return core::FileRef();
-    }
     auto needle = remoteName2Local(uri);
     return gs.findFileByPath(needle);
 }
@@ -224,7 +230,12 @@ vector<string> LSPConfiguration::frefsToPaths(const core::GlobalState &gs, const
 }
 
 bool LSPConfiguration::isFileIgnored(string_view filePath) const {
-    return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+    if (absl::StartsWith(filePath, clientConfig->workspaceRootPath)) {
+        return FileOps::isFileIgnored(clientConfig->workspaceRootPath, filePath, opts.absoluteIgnorePatterns,
+                                      opts.relativeIgnorePatterns);
+    }
+    // Ignore all files outside the main workspace root
+    return true;
 }
 
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
