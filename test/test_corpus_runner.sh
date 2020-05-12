@@ -107,7 +107,7 @@ if [ "$(< "$target/sorbet.exit")" -ne 0 ]; then
 
   something_failed
 fi
-if [ -z "$(ls -A "$target")" ]; then
+if [ -z "$(find "$target" -name '*.so' -o -name '*.bundle')" ]; then
   if ! grep -q '# typed:' "${rb[@]}"; then
     attn "├─ No '# typed: ...' sigil(s) in input files"
   fi
@@ -119,7 +119,7 @@ if [ -z "$(ls -A "$target")" ]; then
   info   "├─ console output:"
   < "$target/sorbet.outerr" indent_and_nest
 
-  error  '└─ empty LLVM IR output. See above.'
+  error  '└─ no shared object produced. See above for potential reasons why.'
 
   something_failed
 fi
