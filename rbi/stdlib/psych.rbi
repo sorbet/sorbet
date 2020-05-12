@@ -503,17 +503,32 @@ module Psych
   def self.load_file(filename, fallback: false); end
 end
 
-module Psych::Handler
+class Psych::Handler
 end
 
-module Psych::Nodes::Document
+class Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
-module Psych::Nodes::Stream
+class Psych::Nodes::Document < Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
-module Psych::Parser
+class Psych::Nodes::Stream < Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
-module Psych::Visitors::ToRuby
+class Psych::Parser
+end
+
+class Psych::Visitors::Visitor
+end
+
+class Psych::Visitors::ToRuby < Psych::Visitors::Visitor
 end
