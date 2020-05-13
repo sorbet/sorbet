@@ -554,13 +554,13 @@ int realmain(int argc, char *argv[]) {
                     // don't change the sigil on "special" files
                     continue;
                 }
-                auto minErrorLevel = levelToRecommendation(levelMinusOne(file.data(*gs).minErrorLevel()));
+                auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
                 if (file.data(*gs).originalSigil == minErrorLevel) {
                     continue;
                 }
                 auto loc = findTyped(gs, file);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
-                    auto sigil = levelToSigil(minErrorLevel);
+                    auto sigil = levelToSigil(levelToRecommendation(minErrorLevel));
                     e.setHeader("You could add `# typed: {}`", sigil);
                     e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
