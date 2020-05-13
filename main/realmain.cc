@@ -558,9 +558,15 @@ int realmain(int argc, char *argv[]) {
                 if (file.data(*gs).originalSigil == minErrorLevel) {
                     continue;
                 }
+                minErrorLevel = levelToRecommendation(minErrorLevel);
+                if (file.data(*gs).originalSigil == minErrorLevel) {
+                    // if the file could be strong, but is only marked strict, ensure that we don't reccomend that it be
+                    // marked strict.
+                    continue;
+                }
                 auto loc = findTyped(gs, file);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
-                    auto sigil = levelToSigil(levelToRecommendation(minErrorLevel));
+                    auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
                     e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
