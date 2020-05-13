@@ -104,6 +104,22 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
     }
 }
 
+// Filter levels to a sensible recommendation.
+core::StrictLevel levelToRecommendation(core::StrictLevel level) {
+    switch (level) {
+        case core::StrictLevel::Ignore:
+        case core::StrictLevel::False:
+        case core::StrictLevel::True:
+        case core::StrictLevel::Strict:
+            return level;
+        case core::StrictLevel::Strong:
+        case core::StrictLevel::Max:
+            return core::StrictLevel::Strict;
+        default:
+            Exception::raise("Should never happen");
+    }
+}
+
 string levelToSigil(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::None:
@@ -531,12 +547,8 @@ int realmain(int argc, char *argv[]) {
                     // don't change the sigil on "special" files
                     continue;
                 }
-                auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
+                auto minErrorLevel = levelToRecommendation(levelMinusOne(file.data(*gs).minErrorLevel()));
                 if (file.data(*gs).originalSigil == minErrorLevel) {
-                    continue;
-                }
-                if (minErrorLevel == core::StrictLevel::Strong) {
-                    // Strong is fragile, and breaks without warning
                     continue;
                 }
                 auto loc = findTyped(gs, file);
