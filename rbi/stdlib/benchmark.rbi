@@ -389,6 +389,160 @@ end
 class Benchmark::Tms < Object
   # Default caption, see also Benchmark::CAPTION
   CAPTION = T.let(T.unsafe(nil), String)
+
   # Default format string, see also Benchmark::FORMAT
   FORMAT = T.let(T.unsafe(nil), String)
+
+  # Returns an initialized
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object which
+  # has `utime` as the user CPU time, `stime` as the system CPU time, `cutime`
+  # as the children’s user CPU time, `cstime` as the children’s system CPU time,
+  # `real` as the elapsed real time and `label` as the label.
+  sig do
+    params(
+      utime: Numeric,
+      stime: Numeric,
+      cutime: Numeric,
+      cstime: Numeric,
+      real: Numeric,
+      label: T.nilable(String)
+    ).void
+  end
+  def initialize(utime = 0.0, stime = 0.0, cutime = 0.0, cstime = 0.0, real = 0.0, label = nil); end
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # obtained by memberwise multiplication of the individual times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object by
+  # `x`.
+  sig { params(x: T.any(Numeric, Benchmark::Tms)).returns(Benchmark::Tms) }
+  def *(x); end
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # obtained by memberwise summation of the individual times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object with
+  # those of the `other`
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object. This
+  # method and #/() are useful for taking statistics.
+  sig { params(other: T.any(Numeric, Benchmark::Tms)).returns(Benchmark::Tms) }
+  def +(other); end
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # obtained by memberwise subtraction of the individual times for the `other`
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object from
+  # those of this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object.
+  sig { params(other: T.any(Numeric, Benchmark::Tms)).returns(Benchmark::Tms) }
+  def -(other); end
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # obtained by memberwise division of the individual times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object by
+  # `x`. This method and
+  # [`+()`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#method-i-2B)
+  # are useful for taking statistics.
+  sig { params(x: T.any(Numeric, Benchmark::Tms)).returns(Benchmark::Tms) }
+  def /(x); end
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object whose
+  # times are the sum of the times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object, plus
+  # the time required to execute the code block (`blk`).
+  sig { params(blk: T.proc.void).returns(Benchmark::Tms) }
+  def add(&blk); end
+
+  # An in-place version of
+  # [`add`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#method-i-add).
+  # Changes the times of this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object by
+  # making it the sum of the times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object, plus
+  # the time required to execute the code block (`blk`).
+  sig { params(blk: T.proc.void).void }
+  def add!(&blk); end
+
+  # System CPU time of children
+  sig { returns(Float) }
+  def cstime; end
+
+  # User CPU time of children
+  sig { returns(Float) }
+  def cutime; end
+
+  # Returns the contents of this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object as a
+  # formatted string, according to a `format` string like that passed to
+  # [`Kernel.format`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-format).
+  # In addition,
+  # [`format`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#method-i-format)
+  # accepts the following extensions:
+  #
+  # `%u`
+  # :   Replaced by the user CPU time, as reported by
+  #     [`Tms#utime`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-utime).
+  # `%y`
+  # :   Replaced by the system CPU time, as reported by
+  #     [`stime`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-stime)
+  #     (Mnemonic: y of "s\*y\*stem")
+  # `%U`
+  # :   Replaced by the children's user CPU time, as reported by
+  #     [`Tms#cutime`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-cutime)
+  # `%Y`
+  # :   Replaced by the children's system CPU time, as reported by
+  #     [`Tms#cstime`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-cstime)
+  # `%t`
+  # :   Replaced by the total CPU time, as reported by
+  #     [`Tms#total`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-total)
+  # `%r`
+  # :   Replaced by the elapsed real time, as reported by
+  #     [`Tms#real`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-real)
+  # `%n`
+  # :   Replaced by the label string, as reported by
+  #     [`Tms#label`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#attribute-i-label)
+  #     (Mnemonic: n of "\*n\*ame")
+  #
+  #
+  # If `format` is not given,
+  # [`FORMAT`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html#FORMAT) is
+  # used as default value, detailing the user, system and real elapsed time.
+  sig { params(format: String, args: T.untyped).returns(String) }
+  def format(format = _, *args); end
+
+  # Label
+  sig { returns(String) }
+  def label; end
+
+  # Elapsed real time
+  sig { returns(Float) }
+  def real; end
+
+  # System CPU time
+  sig { returns(Float) }
+  def stime; end
+
+  # Total time, that is `utime` + `stime` + `cutime` + `cstime`
+  sig { returns(Float) }
+  def total; end
+
+  # User CPU time
+  sig { returns(Float) }
+  def utime; end
+
+  protected
+
+  # Returns a new
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # obtained by memberwise operation `op` of the individual times for this
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object with
+  # those of the other
+  # [`Tms`](https://docs.ruby-lang.org/en/2.6.0/Benchmark/Tms.html) object
+  # (`x`).
+  #
+  # `op` can be a mathematical operation such as `+`, `-`, `*`, `/`
+  sig { params(op: T.any(String, Symbol), x: Numeric).returns(Benchmark::Tms) }
+  def memberwise(op, x); end
 end
