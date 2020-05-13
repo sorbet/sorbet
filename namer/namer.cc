@@ -124,6 +124,7 @@ struct FoundTypeMember final {
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets nameLoc;
+    core::LocOffsets litLoc;
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
@@ -571,7 +572,7 @@ public:
         found.nameLoc = typeName->loc;
         found.name = typeName->cnst;
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
-        found.varianceName = core::Names::empty();
+        found.varianceName = core::NameRef();
         found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
         if (!send->args.empty()) {
@@ -583,6 +584,7 @@ public:
             auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
             if (lit != nullptr && lit->isSymbol(ctx)) {
                 found.varianceName = lit->asSymbol(ctx);
+                found.litLoc = lit->loc;
             }
 
             auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
@@ -1169,14 +1171,20 @@ class SymbolDefiner {
 
         auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
 
-        core::NameRef name = typeMember.varianceName;
-
-        if (name == core::Names::covariant()) {
-            variance = core::Variance::CoVariant;
-        } else if (name == core::Names::contravariant()) {
-            variance = core::Variance::ContraVariant;
-        } else if (name == core::Names::invariant()) {
-            variance = core::Variance::Invariant;
+        core::NameRef foundVariance = typeMember.varianceName;
+        if (foundVariance.exists()) {
+            if (foundVariance == core::Names::covariant()) {
+                variance = core::Variance::CoVariant;
+            } else if (foundVariance == core::Names::contravariant()) {
+                variance = core::Variance::ContraVariant;
+            } else if (foundVariance == core::Names::invariant()) {
+                variance = core::Variance::Invariant;
+            } else {
+                if (auto e = ctx.beginError(typeMember.litLoc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",
+                                ":" + core::Names::covariant().show(ctx), ":" + core::Names::contravariant().show(ctx));
+                }
+            }
         }
 
         core::SymbolRef sym;
@@ -1584,10 +1592,6 @@ public:
         }
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs->cnst);
-        if (!cnst.exists()) {
-            ctx.state.tracer().debug("cnst doesn't exist: {} on {}", lhs->cnst.toString(ctx),
-                                     scope.data(ctx)->name.toString(ctx));
-        }
         ENFORCE(cnst.exists());
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
@@ -1634,7 +1638,8 @@ public:
             ENFORCE(onSymbol.exists());
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
             ENFORCE(sym.exists());
-            auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
+            auto lit = ast::cast_tree<ast::Literal>(send->args.front().get());
+            auto hash = ast::cast_tree<ast::Hash>(send->args.back().get());
             if (hash) {
                 bool fixed = false;
                 bool bounded = false;
@@ -1670,6 +1675,10 @@ public:
                     if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Missing required param `{}`", "fixed");
                     }
+                }
+            } else if (send->args.size() != 1 || !lit || !lit->isSymbol(ctx)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Invalid param, must be a :symbol");
                 }
             }
         }
