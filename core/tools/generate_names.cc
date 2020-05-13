@@ -202,6 +202,7 @@ NameDef names[] = {
     {"ArrayMutator", "ArrayMutator", true},
     {"DocumentMutator", "DocumentMutator", true},
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
+    {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
     {"to"},
