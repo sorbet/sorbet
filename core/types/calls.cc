@@ -1112,95 +1112,6 @@ public:
     }
 } T_revealType;
 
-class T_NonForcingConstants_nonForcingIsA_p : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
-
-        if (args.args.size() != 2) {
-            return;
-        }
-
-        auto stringLoc = Loc(args.locs.file, args.locs.args[1]);
-
-        auto literal = cast_type<LiteralType>(args.args[1]->type.get());
-        if (literal == nullptr) {
-            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
-        }
-
-        if (literal->literalKind != LiteralType::LiteralTypeKind::String) {
-            // Infer already reported a type error via the RBI
-            return;
-        }
-
-        auto name = NameRef(gs, literal->value);
-        auto shortName = name.data(gs)->shortName(gs);
-        if (shortName.empty()) {
-            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                e.setHeader("The string given to `{}` must not be empty", method);
-            }
-            return;
-        }
-
-        auto parts = absl::StrSplit(shortName, "::");
-        core::SymbolRef current;
-        for (auto part : parts) {
-            if (!current.exists()) {
-                // First iteration
-                if (part != "") {
-                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                        e.setHeader(
-                            "The string given to `{}` must be an absolute constant reference that starts with `{}`",
-                            method, "::");
-                    }
-                    return;
-                }
-
-                current = core::Symbols::root();
-            } else {
-                auto member = gs.lookupNameConstant(part);
-                if (!member.exists()) {
-                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                        auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(gs)->show(gs);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
-                    }
-                    return;
-                }
-
-                auto newCurrent = current.data(gs)->findMember(gs, member);
-                if (!newCurrent.exists()) {
-                    if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                        auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(gs)->show(gs);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
-                    }
-                    return;
-                }
-                current = newCurrent;
-            }
-        }
-
-        ENFORCE(current.exists(), "Loop invariant violated");
-
-        if (!current.data(gs)->isClassOrModule()) {
-            if (auto e = gs.beginError(stringLoc, errors::Infer::LazyResolve)) {
-                e.setHeader("The string given to `{}` must resolve to a class or module", method);
-                e.addErrorLine(current.data(gs)->loc(), "Resolved to this constant");
-            }
-            return;
-        }
-
-        // The generated code relies on being able to generate calls non_forcing_is_a? unconditionally.
-        // If we were do to something smarter here with the returnType, infer would report dead code
-        // errors when it could prove that the check was always false, so we always return T::Boolean.
-        // (Well, it's implicit from the sig.)
-    }
-} T_NonForcingConstants_nonForcingIsA_p;
-
 class T_nilable : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2307,9 +2218,6 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
-
-    {Symbols::T_NonForcingConstants(), Intrinsic::Kind::Singleton, Names::nonForcingIsA_p(),
-     &T_NonForcingConstants_nonForcingIsA_p},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
