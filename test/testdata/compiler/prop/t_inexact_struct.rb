@@ -26,3 +26,6 @@ child = Child.new(foo: 141, bar: "hello", qux: :my_symbol)
 p child
 
 p child.qux
+
+child.qux = :zl_flzoby
+p child.qux
