@@ -685,6 +685,15 @@ class Pathname < Object
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
+  # Tests the file is empty.
+  #
+  # See
+  # [`Dir#empty?`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-i-empty-3F)
+  # and
+  # [`FileTest.empty?`](https://docs.ruby-lang.org/en/2.6.0/FileTest.html#method-i-empty-3F).
+  sig { returns(T::Boolean) }
+  def empty?; end
+
   # Return the entries (files and subdirectories) in the directory, each as a
   # [`Pathname`](https://docs.ruby-lang.org/en/2.6.0/Pathname.html) object.
   #
