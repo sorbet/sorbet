@@ -5,7 +5,7 @@
 #
 #   https://github.com/sorbet/sorbet-typed/edit/master/lib/ruby/all/resolv.rbi
 #
-# typed: strong
+# typed: strict
 
 class Resolv
   sig { params(name: String).returns(String) }

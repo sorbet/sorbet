@@ -82,40 +82,40 @@ def strict_func
 end
 No errors! Great job.
 -------------------------
-suggest-typed-strong.rb:1: You could add `# typed: strong` https://srb.help/7022
+suggest-typed-strong.rb:1: You could add `# typed: strict` https://srb.help/7022
      1 |1
         ^
   Autocorrect: Done
-    suggest-typed-strong.rb:1: Inserted `# typed: strong
+    suggest-typed-strong.rb:1: Inserted `# typed: strict
 `
      1 |1
         ^
 Errors: 1
-# typed: strong
+# typed: strict
 1
 No errors! Great job.
 -------------------------
-empty.rb:1: You could add `# typed: strong` https://srb.help/7022
+empty.rb:1: You could add `# typed: strict` https://srb.help/7022
      1 |
         ^
   Autocorrect: Use `-a` to autocorrect
-    empty.rb:1: Insert `# typed: strong
+    empty.rb:1: Insert `# typed: strict
 `
      1 |
         ^
 Errors: 1
 -------------------------
-suggest-typed-with-too-low.rb:2: You could add `# typed: strong` https://srb.help/7022
+suggest-typed-with-too-low.rb:2: You could add `# typed: strict` https://srb.help/7022
      2 |# typed: false
      3 |
   Autocorrect: Done
-    suggest-typed-with-too-low.rb:2: Replaced with `# typed: strong
+    suggest-typed-with-too-low.rb:2: Replaced with `# typed: strict
 `
      2 |# typed: false
      3 |
 Errors: 1
 1
-# typed: strong
+# typed: strict
 -------------------------
 No errors! Great job.
 -------------------------
