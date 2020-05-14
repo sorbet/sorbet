@@ -6987,6 +6987,52 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
   end
   def set_key(_, _1, _2); end
 
+  # Signs *data* using the Probabilistic Signature Scheme (RSA-PSS) and returns
+  # the calculated signature.
+  #
+  # RSAError will be raised if an error occurs.
+  #
+  # See
+  # [`verify_pss`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-verify_pss)
+  # for the verification operation.
+  #
+  # ### Parameters
+  # *digest*
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  #     the message digest algorithm name.
+  # *data*
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The data
+  #     to be signed.
+  # *salt\_length*
+  # :   The length in octets of the salt. Two special values are reserved:
+  #     `:digest` means the digest length, and `:max` means the maximum possible
+  #     length for the combination of the private key and the selected message
+  #     digest algorithm.
+  # *mgf1\_hash*
+  # :   The hash algorithm used in MGF1 (the currently supported mask generation
+  #     function (MGF)).
+  #
+  #
+  # ### Example
+  #
+  # ```ruby
+  # data = "Sign me!"
+  # pkey = OpenSSL::PKey::RSA.new(2048)
+  # signature = pkey.sign_pss("SHA256", data, salt_length: :max, mgf1_hash: "SHA256")
+  # pub_key = pkey.public_key
+  # puts pub_key.verify_pss("SHA256", signature, data,
+  #                         salt_length: :auto, mgf1_hash: "SHA256") # => true
+  # ```
+  sig do
+    params(
+      digest: String,
+      data: String,
+      salt_length: Integer,
+      mgf1_hash: String
+    ).returns(String)
+  end
+  def sign_pss(digest, data, salt_length:, mgf1_hash:); end
+
   # Outputs this keypair in DER encoding.
   sig {returns(::T.untyped)}
   def to_der(); end
@@ -7032,6 +7078,39 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
     .returns(::T.untyped)
   end
   def self.generate(*_); end
+
+  # Verifies *data* using the Probabilistic Signature Scheme (RSA-PSS).
+  #
+  # The return value is `true` if the signature is valid, `false` otherwise.
+  # RSAError will be raised if an error occurs.
+  #
+  # See
+  # [`sign_pss`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html#method-i-sign_pss)
+  # for the signing operation and an example code.
+  #
+  # ### Parameters
+  # *digest*
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing
+  #     the message digest algorithm name.
+  # *data*
+  # :   A [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The data
+  #     to be signed.
+  # *salt\_length*
+  # :   The length in octets of the salt. Two special values are reserved:
+  #     `:digest` means the digest length, and `:auto` means automatically
+  #     determining the length based on the signature.
+  # *mgf1\_hash*
+  # :   The hash algorithm used in MGF1.
+  sig do
+    params(
+      digest: String,
+      signature: String,
+      data: String,
+      salt_length: Integer,
+      mgf1_hash: String
+    ).returns(T::Boolean)
+  end
+  def verify_pss(digest, signature, data, salt_length:, mgf1_hash:); end
 end
 
 # Generic exception that is raised if an operation on an RSA
