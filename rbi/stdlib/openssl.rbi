@@ -7494,7 +7494,7 @@ class OpenSSL::SSL::SSLContext
   # instead.
   sig do
     params(
-      extra_chain_cert: ::T.untyped,
+      extra_chain_cert: ::T.untyped
     )
     .returns(::T.untyped)
   end
