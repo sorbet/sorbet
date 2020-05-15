@@ -14,6 +14,7 @@
 #include "resolver/type_syntax.h"
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/Symbols.h"
@@ -1732,9 +1733,6 @@ private:
 
                     auto self = ast::MK::Self(mdef->loc);
                     mdef->rhs = ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), std::move(args));
-
-                    stopInDebugger();
-
                 } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
                     if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");
@@ -1869,6 +1867,97 @@ private:
         return true;
     }
 
+    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
+        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
+
+        if (send.args.size() != 2) {
+            return;
+        }
+
+        auto stringLoc = send.args[1]->loc;
+
+        auto literalNode = ast::cast_tree<ast::Literal>(send.args[1].get());
+        if (literalNode == nullptr) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("`{}` only accepts string literals", method);
+            }
+            return;
+        }
+
+        auto literal = core::cast_type<core::LiteralType>(literalNode->value.get());
+        if (literal == nullptr) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("`{}` only accepts string literals", method);
+            }
+            return;
+        }
+
+        if (literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
+            // Infer will report a type error
+            return;
+        }
+
+        auto name = core::NameRef(ctx.state, literal->value);
+        auto shortName = name.data(ctx)->shortName(ctx);
+        if (shortName.empty()) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("The string given to `{}` must not be empty", method);
+            }
+            return;
+        }
+
+        auto parts = absl::StrSplit(shortName, "::");
+        core::SymbolRef current;
+        for (auto part : parts) {
+            if (!current.exists()) {
+                // First iteration
+                if (part != "") {
+                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                        e.setHeader(
+                            "The string given to `{}` must be an absolute constant reference that starts with `{}`",
+                            method, "::");
+                    }
+                    return;
+                }
+
+                current = core::Symbols::root();
+            } else {
+                auto member = ctx.state.lookupNameConstant(part);
+                if (!member.exists()) {
+                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                        auto prettyCurrent =
+                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    }
+                    return;
+                }
+
+                auto newCurrent = current.data(ctx)->findMember(ctx, member);
+                if (!newCurrent.exists()) {
+                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                        auto prettyCurrent =
+                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    }
+                    return;
+                }
+                current = newCurrent;
+            }
+        }
+
+        ENFORCE(current.exists(), "Loop invariant violated");
+
+        if (!current.data(ctx)->isClassOrModule()) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("The string given to `{}` must resolve to a class or module", method);
+                e.addErrorLine(current.data(ctx)->loc(), "Resolved to this constant");
+            }
+            return;
+        }
+    }
+
     core::SymbolRef methodOwner(core::Context ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
@@ -1993,8 +2082,7 @@ public:
                                             make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
                 }
                 case core::Names::revealType()._id:
-                case core::Names::absurd()._id:
-                case core::Names::nonForcingIsA_p()._id: {
+                case core::Names::absurd()._id: {
                     // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
 
@@ -2015,6 +2103,9 @@ public:
                     }
                     return send;
                 }
+                case core::Names::nonForcingIsA_p()._id:
+                    validateNonForcingIsA(ctx, *send);
+                    return send;
                 default:
                     return send;
             }

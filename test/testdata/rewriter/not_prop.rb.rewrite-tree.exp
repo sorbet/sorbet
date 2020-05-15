@@ -17,7 +17,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
       begin
-        ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"array_of_explicit")
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"array_of_explicit")
+        else
+          <emptyTree>
+        end
         <self>.instance_variable_set(:"@array_of_explicit", arg0)
       end
     end

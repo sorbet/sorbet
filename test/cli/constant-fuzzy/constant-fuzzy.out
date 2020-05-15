@@ -10,7 +10,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Fiber`
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Find`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L660: Did you mean: `Enumerator::Yielder`?
@@ -19,9 +19,9 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L78: Did you mean: `Ripper`?
     78 |class Ripper
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#L67: Did you mean: `Fiber`?
-    67 |class Fiber < Object
-        ^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/find.rbi#L25: Did you mean: `Find`?
+    25 |module Find
+        ^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)

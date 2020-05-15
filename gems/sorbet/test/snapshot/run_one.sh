@@ -158,10 +158,11 @@ fi
   fi
 
   # Configuring output to vendor/bundle
+  # Setting no-prune to not delete unused gems in vendor/cache
   # Passing --local to never consult rubygems.org
-  # Passing --no-prune to not delete unused gems in vendor/cache
   info "├─ Installing dependencies to BUNDLE_PATH"
-  bundle install --verbose --local --no-prune
+  bundle config set no_prune true
+  bundle install --verbose --local
 
   info "├─ Checking installation"
   bundle check

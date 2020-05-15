@@ -103,8 +103,6 @@ cc_binary(
     deps = [
         "//main/lsp",
         "//payload",
-        "//test/helpers",
-        "@doctest//:doctest_custom_main",
     ],
 )
 
