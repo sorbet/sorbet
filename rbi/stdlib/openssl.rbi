@@ -7106,7 +7106,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
       digest: String,
       signature: String,
       data: String,
-      salt_length: Integer,
+      salt_length: T.any(Integer, Symbol),
       mgf1_hash: String
     ).returns(T::Boolean)
   end
