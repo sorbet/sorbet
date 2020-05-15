@@ -9546,8 +9546,6 @@ module ObjectSpace
 end
 
 class Pathname
-  def empty?(); end
-
   def fnmatch?(*_); end
 
   def glob(*_); end
