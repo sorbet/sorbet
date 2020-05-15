@@ -252,8 +252,8 @@ bundle exec srb rbi suggest-typed
 
 ## What platforms does Sorbet support?
 
-The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.5
-and Ruby 2.6.
+The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.5 and
+Ruby 2.6.
 
 Ruby 2.7 has
 [known issues](https://github.com/sorbet/sorbet/issues?q=is%3Aissue+2.7+) and is
