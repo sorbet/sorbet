@@ -84,7 +84,8 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     ENFORCE(committed);
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
+bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
+                               vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
@@ -605,11 +606,12 @@ TypecheckRun::TypecheckRun(vector<unique_ptr<core::Error>> errors, vector<core::
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), workers(workers) {}
 
-void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates) {
+void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
+                                                 vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     if (!updates.canTakeFastPath) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto committed = typechecker.typecheck(move(updates), workers);
+    auto committed = typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers));
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }
