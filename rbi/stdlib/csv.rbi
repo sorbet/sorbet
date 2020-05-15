@@ -276,6 +276,185 @@ class CSV < Object
   end
   def self.foreach(path, options=T.unsafe(nil), &blk); end
 
+  # This constructor will wrap either a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object passed in `data`
+  # for reading and/or writing. In addition to the
+  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) instance methods,
+  # several [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) methods are
+  # delegated. (See
+  # [`CSV::open()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-open)
+  # for a complete list.)  If you pass a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) for `data`, you
+  # can later retrieve it (after writing to it, for example) with CSV.string().
+  #
+  # Note that a wrapped
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  # positioned at the beginning (for reading). If you want it at the end (for
+  # writing), use
+  # [`CSV::generate()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-generate).
+  # If you want any other positioning, pass a preset
+  # [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html) object
+  # instead.
+  #
+  # You may set any reading and/or writing preferences in the `options`
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html). Available options
+  # are:
+  #
+  # **`:col_sep`**
+  # :   The [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) placed
+  #     between each field. This
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  #     transcoded into the data's
+  #     [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) before
+  #     parsing.
+  # **`:row_sep`**
+  # :   The [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) appended
+  #     to the end of each row. This can be set to the special `:auto` setting,
+  #     which requests that
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) automatically
+  #     discover this from the data. Auto-discovery reads ahead in the data
+  #     looking for the next `"\r\n"`, `"\n"`, or `"\r"` sequence. A sequence
+  #     will be selected even if it occurs in a quoted field, assuming that you
+  #     would have the same line endings there. If none of those sequences is
+  #     found, `data` is `ARGF`, `STDIN`, `STDOUT`, or `STDERR`, or the stream
+  #     is only available for output, the default `$INPUT_RECORD_SEPARATOR`
+  #     (`$/`) is used. Obviously, discovery takes a little time.
+  #     [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) manually if speed
+  #     is important. Also note that
+  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) objects should be
+  #     opened in binary mode on Windows if this feature will be used as the
+  #     line-ending translation can cause problems with resetting the document
+  #     position to where it was before the read ahead. This
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  #     transcoded into the data's
+  #     [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) before
+  #     parsing.
+  # **`:quote_char`**
+  # :   The character used to quote fields. This has to be a single character
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). This is
+  #     useful for application that incorrectly use `'` as the quote character
+  #     instead of the correct `"`.
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will always
+  #     consider a double sequence of this character to be an escaped quote.
+  #     This [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  #     transcoded into the data's
+  #     [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) before
+  #     parsing.
+  # **`:field_size_limit`**
+  # :   This is a maximum size
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will read ahead
+  #     looking for the closing quote for a field. (In truth, it reads to the
+  #     first line ending beyond this size.)  If a quote cannot be found within
+  #     the limit [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will
+  #     raise a MalformedCSVError, assuming the data is faulty. You can use this
+  #     limit to prevent what are effectively DoS attacks on the parser.
+  #     However, this limit can cause a legitimate parse to fail and thus is set
+  #     to `nil`, or off, by default.
+  # **`:converters`**
+  # :   An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of names
+  #     from the
+  #     [`Converters`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#Converters)
+  #     [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) and/or lambdas
+  #     that handle custom conversion. A single converter doesn't have to be in
+  #     an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). All
+  #     built-in converters try to transcode fields to UTF-8 before converting.
+  #     The conversion will fail if the data cannot be transcoded, leaving the
+  #     field unchanged.
+  # **`:unconverted_fields`**
+  # :   If set to `true`, an unconverted\_fields() method will be added to all
+  #     returned rows (Array or
+  #     [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html)) that
+  #     will return the fields as they were before conversion. Note that
+  #     `:headers` supplied by
+  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) were not
+  #     fields of the document and thus will have an empty
+  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) attached.
+  # **`:headers`**
+  # :   If set to `:first_row` or `true`, the initial row of the
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) file will be
+  #     treated as a row of headers. If set to an
+  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), the contents
+  #     will be used as the headers. If set to a
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), the
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) is run
+  #     through a call of
+  #     [`CSV::parse_line()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-parse_line)
+  #     with the same `:col_sep`, `:row_sep`, and `:quote_char` as this instance
+  #     to produce an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  #     of headers. This setting causes
+  #     [`CSV#shift()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-shift)
+  #     to return rows as
+  #     [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) objects
+  #     instead of Arrays and
+  #     [`CSV#read()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-read)
+  #     to return
+  #     [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html)
+  #     objects instead of an
+  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays.
+  # **`:return_headers`**
+  # :   When `false`, header rows are silently swallowed. If set to `true`,
+  #     header rows are returned in a
+  #     [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) object
+  #     with identical headers and fields (save that the fields do not go
+  #     through the converters).
+  # **`:write_headers`**
+  # :   When `true` and `:headers` is set, a header row will be added to the
+  #     output.
+  # **`:header_converters`**
+  # :   Identical in functionality to `:converters` save that the conversions
+  #     are only made to header rows. All built-in converters try to transcode
+  #     headers to UTF-8 before converting. The conversion will fail if the data
+  #     cannot be transcoded, leaving the header unchanged.
+  # **`:skip_blanks`**
+  # :   When set to a `true` value,
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will skip over any
+  #     empty rows. Note that this setting will not skip rows that contain
+  #     column separators, even if the rows contain no actual data. If you want
+  #     to skip rows that contain separators but no content, consider using
+  #     `:skip_lines`, or inspecting fields.compact.empty? on each row.
+  # **`:force_quotes`**
+  # :   When set to a `true` value,
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will quote all
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) fields it creates.
+  # **`:skip_lines`**
+  # :   When set to an object responding to `match`, every line matching it is
+  #     considered a comment and ignored during parsing. When set to a
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), it is first
+  #     converted to a
+  #     [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html). When set to
+  #     `nil` no line is considered a comment. If the passed object does not
+  #     respond to `match`, `ArgumentError` is thrown.
+  # **`:liberal_parsing`**
+  # :   When set to a `true` value,
+  #     [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will attempt to
+  #     parse input not conformant with RFC 4180, such as double quotes in
+  #     unquoted fields.
+  # **`:nil_value`**
+  # :   When set an object, any values of an empty field are replaced by the set
+  #     object, not nil.
+  # **`:empty_value`**
+  # :   When set an object, any values of a blank string field is replaced by
+  #     the set object.
+  # **`:quote_empty`**
+  # :   TODO
+  # **`:write_converters`**
+  # :   TODO
+  # **`:write_nil_value`**
+  # :   TODO
+  # **`:write_empty_value`**
+  # :   TODO
+  # **`:strip`**
+  # :   TODO
+  #
+  #
+  # See
+  # [`CSV::DEFAULT_OPTIONS`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#DEFAULT_OPTIONS)
+  # for the default settings.
+  #
+  # Options cannot be overridden in the instance methods for performance
+  # reasons, so be sure to set what you want here.
   sig do
     params(
         io: T.any(::Sorbet::Private::Static::IOLike, String),
@@ -364,9 +543,47 @@ class CSV < Object
   end
   def self.read(path, options=T.unsafe(nil)); end
 
+  # The primary write method for wrapped Strings and IOs, `row` (an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html)) is converted
+  # to [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) and appended to the
+  # data source. When a
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is passed,
+  # only the row's fields() are appended to the output.
+  #
+  # The data source must be open for writing.
+  #
+  # Also aliased as:
+  # [`add_row`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-add_row),
+  # [`puts`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-puts)
   sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).void }
   def <<(row); end
 
+  # This method wraps a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) you provide, or
+  # an empty default
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), in a
+  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object which is passed
+  # to the provided block. You can use the block to append
+  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) rows to the
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and when the
+  # block exits, the final
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  # returned.
+  #
+  # Note that a passed
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) **is** modified
+  # by this method. Call dup() before passing if you need a new
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #
+  # The `options` parameter can be anything
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # understands. This method understands an additional `:encoding` parameter
+  # when not passed a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to set the base
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) for the
+  # output. [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) needs this
+  # hint if you plan to output non-ASCII compatible data.
   sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
   def self.generate(str = "", **options, &blk); end
 
