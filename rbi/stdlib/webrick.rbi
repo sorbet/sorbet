@@ -473,6 +473,83 @@ class WEBrick::BasicLog
   def warn?(); end
 end
 
+# specific field.
+class WEBrick::AccessLog::AccessLogError < ::StandardError
+end
+
+module WEBrick::Config
+  # Default configuration for
+  # [`WEBrick::HTTPAuth::BasicAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/BasicAuth.html)
+  #
+  # :AutoReloadUserDB
+  # :   Reload the user database provided by :UserDB automatically?
+  BasicAuth = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
+
+  # Default configuration for
+  # [`WEBrick::HTTPAuth::DigestAuth`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPAuth/DigestAuth.html).
+  #
+  # :Algorithm
+  # :   MD5, MD5-sess (default), SHA1, SHA1-sess
+  # :Domain
+  # :   An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of URIs
+  #     that define the protected space
+  # :Qop
+  # :   'auth' for authentication, 'auth-int' for integrity protection or both
+  # :UseOpaque
+  # :   Should the server send opaque values to the client?  This helps prevent
+  #     replay attacks.
+  # :CheckNc
+  # :   Should the server check the nonce count?  This helps the server detect
+  #     replay attacks.
+  # :UseAuthenticationInfoHeader
+  # :   Should the server send an AuthenticationInfo header?
+  # :AutoReloadUserDB
+  # :   Reload the user database provided by :UserDB automatically?
+  # :NonceExpirePeriod
+  # :   How long should we store used nonces?  Default is 30 minutes.
+  # :NonceExpireDelta
+  # :   How long is a nonce valid?  Default is 1 minute
+  # :InternetExplorerHack
+  # :   Hack which allows Internet Explorer to work.
+  # :OperaHack
+  # :   Hack which allows Opera to work.
+  DigestAuth = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
+
+  # Default configuration for
+  # [`WEBrick::HTTPServlet::FileHandler`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/FileHandler.html)
+  #
+  # :AcceptableLanguages
+  # :   [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of languages
+  #     allowed for accept-language. There is no default
+  # :DirectoryCallback
+  # :   Allows preprocessing of directory requests. There is no default
+  #     callback.
+  # :FancyIndexing
+  # :   If true, show an index for directories. The default is true.
+  # :FileCallback
+  # :   Allows preprocessing of file requests. There is no default callback.
+  # :HandlerCallback
+  # :   Allows preprocessing of requests. There is no default callback.
+  # :HandlerTable
+  # :   Maps file suffixes to file handlers. DefaultFileHandler is used by
+  #     default but any servlet can be used.
+  # :NondisclosureName
+  # :   Do not show files matching this array of globs. .ht\* and \*~ are
+  #     excluded by default.
+  # :UserDir
+  # :   Directory inside ~user to serve content from for /~user requests. Only
+  #     works if mounted on /. Disabled by default.
+  FileHandler = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
+
+  # for GenericServer
+  General = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
+
+  # for HTTPServer, HTTPRequest, HTTPResponse ...
+  HTTP = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
+
+  LIBDIR = T.let(T.unsafe(nil), String)
+end
+
 # Processes HTTP cookies
 class WEBrick::Cookie
   # The cookie comment
@@ -1892,6 +1969,8 @@ class WEBrick::HTTPResponse
   def to_s(); end
 end
 
+class WEBrick::HTTPResponse::InvalidHeader < ::StandardError; end
+
 # An HTTP Server
 class WEBrick::HTTPServer < WEBrick::GenericServer
   # Logs `req` and `res` in the access logs. `config` is used for the server
@@ -2056,6 +2135,10 @@ class WEBrick::HTTPServer::MountTable
   end
   def scan(path); end
 end
+
+class WEBrick::HTTPServerError < ::WEBrick::ServerError; end
+
+module WEBrick::HTTPServlet; end
 
 # [`AbstractServlet`](https://docs.ruby-lang.org/en/2.6.0/WEBrick/HTTPServlet/AbstractServlet.html)
 # allows HTTP server modules to be reused across multiple servers and allows
@@ -2480,6 +2563,8 @@ class WEBrick::HTTPServlet::ProcHandler < WEBrick::HTTPServlet::AbstractServlet
   def initialize(proc); end
 end
 
+class WEBrick::HTTPServlet::HTTPServletError < ::StandardError; end
+
 # This module is used to manager HTTP status codes.
 #
 # See http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html for more
@@ -2642,6 +2727,9 @@ class WEBrick::HTTPStatus::Continue < WEBrick::HTTPStatus::Info
 end
 
 class WEBrick::HTTPStatus::Created < WEBrick::HTTPStatus::Success
+end
+
+class WEBrick::HTTPStatus::EOFError < ::StandardError
 end
 
 # Root of the HTTP error statuses
@@ -3246,6 +3334,9 @@ class WEBrick::Log < WEBrick::BasicLog
   end
   def time_format=(_); end
 end
+
+# Server error exception
+class WEBrick::ServerError < ::StandardError; end
 
 # Base server class
 class WEBrick::SimpleServer
