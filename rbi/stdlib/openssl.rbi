@@ -7027,7 +7027,7 @@ class OpenSSL::PKey::RSA < OpenSSL::PKey::PKey
     params(
       digest: String,
       data: String,
-      salt_length: Integer,
+      salt_length: T.any(Integer, Symbol),
       mgf1_hash: String
     ).returns(String)
   end
