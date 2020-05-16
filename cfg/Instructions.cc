@@ -176,15 +176,6 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, int tabs) const
     return fmt::format("GetCurrentException {{}}", spacesForTabLevel(tabs));
 }
 
-string CleanupException::toString(const core::GlobalState &gs) const {
-    return fmt::format("cleanup_exception({})", this->what.toString(gs));
-}
-
-string CleanupException::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("CleanupException {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
-                       this->what.showRaw(gs, tabs + 1));
-}
-
 string Cast::toString(const core::GlobalState &gs) const {
     return fmt::format("cast({}, {});", this->value.toString(gs), this->type->toString(gs));
 }

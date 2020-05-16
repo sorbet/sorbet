@@ -152,16 +152,6 @@ public:
 };
 CheckSize(GetCurrentException, 16, 8);
 
-class CleanupException : public Instruction {
-public:
-    VariableUseSite what;
-
-    CleanupException(core::LocalVariable value) : what(value) {}
-
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-};
-
 class LoadArg final : public Instruction {
 public:
     core::SymbolRef method;
