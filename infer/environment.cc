@@ -1042,6 +1042,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
+            [&](cfg::CleanupException *i) {
+                tp.type = core::Types::untypedUntracked();
+                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+            },
             [&](cfg::LoadSelf *l) {
                 ENFORCE(l->link);
                 if (l->link->result->main.blockSpec.rebind.exists()) {
