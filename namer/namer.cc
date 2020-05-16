@@ -949,8 +949,8 @@ class SymbolDefiner {
             symbol.data(ctx)->setPublic();
         }
 
-        ctx.state.tracer().debug("Inserting method {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx),
-                                 symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
+        // ctx.state.tracer().debug("Inserting method {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx),
+        //                         symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return symbol;
     }
 
@@ -1057,8 +1057,9 @@ class SymbolDefiner {
             ctx.state.staticInitForClass(symbol, core::Loc(ctx.file, klass.loc));
         }
 
-        ctx.state.tracer().debug("Inserting class {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx), symbol._id,
-                                 ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
+        // ctx.state.tracer().debug("Inserting class {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx),
+        // symbol._id,
+        //                         ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
 
         return symbol;
     }
@@ -1470,8 +1471,8 @@ public:
             }
         }
 
-        ctx.state.tracer().debug("Using class {} ({}) on {} ({})", klass->symbol.data(ctx)->name.toString(ctx),
-                                 klass->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
+        // ctx.state.tracer().debug("Using class {} ({}) on {} ({})", klass->symbol.data(ctx)->name.toString(ctx),
+        //                         klass->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return klass;
     }
 
@@ -1569,8 +1570,8 @@ public:
         method->symbol = sym;
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs), std::move(method->args));
 
-        ctx.state.tracer().debug("Using method {} ({}) on {} ({})", method->symbol.data(ctx)->name.toString(ctx),
-                                 method->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
+        // ctx.state.tracer().debug("Using method {} ({}) on {} ({})", method->symbol.data(ctx)->name.toString(ctx),
+        //                         method->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return method;
     }
 
@@ -1730,7 +1731,7 @@ vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::Pa
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                gs.tracer().debug("findSymbols: {}", job.file.data(gs).path());
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
                 NameFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
@@ -1764,7 +1765,6 @@ vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<NameFinderRe
     vector<ast::ParsedFile> output;
     output.reserve(allFoundNames.size());
     for (auto &fileFoundNames : allFoundNames) {
-        gs.tracer().debug("defineNames: {}", fileFoundNames.tree.file.data(gs).path());
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundNames.tree.file);
         SymbolDefiner symbolDefiner(move(fileFoundNames.names));
         output.push_back(move(fileFoundNames.tree));
@@ -1789,7 +1789,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                gs.tracer().debug("symbolizeTrees: {}", job.file.data(gs).path());
+                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));
