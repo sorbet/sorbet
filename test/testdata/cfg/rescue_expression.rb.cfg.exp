@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<exceptionValue>$3: T.untyped = <unanalyzable>\l<exceptionValue>$3: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<magic>$7: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$3: T.untyped = <get-current-exception>\l<exceptionValue>$3: T.untyped\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,35 +18,35 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped)\le: T.untyped = <exceptionValue>$3\l<statTemp>$9: T.class_of(MyException) = alias <C MyException>\l<statTemp>$8: MyException = <statTemp>$9: T.class_of(MyException).new()\l<exceptionClassTemp>$7: T.class_of(MyException) = <statTemp>$8: MyException.class()\l<isaCheckTemp>$10: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(MyException))\l<isaCheckTemp>$10: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$7: T.class_of(<Magic>))\le: T.untyped = <exceptionValue>$3\l<statTemp>$11: T.class_of(MyException) = alias <C MyException>\l<statTemp>$10: MyException = <statTemp>$11: T.class_of(MyException).new()\l<exceptionClassTemp>$9: T.class_of(MyException) = <statTemp>$10: MyException.class()\l<isaCheckTemp>$12: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$9: T.class_of(MyException))\l<isaCheckTemp>$12: T.untyped\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_7" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4, rubyBlockId=1](<self>: Object)\l<statTemp>$6: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: MyException = <statTemp>$6: T.class_of(MyException).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)\l<exceptionValue>$3 = <unanalyzable>\l<exceptionValue>$3\l"
+        label = "block[id=4, rubyBlockId=1](<self>: Object, <magic>$7: T.class_of(<Magic>))\l<statTemp>$6: T.class_of(MyException) = alias <C MyException>\l<statTemp>$5: MyException = <statTemp>$6: T.class_of(MyException).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)\l<exceptionValue>$3 = <get-current-exception>\l<exceptionValue>$3\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$11: NilClass)\l<gotoDeadTemp>$11\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$13: NilClass)\l<gotoDeadTemp>$13\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_7" [
-        label = "block[id=7, rubyBlockId=2]()\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$7: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$13: NilClass\l"
     ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_7" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];

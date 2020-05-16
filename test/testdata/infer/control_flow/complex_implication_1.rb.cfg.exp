@@ -24,7 +24,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: ModuleMethods = cast(<self>: NilClass, ModuleMethods);\lfinal_attempt: T.untyped = load_arg(final_attempt)\lfoo: T.untyped = load_arg(foo)\l<exceptionValue>$4: T.untyped = <unanalyzable>\l<exceptionValue>$4: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: ModuleMethods = cast(<self>: NilClass, ModuleMethods);\lfinal_attempt: T.untyped = load_arg(final_attempt)\lfoo: T.untyped = load_arg(foo)\l<magic>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
@@ -36,35 +36,35 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3, rubyBlockId=2](<exceptionValue>$4: T.untyped, final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <exceptionValue>$4\l<exceptionClassTemp>$5: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$6: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$5: T.class_of(StandardError))\l<isaCheckTemp>$6: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<exceptionValue>$4: T.untyped, <magic>$5: T.class_of(<Magic>), final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <exceptionValue>$4\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$8: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_7" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_8" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_4" [
-        label = "block[id=4, rubyBlockId=1](final_attempt: T.untyped, foo: T.untyped)\l<exceptionValue>$4: T.untyped = <unanalyzable>\l<exceptionValue>$4: T.untyped\l"
+        label = "block[id=4, rubyBlockId=1](<magic>$5: T.class_of(<Magic>), final_attempt: T.untyped, foo: T.untyped)\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_4" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
     "bb::ModuleMethods#instrumented_request_4" -> "bb::ModuleMethods#instrumented_request_6" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_6" [
-        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$7: NilClass, err: NilClass, final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$7: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$9: NilClass, err: NilClass, final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$9: NilClass\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_6" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_6" -> "bb::ModuleMethods#instrumented_request_9" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_7" [
-        label = "block[id=7, rubyBlockId=2](e: StandardError, final_attempt: T.untyped, foo: T.untyped)\lerr: StandardError = e\l<gotoDeadTemp>$7: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$5: T.class_of(<Magic>), e: StandardError, final_attempt: T.untyped, foo: T.untyped)\l<exceptionValue>$4: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)\lerr: StandardError = e\l<gotoDeadTemp>$9: NilClass\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_9" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_8" [
-        label = "block[id=8, rubyBlockId=2](final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$7: TrueClass(true) = true\l<gotoDeadTemp>$7: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$9: TrueClass(true) = true\l<gotoDeadTemp>$9: TrueClass(true)\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_8" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
@@ -92,7 +92,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_11" -> "bb::ModuleMethods#instrumented_request_14" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_13" [
-        label = "block[id=13, rubyBlockId=0](is_successful: T::Boolean, ||$2: T.untyped)\l<ifTemp>$11: T.untyped = ||$2\l<ifTemp>$11: T.untyped\l"
+        label = "block[id=13, rubyBlockId=0](is_successful: T::Boolean, ||$2: T.untyped)\l<ifTemp>$13: T.untyped = ||$2\l<ifTemp>$13: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_13" -> "bb::ModuleMethods#instrumented_request_19" [style="bold"];
@@ -106,21 +106,21 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_14" -> "bb::ModuleMethods#instrumented_request_16" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_15" [
-        label = "block[id=15, rubyBlockId=0](foo: T.untyped, is_successful: FalseClass)\l<ifTemp>$11: T.untyped = foo\l<ifTemp>$11: T.untyped\l"
+        label = "block[id=15, rubyBlockId=0](foo: T.untyped, is_successful: FalseClass)\l<ifTemp>$13: T.untyped = foo\l<ifTemp>$13: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_15" -> "bb::ModuleMethods#instrumented_request_19" [style="bold"];
     "bb::ModuleMethods#instrumented_request_15" -> "bb::ModuleMethods#instrumented_request_24" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_16" [
-        label = "block[id=16, rubyBlockId=0](err: StandardError, is_successful: FalseClass)\l<ifTemp>$11 = err\l<ifTemp>$11\l"
+        label = "block[id=16, rubyBlockId=0](err: StandardError, is_successful: FalseClass)\l<ifTemp>$13 = err\l<ifTemp>$13\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_16" -> "bb::ModuleMethods#instrumented_request_19" [style="bold"];
     "bb::ModuleMethods#instrumented_request_16" -> "bb::ModuleMethods#instrumented_request_24" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_19" [
-        label = "block[id=19, rubyBlockId=0](is_successful: T::Boolean)\l<ifTemp>$16: T::Boolean = is_successful: T::Boolean.!()\l<ifTemp>$16: T::Boolean\l"
+        label = "block[id=19, rubyBlockId=0](is_successful: T::Boolean)\l<ifTemp>$18: T::Boolean = is_successful: T::Boolean.!()\l<ifTemp>$18: T::Boolean\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_19" -> "bb::ModuleMethods#instrumented_request_21" [style="bold"];

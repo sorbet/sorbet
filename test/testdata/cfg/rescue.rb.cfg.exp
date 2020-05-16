@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<exceptionValue>$3: T.untyped = <unanalyzable>\l<exceptionValue>$3: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<magic>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$3: T.untyped = <get-current-exception>\l<exceptionValue>$3: T.untyped\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_3" [style="bold"];
@@ -18,14 +18,14 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object, <exceptionValue>$3: T.untyped)\l<exceptionClassTemp>$6: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$7: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<exceptionClassTemp>$6: T.class_of(StandardError))\l<isaCheckTemp>$7: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>))\l<exceptionClassTemp>$8: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$9: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(StandardError))\l<isaCheckTemp>$9: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_7" [style="bold"];
     "bb::Object#main_3" -> "bb::Object#main_8" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4, rubyBlockId=1](<self>: Object)\l<returnMethodTemp>$2: T.untyped = <self>: Object.a()\l<exceptionValue>$3: T.untyped = <unanalyzable>\l<exceptionValue>$3: T.untyped\l"
+        label = "block[id=4, rubyBlockId=1](<self>: Object, <magic>$6: T.class_of(<Magic>))\l<returnMethodTemp>$2: T.untyped = <self>: Object.a()\l<exceptionValue>$3: T.untyped = <get-current-exception>\l<exceptionValue>$3: T.untyped\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_3" [style="bold"];
@@ -37,19 +37,19 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$9: T.nilable(TrueClass))\l<throwAwayTemp>$10: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$9: T.nilable(TrueClass)\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$11: T.nilable(TrueClass))\l<throwAwayTemp>$12: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_9" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: Object)\l<returnMethodTemp>$2: T.untyped = <self>: Object.b()\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=2](<self>: Object, <magic>$6: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: Object.b()\l<unconditional>\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$9: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_6" [style="bold"];
