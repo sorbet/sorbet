@@ -128,7 +128,6 @@ struct FoundTypeMember final {
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
-    bool tooManyArgs = false;
 };
 
 struct FoundMethod final {
@@ -575,12 +574,19 @@ public:
         found.varianceName = core::NameRef();
         found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
-        if (!send->args.empty()) {
-            if (send->args.size() > 2) {
-                // Defer error until next phase.
-                found.tooManyArgs = true;
-            }
+        if (send->args.size() > 2 || found.owner.kind() == NameKind::Root) {
+            // Too many arguments or type member defined at root. Define a static field that we'll use for this type
+            // member later.
+            FoundStaticField staticField;
+            staticField.owner = found.owner;
+            staticField.name = found.name;
+            staticField.asgnLoc = found.asgnLoc;
+            staticField.lhsLoc = asgn->lhs->loc;
+            staticField.isTypeAlias = true;
+            return foundNames->addStaticField(move(staticField));
+        }
 
+        if (!send->args.empty()) {
             auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
             if (lit != nullptr && lit->isSymbol(ctx)) {
                 found.varianceName = lit->asSymbol(ctx);
@@ -1155,16 +1161,8 @@ class SymbolDefiner {
     }
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const FoundTypeMember &typeMember) {
-        // TODO: Move to finder pass?
-        if (typeMember.tooManyArgs || ctx.owner == core::Symbols::root()) {
-            FoundStaticField staticField;
-            staticField.owner = typeMember.owner;
-            staticField.name = typeMember.name;
-            staticField.asgnLoc = typeMember.asgnLoc;
-            staticField.lhsLoc = typeMember.asgnLoc;
-            staticField.isTypeAlias = true;
-            return insertStaticField(ctx, staticField);
-        }
+        // SymbolFinder pass should have filtered these out.
+        ENFORCE(ctx.owner != core::Symbols::root());
 
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
