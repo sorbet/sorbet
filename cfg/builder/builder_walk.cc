@@ -538,6 +538,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     rescueHandlersBlock->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
                                                             make_unique<Ident>(exceptionValue));
 
+                    // overwrite exceptionValue value upon entry to the block
+                    synthesizeExpr(caseBody, exceptionValue, what->loc, make_unique<Literal>(core::Types::nilClass()));
+
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
@@ -569,21 +572,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
 
                     caseBody = walk(cctx, rescueCase->body.get(), caseBody);
+
                     unconditionalJump(caseBody, ensureBody, cctx.inWhat, a->loc);
                 }
 
-                // This magic local remembers if none of the `rescue`s match,
-                // and if so, after the ensure runs, we should jump to dead
-                // since in Ruby the exception would propagate up the statck.
-                auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
-                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a->loc,
-                               make_unique<Literal>(core::make_type<core::LiteralType>(true)));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
                 ret = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
-                conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
+                conditionalJump(ensureBody, exceptionValue, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
             [&](ast::Hash *h) {
