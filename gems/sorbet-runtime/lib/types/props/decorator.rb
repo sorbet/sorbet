@@ -440,14 +440,16 @@ class T::Props::Decorator
   end
   private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
-    if !enum.nil?
-      if T::Utils.unwrap_nilable(type)
-        T.nilable(T.enum(enum))
-      else
-        T.enum(enum)
-      end
+    type = T::Utils.coerce(type)
+    if enum.nil?
+      type
     else
-      T::Utils.coerce(type)
+      nonnil_type = T::Utils.unwrap_nilable(type)
+      if nonnil_type
+        T.nilable(T.all(nonnil_type, T.enum(enum)))
+      else
+        T.all(type, T.enum(enum))
+      end
     end
   end
 
