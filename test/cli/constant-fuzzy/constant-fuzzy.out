@@ -6,22 +6,22 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Ripper`
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Shell`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Find`
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Ripper`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L660: Did you mean: `Enumerator::Yielder`?
      660 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/shell.rbi#L77: Did you mean: `Shell`?
+    77 |class Shell
+        ^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/ripper.rbi#L78: Did you mean: `Ripper`?
     78 |class Ripper
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/find.rbi#L25: Did you mean: `Find`?
-    25 |module Find
-        ^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
