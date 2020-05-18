@@ -574,9 +574,8 @@ public:
         found.varianceName = core::NameRef();
         found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
-        if (send->args.size() > 2 || found.owner.kind() == NameKind::Root) {
-            // Too many arguments or type member defined at root. Define a static field that we'll use for this type
-            // member later.
+        if (send->args.size() > 2) {
+            // Too many arguments. Define a static field that we'll use for this type åmember later.
             FoundStaticField staticField;
             staticField.owner = found.owner;
             staticField.name = found.name;
@@ -1162,8 +1161,15 @@ class SymbolDefiner {
     }
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const FoundTypeMember &typeMember) {
-        // SymbolFinder pass should have filtered these out.
-        ENFORCE(ctx.owner != core::Symbols::root());
+        if (ctx.owner == core::Symbols::root()) {
+            FoundStaticField staticField;
+            staticField.owner = typeMember.owner;
+            staticField.name = typeMember.name;
+            staticField.asgnLoc = typeMember.asgnLoc;
+            staticField.lhsLoc = typeMember.asgnLoc;
+            staticField.isTypeAlias = true;
+            return insertStaticField(ctx, staticField);
+        }
 
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
