@@ -120,8 +120,13 @@ public:
     spdlog::logger &tracer() const;
     unsigned int namesUsed() const;
 
-    unsigned int symbolsUsed() const;
+    unsigned int classAndModulesUsed() const;
+    unsigned int methodsUsed() const;
+    unsigned int fieldsUsed() const;
+    unsigned int typeArgumentsUsed() const;
+    unsigned int typeMembersUsed() const;
     unsigned int filesUsed() const;
+    unsigned int allSymbolsUsed() const;
 
     void sanityCheck() const;
     void markAsPayload();
@@ -234,7 +239,11 @@ private:
     u2 stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
     UnorderedMap<std::string, FileRef> fileRefByPath;
-    std::vector<Symbol> symbols;
+    std::vector<Symbol> classAndModules;
+    std::vector<Symbol> methods;
+    std::vector<Symbol> fields;
+    std::vector<Symbol> typeMembers;
+    std::vector<Symbol> typeArguments;
     std::vector<std::pair<unsigned int, unsigned int>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
@@ -255,7 +264,7 @@ private:
 
     void expandNames(u4 newSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
+    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;

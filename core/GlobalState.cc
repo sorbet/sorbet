@@ -31,17 +31,17 @@ namespace sorbet::core {
 SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
-    SymbolRef symRef = SymbolRef(this, symbols.size());
-    symbols.emplace_back();
+    SymbolRef symRef = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    classAndModules.emplace_back();
     SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
     data->owner = Symbols::root();
     data->flags = 0;
     data->setClassOrModule();
     data->setIsModule(isModule);
-    data->setSuperClass(SymbolRef(this, superclass));
+    data->setSuperClass(SymbolRef(this, SymbolRef::Kind::ClassOrModule, superclass));
 
-    if (symRef._id > Symbols::root()._id) {
+    if (symRef.id() > Symbols::root().id()) {
         Symbols::root().dataAllowingNone(*this)->members()[nameId] = symRef;
     }
     return symRef;
@@ -58,11 +58,21 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
       lspQuery(lsp::Query::noQuery()), epochManager(move(epochManager)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
+    // TODO(jvilk): Update
     unsigned int maxNameCount = 8192;
-    unsigned int maxSymbolCount = 16384;
+    unsigned int maxClassAndModuleCount = 16384;
+    unsigned int maxMethodCount = 16384;
+    unsigned int maxFieldCount = 16384;
+    unsigned int maxTypeArgumentCount = 16384;
+    unsigned int maxTypeMemberCount = 16384;
 
     names.reserve(maxNameCount);
-    symbols.reserve(maxSymbolCount);
+    classAndModules.reserve(maxClassAndModuleCount);
+    methods.reserve(maxMethodCount);
+    fields.reserve(maxFieldCount);
+    typeArguments.reserve(maxTypeArgumentCount);
+    typeMembers.reserve(maxTypeMemberCount);
+
     int namesByHashSize = 2 * maxNameCount;
     namesByHash.resize(namesByHashSize);
     ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
@@ -90,7 +100,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
-    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject()._id);
+    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject().id());
     ENFORCE(id == Symbols::Object());
     id = synthesizeClass(core::Names::Constants::Integer());
     ENFORCE(id == Symbols::Integer());
@@ -114,7 +124,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::untyped());
     id = synthesizeClass(core::Names::Constants::Opus(), 0, true);
     ENFORCE(id == Symbols::Opus());
-    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo()._id, true);
+    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo().id(), true);
     ENFORCE(id == Symbols::T());
     id = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE(id == Symbols::Class());
@@ -671,9 +681,9 @@ void GlobalState::initEmpty() {
     // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
     // iterator
     vector<SymbolRef> needSingletons;
-    for (auto &sym : symbols) {
+    for (auto &sym : classAndModules) {
         auto ref = sym.ref(*this);
-        if (ref.exists() && sym.isClassOrModule()) {
+        if (ref.exists()) {
             needSingletons.emplace_back(ref);
         }
     }
@@ -681,9 +691,9 @@ void GlobalState::initEmpty() {
         sym.data(*this)->singletonClass(*this);
     }
 
-    // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
-    ENFORCE(symbols.size() < Symbols::Proc0()._id);
-    while (symbols.size() < Symbols::Proc0()._id) {
+    // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
+    ENFORCE(classAndModules.size() < Symbols::Proc0().id());
+    while (classAndModules.size() < Symbols::Proc0().id()) {
         string name = absl::StrCat("<RESERVED_", reservedCount, ">");
         synthesizeClass(enterNameConstant(name));
         reservedCount++;
@@ -691,14 +701,28 @@ void GlobalState::initEmpty() {
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
-        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id);
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id._id,
-                Symbols::Proc(arity)._id);
+        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().id());
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id.id(),
+                Symbols::Proc(arity).id());
         id.data(*this)->singletonClass(*this);
     }
 
-    ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
-            "Too many synthetic symbols? have: {} expected: {}", symbols.size(), Symbols::last_synthetic_sym()._id + 1);
+    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().id() + 1,
+            "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
+            Symbols::last_synthetic_class_sym().id() + 1);
+
+    ENFORCE(methods.size() == Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS,
+            "Too many synthetic method symbols? have: {} expected: {}", methods.size(),
+            Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS);
+    ENFORCE(fields.size() == Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS,
+            "Too many synthetic field symbols? have: {} expected: {}", fields.size(),
+            Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS);
+    ENFORCE(typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
+            "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
+            Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
+    ENFORCE(typeArguments.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
+            "Too many synthetic typeArgument symbols? have: {} expected: {}", typeArguments.size(),
+            Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
 
     installIntrinsics();
 
@@ -734,10 +758,10 @@ void GlobalState::installIntrinsics() {
                 symbol = entry.symbol.data(*this)->singletonClass(*this);
                 break;
         }
-        auto countBefore = symbolsUsed();
+        auto countBefore = methodsUsed();
         SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsic = entry.impl;
-        if (countBefore != symbolsUsed()) {
+        if (countBefore != methodsUsed()) {
             auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
             blkArg.flags.isBlock = true;
         }
@@ -757,16 +781,18 @@ u4 nextPowerOfTwo(u4 v) {
 }
 
 void GlobalState::preallocateTables(u4 symbolSize, u4 nameSize) {
-    u4 symbolSizeScaled = nextPowerOfTwo(symbolSize);
+    // u4 symbolSizeScaled = nextPowerOfTwo(symbolSize);
     u4 nameSizeScaled = nextPowerOfTwo(nameSize);
 
     // Note: reserve is a no-op if size is < current capacity.
-    symbols.reserve(symbolSizeScaled);
+    // TODO: FIX
+    // symbols.reserve(symbolSizeScaled);
     expandNames(nameSizeScaled);
     sanityCheck();
 
-    trace(
-        absl::StrCat("Preallocated symbol and name tables. symbols=", symbols.capacity(), " names=", names.capacity()));
+    // trace(
+    //    absl::StrCat("Preallocated symbol and name tables. symbols=", symbols.capacity(), " names=",
+    //    names.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
@@ -882,9 +908,31 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
 
-    SymbolRef ret = SymbolRef(this, symbols.size());
-    store = ret; // DO NOT MOVE this assignment down. emplace_back on symbol invalidates `store`
-    symbols.emplace_back();
+    SymbolRef ret;
+    if (flags & Symbol::Flags::CLASS_OR_MODULE) {
+        ret = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+        store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
+        classAndModules.emplace_back();
+    } else if (flags & Symbol::Flags::METHOD) {
+        ret = SymbolRef(this, SymbolRef::Kind::Method, methods.size());
+        store = ret; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
+        methods.emplace_back();
+    } else if (flags & (Symbol::Flags::FIELD | Symbol::Flags::STATIC_FIELD)) {
+        ret = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+        store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
+        fields.emplace_back();
+    } else if (flags & Symbol::Flags::TYPE_ARGUMENT) {
+        ret = SymbolRef(this, SymbolRef::Kind::TypeArgument, typeArguments.size());
+        store = ret; // DO NOT MOVE this assignment down. emplace_back on typeArguments invalidates `store`
+        typeArguments.emplace_back();
+    } else if (flags & Symbol::Flags::TYPE_MEMBER) {
+        ret = SymbolRef(this, SymbolRef::Kind::TypeMember, typeMembers.size());
+        store = ret; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
+        typeMembers.emplace_back();
+    } else {
+        ENFORCE(false);
+    }
+
     SymbolData data = ret.dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
@@ -1418,8 +1466,24 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     }
 }
 
-unsigned int GlobalState::symbolsUsed() const {
-    return symbols.size();
+unsigned int GlobalState::classAndModulesUsed() const {
+    return classAndModules.size();
+}
+
+unsigned int GlobalState::methodsUsed() const {
+    return methods.size();
+}
+
+unsigned int GlobalState::fieldsUsed() const {
+    return fields.size();
+}
+
+unsigned int GlobalState::typeArgumentsUsed() const {
+    return typeArguments.size();
+}
+
+unsigned int GlobalState::typeMembersUsed() const {
+    return typeMembers.size();
 }
 
 unsigned int GlobalState::filesUsed() const {
@@ -1428,6 +1492,10 @@ unsigned int GlobalState::filesUsed() const {
 
 unsigned int GlobalState::namesUsed() const {
     return names.size();
+}
+
+unsigned int GlobalState::allSymbolsUsed() const {
+    return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeArgumentsUsed() + typeMembersUsed();
 }
 
 string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
@@ -1461,11 +1529,23 @@ void GlobalState::sanityCheck() const {
     }
 
     i = -1;
-    for (auto &sym : symbols) {
+    for (auto &sym : classAndModules) {
         i++;
         if (i != 0) {
             sym.sanityCheck(*this);
         }
+    }
+    for (auto &sym : methods) {
+        sym.sanityCheck(*this);
+    }
+    for (auto &sym : fields) {
+        sym.sanityCheck(*this);
+    }
+    for (auto &sym : typeArguments) {
+        sym.sanityCheck(*this);
+    }
+    for (auto &sym : typeMembers) {
+        sym.sanityCheck(*this);
     }
     for (auto &ent : namesByHash) {
         if (ent.second == 0) {
@@ -1557,9 +1637,25 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->namesByHash.reserve(this->namesByHash.size());
     result->namesByHash = this->namesByHash;
 
-    result->symbols.reserve(this->symbols.capacity());
-    for (auto &sym : this->symbols) {
-        result->symbols.emplace_back(sym.deepCopy(*result, keepId));
+    result->classAndModules.reserve(this->classAndModules.capacity());
+    for (auto &sym : this->classAndModules) {
+        result->classAndModules.emplace_back(sym.deepCopy(*result, keepId));
+    }
+    result->methods.reserve(this->methods.capacity());
+    for (auto &sym : this->methods) {
+        result->methods.emplace_back(sym.deepCopy(*result, keepId));
+    }
+    result->fields.reserve(this->fields.capacity());
+    for (auto &sym : this->fields) {
+        result->fields.emplace_back(sym.deepCopy(*result, keepId));
+    }
+    result->typeArguments.reserve(this->typeArguments.capacity());
+    for (auto &sym : this->typeArguments) {
+        result->typeArguments.emplace_back(sym.deepCopy(*result, keepId));
+    }
+    result->typeMembers.reserve(this->typeMembers.capacity());
+    for (auto &sym : this->typeMembers) {
+        result->typeMembers.emplace_back(sym.deepCopy(*result, keepId));
     }
     result->pathPrefix = this->pathPrefix;
     for (auto &semanticExtension : this->semanticExtensions) {
@@ -1743,19 +1839,23 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     u4 hierarchyHash = 0;
     UnorderedMap<NameHash, u4> methodHashes;
     int counter = 0;
-    for (const auto &sym : this->symbols) {
-        if (!sym.ignoreInHashing(*this)) {
-            if (sym.isMethod()) {
-                auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
-                target = mix(target, sym.hash(*this));
-                hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
-            } else {
-                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+    vector<const vector<Symbol> *> symbolTypes = {&this->classAndModules, &this->methods, &this->fields,
+                                                  &this->typeArguments, &this->typeMembers};
+    for (const auto symbolType : symbolTypes) {
+        for (const auto &sym : *symbolType) {
+            if (!sym.ignoreInHashing(*this)) {
+                if (sym.isMethod()) {
+                    auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
+                    target = mix(target, sym.hash(*this));
+                    hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+                } else {
+                    hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+                }
             }
-        }
-        counter++;
-        if (DEBUG_HASHING_TAIL && counter > symbolsUsed() - 15) {
-            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+            counter++;
+            if (DEBUG_HASHING_TAIL && counter > classAndModulesUsed() - 15) {
+                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+            }
         }
     }
     unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
@@ -1774,9 +1874,9 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
 }
 
 SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
-    auto prevCount = symbolsUsed();
+    auto prevCount = methodsUsed();
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
-    if (prevCount != symbolsUsed()) {
+    if (prevCount != methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
@@ -1794,9 +1894,9 @@ SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
 
 SymbolRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
-    auto prevCount = this->symbolsUsed();
+    auto prevCount = this->methodsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
-    if (prevCount != this->symbolsUsed()) {
+    if (prevCount != this->methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;

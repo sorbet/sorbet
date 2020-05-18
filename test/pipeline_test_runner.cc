@@ -459,7 +459,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     handler.clear(*gs);
-    auto symbolsBefore = gs->symbolsUsed();
+    auto symbolsBefore = gs->allSymbolsUsed();
 
     vector<ast::ParsedFile> newTrees;
     for (auto &f : trees) {
@@ -530,7 +530,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     {
         INFO("the incremental resolver should not add new symbols");
-        CHECK_EQ(symbolsBefore, gs->symbolsUsed());
+        CHECK_EQ(symbolsBefore, gs->allSymbolsUsed());
     }
 }
 } // namespace sorbet::test

@@ -91,17 +91,28 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
-    for (u4 idx = 1; idx < gs.symbolsUsed(); idx++) {
-        core::SymbolRef ref(gs, idx);
-        if (!hideSymbol(gs, ref) &&
-            // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-            (ref.data(gs)->owner.data(gs)->loc().file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
-            for (auto definitionLocation : ref.data(gs)->locs()) {
-                if (definitionLocation.file() == fref) {
-                    auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                    if (data) {
-                        result.push_back(move(data));
-                        break;
+    vector<pair<core::SymbolRef::Kind, u4>> symbolTypes = {
+        {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
+        {core::SymbolRef::Kind::Method, gs.methodsUsed()},
+        {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
+        {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
+        {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
+    };
+    for (auto pair : symbolTypes) {
+        auto kind = pair.first;
+        auto used = pair.second;
+        for (u4 idx = 1; idx < used; idx++) {
+            core::SymbolRef ref(gs, kind, idx);
+            if (!hideSymbol(gs, ref) &&
+                // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
+                (ref.data(gs)->owner.data(gs)->loc().file() != fref || ref.data(gs)->owner == core::Symbols::root())) {
+                for (auto definitionLocation : ref.data(gs)->locs()) {
+                    if (definitionLocation.file() == fref) {
+                        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
+                        if (data) {
+                            result.push_back(move(data));
+                            break;
+                        }
                     }
                 }
             }

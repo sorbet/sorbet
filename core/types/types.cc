@@ -673,7 +673,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->klass.data(gs)->typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
-                this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
+                this->klass.id() >= Symbols::Proc0().id() && this->klass.id() <= Symbols::last_proc().id(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ->sanityCheck(gs);

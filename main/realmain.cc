@@ -607,7 +607,7 @@ int realmain(int argc, char *argv[]) {
             vector<pair<string, int>> withNames;
             long sum = 0;
             for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef(*gs, e.first).dataAllowingNone(*gs)->showFullName(*gs),
+                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).dataAllowingNone(*gs)->showFullName(*gs),
                                        e.second);
                 sum += e.second;
             }
