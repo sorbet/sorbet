@@ -529,6 +529,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, ensureRubyBlockId);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
 
+                auto magic = cctx.newTemporary(core::Names::magic());
+                synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
+
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                     auto &exceptions = rescueCase->exceptions;
@@ -537,6 +540,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     ENFORCE(local != nullptr, "rescue case var not a local?");
                     rescueHandlersBlock->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
                                                             make_unique<Ident>(exceptionValue));
+
+                    // Mark the exception as handled
+                    synthesizeExpr(caseBody, exceptionValue, what->loc, make_unique<Literal>(core::Types::nilClass()));
+
+                    auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
+                    auto isPrivateOk = false;
+                    auto args = {exceptionValue};
+                    auto argLocs = {what->loc};
+                    synthesizeExpr(caseBody, res, rescueCase->loc,
+                                   make_unique<Send>(magic, core::Names::keepForCfg(), rescueCase->loc, args, argLocs,
+                                                     isPrivateOk));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError

@@ -169,7 +169,7 @@ string LoadYieldParams::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string GetCurrentException::toString(const core::GlobalState &gs) const {
-    return "<unanalyzable>";
+    return "<get-current-exception>";
 }
 
 string GetCurrentException::showRaw(const core::GlobalState &gs, int tabs) const {
