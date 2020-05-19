@@ -27,8 +27,13 @@ subgraph "cluster_::Object#main" {
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_3" [style="bold"];
-    "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
+    "bb::Object#main_4" -> "bb::Object#main_5" [style="tapered"];
 
+    "bb::Object#main_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<unconditional>\l"
+    ];
+
+    "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_6" [
         label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$6: T.nilable(TrueClass))\l<throwAwayTemp>$7: T.untyped = <self>: Object.b()\l<gotoDeadTemp>$6: T.nilable(TrueClass)\l"
     ];

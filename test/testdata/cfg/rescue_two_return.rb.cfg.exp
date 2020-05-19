@@ -29,18 +29,23 @@ subgraph "cluster_::Object#foo" {
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_6" [
+        label = "block[id=6, rubyBlockId=3](<self>: Object, <gotoDeadTemp>$11: TrueClass(true))\l<gotoDeadTemp>$11: TrueClass(true)\l"
+    ];
+
+    "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_6" -> "bb::Object#foo_9" [style="tapered"];
+
     "bb::Object#foo_7" [
         label = "block[id=7, rubyBlockId=2](<magic>$6: T.class_of(<Magic>))\l<exceptionValue>$4: NilClass = nil\l<keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)\l<returnTemp>$10: Integer(2) = 2\l<statTemp>$3: T.noreturn = return <returnTemp>$10: Integer(2)\l<unconditional>\l"
     ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: Object)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<self>: Object)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_8" -> "bb::Object#foo_9" [style="tapered"];
-
+    "bb::Object#foo_8" -> "bb::Object#foo_6" [style="bold"];
     "bb::Object#foo_9" [
         label = "block[id=9, rubyBlockId=0](<self>: Object)\l<returnMethodTemp>$2 = <self>.deadcode()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];

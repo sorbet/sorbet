@@ -29,29 +29,30 @@ subgraph "cluster_::Object#foo" {
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
-    "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
+    "bb::Object#foo_4" -> "bb::Object#foo_5" [style="tapered"];
 
+    "bb::Object#foo_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: NilClass)\l<unconditional>\l"
+    ];
+
+    "bb::Object#foo_5" -> "bb::Object#foo_6" [style="bold"];
     "bb::Object#foo_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$13: NilClass)\l<gotoDeadTemp>$13\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$13: T.nilable(TrueClass))\l<gotoDeadTemp>$13: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_7" [
-        label = "block[id=7, rubyBlockId=2](<magic>$7: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: Integer(3) = 3\l<gotoDeadTemp>$13: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$7: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: Integer(3) = 3\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_7" -> "bb::Object#foo_9" [style="tapered"];
-
+    "bb::Object#foo_7" -> "bb::Object#foo_6" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_8" -> "bb::Object#foo_9" [style="tapered"];
-
+    "bb::Object#foo_8" -> "bb::Object#foo_6" [style="bold"];
     "bb::Object#foo_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
     ];
