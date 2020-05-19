@@ -220,12 +220,6 @@ class T::Props::Decorator
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
-    if (array = rules[:array])
-      unless array.is_a?(Module)
-        raise ArgumentError.new("Bad class as subtype in prop #{@class.name}.#{name}: #{array.inspect}")
-      end
-    end
-
     if !(rules[:clobber_existing_method!]) && !(rules[:without_accessors])
       if BANNED_METHOD_NAMES.include?(name.to_sym)
         raise ArgumentError.new(
@@ -350,7 +344,7 @@ class T::Props::Decorator
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
     end
-    type_object = smart_coerce(type, array: rules[:array], enum: rules[:enum])
+    type_object = smart_coerce(type, enum: rules[:enum])
 
     prop_validate_definition!(name, cls, rules, type_object)
 
@@ -441,27 +435,21 @@ class T::Props::Decorator
   end
 
   sig do
-    params(type: PropTypeOrClass, array: T.untyped, enum: T.untyped)
+    params(type: PropTypeOrClass, enum: T.untyped)
     .returns(T::Types::Base)
   end
-  private def smart_coerce(type, array:, enum:)
+  private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
-    if !array.nil? && !enum.nil?
-      raise ArgumentError.new("Cannot specify both :array and :enum options")
-    elsif !array.nil?
-      if type == Set
-        T::Set[array]
-      else
-        T::Array[array]
-      end
-    elsif !enum.nil?
-      if T::Utils.unwrap_nilable(type)
-        T.nilable(T.enum(enum))
-      else
-        T.enum(enum)
-      end
+    type = T::Utils.coerce(type)
+    if enum.nil?
+      type
     else
-      T::Utils.coerce(type)
+      nonnil_type = T::Utils.unwrap_nilable(type)
+      if nonnil_type
+        T.nilable(T.all(nonnil_type, T.enum(enum)))
+      else
+        T.all(type, T.enum(enum))
+      end
     end
   end
 

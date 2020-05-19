@@ -122,7 +122,7 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
         prop :wday, T.nilable(String), enum: ['mon', 'tue']
       end
       assert_equal(T.nilable(String), c.props[:foo][:type_object])
-      assert_equal(T.nilable(T.enum(['mon', 'tue'])), c.props[:wday][:type_object])
+      assert_equal(T.nilable(T.all(String, T.enum(['mon', 'tue']))), c.props[:wday][:type_object])
     end
 
     it 'tstruct deserialize optional fields' do
