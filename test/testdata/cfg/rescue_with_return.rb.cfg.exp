@@ -29,20 +29,23 @@ subgraph "cluster_::Object#a" {
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_6" [
+        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$9: T.nilable(TrueClass))\l<gotoDeadTemp>$9: T.nilable(TrueClass)\l"
+    ];
+
+    "bb::Object#a_6" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_6" -> "bb::Object#a_9" [style="tapered"];
+
     "bb::Object#a_7" [
-        label = "block[id=7, rubyBlockId=2](<magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<gotoDeadTemp>$9: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<unconditional>\l"
     ];
 
-    "bb::Object#a_7" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_7" -> "bb::Object#a_9" [style="tapered"];
-
+    "bb::Object#a_7" -> "bb::Object#a_6" [style="bold"];
     "bb::Object#a_8" [
-        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass(true) = true\l<gotoDeadTemp>$9: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_8" -> "bb::Object#a_9" [style="tapered"];
-
+    "bb::Object#a_8" -> "bb::Object#a_6" [style="bold"];
     "bb::Object#a_9" [
         label = "block[id=9, rubyBlockId=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
