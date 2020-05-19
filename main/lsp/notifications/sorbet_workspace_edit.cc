@@ -76,11 +76,6 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     }
     const auto newEditCount = updates->editCount - updates->committedEditCount;
     typechecker.typecheckOnFastPath(move(*updates), move(params->diagnosticLatencyTimers));
-    if (latencyTimer != nullptr) {
-        ENFORCE(newEditCount == params->diagnosticLatencyTimers.size());
-        // TODO: Move into pushDiagnostics once we have fast feedback.
-        params->diagnosticLatencyTimers.clear();
-    }
     prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
 }
 
@@ -100,19 +95,9 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     const auto newEditCount = updates->editCount - updates->committedEditCount;
     // Only report stats if the edit was committed.
     if (typechecker.typecheck(move(*updates), workers, move(params->diagnosticLatencyTimers))) {
-        if (latencyTimer != nullptr) {
-            ENFORCE(newEditCount == params->diagnosticLatencyTimers.size());
-            // TODO: Move into pushDiagnostics once we have fast feedback.
-            params->diagnosticLatencyTimers.clear();
-        }
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
     } else if (latencyTimer != nullptr) {
-        // Don't report a latency value for canceled slow paths.
         latencyTimer->cancel();
-        for (auto &timer : params->diagnosticLatencyTimers) {
-            timer->cancel();
-        }
-        params->diagnosticLatencyTimers.clear();
     }
 }
 

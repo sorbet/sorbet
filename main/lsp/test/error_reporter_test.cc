@@ -1,5 +1,7 @@
 #include "doctest.h"
 // has to go first as it violates our requirements
+#include "common/Counters_impl.h"
+#include "common/Timer.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -12,8 +14,10 @@
 #include "main/lsp/json_types.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/null_sink.h"
+#include "test/helpers/CounterStateDatabase.h"
 #include "test/helpers/MockFileSystem.h"
 using namespace std;
+using namespace sorbet::test::lsp;
 
 namespace sorbet::realmain::lsp::test {
 namespace {
@@ -51,7 +55,6 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> errors;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
@@ -59,9 +62,15 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
         auto fref = gs->enterFile(file);
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
+        vector<unique_ptr<core::Error>> errors;
         errors.emplace_back(
             make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(epoch, fref, errors, *gs);
 
         auto output = outputVector->getOutput();
@@ -81,8 +90,6 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> emptyErrorList;
-    vector<unique_ptr<core::Error>> errors;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
@@ -91,11 +98,20 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
         auto fref = gs->enterFile(file);
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
+        vector<unique_ptr<core::Error>> emptyErrorList;
+
+        vector<unique_ptr<core::Error>> errors;
         errors.emplace_back(
             make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(epoch, fref, errors, *gs);
 
+        er.beginEpoch(newEpoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
         auto output = outputVector->getOutput();
         CHECK_EQ(2, output.size());
@@ -114,17 +130,22 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> emptyErrorList;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
         auto newEpoch = 1;
         auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
         auto fref = gs->enterFile(file);
-
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+        vector<unique_ptr<core::Error>> emptyErrorList;
 
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
+
+        er.beginEpoch(newEpoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
         auto output = outputVector->getOutput();
@@ -136,8 +157,6 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     auto gs = makeGS();
     auto cs = makeConfig();
     ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> emptyErrorList;
-    vector<unique_ptr<core::Error>> errors;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto initialEpoch = 0;
@@ -146,14 +165,25 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
         auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, initialEpoch);
         auto fref = gs->enterFile(file);
         auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+        vector<unique_ptr<core::Error>> emptyErrorList;
+
+        vector<unique_ptr<core::Error>> errors;
         errors.emplace_back(
             make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(initialEpoch, move(diagnosticLatencyTimers));
         // pushDiagnostics is called for foo.rb at epoch 0 with no errors (initial state)
         er.pushDiagnostics(initialEpoch, fref, emptyErrorList, *gs);
+
+        er.beginEpoch(latestEpoch, move(diagnosticLatencyTimers));
         // pushDiagnostics is called for foo.rb at epoch 2 with no errors (the fast path preemption)
         er.pushDiagnostics(latestEpoch, fref, emptyErrorList, *gs);
+
+        er.beginEpoch(slowPathEpoch, move(diagnosticLatencyTimers));
         // pushDiagnostics is called for foo.rb at epoch 1 with errors (the slow path)
         er.pushDiagnostics(slowPathEpoch, fref, errors, *gs);
 
@@ -162,12 +192,129 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
         CHECK(output.empty());
     }
 }
+
+TEST_CASE("FirstAndLastLatencyReporting") {
+    auto gs = makeGS();
+    auto cs = makeConfig();
+    ErrorReporter er(cs);
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        auto epoch = 0;
+        auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+        auto fref = gs->enterFile(file);
+        auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+
+        vector<unique_ptr<core::Error>> errors;
+        errors.emplace_back(
+            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+        Timer::timedSleep(chrono::milliseconds(5), *logger, "debugging");
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+
+        Timer::timedSleep(chrono::milliseconds(5), *logger, "debugging");
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+        er.endEpoch(epoch);
+
+        auto counters = getAndClearThreadCounters();
+        auto counterStateDatabase = CounterStateDatabase(move(counters));
+
+        INFO("Reports first_ and last_diagnostic_latency");
+        CHECK_EQ(1, counterStateDatabase.getTimings("first_diagnostic_latency").size());
+        CHECK_EQ(1, counterStateDatabase.getTimings("last_diagnostic_latency").size());
+
+        // Assert that first_diagnostic_latency's end time is set when pushDiagnostics is called for the first time
+        // on a file and is not updated after
+        INFO("first_diagnostic_latency's end time is not changed in subsequent checks of the same file");
+        auto firstDiagnosticLatency = move(counterStateDatabase.getTimings("first_diagnostic_latency").front());
+        auto firstDiagnosticDuration = firstDiagnosticLatency->end.usec - firstDiagnosticLatency->start.usec;
+        CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(10));
+
+        // Assert that last_diagnostic_latency's end time is updated every time we report errors for a file
+        INFO("last_diagnostic_latency's end time is changed in subsequent checks of the same file");
+        auto lastDiagnosticLatency = move(counterStateDatabase.getTimings("last_diagnostic_latency").front());
+        auto lastDiagnosticDuration = lastDiagnosticLatency->end.usec - lastDiagnosticLatency->start.usec;
+        CHECK_GT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(10));
+    }
+}
+
+TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
+    auto gs = makeGS();
+    auto cs = makeConfig();
+    ErrorReporter er(cs);
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        auto epoch = 0;
+        auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+        auto fref = gs->enterFile(file);
+        auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+
+        vector<unique_ptr<core::Error>> errors;
+        errors.emplace_back(
+            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+        Timer::timedSleep(chrono::milliseconds(5), *logger, "debugging");
+        er.pushDiagnostics(epoch, fref, errors, *gs);
+        Timer::timedSleep(chrono::milliseconds(5), *logger, "debugging");
+        er.endEpoch(epoch);
+
+        auto counters = getAndClearThreadCounters();
+        auto counterStateDatabase = CounterStateDatabase(move(counters));
+        auto firstDiagnosticLatency = move(counterStateDatabase.getTimings("first_diagnostic_latency").front());
+        auto firstDiagnosticDuration = firstDiagnosticLatency->end.usec - firstDiagnosticLatency->start.usec;
+        auto lastDiagnosticLatency = move(counterStateDatabase.getTimings("last_diagnostic_latency").front());
+        auto lastDiagnosticDuration = lastDiagnosticLatency->end.usec - lastDiagnosticLatency->start.usec;
+
+        INFO("first_ and last_diagnostic_latency ~equal when there are no errors to report");
+        CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(10));
+        CHECK_LT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(10));
+    }
+}
+
+TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
+    auto gs = makeGS();
+    auto cs = makeConfig();
+    ErrorReporter er(cs);
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        auto epoch = 0;
+        auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+        auto fref = gs->enterFile(file);
+        auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+
+        vector<unique_ptr<core::Error>> emptyErrorList;
+
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+
+        Timer::timedSleep(chrono::milliseconds(5), *logger, "debugging");
+        er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
+        er.cancelEpoch(epoch);
+
+        auto counters = getAndClearThreadCounters();
+        auto counterStateDatabase = CounterStateDatabase(move(counters));
+
+        INFO("first_ and last_diagnostic_latency are equal when no errors are reported");
+        CHECK(counterStateDatabase.getTimings("first_diagnostic_latency").empty());
+        CHECK(counterStateDatabase.getTimings("last_diagnostic_latency").empty());
+    }
+}
+
 TEST_CASE("filesWithErrorsSince") {
     auto cs = makeConfig();
     auto gs = makeGS();
     ErrorReporter er(cs);
-    vector<unique_ptr<core::Error>> errors;
-    vector<unique_ptr<core::Error>> emptyErrorList;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         auto epoch = 0;
@@ -176,14 +323,22 @@ TEST_CASE("filesWithErrorsSince") {
         auto fref = gs->enterFile(file);
         auto fileWithoutErrors = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
         auto frefWithoutErrors = gs->enterFile(fileWithoutErrors);
+        vector<unique_ptr<core::Error>> errors;
+
+        vector<unique_ptr<core::Error>> emptyErrorList;
         errors.emplace_back(
             make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
+        vector<unique_ptr<Timer>> diagnosticLatencyTimers;
+        diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+        er.beginEpoch(epoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(epoch, fref, errors, *gs);
         INFO("Only returns files with lastReportedEpoch >= sent epoch");
         CHECK(er.filesWithErrorsSince(requestedEpoch).empty());
 
+        er.beginEpoch(requestedEpoch, move(diagnosticLatencyTimers));
         er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
         er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
 

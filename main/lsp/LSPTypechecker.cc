@@ -80,7 +80,9 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     indexed = move(updates.updatedFileIndexes);
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
+    errorReporter.beginEpoch(updates.epoch, {});
     auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+    errorReporter.endEpoch(updates.epoch);
     ENFORCE(committed);
 }
 
@@ -88,6 +90,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
                                vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
+    errorReporter.beginEpoch(updates.epoch, move(diagnosticLatencyTimers));
     if (updates.canceledSlowPath) {
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
@@ -129,6 +132,13 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     } else {
         committed = runSlowPath(move(updates), workers, /* cancelable */ true);
     }
+
+    if (committed) {
+        errorReporter.endEpoch(updates.epoch);
+    } else {
+        errorReporter.cancelEpoch(updates.epoch);
+    }
+
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
     return committed;
