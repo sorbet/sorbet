@@ -198,7 +198,7 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             bundler = ctx.files.bundler[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
-            sysroot_flag = ctx.attr.osx_include_path,
+            sysroot_flag = ctx.attr.sysroot_flag,
         )),
     )
 
