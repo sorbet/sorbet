@@ -49,7 +49,7 @@ class FoundNameRef final {
 
     // Store NameKind in upper 8 bits of idx.
     static u4 mask(NameKind kind, u4 idx) {
-        return (u4)kind << 12 | idx;
+        return (u4)kind << 28 | idx;
     }
 
 public:
@@ -65,7 +65,7 @@ public:
     }
 
     NameKind kind() const {
-        return (NameKind)(_id >> 12);
+        return (NameKind)(_id >> 28);
     }
 
     bool exists() const {
@@ -74,7 +74,7 @@ public:
 
     u4 idx() const {
         // Mask top bits.
-        return _id & 0x0FFF;
+        return _id & 0x0FFFFFFF;
     }
 
     FoundClassRef &klassRef(FoundNames &foundNames);
