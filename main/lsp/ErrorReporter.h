@@ -38,8 +38,7 @@ public:
                          const core::GlobalState &gs);
 
     void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
-    void endEpoch(u4 epoch);
-    void cancelEpoch(u4 epoch);
+    void endEpoch(u4 epoch, bool committed = true);
 };
 }; // namespace sorbet::realmain::lsp
 

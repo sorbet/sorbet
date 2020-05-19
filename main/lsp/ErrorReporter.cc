@@ -30,23 +30,20 @@ void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLat
     epochTimers[epoch] = EpochTimers{move(firstDiagnosticLatencyTimers), move(diagnosticLatencyTimers)};
 }
 
-void ErrorReporter::endEpoch(u4 epoch) {
-    epochTimers.erase(epoch);
-}
-
-void ErrorReporter::cancelEpoch(u4 epoch) {
+void ErrorReporter::endEpoch(u4 epoch, bool committed) {
     auto it = epochTimers.find(epoch);
     ENFORCE(it != epochTimers.end());
+    if (committed) {
+        epochTimers.erase(it);
+    } else {
+        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+            timer->cancel();
+        }
 
-    for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
-        timer->cancel();
+        for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
+            timer.cancel();
+        }
     }
-
-    for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
-        timer.cancel();
-    }
-
-    endEpoch(epoch);
 }
 
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
@@ -67,13 +64,14 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
             timer.setEndTime();
         }
+
+        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+            timer->setEndTime();
+        }
     }
 
     // If errors is empty and the file had no errors previously, break
     if (errors.empty() && fileErrorStatus.hasErrors == false) {
-        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
-            timer->setEndTime();
-        }
         return;
     }
 

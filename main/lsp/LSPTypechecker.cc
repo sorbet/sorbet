@@ -133,11 +133,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
         committed = runSlowPath(move(updates), workers, /* cancelable */ true);
     }
 
-    if (committed) {
-        errorReporter.endEpoch(updates.epoch);
-    } else {
-        errorReporter.cancelEpoch(updates.epoch);
-    }
+    errorReporter.endEpoch(updates.epoch, committed);
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
