@@ -6,6 +6,13 @@
 module Net
 end
 
+# This class is equivalent to POP3, except that it uses
+# [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/APOP.html) authentication.
+class Net::APOP < ::Net::POP3
+  # Always returns true.
+  def apop?; end
+end
+
 class Net::BufferedIO
   BUFSIZE = ::T.let(nil, ::T.untyped)
 
@@ -1889,6 +1896,37 @@ class Net::HTTP < Net::Protocol
   end
   def lock(path, body, initheader=T.unsafe(nil)); end
 
+  def max_retries; end
+
+  # Maximum number of times to retry an idempotent request in case of
+  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html),
+  # [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html),
+  # [`EOFError`](https://docs.ruby-lang.org/en/2.6.0/EOFError.html),
+  # [`Errno::ECONNRESET`](https://docs.ruby-lang.org/en/2.6.0/Errno/ECONNRESET.html),
+  # [`Errno::ECONNABORTED`](https://docs.ruby-lang.org/en/2.6.0/Errno/ECONNABORTED.html),
+  # Errno::EPIPE,
+  # [`OpenSSL::SSL::SSLError`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLError.html),
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html).
+  # Should be a non-negative integer number. Zero means no retries. The default
+  # value is 1.
+  def max_retries=(retries); end
+
+  # Sets the maximum SSL version. See
+  # [`OpenSSL::SSL::SSLContext#max_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
+  def max_version; end
+
+  # Sets the maximum SSL version. See
+  # [`OpenSSL::SSL::SSLContext#max_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
+  def max_version=(_); end
+
+  # Sets the minimum SSL version. See
+  # [`OpenSSL::SSL::SSLContext#min_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
+  def min_version; end
+
+  # Sets the minimum SSL version. See
+  # [`OpenSSL::SSL::SSLContext#min_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
+  def min_version=(_); end
+
   # Sends a MKCOL request to the `path` and gets a response, as an HTTPResponse
   # object.
   sig do
@@ -3477,6 +3515,10 @@ class Net::HTTPAccepted < Net::HTTPSuccess
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
 
+class Net::HTTPAlreadyReported < ::Net::HTTPSuccess
+  HAS_BODY = ::T.let(nil, ::T.untyped)
+end
+
 class Net::HTTPBadGateway < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
@@ -4170,8 +4212,17 @@ class Net::HTTPLocked < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
 
+class Net::HTTPLoopDetected < ::Net::HTTPServerError
+  HAS_BODY = T.let(T.unsafe(nil), TrueClass)
+end
+
 class Net::HTTPMethodNotAllowed < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
+end
+
+# 418 I'm a teapot - RFC 2324; a joke RFC 420 Enhance Your Calm - Twitter
+class Net::HTTPMisdirectedRequest < ::Net::HTTPClientError
+  HAS_BODY = T.let(T.unsafe(nil), TrueClass)
 end
 
 class Net::HTTPMovedPermanently < Net::HTTPRedirection
@@ -4200,6 +4251,11 @@ end
 
 class Net::HTTPNotAcceptable < Net::HTTPClientError
   HAS_BODY = ::T.let(nil, ::T.untyped)
+end
+
+# 509 Bandwidth Limit Exceeded - Apache bw/limited extension
+class Net::HTTPNotExtended < ::Net::HTTPServerError
+  HAS_BODY = T.let(T.unsafe(nil), TrueClass)
 end
 
 class Net::HTTPNotFound < Net::HTTPClientError
@@ -4235,6 +4291,10 @@ class Net::HTTPPreconditionFailed < Net::HTTPClientError
 end
 
 class Net::HTTPPreconditionRequired < Net::HTTPClientError
+  HAS_BODY = ::T.let(nil, ::T.untyped)
+end
+
+class Net::HTTPProcessing < ::Net::HTTPInformation
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
 
@@ -4598,6 +4658,10 @@ class Net::HTTPUseProxy < Net::HTTPRedirection
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
 
+class Net::HTTPVariantAlsoNegotiates < ::Net::HTTPServerError
+  HAS_BODY = T.let(T.unsafe(nil), TrueClass)
+end
+
 class Net::HTTPVersionNotSupported < Net::HTTPServerError
   HAS_BODY = ::T.let(nil, ::T.untyped)
 end
@@ -4818,6 +4882,7 @@ class Net::IMAP < Net::Protocol
   # Flag indicating that the message is "recent," meaning that this session is
   # the first session in which the client has been notified of this message.
   RECENT = ::T.let(nil, ::T.untyped)
+  RESPONSE_ERRORS = T.let(nil, ::T.untyped)
   # Flag indicating a message has been seen.
   SEEN = ::T.let(nil, ::T.untyped)
   SSL_PORT = ::T.let(nil, ::T.untyped)
@@ -7483,6 +7548,9 @@ end
 
 # Common validators of number and nz\_number types
 module Net::IMAP::NumValidator
+  # Ensure argument is 'mod\_sequence\_value' or raise DataFormatError
+  def self.ensure_mod_sequence_value(num); end
+
   # Ensure argument is 'number' or raise DataFormatError
   sig do
     params(
@@ -7500,6 +7568,10 @@ module Net::IMAP::NumValidator
     .returns(::T.untyped)
   end
   def self.ensure_nz_number(num); end
+
+  # Check is passed argument valid 'mod\_sequence\_value' in RFC 4551
+  # terminology
+  def self.valid_mod_sequence_value?(num); end
 
   # Check is passed argument valid 'number' in RFC 3501 terminology
   sig do
@@ -8161,6 +8233,693 @@ end
 # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html), is
 # raised if a connection cannot be created within the open\_timeout.
 class Net::OpenTimeout < Timeout::Error
+end
+
+# ## What is This Library?
+#
+# This library provides functionality for retrieving email via
+# [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html), the Post Office
+# Protocol version 3. For details of
+# [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html), see [RFC1939]
+# (http://www.ietf.org/rfc/rfc1939.txt).
+#
+# ## Examples
+#
+# ### Retrieving Messages
+#
+# This example retrieves messages from the server and deletes them on the
+# server.
+#
+# Messages are written to files named 'inbox/1', 'inbox/2', .... Replace
+# 'pop.example.com' with your
+# [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) server address,
+# and 'YourAccount' and 'YourPassword' with the appropriate account details.
+#
+# ```ruby
+# require 'net/pop'
+#
+# pop = Net::POP3.new('pop.example.com')
+# pop.start('YourAccount', 'YourPassword')             # (1)
+# if pop.mails.empty?
+#   puts 'No mail.'
+# else
+#   i = 0
+#   pop.each_mail do |m|   # or "pop.mails.each ..."   # (2)
+#     File.open("inbox/#{i}", 'w') do |f|
+#       f.write m.pop
+#     end
+#     m.delete
+#     i += 1
+#   end
+#   puts "#{pop.mails.size} mails popped."
+# end
+# pop.finish                                           # (3)
+# ```
+#
+# 1.  Call
+#     [`Net::POP3#start`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-start)
+#     and start POP session.
+# 2.  Access messages by using
+#     [`POP3#each_mail`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-each_mail)
+#     and/or
+#     [`POP3#mails`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-mails).
+# 3.  Close POP session by calling
+#     [`POP3#finish`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-finish)
+#     or use the block form of
+#     [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-start).
+#
+#
+# ### Shortened Code
+#
+# The example above is very verbose. You can shorten the code by using some
+# utility methods. First, the block form of
+# [`Net::POP3.start`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-start)
+# can be used instead of
+# [`POP3.new`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-new),
+# [`POP3#start`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-start)
+# and
+# [`POP3#finish`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-finish).
+#
+# ```ruby
+# require 'net/pop'
+#
+# Net::POP3.start('pop.example.com', 110,
+#                 'YourAccount', 'YourPassword') do |pop|
+#   if pop.mails.empty?
+#     puts 'No mail.'
+#   else
+#     i = 0
+#     pop.each_mail do |m|   # or "pop.mails.each ..."
+#       File.open("inbox/#{i}", 'w') do |f|
+#         f.write m.pop
+#       end
+#       m.delete
+#       i += 1
+#     end
+#     puts "#{pop.mails.size} mails popped."
+#   end
+# end
+# ```
+#
+# [`POP3#delete_all`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-delete_all)
+# is an alternative for
+# [`each_mail`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-each_mail)
+# and delete.
+#
+# ```ruby
+# require 'net/pop'
+#
+# Net::POP3.start('pop.example.com', 110,
+#                 'YourAccount', 'YourPassword') do |pop|
+#   if pop.mails.empty?
+#     puts 'No mail.'
+#   else
+#     i = 1
+#     pop.delete_all do |m|
+#       File.open("inbox/#{i}", 'w') do |f|
+#         f.write m.pop
+#       end
+#       i += 1
+#     end
+#   end
+# end
+# ```
+#
+# And here is an even shorter example.
+#
+# ```ruby
+# require 'net/pop'
+#
+# i = 0
+# Net::POP3.delete_all('pop.example.com', 110,
+#                      'YourAccount', 'YourPassword') do |m|
+#   File.open("inbox/#{i}", 'w') do |f|
+#     f.write m.pop
+#   end
+#   i += 1
+# end
+# ```
+#
+# ### Memory Space Issues
+#
+# All the examples above get each message as one big string. This example avoids
+# this.
+#
+# ```ruby
+# require 'net/pop'
+#
+# i = 1
+# Net::POP3.delete_all('pop.example.com', 110,
+#                      'YourAccount', 'YourPassword') do |m|
+#   File.open("inbox/#{i}", 'w') do |f|
+#     m.pop do |chunk|    # get a message little by little.
+#       f.write chunk
+#     end
+#     i += 1
+#   end
+# end
+# ```
+#
+# ### Using [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+#
+# The net/pop library supports
+# [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+# authentication. To use
+# [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP), use
+# the [`Net::APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/APOP.html) class
+# instead of the
+# [`Net::POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) class. You
+# can use the utility method,
+# [`Net::POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html).APOP(). For
+# example:
+#
+# ```ruby
+# require 'net/pop'
+#
+# # Use APOP authentication if $isapop == true
+# pop = Net::POP3.APOP($isapop).new('apop.example.com', 110)
+# pop.start('YourAccount', 'YourPassword') do |pop|
+#   # Rest of the code is the same.
+# end
+# ```
+#
+# ### Fetch Only Selected Mail Using 'UIDL' POP Command
+#
+# If your POP server provides UIDL functionality, you can grab only selected
+# mails from the POP server. e.g.
+#
+# ```ruby
+# def need_pop?( id )
+#   # determine if we need pop this mail...
+# end
+#
+# Net::POP3.start('pop.example.com', 110,
+#                 'Your account', 'Your password') do |pop|
+#   pop.mails.select { |m| need_pop?(m.unique_id) }.each do |m|
+#     do_something(m.pop)
+#   end
+# end
+# ```
+#
+# The POPMail#unique\_id() method returns the unique-id of the message as a
+# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Normally the
+# unique-id is a hash of the message.
+class Net::POP3 < ::Net::Protocol
+  # svn revision of this library
+  Revision = T.let(T.unsafe(nil), String)
+
+  # Creates a new [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  # object.
+  #
+  # `address` is the hostname or ip address of your
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) server.
+  #
+  # The optional `port` is the port to connect to.
+  #
+  # The optional `isapop` specifies whether this connection is going to use
+  # [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+  # authentication; it defaults to `false`.
+  #
+  # This method does **not** open the TCP connection.
+  def self.new(addr, port = _, isapop = _); end
+
+  # Alias for:
+  # [`started?`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-started-3F)
+  def active?; end
+
+  # The address to connect to.
+  def address; end
+
+  # Does this instance use
+  # [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+  # authentication?
+  def apop?; end
+
+  # Starts a pop3 session, attempts authentication, and quits. This method must
+  # not be called while
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) session is
+  # opened. This method raises POPAuthenticationError if authentication fails.
+  def auth_only(account, password); end
+
+  # Deletes all messages on the server.
+  #
+  # If called with a block, yields each message in turn before deleting it.
+  #
+  # ### Example
+  #
+  # ```ruby
+  # n = 1
+  # pop.delete_all do |m|
+  #   File.open("inbox/#{n}") do |f|
+  #     f.write m.pop
+  #   end
+  #   n += 1
+  # end
+  # ```
+  #
+  # This method raises a POPError if an error occurs.
+  def delete_all; end
+
+  # Disable SSL for all new instances.
+  def disable_ssl; end
+
+  # Alias for:
+  # [`each_mail`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-each_mail)
+  def each(&block); end
+
+  # Yields each message to the passed-in block in turn. Equivalent to:
+  #
+  # ```
+  # pop3.mails.each do |popmail|
+  #   ....
+  # end
+  # ```
+  #
+  # This method raises a POPError if an error occurs.
+  #
+  # Also aliased as:
+  # [`each`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-each)
+  def each_mail(&block); end
+
+  # Enables SSL for this instance. Must be called before the connection is
+  # established to have any effect. +[params](:port)+ is port to establish the
+  # SSL connection on; Defaults to 995. `params` (except :port) is passed to
+  # OpenSSL::SSLContext#set\_params.
+  def enable_ssl(verify_or_params = _, certs = _, port = _); end
+
+  # Finishes a [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  # session and closes TCP connection.
+  def finish; end
+
+  # Provide human-readable stringification of class state.
+  def inspect; end
+
+  # debugging output for `msg`
+  def logging(msg); end
+
+  # Returns an array of
+  # [`Net::POPMail`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html)
+  # objects, representing all the messages on the server. This array is renewed
+  # when the session restarts; otherwise, it is fetched from the server the
+  # first time this method is called (directly or indirectly) and cached.
+  #
+  # This method raises a POPError if an error occurs.
+  def mails; end
+
+  # Returns the total size in bytes of all the messages on the POP server.
+  def n_bytes; end
+
+  # Returns the number of messages on the POP server.
+  def n_mails; end
+
+  # Seconds to wait until a connection is opened. If the
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) object cannot
+  # open a connection within this time, it raises a
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # exception. The default value is 30 seconds.
+  def open_timeout; end
+
+  # Seconds to wait until a connection is opened. If the
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) object cannot
+  # open a connection within this time, it raises a
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # exception. The default value is 30 seconds.
+  def open_timeout=(_); end
+
+  # The port number to connect to.
+  def port; end
+
+  # Seconds to wait until reading one block (by one read(1) call). If the
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) object cannot
+  # complete a read() within this time, it raises a
+  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
+  # exception. The default value is 60 seconds.
+  def read_timeout; end
+
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the read timeout.
+  def read_timeout=(sec); end
+
+  # Resets the session. This clears all "deleted" marks from messages.
+  #
+  # This method raises a POPError if an error occurs.
+  def reset; end
+
+  def set_all_uids; end
+
+  # **WARNING**: This method causes a serious security hole. Use this method
+  # only for debugging.
+  #
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) an output stream for
+  # debugging.
+  #
+  # ### Example
+  #
+  # ```
+  # pop = Net::POP.new(addr, port)
+  # pop.set_debug_output $stderr
+  # pop.start(account, passwd) do |pop|
+  #   ....
+  # end
+  # ```
+  def set_debug_output(arg); end
+
+  # Starts a [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  # session.
+  #
+  # When called with block, gives a
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) object to the
+  # block and closes the session after block call finishes.
+  #
+  # This method raises a POPAuthenticationError if authentication fails.
+  def start(account, password); end
+
+  # `true` if the [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  # session has started.
+  #
+  # Also aliased as:
+  # [`active?`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-i-active-3F)
+  def started?; end
+
+  # does this instance use SSL?
+  def use_ssl?; end
+
+  # Returns the
+  # [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+  # class if `isapop` is true; otherwise, returns the POP class. For example:
+  #
+  # ```
+  # # Example 1
+  # pop = Net::POP3::APOP($is_apop).new(addr, port)
+  #
+  # # Example 2
+  # Net::POP3::APOP($is_apop).start(addr, port) do |pop|
+  #   ....
+  # end
+  # ```
+  def self.APOP(isapop); end
+
+  # Opens a [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) session,
+  # attempts authentication, and quits.
+  #
+  # This method raises POPAuthenticationError if authentication fails.
+  #
+  # ### Example: normal [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  #
+  # ```ruby
+  # Net::POP3.auth_only('pop.example.com', 110,
+  #                     'YourAccount', 'YourPassword')
+  # ```
+  #
+  # ### Example: [`APOP`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-APOP)
+  #
+  # ```ruby
+  # Net::POP3.auth_only('pop.example.com', 110,
+  #                     'YourAccount', 'YourPassword', true)
+  # ```
+  def self.auth_only(address, port = _, account = _, password = _, isapop = _); end
+
+  # returns the :ca\_file or :ca\_path from
+  # [`POP3.ssl_params`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-ssl_params)
+  def self.certs; end
+
+  # Constructs proper parameters from arguments
+  def self.create_ssl_params(verify_or_params = _, certs = _); end
+
+  # The default port for
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) connections,
+  # port 110
+  def self.default_pop3_port; end
+
+  # The default port for POP3S connections, port 995
+  def self.default_pop3s_port; end
+
+  # returns the port for
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  def self.default_port; end
+
+  # Starts a [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) session
+  # and deletes all messages on the server. If a block is given, each POPMail
+  # object is yielded to it before being deleted.
+  #
+  # This method raises a POPAuthenticationError if authentication fails.
+  #
+  # ### Example
+  #
+  # ```ruby
+  # Net::POP3.delete_all('pop.example.com', 110,
+  #                      'YourAccount', 'YourPassword') do |m|
+  #   file.write m.pop
+  # end
+  # ```
+  def self.delete_all(address, port = _, account = _, password = _, isapop = _, &block); end
+
+  # Disable SSL for all new instances.
+  def self.disable_ssl; end
+
+  # Enable SSL for all new instances. `params` is passed to
+  # OpenSSL::SSLContext#set\_params.
+  def self.enable_ssl(*args); end
+
+  # Starts a [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) session
+  # and iterates over each POPMail object, yielding it to the `block`. This
+  # method is equivalent to:
+  #
+  # ```ruby
+  # Net::POP3.start(address, port, account, password) do |pop|
+  #   pop.each_mail do |m|
+  #     yield m
+  #   end
+  # end
+  # ```
+  #
+  # This method raises a POPAuthenticationError if authentication fails.
+  #
+  # ### Example
+  #
+  # ```ruby
+  # Net::POP3.foreach('pop.example.com', 110,
+  #                   'YourAccount', 'YourPassword') do |m|
+  #   file.write m.pop
+  #   m.delete if $DELETE
+  # end
+  # ```
+  def self.foreach(address, port = _, account = _, password = _, isapop = _, &block); end
+
+  def self.socket_type; end
+
+  # returns the SSL Parameters
+  #
+  # see also
+  # [`POP3.enable_ssl`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-enable_ssl)
+  def self.ssl_params; end
+
+  # Creates a new [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html)
+  # object and open the connection. Equivalent to
+  #
+  # ```ruby
+  # Net::POP3.new(address, port, isapop).start(account, password)
+  # ```
+  #
+  # If `block` is provided, yields the newly-opened
+  # [`POP3`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html) object to it,
+  # and automatically closes it at the end of the session.
+  #
+  # ### Example
+  #
+  # ```ruby
+  # Net::POP3.start(addr, port, account, password) do |pop|
+  #   pop.each_mail do |m|
+  #     file.write m.pop
+  #     m.delete
+  #   end
+  # end
+  # ```
+  def self.start(address, port = _, account = _, password = _, isapop = _, &block); end
+
+  # returns `true` if
+  # [`POP3.ssl_params`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-ssl_params)
+  # is set
+  def self.use_ssl?; end
+
+  # returns whether verify\_mode is enable from
+  # [`POP3.ssl_params`](https://docs.ruby-lang.org/en/2.6.0/Net/POP3.html#method-c-ssl_params)
+  def self.verify; end
+end
+
+class Net::POP3Command
+  def self.new(sock); end
+
+  def apop(account, password); end
+
+  def auth(account, password); end
+
+  def dele(num); end
+
+  def inspect; end
+
+  def list; end
+
+  def quit; end
+
+  def retr(num, &block); end
+
+  def rset; end
+
+  def socket; end
+
+  def stat; end
+
+  def top(num, lines = _, &block); end
+
+  def uidl(num = _); end
+end
+
+# POP3 authentication error.
+class Net::POPAuthenticationError < ::Net::ProtoAuthError; end
+
+# Unexpected response from the server.
+class Net::POPBadResponse < ::Net::POPError; end
+
+# Non-authentication POP3 protocol error (reply code "-ERR", except
+# authentication).
+class Net::POPError < ::Net::ProtocolError; end
+
+# This class represents a message which exists on the POP server. Instances of
+# this class are created by the POP3 class; they should not be directly created
+# by the user.
+class Net::POPMail
+  def self.new(num, len, pop, cmd); end
+
+  # Alias for:
+  # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-pop)
+  def all(dest = _, &block); end
+
+  # Marks a message for deletion on the server. Deletion does not actually occur
+  # until the end of the session; deletion may be cancelled for *all* marked
+  # messages by calling POP3#reset().
+  #
+  # This method raises a POPError if an error occurs.
+  #
+  # ### Example
+  #
+  # ```ruby
+  # POP3.start('pop.example.com', 110,
+  #            'YourAccount', 'YourPassword') do |pop|
+  #   n = 1
+  #   pop.mails.each do |popmail|
+  #     File.open("inbox/#{n}", 'w') do |f|
+  #       f.write popmail.pop
+  #     end
+  #     popmail.delete         ####
+  #     n += 1
+  #   end
+  # end
+  # ```
+  #
+  #
+  # Also aliased as:
+  # [`delete!`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-delete-21)
+  def delete; end
+
+  # Alias for:
+  # [`delete`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-delete)
+  def delete!; end
+
+  # True if the mail has been deleted.
+  def deleted?; end
+
+  # Fetches the message header.
+  #
+  # The optional `dest` argument is obsolete.
+  #
+  # This method raises a POPError if an error occurs.
+  def header(dest = _); end
+
+  # Provide human-readable stringification of class state.
+  def inspect; end
+
+  # The length of the message in octets.
+  def length; end
+
+  # Alias for:
+  # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-pop)
+  def mail(dest = _, &block); end
+
+  # The sequence number of the message on the server.
+  def number; end
+
+  # This method fetches the message. If called with a block, the message is
+  # yielded to the block one chunk at a time. If called without a block, the
+  # message is returned as a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The optional
+  # `dest` argument will be prepended to the returned
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html); this argument
+  # is essentially obsolete.
+  #
+  # ### Example without block
+  #
+  # ```ruby
+  # POP3.start('pop.example.com', 110,
+  #            'YourAccount', 'YourPassword') do |pop|
+  #   n = 1
+  #   pop.mails.each do |popmail|
+  #     File.open("inbox/#{n}", 'w') do |f|
+  #       f.write popmail.pop
+  #     end
+  #     popmail.delete
+  #     n += 1
+  #   end
+  # end
+  # ```
+  #
+  # ### Example with block
+  #
+  # ```ruby
+  # POP3.start('pop.example.com', 110,
+  #            'YourAccount', 'YourPassword') do |pop|
+  #   n = 1
+  #   pop.mails.each do |popmail|
+  #     File.open("inbox/#{n}", 'w') do |f|
+  #       popmail.pop do |chunk|            ####
+  #         f.write chunk
+  #       end
+  #     end
+  #     n += 1
+  #   end
+  # end
+  # ```
+  #
+  # This method raises a POPError if an error occurs.
+  #
+  # Also aliased as:
+  # [`all`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-all),
+  # [`mail`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-mail)
+  def pop(dest = _, &block); end
+
+  # The length of the message in octets.
+  def size; end
+
+  # Fetches the message header and `lines` lines of body.
+  #
+  # The optional `dest` argument is obsolete.
+  #
+  # This method raises a POPError if an error occurs.
+  def top(lines, dest = _); end
+
+  def uid=(uid); end
+
+  # Alias for:
+  # [`unique_id`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-unique_id)
+  def uidl; end
+
+  # Returns the unique-id of the message. Normally the unique-id is a hash
+  # string of the message.
+  #
+  # This method raises a POPError if an error occurs.
+  #
+  # Also aliased as:
+  # [`uidl`](https://docs.ruby-lang.org/en/2.6.0/Net/POPMail.html#method-i-uidl)
+  def unique_id; end
 end
 
 class Net::ProtoAuthError < Net::ProtocolError
@@ -9234,3 +9993,10 @@ class Net::WriteAdapter
   end
   def write(str); end
 end
+
+# [`WriteTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/WriteTimeout.html), a
+# subclass of
+# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html), is
+# raised if a chunk of the response cannot be written within the write\_timeout.
+# Not raised on Windows.
+class Net::WriteTimeout < ::Timeout::Error; end
