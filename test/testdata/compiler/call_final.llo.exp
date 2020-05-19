@@ -607,8 +607,8 @@ fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.ex
   %callArgsAddr = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0
   store i64 %rawSym, i64* %callArgsAddr, align 8
   %27 = load i64, i64* @rb_cInteger, align 8
-  %callArgsAddr12 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 1
-  store i64 %27, i64* %callArgsAddr12, align 8
+  %callArgsAddr13 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 1
+  store i64 %27, i64* %callArgsAddr13, align 8
   %28 = tail call i64 @rb_hash_new_with_size(i64 1) #15, !noalias !43
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgsAddr, i64 %28) #15
   store i64 %28, i64* %callArgsAddr, align 8

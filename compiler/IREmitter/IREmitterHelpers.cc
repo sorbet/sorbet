@@ -154,6 +154,12 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
                                     blkArg);
                 });
         }
+
+        // no need to track the condition variable if the jump is unconditional
+        if (bb->bexit.thenb != bb->bexit.elseb) {
+            trackBlockUsage(cs, cfg, bb->bexit.cond.variable, bb.get(), ret, escapedVariableIndexes, idx, usesBlockArg,
+                            blkArg);
+        }
     }
     return {std::move(ret), std::move(escapedVariableIndexes), usesBlockArg};
 }
