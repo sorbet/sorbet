@@ -226,19 +226,21 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     auto counterStateDatabase = CounterStateDatabase(move(counters));
 
     INFO("Reports first_ and last_diagnostic_latency");
-    CHECK_EQ(1, counterStateDatabase.getTimings("first_diagnostic_latency").size());
-    CHECK_EQ(1, counterStateDatabase.getTimings("last_diagnostic_latency").size());
+    auto firstDiagnosticLatencies = counterStateDatabase.getTimings("first_diagnostic_latency");
+    auto lastDiagnosticLatencies = counterStateDatabase.getTimings("last_diagnostic_latency");
+    CHECK_EQ(1, firstDiagnosticLatencies.size());
+    CHECK_EQ(1, lastDiagnosticLatencies.size());
 
     // Assert that first_diagnostic_latency's end time is set when pushDiagnostics is called for the first time
     // on a file and is not updated after
     INFO("first_diagnostic_latency's end time is not changed in subsequent checks of the same file");
-    auto firstDiagnosticLatency = move(counterStateDatabase.getTimings("first_diagnostic_latency").front());
+    auto &firstDiagnosticLatency = firstDiagnosticLatencies.front();
     auto firstDiagnosticDuration = firstDiagnosticLatency->end.usec - firstDiagnosticLatency->start.usec;
     CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(10));
 
     // Assert that last_diagnostic_latency's end time is updated every time we report errors for a file
     INFO("last_diagnostic_latency's end time is changed in subsequent checks of the same file");
-    auto lastDiagnosticLatency = move(counterStateDatabase.getTimings("last_diagnostic_latency").front());
+    auto &lastDiagnosticLatency = lastDiagnosticLatencies.front();
     auto lastDiagnosticDuration = lastDiagnosticLatency->end.usec - lastDiagnosticLatency->start.usec;
     CHECK_GT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(10));
 }
