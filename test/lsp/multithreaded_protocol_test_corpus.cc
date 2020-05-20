@@ -38,7 +38,14 @@ void checkDiagnosticTimes(vector<unique_ptr<CounterImpl::Timing>> times, size_t 
 
 class MultithreadedProtocolTest : public ProtocolTest {
 public:
-    MultithreadedProtocolTest() : ProtocolTest(/*multithreading*/ true, /*caching*/ false) {}
+    MultithreadedProtocolTest() : ProtocolTest(/*multithreading*/ true, /*caching*/ false) {
+        // Ensure all latency timers get reported.
+        Timer::setKeepShortTimersForTests(true);
+    }
+
+    ~MultithreadedProtocolTest() {
+        Timer::setKeepShortTimersForTests(false);
+    }
 };
 
 } // namespace
@@ -57,12 +64,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
 
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
-    // Ensure all latency timers get reported.
-    Timer::disableDroppingShortTimersForTests();
     sendAsync(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
-
-    // Ensure all latency timers get reported.
-    Timer::disableDroppingShortTimersForTests();
 
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt))),
                       {{"yolo1.rb", 3, "bear"}});
@@ -102,8 +104,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Syntax error in foo.rb.
     sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
-    // Ensure all latency timers get reported.
-    Timer::disableDroppingShortTimersForTests();
     // Typechecking error in bar.rb
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef hello\n\"hi\"\nend\nend\n",
@@ -190,8 +190,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     sendAsync(*changeFile("bar.rb",
                           "# typed: true\n\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef bar\n10\nend\nend\n", 2,
                           false));
-    // Ensure all latency timers get reported.
-    Timer::disableDroppingShortTimersForTests();
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
@@ -248,8 +246,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Send a hover to request the documentation string.
     sendAsync(*hover("foo.rb", 2, 6));
-    // Ensure all latency timers get reported.
-    Timer::disableDroppingShortTimersForTests();
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // First response should be hover.
@@ -615,8 +611,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Send a hover to request the documentation string.
     sendAsync(*hover("foo.rb", 2, 6));
-    // Ensure all latency timers are reported.
-    Timer::disableDroppingShortTimersForTests();
     // Cancel the hover.
     sendAsync(*cancelRequest(nextId - 1));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));

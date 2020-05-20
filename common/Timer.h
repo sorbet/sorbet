@@ -58,8 +58,8 @@ public:
 
     static microseconds clock_gettime_coarse();
 
-    // Disable dropping timers with duration below clock_threshold_coarse for tests
-    static void disableDroppingShortTimersForTests();
+    // Toggle dropping timers with duration below clock_threshold_coarse for tests
+    static void setKeepShortTimersForTests(bool keepShortTimersForTests);
 
 private:
     spdlog::logger &log;

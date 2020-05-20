@@ -143,8 +143,8 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     tags->push_back(make_pair(name, value));
 }
 
-void Timer::disableDroppingShortTimersForTests() {
-    keepShortTimers = true;
+void Timer::setKeepShortTimersForTests(bool keepShortTimersForTests) {
+    keepShortTimers = keepShortTimersForTests;
 }
 
 Timer::~Timer() {
