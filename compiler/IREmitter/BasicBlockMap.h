@@ -51,6 +51,14 @@ struct BasicBlockMap {
     // val: cfg::BasicBlock::id
     std::vector<int> basicBlockJumpOverrides;
 
+    // Sorbet will simplify and compact the basicBlocks vector inside the CFG. As a result, the mapping from basic block
+    // id back to basic block is broken. Currently the only thing we need this mapping for is to identify the ruby block
+    // that a jump override corresponds to, so this data can just exist along-side the jump overrides.
+    //
+    // idx: cfg::BasicBlock::id
+    // val: cfg::BasicBlock::rubyBlockId
+    std::vector<int> basicBlockRubyBlockId;
+
     // For simplicity, all our compiled functions advertise themselves as variadic Ruby methods.
     // One reason why this is simpler is because we can pre-allocate a stack array big enough to
     // hold the argv of the Ruby method call taking the most arguments within this Ruby method or
@@ -107,6 +115,19 @@ struct BasicBlockMap {
 
     // TODO(jez) usesBlockArgs
     bool usesBlockArgs;
+
+    // Non-zero for basic-blocks that originally jumped to exception-handling code.
+    // idx: block id
+    // val: the rubyBlockId for the body of the exception block
+    std::vector<int> exceptionBlockHeader;
+
+    // Mapping from ruby block id to llvm dead block.
+    std::vector<llvm::BasicBlock *> deadBlockMapping;
+
+    // Mapping from ruby block id to llvm block exit blocks. These blocks are used for the case where a transition
+    // between a basic block in a ruby block exists, and transitions to a node in a different ruby block (that isn't the
+    // dead block).
+    std::vector<llvm::BasicBlock *> blockExitMapping;
 };
 
 } // namespace sorbet::compiler

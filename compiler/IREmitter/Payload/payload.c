@@ -144,6 +144,12 @@ VALUE sorbet_rubyTopSelf() {
     return GET_VM()->top_self;
 }
 
+SORBET_INLINE
+SORBET_ATTRIBUTE(pure)
+VALUE sorbet_rubyException() {
+    return rb_eException;
+}
+
 // ****
 // ****                       Conversions between Ruby values and C values
 // ****
@@ -1417,6 +1423,97 @@ VALUE sorbet_callFunc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) 
     }
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
 }
+
+// ****
+// ****                       Exceptions
+// ****
+
+static VALUE sorbet_applyExceptionClosure_direct(BlockFFIType body, VALUE env) {
+    return body(sorbet_rubyNil(), env, 0, NULL, 0);
+}
+
+struct ExceptionClosure {
+    BlockFFIType body;
+    VALUE env;
+};
+
+static VALUE sorbet_applyExceptionClosure(VALUE arg) {
+    struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
+    return sorbet_applyExceptionClosure_direct(closure->body, closure->env);
+}
+
+static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
+    VALUE *exceptionValue = (VALUE *)exceptionValuePtr;
+
+    // fetch the last exception, and store it in the dest var passed in;
+    *exceptionValue = rb_errinfo();
+
+    return sorbet_rubyNil();
+}
+
+// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised. Returns 1 if an
+// exception was raised, and 0 otherwise.
+_Bool sorbet_try(BlockFFIType body, VALUE env, VALUE *exceptionValue) {
+    struct ExceptionClosure closure;
+    closure.body = body;
+    closure.env = env;
+    rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
+               rb_eException, 0);
+    return *exceptionValue != sorbet_rubyNil();
+}
+
+struct RestoreErrinfoClosure {
+    BlockFFIType body;
+    VALUE previousException;
+    VALUE env;
+};
+
+static VALUE sorbet_applyRestoreErrinfoClosure(VALUE arg) {
+    struct RestoreErrinfoClosure *closure = (struct RestoreErrinfoClosure *)arg;
+
+    VALUE result = sorbet_applyExceptionClosure_direct(closure->body, closure->env);
+
+    // Restore the previous exception. If the body raises an exception, this will skipped when rb_raise does a long jump
+    // out of the body function, and any outer error-handling code will be responsible for setting up the error info.
+    rb_set_errinfo(closure->previousException);
+
+    return result;
+}
+
+// This is a function that can be used in place of any block, and does nothing except for return nil.
+VALUE sorbet_blockReturnNil(VALUE firstYieldedArg, VALUE closure, int argc, VALUE *args, VALUE blockArg) {
+    return sorbet_rubyNil();
+}
+
+// Run the body block, making sure that the ensure block gets called afterwords. The exceptionValue argument is used to
+// determine whether or not to overwrite the current VM exception state, and `env` is the closure to provide to both
+// body and ensure.
+void sorbet_ensure(BlockFFIType body, BlockFFIType ensure, VALUE previousException, VALUE exceptionValue, VALUE env) {
+    struct RestoreErrinfoClosure bodyClosure;
+    bodyClosure.previousException = previousException;
+    bodyClosure.body = body;
+    bodyClosure.env = env;
+
+    struct ExceptionClosure ensureClosure;
+    ensureClosure.body = ensure;
+    ensureClosure.env = env;
+
+    // If the exception value is non-nil, then ensure is being called to handle that exception. Calling `rb_set_errinfo`
+    // with a nil value causes it to forget the current exception, so we avoid that explicitly here to preserve the
+    // behavior of `raise` with no arguments.
+    if (exceptionValue != sorbet_rubyNil()) {
+        rb_set_errinfo(exceptionValue);
+    }
+
+    rb_ensure(sorbet_applyRestoreErrinfoClosure, (VALUE)(&bodyClosure), sorbet_applyExceptionClosure,
+              (VALUE)(&ensureClosure));
+
+    return;
+}
+
+// We use this instead of `rb_raise` to re-raise an exception, because we already have the exception value that we want
+// to raise.
+__attribute__((noreturn)) extern void rb_exc_raise(VALUE);
 
 // ****
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.

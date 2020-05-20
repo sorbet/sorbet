@@ -534,19 +534,19 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs
   %28 = load i64, i64* @rb_cModule, align 8, !tbaa !0
   %29 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %28) #7
   %30 = icmp eq i64 %29, 0
-  br i1 %30, label %codeRepl22, label %sorbet_isa_class_of.exit, !prof !40
+  br i1 %30, label %codeRepl21, label %sorbet_isa_class_of.exit, !prof !40
 
 sorbet_isa_class_of.exit:                         ; preds = %27
   %31 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %23) #7
   %32 = icmp eq i64 %31, 0
-  br i1 %32, label %codeRepl22, label %typeTestSuccess10, !prof !41
+  br i1 %32, label %codeRepl21, label %typeTestSuccess10, !prof !41
 
 typeTestSuccess10:                                ; preds = %sorbet_isa_class_of.exit, %22
   %33 = getelementptr inbounds i64, i64* %17, i64 2
   store i64* %33, i64** %10, align 8, !tbaa !6
   ret i64 %rawArg_n
 
-codeRepl22:                                       ; preds = %27, %sorbet_isa_class_of.exit
+codeRepl21:                                       ; preds = %27, %sorbet_isa_class_of.exit
   tail call fastcc void @func_A.foo.cold.2(i64 %selfRaw) #17
   unreachable
 }
@@ -685,8 +685,8 @@ afterCallFinal_foo:                               ; preds = %20
   store i64* %26, i64** %10, align 8, !tbaa !6
   %27 = load i64, i64* @guard_epoch_A, align 8
   %28 = tail call i64 @sorbet_getConstantEpoch()
-  %needTakeSlowPath18 = icmp eq i64 %27, %28
-  br i1 %needTakeSlowPath18, label %30, label %29, !prof !36
+  %needTakeSlowPath17 = icmp eq i64 %27, %28
+  br i1 %needTakeSlowPath17, label %30, label %29, !prof !36
 
 29:                                               ; preds = %afterCallFinal_foo
   tail call void @const_recompute_A() #15
@@ -696,8 +696,8 @@ afterCallFinal_foo:                               ; preds = %20
   %31 = load i64, i64* @guarded_const_A, align 8
   %32 = load i64, i64* @guard_epoch_A, align 8
   %33 = tail call i64 @sorbet_getConstantEpoch()
-  %guardUpdated19 = icmp eq i64 %32, %33
-  tail call void @llvm.assume(i1 %guardUpdated19)
+  %guardUpdated18 = icmp eq i64 %32, %33
+  tail call void @llvm.assume(i1 %guardUpdated18)
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 %rawArg_a, i64* %callArgsAddr, align 8
   %34 = tail call i32 @ruby_stack_check() #15

@@ -238,7 +238,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl33, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl32, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -269,7 +269,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %31 = icmp eq i64 %30, 20
   br i1 %31, label %typeTestSuccess25, label %codeRepl, !prof !25
 
-codeRepl33:                                       ; preds = %fillRequiredArgs
+codeRepl32:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#fooAll.cold.2"(i64 %selfRaw) #16
   unreachable
 
@@ -318,7 +318,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl37, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl36, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -352,7 +352,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %or.cond = or i1 %31, %33
   br i1 %or.cond, label %typeTestSuccess25, label %34
 
-codeRepl37:                                       ; preds = %fillRequiredArgs
+codeRepl36:                                       ; preds = %fillRequiredArgs
   tail call void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #14
   unreachable
 
@@ -417,7 +417,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl35, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl34, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -464,7 +464,7 @@ sorbet_isa_Float.exit:                            ; preds = %32
   %42 = icmp eq i64 %41, 4
   br i1 %42, label %typeTestSuccess25, label %orContinue
 
-codeRepl35:                                       ; preds = %fillRequiredArgs
+codeRepl34:                                       ; preds = %fillRequiredArgs
   tail call void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #14
   unreachable
 
@@ -516,7 +516,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl55, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl54, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -525,7 +525,7 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %22 = icmp eq i64 %21, 0
   br i1 %22, label %codeRepl, label %typeTestSuccess36, !prof !30
 
-codeRepl55:                                       ; preds = %fillRequiredArgs
+codeRepl54:                                       ; preds = %fillRequiredArgs
   tail call void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #14
   unreachable
 
@@ -588,7 +588,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl31, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl30, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -627,7 +627,7 @@ sorbet_isa_Array.exit:                            ; preds = %25
   %38 = icmp eq i64 %37, 7
   br i1 %38, label %typeTestSuccess23, label %codeRepl, !prof !25
 
-codeRepl31:                                       ; preds = %fillRequiredArgs
+codeRepl30:                                       ; preds = %fillRequiredArgs
   tail call void @sorbet_cast_failure(i64 %selfRaw, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_Object, i64 0, i64 0)) #14
   unreachable
 

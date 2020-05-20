@@ -484,13 +484,13 @@ typeTestSuccess:                                  ; preds = %functionEntryInitia
   tail call void @llvm.assume(i1 %guardUpdated)
   %23 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %20) #6
   %24 = icmp eq i64 %23, 20
-  br i1 %24, label %typeTestSuccess11, label %codeRepl, !prof !35
+  br i1 %24, label %typeTestSuccess10, label %codeRepl, !prof !35
 
 codeRepl:                                         ; preds = %19
   tail call fastcc void @"func_A#foo.cold.1"(i64 %selfRaw) #16
   unreachable
 
-typeTestSuccess11:                                ; preds = %19
+typeTestSuccess10:                                ; preds = %19
   %25 = getelementptr inbounds i64, i64* %14, i64 2
   store i64* %25, i64** %9, align 8, !tbaa !6
   ret i64 183

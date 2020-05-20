@@ -90,6 +90,10 @@ public:
                                                           std::unique_ptr<ast::MethodDef> &md,
                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                           llvm::Function *mainFunc);
+
+    static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                                      UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                      int bodyRubyBlockId, core::LocalVariable exceptionValue);
 };
 } // namespace sorbet::compiler
 #endif

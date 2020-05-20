@@ -222,10 +222,10 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %"call_via_vm_==" = call i64 @sorbet_callFunc(i64 %"call_via_vm_+", i64 %"rubyId_==", i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_==")
   %21 = and i64 %"call_via_vm_==", -9
   %22 = icmp eq i64 %21, 0
-  %.sink47 = select i1 %22, i64 5, i64 3
+  %.sink46 = select i1 %22, i64 5, i64 3
   %rubyStr_ok.sink = select i1 %22, i64 %rubyStr_fail, i64 %rubyStr_ok
   %ic_call_via_vm_puts.1.sink = select i1 %22, %struct.FunctionInlineCache* @ic_call_via_vm_puts, %struct.FunctionInlineCache* @ic_call_via_vm_puts.1
-  %23 = getelementptr inbounds i64, i64* %15, i64 %.sink47
+  %23 = getelementptr inbounds i64, i64* %15, i64 %.sink46
   store i64* %23, i64** %10, align 8, !tbaa !5
   store i64 %rubyStr_ok.sink, i64* %callArgsAddr, align 8
   %call_via_vm_puts33 = call i64 @sorbet_callFunc(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull %ic_call_via_vm_puts.1.sink)

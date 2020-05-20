@@ -29,7 +29,12 @@ namespace {
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const BasicBlockMap &blockMap) {
     if (blockId != 0) {
-        return blockMap.blockLinks[blockId]->argFlags;
+        if (auto blockLink = blockMap.blockLinks[blockId]) {
+            return blockLink->argFlags;
+        } else {
+            // When no block link exists, this is a ruby block that was generated from a context other than a send.
+            return {};
+        }
     }
     vector<core::ArgInfo::ArgFlags> res;
     for (auto &argInfo : method.data(cs)->arguments()) {
@@ -45,9 +50,19 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
     for (auto rubyBlockId = 0; rubyBlockId < blockMap.rubyBlocks2Functions.size(); rubyBlockId++) {
+        builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[rubyBlockId]);
+
+        // If this was a block that was allocated during CFG construction, but got simplified away, it will not have an
+        // entry in the mapping from rubyBlockId to entry basic block. In this case we can just skip it, and mark its
+        // body as unreachable.
+        if (blockMap.userEntryBlockByFunction[rubyBlockId] == nullptr) {
+            // Mark the argument setup block as unreahable, as this function will never be called.
+            builder.CreateUnreachable();
+            continue;
+        }
+
         auto func = blockMap.rubyBlocks2Functions[rubyBlockId];
         cs.functionEntryInitializers = blockMap.functionInitializersByFunction[rubyBlockId];
-        builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[rubyBlockId]);
         auto maxPositionalArgCount = 0;
         auto minPositionalArgCount = 0;
         auto isBlock = rubyBlockId != 0;
@@ -413,6 +428,20 @@ core::LocalVariable returnValue(CompilerState &cs) {
     return {Names::returnValue(cs), 1};
 }
 
+llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const BasicBlockMap &blockMap, const cfg::BasicBlock *from,
+                                    const cfg::BasicBlock *to) {
+    if (to == cfg.deadBlock()) {
+        return blockMap.deadBlockMapping[from->rubyBlockId];
+    }
+
+    auto remapped = blockMap.basicBlockJumpOverrides[to->id];
+    if (from->rubyBlockId != blockMap.basicBlockRubyBlockId[remapped]) {
+        return blockMap.blockExitMapping[from->rubyBlockId];
+    } else {
+        return blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[to->id]];
+    }
+}
+
 void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap,
                   UnorderedMap<core::LocalVariable, Alias> &aliases) {
     llvm::IRBuilder<> builder(cs);
@@ -557,8 +586,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         }
                     },
                     [&](cfg::GetCurrentException *i) {
-                        cs.failCompilation(core::Loc(cs.file, bind.loc),
-                                           "exceptions are not supported in compiled mode");
+                        // if this block isn't an exception block header, there's nothing to do here.
+                        auto bodyRubyBlockId = blockMap.exceptionBlockHeader[bb->id];
+                        if (bodyRubyBlockId == 0) {
+                            return;
+                        }
+
+                        IREmitterHelpers::emitExceptionHandlers(cs, builder, blockMap, aliases, bb->rubyBlockId,
+                                                                bodyRubyBlockId, bind.bind.variable);
                     },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */
@@ -599,25 +634,47 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                 }
             }
             if (!isTerminated) {
-                if (bb->bexit.thenb != bb->bexit.elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
+                auto *thenb = resolveJumpTarget(cfg, blockMap, bb, bb->bexit.thenb);
+                auto *elseb = resolveJumpTarget(cfg, blockMap, bb, bb->bexit.elseb);
+
+                if (thenb != elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
                     auto var =
                         Payload::varGet(cs, bb->bexit.cond.variable, builder, blockMap, aliases, bb->rubyBlockId);
                     auto condValue = Payload::testIsTruthy(cs, builder, var);
 
-                    builder.CreateCondBr(
-                        condValue,
-                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]],
-                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.elseb->id]]);
+                    builder.CreateCondBr(condValue, thenb, elseb);
                 } else {
-                    builder.CreateBr(
-                        blockMap.llvmBlocksBySorbetBlocks[blockMap.basicBlockJumpOverrides[bb->bexit.thenb->id]]);
+                    builder.CreateBr(thenb);
                 }
             }
+        }
+    }
+}
+
+void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap) {
+    llvm::IRBuilder<> builder(cs);
+
+    // Emit the dead block body for each ruby block. It should be an error to transition to the dead block, so
+    // we mark its body as unreachable.
+    for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
+        auto *dead = blockMap.deadBlockMapping[rubyBlockId];
+        builder.SetInsertPoint(dead);
+        builder.CreateUnreachable();
+    }
+}
+
+void emitBlockExits(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMap) {
+    llvm::IRBuilder<> builder(cs);
+
+    for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
+        builder.SetInsertPoint(blockMap.blockExitMapping[rubyBlockId]);
+
+        if (rubyBlockId == 0) {
+            // for the top-level, this block should never be used
+            builder.CreateUnreachable();
         } else {
-            // handle dead block. TODO: this should throw
-            auto var = Payload::rubyNil(cs, builder);
-            Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
-            builder.CreateBr(blockMap.postProcessBlock);
+            // for all other ruby blocks, we treat this block as though it's a BlockReturn
+            builder.CreateRet(Payload::rubyNil(cs, builder));
         }
     }
 }
@@ -733,6 +790,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     emitSigVerification(cs, cfg, md, blockMap, aliases);
 
     emitUserBody(cs, cfg, blockMap, aliases);
+    emitDeadBlocks(cs, cfg, blockMap);
+    emitBlockExits(cs, cfg, blockMap);
     emitPostProcess(cs, cfg, blockMap, aliases);
     for (int funId = 0; funId < blockMap.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(blockMap.functionInitializersByFunction[funId]);
