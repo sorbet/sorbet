@@ -26,7 +26,7 @@ module T::Props
 
       sig do
         params(
-          type: T.any(T::Types::Base, Module),
+          type: T::Types::Base,
           mode: ModeType,
           varname: String,
         )
@@ -134,12 +134,7 @@ module T::Props
         when T::Types::Enum
           generate(T::Utils.lift_enum(type), mode, varname)
         else
-          if type.singleton_class < T::Props::CustomType
-            # Sometimes this comes wrapped in a T::Types::Simple and sometimes not
-            handle_custom_type(varname, T.unsafe(type), mode)
-          else
-            "T::Props::Utils.deep_clone_object(#{varname})"
-          end
+          "T::Props::Utils.deep_clone_object(#{varname})"
         end
       end
 
