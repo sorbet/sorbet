@@ -280,7 +280,6 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
 
     INFO("no LSP messages should be sent");
     CHECK(outputVector->getOutput().empty());
-    CHECK(!counterStateDatabase.getTimings("last_diagnostic_latency").empty());
 
     INFO("first_ and last_diagnostic_latency ~equal when there are no errors to report");
     CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(10));
