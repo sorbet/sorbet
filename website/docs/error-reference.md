@@ -128,7 +128,7 @@ end
 
 ## 4012
 
-A `class` was redefined as a `module` or _vice-versa_ in two separate locations.
+A `class` was redefined as a `module` or _vice versa_ in two separate locations.
 
 ```
 # file_a.rb
