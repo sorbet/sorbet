@@ -66,7 +66,6 @@ class T::Props::Decorator
     without_accessors
     clobber_existing_method!
     extra
-    optional
     setter_validate
     _tnilable
   }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
@@ -289,47 +288,6 @@ class T::Props::Decorator
   end
   def prop_defined(name, cls, rules={})
     cls = T::Utils.resolve_alias(cls)
-    if rules[:optional] == true
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == false
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :false` is deprecated as it\'s the default value.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == :on_load
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == :existing
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    end
 
     if T::Utils::Nilable.is_union_with_nilclass(cls)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
