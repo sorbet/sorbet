@@ -41,6 +41,8 @@ microseconds Timer::clock_gettime_coarse() {
     return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
 }
 
+bool Timer::keepShortTimers = false;
+
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              microseconds start, initializer_list<int> histogramBuckets)
     : log(log), name(name), prev(prev), self{0}, start(start) {
@@ -141,10 +143,14 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     tags->push_back(make_pair(name, value));
 }
 
+void Timer::disableDroppingShortTimersForTests() {
+    keepShortTimers = true;
+}
+
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
     auto dur = microseconds{clock.usec - start.usec};
-    if (!canceled && dur.usec > clock_threshold_coarse.usec) {
+    if (!canceled && (keepShortTimers || dur.usec > clock_threshold_coarse.usec)) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto durMs = (clock.usec - start.usec) / 1'000;
         log.debug("{}: {}ms", this->name.str, durMs);

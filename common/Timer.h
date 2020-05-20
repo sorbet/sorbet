@@ -58,6 +58,9 @@ public:
 
     static microseconds clock_gettime_coarse();
 
+    // Disable dropping timers with duration below clock_threshold_coarse for tests
+    static void disableDroppingShortTimersForTests();
+
 private:
     spdlog::logger &log;
     ConstExprStr name;
@@ -74,6 +77,7 @@ private:
     // on a bucket.
     std::unique_ptr<std::vector<int>> histogramBuckets;
     bool canceled = false;
+    static bool keepShortTimers;
 };
 } // namespace sorbet
 
