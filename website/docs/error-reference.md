@@ -130,7 +130,7 @@ end
 
 A `class` was redefined as a `module` or _vice versa_ in two separate locations.
 
-```
+```ruby
 # file_a.rb
 class Foo
 end
@@ -139,6 +139,9 @@ end
 module Foo
 end
 ```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20file_a.rb%0Aclass%20Foo%0Aend%0A%0A%23%20file_b.rb%0Amodule%20Foo%0Aend">→
+View on sorbet.run</a>
 
 You can fix this error by ensuring that both definitions are declared as
 `class`es, ensuring both definitions are declared as `module`s, or renaming
