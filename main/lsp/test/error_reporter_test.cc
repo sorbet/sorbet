@@ -266,9 +266,9 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
 
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
     er.beginEpoch(epoch, move(diagnosticLatencyTimers));
-    Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(10), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
-    Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::milliseconds(10), *logger, "delay so timer is reported");
     er.endEpoch(epoch);
 
     auto counters = getAndClearThreadCounters();
@@ -282,8 +282,8 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     CHECK(outputVector->getOutput().empty());
 
     INFO("first_ and last_diagnostic_latency ~equal when there are no errors to report");
-    CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(10));
-    CHECK_LT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(10));
+    CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(20));
+    CHECK_LT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(20));
 }
 
 TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
