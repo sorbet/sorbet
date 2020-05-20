@@ -33,9 +33,7 @@ void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLat
 void ErrorReporter::endEpoch(u4 epoch, bool committed) {
     auto it = epochTimers.find(epoch);
     ENFORCE(it != epochTimers.end());
-    if (committed) {
-        epochTimers.erase(it);
-    } else {
+    if (!committed) {
         for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
             timer->cancel();
         }
@@ -44,6 +42,8 @@ void ErrorReporter::endEpoch(u4 epoch, bool committed) {
             timer.cancel();
         }
     }
+
+    epochTimers.erase(it);
 }
 
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,

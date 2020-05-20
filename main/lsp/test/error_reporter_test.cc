@@ -248,7 +248,6 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto newEpoch = 1;
     auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
@@ -260,22 +259,15 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
+
+    auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+
+    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
     er.beginEpoch(epoch, move(diagnosticLatencyTimers));
     Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
     Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
     er.endEpoch(epoch);
-
-    getAndClearThreadCounters();
-    Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
-    auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
-
-    diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
-    er.beginEpoch(newEpoch, move(diagnosticLatencyTimers));
-    Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
-    er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
-    Timer::timedSleep(chrono::milliseconds(5), *logger, "delay so timer is reported");
-    er.endEpoch(newEpoch);
 
     auto counters = getAndClearThreadCounters();
     auto counterStateDatabase = CounterStateDatabase(move(counters));
