@@ -140,9 +140,9 @@ module Foo
 end
 ```
 
-You can fix this error by ensuring that both definitions are declared as `class`es,
-ensuring both definitions are declared as `module`s,
-or renaming either definition so they no longer conflict. 
+You can fix this error by ensuring that both definitions are declared as
+`class`es, ensuring both definitions are declared as `module`s, or renaming
+either definition so they no longer conflict.
 
 ## 4015
 
