@@ -126,6 +126,24 @@ class Main
 end
 ```
 
+## 4012
+
+A `class` was redefined as a `module` or _vice-versa_ in two separate locations.
+
+```
+# file_a.rb
+class Foo
+end
+
+# file_b.rb
+module Foo
+end
+```
+
+You can fix this error by ensuring that both definitions are declared as `class`es,
+ensuring both definitions are declared as `module`s,
+or renaming either definition so they no longer conflict. 
+
 ## 4015
 
 This error usually comes when a class or module is dynamically defined and
