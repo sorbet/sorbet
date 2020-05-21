@@ -283,7 +283,7 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
-        other: T.any(Sorbet::Private::Static::ENVClass, T::Hash[String, T.nilable[String]])
+        other: T.any(Sorbet::Private::Static::ENVClass, T::Hash[String, T.nilable(String)])
     )
     .returns(Sorbet::Private::Static::ENVClass)
   end
