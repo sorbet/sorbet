@@ -283,6 +283,14 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        other: T.any(Sorbet::Private::Static::ENVClass, T::Hash[String, T.nilable[String]])
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  def replace(other); end
+
+  sig do
+    params(
         blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(T::Hash[String, String])
