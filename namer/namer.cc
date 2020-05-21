@@ -670,7 +670,7 @@ class SymbolDefiner {
             case NameKind::ClassRef: {
                 auto &klassRef = name.klassRef(*foundNames);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
-                return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, core::Loc(ctx.file, klassRef.loc));
+                return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
             default:
                 Exception::raise("Invalid name reference");
@@ -702,37 +702,44 @@ class SymbolDefiner {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
+    core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
+                                  core::LocOffsets loc) {
+        // Common case: Everything is fine, user is trying to define a symbol on a class or module.
+        if (scope.data(ctx)->isClassOrModule()) {
+            return scope;
+        }
+
+        // Check if class was already mangled.
+        auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scope.data(ctx)->name);
+        if (klassSymbol.exists()) {
+            return klassSymbol;
+        }
+
+        if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
+            auto constLitName = name.data(ctx)->show(ctx);
+            auto newOwnerName = scope.data(ctx)->show(ctx);
+            e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
+                        newOwnerName);
+            e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", newOwnerName);
+        }
+        // Mangle this one out of the way, and re-enter a symbol with this name as a class.
+        auto scopeName = scope.data(ctx)->name;
+        ctx.state.mangleRenameSymbol(scope, scopeName);
+        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
+        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        return scope;
+    }
+
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
-    core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::Loc loc) {
+    core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
         if (name == core::Names::singleton()) {
             return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         }
 
-        auto scope = ctx.owner;
-        if (!scope.data(ctx)->isClassOrModule()) {
-            // Check if class was already mangled.
-            auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scope.data(ctx)->name);
-            if (klassSymbol.exists()) {
-                scope = klassSymbol;
-            } else {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.data(ctx)->show(ctx);
-                    auto newOwnerName = scope.data(ctx)->show(ctx);
-                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
-                                newOwnerName, newOwnerName);
-                    e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", newOwnerName);
-                }
-                // Mangle this one out of the way, and re-enter a symbol with this name as a class.
-                auto scopeName = scope.data(ctx)->name;
-                ctx.state.mangleRenameSymbol(scope, scopeName);
-                scope = ctx.state.enterClassSymbol(loc, scope.data(ctx)->owner, scopeName);
-                scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
-            }
-        }
-
+        auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
-            existing = ctx.state.enterClassSymbol(loc, scope, name);
+            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -1133,30 +1140,7 @@ class SymbolDefiner {
         }
 
         auto scope = squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner));
-        if (!scope.data(ctx)->isClassOrModule()) {
-            // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scope.data(ctx)->name);
-            if (klassSymbol.exists()) {
-                scope = klassSymbol;
-            } else {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
-                                                  core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = staticField.name.data(ctx)->show(ctx);
-                    auto scopeName = scope.data(ctx)->show(ctx);
-                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
-                                scopeName, scopeName);
-                    e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", scopeName);
-                }
-
-                // Mangle this one out of the way, and re-enter a symbol with this name as a class.
-                auto scopeName = scope.data(ctx)->name;
-                ctx.state.mangleRenameSymbol(scope, scopeName);
-                scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope.data(ctx)->owner,
-                                                   scopeName);
-                scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
-            }
-        }
-
+        scope = ensureIsClass(ctx, scope, staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
