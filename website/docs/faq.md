@@ -356,8 +356,12 @@ Ruby 3.
 
 ## Can I use Sorbet for duck typed code?
 
-No. Duck typed code relies on the partial interface of an object (for example, all
-Rack middleware responds to a `call` method that accepts one argument) to determine
-if it's safe to use the object. Sorbet does not support duck typing either for static
-analysis or runtime checking.
+No.
 
+Duck typed code relies on the partial interface of an object to determine if
+it's safe to use the object. For example, Rack middleware accepts any object
+that has a `call` method which takes one argument and returns a tuple
+representing an HTTP response.
+
+Sorbet does not support duck typing either for static analysis or runtime
+checking.
