@@ -42,8 +42,8 @@ microseconds Timer::clock_gettime_coarse() {
 }
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
-             microseconds start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, start(start) {
+             microseconds start, initializer_list<int> histogramBuckets, bool alwaysReport)
+    : log(log), name(name), prev(prev), self{0}, start(start), alwaysReport(alwaysReport) {
     if (args.size() != 0) {
         this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
     }
@@ -108,7 +108,7 @@ Timer Timer::clone() const {
     return clone(name);
 }
 
-Timer Timer::clone(ConstExprStr name) const {
+Timer Timer::clone(ConstExprStr name, bool alwaysReportTimer) const {
     Timer forked(log, name, prev, {}, start, {});
     if (this->args != nullptr) {
         forked.args = make_unique<vector<pair<ConstExprStr, string>>>(*args);
@@ -120,6 +120,8 @@ Timer Timer::clone(ConstExprStr name) const {
     if (this->histogramBuckets != nullptr) {
         forked.histogramBuckets = make_unique<vector<int>>(*histogramBuckets);
     }
+    forked.alwaysReport = alwaysReportTimer;
+
     return forked;
 }
 
@@ -144,7 +146,7 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
 Timer::~Timer() {
     auto clock = clock_gettime_coarse();
     auto dur = microseconds{clock.usec - start.usec};
-    if (!canceled && dur.usec > clock_threshold_coarse.usec) {
+    if (!canceled && (alwaysReport || dur.usec > clock_threshold_coarse.usec)) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
         auto durMs = (clock.usec - start.usec) / 1'000;
         log.debug("{}: {}ms", this->name.str, durMs);

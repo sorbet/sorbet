@@ -10,7 +10,7 @@ namespace sorbet {
 class Timer {
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args, microseconds start,
-          std::initializer_list<int> histogramBuckets);
+          std::initializer_list<int> histogramBuckets, bool alwaysReport = false);
 
 public:
     Timer(spdlog::logger &log, ConstExprStr name);
@@ -45,7 +45,7 @@ public:
     Timer clone() const;
 
     // Creates a new timer with the same start time, tags, and args but a different name.
-    Timer clone(ConstExprStr name) const;
+    Timer clone(ConstExprStr name, bool alwaysReportTimer = false) const;
 
     // TODO We could add more overloads for this if we need them (to create other kinds of Timers)
     // We could also make this more generic to allow more sleep duration types.
@@ -74,6 +74,7 @@ private:
     // on a bucket.
     std::unique_ptr<std::vector<int>> histogramBuckets;
     bool canceled = false;
+    bool alwaysReport = false;
 };
 } // namespace sorbet
 
