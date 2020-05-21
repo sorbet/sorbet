@@ -359,9 +359,9 @@ Ruby 3.
 No.
 
 Duck typed code relies on the partial interface of an object to determine if
-it's safe to use the object. For example, Rack middleware accepts any object
-that has a `call` method which takes one argument and returns a tuple
-representing an HTTP response.
+it's safe to use. For example, Rack middleware accepts any object that has a
+`call` method which takes one argument and returns a tuple representing an
+HTTP response.
 
 Sorbet does not support duck typing either for static analysis or runtime
 checking.
