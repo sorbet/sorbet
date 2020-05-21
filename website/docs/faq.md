@@ -356,10 +356,11 @@ Ruby 3.
 
 ## Can I use Sorbet for duck typed code?
 
-No.
+No. You can use an [interface](abstract.md) instead, or `T.untyped` if you do
+not control all of the code.
 
-Duck typed code relies on the partial interface of an object to determine if
-it's safe to use. For example, Rack middleware accepts any object that has a
+Duck typed code (or, more formally, Structural typing) specifies types by
+their structure:. For example, Rack middleware accepts any object that has a
 `call` method which takes one argument and returns a tuple representing an
 HTTP response.
 
