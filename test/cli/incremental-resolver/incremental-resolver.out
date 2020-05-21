@@ -53,8 +53,8 @@ Errors: 3
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` https://srb.help/4012
      4 |  A = nil
           ^^^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Previous definition
-     4 |  A = nil
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previous definition
+     3 |  class A; end
           ^^^^^^^
 
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:43: Redefining constant `A` https://srb.help/4012
