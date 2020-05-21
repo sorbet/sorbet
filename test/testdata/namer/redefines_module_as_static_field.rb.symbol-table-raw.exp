@@ -1,0 +1,5 @@
+class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=3:1 end=37:96})
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=3:1 end=37:96}
+      argument <blk><block> @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=??? end=???}
+
