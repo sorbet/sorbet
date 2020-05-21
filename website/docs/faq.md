@@ -359,10 +359,10 @@ Ruby 3.
 No. You can use an [interface](abstract.md) instead, or `T.untyped` if you do
 not control all of the code.
 
-Duck typing (or, more formally, Structural typing) specifies types by
-their structure. For example, Rack middleware accepts any object that has a
-`call` method which takes one argument and returns a tuple representing an
-HTTP response.
+Duck typing (or, more formally, Structural typing) specifies types by their
+structure. For example, Rack middleware accepts any object that has a `call`
+method which takes one argument and returns a tuple representing an HTTP
+response.
 
 Sorbet does not support duck typing either for static analysis or runtime
 checking.
