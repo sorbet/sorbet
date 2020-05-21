@@ -353,3 +353,11 @@ a smooth transition to Ruby 3:
 For more information, watch [this section](https://youtu.be/2g9R7PUCEXo?t=2022)
 from Matz's RubyConf 2019 keynote, which talks about his plans for typing in
 Ruby 3.
+
+## Can I use Sorbet for duck typed code?
+
+No. Duck typed code relies on the partial interface of an object (for example, all
+Rack middleware responds to a `call` method that accepts one argument) to determine
+if it's safe to use the object. Sorbet does not support duck typing either for static
+analysis or runtime checking.
+
