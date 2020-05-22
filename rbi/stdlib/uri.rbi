@@ -567,6 +567,102 @@ end
 # [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) for escaping
 # unsafe characters with codes.
 module URI::Escape
+  # Alias for:
+  # [`unescape`](https://docs.ruby-lang.org/en/2.6.0/URI/Escape.html#method-i-unescape)
+  def decode(*arg); end
+
+  # Alias for:
+  # [`escape`](https://docs.ruby-lang.org/en/2.6.0/URI/Escape.html#method-i-escape)
+  def encode(*arg); end
+
+  # ## Synopsis
+  #
+  # ```
+  # URI.escape(str [, unsafe])
+  # ```
+  #
+  # ## Args
+  #
+  # `str`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to replaces
+  #     in.
+  # `unsafe`
+  # :   [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) that matches
+  #     all symbols that must be replaced with codes. By default uses `UNSAFE`.
+  #     When this argument is a
+  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), it
+  #     represents a character set.
+  #
+  #
+  # ## Description
+  #
+  # Escapes the string, replacing all unsafe characters with codes.
+  #
+  # This method is obsolete and should not be used. Instead, use
+  # [`CGI.escape`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escape),
+  # [`URI.encode_www_form`](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form)
+  # or
+  # [`URI.encode_www_form_component`](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-encode_www_form_component)
+  # depending on your specific use case.
+  #
+  # ## Usage
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # enc_uri = URI.escape("http://example.com/?a=\11\15")
+  # # => "http://example.com/?a=%09%0D"
+  #
+  # URI.unescape(enc_uri)
+  # # => "http://example.com/?a=\t\r"
+  #
+  # URI.escape("@?@!", "!?")
+  # # => "@%3F@%21"
+  # ```
+  #
+  #
+  # Also aliased as:
+  # [`encode`](https://docs.ruby-lang.org/en/2.6.0/URI/Escape.html#method-i-encode)
+  def escape(*arg); end
+
+  # ## Synopsis
+  #
+  # ```ruby
+  # URI.unescape(str)
+  # ```
+  #
+  # ## Args
+  #
+  # `str`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to unescape.
+  #
+  #
+  # ## Description
+  #
+  # This method is obsolete and should not be used. Instead, use
+  # [`CGI.unescape`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-unescape),
+  # [`URI.decode_www_form`](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form)
+  # or
+  # [`URI.decode_www_form_component`](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-decode_www_form_component)
+  # depending on your specific use case.
+  #
+  # ## Usage
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # enc_uri = URI.escape("http://example.com/?a=\11\15")
+  # # => "http://example.com/?a=%09%0D"
+  #
+  # URI.unescape(enc_uri)
+  # # => "http://example.com/?a=\t\r"
+  # ```
+  #
+  #
+  # Also aliased as:
+  # [`decode`](https://docs.ruby-lang.org/en/2.6.0/URI/Escape.html#method-i-decode)
+  def unescape(*arg); end
+
 end
 
 # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html)
@@ -621,6 +717,130 @@ class URI::FTP < URI::Generic
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # ## Description
+  #
+  # Creates a new [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html)
+  # object from generic URL components with no syntax checking.
+  #
+  # Unlike build(), this method does not escape the path component as required
+  # by RFC1738; instead it is treated as per RFC2396.
+  #
+  # Arguments are `scheme`, `userinfo`, `host`, `port`, `registry`, `path`,
+  # `opaque`, `query`, and `fragment`, in that order.
+  def self.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = _, arg_check = _); end
+
+  def merge(oth); end
+
+  # Returns the path from an
+  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html)
+  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html).
+  #
+  # RFC 1738 specifically states that the path for an
+  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html)
+  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) does not include the /
+  # which separates the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # path from the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) host.
+  # Example:
+  #
+  # `ftp://ftp.example.com/pub/ruby`
+  #
+  # The above [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) indicates
+  # that the client should connect to ftp.example.com then cd to pub/ruby from
+  # the initial login directory.
+  #
+  # If you want to cd to an absolute directory, you must include an escaped /
+  # (%2F) in the path. Example:
+  #
+  # `ftp://ftp.example.com/%2Fpub/ruby`
+  #
+  # This method will then return "/pub/ruby".
+  def path; end
+
+  # Returns a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # representation of the
+  # [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html).
+  def to_s; end
+
+  # typecode accessor.
+  #
+  # See
+  # [`URI::FTP::COMPONENT`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html#COMPONENT).
+  def typecode; end
+
+  # ## Args
+  #
+  # `v`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  #
+  #
+  # ## Description
+  #
+  # Public setter for the typecode `v` (with validation).
+  #
+  # See also
+  # [`URI::FTP.check_typecode`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html#method-i-check_typecode).
+  #
+  # ## Usage
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # uri = URI.parse("ftp://john@ftp.example.com/my_file.img")
+  # #=> #<URI::FTP ftp://john@ftp.example.com/my_file.img>
+  # uri.typecode = "i"
+  # uri
+  # #=> #<URI::FTP ftp://john@ftp.example.com/my_file.img;type=i>
+  # ```
+  def typecode=(typecode); end
+
+  protected
+
+  # Private setter for the path of the
+  # [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html).
+  def set_path(v); end
+
+  # Private setter for the typecode `v`.
+  #
+  # See also
+  # [`URI::FTP.typecode=`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html#method-i-typecode-3D).
+  def set_typecode(v); end
+
+  # ## Description
+  #
+  # Creates a new [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html)
+  # object from components, with syntax checking.
+  #
+  # The components accepted are `userinfo`, `host`, `port`, `path`, and
+  # `typecode`.
+  #
+  # The components should be provided either as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), or as a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) with keys formed by
+  # preceding the component names with a colon.
+  #
+  # If an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) is used, the
+  # components must be passed in the order `[userinfo, host, port, path,
+  # typecode]`.
+  #
+  # If the path supplied is absolute, it will be escaped in order to make it
+  # absolute in the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html).
+  #
+  # Examples:
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # uri1 = URI::FTP.build(['user:password', 'ftp.example.com', nil,
+  #   '/path/file.zip', 'i'])
+  # uri1.to_s  # => "ftp://user:password@ftp.example.com/%2Fpath/file.zip;type=i"
+  #
+  # uri2 = URI::FTP.build({:host => 'ftp.example.com',
+  #   :path => 'ruby/src'})
+  # uri2.to_s  # => "ftp://ftp.example.com/ruby/src"
+  # ```
+  def self.build(args); end
+
 end
 
 # Base class for all [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
@@ -1523,6 +1743,37 @@ class URI::HTTP < URI::Generic
   # ```
   sig { returns(String) }
   def request_uri; end
+
+  # ## Description
+  #
+  # Creates a new
+  # [`URI::HTTP`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html) object from
+  # components, with syntax checking.
+  #
+  # The components accepted are userinfo, host, port, path, query, and fragment.
+  #
+  # The components should be provided either as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), or as a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) with keys formed by
+  # preceding the component names with a colon.
+  #
+  # If an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) is used, the
+  # components must be passed in the order `[userinfo, host, port, path, query,
+  # fragment]`.
+  #
+  # Example:
+  #
+  # ```ruby
+  # uri = URI::HTTP.build(host: 'www.example.com', path: '/foo/bar')
+  #
+  # uri = URI::HTTP.build([nil, "www.example.com", nil, "/path",
+  #   "query", 'fragment'])
+  # ```
+  #
+  # Currently, if passed userinfo components this method generates invalid
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html) URIs as per RFC
+  # 1738.
+  def self.build(args); end
 end
 
 # The default port for
@@ -1662,6 +1913,108 @@ class URI::LDAPS < URI::LDAP
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # ## Description
+  #
+  # Creates a new
+  # [`URI::LDAP`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAP.html) object from
+  # generic [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) components as
+  # per RFC 2396. No LDAP-specific syntax checking is performed.
+  #
+  # Arguments are `scheme`, `userinfo`, `host`, `port`, `registry`, `path`,
+  # `opaque`, `query`, and `fragment`, in that order.
+  #
+  # Example:
+  #
+  # ```ruby
+  # uri = URI::LDAP.new("ldap", nil, "ldap.example.com", nil, nil,
+  #   "/dc=example;dc=com", nil, "query", nil)
+  # ```
+  #
+  # See also
+  # [`URI::Generic.new`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#method-c-new).
+  def self.new(*arg); end
+
+  # Returns attributes.
+  def attributes; end
+
+  # Setter for attributes `val`.
+  def attributes=(val); end
+
+  # Returns dn.
+  def dn; end
+
+  # Setter for dn `val`.
+  def dn=(val); end
+
+  # Returns extensions.
+  def extensions; end
+
+  # Setter for extensions `val`.
+  def extensions=(val); end
+
+  # Returns filter.
+  def filter; end
+
+  # Setter for filter `val`.
+  def filter=(val); end
+
+  # Checks if [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) has a path.
+  # For [`URI::LDAP`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAP.html) this
+  # will return `false`.
+  def hierarchical?; end
+
+  # Returns scope.
+  def scope; end
+
+  # Setter for scope `val`.
+  def scope=(val); end
+
+  protected
+
+  # Private setter for attributes `val`.
+  def set_attributes(val); end
+
+  # Private setter for dn `val`.
+  def set_dn(val); end
+
+  # Private setter for extensions `val`.
+  def set_extensions(val); end
+
+  # Private setter for filter `val`.
+  def set_filter(val); end
+
+  # Private setter for scope `val`.
+  def set_scope(val); end
+
+  # ## Description
+  #
+  # Creates a new
+  # [`URI::LDAP`](https://docs.ruby-lang.org/en/2.6.0/URI/LDAP.html) object from
+  # components, with syntax checking.
+  #
+  # The components accepted are host, port, dn, attributes, scope, filter, and
+  # extensions.
+  #
+  # The components should be provided either as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), or as a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) with keys formed by
+  # preceding the component names with a colon.
+  #
+  # If an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) is used, the
+  # components must be passed in the order `[host, port, dn, attributes, scope,
+  # filter, extensions]`.
+  #
+  # Example:
+  #
+  # ```ruby
+  # uri = URI::LDAP.build({:host => 'ldap.example.com',
+  #   :dn => '/dc=example'})
+  #
+  # uri = URI::LDAP.build(["ldap.example.com", nil,
+  #   "/dc=example;dc=com", "query", nil, nil, nil])
+  # ```
+  def self.build(args); end
 end
 
 # RFC6068, the mailto URL scheme.
@@ -1701,6 +2054,101 @@ class URI::MailTo < URI::Generic
   VERSION = T.let(T.unsafe(nil), String)
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
+
+  # ## Description
+  #
+  # Creates a new
+  # [`URI::MailTo`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html) object
+  # from generic URL components with no syntax checking.
+  #
+  # This method is usually called from
+  # [`URI::parse`](https://docs.ruby-lang.org/en/2.6.0/URI.html#method-c-parse),
+  # which checks the validity of each component.
+  def self.new(*arg); end
+
+  # E-mail headers set by the URL, as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays.
+  def headers; end
+
+  # Setter for headers `v`.
+  def headers=(v); end
+
+  # The primary e-mail address of the URL, as a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  def to; end
+
+  # Setter for to `v`.
+  def to=(v); end
+
+  # Returns the RFC822 e-mail text equivalent of the URL, as a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # uri = URI.parse("mailto:ruby-list@ruby-lang.org?Subject=subscribe&cc=myaddr")
+  # uri.to_mailtext
+  # # => "To: ruby-list@ruby-lang.org\nSubject: subscribe\nCc: myaddr\n\n\n"
+  # ```
+  #
+  #
+  # Also aliased as:
+  # [`to_rfc822text`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html#method-i-to_rfc822text)
+  def to_mailtext; end
+
+  # Alias for:
+  # [`to_mailtext`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html#method-i-to_mailtext)
+  def to_rfc822text; end
+
+  # Constructs [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) from
+  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html).
+  def to_s; end
+
+  protected
+
+  # Private setter for headers `v`.
+  def set_headers(v); end
+
+  # Private setter for to `v`.
+  def set_to(v); end
+
+  # ## Description
+  #
+  # Creates a new
+  # [`URI::MailTo`](https://docs.ruby-lang.org/en/2.6.0/URI/MailTo.html) object
+  # from components, with syntax checking.
+  #
+  # Components can be provided as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html). If an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) is used, the
+  # components must be supplied as `[to, headers]`.
+  #
+  # If a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) is used, the
+  # keys are the component names preceded by colons.
+  #
+  # The headers can be supplied as a pre-encoded string, such as
+  # `"subject=subscribe&cc=address"`, or as an
+  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays like
+  # `[['subject', 'subscribe'], ['cc', 'address']]`.
+  #
+  # Examples:
+  #
+  # ```ruby
+  # require 'uri'
+  #
+  # m1 = URI::MailTo.build(['joe@example.com', 'subject=Ruby'])
+  # m1.to_s  # => "mailto:joe@example.com?subject=Ruby"
+  #
+  # m2 = URI::MailTo.build(['john@example.com', [['Subject', 'Ruby'], ['Cc', 'jack@example.com']]])
+  # m2.to_s  # => "mailto:john@example.com?Subject=Ruby&Cc=jack@example.com"
+  #
+  # m3 = URI::MailTo.build({:to => 'listman@example.com', :headers => [['subject', 'subscribe']]})
+  # m3.to_s  # => "mailto:listman@example.com?subject=subscribe"
+  # ```
+  def self.build(args); end
 end
 
 # Includes URI::REGEXP::PATTERN
@@ -1752,6 +2200,151 @@ end
 # patterns and Regexp's that match and validate.
 class URI::RFC2396_Parser < Object
   include URI::RFC2396_REGEXP
+
+  # ## Synopsis
+  #
+  # ```ruby
+  # URI::Parser.new([opts])
+  # ```
+  #
+  # ## Args
+  #
+  # The constructor accepts a hash as options for parser. Keys of options are
+  # pattern names of [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # components and values of options are pattern strings. The constructor
+  # generates set of regexps for parsing URIs.
+  #
+  # You can use the following keys:
+  #
+  # ```
+  # * :ESCAPED (URI::PATTERN::ESCAPED in default)
+  # * :UNRESERVED (URI::PATTERN::UNRESERVED in default)
+  # * :DOMLABEL (URI::PATTERN::DOMLABEL in default)
+  # * :TOPLABEL (URI::PATTERN::TOPLABEL in default)
+  # * :HOSTNAME (URI::PATTERN::HOSTNAME in default)
+  # ```
+  #
+  # ## Examples
+  #
+  # ```ruby
+  # p = URI::Parser.new(:ESCAPED => "(?:%[a-fA-F0-9]{2}|%u[a-fA-F0-9]{4})")
+  # u = p.parse("http://example.jp/%uABCD") #=> #<URI::HTTP http://example.jp/%uABCD>
+  # URI.parse(u.to_s) #=> raises URI::InvalidURIError
+  #
+  # s = "http://example.com/ABCD"
+  # u1 = p.parse(s) #=> #<URI::HTTP http://example.com/ABCD>
+  # u2 = URI.parse(s) #=> #<URI::HTTP http://example.com/ABCD>
+  # u1 == u2 #=> true
+  # u1.eql?(u2) #=> false
+  # ```
+  def self.new(opts = _); end
+
+  # ## Args
+  #
+  # `str`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to make safe
+  # `unsafe`
+  # :   [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) to apply.
+  #     Defaults to [self.regexp](:UNSAFE)
+  #
+  #
+  # ## Description
+  #
+  # Constructs a safe
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) from `str`,
+  # removing unsafe characters, replacing them with codes.
+  def escape(str, unsafe = _); end
+
+  # ## Args
+  #
+  # `str`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to search
+  # `schemes`
+  # :   Patterns to apply to `str`
+  #
+  #
+  # ## Description
+  #
+  # Attempts to parse and merge a set of URIs. If no `block` given, then returns
+  # the result, else it calls `block` for each element in result.
+  #
+  # See also
+  # [`URI::Parser.make_regexp`](https://docs.ruby-lang.org/en/2.6.0/URI/RFC2396_Parser.html#method-i-make_regexp).
+  def extract(str, schemes = _); end
+
+  def inspect; end
+
+  # ## Args
+  #
+  # `uris`
+  # :   an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Strings
+  #
+  #
+  # ## Description
+  #
+  # Attempts to parse and merge a set of URIs.
+  def join(*uris); end
+
+  # Returns [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) that is
+  # default [self.regexp](:ABS\_URI\_REF), unless `schemes` is provided. Then it
+  # is a
+  # [`Regexp.union`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html#method-c-union)
+  # with [self.pattern](:X\_ABS\_URI).
+  def make_regexp(schemes = _); end
+
+  # ## Args
+  #
+  # `uri`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  #
+  #
+  # ## Description
+  #
+  # Parses `uri` and constructs either matching
+  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) scheme object (File,
+  # FTP, HTTP, HTTPS, LDAP, LDAPS, or MailTo) or
+  # [`URI::Generic`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html).
+  #
+  # ## Usage
+  #
+  # ```ruby
+  # p = URI::Parser.new
+  # p.parse("ldap://ldap.example.com/dc=example?user=john")
+  # #=> #<URI::LDAP ldap://ldap.example.com/dc=example?user=john>
+  # ```
+  def parse(uri); end
+
+  # The [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of patterns.
+  #
+  # See also
+  # [`URI::Parser.initialize_pattern`](https://docs.ruby-lang.org/en/2.6.0/URI/RFC2396_Parser.html#method-i-initialize_pattern).
+  def pattern; end
+
+  # The [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html).
+  #
+  # See also
+  # [`URI::Parser.initialize_regexp`](https://docs.ruby-lang.org/en/2.6.0/URI/RFC2396_Parser.html#method-i-initialize_regexp).
+  def regexp; end
+
+  # Returns a split [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # against [regexp](:ABS_URI).
+  def split(uri); end
+
+  # ## Args
+  #
+  # `str`
+  # :   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to remove
+  #     escapes from
+  # `escaped`
+  # :   [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) to apply.
+  #     Defaults to [self.regexp](:ESCAPED)
+  #
+  #
+  # ## Description
+  #
+  # Removes escapes from `str`.
+  def unescape(str, escaped = _); end
 end
 
 class URI::RFC3986_Parser < Object
