@@ -215,10 +215,10 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
     er.beginEpoch(epoch, move(diagnosticLatencyTimers));
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::microseconds(50'000), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
-    Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
+    Timer::timedSleep(chrono::microseconds(50'000), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
     er.endEpoch(epoch);
 
@@ -242,6 +242,7 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     INFO("last_diagnostic_latency's end time is changed in subsequent checks of the same file");
     auto &lastDiagnosticLatency = lastDiagnosticLatencies.front();
     auto lastDiagnosticDuration = lastDiagnosticLatency->end.usec - lastDiagnosticLatency->start.usec;
+    INFO("lastDiagnosticDuration was actually " << lastDiagnosticDuration);
     CHECK_GE(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(100));
 }
 
