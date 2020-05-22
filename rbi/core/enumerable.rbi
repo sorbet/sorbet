@@ -76,6 +76,142 @@ module Enumerable
   end
   def any?(&blk); end
 
+  # Enumerates over the items, chunking them together based on the return value
+  # of the block.
+  #
+  # Consecutive elements which return the same block value are chunked together.
+  #
+  # For example, consecutive even numbers and odd numbers can be chunked as
+  # follows.
+  #
+  # ```ruby
+  # [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5].chunk { |n|
+  #   n.even?
+  # }.each { |even, ary|
+  #   p [even, ary]
+  # }
+  # #=> [false, [3, 1]]
+  # #   [true, [4]]
+  # #   [false, [1, 5, 9]]
+  # #   [true, [2, 6]]
+  # #   [false, [5, 3, 5]]
+  # ```
+  #
+  # This method is especially useful for sorted series of elements. The
+  # following example counts words for each initial letter.
+  #
+  # ```ruby
+  # open("/usr/share/dict/words", "r:iso-8859-1") { |f|
+  #   f.chunk { |line| line.ord }.each { |ch, lines| p [ch.chr, lines.length] }
+  # }
+  # #=> ["\n", 1]
+  # #   ["A", 1327]
+  # #   ["B", 1372]
+  # #   ["C", 1507]
+  # #   ["D", 791]
+  # #   ...
+  # ```
+  #
+  # The following key values have special meaning:
+  # *   `nil` and `:_separator` specifies that the elements should be dropped.
+  # *   `:_alone` specifies that the element should be chunked by itself.
+  #
+  #
+  # Any other symbols that begin with an underscore will raise an error:
+  #
+  # ```ruby
+  # items.chunk { |item| :_underscore }
+  # #=> RuntimeError: symbols beginning with an underscore are reserved
+  # ```
+  #
+  # `nil` and `:_separator` can be used to ignore some elements.
+  #
+  # For example, the sequence of hyphens in svn log can be eliminated as
+  # follows:
+  #
+  # ```ruby
+  # sep = "-"*72 + "\n"
+  # IO.popen("svn log README") { |f|
+  #   f.chunk { |line|
+  #     line != sep || nil
+  #   }.each { |_, lines|
+  #     pp lines
+  #   }
+  # }
+  # #=> ["r20018 | knu | 2008-10-29 13:20:42 +0900 (Wed, 29 Oct 2008) | 2 lines\n",
+  # #    "\n",
+  # #    "* README, README.ja: Update the portability section.\n",
+  # #    "\n"]
+  # #   ["r16725 | knu | 2008-05-31 23:34:23 +0900 (Sat, 31 May 2008) | 2 lines\n",
+  # #    "\n",
+  # #    "* README, README.ja: Add a note about default C flags.\n",
+  # #    "\n"]
+  # #   ...
+  # ```
+  #
+  # Paragraphs separated by empty lines can be parsed as follows:
+  #
+  # ```ruby
+  # File.foreach("README").chunk { |line|
+  #   /\A\s*\z/ !~ line || nil
+  # }.each { |_, lines|
+  #   pp lines
+  # }
+  # ```
+  #
+  # `:_alone` can be used to force items into their own chunk. For example, you
+  # can put lines that contain a URL by themselves, and chunk the rest of the
+  # lines together, like this:
+  #
+  # ```ruby
+  # pattern = /http/
+  # open(filename) { |f|
+  #   f.chunk { |line| line =~ pattern ? :_alone : true }.each { |key, lines|
+  #     pp lines
+  #   }
+  # }
+  # ```
+  #
+  # If no block is given, an enumerator to `chunk` is returned instead.
+  def chunk; end
+
+  # Creates an enumerator for each chunked elements. The beginnings of chunks
+  # are defined by the block.
+  #
+  # This method split each chunk using adjacent elements, *elt\_before* and
+  # *elt\_after*, in the receiver enumerator. This method split chunks between
+  # *elt\_before* and *elt\_after* where the block returns `false`.
+  #
+  # The block is called the length of the receiver enumerator minus one.
+  #
+  # The result enumerator yields the chunked elements as an array. So `each`
+  # method can be called as follows:
+  #
+  # ```
+  # enum.chunk_while { |elt_before, elt_after| bool }.each { |ary| ... }
+  # ```
+  #
+  # Other methods of the
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # module, such as `to_a`, `map`, etc., are also usable.
+  #
+  # For example, one-by-one increasing subsequence can be chunked as follows:
+  #
+  # ```ruby
+  # a = [1,2,4,9,10,11,12,15,16,19,20,21]
+  # b = a.chunk_while {|i, j| i+1 == j }
+  # p b.to_a #=> [[1, 2], [4], [9, 10, 11, 12], [15, 16], [19, 20, 21]]
+  # c = b.map {|a| a.length < 3 ? a : "#{a.first}-#{a.last}" }
+  # p c #=> [[1, 2], [4], "9-12", [15, 16], "19-21"]
+  # d = c.join(",")
+  # p d #=> "1,2,4,9-12,15,16,19-21"
+  # ```
+  #
+  # Increasing (non-decreasing) subsequence can be chunked as follows:
+  #
+  # ```ruby
+  #
   # Returns a new array with the results of running *block* once for every
   # element in *enum*.
   #
@@ -262,6 +398,32 @@ module Enumerable
   end
   def each_cons(n, &blk); end
 
+  # Calls *block* once for each element in `self`, passing that element as a
+  # parameter, converting multiple values from yield to an array.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # class Foo
+  #   include Enumerable
+  #   def each
+  #     yield 1
+  #     yield 1, 2
+  #     yield
+  #   end
+  # end
+  # Foo.new.each_entry{ |o| p o }
+  # ```
+  #
+  # produces:
+  #
+  # ```ruby
+  # 1
+  # [1, 2]
+  # nil
+  # ```
+  def each_entry(*_); end
+
   # Calls *block* with two arguments, the item and its index, for each item in
   # *enum*. Given arguments are passed through to each().
   #
@@ -419,6 +581,18 @@ module Enumerable
     .returns(T::Array[T.type_parameter(:U)])
   end
   def grep(arg0, &blk); end
+
+  # Inverted version of
+  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-grep).
+  # Returns an array of every element in *enum* for which not `Pattern ===
+  # element`.
+  #
+  # ```ruby
+  # (1..10).grep_v 2..5   #=> [1, 6, 7, 8, 9, 10]
+  # res =(1..10).grep_v(2..5) { |v| v * 2 }
+  # res                    #=> [2, 12, 14, 16, 18, 20]
+  # ```
+  def grep_v(_); end
 
   # Groups the collection by result of the block. Returns a hash where the keys
   # are the evaluated result from the block and the values are arrays of
@@ -891,6 +1065,265 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def reverse_each(&blk); end
 
+  # Creates an enumerator for each chunked elements. The ends of chunks are
+  # defined by *pattern* and the block.
+  #
+  # If `pattern === elt` returns `true` or the block returns `true` for the
+  # element, the element is end of a chunk.
+  #
+  # The `===` and *block* is called from the first element to the last element
+  # of *enum*.
+  #
+  # The result enumerator yields the chunked elements as an array. So `each`
+  # method can be called as follows:
+  #
+  # ```
+  # enum.slice_after(pattern).each { |ary| ... }
+  # enum.slice_after { |elt| bool }.each { |ary| ... }
+  # ```
+  #
+  # Other methods of the
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # module, such as `map`, etc., are also usable.
+  #
+  # For example, continuation lines (lines end with backslash) can be
+  # concatenated as follows:
+  #
+  # ```ruby
+  # lines = ["foo\n", "bar\\\n", "baz\n", "\n", "qux\n"]
+  # e = lines.slice_after(/(?<!\\)\n\z/)
+  # p e.to_a
+  # #=> [["foo\n"], ["bar\\\n", "baz\n"], ["\n"], ["qux\n"]]
+  # p e.map {|ll| ll[0...-1].map {|l| l.sub(/\\\n\z/, "") }.join + ll.last }
+  # #=>["foo\n", "barbaz\n", "\n", "qux\n"]
+  # ```
+  def slice_after(*_); end
+
+  # Creates an enumerator for each chunked elements. The beginnings of chunks
+  # are defined by *pattern* and the block.
+  #
+  # If `pattern === elt` returns `true` or the block returns `true` for the
+  # element, the element is beginning of a chunk.
+  #
+  # The `===` and *block* is called from the first element to the last element
+  # of *enum*. The result for the first element is ignored.
+  #
+  # The result enumerator yields the chunked elements as an array. So `each`
+  # method can be called as follows:
+  #
+  # ```
+  # enum.slice_before(pattern).each { |ary| ... }
+  # enum.slice_before { |elt| bool }.each { |ary| ... }
+  # ```
+  #
+  # Other methods of the
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # module, such as `to_a`, `map`, etc., are also usable.
+  #
+  # For example, iteration over ChangeLog entries can be implemented as follows:
+  #
+  # ```ruby
+  # # iterate over ChangeLog entries.
+  # open("ChangeLog") { |f|
+  #   f.slice_before(/\A\S/).each { |e| pp e }
+  # }
+  #
+  # # same as above.  block is used instead of pattern argument.
+  # open("ChangeLog") { |f|
+  #   f.slice_before { |line| /\A\S/ === line }.each { |e| pp e }
+  # }
+  # ```
+  #
+  # "svn proplist -R" produces multiline output for each file. They can be
+  # chunked as follows:
+  #
+  # ```ruby
+  # IO.popen([{"LC_ALL"=>"C"}, "svn", "proplist", "-R"]) { |f|
+  #   f.lines.slice_before(/\AProp/).each { |lines| p lines }
+  # }
+  # #=> ["Properties on '.':\n", "  svn:ignore\n", "  svk:merge\n"]
+  # #   ["Properties on 'goruby.c':\n", "  svn:eol-style\n"]
+  # #   ["Properties on 'complex.c':\n", "  svn:mime-type\n", "  svn:eol-style\n"]
+  # #   ["Properties on 'regparse.c':\n", "  svn:eol-style\n"]
+  # #   ...
+  # ```
+  #
+  # If the block needs to maintain state over multiple elements, local variables
+  # can be used. For example, three or more consecutive increasing numbers can
+  # be squashed as follows (see `chunk_while` for a better way):
+  #
+  # ```ruby
+  # a = [0, 2, 3, 4, 6, 7, 9]
+  # prev = a[0]
+  # p a.slice_before { |e|
+  #   prev, prev2 = e, prev
+  #   prev2 + 1 != e
+  # }.map { |es|
+  #   es.length <= 2 ? es.join(",") : "#{es.first}-#{es.last}"
+  # }.join(",")
+  # #=> "0,2-4,6,7,9"
+  # ```
+  #
+  # However local variables should be used carefully if the result enumerator is
+  # enumerated twice or more. The local variables should be initialized for each
+  # enumeration.
+  # [`Enumerator.new`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-c-new)
+  # can be used to do it.
+  #
+  # ```ruby
+  # # Word wrapping.  This assumes all characters have same width.
+  # def wordwrap(words, maxwidth)
+  #   Enumerator.new {|y|
+  #     # cols is initialized in Enumerator.new.
+  #     cols = 0
+  #     words.slice_before { |w|
+  #       cols += 1 if cols != 0
+  #       cols += w.length
+  #       if maxwidth < cols
+  #         cols = w.length
+  #         true
+  #       else
+  #         false
+  #       end
+  #     }.each {|ws| y.yield ws }
+  #   }
+  # end
+  # text = (1..20).to_a.join(" ")
+  # enum = wordwrap(text.split(/\s+/), 10)
+  # puts "-"*10
+  # enum.each { |ws| puts ws.join(" ") } # first enumeration.
+  # puts "-"*10
+  # enum.each { |ws| puts ws.join(" ") } # second enumeration generates same result as the first.
+  # puts "-"*10
+  # #=> ----------
+  # #   1 2 3 4 5
+  # #   6 7 8 9 10
+  # #   11 12 13
+  # #   14 15 16
+  # #   17 18 19
+  # #   20
+  # #   ----------
+  # #   1 2 3 4 5
+  # #   6 7 8 9 10
+  # #   11 12 13
+  # #   14 15 16
+  # #   17 18 19
+  # #   20
+  # #   ----------
+  # ```
+  #
+  # mbox contains series of mails which start with Unix From line. So each mail
+  # can be extracted by slice before Unix From line.
+  #
+  # ```ruby
+  # # parse mbox
+  # open("mbox") { |f|
+  #   f.slice_before { |line|
+  #     line.start_with? "From "
+  #   }.each { |mail|
+  #     unix_from = mail.shift
+  #     i = mail.index("\n")
+  #     header = mail[0...i]
+  #     body = mail[(i+1)..-1]
+  #     body.pop if body.last == "\n"
+  #     fields = header.slice_before { |line| !" \t".include?(line[0]) }.to_a
+  #     p unix_from
+  #     pp fields
+  #     pp body
+  #   }
+  # }
+  #
+  # # split mails in mbox (slice before Unix From line after an empty line)
+  # open("mbox") { |f|
+  #   emp = true
+  #   f.slice_before { |line|
+  #     prevemp = emp
+  #     emp = line == "\n"
+  #     prevemp && line.start_with?("From ")
+  #   }.each { |mail|
+  #     mail.pop if mail.last == "\n"
+  #     pp mail
+  #   }
+  # }
+  # ```
+  def slice_before(*_); end
+
+  # Creates an enumerator for each chunked elements. The beginnings of chunks
+  # are defined by the block.
+  #
+  # This method split each chunk using adjacent elements, *elt\_before* and
+  # *elt\_after*, in the receiver enumerator. This method split chunks between
+  # *elt\_before* and *elt\_after* where the block returns `true`.
+  #
+  # The block is called the length of the receiver enumerator minus one.
+  #
+  # The result enumerator yields the chunked elements as an array. So `each`
+  # method can be called as follows:
+  #
+  # ```
+  # enum.slice_when { |elt_before, elt_after| bool }.each { |ary| ... }
+  # ```
+  #
+  # Other methods of the
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # module, such as `to_a`, `map`, etc., are also usable.
+  #
+  # For example, one-by-one increasing subsequence can be chunked as follows:
+  #
+  # ```ruby
+  # a = [1,2,4,9,10,11,12,15,16,19,20,21]
+  # b = a.slice_when {|i, j| i+1 != j }
+  # p b.to_a #=> [[1, 2], [4], [9, 10, 11, 12], [15, 16], [19, 20, 21]]
+  # c = b.map {|a| a.length < 3 ? a : "#{a.first}-#{a.last}" }
+  # p c #=> [[1, 2], [4], "9-12", [15, 16], "19-21"]
+  # d = c.join(",")
+  # p d #=> "1,2,4,9-12,15,16,19-21"
+  # ```
+  #
+  # Near elements (threshold: 6) in sorted array can be chunked as follows:
+  #
+  # ```ruby
+  # a = [3, 11, 14, 25, 28, 29, 29, 41, 55, 57]
+  # p a.slice_when {|i, j| 6 < j - i }.to_a
+  # #=> [[3], [11, 14], [25, 28, 29, 29], [41], [55, 57]]
+  # ```
+  #
+  # Increasing (non-decreasing) subsequence can be chunked as follows:
+  #
+  # ```ruby
+  # a = [0, 9, 2, 2, 3, 2, 7, 5, 9, 5]
+  # p a.slice_when {|i, j| i > j }.to_a
+  # #=> [[0, 9], [2, 2, 3], [2, 7], [5, 9], [5]]
+  # ```
+  #
+  # Adjacent evens and odds can be chunked as follows: (Enumerable#chunk is
+  # another way to do it.)
+  #
+  # ```ruby
+  # a = [7, 5, 9, 2, 0, 7, 9, 4, 2, 0]
+  # p a.slice_when {|i, j| i.even? != j.even? }.to_a
+  # #=> [[7, 5, 9], [2, 0], [7, 9], [4, 2, 0]]
+  # ```
+  #
+  # Paragraphs (non-empty lines with trailing empty lines) can be chunked as
+  # follows: (See
+  # [`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-chunk)
+  # to ignore empty lines.)
+  #
+  # ```ruby
+  # lines = ["foo\n", "bar\n", "\n", "baz\n", "qux\n"]
+  # p lines.slice_when {|l1, l2| /\A\s*\z/ =~ l1 && /\S/ =~ l2 }.to_a
+  # #=> [["foo\n", "bar\n", "\n"], ["baz\n", "qux\n"]]
+  # ```
+  #
+  # [`Enumerable#chunk_while`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-chunk_while)
+  # does the same, except splitting when the block returns `false` instead of
+  # `true`.
+  def slice_when; end
+
   # Returns an array containing the items in *enum* sorted.
   #
   # Comparisons for the sort will be done using the items' own `<=>` operator or
@@ -1061,6 +1494,12 @@ module Enumerable
   # ```
   sig {returns(T::Hash[T.untyped, T.untyped])}
   def to_h(); end
+
+  # Returns a new array by removing duplicate values in `self`.
+  #
+  # See also
+  # [`Array#uniq`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-uniq).
+  def uniq; end
 
   # Iterates the given block for each slice of <n> elements. If no block is
   # given, returns an enumerator.
