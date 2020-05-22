@@ -1,5 +1,5 @@
 # typed: false
-# disable-stress-incremental: true
+
 # contains miscellaneous syntactic features in order of implementation
 # in our parser.
 
