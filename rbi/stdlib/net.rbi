@@ -123,6 +123,1321 @@ class Net::BufferedIO
   def writeline(str); end
 end
 
+module Net::DNS
+  include ::Net::DNS::QueryClasses
+  include ::Net::DNS::QueryTypes
+  include ::Logger::Severity
+  HFIXEDSZ = ::T.let(nil, ::T.untyped)
+  INT16SZ = ::T.let(nil, ::T.untyped)
+  INT32SZ = ::T.let(nil, ::T.untyped)
+  PACKETSZ = ::T.let(nil, ::T.untyped)
+  QFIXEDSZ = ::T.let(nil, ::T.untyped)
+  RRFIXEDSZ = ::T.let(nil, ::T.untyped)
+  VERSION = ::T.let(nil, ::T.untyped)
+
+end
+
+class Net::DNS::Header
+  IQUERY = ::T.let(nil, ::T.untyped)
+  OPARR = ::T.let(nil, ::T.untyped)
+  QUERY = ::T.let(nil, ::T.untyped)
+  STATUS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def aa=(val); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ad=(val); end
+
+  sig {returns(::T.untyped)}
+  def anCount(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def anCount=(val); end
+
+  sig {returns(::T.untyped)}
+  def arCount(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def arCount=(val); end
+
+  sig {returns(::T.untyped)}
+  def auth?(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def cd=(val); end
+
+  sig {returns(::T.untyped)}
+  def checking?(); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig {returns(::T.untyped)}
+  def error?(); end
+
+  sig {returns(::T.untyped)}
+  def format(); end
+
+  sig {returns(::T.untyped)}
+  def id(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def id=(val); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(arg=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def nsCount(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def nsCount=(val); end
+
+  sig {returns(::T.untyped)}
+  def opCode(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def opCode=(val); end
+
+  sig {returns(::T.untyped)}
+  def opCode_str(); end
+
+  sig {returns(::T.untyped)}
+  def qdCount(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def qdCount=(val); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def qr=(val); end
+
+  sig {returns(::T.untyped)}
+  def query?(); end
+
+  sig {returns(::T.untyped)}
+  def rCode(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rCode=(val); end
+
+  sig {returns(::T.untyped)}
+  def rCode_str(); end
+
+  sig {returns(::T.untyped)}
+  def r_available?(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ra=(val); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rd=(val); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def recursive=(val); end
+
+  sig {returns(::T.untyped)}
+  def recursive?(); end
+
+  sig {returns(::T.untyped)}
+  def response?(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def tc=(val); end
+
+  sig {returns(::T.untyped)}
+  def truncated?(); end
+
+  sig {returns(::T.untyped)}
+  def verified?(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse(arg); end
+end
+
+class Net::DNS::Header::Error < StandardError
+end
+
+class Net::DNS::Header::RCode
+  FORMAT = ::T.let(nil, ::T.untyped)
+  NAME = ::T.let(nil, ::T.untyped)
+  NOERROR = ::T.let(nil, ::T.untyped)
+  NOTIMPLEMENTED = ::T.let(nil, ::T.untyped)
+  RCodeErrorString = ::T.let(nil, ::T.untyped)
+  RCodeType = ::T.let(nil, ::T.untyped)
+  REFUSED = ::T.let(nil, ::T.untyped)
+  SERVER = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def code(); end
+
+  sig {returns(::T.untyped)}
+  def explanation(); end
+
+  sig do
+    params(
+      code: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(code); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+end
+
+class Net::DNS::Header::WrongCountError < ArgumentError
+end
+
+class Net::DNS::Header::WrongOpcodeError < ArgumentError
+end
+
+class Net::DNS::Header::WrongRecursiveError < ArgumentError
+end
+
+module Net::DNS::Names
+  INT16SZ = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+      offset: ::T.untyped,
+      compnames: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def dn_comp(name, offset, compnames); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def dn_expand(packet, offset); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def names_array(name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def pack_name(name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def valid?(name); end
+end
+
+class Net::DNS::Names::Error < StandardError
+end
+
+class Net::DNS::Names::ExpandError < Net::DNS::Names::Error
+end
+
+class Net::DNS::Packet
+  include ::Net::DNS::Names
+  sig {returns(::T.untyped)}
+  def additional(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def additional=(object); end
+
+  sig {returns(::T.untyped)}
+  def answer(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def answer=(object); end
+
+  sig {returns(::T.untyped)}
+  def answerfrom(); end
+
+  sig {returns(::T.untyped)}
+  def answersize(); end
+
+  sig {returns(::T.untyped)}
+  def authority(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authority=(object); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig {returns(::T.untyped)}
+  def data_comp(); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each_address(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each_cname(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each_mx(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each_nameserver(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each_ptr(&block); end
+
+  sig {returns(::T.untyped)}
+  def header(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def header=(object); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      type: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(name, type=T.unsafe(nil), cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def nxdomain?(); end
+
+  sig {returns(::T.untyped)}
+  def query?(); end
+
+  sig {returns(::T.untyped)}
+  def question(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def question=(object); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def truncated?(); end
+
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse(*args); end
+end
+
+class Net::DNS::Packet::Error < StandardError
+end
+
+class Net::DNS::Packet::PacketError < Net::DNS::Packet::Error
+end
+
+module Net::DNS::QueryClasses
+  ANY = ::T.let(nil, ::T.untyped)
+  CH = ::T.let(nil, ::T.untyped)
+  HS = ::T.let(nil, ::T.untyped)
+  IN = ::T.let(nil, ::T.untyped)
+  NONE = ::T.let(nil, ::T.untyped)
+
+end
+
+module Net::DNS::QueryTypes
+  A = ::T.let(nil, ::T.untyped)
+  AAAA = ::T.let(nil, ::T.untyped)
+  AFSDB = ::T.let(nil, ::T.untyped)
+  ANY = ::T.let(nil, ::T.untyped)
+  ATMA = ::T.let(nil, ::T.untyped)
+  AXFR = ::T.let(nil, ::T.untyped)
+  CERT = ::T.let(nil, ::T.untyped)
+  CNAME = ::T.let(nil, ::T.untyped)
+  DNAME = ::T.let(nil, ::T.untyped)
+  DNSKEY = ::T.let(nil, ::T.untyped)
+  DS = ::T.let(nil, ::T.untyped)
+  EID = ::T.let(nil, ::T.untyped)
+  GID = ::T.let(nil, ::T.untyped)
+  GPOS = ::T.let(nil, ::T.untyped)
+  HINFO = ::T.let(nil, ::T.untyped)
+  ISDN = ::T.let(nil, ::T.untyped)
+  IXFR = ::T.let(nil, ::T.untyped)
+  KEY = ::T.let(nil, ::T.untyped)
+  KX = ::T.let(nil, ::T.untyped)
+  LOC = ::T.let(nil, ::T.untyped)
+  MAILA = ::T.let(nil, ::T.untyped)
+  MAILB = ::T.let(nil, ::T.untyped)
+  MB = ::T.let(nil, ::T.untyped)
+  MD = ::T.let(nil, ::T.untyped)
+  MF = ::T.let(nil, ::T.untyped)
+  MG = ::T.let(nil, ::T.untyped)
+  MINFO = ::T.let(nil, ::T.untyped)
+  MR = ::T.let(nil, ::T.untyped)
+  MX = ::T.let(nil, ::T.untyped)
+  NAPTR = ::T.let(nil, ::T.untyped)
+  NIMLOC = ::T.let(nil, ::T.untyped)
+  NS = ::T.let(nil, ::T.untyped)
+  NSAP = ::T.let(nil, ::T.untyped)
+  NSAPPTR = ::T.let(nil, ::T.untyped)
+  NSEC = ::T.let(nil, ::T.untyped)
+  NULL = ::T.let(nil, ::T.untyped)
+  NXT = ::T.let(nil, ::T.untyped)
+  OPT = ::T.let(nil, ::T.untyped)
+  PTR = ::T.let(nil, ::T.untyped)
+  PX = ::T.let(nil, ::T.untyped)
+  RP = ::T.let(nil, ::T.untyped)
+  RRSIG = ::T.let(nil, ::T.untyped)
+  RT = ::T.let(nil, ::T.untyped)
+  SIG = ::T.let(nil, ::T.untyped)
+  SIGZERO = ::T.let(nil, ::T.untyped)
+  SOA = ::T.let(nil, ::T.untyped)
+  SRV = ::T.let(nil, ::T.untyped)
+  SSHFP = ::T.let(nil, ::T.untyped)
+  TKEY = ::T.let(nil, ::T.untyped)
+  TSIG = ::T.let(nil, ::T.untyped)
+  TXT = ::T.let(nil, ::T.untyped)
+  UID = ::T.let(nil, ::T.untyped)
+  UINFO = ::T.let(nil, ::T.untyped)
+  UNSPEC = ::T.let(nil, ::T.untyped)
+  WKS = ::T.let(nil, ::T.untyped)
+  X25 = ::T.let(nil, ::T.untyped)
+
+end
+
+class Net::DNS::Question
+  include ::Net::DNS::Names
+  sig {returns(::T.untyped)}
+  def comp_data(); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      type: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(name, type=T.unsafe(nil), cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def qClass(); end
+
+  sig {returns(::T.untyped)}
+  def qName(); end
+
+  sig {returns(::T.untyped)}
+  def qType(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse(arg); end
+end
+
+class Net::DNS::Question::Error < StandardError
+end
+
+class Net::DNS::Question::NameInvalid < Net::DNS::Question::Error
+end
+
+class Net::DNS::RR
+  include ::Net::DNS::Names
+  RRFIXEDSZ = ::T.let(nil, ::T.untyped)
+  RR_REGEXP = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def cls(); end
+
+  sig do
+    params(
+      offset: ::T.untyped,
+      compnames: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def comp_data(offset, compnames); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(arg); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def name(); end
+
+  sig {returns(::T.untyped)}
+  def rdata(); end
+
+  sig {returns(::T.untyped)}
+  def to_a(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def ttl(); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.new(*args); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse(data); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse_packet(data, offset); end
+end
+
+class Net::DNS::RR::A < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def address(); end
+
+  sig do
+    params(
+      string_or_ipaddr: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def address=(string_or_ipaddr); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::AAAA < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def address(); end
+
+  sig do
+    params(
+      string_or_ipaddr: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def address=(string_or_ipaddr); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::CNAME < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def cname(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::Classes
+  CLASSES = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(cls); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def to_i(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def self.default(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.default=(str); end
+
+  sig {returns(::T.untyped)}
+  def self.regexp(); end
+
+  sig do
+    params(
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.valid?(cls); end
+end
+
+class Net::DNS::RR::DataError < Net::DNS::RR::Error
+end
+
+class Net::DNS::RR::Error < StandardError
+end
+
+class Net::DNS::RR::HINFO < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def cpu(); end
+
+  sig {returns(::T.untyped)}
+  def os(); end
+
+  sig {returns(::T.untyped)}
+  def to_a(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::MR < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def newname(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::MX < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def exchange(); end
+
+  sig {returns(::T.untyped)}
+  def preference(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::NS < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def nsdname(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::PTR < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def ptr(); end
+
+  sig {returns(::T.untyped)}
+  def ptrdname(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+end
+
+class Net::DNS::RR::SOA < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def expire(); end
+
+  sig {returns(::T.untyped)}
+  def minimum(); end
+
+  sig {returns(::T.untyped)}
+  def mname(); end
+
+  sig {returns(::T.untyped)}
+  def refresh(); end
+
+  sig {returns(::T.untyped)}
+  def retry(); end
+
+  sig {returns(::T.untyped)}
+  def rname(); end
+
+  sig {returns(::T.untyped)}
+  def serial(); end
+end
+
+class Net::DNS::RR::SRV < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig {returns(::T.untyped)}
+  def port(); end
+
+  sig {returns(::T.untyped)}
+  def priority(); end
+
+  sig {returns(::T.untyped)}
+  def weight(); end
+end
+
+class Net::DNS::RR::TXT < Net::DNS::RR
+  sig {returns(::T.untyped)}
+  def txt(); end
+end
+
+class Net::DNS::RR::Types
+  TYPES = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(type); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig {returns(::T.untyped)}
+  def to_i(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def to_str(); end
+
+  sig {returns(::T.untyped)}
+  def self.default(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.default=(str); end
+
+  sig {returns(::T.untyped)}
+  def self.regexp(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.to_str(type); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.valid?(type); end
+end
+
+class Net::DNS::Resolver
+  Defaults = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def axfr(name, cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def defname(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def defname=(bool); end
+
+  sig {returns(::T.untyped)}
+  def defname?(); end
+
+  sig {returns(::T.untyped)}
+  def dns_search(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def dns_search=(bool); end
+
+  sig {returns(::T.untyped)}
+  def dnsrch(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def dnsrch=(bool); end
+
+  sig {returns(::T.untyped)}
+  def domain(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def domain=(name); end
+
+  sig {returns(::T.untyped)}
+  def ignore_truncated(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ignore_truncated=(bool); end
+
+  sig {returns(::T.untyped)}
+  def ignore_truncated?(); end
+
+  sig do
+    params(
+      config: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(config=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def inspect(); end
+
+  sig do
+    params(
+      log: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def log_file=(log); end
+
+  sig do
+    params(
+      level: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def log_level=(level); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def logger=(logger); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mx(name, cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def nameserver(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def nameserver=(arg); end
+
+  sig {returns(::T.untyped)}
+  def nameservers(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def nameservers=(arg); end
+
+  sig {returns(::T.untyped)}
+  def packet_size(); end
+
+  sig {returns(::T.untyped)}
+  def port(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def port=(num); end
+
+  sig {returns(::T.untyped)}
+  def print(); end
+
+  sig do
+    params(
+      argument: ::T.untyped,
+      type: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def query(argument, type=T.unsafe(nil), cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def recurse(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def recurse=(bool); end
+
+  sig {returns(::T.untyped)}
+  def recursive(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def recursive=(bool); end
+
+  sig {returns(::T.untyped)}
+  def recursive?(); end
+
+  sig {returns(::T.untyped)}
+  def retrans(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def retrans=(num); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def retry=(num); end
+
+  sig {returns(::T.untyped)}
+  def retry_interval(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def retry_interval=(num); end
+
+  sig {returns(::T.untyped)}
+  def retry_number(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def retry_number=(num); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      type: ::T.untyped,
+      cls: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def search(name, type=T.unsafe(nil), cls=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def searchlist(); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def searchlist=(arg); end
+
+  sig {returns(::T.untyped)}
+  def source_address(); end
+
+  sig do
+    params(
+      addr: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def source_address=(addr); end
+
+  sig {returns(::T.untyped)}
+  def source_address_inet6(); end
+
+  sig {returns(::T.untyped)}
+  def source_port(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def source_port=(num); end
+
+  sig {returns(::T.untyped)}
+  def srcaddr(); end
+
+  sig do
+    params(
+      addr: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def srcaddr=(addr); end
+
+  sig {returns(::T.untyped)}
+  def srcport(); end
+
+  sig do
+    params(
+      num: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def srcport=(num); end
+
+  sig {returns(::T.untyped)}
+  def state(); end
+
+  sig {returns(::T.untyped)}
+  def tcp_timeout(); end
+
+  sig do
+    params(
+      secs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def tcp_timeout=(secs); end
+
+  sig {returns(::T.untyped)}
+  def udp_timeout(); end
+
+  sig do
+    params(
+      secs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def udp_timeout=(secs); end
+
+  sig {returns(::T.untyped)}
+  def use_tcp(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def use_tcp=(bool); end
+
+  sig {returns(::T.untyped)}
+  def use_tcp?(); end
+
+  sig {returns(::T.untyped)}
+  def usevc(); end
+
+  sig do
+    params(
+      bool: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def usevc=(bool); end
+
+  sig {returns(::T.untyped)}
+  def self.platform_windows?(); end
+
+  sig do
+    params(
+      params: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.start(*params); end
+end
+
+class Net::DNS::Resolver::DnsTimeout
+  sig do
+    params(
+      seconds: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(seconds); end
+
+  sig {returns(::T.untyped)}
+  def pretty_to_s(); end
+
+  sig {returns(::T.untyped)}
+  def seconds(); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def timeout(&block); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+end
+
+class Net::DNS::Resolver::Error < StandardError
+end
+
+class Net::DNS::Resolver::NoResponseError < Net::DNS::Resolver::Error
+end
+
+class Net::DNS::Resolver::TcpTimeout < Net::DNS::Resolver::DnsTimeout
+  sig do
+    params(
+      seconds: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(seconds); end
+end
+
+class Net::DNS::Resolver::UdpTimeout < Net::DNS::Resolver::DnsTimeout
+  sig do
+    params(
+      seconds: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(seconds); end
+end
+
 # This class implements the
 # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) Transfer Protocol. If
 # you have used a command-line
@@ -1540,6 +2855,7 @@ end
 # [`Net::HTTPBadResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPBadResponse.html)
 # exception which is raised when there is a protocol error.
 class Net::HTTP < Net::Protocol
+  include ::AWS::Core::Http::Patches::Ruby_2
   HAVE_ZLIB = ::T.let(nil, ::T.untyped)
   HTTPVersion = ::T.let(nil, ::T.untyped)
   IDEMPOTENT_METHODS_ = ::T.let(nil, ::T.untyped)
@@ -2933,6 +4249,7 @@ class Net::HTTP::Patch < Net::HTTPRequest
 end
 
 class Net::HTTP::Persistent
+  DEFAULT_POOL_SIZE = ::T.let(nil, ::T.untyped)
   EPOCH = ::T.let(nil, ::T.untyped)
   HAVE_OPENSSL = ::T.let(nil, ::T.untyped)
   RETRIED_EXCEPTIONS = ::T.let(nil, ::T.untyped)
@@ -2948,6 +4265,17 @@ class Net::HTTP::Persistent
     .returns(::T.untyped)
   end
   def ca_file=(file); end
+
+  sig {returns(::T.untyped)}
+  def ca_path(); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ca_path=(path); end
 
   sig do
     params(
@@ -2990,6 +4318,17 @@ class Net::HTTP::Persistent
     .returns(::T.untyped)
   end
   def certificate=(certificate); end
+
+  sig {returns(::T.untyped)}
+  def ciphers(); end
+
+  sig do
+    params(
+      ciphers: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ciphers=(ciphers); end
 
   sig do
     params(
@@ -3195,6 +4534,9 @@ class Net::HTTP::Persistent
   def pipeline(uri, requests, &block); end
 
   sig {returns(::T.untyped)}
+  def pool(); end
+
+  sig {returns(::T.untyped)}
   def private_key(); end
 
   sig do
@@ -3340,6 +4682,17 @@ class Net::HTTP::Persistent
   def ssl_generation(); end
 
   sig {returns(::T.untyped)}
+  def ssl_timeout(); end
+
+  sig do
+    params(
+      ssl_timeout: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ssl_timeout=(ssl_timeout); end
+
+  sig {returns(::T.untyped)}
   def ssl_generation_key(); end
 
   sig {returns(::T.untyped)}
@@ -3364,6 +4717,14 @@ class Net::HTTP::Persistent
   sig {returns(::T.untyped)}
   def timeout_key(); end
 
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unescape(str); end
+
   sig {returns(::T.untyped)}
   def verify_callback(); end
 
@@ -3374,6 +4735,17 @@ class Net::HTTP::Persistent
     .returns(::T.untyped)
   end
   def verify_callback=(callback); end
+
+  sig {returns(::T.untyped)}
+  def verify_depth(); end
+
+  sig do
+    params(
+      verify_depth: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_depth=(verify_depth); end
 
   sig {returns(::T.untyped)}
   def verify_mode(); end
@@ -3396,7 +4768,127 @@ class Net::HTTP::Persistent
   def self.detect_idle_timeout(uri, max=T.unsafe(nil)); end
 end
 
+class Net::HTTP::Persistent::Connection
+  sig {returns(::T.untyped)}
+  def finish(); end
+
+  sig {returns(::T.untyped)}
+  def http(); end
+
+  sig do
+    params(
+      http: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def http=(http); end
+
+  sig do
+    params(
+      http_class: ::T.untyped,
+      http_args: ::T.untyped,
+      ssl_generation: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(http_class, http_args, ssl_generation); end
+
+  sig {returns(::T.untyped)}
+  def last_use(); end
+
+  sig do
+    params(
+      last_use: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def last_use=(last_use); end
+
+  sig {returns(::T.untyped)}
+  def requests(); end
+
+  sig do
+    params(
+      requests: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def requests=(requests); end
+
+  sig {returns(::T.untyped)}
+  def reset(); end
+
+  sig do
+    params(
+      ssl_generation: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ressl(ssl_generation); end
+
+  sig {returns(::T.untyped)}
+  def ssl_generation(); end
+
+  sig do
+    params(
+      ssl_generation: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ssl_generation=(ssl_generation); end
+end
+
 class Net::HTTP::Persistent::Error < StandardError
+end
+
+class Net::HTTP::Persistent::Pool < ConnectionPool
+  sig {returns(::T.untyped)}
+  def available(); end
+
+  sig do
+    params(
+      net_http_args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def checkin(net_http_args); end
+
+  sig do
+    params(
+      net_http_args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def checkout(net_http_args); end
+
+  sig do
+    params(
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(options=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def key(); end
+end
+
+class Net::HTTP::Persistent::TimedStackMulti < ConnectionPool::TimedStack
+  sig {returns(::T.untyped)}
+  def empty?(); end
+
+  sig do
+    params(
+      size: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(size=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def length(); end
 end
 
 class Net::HTTP::Persistent::SSLReuse < Net::HTTP
@@ -3498,7 +4990,6 @@ end
 
 class Net::HTTPContinue < Net::HTTPInformation
   HAS_BODY = ::T.let(nil, ::T.untyped)
-
 end
 
 class Net::HTTPCreated < Net::HTTPSuccess
@@ -8153,6 +9644,1186 @@ class Net::InternetMessageIO < Net::BufferedIO
   def write_message_by_block(&block); end
 end
 
+module Net::NTLM
+  BLOB_SIGN = ::T.let(nil, ::T.untyped)
+  DEFAULT_FLAGS = ::T.let(nil, ::T.untyped)
+  FLAGS = ::T.let(nil, ::T.untyped)
+  FLAG_KEYS = ::T.let(nil, ::T.untyped)
+  LM_MAGIC = ::T.let(nil, ::T.untyped)
+  MAX64 = ::T.let(nil, ::T.untyped)
+  SSP_SIGN = ::T.let(nil, ::T.untyped)
+  TIME_OFFSET = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      plain: ::T.untyped,
+      keys: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.apply_des(plain, keys); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.gen_keys(str); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.is_ntlm_hash?(data); end
+
+  sig do
+    params(
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.lm_hash(password); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.lm_response(arg); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.lmv2_response(arg, opt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.ntlm2_session(arg, opt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      password: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.ntlm_hash(password, opt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.ntlm_response(arg); end
+
+  sig do
+    params(
+      user: ::T.untyped,
+      password: ::T.untyped,
+      target: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.ntlmv2_hash(user, password, target, opt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.ntlmv2_response(arg, opt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.pack_int64le(val); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.split7(str); end
+end
+
+class Net::NTLM::Blob < Net::NTLM::FieldSet
+  sig {returns(::T.untyped)}
+  def blob_signature(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def blob_signature=(val); end
+
+  sig {returns(::T.untyped)}
+  def challenge(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def challenge=(val); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def reserved(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def reserved=(val); end
+
+  sig {returns(::T.untyped)}
+  def target_info(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def target_info=(val); end
+
+  sig {returns(::T.untyped)}
+  def timestamp(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def timestamp=(val); end
+
+  sig {returns(::T.untyped)}
+  def unknown1(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unknown1=(val); end
+
+  sig {returns(::T.untyped)}
+  def unknown2(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unknown2=(val); end
+end
+
+class Net::NTLM::ChannelBinding
+  sig {returns(::T.untyped)}
+  def acceptor_address_length(); end
+
+  sig {returns(::T.untyped)}
+  def acceptor_addrtype(); end
+
+  sig {returns(::T.untyped)}
+  def application_data(); end
+
+  sig {returns(::T.untyped)}
+  def channel(); end
+
+  sig {returns(::T.untyped)}
+  def channel_binding_token(); end
+
+  sig {returns(::T.untyped)}
+  def channel_hash(); end
+
+  sig {returns(::T.untyped)}
+  def gss_channel_bindings_struct(); end
+
+  sig do
+    params(
+      outer_channel: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(outer_channel); end
+
+  sig {returns(::T.untyped)}
+  def initiator_address_length(); end
+
+  sig {returns(::T.untyped)}
+  def initiator_addtype(); end
+
+  sig {returns(::T.untyped)}
+  def unique_prefix(); end
+
+  sig do
+    params(
+      outer_channel: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.create(outer_channel); end
+end
+
+class Net::NTLM::Client
+  DEFAULT_FLAGS = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def domain(); end
+
+  sig {returns(::T.untyped)}
+  def flags(); end
+
+  sig do
+    params(
+      resp: ::T.untyped,
+      channel_binding: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def init_context(resp=T.unsafe(nil), channel_binding=T.unsafe(nil)); end
+
+  sig do
+    params(
+      username: ::T.untyped,
+      password: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(username, password, opts=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def password(); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+
+  sig {returns(::T.untyped)}
+  def session_key(); end
+
+  sig {returns(::T.untyped)}
+  def username(); end
+
+  sig {returns(::T.untyped)}
+  def workstation(); end
+end
+
+class Net::NTLM::Client::Session
+  CLIENT_TO_SERVER_SEALING = ::T.let(nil, ::T.untyped)
+  CLIENT_TO_SERVER_SIGNING = ::T.let(nil, ::T.untyped)
+  MAX64 = ::T.let(nil, ::T.untyped)
+  SERVER_TO_CLIENT_SEALING = ::T.let(nil, ::T.untyped)
+  SERVER_TO_CLIENT_SIGNING = ::T.let(nil, ::T.untyped)
+  TIME_OFFSET = ::T.let(nil, ::T.untyped)
+  VERSION_MAGIC = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def authenticate!(); end
+
+  sig {returns(::T.untyped)}
+  def challenge_message(); end
+
+  sig {returns(::T.untyped)}
+  def channel_binding(); end
+
+  sig {returns(::T.untyped)}
+  def client(); end
+
+  sig {returns(::T.untyped)}
+  def exported_session_key(); end
+
+  sig do
+    params(
+      client: ::T.untyped,
+      challenge_message: ::T.untyped,
+      channel_binding: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(client, challenge_message, channel_binding=T.unsafe(nil)); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def seal_message(message); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign_message(message); end
+
+  sig do
+    params(
+      emessage: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unseal_message(emessage); end
+
+  sig do
+    params(
+      signature: ::T.untyped,
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_signature(signature, message); end
+end
+
+class Net::NTLM::EncodeUtil
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.decode_utf16le(str); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.encode_utf16le(str); end
+end
+
+class Net::NTLM::Field
+  sig {returns(::T.untyped)}
+  def active(); end
+
+  sig do
+    params(
+      active: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def active=(active); end
+
+  sig do
+    params(
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opts); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def value=(value); end
+end
+
+class Net::NTLM::FieldSet
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(name, val); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def disable(name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def enable(name); end
+
+  sig {returns(::T.untyped)}
+  def has_disabled_fields?(); end
+
+  sig {returns(::T.untyped)}
+  def initialize(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.int16LE(name, opts); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.int32LE(name, opts); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.int64LE(name, opts); end
+
+  sig {returns(::T.untyped)}
+  def self.names(); end
+
+  sig {returns(::T.untyped)}
+  def self.opts(); end
+
+  sig {returns(::T.untyped)}
+  def self.prototypes(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.security_buffer(name, opts); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.string(name, opts); end
+
+  sig {returns(::T.untyped)}
+  def self.types(); end
+end
+
+class Net::NTLM::Int16LE < Net::NTLM::Field
+  sig do
+    params(
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opt); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+end
+
+class Net::NTLM::Int32LE < Net::NTLM::Field
+  sig do
+    params(
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opt); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+end
+
+class Net::NTLM::Int64LE < Net::NTLM::Field
+  sig do
+    params(
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opt); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+end
+
+class Net::NTLM::InvalidTargetDataError < Net::NTLM::NtlmError
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig do
+    params(
+      msg: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(msg, data); end
+end
+
+class Net::NTLM::Message < Net::NTLM::FieldSet
+  sig {returns(::T.untyped)}
+  def data_edge(); end
+
+  sig {returns(::T.untyped)}
+  def data_size(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def decode64(str); end
+
+  sig {returns(::T.untyped)}
+  def deflag(); end
+
+  sig {returns(::T.untyped)}
+  def dump_flags(); end
+
+  sig {returns(::T.untyped)}
+  def encode64(); end
+
+  sig do
+    params(
+      flag: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def has_flag?(flag); end
+
+  sig {returns(::T.untyped)}
+  def head_size(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str); end
+
+  sig {returns(::T.untyped)}
+  def security_buffers(); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+
+  sig do
+    params(
+      flag: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def set_flag(flag); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.decode64(str); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.parse(str); end
+end
+
+class Net::NTLM::Message::Type0 < Net::NTLM::Message
+  sig {returns(::T.untyped)}
+  def sign(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign=(val); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(val); end
+end
+
+class Net::NTLM::Message::Type1 < Net::NTLM::Message
+  sig {returns(::T.untyped)}
+  def domain(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def domain=(val); end
+
+  sig {returns(::T.untyped)}
+  def flag(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def flag=(val); end
+
+  sig {returns(::T.untyped)}
+  def os_version(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def os_version=(val); end
+
+  sig {returns(::T.untyped)}
+  def sign(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign=(val); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(val); end
+
+  sig {returns(::T.untyped)}
+  def workstation(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def workstation=(val); end
+end
+
+class Net::NTLM::Message::Type2 < Net::NTLM::Message
+  sig {returns(::T.untyped)}
+  def challenge(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def challenge=(val); end
+
+  sig {returns(::T.untyped)}
+  def context(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def context=(val); end
+
+  sig {returns(::T.untyped)}
+  def flag(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def flag=(val); end
+
+  sig {returns(::T.untyped)}
+  def os_version(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def os_version=(val); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def response(arg, opt=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def sign(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign=(val); end
+
+  sig {returns(::T.untyped)}
+  def target_info(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def target_info=(val); end
+
+  sig {returns(::T.untyped)}
+  def target_name(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def target_name=(val); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(val); end
+end
+
+class Net::NTLM::Message::Type3 < Net::NTLM::Message
+  sig do
+    params(
+      server_challenge: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def blank_password?(server_challenge); end
+
+  sig {returns(::T.untyped)}
+  def domain(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def domain=(val); end
+
+  sig {returns(::T.untyped)}
+  def flag(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def flag=(val); end
+
+  sig {returns(::T.untyped)}
+  def lm_response(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def lm_response=(val); end
+
+  sig {returns(::T.untyped)}
+  def ntlm_response(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ntlm_response=(val); end
+
+  sig {returns(::T.untyped)}
+  def ntlm_version(); end
+
+  sig {returns(::T.untyped)}
+  def os_version(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def os_version=(val); end
+
+  sig do
+    params(
+      password: ::T.untyped,
+      server_challenge: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def password?(password, server_challenge); end
+
+  sig {returns(::T.untyped)}
+  def session_key(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def session_key=(val); end
+
+  sig {returns(::T.untyped)}
+  def sign(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign=(val); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(val); end
+
+  sig {returns(::T.untyped)}
+  def user(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def user=(val); end
+
+  sig {returns(::T.untyped)}
+  def workstation(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def workstation=(val); end
+
+  sig do
+    params(
+      arg: ::T.untyped,
+      opt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.create(arg, opt=T.unsafe(nil)); end
+end
+
+class Net::NTLM::NtlmError < StandardError
+end
+
+class Net::NTLM::SecurityBuffer < Net::NTLM::FieldSet
+  sig {returns(::T.untyped)}
+  def active(); end
+
+  sig do
+    params(
+      active: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def active=(active); end
+
+  sig {returns(::T.untyped)}
+  def allocated(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def allocated=(val); end
+
+  sig {returns(::T.untyped)}
+  def data_size(); end
+
+  sig do
+    params(
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opts=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def length(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def length=(val); end
+
+  sig {returns(::T.untyped)}
+  def offset(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def offset=(val); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+
+  sig {returns(::T.untyped)}
+  def value(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def value=(val); end
+end
+
+class Net::NTLM::String < Net::NTLM::Field
+  sig do
+    params(
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(opts); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(str, offset=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def serialize(); end
+
+  sig do
+    params(
+      val: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def value=(val); end
+end
+
+class Net::NTLM::TargetInfo
+  MSV_AV_CHANNEL_BINDINGS = ::T.let(nil, ::T.untyped)
+  MSV_AV_DNS_COMPUTER_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_DNS_DOMAIN_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_DNS_TREE_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_EOL = ::T.let(nil, ::T.untyped)
+  MSV_AV_FLAGS = ::T.let(nil, ::T.untyped)
+  MSV_AV_NB_COMPUTER_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_NB_DOMAIN_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_SINGLE_HOST = ::T.let(nil, ::T.untyped)
+  MSV_AV_TARGET_NAME = ::T.let(nil, ::T.untyped)
+  MSV_AV_TIMESTAMP = ::T.let(nil, ::T.untyped)
+  VALID_PAIR_ID = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def av_pairs(); end
+
+  sig do
+    params(
+      av_pair_sequence: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(av_pair_sequence); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+end
+
 module Net::NetPrivate
 end
 
@@ -8224,6 +10895,2294 @@ end
 # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html), is
 # raised if a chunk of the response cannot be read within the read\_timeout.
 class Net::ReadTimeout < Timeout::Error
+end
+
+module Net::SFTP
+  sig do
+    params(
+      host: ::T.untyped,
+      user: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.start(host, user, options=T.unsafe(nil), &block); end
+end
+
+module Net::SFTP::Constants
+end
+
+module Net::SFTP::Constants::ACE
+end
+
+module Net::SFTP::Constants::ACE::Flag
+  DIRECTORY_INHERIT = ::T.let(nil, ::T.untyped)
+  FAILED_ACCESS = ::T.let(nil, ::T.untyped)
+  FILE_INHERIT = ::T.let(nil, ::T.untyped)
+  IDENTIFIER_GROUP = ::T.let(nil, ::T.untyped)
+  INHERIT_ONLY = ::T.let(nil, ::T.untyped)
+  NO_PROPAGATE_INHERIT = ::T.let(nil, ::T.untyped)
+  SUCCESSFUL_ACCESS = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::ACE::Mask
+  ADD_FILE = ::T.let(nil, ::T.untyped)
+  ADD_SUBDIRECTORY = ::T.let(nil, ::T.untyped)
+  APPEND_DATA = ::T.let(nil, ::T.untyped)
+  DELETE = ::T.let(nil, ::T.untyped)
+  DELETE_CHILD = ::T.let(nil, ::T.untyped)
+  EXECUTE = ::T.let(nil, ::T.untyped)
+  LIST_DIRECTORY = ::T.let(nil, ::T.untyped)
+  READ_ACL = ::T.let(nil, ::T.untyped)
+  READ_ATTRIBUTES = ::T.let(nil, ::T.untyped)
+  READ_DATA = ::T.let(nil, ::T.untyped)
+  READ_NAMED_ATTRS = ::T.let(nil, ::T.untyped)
+  SYNCHRONIZE = ::T.let(nil, ::T.untyped)
+  WRITE_ACL = ::T.let(nil, ::T.untyped)
+  WRITE_ATTRIBUTES = ::T.let(nil, ::T.untyped)
+  WRITE_DATA = ::T.let(nil, ::T.untyped)
+  WRITE_NAMED_ATTRS = ::T.let(nil, ::T.untyped)
+  WRITE_OWNER = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::ACE::Type
+  ACCESS_ALLOWED = ::T.let(nil, ::T.untyped)
+  ACCESS_DENIED = ::T.let(nil, ::T.untyped)
+  SYSTEM_ALARM = ::T.let(nil, ::T.untyped)
+  SYSTEM_AUDIT = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::LockTypes
+  ADVISORY = ::T.let(nil, ::T.untyped)
+  DELETE = ::T.let(nil, ::T.untyped)
+  READ = ::T.let(nil, ::T.untyped)
+  WRITE = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::OpenFlags
+end
+
+module Net::SFTP::Constants::OpenFlags::FV1
+  APPEND = ::T.let(nil, ::T.untyped)
+  CREAT = ::T.let(nil, ::T.untyped)
+  EXCL = ::T.let(nil, ::T.untyped)
+  READ = ::T.let(nil, ::T.untyped)
+  TRUNC = ::T.let(nil, ::T.untyped)
+  WRITE = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::OpenFlags::FV5
+  APPEND_DATA = ::T.let(nil, ::T.untyped)
+  APPEND_DATA_ATOMIC = ::T.let(nil, ::T.untyped)
+  CREATE_NEW = ::T.let(nil, ::T.untyped)
+  CREATE_TRUNCATE = ::T.let(nil, ::T.untyped)
+  DELETE_LOCK = ::T.let(nil, ::T.untyped)
+  OPEN_EXISTING = ::T.let(nil, ::T.untyped)
+  OPEN_OR_CREATE = ::T.let(nil, ::T.untyped)
+  READ_LOCK = ::T.let(nil, ::T.untyped)
+  TEXT_MODE = ::T.let(nil, ::T.untyped)
+  TRUNCATE_EXISTING = ::T.let(nil, ::T.untyped)
+  WRITE_LOCK = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::OpenFlags::FV6
+  ACCESS_AUDIT_ALARM_INFO = ::T.let(nil, ::T.untyped)
+  ACCESS_BACKUP = ::T.let(nil, ::T.untyped)
+  ADVISORY_LOCK = ::T.let(nil, ::T.untyped)
+  BACKUP_STREAM = ::T.let(nil, ::T.untyped)
+  DELETE_ON_CLOSE = ::T.let(nil, ::T.untyped)
+  NOFOLLOW = ::T.let(nil, ::T.untyped)
+  OVERRIDE_OWNER = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::PacketTypes
+  FXP_ATTRS = ::T.let(nil, ::T.untyped)
+  FXP_BLOCK = ::T.let(nil, ::T.untyped)
+  FXP_CLOSE = ::T.let(nil, ::T.untyped)
+  FXP_DATA = ::T.let(nil, ::T.untyped)
+  FXP_EXTENDED = ::T.let(nil, ::T.untyped)
+  FXP_EXTENDED_REPLY = ::T.let(nil, ::T.untyped)
+  FXP_FSETSTAT = ::T.let(nil, ::T.untyped)
+  FXP_FSTAT = ::T.let(nil, ::T.untyped)
+  FXP_HANDLE = ::T.let(nil, ::T.untyped)
+  FXP_INIT = ::T.let(nil, ::T.untyped)
+  FXP_LINK = ::T.let(nil, ::T.untyped)
+  FXP_LSTAT = ::T.let(nil, ::T.untyped)
+  FXP_MKDIR = ::T.let(nil, ::T.untyped)
+  FXP_NAME = ::T.let(nil, ::T.untyped)
+  FXP_OPEN = ::T.let(nil, ::T.untyped)
+  FXP_OPENDIR = ::T.let(nil, ::T.untyped)
+  FXP_READ = ::T.let(nil, ::T.untyped)
+  FXP_READDIR = ::T.let(nil, ::T.untyped)
+  FXP_READLINK = ::T.let(nil, ::T.untyped)
+  FXP_REALPATH = ::T.let(nil, ::T.untyped)
+  FXP_REMOVE = ::T.let(nil, ::T.untyped)
+  FXP_RENAME = ::T.let(nil, ::T.untyped)
+  FXP_RMDIR = ::T.let(nil, ::T.untyped)
+  FXP_SETSTAT = ::T.let(nil, ::T.untyped)
+  FXP_STAT = ::T.let(nil, ::T.untyped)
+  FXP_STATUS = ::T.let(nil, ::T.untyped)
+  FXP_SYMLINK = ::T.let(nil, ::T.untyped)
+  FXP_UNBLOCK = ::T.let(nil, ::T.untyped)
+  FXP_VERSION = ::T.let(nil, ::T.untyped)
+  FXP_WRITE = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::RenameFlags
+  ATOMIC = ::T.let(nil, ::T.untyped)
+  NATIVE = ::T.let(nil, ::T.untyped)
+  OVERWRITE = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SFTP::Constants::StatusCodes
+  FX_BAD_MESSAGE = ::T.let(nil, ::T.untyped)
+  FX_CONNECTION_LOST = ::T.let(nil, ::T.untyped)
+  FX_DIR_NOT_EMPTY = ::T.let(nil, ::T.untyped)
+  FX_EOF = ::T.let(nil, ::T.untyped)
+  FX_FAILURE = ::T.let(nil, ::T.untyped)
+  FX_FILE_ALREADY_EXISTS = ::T.let(nil, ::T.untyped)
+  FX_INVALID_FILENAME = ::T.let(nil, ::T.untyped)
+  FX_INVALID_HANDLE = ::T.let(nil, ::T.untyped)
+  FX_LINK_LOOP = ::T.let(nil, ::T.untyped)
+  FX_LOCK_CONFlICT = ::T.let(nil, ::T.untyped)
+  FX_NOT_A_DIRECTORY = ::T.let(nil, ::T.untyped)
+  FX_NO_CONNECTION = ::T.let(nil, ::T.untyped)
+  FX_NO_MEDIA = ::T.let(nil, ::T.untyped)
+  FX_NO_SPACE_ON_FILESYSTEM = ::T.let(nil, ::T.untyped)
+  FX_NO_SUCH_FILE = ::T.let(nil, ::T.untyped)
+  FX_NO_SUCH_PATH = ::T.let(nil, ::T.untyped)
+  FX_OK = ::T.let(nil, ::T.untyped)
+  FX_OP_UNSUPPORTED = ::T.let(nil, ::T.untyped)
+  FX_PERMISSION_DENIED = ::T.let(nil, ::T.untyped)
+  FX_QUOTA_EXCEEDED = ::T.let(nil, ::T.untyped)
+  FX_UNKNOWN_PRINCIPLE = ::T.let(nil, ::T.untyped)
+  FX_WRITE_PROTECT = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SFTP::Exception < RuntimeError
+end
+
+module Net::SFTP::Operations
+end
+
+class Net::SFTP::Operations::Dir
+  sig do
+    params(
+      path: ::T.untyped,
+      pattern: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](path, pattern); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def entries(path); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def foreach(path); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      pattern: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def glob(path, pattern, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      sftp: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(sftp); end
+
+  sig {returns(::T.untyped)}
+  def sftp(); end
+end
+
+class Net::SFTP::Operations::Download
+  include ::Net::SSH::Loggable
+  DEFAULT_READ_SIZE = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(name, value); end
+
+  sig {returns(::T.untyped)}
+  def abort!(); end
+
+  sig {returns(::T.untyped)}
+  def active?(); end
+
+  sig do
+    params(
+      sftp: ::T.untyped,
+      local: ::T.untyped,
+      remote: ::T.untyped,
+      options: ::T.untyped,
+      progress: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(sftp, local, remote, options=T.unsafe(nil), &progress); end
+
+  sig {returns(::T.untyped)}
+  def local(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def properties(); end
+
+  sig {returns(::T.untyped)}
+  def recursive?(); end
+
+  sig {returns(::T.untyped)}
+  def remote(); end
+
+  sig {returns(::T.untyped)}
+  def sftp(); end
+
+  sig {returns(::T.untyped)}
+  def wait(); end
+end
+
+class Net::SFTP::Operations::Download::Entry < Struct
+  sig {returns(::T.untyped)}
+  def directory(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def directory=(_); end
+
+  sig {returns(::T.untyped)}
+  def handle(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def handle=(_); end
+
+  sig {returns(::T.untyped)}
+  def local(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def local=(_); end
+
+  sig {returns(::T.untyped)}
+  def offset(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def offset=(_); end
+
+  sig {returns(::T.untyped)}
+  def remote(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remote=(_); end
+
+  sig {returns(::T.untyped)}
+  def sink(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sink=(_); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def size=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.[](*_); end
+
+  sig {returns(::T.untyped)}
+  def self.members(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.new(*_); end
+end
+
+class Net::SFTP::Operations::File
+  sig {returns(::T.untyped)}
+  def close(); end
+
+  sig {returns(::T.untyped)}
+  def eof?(); end
+
+  sig do
+    params(
+      sep_string: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def gets(sep_string=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def handle(); end
+
+  sig do
+    params(
+      sftp: ::T.untyped,
+      handle: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(sftp, handle); end
+
+  sig {returns(::T.untyped)}
+  def pos(); end
+
+  sig do
+    params(
+      offset: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def pos=(offset); end
+
+  sig do
+    params(
+      items: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def print(*items); end
+
+  sig do
+    params(
+      items: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def puts(*items); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read(n=T.unsafe(nil)); end
+
+  sig do
+    params(
+      sep_string: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readline(sep_string=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def sftp(); end
+
+  sig {returns(::T.untyped)}
+  def stat(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write(data); end
+end
+
+class Net::SFTP::Operations::FileFactory
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def directory?(path); end
+
+  sig do
+    params(
+      sftp: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(sftp); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      flags: ::T.untyped,
+      mode: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open(name, flags=T.unsafe(nil), mode=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def sftp(); end
+end
+
+class Net::SFTP::Operations::Upload
+  include ::Net::SSH::Loggable
+  DEFAULT_READ_SIZE = ::T.let(nil, ::T.untyped)
+  RECURSIVE_READERS = ::T.let(nil, ::T.untyped)
+  SINGLE_FILE_READERS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(name, value); end
+
+  sig {returns(::T.untyped)}
+  def abort!(); end
+
+  sig {returns(::T.untyped)}
+  def active?(); end
+
+  sig do
+    params(
+      sftp: ::T.untyped,
+      local: ::T.untyped,
+      remote: ::T.untyped,
+      options: ::T.untyped,
+      progress: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(sftp, local, remote, options=T.unsafe(nil), &progress); end
+
+  sig {returns(::T.untyped)}
+  def local(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def properties(); end
+
+  sig {returns(::T.untyped)}
+  def recursive?(); end
+
+  sig {returns(::T.untyped)}
+  def remote(); end
+
+  sig {returns(::T.untyped)}
+  def sftp(); end
+
+  sig {returns(::T.untyped)}
+  def wait(); end
+end
+
+class Net::SFTP::Operations::Upload::LiveFile < Struct
+  sig {returns(::T.untyped)}
+  def handle(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def handle=(_); end
+
+  sig {returns(::T.untyped)}
+  def io(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def io=(_); end
+
+  sig {returns(::T.untyped)}
+  def local(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def local=(_); end
+
+  sig {returns(::T.untyped)}
+  def remote(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remote=(_); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def size=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.[](*_); end
+
+  sig {returns(::T.untyped)}
+  def self.members(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.new(*_); end
+end
+
+class Net::SFTP::Packet < Net::SSH::Buffer
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(data); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+end
+
+module Net::SFTP::Protocol
+  sig do
+    params(
+      session: ::T.untyped,
+      version: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load(session, version); end
+end
+
+class Net::SFTP::Protocol::Base
+  include ::Net::SFTP::Constants::PacketTypes
+  include ::Net::SFTP::Constants
+  include ::Net::SSH::Loggable
+  sig do
+    params(
+      session: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(packet); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+end
+
+module Net::SFTP::Protocol::V01
+end
+
+class Net::SFTP::Protocol::V01::Attributes
+  F_ACMODTIME = ::T.let(nil, ::T.untyped)
+  F_EXTENDED = ::T.let(nil, ::T.untyped)
+  F_PERMISSIONS = ::T.let(nil, ::T.untyped)
+  F_SIZE = ::T.let(nil, ::T.untyped)
+  F_UIDGID = ::T.let(nil, ::T.untyped)
+  T_BLOCK_DEVICE = ::T.let(nil, ::T.untyped)
+  T_CHAR_DEVICE = ::T.let(nil, ::T.untyped)
+  T_DIRECTORY = ::T.let(nil, ::T.untyped)
+  T_FIFO = ::T.let(nil, ::T.untyped)
+  T_REGULAR = ::T.let(nil, ::T.untyped)
+  T_SOCKET = ::T.let(nil, ::T.untyped)
+  T_SPECIAL = ::T.let(nil, ::T.untyped)
+  T_SYMLINK = ::T.let(nil, ::T.untyped)
+  T_UNKNOWN = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def atime(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def atime=(value); end
+
+  sig {returns(::T.untyped)}
+  def attributes(); end
+
+  sig {returns(::T.untyped)}
+  def directory?(); end
+
+  sig {returns(::T.untyped)}
+  def extended(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def extended=(value); end
+
+  sig {returns(::T.untyped)}
+  def file?(); end
+
+  sig {returns(::T.untyped)}
+  def gid(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def gid=(value); end
+
+  sig {returns(::T.untyped)}
+  def group(); end
+
+  sig do
+    params(
+      attributes: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(attributes=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def mtime(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mtime=(value); end
+
+  sig {returns(::T.untyped)}
+  def owner(); end
+
+  sig {returns(::T.untyped)}
+  def permissions(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def permissions=(value); end
+
+  sig {returns(::T.untyped)}
+  def size(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def size=(value); end
+
+  sig {returns(::T.untyped)}
+  def symbolic_type(); end
+
+  sig {returns(::T.untyped)}
+  def symlink?(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig {returns(::T.untyped)}
+  def uid(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def uid=(value); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.attr_accessor(name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.attr_writer(name); end
+
+  sig {returns(::T.untyped)}
+  def self.elements(); end
+
+  sig do
+    params(
+      buffer: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.from_buffer(buffer); end
+end
+
+class Net::SFTP::Protocol::V01::Base < Net::SFTP::Protocol::Base
+  include ::Net::SFTP::Constants::OpenFlags
+  sig {returns(::T.untyped)}
+  def attribute_factory(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      mask: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def block(handle, offset, length, mask); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def close(handle); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      attrs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fsetstat(handle, attrs); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fstat(handle, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def link(*args); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def lstat(path, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mkdir(path, attrs); end
+
+  sig {returns(::T.untyped)}
+  def name_factory(); end
+
+  sig do
+    params(
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def normalize_open_flags(flags); end
+
+  sig do
+    params(
+      operation: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def not_implemented!(operation); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open(path, flags, options); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def opendir(path); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_attrs_packet(packet); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_data_packet(packet); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_handle_packet(packet); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_name_packet(packet); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_status_packet(packet); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read(handle, offset, length); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readdir(handle); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readlink(path); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def realpath(path); end
+
+  sig do
+    params(
+      filename: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remove(filename); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      new_name: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rename(name, new_name, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rmdir(path); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def setstat(path, attrs); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def stat(path, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      target: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def symlink(path, target); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unblock(handle, offset, length); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write(handle, offset, data); end
+end
+
+class Net::SFTP::Protocol::V01::Name
+  sig {returns(::T.untyped)}
+  def attributes(); end
+
+  sig {returns(::T.untyped)}
+  def directory?(); end
+
+  sig {returns(::T.untyped)}
+  def file?(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      longname: ::T.untyped,
+      attributes: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(name, longname, attributes); end
+
+  sig {returns(::T.untyped)}
+  def longname(); end
+
+  sig {returns(::T.untyped)}
+  def name(); end
+
+  sig {returns(::T.untyped)}
+  def symlink?(); end
+end
+
+module Net::SFTP::Protocol::V02
+end
+
+class Net::SFTP::Protocol::V02::Base < Net::SFTP::Protocol::V01::Base
+  sig do
+    params(
+      name: ::T.untyped,
+      new_name: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rename(name, new_name, flags=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+module Net::SFTP::Protocol::V03
+end
+
+class Net::SFTP::Protocol::V03::Base < Net::SFTP::Protocol::V02::Base
+  sig do
+    params(
+      path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readlink(path); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      target: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def symlink(path, target); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+module Net::SFTP::Protocol::V04
+end
+
+class Net::SFTP::Protocol::V04::Attributes < Net::SFTP::Protocol::V01::Attributes
+  F_ACCESSTIME = ::T.let(nil, ::T.untyped)
+  F_ACL = ::T.let(nil, ::T.untyped)
+  F_CREATETIME = ::T.let(nil, ::T.untyped)
+  F_MODIFYTIME = ::T.let(nil, ::T.untyped)
+  F_OWNERGROUP = ::T.let(nil, ::T.untyped)
+  F_SUBSECOND_TIMES = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def acl(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def acl=(value); end
+
+  sig {returns(::T.untyped)}
+  def atime_nseconds(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def atime_nseconds=(value); end
+
+  sig {returns(::T.untyped)}
+  def createtime(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def createtime=(value); end
+
+  sig {returns(::T.untyped)}
+  def createtime_nseconds(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def createtime_nseconds=(value); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def group=(value); end
+
+  sig do
+    params(
+      attributes: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(attributes=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def mtime_nseconds(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mtime_nseconds=(value); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def owner=(value); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(value); end
+
+  sig {returns(::T.untyped)}
+  def self.elements(); end
+end
+
+class Net::SFTP::Protocol::V04::Attributes::ACL < Struct
+  sig {returns(::T.untyped)}
+  def flag(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def flag=(_); end
+
+  sig {returns(::T.untyped)}
+  def mask(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mask=(_); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(_); end
+
+  sig {returns(::T.untyped)}
+  def who(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def who=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.[](*_); end
+
+  sig {returns(::T.untyped)}
+  def self.members(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.new(*_); end
+end
+
+class Net::SFTP::Protocol::V04::Base < Net::SFTP::Protocol::V03::Base
+  DEFAULT_FLAGS = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def attribute_factory(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fstat(handle, flags=T.unsafe(nil)); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def lstat(path, flags=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def name_factory(); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_name_packet(packet); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def stat(path, flags=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+class Net::SFTP::Protocol::V04::Name
+  sig {returns(::T.untyped)}
+  def attributes(); end
+
+  sig {returns(::T.untyped)}
+  def directory?(); end
+
+  sig {returns(::T.untyped)}
+  def file?(); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      attributes: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(name, attributes); end
+
+  sig {returns(::T.untyped)}
+  def longname(); end
+
+  sig {returns(::T.untyped)}
+  def name(); end
+
+  sig {returns(::T.untyped)}
+  def symlink?(); end
+end
+
+module Net::SFTP::Protocol::V05
+end
+
+class Net::SFTP::Protocol::V05::Base < Net::SFTP::Protocol::V04::Base
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open(path, flags, options); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      new_name: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rename(name, new_name, flags=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+module Net::SFTP::Protocol::V06
+end
+
+class Net::SFTP::Protocol::V06::Attributes < Net::SFTP::Protocol::V04::Attributes
+  F_ALLOCATION_SIZE = ::T.let(nil, ::T.untyped)
+  F_BITS = ::T.let(nil, ::T.untyped)
+  F_CTIME = ::T.let(nil, ::T.untyped)
+  F_LINK_COUNT = ::T.let(nil, ::T.untyped)
+  F_MIME_TYPE = ::T.let(nil, ::T.untyped)
+  F_TEXT_HINT = ::T.let(nil, ::T.untyped)
+  F_UNTRANSLATED_NAME = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def allocation_size(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def allocation_size=(value); end
+
+  sig {returns(::T.untyped)}
+  def attrib_bits(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def attrib_bits=(value); end
+
+  sig {returns(::T.untyped)}
+  def attrib_bits_valid(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def attrib_bits_valid=(value); end
+
+  sig {returns(::T.untyped)}
+  def ctime(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ctime=(value); end
+
+  sig {returns(::T.untyped)}
+  def ctime_nseconds(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ctime_nseconds=(value); end
+
+  sig {returns(::T.untyped)}
+  def link_count(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def link_count=(value); end
+
+  sig {returns(::T.untyped)}
+  def mime_type(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mime_type=(value); end
+
+  sig {returns(::T.untyped)}
+  def text_hint(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def text_hint=(value); end
+
+  sig {returns(::T.untyped)}
+  def untranslated_name(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def untranslated_name=(value); end
+
+  sig {returns(::T.untyped)}
+  def self.elements(); end
+end
+
+class Net::SFTP::Protocol::V06::Base < Net::SFTP::Protocol::V05::Base
+  sig {returns(::T.untyped)}
+  def attribute_factory(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      mask: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def block(handle, offset, length, mask); end
+
+  sig do
+    params(
+      new_link_path: ::T.untyped,
+      existing_path: ::T.untyped,
+      symlink: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def link(new_link_path, existing_path, symlink); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      target: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def symlink(path, target); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unblock(handle, offset, length); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+class Net::SFTP::Request
+  include ::Net::SFTP::Constants::PacketTypes
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](key); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(key, value); end
+
+  sig {returns(::T.untyped)}
+  def callback(); end
+
+  sig {returns(::T.untyped)}
+  def id(); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+      type: ::T.untyped,
+      id: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session, type, id, &callback); end
+
+  sig {returns(::T.untyped)}
+  def pending?(); end
+
+  sig {returns(::T.untyped)}
+  def properties(); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def respond_to(packet); end
+
+  sig {returns(::T.untyped)}
+  def response(); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig {returns(::T.untyped)}
+  def wait(); end
+end
+
+class Net::SFTP::Response
+  include ::Net::SFTP::Constants::StatusCodes
+  MAP = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](key); end
+
+  sig {returns(::T.untyped)}
+  def code(); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig {returns(::T.untyped)}
+  def eof?(); end
+
+  sig do
+    params(
+      request: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(request, data=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def message(); end
+
+  sig {returns(::T.untyped)}
+  def ok?(); end
+
+  sig {returns(::T.untyped)}
+  def request(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig {returns(::T.untyped)}
+  def to_str(); end
+end
+
+class Net::SFTP::Session
+  include ::Net::SFTP::Constants::PacketTypes
+  include ::Net::SSH::Loggable
+  HIGHEST_PROTOCOL_VERSION_SUPPORTED = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      mask: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def block(handle, offset, length, mask, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      mask: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def block!(handle, offset, length, mask, &callback); end
+
+  sig {returns(::T.untyped)}
+  def channel(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def close(handle, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def close!(handle, &callback); end
+
+  sig {returns(::T.untyped)}
+  def close_channel(); end
+
+  sig {returns(::T.untyped)}
+  def closed?(); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def connect(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def connect!(&block); end
+
+  sig {returns(::T.untyped)}
+  def dir(); end
+
+  sig do
+    params(
+      remote: ::T.untyped,
+      local: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def download(remote, local, options=T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      remote: ::T.untyped,
+      local: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def download!(remote, local=T.unsafe(nil), options=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def file(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fsetstat(handle, attrs, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fsetstat!(handle, attrs, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fstat(handle, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fstat!(handle, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session, &block); end
+
+  sig do
+    params(
+      new_link_path: ::T.untyped,
+      existing_path: ::T.untyped,
+      symlink: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def link(new_link_path, existing_path, symlink=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      new_link_path: ::T.untyped,
+      existing_path: ::T.untyped,
+      symlink: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def link!(new_link_path, existing_path, symlink=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def loop(&block); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def lstat(path, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def lstat!(path, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mkdir(path, attrs=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def mkdir!(path, attrs=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      options: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open(path, flags=T.unsafe(nil), options=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      options: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open!(path, flags=T.unsafe(nil), options=T.unsafe(nil), &callback); end
+
+  sig {returns(::T.untyped)}
+  def open?(); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def opendir(path, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def opendir!(path, &callback); end
+
+  sig {returns(::T.untyped)}
+  def opening?(); end
+
+  sig {returns(::T.untyped)}
+  def pending_requests(); end
+
+  sig {returns(::T.untyped)}
+  def protocol(); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read(handle, offset, length, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read!(handle, offset, length, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readdir(handle, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readdir!(handle, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readlink(path, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def readlink!(path, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def realpath(path, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def realpath!(path, &callback); end
+
+  sig do
+    params(
+      filename: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remove(filename, &callback); end
+
+  sig do
+    params(
+      filename: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remove!(filename, &callback); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      new_name: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rename(name, new_name, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      new_name: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rename!(name, new_name, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rmdir(path, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rmdir!(path, &callback); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_packet(type, *args); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def setstat(path, attrs, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      attrs: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def setstat!(path, attrs, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def stat(path, flags=T.unsafe(nil), &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      flags: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def stat!(path, flags=T.unsafe(nil), &callback); end
+
+  sig {returns(::T.untyped)}
+  def state(); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      target: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def symlink(path, target, &callback); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      target: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def symlink!(path, target, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unblock(handle, offset, length, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      length: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def unblock!(handle, offset, length, &callback); end
+
+  sig do
+    params(
+      local: ::T.untyped,
+      remote: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def upload(local, remote=T.unsafe(nil), options=T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      local: ::T.untyped,
+      remote: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def upload!(local, remote=T.unsafe(nil), options=T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      data: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write(handle, offset, data, &callback); end
+
+  sig do
+    params(
+      handle: ::T.untyped,
+      offset: ::T.untyped,
+      data: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write!(handle, offset, data, &callback); end
+end
+
+class Net::SFTP::StatusException < Net::SFTP::Exception
+  sig {returns(::T.untyped)}
+  def code(); end
+
+  sig {returns(::T.untyped)}
+  def description(); end
+
+  sig do
+    params(
+      response: ::T.untyped,
+      text: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(response, text=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def message(); end
+
+  sig {returns(::T.untyped)}
+  def response(); end
+
+  sig {returns(::T.untyped)}
+  def text(); end
 end
 
 # ## What is This Library?
@@ -9174,6 +14133,3519 @@ end
 # Command is not supported on server.
 class Net::SMTPUnsupportedCommand < Net::ProtocolError
   include ::Net::SMTPError
+end
+
+module Net::SSH
+  VALID_OPTIONS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.assign_defaults(options); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      use_ssh_config: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.configuration_for(host, use_ssh_config); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      user: ::T.untyped,
+      options: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.start(host, user=T.unsafe(nil), options=T.unsafe(nil), &block); end
+end
+
+module Net::SSH::Authentication
+end
+
+class Net::SSH::Authentication::Agent
+  include ::Net::SSH::Loggable
+  SSH2_AGENT_ADD_IDENTITY = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_ADD_ID_CONSTRAINED = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_FAILURE = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_IDENTITIES_ANSWER = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_REMOVE_ALL_IDENTITIES = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_REMOVE_IDENTITY = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_REQUEST_IDENTITIES = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_REQUEST_VERSION = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_SIGN_REQUEST = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_SIGN_RESPONSE = ::T.let(nil, ::T.untyped)
+  SSH2_AGENT_VERSION_RESPONSE = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_CONSTRAIN_CONFIRM = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_CONSTRAIN_LIFETIME = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_FAILURE = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_REQUEST_RSA_IDENTITIES = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_RSA_IDENTITIES_ANSWER1 = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_RSA_IDENTITIES_ANSWER2 = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_RSA_SHA2_256 = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_RSA_SHA2_512 = ::T.let(nil, ::T.untyped)
+  SSH_AGENT_SUCCESS = ::T.let(nil, ::T.untyped)
+  SSH_COM_AGENT2_FAILURE = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      priv_key: ::T.untyped,
+      comment: ::T.untyped,
+      lifetime: ::T.untyped,
+      confirm: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def add_identity(priv_key, comment, lifetime: T.unsafe(nil), confirm: T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def close(); end
+
+  sig do
+    params(
+      agent_socket_factory: ::T.untyped,
+      identity_agent: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def connect!(agent_socket_factory=T.unsafe(nil), identity_agent=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def identities(); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(logger=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def negotiate!(); end
+
+  sig {returns(::T.untyped)}
+  def remove_all_identities(); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remove_identity(key); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+      data: ::T.untyped,
+      flags: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign(key, data, flags=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def socket(); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+      agent_socket_factory: ::T.untyped,
+      identity_agent: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.connect(logger=T.unsafe(nil), agent_socket_factory=T.unsafe(nil), identity_agent=T.unsafe(nil)); end
+end
+
+module Net::SSH::Authentication::Agent::Comment
+  sig {returns(::T.untyped)}
+  def comment(); end
+
+  sig do
+    params(
+      comment: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def comment=(comment); end
+end
+
+class Net::SSH::Authentication::AgentError < Net::SSH::Exception
+end
+
+class Net::SSH::Authentication::AgentNotAvailable < Net::SSH::Authentication::AgentError
+end
+
+class Net::SSH::Authentication::Certificate
+  sig {returns(::T.untyped)}
+  def critical_options(); end
+
+  sig do
+    params(
+      critical_options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def critical_options=(critical_options); end
+
+  sig {returns(::T.untyped)}
+  def extensions(); end
+
+  sig do
+    params(
+      extensions: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def extensions=(extensions); end
+
+  sig {returns(::T.untyped)}
+  def fingerprint(); end
+
+  sig {returns(::T.untyped)}
+  def key(); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def key=(key); end
+
+  sig {returns(::T.untyped)}
+  def key_id(); end
+
+  sig do
+    params(
+      key_id: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def key_id=(key_id); end
+
+  sig {returns(::T.untyped)}
+  def nonce(); end
+
+  sig do
+    params(
+      nonce: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def nonce=(nonce); end
+
+  sig {returns(::T.untyped)}
+  def reserved(); end
+
+  sig do
+    params(
+      reserved: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def reserved=(reserved); end
+
+  sig {returns(::T.untyped)}
+  def serial(); end
+
+  sig do
+    params(
+      serial: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def serial=(serial); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+      sign_nonce: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign(key, sign_nonce=T.unsafe(nil)); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+      sign_nonce: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign!(key, sign_nonce=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def signature(); end
+
+  sig do
+    params(
+      signature: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def signature=(signature); end
+
+  sig {returns(::T.untyped)}
+  def signature_key(); end
+
+  sig do
+    params(
+      signature_key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def signature_key=(signature_key); end
+
+  sig {returns(::T.untyped)}
+  def signature_valid?(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ssh_do_sign(data); end
+
+  sig do
+    params(
+      sig: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ssh_do_verify(sig, data); end
+
+  sig {returns(::T.untyped)}
+  def ssh_signature_type(); end
+
+  sig {returns(::T.untyped)}
+  def ssh_type(); end
+
+  sig {returns(::T.untyped)}
+  def to_blob(); end
+
+  sig {returns(::T.untyped)}
+  def to_pem(); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def type=(type); end
+
+  sig {returns(::T.untyped)}
+  def valid_after(); end
+
+  sig do
+    params(
+      valid_after: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def valid_after=(valid_after); end
+
+  sig {returns(::T.untyped)}
+  def valid_before(); end
+
+  sig do
+    params(
+      valid_before: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def valid_before=(valid_before); end
+
+  sig {returns(::T.untyped)}
+  def valid_principals(); end
+
+  sig do
+    params(
+      valid_principals: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def valid_principals=(valid_principals); end
+
+  sig do
+    params(
+      buffer: ::T.untyped,
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.read_certblob(buffer, type); end
+end
+
+module Net::SSH::Authentication::Constants
+  USERAUTH_BANNER = ::T.let(nil, ::T.untyped)
+  USERAUTH_FAILURE = ::T.let(nil, ::T.untyped)
+  USERAUTH_METHOD_RANGE = ::T.let(nil, ::T.untyped)
+  USERAUTH_PASSWD_CHANGEREQ = ::T.let(nil, ::T.untyped)
+  USERAUTH_PK_OK = ::T.let(nil, ::T.untyped)
+  USERAUTH_REQUEST = ::T.let(nil, ::T.untyped)
+  USERAUTH_SUCCESS = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::Authentication::DisallowedMethod < Net::SSH::Exception
+end
+
+module Net::SSH::Authentication::ED25519Loader
+  ERROR = ::T.let(nil, ::T.untyped)
+  LOADED = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def self.dependenciesRequiredForED25519(); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.raiseUnlessLoaded(message); end
+end
+
+class Net::SSH::Authentication::KeyManager
+  include ::Net::SSH::Loggable
+  sig do
+    params(
+      key_file: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def add(key_file); end
+
+  sig do
+    params(
+      key_data_: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def add_key_data(key_data_); end
+
+  sig {returns(::T.untyped)}
+  def agent(); end
+
+  sig {returns(::T.untyped)}
+  def clear!(); end
+
+  sig {returns(::T.untyped)}
+  def each_identity(); end
+
+  sig {returns(::T.untyped)}
+  def finish(); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(logger, options=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def key_data(); end
+
+  sig {returns(::T.untyped)}
+  def key_files(); end
+
+  sig {returns(::T.untyped)}
+  def known_identities(); end
+
+  sig {returns(::T.untyped)}
+  def no_keys?(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig do
+    params(
+      identity: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sign(identity, data); end
+
+  sig do
+    params(
+      use_agent: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def use_agent=(use_agent); end
+
+  sig {returns(::T.untyped)}
+  def use_agent?(); end
+end
+
+class Net::SSH::Authentication::KeyManagerError < Net::SSH::Exception
+end
+
+module Net::SSH::Authentication::Methods
+end
+
+class Net::SSH::Authentication::Methods::Abstract
+  include ::Net::SSH::Authentication::Constants
+  include ::Net::SSH::Loggable
+  sig do
+    params(
+      session: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session, options=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def key_manager(); end
+
+  sig do
+    params(
+      msg: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_message(msg); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+
+  sig {returns(::T.untyped)}
+  def session_id(); end
+
+  sig do
+    params(
+      username: ::T.untyped,
+      next_service: ::T.untyped,
+      auth_method: ::T.untyped,
+      others: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def userauth_request(username, next_service, auth_method, *others); end
+end
+
+class Net::SSH::Authentication::Methods::Hostbased < Net::SSH::Authentication::Methods::Abstract
+  sig do
+    params(
+      next_service: ::T.untyped,
+      username: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, username, password=T.unsafe(nil)); end
+end
+
+class Net::SSH::Authentication::Methods::KeyboardInteractive < Net::SSH::Authentication::Methods::Abstract
+  USERAUTH_INFO_REQUEST = ::T.let(nil, ::T.untyped)
+  USERAUTH_INFO_RESPONSE = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      next_service: ::T.untyped,
+      username: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, username, password=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def interactive?(); end
+end
+
+class Net::SSH::Authentication::Methods::None < Net::SSH::Authentication::Methods::Abstract
+  sig do
+    params(
+      next_service: ::T.untyped,
+      user: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, user=T.unsafe(nil), password=T.unsafe(nil)); end
+end
+
+class Net::SSH::Authentication::Methods::Password < Net::SSH::Authentication::Methods::Abstract
+  NUMBER_OF_PASSWORD_PROMPTS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      next_service: ::T.untyped,
+      username: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, username, password=T.unsafe(nil)); end
+end
+
+class Net::SSH::Authentication::Methods::Publickey < Net::SSH::Authentication::Methods::Abstract
+  sig do
+    params(
+      next_service: ::T.untyped,
+      username: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, username, password=T.unsafe(nil)); end
+end
+
+module Net::SSH::Authentication::PubKeyFingerprint
+  sig do
+    params(
+      algorithm: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fingerprint(algorithm=T.unsafe(nil)); end
+
+  sig do
+    params(
+      blob: ::T.untyped,
+      algorithm: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.fingerprint(blob, algorithm=T.unsafe(nil)); end
+end
+
+class Net::SSH::Authentication::Session
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Authentication::Constants
+  include ::Net::SSH::Loggable
+  sig {returns(::T.untyped)}
+  def allowed_auth_methods(); end
+
+  sig {returns(::T.untyped)}
+  def auth_methods(); end
+
+  sig do
+    params(
+      next_service: ::T.untyped,
+      username: ::T.untyped,
+      password: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def authenticate(next_service, username, password=T.unsafe(nil)); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def expect_message(type); end
+
+  sig do
+    params(
+      transport: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(transport, options=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def next_message(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def transport(); end
+end
+
+class Net::SSH::AuthenticationFailed < Net::SSH::Exception
+end
+
+class Net::SSH::Buffer
+  sig do
+    params(
+      buffer: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ==(buffer); end
+
+  sig do
+    params(
+      text: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def append(text); end
+
+  sig {returns(::T.untyped)}
+  def available(); end
+
+  sig {returns(::T.untyped)}
+  def clear!(); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def consume!(n=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def content(); end
+
+  sig {returns(::T.untyped)}
+  def empty?(); end
+
+  sig {returns(::T.untyped)}
+  def eof?(); end
+
+  sig do
+    params(
+      content: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(content=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def length(); end
+
+  sig {returns(::T.untyped)}
+  def position(); end
+
+  sig do
+    params(
+      position: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def position=(position); end
+
+  sig do
+    params(
+      count: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read(count=T.unsafe(nil)); end
+
+  sig do
+    params(
+      count: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read!(count=T.unsafe(nil)); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read_all(&block); end
+
+  sig {returns(::T.untyped)}
+  def read_bignum(); end
+
+  sig {returns(::T.untyped)}
+  def read_bool(); end
+
+  sig {returns(::T.untyped)}
+  def read_buffer(); end
+
+  sig {returns(::T.untyped)}
+  def read_byte(); end
+
+  sig {returns(::T.untyped)}
+  def read_int64(); end
+
+  sig {returns(::T.untyped)}
+  def read_key(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read_keyblob(type); end
+
+  sig {returns(::T.untyped)}
+  def read_long(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read_private_keyblob(type); end
+
+  sig {returns(::T.untyped)}
+  def read_string(); end
+
+  sig do
+    params(
+      pattern: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read_to(pattern); end
+
+  sig {returns(::T.untyped)}
+  def remainder_as_buffer(); end
+
+  sig {returns(::T.untyped)}
+  def reset!(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write(*data); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_bignum(*n); end
+
+  sig do
+    params(
+      b: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_bool(*b); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_byte(*n); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_int64(*n); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_key(*key); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_long(*n); end
+
+  sig do
+    params(
+      string: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_moved(string); end
+
+  sig do
+    params(
+      text: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_mstring(*text); end
+
+  sig do
+    params(
+      text: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def write_string(*text); end
+
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.from(*args); end
+end
+
+module Net::SSH::BufferedIo
+  include ::Net::SSH::Loggable
+  sig {returns(::T.untyped)}
+  def available(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def enqueue(data); end
+
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fill(n=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def pending_write?(); end
+
+  sig do
+    params(
+      length: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def read_available(length=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def read_buffer(); end
+
+  sig {returns(::T.untyped)}
+  def send_pending(); end
+
+  sig {returns(::T.untyped)}
+  def wait_for_pending_sends(); end
+
+  sig {returns(::T.untyped)}
+  def write_buffer(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.extended(object); end
+end
+
+class Net::SSH::ChannelOpenFailed < Net::SSH::Exception
+  sig {returns(::T.untyped)}
+  def code(); end
+
+  sig do
+    params(
+      code: ::T.untyped,
+      reason: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(code, reason); end
+
+  sig {returns(::T.untyped)}
+  def reason(); end
+end
+
+class Net::SSH::ChannelRequestFailed < Net::SSH::Exception
+end
+
+class Net::SSH::Config
+  sig {returns(::T.untyped)}
+  def self.default_auth_methods(); end
+
+  sig {returns(::T.untyped)}
+  def self.default_files(); end
+
+  sig {returns(::T.untyped)}
+  def self.expandable_default_files(); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      files: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.for(host, files=T.unsafe(nil)); end
+
+  sig do
+    params(
+      path: ::T.untyped,
+      host: ::T.untyped,
+      settings: ::T.untyped,
+      base_dir: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load(path, host, settings=T.unsafe(nil), base_dir=T.unsafe(nil)); end
+
+  sig do
+    params(
+      settings: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.translate(settings); end
+end
+
+module Net::SSH::Connection
+end
+
+class Net::SSH::Connection::Channel
+  include ::Net::SSH::Connection::Constants
+  include ::Net::SSH::Loggable
+  GOOD_LOCAL_MAXIUMUM_WINDOW_SIZE = ::T.let(nil, ::T.untyped)
+  LOCAL_WINDOW_SIZE_INCREMENT = ::T.let(nil, ::T.untyped)
+  VALID_PTY_OPTIONS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](name); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(name, value); end
+
+  sig {returns(::T.untyped)}
+  def active?(); end
+
+  sig {returns(::T.untyped)}
+  def close(); end
+
+  sig {returns(::T.untyped)}
+  def closing?(); end
+
+  sig {returns(::T.untyped)}
+  def connection(); end
+
+  sig {returns(::T.untyped)}
+  def do_close(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_data(data); end
+
+  sig {returns(::T.untyped)}
+  def do_eof(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_extended_data(type, data); end
+
+  sig {returns(::T.untyped)}
+  def do_failure(); end
+
+  sig do
+    params(
+      remote_id: ::T.untyped,
+      max_window: ::T.untyped,
+      max_packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_open_confirmation(remote_id, max_window, max_packet); end
+
+  sig do
+    params(
+      reason_code: ::T.untyped,
+      description: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_open_failed(reason_code, description); end
+
+  sig do
+    params(
+      request: ::T.untyped,
+      want_reply: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_request(request, want_reply, data); end
+
+  sig {returns(::T.untyped)}
+  def do_success(); end
+
+  sig do
+    params(
+      bytes: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def do_window_adjust(bytes); end
+
+  sig {returns(::T.untyped)}
+  def enqueue_pending_output(); end
+
+  sig do
+    params(
+      variable_name: ::T.untyped,
+      variable_value: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def env(variable_name, variable_value, &block); end
+
+  sig {returns(::T.untyped)}
+  def eof!(); end
+
+  sig {returns(::T.untyped)}
+  def eof?(); end
+
+  sig do
+    params(
+      command: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def exec(command, &block); end
+
+  sig do
+    params(
+      connection: ::T.untyped,
+      type: ::T.untyped,
+      local_id: ::T.untyped,
+      max_pkt_size: ::T.untyped,
+      max_win_size: ::T.untyped,
+      on_confirm_open: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(connection, type, local_id, max_pkt_size=T.unsafe(nil), max_win_size=T.unsafe(nil), &on_confirm_open); end
+
+  sig {returns(::T.untyped)}
+  def local_closed?(); end
+
+  sig {returns(::T.untyped)}
+  def local_id(); end
+
+  sig {returns(::T.untyped)}
+  def local_maximum_packet_size(); end
+
+  sig {returns(::T.untyped)}
+  def local_maximum_window_size(); end
+
+  sig {returns(::T.untyped)}
+  def local_window_size(); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_close(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_data(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_eof(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_extended_data(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_open_failed(&block); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_process(&block); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_request(type, &block); end
+
+  sig {returns(::T.untyped)}
+  def output(); end
+
+  sig {returns(::T.untyped)}
+  def pending_requests(); end
+
+  sig {returns(::T.untyped)}
+  def process(); end
+
+  sig {returns(::T.untyped)}
+  def properties(); end
+
+  sig {returns(::T.untyped)}
+  def remote_closed!(); end
+
+  sig {returns(::T.untyped)}
+  def remote_closed?(); end
+
+  sig {returns(::T.untyped)}
+  def remote_id(); end
+
+  sig {returns(::T.untyped)}
+  def remote_maximum_packet_size(); end
+
+  sig {returns(::T.untyped)}
+  def remote_maximum_window_size(); end
+
+  sig {returns(::T.untyped)}
+  def remote_window_size(); end
+
+  sig do
+    params(
+      opts: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def request_pty(opts=T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      request_name: ::T.untyped,
+      data: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_channel_request(request_name, *data, &callback); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_data(data); end
+
+  sig do
+    params(
+      subsystem: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def subsystem(subsystem, &block); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig {returns(::T.untyped)}
+  def wait(); end
+end
+
+module Net::SSH::Connection::Constants
+  CHANNEL_CLOSE = ::T.let(nil, ::T.untyped)
+  CHANNEL_DATA = ::T.let(nil, ::T.untyped)
+  CHANNEL_EOF = ::T.let(nil, ::T.untyped)
+  CHANNEL_EXTENDED_DATA = ::T.let(nil, ::T.untyped)
+  CHANNEL_FAILURE = ::T.let(nil, ::T.untyped)
+  CHANNEL_OPEN = ::T.let(nil, ::T.untyped)
+  CHANNEL_OPEN_CONFIRMATION = ::T.let(nil, ::T.untyped)
+  CHANNEL_OPEN_FAILURE = ::T.let(nil, ::T.untyped)
+  CHANNEL_REQUEST = ::T.let(nil, ::T.untyped)
+  CHANNEL_SUCCESS = ::T.let(nil, ::T.untyped)
+  CHANNEL_WINDOW_ADJUST = ::T.let(nil, ::T.untyped)
+  GLOBAL_REQUEST = ::T.let(nil, ::T.untyped)
+  REQUEST_FAILURE = ::T.let(nil, ::T.untyped)
+  REQUEST_SUCCESS = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::Connection::EventLoop
+  include ::Net::SSH::Loggable
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_preprocess(&block); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_select_and_postprocess(wait); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(logger=T.unsafe(nil)); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def process(wait=T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+      wait: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def process_only(session, wait=T.unsafe(nil)); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def register(session); end
+end
+
+class Net::SSH::Connection::Keepalive
+  include ::Net::SSH::Loggable
+  sig {returns(::T.untyped)}
+  def enabled?(); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session); end
+
+  sig {returns(::T.untyped)}
+  def interval(); end
+
+  sig {returns(::T.untyped)}
+  def keepalive_maxcount(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig do
+    params(
+      was_events: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_as_needed(was_events); end
+
+  sig {returns(::T.untyped)}
+  def should_send?(); end
+end
+
+class Net::SSH::Connection::Session
+  include ::Net::SSH::Connection::Constants
+  include ::Net::SSH::Loggable
+  DEFAULT_IO_SELECT_TIMEOUT = ::T.let(nil, ::T.untyped)
+  MAP = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](key); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def []=(key, value); end
+
+  sig do
+    params(
+      include_invisible: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def busy?(include_invisible=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def channel_open_handlers(); end
+
+  sig {returns(::T.untyped)}
+  def channels(); end
+
+  sig do
+    params(
+      channel: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def cleanup_channel(channel); end
+
+  sig {returns(::T.untyped)}
+  def close(); end
+
+  sig {returns(::T.untyped)}
+  def closed?(); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_do_calculate_rw_wait(wait); end
+
+  sig do
+    params(
+      readers: ::T.untyped,
+      writers: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_do_handle_events(readers, writers); end
+
+  sig do
+    params(
+      was_events: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_do_postprocess(was_events); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_preprocess(&block); end
+
+  sig do
+    params(
+      command: ::T.untyped,
+      status: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def exec(command, status: T.unsafe(nil), &block); end
+
+  sig do
+    params(
+      command: ::T.untyped,
+      status: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def exec!(command, status: T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def forward(); end
+
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig do
+    params(
+      transport: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(transport, options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      io: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def listen_to(io, &callback); end
+
+  sig {returns(::T.untyped)}
+  def listeners(); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def loop(wait=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def max_select_wait_time(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_global_request(type, &block); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def on_open_channel(type, &block); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      extra: ::T.untyped,
+      on_confirm: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open_channel(type=T.unsafe(nil), *extra, &on_confirm); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def pending_requests(); end
+
+  sig do
+    params(
+      readers: ::T.untyped,
+      writers: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def postprocess(readers, writers); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def preprocess(&block); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def process(wait=T.unsafe(nil), &block); end
+
+  sig {returns(::T.untyped)}
+  def properties(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      extra: ::T.untyped,
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_global_request(type, *extra, &callback); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_message(message); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def sftp(wait=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def shutdown!(); end
+
+  sig do
+    params(
+      io: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def stop_listening_to(io); end
+
+  sig {returns(::T.untyped)}
+  def transport(); end
+end
+
+class Net::SSH::Connection::Session::NilChannel
+  sig do
+    params(
+      session: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session); end
+
+  sig do
+    params(
+      sym: ::T.untyped,
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def method_missing(sym, *args); end
+end
+
+class Net::SSH::Connection::Session::StringWithExitstatus < String
+  sig {returns(::T.untyped)}
+  def exitstatus(); end
+
+  sig do
+    params(
+      str: ::T.untyped,
+      exitstatus: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(str, exitstatus); end
+end
+
+class Net::SSH::Connection::SingleSessionEventLoop < Net::SSH::Connection::EventLoop
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_preprocess(&block); end
+
+  sig do
+    params(
+      wait: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ev_select_and_postprocess(wait); end
+end
+
+module Net::SSH::Connection::Term
+  CS7 = ::T.let(nil, ::T.untyped)
+  CS8 = ::T.let(nil, ::T.untyped)
+  ECHO = ::T.let(nil, ::T.untyped)
+  ECHOCTL = ::T.let(nil, ::T.untyped)
+  ECHOE = ::T.let(nil, ::T.untyped)
+  ECHOK = ::T.let(nil, ::T.untyped)
+  ECHOKE = ::T.let(nil, ::T.untyped)
+  ECHONL = ::T.let(nil, ::T.untyped)
+  ICANON = ::T.let(nil, ::T.untyped)
+  ICRNL = ::T.let(nil, ::T.untyped)
+  IEXTEN = ::T.let(nil, ::T.untyped)
+  IGNCR = ::T.let(nil, ::T.untyped)
+  IGNPAR = ::T.let(nil, ::T.untyped)
+  IMAXBEL = ::T.let(nil, ::T.untyped)
+  INCLR = ::T.let(nil, ::T.untyped)
+  INPCK = ::T.let(nil, ::T.untyped)
+  ISIG = ::T.let(nil, ::T.untyped)
+  ISTRIP = ::T.let(nil, ::T.untyped)
+  IUCLC = ::T.let(nil, ::T.untyped)
+  IXANY = ::T.let(nil, ::T.untyped)
+  IXOFF = ::T.let(nil, ::T.untyped)
+  IXON = ::T.let(nil, ::T.untyped)
+  NOFLSH = ::T.let(nil, ::T.untyped)
+  OCRNL = ::T.let(nil, ::T.untyped)
+  OLCUC = ::T.let(nil, ::T.untyped)
+  ONLCR = ::T.let(nil, ::T.untyped)
+  ONLRET = ::T.let(nil, ::T.untyped)
+  ONOCR = ::T.let(nil, ::T.untyped)
+  OPOST = ::T.let(nil, ::T.untyped)
+  PARENB = ::T.let(nil, ::T.untyped)
+  PARMRK = ::T.let(nil, ::T.untyped)
+  PARODD = ::T.let(nil, ::T.untyped)
+  PENDIN = ::T.let(nil, ::T.untyped)
+  TOSTOP = ::T.let(nil, ::T.untyped)
+  TTY_OP_ISPEED = ::T.let(nil, ::T.untyped)
+  TTY_OP_OSPEED = ::T.let(nil, ::T.untyped)
+  VDISCARD = ::T.let(nil, ::T.untyped)
+  VDSUSP = ::T.let(nil, ::T.untyped)
+  VEOF = ::T.let(nil, ::T.untyped)
+  VEOL = ::T.let(nil, ::T.untyped)
+  VEOL2 = ::T.let(nil, ::T.untyped)
+  VERASE = ::T.let(nil, ::T.untyped)
+  VFLUSH = ::T.let(nil, ::T.untyped)
+  VINTR = ::T.let(nil, ::T.untyped)
+  VKILL = ::T.let(nil, ::T.untyped)
+  VLNEXT = ::T.let(nil, ::T.untyped)
+  VQUIT = ::T.let(nil, ::T.untyped)
+  VREPRINT = ::T.let(nil, ::T.untyped)
+  VSTART = ::T.let(nil, ::T.untyped)
+  VSTATUS = ::T.let(nil, ::T.untyped)
+  VSTOP = ::T.let(nil, ::T.untyped)
+  VSUSP = ::T.let(nil, ::T.untyped)
+  VSWITCH = ::T.let(nil, ::T.untyped)
+  VWERASE = ::T.let(nil, ::T.untyped)
+  XCASE = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::ConnectionTimeout < Net::SSH::Exception
+end
+
+class Net::SSH::Disconnect < Net::SSH::Exception
+end
+
+class Net::SSH::Exception < RuntimeError
+end
+
+module Net::SSH::ForwardedBufferedIo
+  sig do
+    params(
+      n: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def fill(n=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def send_pending(); end
+end
+
+class Net::SSH::HostKeyError < Net::SSH::Exception
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](key); end
+
+  sig do
+    params(
+      callback: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def callback=(callback); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def data=(data); end
+
+  sig {returns(::T.untyped)}
+  def fingerprint(); end
+
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig {returns(::T.untyped)}
+  def ip(); end
+
+  sig {returns(::T.untyped)}
+  def key(); end
+
+  sig {returns(::T.untyped)}
+  def port(); end
+
+  sig {returns(::T.untyped)}
+  def remember_host!(); end
+end
+
+class Net::SSH::HostKeyMismatch < Net::SSH::HostKeyError
+end
+
+class Net::SSH::HostKeyUnknown < Net::SSH::HostKeyError
+end
+
+class Net::SSH::HostKeys
+  include ::Enumerable
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def add_host_key(key); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def each(&block); end
+
+  sig {returns(::T.untyped)}
+  def empty?(); end
+
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig do
+    params(
+      host_keys: ::T.untyped,
+      host: ::T.untyped,
+      known_hosts: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(host_keys, host, known_hosts, options=T.unsafe(nil)); end
+end
+
+class Net::SSH::KeyFactory
+  MAP = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.get(name); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+      passphrase: ::T.untyped,
+      ask_passphrase: ::T.untyped,
+      filename: ::T.untyped,
+      prompt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_data_private_key(data, passphrase=T.unsafe(nil), ask_passphrase=T.unsafe(nil), filename=T.unsafe(nil), prompt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+      filename: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_data_public_key(data, filename=T.unsafe(nil)); end
+
+  sig do
+    params(
+      filename: ::T.untyped,
+      passphrase: ::T.untyped,
+      ask_passphrase: ::T.untyped,
+      prompt: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_private_key(filename, passphrase=T.unsafe(nil), ask_passphrase=T.unsafe(nil), prompt=T.unsafe(nil)); end
+
+  sig do
+    params(
+      filename: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_public_key(filename); end
+end
+
+class Net::SSH::KnownHosts
+  SUPPORTED_TYPE = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      host: ::T.untyped,
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def add(host, key); end
+
+  sig do
+    params(
+      source: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(source); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def keys_for(host); end
+
+  sig do
+    params(
+      hostlist: ::T.untyped,
+      entries: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def known_host_hash?(hostlist, entries); end
+
+  sig {returns(::T.untyped)}
+  def source(); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      key: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.add(host, key, options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      options: ::T.untyped,
+      which: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.hostfiles(options, which=T.unsafe(nil)); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.search_for(host, options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      files: ::T.untyped,
+      host: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.search_in(files, host); end
+end
+
+module Net::SSH::Loggable
+  sig {returns(::T.untyped)}
+  def debug(); end
+
+  sig {returns(::T.untyped)}
+  def error(); end
+
+  sig {returns(::T.untyped)}
+  def fatal(); end
+
+  sig {returns(::T.untyped)}
+  def info(); end
+
+  sig {returns(::T.untyped)}
+  def logger(); end
+
+  sig do
+    params(
+      logger: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def logger=(logger); end
+
+  sig {returns(::T.untyped)}
+  def lwarn(); end
+end
+
+class Net::SSH::Packet < Net::SSH::Buffer
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Authentication::Constants
+  include ::Net::SSH::Connection::Constants
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](name); end
+
+  sig do
+    params(
+      payload: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(payload); end
+
+  sig {returns(::T.untyped)}
+  def type(); end
+
+  sig do
+    params(
+      type: ::T.untyped,
+      pairs: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.register(type, *pairs); end
+end
+
+class Net::SSH::Prompt
+  sig do
+    params(
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      info: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def start(info); end
+
+  sig do
+    params(
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.default(options=T.unsafe(nil)); end
+end
+
+class Net::SSH::Prompt::Prompter
+  sig do
+    params(
+      prompt: ::T.untyped,
+      echo: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def ask(prompt, echo=T.unsafe(nil)); end
+
+  sig do
+    params(
+      info: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(info); end
+
+  sig {returns(::T.untyped)}
+  def success(); end
+end
+
+module Net::SSH::Proxy
+end
+
+class Net::SSH::Proxy::ConnectError < Net::SSH::Proxy::Error
+end
+
+class Net::SSH::Proxy::Error < Net::SSH::Exception
+end
+
+class Net::SSH::Proxy::HTTP
+  sig do
+    params(
+      connect_timeout: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def establish_connection(connect_timeout); end
+
+  sig do
+    params(
+      proxy_host: ::T.untyped,
+      proxy_port: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(proxy_host, proxy_port=T.unsafe(nil), options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      port: ::T.untyped,
+      connection_options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def open(host, port, connection_options); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig do
+    params(
+      socket: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def parse_response(socket); end
+
+  sig {returns(::T.untyped)}
+  def proxy_host(); end
+
+  sig {returns(::T.untyped)}
+  def proxy_port(); end
+end
+
+class Net::SSH::Proxy::UnauthorizedError < Net::SSH::Proxy::Error
+end
+
+module Net::SSH::Service
+end
+
+class Net::SSH::Service::Forward
+  include ::Net::SSH::Loggable
+  sig {returns(::T.untyped)}
+  def active_local_sockets(); end
+
+  sig {returns(::T.untyped)}
+  def active_locals(); end
+
+  sig {returns(::T.untyped)}
+  def active_remote_destinations(); end
+
+  sig {returns(::T.untyped)}
+  def active_remotes(); end
+
+  sig do
+    params(
+      channel: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def agent(channel); end
+
+  sig do
+    params(
+      port: ::T.untyped,
+      bind_address: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def cancel_local(port, bind_address=T.unsafe(nil)); end
+
+  sig do
+    params(
+      local_socket_path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def cancel_local_socket(local_socket_path); end
+
+  sig do
+    params(
+      port: ::T.untyped,
+      host: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def cancel_remote(port, host=T.unsafe(nil)); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session); end
+
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def local(*args); end
+
+  sig do
+    params(
+      local_socket_path: ::T.untyped,
+      remote_socket_path: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def local_socket(local_socket_path, remote_socket_path); end
+
+  sig do
+    params(
+      port: ::T.untyped,
+      host: ::T.untyped,
+      remote_port: ::T.untyped,
+      remote_host: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remote(port, host, remote_port, remote_host=T.unsafe(nil)); end
+
+  sig do
+    params(
+      port: ::T.untyped,
+      host: ::T.untyped,
+      remote_port: ::T.untyped,
+      remote_host: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remote_to(port, host, remote_port, remote_host=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+end
+
+class Net::SSH::Service::Forward::Remote < Struct
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def host=(_); end
+
+  sig {returns(::T.untyped)}
+  def port(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def port=(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.[](*_); end
+
+  sig {returns(::T.untyped)}
+  def self.members(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.new(*_); end
+end
+
+class Net::SSH::Timeout < Net::SSH::Disconnect
+end
+
+module Net::SSH::Transport
+end
+
+class Net::SSH::Transport::Algorithms
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Loggable
+  ALGORITHMS = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def [](key); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def accept_kexinit(packet); end
+
+  sig {returns(::T.untyped)}
+  def algorithms(); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def allow?(packet); end
+
+  sig {returns(::T.untyped)}
+  def compression_client(); end
+
+  sig {returns(::T.untyped)}
+  def compression_server(); end
+
+  sig {returns(::T.untyped)}
+  def encryption_client(); end
+
+  sig {returns(::T.untyped)}
+  def encryption_server(); end
+
+  sig {returns(::T.untyped)}
+  def hmac_client(); end
+
+  sig {returns(::T.untyped)}
+  def hmac_server(); end
+
+  sig {returns(::T.untyped)}
+  def host_key(); end
+
+  sig {returns(::T.untyped)}
+  def host_key_format(); end
+
+  sig do
+    params(
+      session: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(session, options=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def initialized?(); end
+
+  sig {returns(::T.untyped)}
+  def kex(); end
+
+  sig {returns(::T.untyped)}
+  def language_client(); end
+
+  sig {returns(::T.untyped)}
+  def language_server(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def pending?(); end
+
+  sig {returns(::T.untyped)}
+  def rekey!(); end
+
+  sig {returns(::T.untyped)}
+  def session(); end
+
+  sig {returns(::T.untyped)}
+  def session_id(); end
+
+  sig {returns(::T.untyped)}
+  def start(); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.allowed_packet?(packet); end
+end
+
+module Net::SSH::Transport::CTR
+  sig do
+    params(
+      orig: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.extended(orig); end
+end
+
+class Net::SSH::Transport::CipherFactory
+  KEY_LEN_OVERRIDE = ::T.let(nil, ::T.untyped)
+  SSH_TO_OSSL = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.get(name, options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.get_lengths(name, options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.supported?(name); end
+end
+
+module Net::SSH::Transport::Constants
+  DEBUG = ::T.let(nil, ::T.untyped)
+  DISCONNECT = ::T.let(nil, ::T.untyped)
+  IGNORE = ::T.let(nil, ::T.untyped)
+  KEXDH_INIT = ::T.let(nil, ::T.untyped)
+  KEXDH_REPLY = ::T.let(nil, ::T.untyped)
+  KEXECDH_INIT = ::T.let(nil, ::T.untyped)
+  KEXECDH_REPLY = ::T.let(nil, ::T.untyped)
+  KEXINIT = ::T.let(nil, ::T.untyped)
+  NEWKEYS = ::T.let(nil, ::T.untyped)
+  SERVICE_ACCEPT = ::T.let(nil, ::T.untyped)
+  SERVICE_REQUEST = ::T.let(nil, ::T.untyped)
+  UNIMPLEMENTED = ::T.let(nil, ::T.untyped)
+end
+
+module Net::SSH::Transport::HMAC
+  MAP = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      name: ::T.untyped,
+      key: ::T.untyped,
+      parameters: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.get(name, key=T.unsafe(nil), parameters=T.unsafe(nil)); end
+
+  sig do
+    params(
+      name: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.key_length(name); end
+end
+
+class Net::SSH::Transport::HMAC::Abstract
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def digest(data); end
+
+  sig {returns(::T.untyped)}
+  def digest_class(); end
+
+  sig do
+    params(
+      key: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(key=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def key(); end
+
+  sig do
+    params(
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def key=(value); end
+
+  sig {returns(::T.untyped)}
+  def key_length(); end
+
+  sig {returns(::T.untyped)}
+  def mac_length(); end
+
+  sig do
+    params(
+      v: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.digest_class(*v); end
+
+  sig do
+    params(
+      v: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.key_length(*v); end
+
+  sig do
+    params(
+      v: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.mac_length(*v); end
+end
+
+class Net::SSH::Transport::HMAC::MD5 < Net::SSH::Transport::HMAC::Abstract
+end
+
+class Net::SSH::Transport::HMAC::MD5_96 < Net::SSH::Transport::HMAC::MD5
+end
+
+class Net::SSH::Transport::HMAC::None < Net::SSH::Transport::HMAC::Abstract
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def digest(data); end
+end
+
+class Net::SSH::Transport::HMAC::RIPEMD160 < Net::SSH::Transport::HMAC::Abstract
+end
+
+class Net::SSH::Transport::HMAC::SHA1 < Net::SSH::Transport::HMAC::Abstract
+end
+
+class Net::SSH::Transport::HMAC::SHA1_96 < Net::SSH::Transport::HMAC::SHA1
+end
+
+class Net::SSH::Transport::HMAC::SHA2_256 < Net::SSH::Transport::HMAC::Abstract
+end
+
+class Net::SSH::Transport::HMAC::SHA2_256_96 < Net::SSH::Transport::HMAC::SHA2_256
+end
+
+class Net::SSH::Transport::HMAC::SHA2_512 < Net::SSH::Transport::HMAC::Abstract
+end
+
+class Net::SSH::Transport::HMAC::SHA2_512_96 < Net::SSH::Transport::HMAC::SHA2_512
+end
+
+class Net::SSH::Transport::IdentityCipher
+  sig {returns(::T.untyped)}
+  def self.block_size(); end
+
+  sig {returns(::T.untyped)}
+  def self.decrypt(); end
+
+  sig {returns(::T.untyped)}
+  def self.encrypt(); end
+
+  sig {returns(::T.untyped)}
+  def self.final(); end
+
+  sig do
+    params(
+      v: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.iv=(v); end
+
+  sig {returns(::T.untyped)}
+  def self.iv_len(); end
+
+  sig {returns(::T.untyped)}
+  def self.name(); end
+
+  sig {returns(::T.untyped)}
+  def self.reset(); end
+
+  sig do
+    params(
+      text: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.update(text); end
+end
+
+module Net::SSH::Transport::Kex
+  MAP = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroup14SHA1 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+  G = ::T.let(nil, ::T.untyped)
+  P_r = ::T.let(nil, ::T.untyped)
+  P_s = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Loggable
+  G = ::T.let(nil, ::T.untyped)
+  P_r = ::T.let(nil, ::T.untyped)
+  P_s = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def algorithms(); end
+
+  sig {returns(::T.untyped)}
+  def connection(); end
+
+  sig {returns(::T.untyped)}
+  def data(); end
+
+  sig {returns(::T.untyped)}
+  def dh(); end
+
+  sig {returns(::T.untyped)}
+  def digester(); end
+
+  sig {returns(::T.untyped)}
+  def exchange_keys(); end
+
+  sig {returns(::T.untyped)}
+  def g(); end
+
+  sig do
+    params(
+      algorithms: ::T.untyped,
+      connection: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(algorithms, connection, data); end
+
+  sig {returns(::T.untyped)}
+  def p(); end
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroupExchangeSHA1 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+  KEXDH_GEX_GROUP = ::T.let(nil, ::T.untyped)
+  KEXDH_GEX_INIT = ::T.let(nil, ::T.untyped)
+  KEXDH_GEX_REPLY = ::T.let(nil, ::T.untyped)
+  KEXDH_GEX_REQUEST = ::T.let(nil, ::T.untyped)
+  MAXIMUM_BITS = ::T.let(nil, ::T.untyped)
+  MINIMUM_BITS = ::T.let(nil, ::T.untyped)
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroupExchangeSHA256 < Net::SSH::Transport::Kex::DiffieHellmanGroupExchangeSHA1
+  sig do
+    params(
+      args: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(*args); end
+end
+
+class Net::SSH::Transport::Kex::EcdhSHA2NistP256 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+  sig {returns(::T.untyped)}
+  def curve_name(); end
+
+  sig {returns(::T.untyped)}
+  def digester(); end
+
+  sig {returns(::T.untyped)}
+  def ecdh(); end
+
+  sig do
+    params(
+      algorithms: ::T.untyped,
+      connection: ::T.untyped,
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(algorithms, connection, data); end
+end
+
+class Net::SSH::Transport::Kex::EcdhSHA2NistP384 < Net::SSH::Transport::Kex::EcdhSHA2NistP256
+  sig {returns(::T.untyped)}
+  def curve_name(); end
+
+  sig {returns(::T.untyped)}
+  def digester(); end
+end
+
+class Net::SSH::Transport::Kex::EcdhSHA2NistP521 < Net::SSH::Transport::Kex::EcdhSHA2NistP256
+  sig {returns(::T.untyped)}
+  def curve_name(); end
+
+  sig {returns(::T.untyped)}
+  def digester(); end
+end
+
+module Net::SSH::Transport::KeyExpander
+  sig do
+    params(
+      bytes: ::T.untyped,
+      start: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.expand_key(bytes, start, options=T.unsafe(nil)); end
+end
+
+class Net::SSH::Transport::OpenSSLAESCTR < SimpleDelegator
+  sig {returns(::T.untyped)}
+  def block_size(); end
+
+  sig {returns(::T.untyped)}
+  def class(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def clone(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def define_singleton_method(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def display(*_); end
+
+  sig {returns(::T.untyped)}
+  def dup(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def enum_for(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def extend(*_); end
+
+  sig {returns(::T.untyped)}
+  def freeze(); end
+
+  sig {returns(::T.untyped)}
+  def frozen?(); end
+
+  sig do
+    params(
+      original: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(original); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def instance_of?(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def instance_variable_defined?(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def instance_variable_get(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+      _1: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def instance_variable_set(_, _1); end
+
+  sig {returns(::T.untyped)}
+  def instance_variables(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def is_a?(_); end
+
+  sig {returns(::T.untyped)}
+  def itself(); end
+
+  sig do
+    params(
+      iv_s: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def iv=(iv_s); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def kind_of?(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def method(_); end
+
+  sig do
+    params(
+      all: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def methods(all=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def nil?(); end
+
+  sig {returns(::T.untyped)}
+  def object_id(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def private_methods(*_); end
+
+  sig do
+    params(
+      all: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def protected_methods(all=T.unsafe(nil)); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def public_method(_); end
+
+  sig do
+    params(
+      all: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def public_methods(all=T.unsafe(nil)); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def public_send(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def remove_instance_variable(_); end
+
+  sig {returns(::T.untyped)}
+  def reset(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def respond_to?(*_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send(*_); end
+
+  sig {returns(::T.untyped)}
+  def singleton_class(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def singleton_method(_); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def singleton_methods(*_); end
+
+  sig {returns(::T.untyped)}
+  def taint(); end
+
+  sig {returns(::T.untyped)}
+  def tainted?(); end
+
+  sig {returns(::T.untyped)}
+  def tap(); end
+
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def to_enum(*_); end
+
+  sig {returns(::T.untyped)}
+  def trust(); end
+
+  sig {returns(::T.untyped)}
+  def untaint(); end
+
+  sig {returns(::T.untyped)}
+  def untrust(); end
+
+  sig {returns(::T.untyped)}
+  def untrusted?(); end
+
+  sig {returns(::T.untyped)}
+  def self.block_size(); end
+end
+
+module Net::SSH::Transport::PacketStream
+  include ::Net::SSH::BufferedIo
+  include ::Net::SSH::Loggable
+  PROXY_COMMAND_HOST_IP = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def available_for_read?(); end
+
+  sig {returns(::T.untyped)}
+  def cleanup(); end
+
+  sig {returns(::T.untyped)}
+  def client(); end
+
+  sig {returns(::T.untyped)}
+  def client_name(); end
+
+  sig do
+    params(
+      payload: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def enqueue_packet(payload); end
+
+  sig {returns(::T.untyped)}
+  def hints(); end
+
+  sig {returns(::T.untyped)}
+  def if_needs_rekey?(); end
+
+  sig {returns(::T.untyped)}
+  def initialize_ssh(); end
+
+  sig do
+    params(
+      mode: ::T.untyped,
+      timeout: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def next_packet(mode=T.unsafe(nil), timeout=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def peer_ip(); end
+
+  sig {returns(::T.untyped)}
+  def poll_next_packet(); end
+
+  sig do
+    params(
+      payload: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_packet(payload); end
+
+  sig {returns(::T.untyped)}
+  def server(); end
+
+  sig do
+    params(
+      object: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.extended(object); end
+end
+
+class Net::SSH::Transport::ServerVersion
+  include ::Net::SSH::Loggable
+  PROTO_VERSION = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def header(); end
+
+  sig do
+    params(
+      socket: ::T.untyped,
+      logger: ::T.untyped,
+      timeout: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(socket, logger, timeout=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def version(); end
+end
+
+class Net::SSH::Transport::Session
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Loggable
+  DEFAULT_PORT = ::T.let(nil, ::T.untyped)
+
+  sig {returns(::T.untyped)}
+  def algorithms(); end
+
+  sig {returns(::T.untyped)}
+  def close(); end
+
+  sig {returns(::T.untyped)}
+  def closed?(); end
+
+  sig do
+    params(
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def configure_client(options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def configure_server(options=T.unsafe(nil)); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def enqueue_message(message); end
+
+  sig do
+    params(
+      which: ::T.untyped,
+      value: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def hint(which, value=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def host(); end
+
+  sig {returns(::T.untyped)}
+  def host_as_string(); end
+
+  sig {returns(::T.untyped)}
+  def host_key_verifier(); end
+
+  sig {returns(::T.untyped)}
+  def host_keys(); end
+
+  sig do
+    params(
+      host: ::T.untyped,
+      options: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(host, options=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def next_message(); end
+
+  sig {returns(::T.untyped)}
+  def options(); end
+
+  sig {returns(::T.untyped)}
+  def peer(); end
+
+  sig do
+    params(
+      mode: ::T.untyped,
+      consume_queue: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def poll_message(mode=T.unsafe(nil), consume_queue=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def port(); end
+
+  sig do
+    params(
+      packet: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def push(packet); end
+
+  sig {returns(::T.untyped)}
+  def queue(); end
+
+  sig {returns(::T.untyped)}
+  def rekey!(); end
+
+  sig {returns(::T.untyped)}
+  def rekey_as_needed(); end
+
+  sig do
+    params(
+      message: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def send_message(message); end
+
+  sig {returns(::T.untyped)}
+  def server_version(); end
+
+  sig do
+    params(
+      service: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def service_request(service); end
+
+  sig {returns(::T.untyped)}
+  def shutdown!(); end
+
+  sig {returns(::T.untyped)}
+  def socket(); end
+
+  sig {returns(::T.untyped)}
+  def wait(); end
+end
+
+class Net::SSH::Transport::Session::CompatibleVerifier
+  sig do
+    params(
+      verifier: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(verifier); end
+
+  sig do
+    params(
+      arguments: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify(arguments); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_signature(&block); end
+end
+
+class Net::SSH::Transport::State
+  sig {returns(::T.untyped)}
+  def block_size(); end
+
+  sig {returns(::T.untyped)}
+  def blocks(); end
+
+  sig {returns(::T.untyped)}
+  def cipher(); end
+
+  sig {returns(::T.untyped)}
+  def cleanup(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def compress(data); end
+
+  sig {returns(::T.untyped)}
+  def compression(); end
+
+  sig {returns(::T.untyped)}
+  def compression?(); end
+
+  sig {returns(::T.untyped)}
+  def compression_level(); end
+
+  sig {returns(::T.untyped)}
+  def compressor(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def decompress(data); end
+
+  sig {returns(::T.untyped)}
+  def decompressor(); end
+
+  sig {returns(::T.untyped)}
+  def final_cipher(); end
+
+  sig {returns(::T.untyped)}
+  def hmac(); end
+
+  sig do
+    params(
+      packet_length: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def increment(packet_length); end
+
+  sig do
+    params(
+      socket: ::T.untyped,
+      role: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(socket, role); end
+
+  sig {returns(::T.untyped)}
+  def max_blocks(); end
+
+  sig do
+    params(
+      max_blocks: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def max_blocks=(max_blocks); end
+
+  sig {returns(::T.untyped)}
+  def max_packets(); end
+
+  sig do
+    params(
+      max_packets: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def max_packets=(max_packets); end
+
+  sig {returns(::T.untyped)}
+  def needs_rekey?(); end
+
+  sig {returns(::T.untyped)}
+  def packets(); end
+
+  sig {returns(::T.untyped)}
+  def rekey_limit(); end
+
+  sig do
+    params(
+      rekey_limit: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def rekey_limit=(rekey_limit); end
+
+  sig {returns(::T.untyped)}
+  def reset!(); end
+
+  sig {returns(::T.untyped)}
+  def role(); end
+
+  sig {returns(::T.untyped)}
+  def sequence_number(); end
+
+  sig do
+    params(
+      values: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def set(values); end
+
+  sig {returns(::T.untyped)}
+  def socket(); end
+
+  sig do
+    params(
+      data: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def update_cipher(data); end
+end
+
+module Net::SSH::Verifiers
+end
+
+class Net::SSH::Verifiers::AcceptNew < Net::SSH::Verifiers::Always
+  sig do
+    params(
+      arguments: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify(arguments); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_signature(&block); end
+end
+
+class Net::SSH::Verifiers::AcceptNewOrLocalTunnel < Net::SSH::Verifiers::AcceptNew
+  sig do
+    params(
+      arguments: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify(arguments); end
+end
+
+class Net::SSH::Verifiers::Always
+  sig do
+    params(
+      arguments: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify(arguments); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_signature(&block); end
+end
+
+class Net::SSH::Verifiers::Never
+  sig do
+    params(
+      arguments: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify(arguments); end
+
+  sig do
+    params(
+      block: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def verify_signature(&block); end
+end
+
+class Net::SSH::Version
+  include ::Comparable
+  CURRENT = ::T.let(nil, ::T.untyped)
+  MAJOR = ::T.let(nil, ::T.untyped)
+  MINOR = ::T.let(nil, ::T.untyped)
+  PRE = ::T.let(nil, ::T.untyped)
+  STRING = ::T.let(nil, ::T.untyped)
+  TINY = ::T.let(nil, ::T.untyped)
+
+  sig do
+    params(
+      version: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def <=>(version); end
+
+  sig do
+    params(
+      major: ::T.untyped,
+      minor: ::T.untyped,
+      tiny: ::T.untyped,
+      pre: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def initialize(major, minor, tiny, pre=T.unsafe(nil)); end
+
+  sig {returns(::T.untyped)}
+  def major(); end
+
+  sig {returns(::T.untyped)}
+  def minor(); end
+
+  sig {returns(::T.untyped)}
+  def tiny(); end
+
+  sig {returns(::T.untyped)}
+  def to_i(); end
+
+  sig {returns(::T.untyped)}
+  def to_s(); end
+
+  sig do
+    params(
+      major: ::T.untyped,
+      minor: ::T.untyped,
+      tiny: ::T.untyped,
+      pre: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.[](major, minor, tiny, pre=T.unsafe(nil)); end
 end
 
 # The writer adapter class
