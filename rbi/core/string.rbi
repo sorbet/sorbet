@@ -287,6 +287,19 @@ class String < Object
   end
   def [](arg0, arg1=T.unsafe(nil)); end
 
+  # Element Assignment---Replaces some or all of the content of *str*. The
+  # portion of the string affected is determined using the same criteria as
+  # `String#[]`. If the replacement string is not the same length as the text it
+  # is replacing, the string will be adjusted accordingly. If the regular
+  # expression or string is used as the index doesn't match a position in the
+  # string, `IndexError` is raised. If the regular expression form is used, the
+  # optional second `Integer` allows you to specify which portion of the match
+  # to replace (effectively using the `MatchData` indexing rules. The forms that
+  # take an `Integer` will raise an `IndexError` if the value is out of range;
+  # the `Range` form will raise a `RangeError`, and the `Regexp` and `String`
+  # will raise an `IndexError` on negative match.
+  def []=(*_); end
+
   # Returns true for a string which has only ASCII characters.
   #
   # ```ruby
@@ -409,6 +422,26 @@ class String < Object
     .returns(T.nilable(Integer))
   end
   def casecmp(arg0); end
+
+  # Returns `true` if `str` and `other_str` are equal after Unicode case
+  # folding, `false` if they are not equal.
+  #
+  # ```ruby
+  # "aBcDeF".casecmp?("abcde")     #=> false
+  # "aBcDeF".casecmp?("abcdef")    #=> true
+  # "aBcDeF".casecmp?("abcdefg")   #=> false
+  # "abcdef".casecmp?("ABCDEF")    #=> true
+  # "\u{e4 f6 fc}".casecmp?("\u{c4 d6 dc}")   #=> true
+  # ```
+  #
+  # `nil` is returned if the two strings have incompatible encodings, or if
+  # `other_str` is not a string.
+  #
+  # ```ruby
+  # "foo".casecmp?(2)   #=> nil
+  # "\u{e4 f6 fc}".encode("ISO-8859-1").casecmp?("\u{c4 d6 dc}")   #=> nil
+  # ```
+  def casecmp?(_); end
 
   # Centers `str` in `width`. If `width` is greater than the length of `str`,
   # returns a new [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) of
@@ -818,6 +851,18 @@ class String < Object
   sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
 
+  # Passes each grapheme cluster in *str* to the given block, or returns an
+  # enumerator if no block is given. Unlike
+  # [`String#each_char`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-each_char),
+  # this enumerates by grapheme clusters defined by Unicode Standard Annex #29
+  # http://unicode.org/reports/tr29/
+  #
+  # ```ruby
+  # "a\u0300".each_char.to_a.size #=> 2
+  # "a\u0300".each_grapheme_cluster.to_a.size #=> 1
+  # ```
+  def each_grapheme_cluster; end
+
   # Splits *str* using the supplied parameter as the record separator (`$/` by
   # default), passing each substring in turn to the supplied block. If a
   # zero-length record separator is supplied, the string is split into
@@ -910,6 +955,15 @@ class String < Object
   sig {returns(Encoding)}
   def encoding(); end
 
+  # The first form transcodes the contents of *str* from str.encoding to
+  # `encoding`. The second form transcodes the contents of *str* from
+  # src\_encoding to dst\_encoding. The options
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) gives details for
+  # conversion. See
+  # [`String#encode`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode)
+  # for details. Returns the string even if no changes were made.
+  def encode!(*_); end
+
   # Returns true if `str` ends with one of the `suffixes` given.
   #
   # ```ruby
@@ -945,6 +999,8 @@ class String < Object
   end
   def force_encoding(arg0); end
 
+  def freeze; end
+
   # returns the *index*th byte as an integer.
   sig do
     params(
@@ -953,6 +1009,13 @@ class String < Object
     .returns(T.nilable(Integer))
   end
   def getbyte(arg0); end
+
+  # Returns an array of grapheme clusters in *str*. This is a shorthand for
+  # `str.each_grapheme_cluster.to_a`.
+  #
+  # If a block is given, which is a deprecated form, works the same as
+  # `each_grapheme_cluster`.
+  def grapheme_clusters; end
 
   # Returns a copy of *str* with *all* occurrences of *pattern* substituted for
   # the second argument. The *pattern* is typically a `Regexp`; if given as a
@@ -1420,6 +1483,9 @@ class String < Object
   # ```
   sig {returns(String)}
   def reverse(); end
+
+  # Reverses *str* in place.
+  def reverse!; end
 
   # Returns the index of the last occurrence of the given *substring* or pattern
   # (*regexp*) in *str*. Returns `nil` if not found. If the second parameter is
@@ -1903,6 +1969,9 @@ class String < Object
   sig {returns(String)}
   def succ(); end
 
+  # Equivalent to `String#succ`, but modifies the receiver in place.
+  def succ!; end
+
   # Returns a basic *n*-bit checksum of the characters in *str*, where *n* is
   # the optional `Integer` parameter, defaulting to 16. The result is simply the
   # sum of the binary value of each byte in *str* modulo `2**n - 1`. This is not
@@ -2153,6 +2222,65 @@ class String < Object
   end
   def tr_s!(arg0, arg1); end
 
+  # Produces unescaped version of `str`. See also
+  # [`String#dump`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-dump)
+  # because
+  # [`String#undump`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-undump)
+  # does inverse of
+  # [`String#dump`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-dump).
+  #
+  # ```ruby
+  # "\"hello \\n ''\"".undump #=> "hello \n ''"
+  # ```
+  def undump; end
+
+  # Unicode Normalization---Returns a normalized form of `str`, using Unicode
+  # normalizations NFC, NFD, NFKC, or NFKD. The normalization form used is
+  # determined by `form`, which can be any of the four values `:nfc`, `:nfd`,
+  # `:nfkc`, or `:nfkd`. The default is `:nfc`.
+  #
+  # If the string is not in a Unicode
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html), then an
+  # [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) is raised.
+  # In this context, 'Unicode Encoding' means any of UTF-8, UTF-16BE/LE, and
+  # UTF-32BE/LE, as well as GB18030, UCS\_2BE, and UCS\_4BE. Anything other than
+  # UTF-8 is implemented by converting to UTF-8, which makes it slower than
+  # UTF-8.
+  #
+  # ```ruby
+  # "a\u0300".unicode_normalize        #=> "\u00E0"
+  # "a\u0300".unicode_normalize(:nfc)  #=> "\u00E0"
+  # "\u00E0".unicode_normalize(:nfd)   #=> "a\u0300"
+  # "\xE0".force_encoding('ISO-8859-1').unicode_normalize(:nfd)
+  #                                    #=> Encoding::CompatibilityError raised
+  # ```
+  def unicode_normalize(*_); end
+
+  # Destructive version of
+  # [`String#unicode_normalize`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-unicode_normalize),
+  # doing Unicode normalization in place.
+  def unicode_normalize!(*_); end
+
+  # Checks whether `str` is in Unicode normalization form `form`, which can be
+  # any of the four values `:nfc`, `:nfd`, `:nfkc`, or `:nfkd`. The default is
+  # `:nfc`.
+  #
+  # If the string is not in a Unicode
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html), then an
+  # [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) is raised.
+  # For details, see
+  # [`String#unicode_normalize`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-unicode_normalize).
+  #
+  # ```ruby
+  # "a\u0300".unicode_normalized?        #=> false
+  # "a\u0300".unicode_normalized?(:nfd)  #=> true
+  # "\u00E0".unicode_normalized?         #=> true
+  # "\u00E0".unicode_normalized?(:nfd)   #=> false
+  # "\xE0".force_encoding('ISO-8859-1').unicode_normalized?
+  #                                      #=> Encoding::CompatibilityError raised
+  # ```
+  def unicode_normalized?(*_); end
+
   # Decodes *str* (which may contain binary data) according to the format
   # string, returning an array of each value extracted. The format string
   # consists of a sequence of single-character directives, summarized in the
@@ -2275,6 +2403,11 @@ class String < Object
     .returns(T::Array[T.nilable(T.any(Integer, Float, String))])
   end
   def unpack(arg0); end
+
+  # Decodes *str* (which may contain binary data) according to the format
+  # string, returning the first value extracted. See also `String#unpack`,
+  # `Array#pack`.
+  def unpack1(_); end
 
   # Returns a copy of *str* with all lowercase letters replaced with their
   # uppercase counterparts.
