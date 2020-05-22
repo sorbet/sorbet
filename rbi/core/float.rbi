@@ -862,6 +862,9 @@ class Float < Numeric
   sig {returns(T::Boolean)}
   def nan?(); end
 
+  # Returns `true` if `float` is less than 0.
+  def negative?; end
+
   # Returns the next representable floating point number.
   #
   # Float::MAX.next\_float and Float::INFINITY.next\_float is
@@ -932,6 +935,9 @@ class Float < Numeric
   # Returns 0 if the value is positive, pi otherwise.
   sig {returns(T.any(Integer, Float))}
   def phase(); end
+
+  # Returns `true` if `float` is greater than 0.
+  def positive?; end
 
   # Returns the previous representable floating point number.
   #
