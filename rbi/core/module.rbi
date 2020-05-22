@@ -1510,13 +1510,53 @@ class Module < Object
   sig {returns(String)}
   def to_s(); end
 
+  # Prevents the current class from responding to calls to the named method.
+  # Contrast this with `remove_method`, which deletes the method from the
+  # particular class; Ruby will still search superclasses and mixed-in modules
+  # for a possible receiver.
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) arguments are
+  # converted to symbols.
+  #
+  # ```ruby
+  # class Parent
+  #   def hello
+  #     puts "In parent"
+  #   end
+  # end
+  # class Child < Parent
+  #   def hello
+  #     puts "In child"
+  #   end
+  # end
+  #
+  # c = Child.new
+  # c.hello
+  #
+  # class Child
+  #   remove_method :hello  # remove from child, still in parent
+  # end
+  # c.hello
+  #
+  # class Child
+  #   undef_method :hello   # prevent any calls to 'hello'
+  # end
+  # c.hello
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # In child
+  # In parent
+  # prog.rb:23: undefined method `hello' for #<Child:0x401b3bb4> (NoMethodError)
+  # ```
   sig do
     params(
         arg0: T.any(Symbol, String),
     )
     .returns(T.self_type)
   end
-  def undefMethod(arg0); end
+  def undef_method(arg0); end
 
   # Import class refinements from *module* into the current class or module
   # definition.
