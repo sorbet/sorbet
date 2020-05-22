@@ -252,14 +252,6 @@ NameDef names[] = {
     {"Command", "Command", true},
     {"Enum", "Enum", true},
 
-    {"Google", "Google", true},
-    {"Protobuf", "Protobuf", true},
-    {"DescriptorPool", "DescriptorPool", true},
-    {"generatedPool", "generated_pool"},
-    {"lookup"},
-    {"msgclass"},
-    {"enummodule"},
-
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
