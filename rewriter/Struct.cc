@@ -116,9 +116,10 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
-        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, core::Loc(ctx.file, symLoc), name, ast::MK::EmptyTree()));
+        body.emplace_back(
+            ast::MK::SyntheticMethod0(symLoc, core::Loc(ctx.file, symLoc), name, ast::MK::RaiseUnimplemented(loc)));
         body.emplace_back(ast::MK::SyntheticMethod1(symLoc, core::Loc(ctx.file, symLoc), name.addEq(ctx),
-                                                    ast::MK::Local(symLoc, name), ast::MK::Local(symLoc, name)));
+                                                    ast::MK::Local(symLoc, name), ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Elem = type_member(fixed: T.untyped)

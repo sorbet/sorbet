@@ -14,19 +14,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C RealStruct><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def foo=<<C <todo sym>>>(foo, &<blk>)
-        foo
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar=<<C <todo sym>>>(bar, &<blk>)
-        bar
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -52,19 +52,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def foo=<<C <todo sym>>>(foo, &<blk>)
-        foo
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar=<<C <todo sym>>>(bar, &<blk>)
-        bar
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -152,11 +152,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TwoStructs><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def foo=<<C <todo sym>>>(foo, &<blk>)
-        foo
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -178,11 +178,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def foo=<<C <todo sym>>>(foo, &<blk>)
-        foo
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -208,19 +208,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def foo=<<C <todo sym>>>(foo, &<blk>)
-        foo
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def bar=<<C <todo sym>>>(bar, &<blk>)
-        bar
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -256,11 +256,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
       def x<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def x=<<C <todo sym>>>(x, &<blk>)
-        x
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -288,11 +288,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
       def x<<C <todo sym>>>(&<blk>)
-        <emptyTree>
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       def x=<<C <todo sym>>>(x, &<blk>)
-        x
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
