@@ -199,6 +199,13 @@ class TracePoint < Object
   sig {returns(T::Boolean)}
   def enabled?; end
 
+  # Type of event
+  #
+  # See [Events at
+  # `TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html#label-Events)
+  # for more information.
+  def event; end
+
   # Return a string containing a human-readable
   # [`TracePoint`](https://docs.ruby-lang.org/en/2.6.0/TracePoint.html) status.
   sig {returns(String)}
