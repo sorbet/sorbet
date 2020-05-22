@@ -72,6 +72,21 @@ class Struct < Object
   sig {returns(T::Array[Symbol])}
   def self.members; end
 
+  # Create a new instance of a struct subclass. The number of value parameters
+  # must be less than or equal to the number of attributes defined for the
+  # structure. Unset parameters default to nil.  Passing more parameters than
+  # number of attributes will raise an ArgumentError.
+  #
+  # ```
+  # Customer = Struct.new(:name, :address)
+  # Customer.new("Dave", "123 Main")
+  # #=> #<struct Customer name="Dave", address="123 Main">
+  # Customer["Dave"]
+  # #=> #<struct Customer name="Dave", address=nil>
+  # ```
+  sig {params(args: T.untyped).returns(Struct)}
+  def self.[](*args); end
+
   sig {params(args: T.untyped).returns(Struct)}
   def new(*args); end
 end
