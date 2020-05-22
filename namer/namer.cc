@@ -316,7 +316,7 @@ core::SymbolRef FoundNameRef::symbol(const FoundNames &foundNames) const {
     return foundNames._symbols[idx()];
 }
 
-struct NameFinderResult {
+struct SymbolFinderResult {
     ast::ParsedFile tree;
     unique_ptr<FoundNames> names;
 };
@@ -702,10 +702,34 @@ class SymbolDefiner {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
+    void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, std::string constantName,
+                                    core::Loc prevDefinitionLoc) {
+        if (auto e = ctx.state.beginError(errorLoc, core::errors::Namer::ModuleKindRedefinition)) {
+            e.setHeader("Redefining constant `{}`", constantName);
+            e.addErrorLine(prevDefinitionLoc, "Previous definition");
+        }
+    }
+
+    void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, core::SymbolRef symbol,
+                                    core::SymbolRef renamedSymbol) {
+        emitRedefinedConstantError(ctx, errorLoc, symbol.data(ctx)->show(ctx), renamedSymbol.data(ctx)->loc());
+    }
+
     core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
                                   core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.data(ctx)->isClassOrModule()) {
+            // Check if original symbol was mangled away. If so, complain.
+            auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
+            if (renamedSymbol.exists()) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
+                    auto constLitName = name.data(ctx)->show(ctx);
+                    auto scopeName = scope.data(ctx)->show(ctx);
+                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
+                                scopeName, scopeName);
+                    e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
+                }
+            }
             return scope;
         }
 
@@ -1020,11 +1044,9 @@ class SymbolDefiner {
                 return klassSymbol;
             }
 
-            if (auto e =
-                    ctx.state.beginError(core::Loc(ctx.file, klass.loc), core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("Redefining constant `{}`", symbol.data(ctx)->show(ctx));
-                e.addErrorLine(symbol.data(ctx)->loc(), "Previous definition");
-            }
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.data(ctx)->show(ctx),
+                                       symbol.data(ctx)->loc());
+
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
             symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName);
@@ -1050,11 +1072,7 @@ class SymbolDefiner {
             symbol.data(ctx)->setIsModule(isModule);
             auto renamed = ctx.state.findRenamedSymbol(symbol.data(ctx)->owner, symbol);
             if (renamed.exists()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.loc),
-                                                  core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", symbol.data(ctx)->show(ctx));
-                    e.addErrorLine(renamed.data(ctx)->loc(), "Previous definition");
-                }
+                emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
         }
         return symbol;
@@ -1145,11 +1163,8 @@ class SymbolDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
-                                              core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("Redefining constant `{}`", staticField.name.data(ctx)->show(ctx));
-                e.addErrorLine(currSym.data(ctx)->loc(), "Previous definition");
-            }
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
+                                       staticField.name.data(ctx)->show(ctx), currSym.data(ctx)->loc());
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
         if (sym.exists()) {
@@ -1157,10 +1172,8 @@ class SymbolDefiner {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", renamedSym.data(ctx)->name.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, staticField.asgnLoc), "Previous definition");
-                }
+                emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
+                                           renamedSym.data(ctx)->name.show(ctx), renamedSym.data(ctx)->loc());
             }
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
@@ -1228,11 +1241,7 @@ class SymbolDefiner {
             // same error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
-                                                  core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
-                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
-                }
+                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym, existingTypeMember);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
@@ -1242,11 +1251,8 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
-                                                  core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", oldSym.data(ctx)->show(ctx));
-                    e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
-                }
+                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.data(ctx)->show(ctx),
+                                           oldSym.data(ctx)->loc());
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
             sym =
@@ -1261,11 +1267,8 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
                                          oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.nameLoc),
-                                                      core::errors::Namer::ModuleKindRedefinition)) {
-                        e.setHeader("Redefining constant `{}`", typeMember.name.data(ctx)->show(ctx));
-                        e.addErrorLine(oldSym.data(ctx)->loc(), "Previous definition");
-                    }
+                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc),
+                                               typeMember.name.data(ctx)->show(ctx), oldSym.data(ctx)->loc());
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias =
@@ -1723,11 +1726,12 @@ private:
     UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
 };
 
-vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                       WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<NameFinderResult>>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    vector<NameFinderResult> allFoundNames;
+    vector<SymbolFinderResult> allFoundNames;
     allFoundNames.reserve(trees.size());
     for (auto &tree : trees) {
         fileq->push(move(tree), 1);
@@ -1736,14 +1740,14 @@ vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::Pa
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        vector<NameFinderResult> output;
+        vector<SymbolFinderResult> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
-                NameFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
+                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
                 output.emplace_back(move(jobOutput));
             }
         }
@@ -1754,7 +1758,7 @@ vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::Pa
     trees.clear();
 
     {
-        vector<NameFinderResult> threadResult;
+        vector<SymbolFinderResult> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -1764,12 +1768,12 @@ vector<NameFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::Pa
             }
         }
     }
-    fast_sort(allFoundNames,
-              [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file.id() < rhs.tree.file.id(); });
+    fast_sort(allFoundNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
+
     return allFoundNames;
 }
 
-vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<NameFinderResult> allFoundNames) {
+vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundNames) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundNames.size());

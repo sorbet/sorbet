@@ -57,11 +57,11 @@ test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefi
      3 |  class A; end
           ^^^^^^^
 
-test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:43: Redefining constant `A` https://srb.help/4012
-    43 |
-    44 |
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Previous definition
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` https://srb.help/4012
     59 |  A = nil
+          ^^^^^^^
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previous definition
+    58 |  class A; end
           ^^^^^^^
 Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
