@@ -34,6 +34,19 @@
 # [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) objects have no
 # class-specific methods.
 class Binding < Object
+  # Evaluates the Ruby expression(s) in *string*, in the *binding*'s context. If
+  # the optional *filename* and *lineno* parameters are present, they will be
+  # used when reporting syntax errors.
+  #
+  # ```ruby
+  # def get_binding(param)
+  #   binding
+  # end
+  # b = get_binding("hello")
+  # b.eval("param")   #=> "hello"
+  # ```
+  def eval(*_); end
+
   # Returns `true` if a local variable `symbol` exists.
   #
   # ```ruby
@@ -97,6 +110,24 @@ class Binding < Object
   # if `obj` can be dumped in Ruby code.
   sig {params(symbol: T.any(String, Symbol), obj: T.untyped).returns(T.untyped)}
   def local_variable_set(symbol, obj); end
+
+  # Returns the names of the binding's local variables as symbols.
+  #
+  # ```ruby
+  # def foo
+  #   a = 1
+  #   2.times do |n|
+  #     binding.local_variables #=> [:a, :n]
+  #   end
+  # end
+  # ```
+  #
+  # This method is the short version of the following code:
+  #
+  # ```ruby
+  # binding.eval("local_variables")
+  # ```
+  def local_variables; end
 
   # Returns the bound receiver of the binding object.
   sig {returns(Object)}
