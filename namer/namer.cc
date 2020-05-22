@@ -1168,7 +1168,6 @@ class SymbolDefiner {
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
         if (sym.exists()) {
-            // if sym exists, then currSym should definitely exist
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {

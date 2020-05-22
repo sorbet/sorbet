@@ -1,5 +1,5 @@
 # typed: true
-
+# disable-stress-incremental: true
 module T
 
 end
