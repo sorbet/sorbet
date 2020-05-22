@@ -323,7 +323,8 @@ class Hash < Object
   # h.compact     #=> { a: 1, b: false }
   # h             #=> { a: 1, b: false, c: nil }
   # ```
-  def compact; end
+  sig {returns(T::Hash[K, V])}
+  def compact(); end
 
   # Removes all nil values from the hash. Returns nil if no changes were made,
   # otherwise returns the hash.
@@ -332,7 +333,8 @@ class Hash < Object
   # h = { a: 1, b: false, c: nil }
   # h.compact!     #=> { a: 1, b: false }
   # ```
-  def compact!; end
+  sig {returns(T.nilable(T::Hash[K, V]))}
+  def compact!(); end
 
   # Makes *hsh* compare its keys by their identity, i.e. it will consider exact
   # same objects as same keys.
