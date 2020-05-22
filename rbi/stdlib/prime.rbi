@@ -1,4 +1,4 @@
-# typed: __STDLIB_INTERNAL
+# typed: true
 
 # The set of all prime numbers.
 #
@@ -51,10 +51,37 @@
 #     [`Prime#prime?`](https://docs.ruby-lang.org/en/2.6.0/Prime.html#method-i-prime-3F)
 #     .
 class Prime
-  include(::Singleton)
-  include(::Enumerable)
+  include ::Singleton
+  include ::Enumerable
+  extend ::Enumerable
+  extend ::Singleton::SingletonClassMethods
 
-  Elem = type_member(:out)
+  Elem = type_member
+
+  # Iterates the given block over all prime numbers.
+  #
+  # ## Parameters
+  #
+  # `ubound`
+  # :   Optional. An arbitrary positive number. The upper bound of enumeration.
+  #     The method enumerates prime numbers infinitely if `ubound` is nil.
+  # `generator`
+  # :   Optional. An implementation of pseudo-prime generator.
+  #
+  #
+  # ## Return value
+  #
+  # An evaluated value of the given block at the last time. Or an enumerator
+  # which is compatible to an `Enumerator` if no block given.
+  #
+  # ## Description
+  #
+  # Calls `block` once for each prime number, passing the prime as a parameter.
+  #
+  # `ubound`
+  # :   Upper bound of prime numbers. The iterator stops after it yields all
+  #     prime numbers p <= `ubound`.
+  def self.each(ubound = nil, generator = Prime::EratosthenesGenerator.new, &block); end
 
   # Iterates the given block over all prime numbers.
   #
@@ -105,6 +132,25 @@ class Prime
   # Prime.int_from_prime_division([[2,2], [3,1]])  #=> 12
   # ```
   def int_from_prime_division(pd); end
+
+  # Re-composes a prime factorization and returns the product.
+  #
+  # ## Parameters
+  # `pd`
+  # :   [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of pairs of
+  #     integers. The each internal pair consists of a prime number -- a prime
+  #     factor -- and a natural number -- an exponent.
+  #
+  #
+  # ## Example
+  # For `[[p_1, e_1], [p_2, e_2], ...., [p_n, e_n]]`, it returns:
+  #
+  # ```
+  # p_1**e_1 * p_2**e_2 * .... * p_n**e_n.
+  #
+  # Prime.int_from_prime_division([[2,2], [3,1]])  #=> 12
+  # ```
+  def self.int_from_prime_division(pd); end
 
   # Returns true if `value` is a prime number, else returns false.
   #
