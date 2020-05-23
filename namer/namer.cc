@@ -952,35 +952,36 @@ class SymbolDefiner {
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
-        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
-        auto currentSym = ctx.state.lookupMethodSymbol(owner, method.name);
-
-        if (!sym.exists() && currentSym.exists()) {
-            // we don't have a method definition with the right argument structure, so we need to mangle the
-            // existing one and create a new one
-            if (!isIntrinsic(ctx, currentSym)) {
-                paramMismatchErrors(ctx.withOwner(currentSym), method.declLoc, parsedArgs);
-                ctx.state.mangleRenameSymbol(currentSym, method.name);
-            } else {
-                // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
-                // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?
-                sym.data(ctx)->addLoc(ctx, method.declLoc);
-            }
-        }
+        auto sym = ctx.state.lookupMethodSymbol(owner, method.name);
         if (sym.exists()) {
-            // if the symbol does exist, then we're running in incremental mode, and we need to compare it to the
-            // previously defined equivalent to re-report any errors
-            auto replacedSym = ctx.state.findRenamedSymbol(owner, sym);
-            if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) && !isIntrinsic(ctx, replacedSym)) {
-                paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
+            // See if this is == to the method we're defining now, or if we have a redefinition error.
+            auto matchingSym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
+            if (!matchingSym.exists()) {
+                // we don't have a method definition with the right argument structure, so we need to mangle the
+                // existing one and create a new one
+                if (!isIntrinsic(ctx, sym)) {
+                    paramMismatchErrors(ctx.withOwner(sym), method.declLoc, parsedArgs);
+                    ctx.state.mangleRenameSymbol(sym, method.name);
+                } else {
+                    // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
+                    // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?
+                    matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
+                }
+            } else {
+                // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
+                // the previously defined equivalent to re-report any errors
+                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
+                    !isIntrinsic(ctx, replacedSym)) {
+                    paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
+                }
+                matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
+                defineArgs(ctx.withOwner(matchingSym), parsedArgs);
+                return matchingSym;
             }
-            sym.data(ctx)->addLoc(ctx, method.declLoc);
-            defineArgs(ctx.withOwner(sym), parsedArgs);
-            return sym;
         }
 
-        // we'll only get this far if we're not in incremental mode, so enter a new symbol and fill in the data
-        // appropriately
+        // common case: enter a new symbol and fill in the data appropriately
         sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
         defineArgs(ctx.withOwner(sym), parsedArgs);
         sym.data(ctx)->addLoc(ctx, method.declLoc);
