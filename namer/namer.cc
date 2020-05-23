@@ -952,8 +952,10 @@ class SymbolDefiner {
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
-        auto sym = ctx.state.lookupMethodSymbol(owner, method.name);
-        if (sym.exists()) {
+        auto symTableSize = ctx.state.symbolsUsed();
+        auto sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
+        const bool isNewSymbol = symTableSize != ctx.state.symbolsUsed();
+        if (!isNewSymbol) {
             // See if this is == to the method we're defining now, or if we have a redefinition error.
             auto matchingSym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
             if (!matchingSym.exists()) {
@@ -962,6 +964,8 @@ class SymbolDefiner {
                 if (!isIntrinsic(sym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(sym), method.declLoc, parsedArgs);
                     ctx.state.mangleRenameSymbol(sym, method.name);
+                    // Re-enter a new symbol.
+                    sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
                 } else {
                     // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
                     // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?
@@ -975,14 +979,10 @@ class SymbolDefiner {
                     !isIntrinsic(replacedSym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
                 }
-                matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
-                defineArgs(ctx.withOwner(matchingSym), parsedArgs);
-                return matchingSym;
+                sym = matchingSym;
             }
         }
 
-        // common case: enter a new symbol and fill in the data appropriately
-        sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
         defineArgs(ctx.withOwner(sym), parsedArgs);
         sym.data(ctx)->addLoc(ctx, method.declLoc);
         if (method.flags.isRewriterSynthesized) {
