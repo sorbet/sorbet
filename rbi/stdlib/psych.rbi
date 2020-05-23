@@ -241,7 +241,7 @@ module Psych
   #
   sig do
     params(
-      yaml: String,
+      yaml: T.any(String, StringIO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
@@ -298,7 +298,7 @@ module Psych
   #
   sig do
     params(
-      yaml: String,
+      yaml: T.any(String, StringIO),
       legacy_permitted_classes: Object,
       legacy_permitted_symbols: Object,
       legacy_aliases: Object,
@@ -336,7 +336,7 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   sig do
     params(
-      yaml: String,
+      yaml: T.any(String, StringIO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
@@ -394,7 +394,7 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   sig do
     params(
-      yaml: String,
+      yaml: T.any(String, StringIO),
       legacy_filename: Object,
       filename: T.nilable(String),
       block: T.nilable(T.proc.params(node: Psych::Nodes::Document).void),
@@ -486,7 +486,7 @@ module Psych
   #
   sig do
     params(
-      yaml: String,
+      yaml: T.any(String, StringIO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
