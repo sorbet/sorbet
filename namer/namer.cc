@@ -137,6 +137,7 @@ struct FoundMethod final {
     core::Loc declLoc;
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
+    vector<u4> argsHash;
 };
 
 struct Modifier {
@@ -478,6 +479,7 @@ public:
         foundMethod.declLoc = method->declLoc;
         foundMethod.flags = method->flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method->args);
+        foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.push_back(foundNames->addMethod(move(foundMethod)));
         return method;
     }
@@ -950,7 +952,7 @@ class SymbolDefiner {
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
-        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
         auto currentSym = ctx.state.lookupMethodSymbol(owner, method.name);
 
         if (!sym.exists() && currentSym.exists()) {
@@ -985,8 +987,7 @@ class SymbolDefiner {
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->setRewriterSynthesized();
         }
-        ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs))
-                    .exists());
+        ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash).exists());
         return sym;
     }
 
