@@ -699,8 +699,7 @@ class SymbolDefiner {
 
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
-    bool isIntrinsic(core::Context ctx, core::SymbolRef sym) {
-        auto data = sym.data(ctx);
+    bool isIntrinsic(const core::SymbolData &data) {
         return data->intrinsic != nullptr && !data->hasSig();
     }
 
@@ -772,10 +771,10 @@ class SymbolDefiner {
         return existing;
     }
 
-    void defineArg(core::MutableContext ctx, int pos, const ast::ParsedArg &parsedArg) {
-        if (pos < ctx.owner.data(ctx)->arguments().size()) {
+    void defineArg(core::MutableContext ctx, core::SymbolData &methodData, int pos, const ast::ParsedArg &parsedArg) {
+        if (pos < methodData->arguments().size()) {
             // TODO: check that flags match;
-            ctx.owner.data(ctx)->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
+            methodData->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
             return;
         }
 
@@ -794,30 +793,31 @@ class SymbolDefiner {
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
         // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (ctx.owner.dataAllowingNone(ctx)->arguments().size() == pos) {
+        if (methodData->arguments().size() == pos) {
             auto argCopy = argInfo.deepCopy();
             argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            ctx.owner.dataAllowingNone(ctx)->arguments().emplace_back(move(argCopy));
+            methodData->arguments().emplace_back(move(argCopy));
             return;
         }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
-        ENFORCE(ctx.owner.data(ctx)->arguments().size() >= pos + 1);
+        ENFORCE(methodData->arguments().size() >= pos + 1);
 
         argInfo.flags = parsedArg.flags;
     }
 
     void defineArgs(core::MutableContext ctx, const vector<ast::ParsedArg> &parsedArgs) {
+        auto methodData = ctx.owner.data(ctx);
         bool inShadows = false;
-        bool intrinsic = isIntrinsic(ctx, ctx.owner);
-        bool swapArgs = intrinsic && (ctx.owner.data(ctx)->arguments().size() == 1);
+        bool intrinsic = isIntrinsic(methodData);
+        bool swapArgs = intrinsic && (methodData->arguments().size() == 1);
         core::ArgInfo swappedArg;
         if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(ctx.owner.data(ctx)->arguments()[0].flags.isBlock);
-            swappedArg = move(ctx.owner.data(ctx)->arguments()[0]);
-            ctx.owner.data(ctx)->arguments().clear();
+            ENFORCE(methodData->arguments()[0].flags.isBlock);
+            swappedArg = move(methodData->arguments()[0]);
+            methodData->arguments().clear();
         }
 
         int i = -1;
@@ -830,11 +830,11 @@ class SymbolDefiner {
 
                 if (swapArgs && arg.flags.isBlock) {
                     // see commnent on if (swapArgs) above
-                    ctx.owner.data(ctx)->arguments().emplace_back(move(swappedArg));
+                    methodData->arguments().emplace_back(move(swappedArg));
                 }
 
-                defineArg(ctx, i, arg);
-                ENFORCE(i < ctx.owner.data(ctx)->arguments().size());
+                defineArg(ctx, methodData, i, arg);
+                ENFORCE(i < methodData->arguments().size());
             }
         }
     }
@@ -959,7 +959,7 @@ class SymbolDefiner {
             if (!matchingSym.exists()) {
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
-                if (!isIntrinsic(ctx, sym)) {
+                if (!isIntrinsic(sym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(sym), method.declLoc, parsedArgs);
                     ctx.state.mangleRenameSymbol(sym, method.name);
                 } else {
@@ -972,7 +972,7 @@ class SymbolDefiner {
                 // the previously defined equivalent to re-report any errors
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
                 if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
-                    !isIntrinsic(ctx, replacedSym)) {
+                    !isIntrinsic(replacedSym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
                 }
                 matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
