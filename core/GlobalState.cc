@@ -160,6 +160,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
+    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
