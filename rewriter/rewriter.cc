@@ -139,7 +139,6 @@ public:
         }
         if (replaceNodes.empty()) {
             ModuleFunction::run(ctx, classDef.get());
-            SigRewriter::run(ctx, classDef.get());
             return classDef;
         }
 
@@ -157,7 +156,6 @@ public:
             }
         }
         ModuleFunction::run(ctx, classDef.get());
-        SigRewriter::run(ctx, classDef.get());
 
         return classDef;
     }
@@ -171,6 +169,10 @@ public:
 
         if (auto expr = SelfNew::run(ctx, send.get())) {
             return expr;
+        }
+
+        if (SigRewriter::run(ctx, send.get())) {
+            return send;
         }
 
         return send;
