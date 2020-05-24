@@ -411,6 +411,14 @@ public:
         return ret;
     }
 
+    static bool isRootScope(ast::Expression *scope) {
+        if (ast::isa_tree<ast::EmptyTree>(scope)) {
+            return true;
+        }
+        auto root = ast::cast_tree<ast::ConstantLit>(scope);
+        return root != nullptr && root->symbol == core::Symbols::root();
+    }
+
     static bool isMagicClass(ast::Expression *expr) {
         if (auto *recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol == core::Symbols::Magic();
