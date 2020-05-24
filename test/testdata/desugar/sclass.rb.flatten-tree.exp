@@ -152,7 +152,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"f" => ::Integer}).returns(::Integer)
         end
         ::Sorbet::Private::Static.keep_def(<self>, :"initialize")

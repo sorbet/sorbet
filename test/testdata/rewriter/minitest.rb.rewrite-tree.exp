@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.outside_method()
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Module.const_set(:"CONST", 10)
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C3>.new()
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -63,7 +63,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -74,7 +74,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
@@ -134,7 +134,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({}).void()
       end
 
@@ -172,7 +172,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({}).void()
       end
 
@@ -180,7 +180,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({}).void()
       end
 
@@ -209,7 +209,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({}).void()
       end
 

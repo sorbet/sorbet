@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         bar
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         bar
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -107,7 +107,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         arg0
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C A>)
       end
 
@@ -115,7 +115,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C T>.cast(nil, <emptyTree>::<C A>)
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C BasicObject>)
       end
 
@@ -123,7 +123,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         nil
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.params({:"foo" => <emptyTree>::<C BasicObject>, :"bar" => <emptyTree>::<C BasicObject>}).returns(<emptyTree>::<C BasicObject>)
       end
 
@@ -159,7 +159,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         foo
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
@@ -185,7 +185,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         foo
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
@@ -223,7 +223,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         bar
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
@@ -263,7 +263,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         x
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"x" => ::BasicObject}).void()
       end
 
@@ -295,7 +295,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         x
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params({:"x" => ::BasicObject}).void()
       end
 
