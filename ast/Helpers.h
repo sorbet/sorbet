@@ -314,7 +314,8 @@ public:
                                           std::unique_ptr<Expression> ret) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
-        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
         sigSend->flags.isRewriterSynthesized = true;
@@ -324,7 +325,8 @@ public:
     static std::unique_ptr<ast::Send> SigVoid(core::LocOffsets loc, std::unique_ptr<Expression> hash) {
         auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
         auto void_ = Send0(loc, std::move(params), core::Names::void_());
-        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(void_));
         sigSend->flags.isRewriterSynthesized = true;
@@ -333,7 +335,8 @@ public:
 
     static std::unique_ptr<ast::Send> Sig0(core::LocOffsets loc, std::unique_ptr<Expression> ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), std::move(ret));
-        auto sig = Send0(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig());
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig.get());
         sigSend->block = Block0(loc, std::move(returns));
         sigSend->flags.isRewriterSynthesized = true;
