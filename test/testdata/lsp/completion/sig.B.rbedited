@@ -22,7 +22,7 @@ class Normal
 end
 
 class NoSigInScope
-  sig # error: `sig` requires a block parameter
-  #  ^ completion: sig
+  sig # error: does not exist
+  #  ^ completion: (nothing)
   def no_results_without_extend_tsig; end
 end

@@ -4,6 +4,8 @@ class MyModel < Chalk::ODM::Document
 end
 
 class MyStruct < MyModel
+  extend T::Sig
+
   include T::Props
 
   # We have some code at Stripe where Sorbet can tell that decorator has a
