@@ -86,8 +86,8 @@ OUTFLAG="-fvisibility=default -o" \
 CC="{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
-CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
-LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
+CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}" \
+LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}" \
 run_cmd ./configure \
         {configure_flags} \
         --enable-load-relative \
@@ -256,6 +256,7 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
+            sysroot_flag = ctx.attr.sysroot_flag,
             install_extra_srcs = "\n".join(install_extra_srcs),
             extra_srcs_object_files = " ".join(extra_srcs_object_files),
             install_gems = "\n".join(install_gems),
@@ -304,6 +305,7 @@ _build_ruby = rule(
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
+        "sysroot_flag": attr.string(),
     },
     fragments = ["cpp"],
     provides = [
@@ -507,6 +509,11 @@ def ruby(rubygems, gems, extra_srcs = None, configure_flags = [], copts = [], cp
         linkopts = linkopts,
         deps = deps,
         gems = gems,
+        # This is a hack because macOS Catalina changed the way that system headers and libraries work.
+        sysroot_flag = select({
+            "@com_stripe_ruby_typer//tools/config:darwin": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+            "//conditions:default": "",
+        }),
     )
 
     _ruby_headers(
