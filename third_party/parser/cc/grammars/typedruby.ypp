@@ -34,55 +34,56 @@ using namespace std::string_literals;
 // if any of these token values are changed here, the header must be updated
 // as well.
 %token <token>
-  kCLASS              1001
-  kMODULE             1002
-  kDEF                1003
-  kUNDEF              1004
-  kBEGIN              1005
-  kRESCUE             1006
-  kENSURE             1007
-  kEND                1008
-  kIF                 1009
-  kUNLESS             1010
-  kTHEN               1011
-  kELSIF              1012
-  kELSE               1013
-  kCASE               1014
-  kWHEN               1015
-  kWHILE              1016
-  kUNTIL              1017
-  kFOR                1018
-  kBREAK              1019
-  kNEXT               1020
-  kREDO               1021
-  kRETRY              1022
-  kIN                 1023
-  kDO                 1024
+  eof                 0       "end of file"
+  kCLASS              1001    "class"
+  kMODULE             1002    "module"
+  kDEF                1003    "def"
+  kUNDEF              1004    "undef"
+  kBEGIN              1005    "begin"
+  kRESCUE             1006    "rescue"
+  kENSURE             1007    "ensure"
+  kEND                1008    "end"
+  kIF                 1009    "if"
+  kUNLESS             1010    "unless"
+  kTHEN               1011    "then"
+  kELSIF              1012    "elsif"
+  kELSE               1013    "else"
+  kCASE               1014    "case"
+  kWHEN               1015    "when"
+  kWHILE              1016    "while"
+  kUNTIL              1017    "until"
+  kFOR                1018    "for"
+  kBREAK              1019    "break"
+  kNEXT               1020    "next"
+  kREDO               1021    "redo"
+  kRETRY              1022    "retry"
+  kIN                 1023    "in"
+  kDO                 1024    "do"
   kDO_COND            1025
   kDO_BLOCK           1026
   kDO_LAMBDA          1027
-  kRETURN             1028
-  kYIELD              1029
-  kSUPER              1030
-  kSELF               1031
-  kNIL                1032
-  kTRUE               1033
-  kFALSE              1034
-  kAND                1035
-  kOR                 1036
-  kNOT                1037
+  kRETURN             1028    "return"
+  kYIELD              1029    "yield"
+  kSUPER              1030    "super"
+  kSELF               1031    "self"
+  kNIL                1032    "nil"
+  kTRUE               1033    "true"
+  kFALSE              1034    "false"
+  kAND                1035    "and"
+  kOR                 1036    "or"
+  kNOT                1037    "not"
   kIF_MOD             1038
   kUNLESS_MOD         1039
   kWHILE_MOD          1040
   kUNTIL_MOD          1041
   kRESCUE_MOD         1042
-  kALIAS              1043
-  kDEFINED            1044
-  klBEGIN             1045
-  klEND               1046
-  k__LINE__           1047
-  k__FILE__           1048
-  k__ENCODING__       1049
+  kALIAS              1043    "alias"
+  kDEFINED            1044    "defined?"
+  klBEGIN             1045    "BEGIN"
+  klEND               1046    "END"
+  k__LINE__           1047    "__LINE__"
+  k__FILE__           1048    "__FILE__"
+  k__ENCODING__       1049    "__ENCODING__"
   tIDENTIFIER         1050
   tFID                1051
   tGVAR               1052
@@ -99,55 +100,55 @@ using namespace std::string_literals;
   tUMINUS             1063
   tUNARY_NUM          1064
   tPOW                1065
-  tCMP                1066
-  tEQ                 1067
-  tEQQ                1068
-  tNEQ                1069
-  tEQL                1070
-  tGEQ                1071
-  tLEQ                1072
-  tANDOP              1073
-  tOROP               1074
-  tMATCH              1075
-  tNMATCH             1076
-  tDOT                1077
-  tDOT2               1078
-  tDOT3               1079
-  tAREF               1080
-  tASET               1081
-  tLSHFT              1082
-  tRSHFT              1083
-  tCOLON2             1084
+  tCMP                1066    "<=>"
+  tEQ                 1067    "=="
+  tEQQ                1068    "==="
+  tNEQ                1069    "!="
+  tEQL                1070    "="
+  tGEQ                1071    ">="
+  tLEQ                1072    "<="
+  tANDOP              1073    "&&"
+  tOROP               1074    "||"
+  tMATCH              1075    "=~"
+  tNMATCH             1076    "!~"
+  tDOT                1077    "."
+  tDOT2               1078    ".."
+  tDOT3               1079    "..."
+  tAREF               1080    "[]"
+  tASET               1081    "[]="
+  tLSHFT              1082    "<<"
+  tRSHFT              1083    ">>"
+  tCOLON2             1084    "::"
   tCOLON3             1085
   tOP_ASGN            1086
-  tASSOC              1087
-  tLPAREN             1088
+  tASSOC              1087    "=>"
+  tLPAREN             1088    "("
   tLPAREN2            1089
-  tRPAREN             1090
+  tRPAREN             1090    ")"
   tLPAREN_ARG         1091
-  tLBRACK             1092
+  tLBRACK             1092    "["
   tLBRACK2            1093
-  tRBRACK             1094
-  tLBRACE             1095
+  tRBRACK             1094    "]"
+  tLBRACE             1095    "{"
   tLBRACE_ARG         1096
-  tSTAR               1097
+  tSTAR               1097    "*"
   tSTAR2              1098
-  tAMPER              1099
+  tAMPER              1099    "&"
   tAMPER2             1100
-  tTILDE              1101
-  tPERCENT            1102
-  tDIVIDE             1103
-  tDSTAR              1104
-  tPLUS               1105
-  tMINUS              1106
-  tLT                 1107
-  tGT                 1108
-  tPIPE               1109
-  tBANG               1110
-  tCARET              1111
+  tTILDE              1101    "~"
+  tPERCENT            1102    "%"
+  tDIVIDE             1103    "/"
+  tDSTAR              1104    "**"
+  tPLUS               1105    "+"
+  tMINUS              1106    "-"
+  tLT                 1107    "<"
+  tGT                 1108    ">"
+  tPIPE               1109    "|"
+  tBANG               1110    "!"
+  tCARET              1111    "^"
   tLCURLY             1112
   tRCURLY             1113
-  tBACK_REF2          1114
+  tBACK_REF2          1114    "`"
   tSYMBEG             1115
   tSTRING_BEG         1116
   tXSTRING_BEG        1117
@@ -164,20 +165,21 @@ using namespace std::string_literals;
   tSTRING             1128
   tSYMBOL             1129
   tNL                 1130
-  tEH                 1131
-  tCOLON              1132
-  tCOMMA              1133
+  tEH                 1131    "?"
+  tCOLON              1132    ":"
+  tCOMMA              1133    ","
   tSPACE              1134
-  tSEMI               1135
-  tLAMBDA             1136
+  tSEMI               1135    ";"
+  tLAMBDA             1136    "->"
   tLAMBEG             1137
   tCHARACTER          1138
   tRATIONAL           1139
   tIMAGINARY          1140
   tLABEL_END          1141
-  tANDDOT             1142
+  tANDDOT             1142    "&."
   tRATIONAL_IMAGINARY 1143
   tFLOAT_IMAGINARY    1144
+;
 
 %type <node>
   arg
