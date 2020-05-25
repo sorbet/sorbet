@@ -32,7 +32,8 @@ constexpr ErrorClass GenericPassedAsBlock{7024, StrictLevel::True};
 constexpr ErrorClass AbstractClassInstantiated{7025, StrictLevel::True};
 constexpr ErrorClass NotExhaustive{7026, StrictLevel::True};
 constexpr ErrorClass UntypedConstantSuggestion{7027, StrictLevel::Strict};
-constexpr ErrorClass GenericTypeParamBoundMismatch{7028, StrictLevel::False};
+// constexpr ErrorClass GenericTypeParamBoundMismatch{7028, StrictLevel::False};
 // constexpr ErrorClass LazyResolve{7029, StrictLevel::True};
+// N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif
