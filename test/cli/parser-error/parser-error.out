@@ -6,7 +6,7 @@ test/cli/parser-error/parser-error-2.rb:1: no .<digit> floating literal anymore;
      1 |a.123
          ^^^^
 Errors: 1
-test/cli/parser-error/parser-error-3.rb:1: unexpected token tDOT https://srb.help/2001
+test/cli/parser-error/parser-error-3.rb:1: unexpected token "." https://srb.help/2001
      1 |.
         ^
 Errors: 1
