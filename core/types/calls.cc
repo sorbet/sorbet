@@ -1249,8 +1249,10 @@ public:
                     validBounds = false;
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                         auto argStr = argType->show(gs);
-                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(gs));
-                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", argStr, memType->upperBound->show(gs));
+                        e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
+                                    memData->showFullName(gs));
+                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
+                                       "upper", memType->upperBound->show(gs));
                     }
                 }
 
@@ -1259,8 +1261,10 @@ public:
 
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                         auto argStr = argType->show(gs);
-                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(gs));
-                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", memType->lowerBound->show(gs), argStr);
+                        e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
+                                    memData->showFullName(gs));
+                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
+                                       "lower", memType->lowerBound->show(gs));
                     }
                 }
 
