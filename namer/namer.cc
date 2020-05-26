@@ -18,14 +18,10 @@
 
 using namespace std;
 
-// TODO:
-// - Remove redundancy whenever possible.
-// - ENFORCE that NameFinder never produces errors.
-
 namespace sorbet::namer {
 
 namespace {
-class FoundNames;
+class FoundDefinitions;
 
 struct FoundClassRef;
 struct FoundClass;
@@ -33,7 +29,7 @@ struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
 
-enum class NameKind : u1 {
+enum class DefinitionKind : u1 {
     None = 0,
     Root = 1,
     Class = 2,
@@ -44,28 +40,28 @@ enum class NameKind : u1 {
     Symbol = 7,
 };
 
-class FoundNameRef final {
+class FoundDefinitionRef final {
     u4 _id;
 
-    // Store NameKind in upper 8 bits of idx.
-    static u4 mask(NameKind kind, u4 idx) {
+    // Store DefinitionKind in upper 8 bits of idx.
+    static u4 mask(DefinitionKind kind, u4 idx) {
         return (u4)kind << 28 | idx;
     }
 
 public:
-    FoundNameRef() : FoundNameRef(NameKind::None, 0) {}
-    FoundNameRef(const FoundNameRef &nm) = default;
-    FoundNameRef(FoundNameRef &&nm) = default;
-    FoundNameRef &operator=(const FoundNameRef &rhs) = default;
+    FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::None, 0) {}
+    FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
+    FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
+    FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
-    FoundNameRef(NameKind kind, u4 idx) : _id(mask(kind, idx)) {}
+    FoundDefinitionRef(DefinitionKind kind, u4 idx) : _id(mask(kind, idx)) {}
 
-    static FoundNameRef root() {
-        return FoundNameRef(NameKind::Root, 0);
+    static FoundDefinitionRef root() {
+        return FoundDefinitionRef(DefinitionKind::Root, 0);
     }
 
-    NameKind kind() const {
-        return (NameKind)(_id >> 28);
+    DefinitionKind kind() const {
+        return (DefinitionKind)(_id >> 28);
     }
 
     bool exists() const {
@@ -77,42 +73,42 @@ public:
         return _id & 0x0FFFFFFF;
     }
 
-    FoundClassRef &klassRef(FoundNames &foundNames);
-    const FoundClassRef &klassRef(const FoundNames &foundNames) const;
+    FoundClassRef &klassRef(FoundDefinitions &foundDefs);
+    const FoundClassRef &klassRef(const FoundDefinitions &foundDefs) const;
 
-    FoundClass &klass(FoundNames &foundNames);
-    const FoundClass &klass(const FoundNames &foundNames) const;
+    FoundClass &klass(FoundDefinitions &foundDefs);
+    const FoundClass &klass(const FoundDefinitions &foundDefs) const;
 
-    FoundMethod &method(FoundNames &foundNames);
-    const FoundMethod &method(const FoundNames &foundNames) const;
+    FoundMethod &method(FoundDefinitions &foundDefs);
+    const FoundMethod &method(const FoundDefinitions &foundDefs) const;
 
-    FoundStaticField &staticField(FoundNames &foundNames);
-    const FoundStaticField &staticField(const FoundNames &foundNames) const;
+    FoundStaticField &staticField(FoundDefinitions &foundDefs);
+    const FoundStaticField &staticField(const FoundDefinitions &foundDefs) const;
 
-    FoundTypeMember &typeMember(FoundNames &foundNames);
-    const FoundTypeMember &typeMember(const FoundNames &foundNames) const;
+    FoundTypeMember &typeMember(FoundDefinitions &foundDefs);
+    const FoundTypeMember &typeMember(const FoundDefinitions &foundDefs) const;
 
-    core::SymbolRef symbol(const FoundNames &foundNames) const;
+    core::SymbolRef symbol(const FoundDefinitions &foundDefs) const;
 };
 
 struct FoundClassRef final {
     core::NameRef name;
     core::LocOffsets loc;
     // If !owner.exists(), owner is determined by reference site.
-    FoundNameRef owner;
+    FoundDefinitionRef owner;
 };
 
 struct FoundClass final {
-    FoundNameRef owner;
-    FoundNameRef klass;
+    FoundDefinitionRef owner;
+    FoundDefinitionRef klass;
     core::LocOffsets loc;
     core::Loc declLoc;
     ast::ClassDef::Kind classKind;
 };
 
 struct FoundStaticField final {
-    FoundNameRef owner;
-    FoundNameRef klass;
+    FoundDefinitionRef owner;
+    FoundDefinitionRef klass;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
@@ -120,7 +116,7 @@ struct FoundStaticField final {
 };
 
 struct FoundTypeMember final {
-    FoundNameRef owner;
+    FoundDefinitionRef owner;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets nameLoc;
@@ -131,7 +127,7 @@ struct FoundTypeMember final {
 };
 
 struct FoundMethod final {
-    FoundNameRef owner;
+    FoundDefinitionRef owner;
     core::NameRef name;
     core::LocOffsets loc;
     core::Loc declLoc;
@@ -141,8 +137,8 @@ struct FoundMethod final {
 };
 
 struct Modifier {
-    NameKind kind;
-    FoundNameRef owner;
+    DefinitionKind kind;
+    FoundDefinitionRef owner;
     core::LocOffsets loc;
     // The name of the modification.
     core::NameRef name;
@@ -150,10 +146,10 @@ struct Modifier {
     core::NameRef methodName;
 };
 
-class FoundNames final {
+class FoundDefinitions final {
     // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.
     // Used to determine the order in which symbols are defined in SymbolDefiner.
-    vector<FoundNameRef> _definitions;
+    vector<FoundDefinitionRef> _definitions;
     // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
     // Symbols for classes that are referenced from but not present in the given file.
     vector<FoundClassRef> _klassRefs;
@@ -170,58 +166,58 @@ class FoundNames final {
     // Contains all method and class modifiers (e.g. private/public/protected).
     vector<Modifier> _modifiers;
 
-    FoundNameRef addDefinition(FoundNameRef ref) {
+    FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         _definitions.push_back(ref);
         return ref;
     }
 
 public:
-    FoundNames() = default;
-    FoundNames(FoundNames &&names) = default;
-    FoundNames(const FoundNames &names) = delete;
-    ~FoundNames() = default;
+    FoundDefinitions() = default;
+    FoundDefinitions(FoundDefinitions &&names) = default;
+    FoundDefinitions(const FoundDefinitions &names) = delete;
+    ~FoundDefinitions() = default;
 
-    FoundNameRef addClass(FoundClass &&klass) {
+    FoundDefinitionRef addClass(FoundClass &&klass) {
         const u4 idx = _klasses.size();
         _klasses.push_back(move(klass));
-        return addDefinition(FoundNameRef(NameKind::Class, idx));
+        return addDefinition(FoundDefinitionRef(DefinitionKind::Class, idx));
     }
 
-    FoundNameRef addClassRef(FoundClassRef &&klassRef) {
+    FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
         const u4 idx = _klassRefs.size();
         _klassRefs.push_back(move(klassRef));
-        return FoundNameRef(NameKind::ClassRef, idx);
+        return FoundDefinitionRef(DefinitionKind::ClassRef, idx);
     }
 
-    FoundNameRef addMethod(FoundMethod &&method) {
+    FoundDefinitionRef addMethod(FoundMethod &&method) {
         const u4 idx = _methods.size();
         _methods.push_back(move(method));
-        return addDefinition(FoundNameRef(NameKind::Method, idx));
+        return addDefinition(FoundDefinitionRef(DefinitionKind::Method, idx));
     }
 
-    FoundNameRef addStaticField(FoundStaticField &&staticField) {
+    FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
         const u4 idx = _staticFields.size();
         _staticFields.push_back(move(staticField));
-        return addDefinition(FoundNameRef(NameKind::StaticField, idx));
+        return addDefinition(FoundDefinitionRef(DefinitionKind::StaticField, idx));
     }
 
-    FoundNameRef addTypeMember(FoundTypeMember &&typeMember) {
+    FoundDefinitionRef addTypeMember(FoundTypeMember &&typeMember) {
         const u4 idx = _typeMembers.size();
         _typeMembers.push_back(move(typeMember));
-        return addDefinition(FoundNameRef(NameKind::TypeMember, idx));
+        return addDefinition(FoundDefinitionRef(DefinitionKind::TypeMember, idx));
     }
 
-    FoundNameRef addSymbol(core::SymbolRef symbol) {
+    FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
         const u4 idx = _symbols.size();
         _symbols.push_back(move(symbol));
-        return FoundNameRef(NameKind::Symbol, idx);
+        return FoundDefinitionRef(DefinitionKind::Symbol, idx);
     }
 
     void addModifier(Modifier &&mod) {
         _modifiers.push_back(move(mod));
     }
 
-    const vector<FoundNameRef> &definitions() const {
+    const vector<FoundDefinitionRef> &definitions() const {
         return _definitions;
     }
 
@@ -253,73 +249,73 @@ public:
         return _symbols;
     }
 
-    friend FoundNameRef;
+    friend FoundDefinitionRef;
 };
 
-FoundClassRef &FoundNameRef::klassRef(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::ClassRef);
-    ENFORCE(foundNames._klassRefs.size() > idx());
-    return foundNames._klassRefs[idx()];
+FoundClassRef &FoundDefinitionRef::klassRef(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == DefinitionKind::ClassRef);
+    ENFORCE(foundDefs._klassRefs.size() > idx());
+    return foundDefs._klassRefs[idx()];
 }
-const FoundClassRef &FoundNameRef::klassRef(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::ClassRef);
-    ENFORCE(foundNames._klassRefs.size() > idx());
-    return foundNames._klassRefs[idx()];
-}
-
-FoundClass &FoundNameRef::klass(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::Class);
-    ENFORCE(foundNames._klasses.size() > idx());
-    return foundNames._klasses[idx()];
-}
-const FoundClass &FoundNameRef::klass(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::Class);
-    ENFORCE(foundNames._klasses.size() > idx());
-    return foundNames._klasses[idx()];
+const FoundClassRef &FoundDefinitionRef::klassRef(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::ClassRef);
+    ENFORCE(foundDefs._klassRefs.size() > idx());
+    return foundDefs._klassRefs[idx()];
 }
 
-FoundMethod &FoundNameRef::method(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::Method);
-    ENFORCE(foundNames._methods.size() > idx());
-    return foundNames._methods[idx()];
+FoundClass &FoundDefinitionRef::klass(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == DefinitionKind::Class);
+    ENFORCE(foundDefs._klasses.size() > idx());
+    return foundDefs._klasses[idx()];
 }
-const FoundMethod &FoundNameRef::method(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::Method);
-    ENFORCE(foundNames._methods.size() > idx());
-    return foundNames._methods[idx()];
-}
-
-FoundStaticField &FoundNameRef::staticField(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::StaticField);
-    ENFORCE(foundNames._staticFields.size() > idx());
-    return foundNames._staticFields[idx()];
-}
-const FoundStaticField &FoundNameRef::staticField(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::StaticField);
-    ENFORCE(foundNames._staticFields.size() > idx());
-    return foundNames._staticFields[idx()];
+const FoundClass &FoundDefinitionRef::klass(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::Class);
+    ENFORCE(foundDefs._klasses.size() > idx());
+    return foundDefs._klasses[idx()];
 }
 
-FoundTypeMember &FoundNameRef::typeMember(FoundNames &foundNames) {
-    ENFORCE(kind() == NameKind::TypeMember);
-    ENFORCE(foundNames._typeMembers.size() > idx());
-    return foundNames._typeMembers[idx()];
+FoundMethod &FoundDefinitionRef::method(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == DefinitionKind::Method);
+    ENFORCE(foundDefs._methods.size() > idx());
+    return foundDefs._methods[idx()];
 }
-const FoundTypeMember &FoundNameRef::typeMember(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::TypeMember);
-    ENFORCE(foundNames._typeMembers.size() > idx());
-    return foundNames._typeMembers[idx()];
+const FoundMethod &FoundDefinitionRef::method(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::Method);
+    ENFORCE(foundDefs._methods.size() > idx());
+    return foundDefs._methods[idx()];
 }
 
-core::SymbolRef FoundNameRef::symbol(const FoundNames &foundNames) const {
-    ENFORCE(kind() == NameKind::Symbol);
-    ENFORCE(foundNames._symbols.size() > idx());
-    return foundNames._symbols[idx()];
+FoundStaticField &FoundDefinitionRef::staticField(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == DefinitionKind::StaticField);
+    ENFORCE(foundDefs._staticFields.size() > idx());
+    return foundDefs._staticFields[idx()];
+}
+const FoundStaticField &FoundDefinitionRef::staticField(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::StaticField);
+    ENFORCE(foundDefs._staticFields.size() > idx());
+    return foundDefs._staticFields[idx()];
+}
+
+FoundTypeMember &FoundDefinitionRef::typeMember(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == DefinitionKind::TypeMember);
+    ENFORCE(foundDefs._typeMembers.size() > idx());
+    return foundDefs._typeMembers[idx()];
+}
+const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::TypeMember);
+    ENFORCE(foundDefs._typeMembers.size() > idx());
+    return foundDefs._typeMembers[idx()];
+}
+
+core::SymbolRef FoundDefinitionRef::symbol(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == DefinitionKind::Symbol);
+    ENFORCE(foundDefs._symbols.size() > idx());
+    return foundDefs._symbols[idx()];
 }
 
 struct SymbolFinderResult {
     ast::ParsedFile tree;
-    unique_ptr<FoundNames> names;
+    unique_ptr<FoundDefinitions> names;
 };
 
 core::SymbolRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
@@ -366,14 +362,12 @@ core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat
  * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
  */
 class SymbolFinder {
-    unique_ptr<FoundNames> foundNames = make_unique<FoundNames>();
+    unique_ptr<FoundDefinitions> foundDefs = make_unique<FoundDefinitions>();
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
-    // Instead, we track the owner manually as an index into `foundNames`; the item at that index
-    // will define the `owner` symbol.
-    // The u4 is actually index + 1 so we reserve 0 for the root owner.
-    vector<FoundNameRef> ownerStack;
+    // Instead, we track the owner manually via FoundDefinitionRefs.
+    vector<FoundDefinitionRef> ownerStack;
 
-    void findClassModifiers(core::Context ctx, FoundNameRef klass, unique_ptr<ast::Expression> &line) {
+    void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, unique_ptr<ast::Expression> &line) {
         auto *send = ast::cast_tree<ast::Send>(line.get());
         if (send == nullptr) {
             return;
@@ -385,11 +379,11 @@ class SymbolFinder {
             case core::Names::declareInterface()._id:
             case core::Names::declareAbstract()._id: {
                 Modifier mod;
-                mod.kind = NameKind::Class;
+                mod.kind = DefinitionKind::Class;
                 mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
-                foundNames->addModifier(move(mod));
+                foundDefs->addModifier(move(mod));
                 break;
             }
             default:
@@ -397,38 +391,38 @@ class SymbolFinder {
         }
     }
 
-    FoundNameRef getOwner() {
+    FoundDefinitionRef getOwner() {
         if (ownerStack.empty()) {
-            return FoundNameRef::root();
+            return FoundDefinitionRef::root();
         }
         return ownerStack.back();
     }
 
-    // Returns index to foundNames containing the given name. Recursively inserts class refs for its owners.
-    FoundNameRef squashNames(core::Context ctx, const unique_ptr<ast::Expression> &node) {
+    // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
+    FoundDefinitionRef squashNames(core::Context ctx, const unique_ptr<ast::Expression> &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
-            return foundNames->addSymbol(sym);
+            return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get())) {
             FoundClassRef found;
             found.owner = squashNames(ctx, constLit->scope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
-            return foundNames->addClassRef(move(found));
+            return foundDefs->addClassRef(move(found));
         } else {
             // `class <<self`, `::Foo`, `self::Foo`
             // Return non-existent nameref as placeholder.
-            return FoundNameRef();
+            return FoundDefinitionRef();
         }
     }
 
 public:
-    unique_ptr<FoundNames> getAndClearFoundNames() {
+    unique_ptr<FoundDefinitions> getAndClearFoundDefinitions() {
         ownerStack.clear();
-        auto rv = move(foundNames);
-        foundNames = make_unique<FoundNames>();
+        auto rv = move(foundDefs);
+        foundDefs = make_unique<FoundDefinitions>();
         return rv;
     }
 
@@ -444,7 +438,7 @@ public:
             FoundClassRef foundRef;
             foundRef.name = ident->name;
             foundRef.loc = ident->loc;
-            found.klass = foundNames->addClassRef(move(foundRef));
+            found.klass = foundDefs->addClassRef(move(foundRef));
         } else {
             if (klass->symbol == core::Symbols::todo()) {
                 found.klass = squashNames(ctx, klass->name);
@@ -452,16 +446,16 @@ public:
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
-                found.klass = foundNames->addSymbol(klass->symbol);
+                found.klass = foundDefs->addSymbol(klass->symbol);
             }
         }
 
-        ownerStack.push_back(foundNames->addClass(move(found)));
+        ownerStack.push_back(foundDefs->addClass(move(found)));
         return klass;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
-        FoundNameRef klassName = ownerStack.back();
+        FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
 
         for (auto &exp : klass->rhs) {
@@ -480,7 +474,7 @@ public:
         foundMethod.flags = method->flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method->args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
-        ownerStack.push_back(foundNames->addMethod(move(foundMethod)));
+        ownerStack.push_back(foundDefs->addMethod(move(foundMethod)));
         return method;
     }
 
@@ -503,13 +497,13 @@ public:
             }
 
             Modifier methodModifier;
-            methodModifier.kind = NameKind::Method;
+            methodModifier.kind = DefinitionKind::Method;
             methodModifier.owner = getOwner();
             methodModifier.loc = original->loc;
             methodModifier.name = original->fun;
             methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original->args[0].get());
             if (methodModifier.methodName.exists()) {
-                foundNames->addModifier(move(methodModifier));
+                foundDefs->addModifier(move(methodModifier));
             }
         }
         return original;
@@ -548,7 +542,7 @@ public:
         }
     }
 
-    FoundNameRef fillAssign(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
+    FoundDefinitionRef fillAssign(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
 
@@ -558,12 +552,12 @@ public:
         found.name = lhs->cnst;
         found.asgnLoc = asgn->loc;
         found.lhsLoc = lhs->loc;
-        return foundNames->addStaticField(move(found));
+        return foundDefs->addStaticField(move(found));
     }
 
-    FoundNameRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
-                                            const unique_ptr<ast::Assign> &asgn,
-                                            const ast::UnresolvedConstantLit *typeName) {
+    FoundDefinitionRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send,
+                                                  const unique_ptr<ast::Assign> &asgn,
+                                                  const ast::UnresolvedConstantLit *typeName) {
         ENFORCE(asgn->lhs.get() == typeName &&
                 asgn->rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
 
@@ -584,7 +578,7 @@ public:
             staticField.asgnLoc = found.asgnLoc;
             staticField.lhsLoc = asgn->lhs->loc;
             staticField.isTypeAlias = true;
-            return foundNames->addStaticField(move(staticField));
+            return foundDefs->addStaticField(move(staticField));
         }
 
         if (!send->args.empty()) {
@@ -609,14 +603,14 @@ public:
                 }
             }
         }
-        return foundNames->addTypeMember(move(found));
+        return foundDefs->addTypeMember(move(found));
     }
 
-    FoundNameRef handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
+    FoundDefinitionRef handleAssignment(core::Context ctx, const unique_ptr<ast::Assign> &asgn) {
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         auto foundRef = fillAssign(ctx, asgn);
-        ENFORCE(foundRef.kind() == NameKind::StaticField);
-        auto &staticField = foundRef.staticField(*foundNames);
+        ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
+        auto &staticField = foundRef.staticField(*foundDefs);
         staticField.isTypeAlias = send->fun == core::Names::typeAlias();
         return foundRef;
     }
@@ -653,24 +647,24 @@ public:
  * Defines symbols for all of the names found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    unique_ptr<const FoundNames> foundNames;
+    unique_ptr<const FoundDefinitions> foundDefs;
     vector<core::SymbolRef> definedClasses;
     vector<core::SymbolRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
-    core::SymbolRef squashNames(core::MutableContext ctx, FoundNameRef name, core::SymbolRef owner) {
+    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef name, core::SymbolRef owner) {
         // Prerequisite: Owner is a class or module.
         ENFORCE(owner.data(ctx)->isClassOrModule());
         switch (name.kind()) {
-            case NameKind::None:
+            case DefinitionKind::None:
                 return owner;
-            case NameKind::Root:
+            case DefinitionKind::Root:
                 return core::Symbols::root();
-            case NameKind::Symbol: {
-                return name.symbol(*foundNames);
+            case DefinitionKind::Symbol: {
+                return name.symbol(*foundDefs);
             }
-            case NameKind::ClassRef: {
-                auto &klassRef = name.klassRef(*foundNames);
+            case DefinitionKind::ClassRef: {
+                auto &klassRef = name.klassRef(*foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
@@ -680,16 +674,16 @@ class SymbolDefiner {
     }
 
     // Get the symbol for an already-defined owner. Limited to names that can own things (classes and methods).
-    core::SymbolRef getOwnerSymbol(FoundNameRef ref) {
+    core::SymbolRef getOwnerSymbol(FoundDefinitionRef ref) {
         switch (ref.kind()) {
-            case NameKind::Root:
+            case DefinitionKind::Root:
                 return core::Symbols::root();
-            case NameKind::Symbol:
-                return ref.symbol(*foundNames);
-            case NameKind::Class:
+            case DefinitionKind::Symbol:
+                return ref.symbol(*foundDefs);
+            case DefinitionKind::Class:
                 ENFORCE(ref.idx() < definedClasses.size());
                 return definedClasses[ref.idx()];
-            case NameKind::Method:
+            case DefinitionKind::Method:
                 ENFORCE(ref.idx() < definedMethods.size());
                 return definedMethods[ref.idx()];
             default:
@@ -1009,7 +1003,7 @@ class SymbolDefiner {
     }
 
     void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == NameKind::Method);
+        ENFORCE(mod.kind == DefinitionKind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (mod.name._id == core::Names::privateClassMethod()._id) {
@@ -1113,7 +1107,7 @@ class SymbolDefiner {
     }
 
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == NameKind::Class);
+        ENFORCE(mod.kind == DefinitionKind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
@@ -1288,33 +1282,33 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(unique_ptr<const FoundNames> foundNames) : foundNames(move(foundNames)) {}
+    SymbolDefiner(unique_ptr<const FoundDefinitions> foundDefs) : foundDefs(move(foundDefs)) {}
 
     void run(core::MutableContext ctx) {
-        definedClasses.reserve(foundNames->klasses().size());
-        definedMethods.reserve(foundNames->methods().size());
+        definedClasses.reserve(foundDefs->klasses().size());
+        definedMethods.reserve(foundDefs->methods().size());
 
-        for (auto &ref : foundNames->definitions()) {
+        for (auto &ref : foundDefs->definitions()) {
             switch (ref.kind()) {
-                case NameKind::Class: {
-                    const auto &klass = ref.klass(*foundNames);
+                case DefinitionKind::Class: {
+                    const auto &klass = ref.klass(*foundDefs);
                     ENFORCE(definedClasses.size() == ref.idx());
                     definedClasses.push_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
                     break;
                 }
-                case NameKind::Method: {
-                    const auto &method = ref.method(*foundNames);
+                case DefinitionKind::Method: {
+                    const auto &method = ref.method(*foundDefs);
                     ENFORCE(definedMethods.size() == ref.idx());
                     definedMethods.push_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
-                case NameKind::StaticField: {
-                    const auto &staticField = ref.staticField(*foundNames);
+                case DefinitionKind::StaticField: {
+                    const auto &staticField = ref.staticField(*foundDefs);
                     insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
                     break;
                 }
-                case NameKind::TypeMember: {
-                    const auto &typeMember = ref.typeMember(*foundNames);
+                case DefinitionKind::TypeMember: {
+                    const auto &typeMember = ref.typeMember(*foundDefs);
                     insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                     break;
                 }
@@ -1325,13 +1319,13 @@ public:
         }
 
         // TODO: Split up?
-        for (const auto &modifier : foundNames->modifiers()) {
+        for (const auto &modifier : foundDefs->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
-                case NameKind::Method:
+                case DefinitionKind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
-                case NameKind::Class:
+                case DefinitionKind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
                     break;
                 default:
@@ -1732,8 +1726,8 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     Timer timeit(gs.tracer(), "naming.findSymbols");
     auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    vector<SymbolFinderResult> allFoundNames;
-    allFoundNames.reserve(trees.size());
+    vector<SymbolFinderResult> allFoundDefinitions;
+    allFoundDefinitions.reserve(trees.size());
     for (auto &tree : trees) {
         fileq->push(move(tree), 1);
     }
@@ -1748,7 +1742,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
-                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundNames()};
+                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
         }
@@ -1764,24 +1758,25 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                allFoundNames.insert(allFoundNames.end(), make_move_iterator(threadResult.begin()),
-                                     make_move_iterator(threadResult.end()));
+                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
+                                           make_move_iterator(threadResult.end()));
             }
         }
     }
-    fast_sort(allFoundNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
+    fast_sort(allFoundDefinitions,
+              [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
-    return allFoundNames;
+    return allFoundDefinitions;
 }
 
-vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundNames) {
+vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
-    output.reserve(allFoundNames.size());
-    for (auto &fileFoundNames : allFoundNames) {
-        core::MutableContext ctx(gs, core::Symbols::root(), fileFoundNames.tree.file);
-        SymbolDefiner symbolDefiner(move(fileFoundNames.names));
-        output.push_back(move(fileFoundNames.tree));
+    output.reserve(allFoundDefinitions.size());
+    for (auto &fileFoundDefinitions : allFoundDefinitions) {
+        core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
+        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names));
+        output.push_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
     }
     return output;
@@ -1833,8 +1828,8 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 } // namespace
 
 vector<ast::ParsedFile> Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    auto foundNames = findSymbols(gs, move(trees), workers);
-    trees = defineSymbols(gs, move(foundNames));
+    auto foundDefs = findSymbols(gs, move(trees), workers);
+    trees = defineSymbols(gs, move(foundDefs));
     trees = symbolizeTrees(gs, move(trees), workers);
     return trees;
 }
