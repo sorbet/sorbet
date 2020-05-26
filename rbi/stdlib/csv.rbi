@@ -482,7 +482,12 @@ class CSV < Object
         options: T::Hash[Symbol, T.untyped],
         blk: T.nilable(T.proc.params(arg0: T::Array[T.nilable(String)]).void)
     )
-    .returns(T.nilable(T::Array[T::Array[T.nilable(String)]]))
+    .returns(
+      T.any(
+        CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)],
+        T::Array[T::Array[T.nilable(String)]],
+      )
+    )
   end
   def self.parse(str, options=T.unsafe(nil), &blk); end
 
@@ -924,7 +929,7 @@ class CSV::Row < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T.nilable(String))
+  Elem = type_member(:out, fixed: T.nilable(BasicObject))
 
   # Construct a new
   # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) from
@@ -946,7 +951,9 @@ class CSV::Row < Object
   # *   empty?()
   # *   length()
   # *   size()
-  def self.new(headers, fields, header_row = false); end
+  sig { params(headers: T::Array[BasicObject], fields: T::Array[BasicObject]).void }
+  sig { params(headers: T::Array[BasicObject], fields: T::Array[BasicObject], header_row: T::Boolean).void }
+  def initialize(headers, fields, header_row); end
 
   # If a two-element [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
   # is provided, it is assumed to be a header and field and the pair is
@@ -1164,6 +1171,11 @@ end
 #
 # All tables returned by [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
 # will be constructed from this class, if header row processing is activated.
+CSVRowModeElem = T.type_alias { CSV::Row }
+CSVColumnModeElem = T.type_alias { T::Array[T.nilable(BasicObject)] }
+CSVRowModeTable = T.type_alias { CSV::Table[CSVRowModeElem] }
+CSVColumnModeTable = T.type_alias { CSV::Table[CSVColumnModeElem] }
+
 class CSV::Table < Object
   include Enumerable
 
@@ -1201,9 +1213,15 @@ class CSV::Table < Object
   # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html).
   #
   # This method returns the table for chaining.
+  sig do
+    params(
+      row_or_array: T.any(CSV::Row, T::Array[T.nilable(BasicObject)])
+    ).returns(T.self_type)
+  end
   def <<(row_or_array); end
 
   # Returns `true` if all rows of this table ==() `other`'s rows.
+  sig { params(other: CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]).returns(T::Boolean) }
   def ==(other); end
 
   # In the default mixed mode, this method returns rows for index access and
@@ -1217,6 +1235,9 @@ class CSV::Table < Object
   # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of values.
   # Altering that [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) has
   # no effect on the table.
+  sig { params(index_or_header: Integer).returns(T.nilable(Elem)) }
+  sig { params(index_or_header: T::Range[Integer]).returns(T::Array[Elem]) }
+  sig { params(index_or_header: BasicObject).returns(CSVColumnModeElem) }
   def [](index_or_header); end
 
   # In the default mixed mode, this method assigns rows for index access and
@@ -1240,6 +1261,7 @@ class CSV::Table < Object
   #
   # Assigning to an existing column or row clobbers the data. Assigning to new
   # columns creates them at the right end of the table.
+  sig{ type_parameters(:V).params(index_or_header: BasicObject, value: T.type_parameter(:V)).returns(T.type_parameter(:V)) }
   def []=(index_or_header, value); end
 
   # Returns a duplicate table object, in column mode. This is handy for chaining
@@ -1249,12 +1271,14 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
+  sig { returns(CSVColumnModeTable) }
   def by_col; end
 
   # Switches the mode of this table to column mode. All calls to indexing and
   # iteration methods will work with columns until the mode is changed again.
   #
   # This method returns the table and is safe to chain.
+  sig { returns(CSVColumnModeTable) }
   def by_col!; end
 
   # Returns a duplicate table object, in mixed mode. This is handy for chaining
@@ -1264,6 +1288,7 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
+  sig { returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
   def by_col_or_row; end
 
   # Switches the mode of this table to mixed mode. All calls to indexing and
@@ -1272,6 +1297,7 @@ class CSV::Table < Object
   # reference while anything else is assumed to be column access by headers.
   #
   # This method returns the table and is safe to chain.
+  sig { returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
   def by_col_or_row!; end
 
   # Returns a duplicate table object, in row mode. This is handy for chaining in
@@ -1281,12 +1307,14 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
+  sig { returns(CSVRowModeTable) }
   def by_row; end
 
   # Switches the mode of this table to row mode. All calls to indexing and
   # iteration methods will work with rows until the mode is changed again.
   #
   # This method returns the table and is safe to chain.
+  sig { returns(CSVRowModeTable) }
   def by_row!; end
 
   # Removes and returns the indicated columns or rows. In the default mixed mode
@@ -1296,7 +1324,12 @@ class CSV::Table < Object
   # or
   # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!()
   # to force the lookup.
-  def delete(index_or_header); end
+  sig do
+    params(
+      indexes_or_headers: BasicObject
+    ).returns(T.any(T.nilable(Elem), T::Array[T.nilable(Elem)]))
+  end
+  def delete(*indexes_or_headers); end
 
   # Removes any column or row for which the block returns `true`. In the default
   # mixed mode or row mode, iteration is the standard row major walking of rows.
@@ -1309,7 +1342,13 @@ class CSV::Table < Object
   # If no block is given, an
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
   # returned.
-  def delete_if(&block); end
+  sig { params(blk: T.proc.params(arg0: T.untyped).returns(BasicObject)).returns(T.self_type) }
+  sig { returns(T::Enumerator[T.untyped]) }
+  def delete_if(&blk); end
+
+  sig { params(index_or_header: BasicObject).returns(Elem) }
+  sig { params(index_or_header: BasicObject, index_or_headers: BasicObject).returns(T.nilable(BasicObject)) }
+  def dig(index_or_header, *index_or_headers); end
 
   # In the default mixed mode or row mode, iteration is the standard row major
   # walking of rows. In column mode, iteration will `yield` two element tuples
@@ -1329,10 +1368,12 @@ class CSV::Table < Object
   # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) passed to
   # [`CSV::Table.new`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-c-new)
   # is returned for empty tables.
+  sig { returns(T::Array[BasicObject]) }
   def headers; end
 
   # Shows the mode and size of this table in a US-ASCII
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  sig { returns(String) }
   def inspect; end
 
   # The current access mode for indexing and iteration.
@@ -1353,6 +1394,7 @@ class CSV::Table < Object
   # Returns the table as an
   # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays. Headers
   # will be the first row, then all of the field rows will follow.
+  sig { returns(T::Array[T::Array[T.nilable(BasicObject)]]) }
   def to_a; end
 
   # Returns the table as a complete
@@ -1366,11 +1408,13 @@ class CSV::Table < Object
   #
   # Also aliased as:
   # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-to_s)
-  def to_csv(write_headers: _, **options); end
+  sig { params(write_headers: T::Boolean, options: T.untyped).returns(String) }
+  def to_csv(write_headers: true, **options); end
 
   # Alias for:
   # [`to_csv`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-to_csv)
-  def to_s(write_headers: _, **options); end
+  sig { params(write_headers: T::Boolean, options: T.untyped).returns(String) }
+  def to_s(write_headers: true, **options); end
 
   # The mixed mode default is to treat a list of indices as row access,
   # returning the rows indicated. Anything else is considered columnar access.
@@ -1384,6 +1428,11 @@ class CSV::Table < Object
   # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!().
   #
   # You cannot mix column and row access.
+  sig do
+    params(
+      indices_or_headers: BasicObject
+    ).returns(T.any(T.nilable(Elem), T::Array[T.nilable(Elem)]))
+  end
   def values_at(*indices_or_headers); end
 end
 
