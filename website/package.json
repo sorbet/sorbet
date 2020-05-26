@@ -13,7 +13,7 @@
     "prettier-check": "prettier --check './**/*.js' './**/*.css' './**/*.md'"
   },
   "devDependencies": {
-    "docusaurus": "^1.10.0",
+    "docusaurus": "^1.11.1",
     "prettier": "1.18.2"
   },
   "dependencies": {
