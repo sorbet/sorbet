@@ -2,8 +2,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://sorbet.org/blog</id>
     <title>Sorbet Blog</title>
-    <updated>2019-12-20T06:00:00Z</updated>
-    <generator>Feed for Node.js</generator>
+    <updated>2019-12-20T06:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
@@ -11,9 +11,8 @@
     <entry>
         <title type="html"><![CDATA[Announcing Sorbet 0.5]]></title>
         <id>https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5.html</id>
-        <link href="https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5.html">
-        </link>
-        <updated>2019-12-20T06:00:00Z</updated>
+        <link href="https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5.html"/>
+        <updated>2019-12-20T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Today we’re excited to celebrate six months since Sorbet’s open source release!</p>
 <p>Sorbet is a fast, powerful type checker for Ruby developed by Stripe and an
 ever-growing community of contributors. You can <a href="https://sorbet.run">try it online</a> or
@@ -25,15 +24,15 @@ first public release of Sorbet, and what’s coming in the future.</p>
 ]]></summary>
         <author>
             <name>Jake Zimmerman</name>
+            <email/>
             <uri>https://twitter.com/jez_io</uri>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[Open-sourcing Sorbet: a fast, powerful type checker for Ruby]]></title>
         <id>https://sorbet.org/blog/2019/06/20/open-sourcing-sorbet.html</id>
-        <link href="https://sorbet.org/blog/2019/06/20/open-sourcing-sorbet.html">
-        </link>
-        <updated>2019-06-20T06:00:00Z</updated>
+        <link href="https://sorbet.org/blog/2019/06/20/open-sourcing-sorbet.html"/>
+        <updated>2019-06-20T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>We’re excited to announce that Sorbet is now <a href="https://github.com/sorbet/sorbet">open source</a> and you can try it
 today. Sorbet is a fast, powerful type checker designed for Ruby. It scales to
 codebases with millions of lines of code and can be adopted incrementally.</p>
@@ -45,14 +44,16 @@ community. In fact, we’ve had more than 30 companies beta test Sorbet and
 provide feedback.</p>
 ]]></summary>
         <author>
+            <name/>
+            <email/>
+            <uri/>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[State of Sorbet Spring 2019]]></title>
         <id>https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html</id>
-        <link href="https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html">
-        </link>
-        <updated>2019-05-16T06:00:00Z</updated>
+        <link href="https://sorbet.org/blog/2019/05/16/state-of-sorbet-spring-2019.html"/>
+        <updated>2019-05-16T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Stripe uses Ruby extensively<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>. It’s the main language we use to build
 the business logic behind our APIs, and our Ruby codebase is on the order of
 millions of lines of code. At that scale and with our expected rapid growth rate
@@ -82,6 +83,7 @@ work. <a href="#fnref1" class="footnote-backref">↩</a></p>
 ]]></summary>
         <author>
             <name>James Iry</name>
+            <email/>
             <uri>https://twitter.com/jamesiry</uri>
         </author>
     </entry>
