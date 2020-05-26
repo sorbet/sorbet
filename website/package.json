@@ -13,7 +13,7 @@
     "prettier-check": "prettier --check './**/*.js' './**/*.css' './**/*.md'"
   },
   "devDependencies": {
-    "docusaurus": "^1.11.1",
+    "docusaurus": "^1.14.0",
     "prettier": "1.18.2"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
   },
   "resolutions": {
     "**/underscore.string": "^3.3.5",
-    "**/minimist": "^1.2.2"
+    "**/minimist": "^1.2.2",
+    "**/kind-of": "^6.0.3"
   }
 }
