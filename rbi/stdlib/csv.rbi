@@ -1203,7 +1203,8 @@ class CSV::Table < Object
   # *   empty?()
   # *   length()
   # *   size()
-  def self.new(array_of_rows); end
+  sig { params(array_of_rows: T::Array[CSV::Row], headers: T::Array[BasicObject]).returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
+  def self.new(array_of_rows, headers: nil); end
 
   # Adds a new row to the bottom end of this table. You can provide an
   # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), which will be

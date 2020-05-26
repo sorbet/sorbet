@@ -1,6 +1,12 @@
 # typed: true
 require 'csv'
 
+csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'], [2, 3])])
+T.assert_type!(csv, CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)])
+
+csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'], [2, 3])], headers: ['1', '2'])
+T.assert_type!(csv, CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)])
+
 csv = CSV.parse("1,2,3\n3,,abc\n5,6,1", { headers: true, converters: %i[numeric] })
 
 if csv.is_a?(CSV::Table)
