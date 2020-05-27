@@ -969,9 +969,6 @@ class SymbolDefiner {
             // All other methods default to public (their visibility might be changed later)
             symbol.data(ctx)->setPublic();
         }
-
-        // ctx.state.tracer().debug("Inserting method {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx),
-        //                         symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return symbol;
     }
 
@@ -1072,10 +1069,6 @@ class SymbolDefiner {
             ctx.state.staticInitForClass(symbol, core::Loc(ctx.file, klass.loc));
         }
 
-        // ctx.state.tracer().debug("Inserting class {} ({}) on {} ({})", symbol.data(ctx)->name.toString(ctx),
-        // symbol._id,
-        //                         ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
-
         return symbol;
     }
 
@@ -1150,7 +1143,6 @@ class SymbolDefiner {
             sym.data(ctx)->setTypeAlias();
         }
 
-        // ctx.state.tracer().debug("Defining static field symbol {}", sym.toString(ctx));
         return sym;
     }
 
@@ -1243,8 +1235,6 @@ class SymbolDefiner {
                     ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, typeMember.asgnLoc), context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
             }
-
-            // ctx.state.tracer().debug("Defining type member {}", sym.toString(ctx));
         }
 
         if (typeMember.isFixed) {
@@ -1449,9 +1439,6 @@ public:
                 klass->symbol = klassSymbol;
             }
         }
-
-        // ctx.state.tracer().debug("Using class {} ({}) on {} ({})", klass->symbol.data(ctx)->name.toString(ctx),
-        //                         klass->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return klass;
     }
 
@@ -1548,9 +1535,6 @@ public:
         ENFORCE(sym.exists());
         method->symbol = sym;
         method->args = fillInArgs(ctx.withOwner(method->symbol), move(parsedArgs), std::move(method->args));
-
-        // ctx.state.tracer().debug("Using method {} ({}) on {} ({})", method->symbol.data(ctx)->name.toString(ctx),
-        //                         method->symbol._id, ctx.owner.data(ctx)->name.toString(ctx), ctx.owner._id);
         return method;
     }
 
