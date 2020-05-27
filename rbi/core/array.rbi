@@ -1060,7 +1060,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(T::Enumerator[[Elem,Integer]])}
   def each_with_index(&blk); end
   
   # Returns `true` if `self` contains no elements.
