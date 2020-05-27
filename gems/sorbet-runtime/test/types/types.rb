@@ -376,6 +376,27 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
+      it 'works if the range has no start' do
+        type = T::Range[Integer]
+        value = (nil...10)
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
+      it 'works if the range has no end' do
+        type = T::Range[Integer]
+        value = (1...nil)
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
+      it 'works if the range has no start or end' do
+        type = T::Range[Integer]
+        value = (nil...nil)
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
       it 'fails if the type is wrong' do
         type = T::Range[Float]
         value = (3...10)
