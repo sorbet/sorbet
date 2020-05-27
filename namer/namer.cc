@@ -41,27 +41,22 @@ enum class DefinitionKind : u1 {
 };
 
 class FoundDefinitionRef final {
+    DefinitionKind _kind;
     u4 _id;
 
-    // Store DefinitionKind in upper 8 bits of idx.
-    static u4 mask(DefinitionKind kind, u4 idx) {
-        return (u4)kind << 28 | idx;
-    }
-
 public:
+    FoundDefinitionRef(DefinitionKind kind, u4 idx) : _kind(kind), _id(idx) {}
     FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::None, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
-
-    FoundDefinitionRef(DefinitionKind kind, u4 idx) : _id(mask(kind, idx)) {}
 
     static FoundDefinitionRef root() {
         return FoundDefinitionRef(DefinitionKind::Root, 0);
     }
 
     DefinitionKind kind() const {
-        return (DefinitionKind)(_id >> 28);
+        return _kind;
     }
 
     bool exists() const {
@@ -69,8 +64,7 @@ public:
     }
 
     u4 idx() const {
-        // Mask top bits.
-        return _id & 0x0FFFFFFF;
+        return _id;
     }
 
     FoundClassRef &klassRef(FoundDefinitions &foundDefs);
@@ -88,7 +82,7 @@ public:
     FoundTypeMember &typeMember(FoundDefinitions &foundDefs);
     const FoundTypeMember &typeMember(const FoundDefinitions &foundDefs) const;
 
-    core::SymbolRef symbol(const FoundDefinitions &foundDefs) const;
+    core::SymbolRef symbol() const;
 };
 
 struct FoundClassRef final {
@@ -161,8 +155,6 @@ class FoundDefinitions final {
     vector<FoundStaticField> _staticFields;
     // Contains all type members defined in the file.
     vector<FoundTypeMember> _typeMembers;
-    // Contains all symbol references in the file.
-    vector<core::SymbolRef> _symbols;
     // Contains all method and class modifiers (e.g. private/public/protected).
     vector<Modifier> _modifiers;
 
@@ -208,9 +200,7 @@ public:
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        const u4 idx = _symbols.size();
-        _symbols.emplace_back(move(symbol));
-        return FoundDefinitionRef(DefinitionKind::Symbol, idx);
+        return FoundDefinitionRef(DefinitionKind::Symbol, symbol._id);
     }
 
     void addModifier(Modifier &&mod) {
@@ -291,10 +281,9 @@ const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &fo
     return foundDefs._typeMembers[idx()];
 }
 
-core::SymbolRef FoundDefinitionRef::symbol(const FoundDefinitions &foundDefs) const {
+core::SymbolRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == DefinitionKind::Symbol);
-    ENFORCE(foundDefs._symbols.size() > idx());
-    return foundDefs._symbols[idx()];
+    return core::SymbolRef(nullptr, _id);
 }
 
 struct SymbolFinderResult {
@@ -645,7 +634,7 @@ class SymbolDefiner {
             case DefinitionKind::Root:
                 return core::Symbols::root();
             case DefinitionKind::Symbol: {
-                return name.symbol(*foundDefs);
+                return name.symbol();
             }
             case DefinitionKind::ClassRef: {
                 auto &klassRef = name.klassRef(*foundDefs);
@@ -663,7 +652,7 @@ class SymbolDefiner {
             case DefinitionKind::Root:
                 return core::Symbols::root();
             case DefinitionKind::Symbol:
-                return ref.symbol(*foundDefs);
+                return ref.symbol();
             case DefinitionKind::Class:
                 ENFORCE(ref.idx() < definedClasses.size());
                 return definedClasses[ref.idx()];
