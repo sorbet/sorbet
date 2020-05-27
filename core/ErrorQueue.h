@@ -2,7 +2,7 @@
 #define SORBET_ERROR_QUEUE_H
 
 #include "common/concurrency/ConcurrentQueue.h"
-#include "core/ErrorFlusher.h"
+#include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
 #include "core/lsp/QueryResponse.h"
 #include <atomic>
@@ -17,7 +17,7 @@ private:
     std::vector<std::unique_ptr<ErrorQueueMessage>> drainAll();
     std::vector<std::unique_ptr<ErrorQueueMessage>> drainFlushed();
     void collectForFile(core::FileRef whatFile, std::vector<std::unique_ptr<core::ErrorQueueMessage>> &out);
-    ErrorFlusher errorFlusher;
+    ErrorFlusherStdout errorFlusher;
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<core::ErrorQueueMessage>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
