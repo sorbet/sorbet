@@ -2,6 +2,7 @@
 #include "common/FileSystem.h"
 #include "common/Timer.h"
 #include "core/Error.h"
+#include "core/ErrorFlusherStdout.h"
 
 namespace sorbet::core {
 
@@ -33,7 +34,9 @@ u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
 using namespace std;
 
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
-    : owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+    : owner(this_thread::get_id()), logger(logger), tracer(tracer) {
+    ErrorFlusherStdout errorFlusher;
+};
 
 ErrorQueue::~ErrorQueue() {
     if (owner == this_thread::get_id()) {
@@ -99,15 +102,15 @@ void ErrorQueue::flushErrors(bool all) {
     } else {
         errors = drainFlushed();
     }
-    errorFlusher.flushErrors(logger, move(errors));
+    errorFlusher->flushErrors(logger, move(errors));
 }
 
 void ErrorQueue::flushErrorCount() {
-    errorFlusher.flushErrorCount(logger, nonSilencedErrorCount);
+    errorFlusher->flushErrorCount(logger, nonSilencedErrorCount);
 }
 
 void ErrorQueue::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
-    errorFlusher.flushAutocorrects(gs, fs);
+    errorFlusher->flushAutocorrects(gs, fs);
 }
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
