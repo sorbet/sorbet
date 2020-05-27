@@ -1037,6 +1037,32 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def each_index(&blk); end
 
+  # Same as Enumerator#with_index(0), i.e. there is no starting offset.
+  #
+  # If no block is given, a new [`Enumerator`](https://apidock.com/ruby/Enumerator) is
+  # returned that includes the index.
+  #
+  # ```ruby
+  # a = [ "a", "b", "c" ]
+  # a.each_with_index {|x, i| puts "value: #{x}, index: #{i}" }
+  # ```
+  #
+  # produces:
+  #
+  # ```
+  # value: a, index: 0
+  # value: b, index: 1
+  # value: c, index: 2
+  # ```
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject),
+    )
+    .returns(T::Array[Elem])
+  end
+  sig {returns(T::Enumerator[[Elem,Integer]])}
+  def each_with_index(&blk); end
+  
   # Returns `true` if `self` contains no elements.
   #
   # ```ruby
