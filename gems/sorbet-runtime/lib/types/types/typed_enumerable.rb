@@ -50,7 +50,7 @@ module T::Types
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         return true
       when Range
-        @type.valid?(obj.first) && @type.valid?(obj.last)
+        @type.valid?(obj.begin) && @type.valid?(obj.end)
       when Set
         obj.each do |item|
           return false unless @type.valid?(item)
