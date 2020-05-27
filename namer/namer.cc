@@ -617,7 +617,7 @@ public:
 };
 
 /**
- * Defines symbols for all of the names found via SymbolFinder. Single threaded.
+ * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
     unique_ptr<const FoundDefinitions> foundDefs;
@@ -625,19 +625,19 @@ class SymbolDefiner {
     vector<core::SymbolRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
-    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef name, core::SymbolRef owner) {
+    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::SymbolRef owner) {
         // Prerequisite: Owner is a class or module.
         ENFORCE(owner.data(ctx)->isClassOrModule());
-        switch (name.kind()) {
+        switch (ref.kind()) {
             case DefinitionKind::None:
                 return owner;
             case DefinitionKind::Root:
                 return core::Symbols::root();
             case DefinitionKind::Symbol: {
-                return name.symbol();
+                return ref.symbol();
             }
             case DefinitionKind::ClassRef: {
-                auto &klassRef = name.klassRef(*foundDefs);
+                auto &klassRef = ref.klassRef(*foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
@@ -646,7 +646,7 @@ class SymbolDefiner {
         }
     }
 
-    // Get the symbol for an already-defined owner. Limited to names that can own things (classes and methods).
+    // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::SymbolRef getOwnerSymbol(FoundDefinitionRef ref) {
         switch (ref.kind()) {
             case DefinitionKind::Root:
@@ -959,8 +959,8 @@ class SymbolDefiner {
         return sym;
     }
 
-    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethod &name) {
-        auto symbol = defineMethod(ctx, name);
+    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
+        auto symbol = defineMethod(ctx, method);
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
