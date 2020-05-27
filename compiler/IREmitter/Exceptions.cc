@@ -18,6 +18,9 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     auto *currentFunc = blockMap.rubyBlocks2Functions[rubyBlockId];
     auto *nil = Payload::rubyNil(cs, build);
 
+    auto *pc = builder.CreateLoad(blockMap.lineNumberPtrsByFunction[rubyBlockId]);
+    auto *iseq_encoded = builder.CreateLoad(blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
+
     // 1. Write a nil to `exceptionValue` to make sure that it's properly initialized, and fetch the current exception
     // value so that we can restore it later.
     Payload::varSet(cs, exceptionValue, nil, builder, blockMap, aliases, rubyBlockId);
@@ -27,9 +30,9 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     // `exceptionValue`
     auto *bodyFunction = blockMap.rubyBlocks2Functions[bodyRubyBlockId];
     auto *exceptionResultPtr = builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
-    builder.CreateStore(nil, exceptionResultPtr);
-    auto *exceptionRaised = builder.CreateCall(cs.module->getFunction("sorbet_try"),
-                                               {bodyFunction, closure, exceptionResultPtr}, "exceptionRaised");
+    auto *exceptionRaised =
+        builder.CreateCall(cs.module->getFunction("sorbet_try"),
+                           {bodyFunction, pc, iseq_encoded, closure, exceptionResultPtr}, "exceptionRaised");
     auto *exceptionResult = builder.CreateLoad(exceptionResultPtr);
     Payload::varSet(cs, exceptionValue, exceptionResult, builder, blockMap, aliases, rubyBlockId);
 
@@ -53,7 +56,7 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     // Run the handler with sorbet_ensure, so that we always cleanup the VM exception state, and run the ensure block.
     auto *handler = builder.CreateSelect(exceptionRaised, handlersFunction, elseFunction, "handler");
     builder.CreateCall(cs.module->getFunction("sorbet_ensure"),
-                       {handler, ensureFunction, previousException, exceptionResult, closure});
+                       {handler, ensureFunction, previousException, exceptionResult, pc, iseq_encoded, closure});
 
     // 4. Re-raise the exception value if it wasn't handled.
     {

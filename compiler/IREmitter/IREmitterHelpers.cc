@@ -179,41 +179,121 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
     return maxSendArgCount;
 }
 
-vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func) {
+vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
+                                                        const vector<FunctionType> &blockTypes) {
     vector<llvm::Function *> res;
     res.emplace_back(func);
-    auto ft = cs.getRubyBlockFFIType();
+    auto *bt = cs.getRubyBlockFFIType();
+    auto *et = cs.getRubyExceptionFFIType();
     for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
-        auto fp = llvm::Function::Create(ft, llvm::Function::InternalLinkage,
-                                         llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
-        {
-            // setup argument names
-            // setup function argument names
-            fp->arg_begin()->setName("firstYieldArgRaw");
-            (fp->arg_begin() + 1)->setName("captures");
-            (fp->arg_begin() + 2)->setName("argc");
-            (fp->arg_begin() + 3)->setName("argArray");
-            (fp->arg_begin() + 4)->setName("blockArg");
+        switch (blockTypes[i]) {
+            case FunctionType::TopLevel:
+                res.emplace_back(func);
+                break;
+
+            case FunctionType::Block: {
+                auto *fp =
+                    llvm::Function::Create(bt, llvm::Function::InternalLinkage,
+                                           llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
+                // setup argument names
+                fp->arg_begin()->setName("firstYieldArgRaw");
+                (fp->arg_begin() + 1)->setName("captures");
+                (fp->arg_begin() + 2)->setName("argc");
+                (fp->arg_begin() + 3)->setName("argArray");
+                (fp->arg_begin() + 4)->setName("blockArg");
+                res.emplace_back(fp);
+            } break;
+
+            // NOTE: explicitly treating Unused functions like Exception functions, as they'll be collected by llvm
+            // anyway.
+            case FunctionType::Exception:
+            case FunctionType::Unused: {
+                auto *fp =
+                    llvm::Function::Create(et, llvm::Function::InternalLinkage,
+                                           llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
+
+                // argument names
+                fp->arg_begin()->setName("pc");
+                (fp->arg_begin() + 1)->setName("iseq_encoded");
+                (fp->arg_begin() + 2)->setName("captures");
+
+                res.emplace_back(fp);
+            } break;
         }
-        res.emplace_back(fp);
     }
     return res;
 };
+
+// Returns the mapping of ruby block id to function type, as well as the mapping from basic block to exception handling
+// body block id.
+void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &exceptionHandlingBlockHeaders,
+                         vector<int> &basicBlockJumpOverrides) {
+    // ruby block 0 is always the top-level of the method being compiled
+    blockTypes[0] = FunctionType::TopLevel;
+
+    for (auto &b : cfg.basicBlocks) {
+        if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
+            blockTypes[b->rubyBlockId] = FunctionType::Block;
+        } else if (b->bexit.cond.variable._name == core::Names::exceptionValue()) {
+            auto *bodyBlock = b->bexit.elseb;
+            auto *handlersBlock = b->bexit.thenb;
+
+            // the relative block ids of blocks that are involved in the translation of an exception handling block.
+            auto bodyBlockId = bodyBlock->rubyBlockId;
+            auto handlersBlockId = bodyBlockId + 1;
+            auto ensureBlockId = bodyBlockId + 2;
+            auto elseBlockId = bodyBlockId + 3;
+
+            // `b` is the exception handling header block if the two branches from it have the sequential ids we would
+            // expect for the handler and body blocks. The reason we bail out here if this isn't the case is because
+            // there are other blocks within the translation that will also jump based on the value of the same
+            // exception value variable.
+            if (handlersBlock->rubyBlockId != handlersBlockId) {
+                continue;
+            }
+
+            auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId);
+            auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId);
+
+            // Because of the way the CFG is constructed, we'll either have an else bock, and ensure block, or both
+            // present. It's currently not possible to end up with neither.
+            ENFORCE(elseBlock || ensureBlock);
+
+            {
+                // Find the exit block for exception handling so that we can redirect the header to it.
+                auto *exit = ensureBlock == nullptr ? elseBlock : ensureBlock;
+                auto exits = CFGHelpers::findRubyBlockExits(cfg, exit->rubyBlockId);
+
+                // The ensure block should only ever jump to the code that follows the begin/end block.
+                ENFORCE(exits.size() == 1);
+
+                // Have the entry block jump over all of the exception handling machinery.
+                basicBlockJumpOverrides[handlersBlock->id] = exits.front()->id;
+                basicBlockJumpOverrides[bodyBlock->id] = exits.front()->id;
+            }
+
+            exceptionHandlingBlockHeaders[b->id] = bodyBlockId;
+
+            blockTypes[bodyBlockId] = FunctionType::Exception;
+            blockTypes[handlersBlockId] = FunctionType::Exception;
+
+            if (elseBlock) {
+                blockTypes[elseBlockId] = FunctionType::Exception;
+            }
+
+            if (ensureBlock) {
+                blockTypes[ensureBlockId] = FunctionType::Exception;
+            }
+        }
+    }
+
+    return;
+}
 
 BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                  unique_ptr<ast::MethodDef> &md,
                                                                  UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                                  llvm::Function *mainFunc) {
-    vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc);
-    const int maxSendArgCount = getMaxSendArgCount(cfg);
-    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg);
-    vector<llvm::BasicBlock *> functionInitializersByFunction;
-    vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
-    vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
-    vector<llvm::AllocaInst *> sendArgArrays;
-    vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
-    vector<llvm::Value *> escapedClosure;
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
     vector<int> basicBlockRubyBlockId(cfg.maxBasicBlockId, 0);
     llvm::IRBuilder<> builder(cs);
@@ -226,6 +306,23 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
             basicBlockRubyBlockId[bb->id] = bb->rubyBlockId;
         }
     }
+
+    vector<FunctionType> blockTypes(cfg.maxRubyBlockId + 1, FunctionType::Unused);
+    vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId + 1, 0);
+    determineBlockTypes(cfg, blockTypes, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
+
+    vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes);
+
+    const int maxSendArgCount = getMaxSendArgCount(cfg);
+    auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg);
+    vector<llvm::BasicBlock *> functionInitializersByFunction;
+    vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
+    vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
+    vector<llvm::AllocaInst *> sendArgArrays;
+    vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
+    vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
+    vector<llvm::Value *> escapedClosure;
+
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
     auto iseqEncodedPtrType = llvm::Type::getInt64PtrTy(cs);
@@ -237,16 +334,25 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
         auto sendArgArray = builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount),
                                                  nullptr, "callArgs");
         llvm::Value *localClosure = nullptr;
-        if (i == 0) {
-            if (!escapedVariableIndices.empty())
-                localClosure = builder.CreateCall(
-                    cs.module->getFunction("sorbet_allocClosureAsValue"),
-                    {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
-            else {
-                localClosure = Payload::rubyNil(cs, builder);
-            }
-        } else {
-            localClosure = fun->arg_begin() + 1;
+        switch (blockTypes[i]) {
+            case FunctionType::TopLevel:
+                if (!escapedVariableIndices.empty())
+                    localClosure = builder.CreateCall(
+                        cs.module->getFunction("sorbet_allocClosureAsValue"),
+                        {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
+                else {
+                    localClosure = Payload::rubyNil(cs, builder);
+                }
+                break;
+
+            case FunctionType::Block:
+                localClosure = fun->arg_begin() + 1;
+                break;
+
+            case FunctionType::Exception:
+            case FunctionType::Unused:
+                localClosure = fun->arg_begin() + 2;
+                break;
         }
         ENFORCE(localClosure != nullptr);
         escapedClosure.emplace_back(localClosure);
@@ -296,8 +402,6 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
         }
     }
 
-    vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId, false);
-
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
@@ -331,6 +435,10 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                 rubyBlockArgs[b->rubyBlockId][litType->value] = maybeCallOnLoadYieldArg.bind.variable;
             }
         } else if (b->bexit.cond.variable._name == core::Names::exceptionValue()) {
+            if (exceptionHandlingBlockHeaders[b->id] == 0) {
+                continue;
+            }
+
             auto *bodyBlock = b->bexit.elseb;
             auto *handlersBlock = b->bexit.thenb;
 
@@ -340,44 +448,14 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
             auto ensureBlockId = bodyBlockId + 2;
             auto elseBlockId = bodyBlockId + 3;
 
-            // `b` is the exception handling header block if the two branches from it have the sequential ids we would
-            // expect for the handler and body blocks. The reason we bail out here if this isn't the case is because
-            // there are other blocks within the translation that will also jump based on the value of the same
-            // exception value variable.
-            if (handlersBlock->rubyBlockId != handlersBlockId) {
-                continue;
-            }
-
-            auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId);
-            auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId);
-
-            // Because of the way the CFG is constructed, we'll either have an else bock, and ensure block, or both
-            // present. It's currently not possible to end up with neither.
-            ENFORCE(elseBlock || ensureBlock);
-
-            exceptionHandlingBlockHeaders[b->id] = bodyBlockId;
-
-            {
-                // Find the exit block for exception handling so that we can redirect the header to it.
-                auto *exit = ensureBlock == nullptr ? elseBlock : ensureBlock;
-                auto exits = CFGHelpers::findRubyBlockExits(cfg, exit->rubyBlockId);
-
-                // The ensure block should only ever jump to the code that follows the begin/end block.
-                ENFORCE(exits.size() == 1);
-
-                // Have the entry block jump over all of the exception handling machinery.
-                basicBlockJumpOverrides[handlersBlock->id] = exits.front()->id;
-                basicBlockJumpOverrides[bodyBlock->id] = exits.front()->id;
-            }
-
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];
 
-            if (elseBlock != nullptr) {
+            if (auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId)) {
                 userEntryBlockByFunction[elseBlockId] = llvmBlocks[elseBlock->id];
             }
 
-            if (ensureBlock != nullptr) {
+            if (auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId)) {
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
         }
@@ -401,6 +479,7 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
                                 move(blockLinks),
                                 move(rubyBlockArgs),
                                 move(rubyBlock2Function),
+                                move(blockTypes),
                                 move(lineNumberPtrsByFunction),
                                 move(iseqEncodedPtrsByFunction),
                                 usesBlockArgs,

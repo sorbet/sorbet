@@ -5,6 +5,20 @@
 
 namespace sorbet::compiler {
 
+enum class FunctionType {
+    // Top-level methods
+    TopLevel,
+
+    // Blocks used within a method
+    Block,
+
+    // Functions extracted for part of exception
+    Exception,
+
+    // The type of blocks that aren't reference, and should be skipped during code generation
+    Unused,
+};
+
 // We probably want to rename this something more like IREmitterContext, because that's what it's grown into being.
 //
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
@@ -106,6 +120,11 @@ struct BasicBlockMap {
     //
     // idx: cfg::BasicBlock::rubyBlockId
     std::vector<llvm::Function *> rubyBlocks2Functions;
+
+    // The type of each function that we're going to generate.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    std::vector<FunctionType> rubyBlockType;
 
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;

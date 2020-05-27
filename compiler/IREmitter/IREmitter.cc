@@ -28,20 +28,47 @@ namespace {
 
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const BasicBlockMap &blockMap) {
-    if (blockId != 0) {
-        if (auto blockLink = blockMap.blockLinks[blockId]) {
-            return blockLink->argFlags;
-        } else {
-            // When no block link exists, this is a ruby block that was generated from a context other than a send.
-            return {};
-        }
+    auto ty = blockMap.rubyBlockType[blockId];
+    ENFORCE(ty == FunctionType::Block || ty == FunctionType::TopLevel);
+
+    if (ty == FunctionType::Block) {
+        auto blockLink = blockMap.blockLinks[blockId];
+        return blockLink->argFlags;
     }
+
     vector<core::ArgInfo::ArgFlags> res;
     for (auto &argInfo : method.data(cs)->arguments()) {
         res.emplace_back(argInfo.flags);
     }
 
     return res;
+}
+
+void setupStackFrame(CompilerState &cs, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
+                     llvm::IRBuilderBase &build, int rubyBlockId) {
+    llvm::IRBuilder<> builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    switch (blockMap.rubyBlockType[rubyBlockId]) {
+        case FunctionType::TopLevel:
+        case FunctionType::Block: {
+            // Switch the current control frame from a C frame to a Ruby-esque one
+            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
+            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
+            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
+        } break;
+
+        case FunctionType::Exception: {
+            // Exception functions get their pc and iseq_encoded values as arguments
+            auto func = blockMap.rubyBlocks2Functions[rubyBlockId];
+            auto *pc = func->arg_begin();
+            auto *iseq_encoded = func->arg_begin() + 1;
+            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
+            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
+        } break;
+
+        case FunctionType::Unused:
+            break;
+    }
 }
 
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
@@ -52,328 +79,266 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
     for (auto rubyBlockId = 0; rubyBlockId < blockMap.rubyBlocks2Functions.size(); rubyBlockId++) {
         builder.SetInsertPoint(blockMap.argumentSetupBlocksByFunction[rubyBlockId]);
 
-        // If this was a block that was allocated during CFG construction, but got simplified away, it will not have an
-        // entry in the mapping from rubyBlockId to entry basic block. In this case we can just skip it, and mark its
-        // body as unreachable.
-        if (blockMap.userEntryBlockByFunction[rubyBlockId] == nullptr) {
-            // Mark the argument setup block as unreahable, as this function will never be called.
-            builder.CreateUnreachable();
-            continue;
-        }
+        auto blockType = blockMap.rubyBlockType[rubyBlockId];
+        if (blockType == FunctionType::TopLevel || blockType == FunctionType::Block) {
+            auto func = blockMap.rubyBlocks2Functions[rubyBlockId];
+            cs.functionEntryInitializers = blockMap.functionInitializersByFunction[rubyBlockId];
+            auto maxPositionalArgCount = 0;
+            auto minPositionalArgCount = 0;
+            auto isBlock = blockType == FunctionType::Block;
+            auto hasRestArgs = false;
+            auto hasKWArgs = false;
+            auto hasKWRestArgs = false;
+            llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
+            llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
+            llvm::Value *hashArgs;
 
-        auto func = blockMap.rubyBlocks2Functions[rubyBlockId];
-        cs.functionEntryInitializers = blockMap.functionInitializersByFunction[rubyBlockId];
-        auto maxPositionalArgCount = 0;
-        auto minPositionalArgCount = 0;
-        auto isBlock = rubyBlockId != 0;
-        auto hasRestArgs = false;
-        auto hasKWArgs = false;
-        auto hasKWRestArgs = false;
-        llvm::Value *argCountRaw = !isBlock ? func->arg_begin() : func->arg_begin() + 2;
-        llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
-        llvm::Value *hashArgs;
+            core::LocalVariable blkArgName;
+            core::LocalVariable restArgName;
+            core::LocalVariable kwRestArgName;
 
-        core::LocalVariable blkArgName;
-        core::LocalVariable restArgName;
-        core::LocalVariable kwRestArgName;
-
-        auto argsFlags = getArgFlagsForBlockId(cs, rubyBlockId, cfg.symbol, blockMap);
-        {
-            auto argId = -1;
-            ENFORCE(argsFlags.size() == blockMap.rubyBlockArgs[rubyBlockId].size());
-            for (auto &argFlags : argsFlags) {
-                argId += 1;
-                if (argFlags.isKeyword) {
-                    hasKWArgs = true;
+            auto argsFlags = getArgFlagsForBlockId(cs, rubyBlockId, cfg.symbol, blockMap);
+            {
+                auto argId = -1;
+                ENFORCE(argsFlags.size() == blockMap.rubyBlockArgs[rubyBlockId].size());
+                for (auto &argFlags : argsFlags) {
+                    argId += 1;
+                    if (argFlags.isKeyword) {
+                        hasKWArgs = true;
+                        if (argFlags.isRepeated) {
+                            kwRestArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
+                            hasKWRestArgs = true;
+                        }
+                        continue;
+                    }
                     if (argFlags.isRepeated) {
-                        kwRestArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
-                        hasKWRestArgs = true;
+                        restArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
+                        hasRestArgs = true;
+                        continue;
                     }
-                    continue;
-                }
-                if (argFlags.isRepeated) {
-                    restArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
-                    hasRestArgs = true;
-                    continue;
-                }
-                if (argFlags.isDefault) {
+                    if (argFlags.isDefault) {
+                        maxPositionalArgCount += 1;
+                        continue;
+                    }
+                    if (argFlags.isBlock) {
+                        blkArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
+                        continue;
+                    }
                     maxPositionalArgCount += 1;
-                    continue;
-                }
-                if (argFlags.isBlock) {
-                    blkArgName = blockMap.rubyBlockArgs[rubyBlockId][argId];
-                    continue;
-                }
-                maxPositionalArgCount += 1;
-                minPositionalArgCount += 1;
-            }
-        }
-
-        hashArgs = Payload::rubyUndef(cs, builder);
-
-        if (hasKWArgs) {
-            // if last argument is a hash, it's not part of positional arguments - it's going to
-            // fullfill all kw arguments instead
-            auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
-            auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
-            auto afterHash = llvm::BasicBlock::Create(cs, "afterKWHash", func);
-            // checkForArgSize
-            auto argSizeForHashCheck = builder.CreateICmpUGE(
-                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "hashAttemptReadGuard");
-            builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
-
-            auto sizeTestFailedEnd = builder.GetInsertBlock();
-            builder.SetInsertPoint(hasEnoughArgs);
-            llvm::Value *argsWithoutHashCount =
-                builder.CreateSub(argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
-
-            llvm::Value *indices[] = {argsWithoutHashCount};
-
-            auto maybeHashValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "KWArgHash");
-
-            // checkIfLastArgIsHash
-            auto isHashValue =
-                Payload::typeTest(cs, builder, maybeHashValue, core::make_type<core::ClassType>(core::Symbols::Hash()));
-
-            builder.CreateCondBr(isHashValue, hasPassedHash, afterHash);
-
-            auto hashTypeFailedTestEnd = builder.GetInsertBlock();
-            builder.SetInsertPoint(hasPassedHash);
-            // yes, this is an empty block. It's used only for Phi node
-            auto hasPassedHashEnd = builder.GetInsertBlock();
-            builder.CreateBr(afterHash);
-            builder.SetInsertPoint(afterHash);
-            auto hashArgsPhi = builder.CreatePHI(builder.getInt64Ty(), 3, "hashArgsPhi");
-            auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
-            argcPhi->addIncoming(argCountRaw, sizeTestFailedEnd);
-            argcPhi->addIncoming(argCountRaw, hashTypeFailedTestEnd);
-            hashArgsPhi->addIncoming(hashArgs, sizeTestFailedEnd);
-            hashArgsPhi->addIncoming(hashArgs, hashTypeFailedTestEnd);
-            argcPhi->addIncoming(argsWithoutHashCount, hasPassedHashEnd);
-            hashArgsPhi->addIncoming(maybeHashValue, hasPassedHashEnd);
-
-            argCountRaw = argcPhi;
-            hashArgs = hashArgsPhi;
-        }
-
-        if (isBlock) {
-            if (minPositionalArgCount != 1) {
-                // blocks can expand their first argument in arg array
-                auto arrayTestBlock = llvm::BasicBlock::Create(cs, "argArrayExpandArrayTest", func);
-                auto argExpandBlock = llvm::BasicBlock::Create(cs, "argArrayExpand", func);
-                auto afterArgArrayExpandBlock = llvm::BasicBlock::Create(cs, "afterArgArrayExpand", func);
-                auto argSizeForExpansionCheck = builder.CreateICmpEQ(
-                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "arrayExpansionSizeGuard");
-                builder.CreateCondBr(argSizeForExpansionCheck, arrayTestBlock, afterArgArrayExpandBlock);
-                auto sizeTestEnd = builder.GetInsertBlock();
-                builder.SetInsertPoint(arrayTestBlock);
-                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
-                auto rawArg1Value =
-                    builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
-                auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
-                                                 core::make_type<core::ClassType>(core::Symbols::Array()));
-                auto typeTestEnd = builder.GetInsertBlock();
-
-                builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
-                builder.SetInsertPoint(argExpandBlock);
-                auto newArgArray = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayInnerPtr"),
-                                                      {rawArg1Value}, "expandedArgArray");
-                auto newArgc =
-                    builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayLen"), {rawArg1Value}, "expandedArgc");
-                auto expansionEnd = builder.GetInsertBlock();
-                builder.CreateBr(afterArgArrayExpandBlock);
-                builder.SetInsertPoint(afterArgArrayExpandBlock);
-                auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
-                argcPhi->addIncoming(argCountRaw, sizeTestEnd);
-                argcPhi->addIncoming(argCountRaw, typeTestEnd);
-                argcPhi->addIncoming(newArgc, expansionEnd);
-                argCountRaw = argcPhi;
-                auto argArrayPhi = builder.CreatePHI(llvm::Type::getInt64PtrTy(cs), 3, "argArrayPhi");
-                argArrayPhi->addIncoming(argArrayRaw, sizeTestEnd);
-                argArrayPhi->addIncoming(argArrayRaw, typeTestEnd);
-                argArrayPhi->addIncoming(newArgArray, expansionEnd);
-
-                argArrayRaw = argArrayPhi;
-            }
-            minPositionalArgCount = 0;
-            // blocks Can have 0 args always
-        }
-
-        auto numOptionalArgs = maxPositionalArgCount - minPositionalArgCount;
-        if (!isBlock) {
-            // validate arg count
-            auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
-            auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
-            auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
-
-            if (!hasRestArgs) {
-                auto tooManyArgs = builder.CreateICmpUGT(
-                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), "tooManyArgs");
-                auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
-                builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
-            } else {
-                builder.CreateBr(argCountSecondCheckBlock);
-            }
-
-            builder.SetInsertPoint(argCountSecondCheckBlock);
-            auto tooFewArgs = builder.CreateICmpULT(
-                argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)), "tooFewArgs");
-            auto expected2 = Payload::setExpectedBool(cs, builder, tooFewArgs, false);
-            builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
-
-            builder.SetInsertPoint(argCountFailBlock);
-            Payload::raiseArity(cs, builder, argCountRaw, minPositionalArgCount,
-                                hasRestArgs ? -1 : maxPositionalArgCount);
-
-            builder.SetInsertPoint(argCountSuccessBlock);
-        }
-
-        vector<llvm::BasicBlock *> checkBlocks;
-        vector<llvm::BasicBlock *> fillFromArgBlocks;
-        vector<llvm::BasicBlock *> fillFromDefaultBlocks;
-        {
-            // create blocks for arg filling
-            for (auto i = 0; i < numOptionalArgs + 1; i++) {
-                auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
-                checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
-                fillFromDefaultBlocks.emplace_back(
-                    llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
-                // Don't bother making the "Done" block for fillFromArgBlocks
-                if (i < numOptionalArgs) {
-                    fillFromArgBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
-                }
-            }
-        }
-        {
-            // fill local variables from args
-            auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
-            builder.CreateBr(fillRequiredArgs);
-            builder.SetInsertPoint(fillRequiredArgs);
-
-            // box `self`
-            if (!isBlock) {
-                auto selfArgRaw = func->arg_begin() + 2;
-                Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases,
-                                rubyBlockId);
-            }
-
-            for (auto i = 0; i < maxPositionalArgCount; i++) {
-                if (i >= minPositionalArgCount) {
-                    // if these are optional, put them in their own BasicBlock
-                    // because we might not run it
-                    auto &block = fillFromArgBlocks[i - minPositionalArgCount];
-                    builder.SetInsertPoint(block);
-                }
-                const auto a = blockMap.rubyBlockArgs[rubyBlockId][i];
-                if (!a._name.exists()) {
-                    cs.failCompilation(md->declLoc, "this method has a block argument construct that's not supported");
-                }
-
-                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
-                auto name = a._name.data(cs)->shortName(cs);
-                llvm::StringRef nameRef(name.data(), name.length());
-                auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-                Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
-                if (i >= minPositionalArgCount) {
-                    // check if we need to fill in the next variable from the arg
-                    builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
+                    minPositionalArgCount += 1;
                 }
             }
 
-            // make the last instruction in all the required args point at the first check block
-            builder.SetInsertPoint(fillRequiredArgs);
-            //
-            if (blkArgName.exists() && blockMap.usesBlockArgs) {
-                // TODO: I don't think this correctly handles blocks with block args
-                Payload::varSet(cs, blkArgName,
-                                builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
-                                blockMap, aliases, 0);
-            }
-            builder.CreateBr(checkBlocks[0]);
-        }
-        {
-            // build check blocks
-            for (auto i = 0; i < numOptionalArgs; i++) {
-                auto &block = checkBlocks[i];
-                builder.SetInsertPoint(block);
-                auto argCount = builder.CreateICmpEQ(
-                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minPositionalArgCount)),
-                    llvm::Twine("default") + llvm::Twine(i));
-                auto expected = Payload::setExpectedBool(cs, builder, argCount, false);
-                builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
-            }
-        }
-        auto optionalMethodIndex = 0;
-        {
-            // build fillFromDefaultBlocks
-            for (auto i = 0; i < numOptionalArgs; i++) {
-                auto &block = fillFromDefaultBlocks[i];
-                builder.SetInsertPoint(block);
-                if (!isBlock && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-                    md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
-                    // This method is already a default method so don't fill in
-                    // another other defaults for it or else it is turtles all the
-                    // way down
-                } else {
-                    llvm::Value *rawValue;
-                    if (!isBlock) {
-                        optionalMethodIndex++;
-                        auto argMethodName =
-                            cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
-                        ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
-                                                            to_string(optionalMethodIndex) + " does not exist");
-                        auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
-                        ENFORCE(argMethod.exists());
-                        auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
-                        rawValue =
-                            builder.CreateCall(fillDefaultFunc, {argCountRaw, argArrayRaw,
-                                                                 func->arg_begin() + 2 /* this is wrong for block*/});
-                    } else {
-                        rawValue = Payload::rubyNil(cs, builder);
-                    }
-                    auto argIndex = i + minPositionalArgCount;
-                    auto a = blockMap.rubyBlockArgs[rubyBlockId][argIndex];
+            hashArgs = Payload::rubyUndef(cs, builder);
 
-                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
-                }
-                builder.CreateBr(fillFromDefaultBlocks[i + 1]);
-            }
-        }
-        {
-            // Tie up all the "Done" blocks at the end
-            builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
-            builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
-            builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
-            if (hasRestArgs) {
-                Payload::varSet(cs, restArgName,
-                                Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
-                                builder, blockMap, aliases, rubyBlockId);
-            }
             if (hasKWArgs) {
-                for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
-                    if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
-                        auto name = blockMap.rubyBlockArgs[rubyBlockId][argId];
-                        auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
-                        auto rawRubySym = builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+                // if last argument is a hash, it's not part of positional arguments - it's going to
+                // fullfill all kw arguments instead
+                auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
+                auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
+                auto afterHash = llvm::BasicBlock::Create(cs, "afterKWHash", func);
+                // checkForArgSize
+                auto argSizeForHashCheck = builder.CreateICmpUGE(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "hashAttemptReadGuard");
+                builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
 
-                        auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
-                        auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
+                auto sizeTestFailedEnd = builder.GetInsertBlock();
+                builder.SetInsertPoint(hasEnoughArgs);
+                llvm::Value *argsWithoutHashCount = builder.CreateSub(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "argsWithoutHashCount");
 
-                        auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
-                        auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
-                        auto isUndefEnd = builder.GetInsertBlock();
-                        builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
-                        builder.SetInsertPoint(kwArgDefault);
-                        llvm::Value *defaultValue;
-                        if ((md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-                             md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
-                            !argsFlags[argId].isDefault) {
-                            // This method is already a default method so don't fill in
-                            // another other defaults for it or else it is turtles all the
-                            // way down
+                llvm::Value *indices[] = {argsWithoutHashCount};
 
-                            defaultValue = Payload::rubyNil(cs, builder);
-                        } else {
+                auto maybeHashValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "KWArgHash");
+
+                // checkIfLastArgIsHash
+                auto isHashValue = Payload::typeTest(cs, builder, maybeHashValue,
+                                                     core::make_type<core::ClassType>(core::Symbols::Hash()));
+
+                builder.CreateCondBr(isHashValue, hasPassedHash, afterHash);
+
+                auto hashTypeFailedTestEnd = builder.GetInsertBlock();
+                builder.SetInsertPoint(hasPassedHash);
+                // yes, this is an empty block. It's used only for Phi node
+                auto hasPassedHashEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterHash);
+                builder.SetInsertPoint(afterHash);
+                auto hashArgsPhi = builder.CreatePHI(builder.getInt64Ty(), 3, "hashArgsPhi");
+                auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
+                argcPhi->addIncoming(argCountRaw, sizeTestFailedEnd);
+                argcPhi->addIncoming(argCountRaw, hashTypeFailedTestEnd);
+                hashArgsPhi->addIncoming(hashArgs, sizeTestFailedEnd);
+                hashArgsPhi->addIncoming(hashArgs, hashTypeFailedTestEnd);
+                argcPhi->addIncoming(argsWithoutHashCount, hasPassedHashEnd);
+                hashArgsPhi->addIncoming(maybeHashValue, hasPassedHashEnd);
+
+                argCountRaw = argcPhi;
+                hashArgs = hashArgsPhi;
+            }
+
+            if (isBlock) {
+                if (minPositionalArgCount != 1) {
+                    // blocks can expand their first argument in arg array
+                    auto arrayTestBlock = llvm::BasicBlock::Create(cs, "argArrayExpandArrayTest", func);
+                    auto argExpandBlock = llvm::BasicBlock::Create(cs, "argArrayExpand", func);
+                    auto afterArgArrayExpandBlock = llvm::BasicBlock::Create(cs, "afterArgArrayExpand", func);
+                    auto argSizeForExpansionCheck = builder.CreateICmpEQ(
+                        argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "arrayExpansionSizeGuard");
+                    builder.CreateCondBr(argSizeForExpansionCheck, arrayTestBlock, afterArgArrayExpandBlock);
+                    auto sizeTestEnd = builder.GetInsertBlock();
+                    builder.SetInsertPoint(arrayTestBlock);
+                    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
+                    auto rawArg1Value =
+                        builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
+                    auto isArray = Payload::typeTest(cs, builder, rawArg1Value,
+                                                     core::make_type<core::ClassType>(core::Symbols::Array()));
+                    auto typeTestEnd = builder.GetInsertBlock();
+
+                    builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
+                    builder.SetInsertPoint(argExpandBlock);
+                    auto newArgArray = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayInnerPtr"),
+                                                          {rawArg1Value}, "expandedArgArray");
+                    auto newArgc = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayLen"), {rawArg1Value},
+                                                      "expandedArgc");
+                    auto expansionEnd = builder.GetInsertBlock();
+                    builder.CreateBr(afterArgArrayExpandBlock);
+                    builder.SetInsertPoint(afterArgArrayExpandBlock);
+                    auto argcPhi = builder.CreatePHI(builder.getInt32Ty(), 3, "argcPhi");
+                    argcPhi->addIncoming(argCountRaw, sizeTestEnd);
+                    argcPhi->addIncoming(argCountRaw, typeTestEnd);
+                    argcPhi->addIncoming(newArgc, expansionEnd);
+                    argCountRaw = argcPhi;
+                    auto argArrayPhi = builder.CreatePHI(llvm::Type::getInt64PtrTy(cs), 3, "argArrayPhi");
+                    argArrayPhi->addIncoming(argArrayRaw, sizeTestEnd);
+                    argArrayPhi->addIncoming(argArrayRaw, typeTestEnd);
+                    argArrayPhi->addIncoming(newArgArray, expansionEnd);
+
+                    argArrayRaw = argArrayPhi;
+                }
+                minPositionalArgCount = 0;
+                // blocks Can have 0 args always
+            }
+
+            auto numOptionalArgs = maxPositionalArgCount - minPositionalArgCount;
+            if (!isBlock) {
+                // validate arg count
+                auto argCountFailBlock = llvm::BasicBlock::Create(cs, "argCountFailBlock", func);
+                auto argCountSecondCheckBlock = llvm::BasicBlock::Create(cs, "argCountSecondCheckBlock", func);
+                auto argCountSuccessBlock = llvm::BasicBlock::Create(cs, "argCountSuccess", func);
+
+                if (!hasRestArgs) {
+                    auto tooManyArgs = builder.CreateICmpUGT(
+                        argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, maxPositionalArgCount)), "tooManyArgs");
+                    auto expected1 = Payload::setExpectedBool(cs, builder, tooManyArgs, false);
+                    builder.CreateCondBr(expected1, argCountFailBlock, argCountSecondCheckBlock);
+                } else {
+                    builder.CreateBr(argCountSecondCheckBlock);
+                }
+
+                builder.SetInsertPoint(argCountSecondCheckBlock);
+                auto tooFewArgs = builder.CreateICmpULT(
+                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)), "tooFewArgs");
+                auto expected2 = Payload::setExpectedBool(cs, builder, tooFewArgs, false);
+                builder.CreateCondBr(expected2, argCountFailBlock, argCountSuccessBlock);
+
+                builder.SetInsertPoint(argCountFailBlock);
+                Payload::raiseArity(cs, builder, argCountRaw, minPositionalArgCount,
+                                    hasRestArgs ? -1 : maxPositionalArgCount);
+
+                builder.SetInsertPoint(argCountSuccessBlock);
+            }
+
+            vector<llvm::BasicBlock *> checkBlocks;
+            vector<llvm::BasicBlock *> fillFromArgBlocks;
+            vector<llvm::BasicBlock *> fillFromDefaultBlocks;
+            {
+                // create blocks for arg filling
+                for (auto i = 0; i < numOptionalArgs + 1; i++) {
+                    auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
+                    checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
+                    fillFromDefaultBlocks.emplace_back(
+                        llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
+                    // Don't bother making the "Done" block for fillFromArgBlocks
+                    if (i < numOptionalArgs) {
+                        fillFromArgBlocks.emplace_back(
+                            llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
+                    }
+                }
+            }
+            {
+                // fill local variables from args
+                auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
+                builder.CreateBr(fillRequiredArgs);
+                builder.SetInsertPoint(fillRequiredArgs);
+
+                // box `self`
+                if (!isBlock) {
+                    auto selfArgRaw = func->arg_begin() + 2;
+                    Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, blockMap, aliases,
+                                    rubyBlockId);
+                }
+
+                for (auto i = 0; i < maxPositionalArgCount; i++) {
+                    if (i >= minPositionalArgCount) {
+                        // if these are optional, put them in their own BasicBlock
+                        // because we might not run it
+                        auto &block = fillFromArgBlocks[i - minPositionalArgCount];
+                        builder.SetInsertPoint(block);
+                    }
+                    const auto a = blockMap.rubyBlockArgs[rubyBlockId][i];
+                    if (!a._name.exists()) {
+                        cs.failCompilation(md->declLoc,
+                                           "this method has a block argument construct that's not supported");
+                    }
+
+                    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
+                    auto name = a._name.data(cs)->shortName(cs);
+                    llvm::StringRef nameRef(name.data(), name.length());
+                    auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
+                    Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
+                    if (i >= minPositionalArgCount) {
+                        // check if we need to fill in the next variable from the arg
+                        builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
+                    }
+                }
+
+                // make the last instruction in all the required args point at the first check block
+                builder.SetInsertPoint(fillRequiredArgs);
+                //
+                if (blkArgName.exists() && blockMap.usesBlockArgs) {
+                    // TODO: I don't think this correctly handles blocks with block args
+                    Payload::varSet(cs, blkArgName,
+                                    builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
+                                    blockMap, aliases, 0);
+                }
+                builder.CreateBr(checkBlocks[0]);
+            }
+            {
+                // build check blocks
+                for (auto i = 0; i < numOptionalArgs; i++) {
+                    auto &block = checkBlocks[i];
+                    builder.SetInsertPoint(block);
+                    auto argCount = builder.CreateICmpEQ(
+                        argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, i + minPositionalArgCount)),
+                        llvm::Twine("default") + llvm::Twine(i));
+                    auto expected = Payload::setExpectedBool(cs, builder, argCount, false);
+                    builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
+                }
+            }
+            auto optionalMethodIndex = 0;
+            {
+                // build fillFromDefaultBlocks
+                for (auto i = 0; i < numOptionalArgs; i++) {
+                    auto &block = fillFromDefaultBlocks[i];
+                    builder.SetInsertPoint(block);
+                    if (!isBlock && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                        md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
+                        // This method is already a default method so don't fill in
+                        // another other defaults for it or else it is turtles all the
+                        // way down
+                    } else {
+                        llvm::Value *rawValue;
+                        if (!isBlock) {
                             optionalMethodIndex++;
                             auto argMethodName =
                                 cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
@@ -382,44 +347,108 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                             auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                             ENFORCE(argMethod.exists());
                             auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
-                            defaultValue = builder.CreateCall(
+                            rawValue = builder.CreateCall(
                                 fillDefaultFunc,
                                 {argCountRaw, argArrayRaw, func->arg_begin() + 2 /* this is wrong for block*/});
-                            // insert default computation
+                        } else {
+                            rawValue = Payload::rubyNil(cs, builder);
                         }
-                        auto kwArgDefaultEnd = builder.GetInsertBlock();
-                        builder.CreateBr(kwArgContinue);
-                        builder.SetInsertPoint(kwArgContinue);
+                        auto argIndex = i + minPositionalArgCount;
+                        auto a = blockMap.rubyBlockArgs[rubyBlockId][argIndex];
 
-                        auto kwArgValue = builder.CreatePHI(builder.getInt64Ty(), 2, "kwArgValue");
-                        kwArgValue->addIncoming(passedValue, isUndefEnd);
-                        kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
-
-                        Payload::varSet(cs, name, kwArgValue, builder, blockMap, aliases, rubyBlockId);
+                        Payload::varSet(cs, a, rawValue, builder, blockMap, aliases, rubyBlockId);
                     }
+                    builder.CreateBr(fillFromDefaultBlocks[i + 1]);
                 }
-                if (hasKWRestArgs) {
-                    Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder, blockMap,
-                                    aliases, rubyBlockId);
-                } else {
-                    Payload::assertNoExtraKWArg(cs, builder, hashArgs);
+            }
+            {
+                // Tie up all the "Done" blocks at the end
+                builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
+                builder.CreateBr(fillFromDefaultBlocks[numOptionalArgs]);
+                builder.SetInsertPoint(fillFromDefaultBlocks[numOptionalArgs]);
+                if (hasRestArgs) {
+                    Payload::varSet(cs, restArgName,
+                                    Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
+                                    builder, blockMap, aliases, rubyBlockId);
+                }
+                if (hasKWArgs) {
+                    for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
+                        if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
+                            auto name = blockMap.rubyBlockArgs[rubyBlockId][argId];
+                            auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
+                            auto rawRubySym =
+                                builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+
+                            auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
+                            auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
+
+                            auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
+                            auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
+                            auto isUndefEnd = builder.GetInsertBlock();
+                            builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
+                            builder.SetInsertPoint(kwArgDefault);
+                            llvm::Value *defaultValue;
+                            if ((md->name.data(cs)->kind == core::NameKind::UNIQUE &&
+                                 md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
+                                !argsFlags[argId].isDefault) {
+                                // This method is already a default method so don't fill in
+                                // another other defaults for it or else it is turtles all the
+                                // way down
+
+                                defaultValue = Payload::rubyNil(cs, builder);
+                            } else {
+                                optionalMethodIndex++;
+                                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name,
+                                                                            optionalMethodIndex);
+                                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                                                    to_string(optionalMethodIndex) + " does not exist");
+                                auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                                ENFORCE(argMethod.exists());
+                                auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
+                                defaultValue = builder.CreateCall(
+                                    fillDefaultFunc,
+                                    {argCountRaw, argArrayRaw, func->arg_begin() + 2 /* this is wrong for block*/});
+                                // insert default computation
+                            }
+                            auto kwArgDefaultEnd = builder.GetInsertBlock();
+                            builder.CreateBr(kwArgContinue);
+                            builder.SetInsertPoint(kwArgContinue);
+
+                            auto kwArgValue = builder.CreatePHI(builder.getInt64Ty(), 2, "kwArgValue");
+                            kwArgValue->addIncoming(passedValue, isUndefEnd);
+                            kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
+
+                            Payload::varSet(cs, name, kwArgValue, builder, blockMap, aliases, rubyBlockId);
+                        }
+                    }
+                    if (hasKWRestArgs) {
+                        Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder,
+                                        blockMap, aliases, rubyBlockId);
+                    } else {
+                        Payload::assertNoExtraKWArg(cs, builder, hashArgs);
+                    }
                 }
             }
         }
 
-        {
-            // Switch the current control frame from a C frame to a Ruby-esque one
-            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
-            builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
-            builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
-        }
+        setupStackFrame(cs, md, blockMap, builder, rubyBlockId);
 
-        if (!isBlock) {
-            // jump to sig verification that will come before user body
-            builder.CreateBr(blockMap.sigVerificationBlock);
-        } else {
-            // jump dirrectly to user body
-            builder.CreateBr(blockMap.userEntryBlockByFunction[rubyBlockId]);
+        switch (blockType) {
+            case FunctionType::TopLevel:
+                // jump to sig verification that will come before user body
+                builder.CreateBr(blockMap.sigVerificationBlock);
+                break;
+
+            case FunctionType::Block:
+            case FunctionType::Exception:
+                // jump dirrectly to user body
+                builder.CreateBr(blockMap.userEntryBlockByFunction[rubyBlockId]);
+                break;
+
+            case FunctionType::Unused:
+                // this function will never be called
+                builder.CreateUnreachable();
+                break;
         }
     }
 }
