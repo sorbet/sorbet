@@ -711,4 +711,3 @@ test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unex
             ^^^
 Errors: 1
 ------ Bad plugin output on many files
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token kEND https://srb.help/2001
