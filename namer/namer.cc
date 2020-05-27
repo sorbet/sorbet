@@ -30,14 +30,13 @@ struct FoundTypeMember;
 struct FoundMethod;
 
 enum class DefinitionKind : u1 {
-    None = 0,
-    Root = 1,
-    Class = 2,
-    ClassRef = 3,
-    Method = 4,
-    StaticField = 5,
-    TypeMember = 6,
-    Symbol = 7,
+    Empty = 0,
+    Class = 1,
+    ClassRef = 2,
+    Method = 3,
+    StaticField = 4,
+    TypeMember = 5,
+    Symbol = 6,
 };
 
 class FoundDefinitionRef final {
@@ -46,13 +45,13 @@ class FoundDefinitionRef final {
 
 public:
     FoundDefinitionRef(DefinitionKind kind, u4 idx) : _kind(kind), _id(idx) {}
-    FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::None, 0) {}
+    FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Root, 0);
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root()._id);
     }
 
     DefinitionKind kind() const {
@@ -629,10 +628,8 @@ class SymbolDefiner {
         // Prerequisite: Owner is a class or module.
         ENFORCE(owner.data(ctx)->isClassOrModule());
         switch (ref.kind()) {
-            case DefinitionKind::None:
+            case DefinitionKind::Empty:
                 return owner;
-            case DefinitionKind::Root:
-                return core::Symbols::root();
             case DefinitionKind::Symbol: {
                 return ref.symbol();
             }
@@ -649,8 +646,6 @@ class SymbolDefiner {
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::SymbolRef getOwnerSymbol(FoundDefinitionRef ref) {
         switch (ref.kind()) {
-            case DefinitionKind::Root:
-                return core::Symbols::root();
             case DefinitionKind::Symbol:
                 return ref.symbol();
             case DefinitionKind::Class:
