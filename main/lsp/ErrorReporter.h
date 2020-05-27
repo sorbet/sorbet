@@ -50,7 +50,7 @@ public:
 
     ~ErrorEpoch();
 
-    bool committed;
+    bool committed = false;
 };
 }; // namespace sorbet::realmain::lsp
 
