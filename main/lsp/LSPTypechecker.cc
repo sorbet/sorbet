@@ -80,11 +80,17 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     indexed = move(updates.updatedFileIndexes);
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
-    auto committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+    auto committed = false;
+    {
+        ErrorEpoch epoch(errorReporter, updates.epoch, {});
+        committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+        epoch.committed = committed;
+    }
     ENFORCE(committed);
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
+bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
+                               vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
@@ -120,14 +126,20 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers) {
     bool committed = true;
     const bool isFastPath = updates.canTakeFastPath;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
-    if (isFastPath) {
-        auto run = runFastPath(move(updates), workers);
-        prodCategoryCounterInc("lsp.updates", "fastpath");
-        filesTypechecked = run.filesTypechecked;
-        commitTypecheckRun(move(run));
-    } else {
-        committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+    {
+        ErrorEpoch epoch(errorReporter, updates.epoch, move(diagnosticLatencyTimers));
+
+        if (isFastPath) {
+            auto run = runFastPath(move(updates), workers);
+            prodCategoryCounterInc("lsp.updates", "fastpath");
+            filesTypechecked = run.filesTypechecked;
+            commitTypecheckRun(move(run));
+        } else {
+            committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+        }
+        epoch.committed = committed;
     }
+
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       isFastPath, move(filesTypechecked));
     return committed;
@@ -605,11 +617,12 @@ TypecheckRun::TypecheckRun(vector<unique_ptr<core::Error>> errors, vector<core::
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), workers(workers) {}
 
-void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates) {
+void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
+                                                 vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     if (!updates.canTakeFastPath) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto committed = typechecker.typecheck(move(updates), workers);
+    auto committed = typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers));
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }
