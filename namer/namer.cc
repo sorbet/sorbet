@@ -167,7 +167,7 @@ class FoundDefinitions final {
     vector<Modifier> _modifiers;
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
-        _definitions.push_back(ref);
+        _definitions.emplace_back(ref);
         return ref;
     }
 
@@ -179,42 +179,42 @@ public:
 
     FoundDefinitionRef addClass(FoundClass &&klass) {
         const u4 idx = _klasses.size();
-        _klasses.push_back(move(klass));
+        _klasses.emplace_back(move(klass));
         return addDefinition(FoundDefinitionRef(DefinitionKind::Class, idx));
     }
 
     FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
         const u4 idx = _klassRefs.size();
-        _klassRefs.push_back(move(klassRef));
+        _klassRefs.emplace_back(move(klassRef));
         return FoundDefinitionRef(DefinitionKind::ClassRef, idx);
     }
 
     FoundDefinitionRef addMethod(FoundMethod &&method) {
         const u4 idx = _methods.size();
-        _methods.push_back(move(method));
+        _methods.emplace_back(move(method));
         return addDefinition(FoundDefinitionRef(DefinitionKind::Method, idx));
     }
 
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
         const u4 idx = _staticFields.size();
-        _staticFields.push_back(move(staticField));
+        _staticFields.emplace_back(move(staticField));
         return addDefinition(FoundDefinitionRef(DefinitionKind::StaticField, idx));
     }
 
     FoundDefinitionRef addTypeMember(FoundTypeMember &&typeMember) {
         const u4 idx = _typeMembers.size();
-        _typeMembers.push_back(move(typeMember));
+        _typeMembers.emplace_back(move(typeMember));
         return addDefinition(FoundDefinitionRef(DefinitionKind::TypeMember, idx));
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
         const u4 idx = _symbols.size();
-        _symbols.push_back(move(symbol));
+        _symbols.emplace_back(move(symbol));
         return FoundDefinitionRef(DefinitionKind::Symbol, idx);
     }
 
     void addModifier(Modifier &&mod) {
-        _modifiers.push_back(move(mod));
+        _modifiers.emplace_back(move(mod));
     }
 
     const vector<FoundDefinitionRef> &definitions() const {
@@ -434,7 +434,7 @@ public:
             }
         }
 
-        ownerStack.push_back(foundDefs->addClass(move(found)));
+        ownerStack.emplace_back(foundDefs->addClass(move(found)));
         return klass;
     }
 
@@ -458,7 +458,7 @@ public:
         foundMethod.flags = method->flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method->args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
-        ownerStack.push_back(foundDefs->addMethod(move(foundMethod)));
+        ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
         return method;
     }
 
@@ -1277,13 +1277,13 @@ public:
                 case DefinitionKind::Class: {
                     const auto &klass = ref.klass(*foundDefs);
                     ENFORCE(definedClasses.size() == ref.idx());
-                    definedClasses.push_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+                    definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
                     break;
                 }
                 case DefinitionKind::Method: {
                     const auto &method = ref.method(*foundDefs);
                     ENFORCE(definedMethods.size() == ref.idx());
-                    definedMethods.push_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+                    definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
                 case DefinitionKind::StaticField: {
@@ -1760,7 +1760,7 @@ vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<SymbolFinder
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
         SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names));
-        output.push_back(move(fileFoundDefinitions.tree));
+        output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
     }
     return output;
