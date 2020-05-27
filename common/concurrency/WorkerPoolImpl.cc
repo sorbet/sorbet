@@ -71,7 +71,8 @@ void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
 void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     logger.debug("Multiplexing job");
     for (int i = 0; i < size; i++) {
-        threadQueues[i]->enqueue(t);
+        const bool enqueued = threadQueues[i]->enqueue(t);
+        ENFORCE(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");
     }
 }
 
