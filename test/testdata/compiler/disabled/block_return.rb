@@ -1,15 +1,19 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-def flag_overridable?(s)
-    true
-end
-def flag_overrides_valid?(flag_overrides={})
-  flag_overrides.each do |flag_name, flag_value|
-    return false if !flag_overridable?(flag_name)
-    return false if !flag_value.is_a?(Integer)
+
+def test1
+  1.times do
+    return 10
   end
-  true
 end
 
-flag_overrides_valid?({name: "value"})
+puts test1
+
+def test2
+  1.times do
+    return 10
+  ensure
+    return 20
+  end
+end

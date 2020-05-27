@@ -1430,20 +1430,21 @@ VALUE sorbet_callFunc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) 
 // ****                       Exceptions
 // ****
 
-static VALUE sorbet_applyExceptionClosure_direct(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env) {
-    return body(pc, iseq_encoded, env);
-}
-
 struct ExceptionClosure {
     ExceptionFFIType body;
     VALUE **pc;
     VALUE *iseq_encoded;
     VALUE env;
+    VALUE *returnValue;
 };
 
 static VALUE sorbet_applyExceptionClosure(VALUE arg) {
     struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    return sorbet_applyExceptionClosure_direct(closure->body, closure->pc, closure->iseq_encoded, closure->env);
+    VALUE res = closure->body(closure->pc, closure->iseq_encoded, closure->env);
+    if (res != sorbet_rubyUndef()) {
+        *closure->returnValue = res;
+    }
+    return sorbet_rubyUndef();
 }
 
 static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
@@ -1452,66 +1453,73 @@ static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
     // fetch the last exception, and store it in the dest var passed in;
     *exceptionValue = rb_errinfo();
 
-    return sorbet_rubyNil();
+    return sorbet_rubyUndef();
 }
 
 // Run a function with a closure, and populate an exceptionValue pointer if an exception is raised. Returns 1 if an
 // exception was raised, and 0 otherwise.
-_Bool sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env, VALUE *exceptionValue) {
+VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env, VALUE *exceptionValue) {
+    VALUE returnValue = sorbet_rubyUndef();
+
     struct ExceptionClosure closure;
     closure.body = body;
     closure.pc = pc;
     closure.iseq_encoded = iseq_encoded;
     closure.env = env;
+    closure.returnValue = &returnValue;
 
     *exceptionValue = sorbet_rubyNil();
     rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
                rb_eException, 0);
-    return *exceptionValue != sorbet_rubyNil();
+
+    return returnValue;
 }
 
 struct RestoreErrinfoClosure {
-    ExceptionFFIType body;
+    struct ExceptionClosure exceptionClosure;
     VALUE previousException;
-    VALUE **pc;
-    VALUE *iseq_encoded;
-    VALUE env;
 };
+
+extern void rb_set_errinfo(VALUE);
 
 static VALUE sorbet_applyRestoreErrinfoClosure(VALUE arg) {
     struct RestoreErrinfoClosure *closure = (struct RestoreErrinfoClosure *)arg;
 
-    VALUE result = sorbet_applyExceptionClosure_direct(closure->body, closure->pc, closure->iseq_encoded, closure->env);
+    sorbet_applyExceptionClosure((VALUE)(&closure->exceptionClosure));
 
     // Restore the previous exception. If the body raises an exception, this will skipped when rb_raise does a long jump
     // out of the body function, and any outer error-handling code will be responsible for setting up the error info.
     rb_set_errinfo(closure->previousException);
 
-    return result;
+    return sorbet_rubyUndef();
 }
 
 // This is a function that can be used in place of any exception function, and does nothing except for return nil.
-VALUE sorbet_blockReturnNil(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
-    return sorbet_rubyNil();
+VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
+    return sorbet_rubyUndef();
 }
 
 // Run the body block, making sure that the ensure block gets called afterwords. The exceptionValue argument is used to
 // determine whether or not to overwrite the current VM exception state, and `env` is the closure to provide to both
 // body and ensure.
-void sorbet_ensure(ExceptionFFIType body, ExceptionFFIType ensure, VALUE previousException, VALUE exceptionValue,
-                   VALUE **pc, VALUE *iseq_encoded, VALUE env) {
+VALUE sorbet_ensure(ExceptionFFIType body, ExceptionFFIType ensure, VALUE previousException, VALUE exceptionValue,
+                    VALUE **pc, VALUE *iseq_encoded, VALUE env) {
+    VALUE returnValue = sorbet_rubyUndef();
+
     struct RestoreErrinfoClosure bodyClosure;
-    bodyClosure.body = body;
+    bodyClosure.exceptionClosure.body = body;
+    bodyClosure.exceptionClosure.pc = pc;
+    bodyClosure.exceptionClosure.iseq_encoded = iseq_encoded;
+    bodyClosure.exceptionClosure.env = env;
+    bodyClosure.exceptionClosure.returnValue = &returnValue;
     bodyClosure.previousException = previousException;
-    bodyClosure.pc = pc;
-    bodyClosure.iseq_encoded = iseq_encoded;
-    bodyClosure.env = env;
 
     struct ExceptionClosure ensureClosure;
     ensureClosure.body = ensure;
     ensureClosure.pc = pc;
     ensureClosure.iseq_encoded = iseq_encoded;
     ensureClosure.env = env;
+    ensureClosure.returnValue = &returnValue;
 
     // If the exception value is non-nil, then ensure is being called to handle that exception. Calling `rb_set_errinfo`
     // with a nil value causes it to forget the current exception, so we avoid that explicitly here to preserve the
@@ -1523,7 +1531,7 @@ void sorbet_ensure(ExceptionFFIType body, ExceptionFFIType ensure, VALUE previou
     rb_ensure(sorbet_applyRestoreErrinfoClosure, (VALUE)(&bodyClosure), sorbet_applyExceptionClosure,
               (VALUE)(&ensureClosure));
 
-    return;
+    return returnValue;
 }
 
 // We use this instead of `rb_raise` to re-raise an exception, because we already have the exception value that we want

@@ -55,7 +55,8 @@ void setupStackFrame(CompilerState &cs, unique_ptr<ast::MethodDef> &md, const Ba
             auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
             builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
             builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
-        } break;
+            break;
+        }
 
         case FunctionType::Exception: {
             // Exception functions get their pc and iseq_encoded values as arguments
@@ -64,7 +65,8 @@ void setupStackFrame(CompilerState &cs, unique_ptr<ast::MethodDef> &md, const Ba
             auto *iseq_encoded = func->arg_begin() + 1;
             builder.CreateStore(pc, blockMap.lineNumberPtrsByFunction[rubyBlockId]);
             builder.CreateStore(iseq_encoded, blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
-        } break;
+            break;
+        }
 
         case FunctionType::Unused:
             break;
@@ -543,14 +545,30 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &blockMa
                         Payload::varSet(cs, bind.bind.variable, rawCall, builder, blockMap, aliases, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
-                        if (bb->rubyBlockId != 0) {
-                            cs.failCompilation(core::Loc(cs.file, bind.loc),
-                                               "returns through multiple stacks not implemented");
-                        }
                         isTerminated = true;
-                        auto var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
-                        Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
-                        builder.CreateBr(blockMap.postProcessBlock);
+                        auto *var = Payload::varGet(cs, i->what.variable, builder, blockMap, aliases, bb->rubyBlockId);
+                        switch (blockMap.rubyBlockType[bb->rubyBlockId]) {
+                            case FunctionType::TopLevel: {
+                                Payload::varSet(cs, returnValue(cs), var, builder, blockMap, aliases, bb->rubyBlockId);
+                                builder.CreateBr(blockMap.postProcessBlock);
+                                break;
+                            }
+
+                            case FunctionType::Block:
+                                // NOTE: this doesn't catch all block-return cases:
+                                // https://github.com/stripe/sorbet_llvm/issues/94
+                                cs.failCompilation(core::Loc(cs.file, bind.loc),
+                                                   "returns through multiple stacks not implemented");
+                                break;
+
+                            case FunctionType::Exception:
+                                builder.CreateRet(var);
+                                break;
+
+                            case FunctionType::Unused:
+                                builder.CreateRet(var);
+                                break;
+                        }
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
@@ -698,12 +716,17 @@ void emitBlockExits(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &block
     for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
         builder.SetInsertPoint(blockMap.blockExitMapping[rubyBlockId]);
 
-        if (rubyBlockId == 0) {
-            // for the top-level, this block should never be used
-            builder.CreateUnreachable();
-        } else {
-            // for all other ruby blocks, we treat this block as though it's a BlockReturn
-            builder.CreateRet(Payload::rubyNil(cs, builder));
+        switch (blockMap.rubyBlockType[rubyBlockId]) {
+            case FunctionType::TopLevel:
+                builder.CreateUnreachable();
+                break;
+
+            case FunctionType::Block:
+            case FunctionType::Exception:
+            case FunctionType::Unused:
+                // for non-top-level functions, we return `Qundef` to indicate that this value isn't used for anything.
+                builder.CreateRet(Payload::rubyUndef(cs, builder));
+                break;
         }
     }
 }

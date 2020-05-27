@@ -40,6 +40,7 @@ begin
     begin
     rescue
     else
+      puts "Raising the outer exception"
       raise
     end
   end

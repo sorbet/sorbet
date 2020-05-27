@@ -9,57 +9,158 @@
 
 namespace sorbet::compiler {
 
-void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
-                                             const BasicBlockMap &blockMap,
-                                             UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                             int bodyRubyBlockId, core::LocalVariable exceptionValue) {
-    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
-    auto *closure = blockMap.escapedClosure[rubyBlockId];
-    auto *currentFunc = blockMap.rubyBlocks2Functions[rubyBlockId];
-    auto *nil = Payload::rubyNil(cs, build);
+namespace {
 
-    auto *pc = builder.CreateLoad(blockMap.lineNumberPtrsByFunction[rubyBlockId]);
-    auto *iseq_encoded = builder.CreateLoad(blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
+class ExceptionState {
+    CompilerState &cs;
+    llvm::IRBuilder<> &builder;
+    const BasicBlockMap &blockMap;
+    UnorderedMap<core::LocalVariable, Alias> &aliases;
+    const int rubyBlockId;
+    const int bodyRubyBlockId;
+    const int handlersRubyBlockId;
+    const int ensureRubyBlockId;
+    const int elseRubyBlockId;
+    core::LocalVariable exceptionValue;
+    llvm::Function *currentFunc;
+    llvm::Value *closure;
 
-    // 1. Write a nil to `exceptionValue` to make sure that it's properly initialized, and fetch the current exception
-    // value so that we can restore it later.
-    Payload::varSet(cs, exceptionValue, nil, builder, blockMap, aliases, rubyBlockId);
-    auto *previousException = builder.CreateCall(cs.module->getFunction("rb_errinfo"), {}, "previousException");
+    llvm::Value *pc = nullptr;
+    llvm::Value *iseq_encoded = nullptr;
+    llvm::Value *nil = nullptr;
+    llvm::Value *undef = nullptr;
+    llvm::Function *doNothing = nullptr;
+    llvm::Value *previousException = nullptr;
+    llvm::BasicBlock *exceptionEntry = nullptr;
 
-    // 2. wrap the call to the body block in `rb_rescue2`, with the rescue handler writing out the exception value to
-    // `exceptionValue`
-    auto *bodyFunction = blockMap.rubyBlocks2Functions[bodyRubyBlockId];
-    auto *exceptionResultPtr = builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
-    auto *exceptionRaised =
-        builder.CreateCall(cs.module->getFunction("sorbet_try"),
-                           {bodyFunction, pc, iseq_encoded, closure, exceptionResultPtr}, "exceptionRaised");
-    auto *exceptionResult = builder.CreateLoad(exceptionResultPtr);
-    Payload::varSet(cs, exceptionValue, exceptionResult, builder, blockMap, aliases, rubyBlockId);
+    ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                   UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId, int bodyRubyBlockId,
+                   core::LocalVariable exceptionValue)
+        : cs(cs), builder(static_cast<llvm::IRBuilder<> &>(builder)), blockMap(blockMap), aliases(aliases),
+          rubyBlockId(rubyBlockId), bodyRubyBlockId(bodyRubyBlockId),
+          handlersRubyBlockId(bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET),
+          ensureRubyBlockId(bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET),
+          elseRubyBlockId(bodyRubyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET), exceptionValue(exceptionValue),
+          currentFunc(blockMap.rubyBlocks2Functions[rubyBlockId]), closure(blockMap.escapedClosure[rubyBlockId]) {}
 
-    // 3. if `exceptionValue` is non-nil, call the `handlers` block, otherwise call the `else` block. If there is an
-    // ensure block present in the CFG, wrap this call in `rb_ensure`.
-    auto handlersRubyBlockId = bodyRubyBlockId + 1;
-    auto ensureRubyBlockId = bodyRubyBlockId + 2;
-    auto elseRubyBlockId = bodyRubyBlockId + 3;
+public:
+    // Setup the context for compiling exception-handling code, and bring some needed constants into scope.
+    static ExceptionState setup(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                                UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId, int bodyRubyBlockId,
+                                core::LocalVariable exceptionValue) {
+        ExceptionState state(cs, builder, blockMap, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
-    auto *handlersFunction = blockMap.rubyBlocks2Functions[handlersRubyBlockId];
+        // Setup local environment
+        state.pc = state.builder.CreateLoad(state.blockMap.lineNumberPtrsByFunction[state.rubyBlockId]);
+        state.iseq_encoded = state.builder.CreateLoad(state.blockMap.iseqEncodedPtrsByFunction[state.rubyBlockId]);
+        state.nil = Payload::rubyNil(state.cs, state.builder);
+        state.undef = Payload::rubyUndef(state.cs, state.builder);
+        state.doNothing = cs.module->getFunction("sorbet_blockReturnUndef");
 
-    // We use this block function in place of any user code when else or ensure are missing.
-    auto *doNothing = cs.module->getFunction("sorbet_blockReturnNil");
+        // Store the last exception state
+        state.previousException =
+            state.builder.CreateCall(cs.module->getFunction("rb_errinfo"), {}, "previousException");
 
-    bool elsePresent = nullptr != blockMap.userEntryBlockByFunction[elseRubyBlockId];
-    auto *elseFunction = elsePresent ? blockMap.rubyBlocks2Functions[elseRubyBlockId] : doNothing;
+        // Setup the exception handling entry block
+        state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", state.currentFunc);
+        state.builder.CreateBr(state.exceptionEntry);
+        state.builder.SetInsertPoint(state.exceptionEntry);
 
-    bool ensurePresent = nullptr != blockMap.userEntryBlockByFunction[ensureRubyBlockId];
-    auto *ensureFunction = ensurePresent ? blockMap.rubyBlocks2Functions[ensureRubyBlockId] : doNothing;
+        // Clear out the variable that we store the current exception in
+        Payload::varSet(cs, exceptionValue, state.nil, builder, blockMap, aliases, rubyBlockId);
 
-    // Run the handler with sorbet_ensure, so that we always cleanup the VM exception state, and run the ensure block.
-    auto *handler = builder.CreateSelect(exceptionRaised, handlersFunction, elseFunction, "handler");
-    builder.CreateCall(cs.module->getFunction("sorbet_ensure"),
-                       {handler, ensureFunction, previousException, exceptionResult, pc, iseq_encoded, closure});
+        return state;
+    }
 
-    // 4. Re-raise the exception value if it wasn't handled.
-    {
+    llvm::Function *getEnsure() const {
+        auto ensurePresent = blockMap.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused;
+        return ensurePresent ? blockMap.rubyBlocks2Functions[ensureRubyBlockId] : doNothing;
+    }
+
+    llvm::Function *getElse() const {
+        auto elsePresent = blockMap.rubyBlockType[elseRubyBlockId] != FunctionType::Unused;
+        return elsePresent ? blockMap.rubyBlocks2Functions[elseRubyBlockId] : doNothing;
+    }
+
+    llvm::Function *getHandlers() const {
+        return blockMap.rubyBlocks2Functions[handlersRubyBlockId];
+    }
+
+    llvm::Value *sorbetEnsure(llvm::Value *handler, llvm::Value *exceptionResult) {
+        return builder.CreateCall(
+            cs.module->getFunction("sorbet_ensure"),
+            {handler, getEnsure(), previousException, exceptionResult, pc, iseq_encoded, closure});
+    }
+
+    void restorePreviousException() {
+        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {previousException});
+    }
+
+    enum class Ensure {
+        Needed,
+        AlreadyCalled,
+    };
+
+    // If a non-undef return value was present, this means that a `return` happened. In this case, an exception
+    // couldn't have happened, so restore the previous exception and return.
+    void handleEarlyReturn(Ensure es, llvm::Value *handlerReturnValue) {
+        auto *returnBlock = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);
+        auto *continueBlock = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
+        auto *earlyReturn = builder.CreateICmpNE(handlerReturnValue, undef, "earlyReturn");
+        builder.CreateCondBr(earlyReturn, returnBlock, continueBlock);
+
+        builder.SetInsertPoint(returnBlock);
+        switch (es) {
+            case Ensure::Needed: {
+                auto *res = sorbetEnsure(doNothing, nil);
+                auto *notUndef = builder.CreateICmpNE(res, undef, "ensureReturnValue");
+                builder.CreateRet(builder.CreateSelect(notUndef, res, handlerReturnValue));
+                break;
+            }
+
+            case Ensure::AlreadyCalled:
+                builder.CreateRet(handlerReturnValue);
+                break;
+        }
+
+        builder.SetInsertPoint(continueBlock);
+    }
+
+    // Returns the exception value that was raised.
+    llvm::Value *runBody() {
+        // Call the body, using sorbet_try to catch any exceptions raised and communicate them out via
+        // exceptionResultPtr.
+        auto *bodyFunction = blockMap.rubyBlocks2Functions[bodyRubyBlockId];
+        auto *exceptionResultPtr = builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
+        auto *bodyResult =
+            builder.CreateCall(cs.module->getFunction("sorbet_try"),
+                               {bodyFunction, pc, iseq_encoded, closure, exceptionResultPtr}, "bodyResult");
+
+        handleEarlyReturn(Ensure::Needed, bodyResult);
+
+        // Update the exceptionValue closure variable
+        auto *exceptionResult = builder.CreateLoad(exceptionResultPtr);
+        Payload::varSet(cs, exceptionValue, exceptionResult, builder, blockMap, aliases, rubyBlockId);
+
+        return exceptionResult;
+    }
+
+    void runRescueElseEnsure(llvm::Value *exceptionResult) {
+        auto *handlersFunction = getHandlers();
+        auto *elseFunction = getElse();
+
+        // Run the handler with sorbet_ensure, so that we always cleanup the VM exception state, and run the ensure
+        // block.
+        auto *exceptionRaised = builder.CreateICmpNE(exceptionResult, nil);
+        auto *handler = builder.CreateSelect(exceptionRaised, handlersFunction, elseFunction, "handler");
+        auto *res = sorbetEnsure(handler, exceptionResult);
+
+        handleEarlyReturn(Ensure::AlreadyCalled, res);
+    }
+
+    // If no rescue clause handled the exception, the exceptionValue will contain a non-nil value. Test for that at the
+    // end of exception handling, conditionally re-raising it to the outer context.
+    void raiseUnhandledException() {
         auto *raiseBlock = llvm::BasicBlock::Create(cs, "raise-unhandled", currentFunc);
         auto *exitBlock = llvm::BasicBlock::Create(cs, "exit-exception-handling", currentFunc);
 
@@ -74,6 +175,19 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
         builder.SetInsertPoint(exitBlock);
     }
+};
+
+} // namespace
+
+void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
+                                             const BasicBlockMap &blockMap,
+                                             UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                             int bodyRubyBlockId, core::LocalVariable exceptionValue) {
+    auto state = ExceptionState::setup(cs, build, blockMap, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
+
+    auto exceptionResult = state.runBody();
+    state.runRescueElseEnsure(exceptionResult);
+    state.raiseUnhandledException();
 
     return;
 }

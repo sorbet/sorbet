@@ -202,7 +202,8 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
                 (fp->arg_begin() + 3)->setName("argArray");
                 (fp->arg_begin() + 4)->setName("blockArg");
                 res.emplace_back(fp);
-            } break;
+                break;
+            }
 
             // NOTE: explicitly treating Unused functions like Exception functions, as they'll be collected by llvm
             // anyway.
@@ -218,7 +219,8 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
                 (fp->arg_begin() + 2)->setName("captures");
 
                 res.emplace_back(fp);
-            } break;
+                break;
+            }
         }
     }
     return res;
@@ -240,9 +242,9 @@ void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector
 
             // the relative block ids of blocks that are involved in the translation of an exception handling block.
             auto bodyBlockId = bodyBlock->rubyBlockId;
-            auto handlersBlockId = bodyBlockId + 1;
-            auto ensureBlockId = bodyBlockId + 2;
-            auto elseBlockId = bodyBlockId + 3;
+            auto handlersBlockId = bodyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET;
+            auto ensureBlockId = bodyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET;
+            auto elseBlockId = bodyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET;
 
             // `b` is the exception handling header block if the two branches from it have the sequential ids we would
             // expect for the handler and body blocks. The reason we bail out here if this isn't the case is because
