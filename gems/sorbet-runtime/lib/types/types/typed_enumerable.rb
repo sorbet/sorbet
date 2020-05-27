@@ -124,7 +124,7 @@ module T::Types
         inferred_val = type_from_instances(obj.values)
         T::Hash[inferred_key, inferred_val]
       when Range
-        T::Range[type_from_instances([obj.first, obj.last])]
+        T::Range[type_from_instances([obj.begin, obj.end])]
       when Enumerator
         T::Enumerator[type_from_instances(obj)]
       when Set
