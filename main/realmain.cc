@@ -527,7 +527,7 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
-            indexed = pipeline::name(*gs, move(indexed), opts);
+            indexed = pipeline::name(*gs, move(indexed), opts, *workers);
             autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);

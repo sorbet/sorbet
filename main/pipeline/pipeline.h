@@ -32,7 +32,7 @@ std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vect
                                                 const options::Options &opts);
 
 std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                  const options::Options &opts, bool skipConfigatron = false);
+                                  const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 ast::ParsedFilesOrCancelled

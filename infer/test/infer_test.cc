@@ -39,8 +39,8 @@ void processSource(core::GlobalState &cb, string str) {
     tree = local_vars::LocalVars::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
-    trees = namer::Namer::run(cb, move(trees));
     auto workers = WorkerPool::create(0, *logger);
+    trees = namer::Namer::run(cb, move(trees), *workers);
     auto resolved = resolver::Resolver::run(cb, move(trees), *workers);
     for (auto &tree : resolved.result()) {
         sorbet::core::MutableContext ctx(cb, core::Symbols::root(), tree.file);
