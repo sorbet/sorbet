@@ -40,6 +40,18 @@ public:
     void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(u4 epoch, bool committed = true);
 };
+
+class ErrorEpoch final {
+    ErrorReporter &errorReporter;
+    u4 epoch;
+
+public:
+    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+
+    ~ErrorEpoch();
+
+    bool committed;
+};
 }; // namespace sorbet::realmain::lsp
 
 #endif // RUBY_TYPER_LSP_ERRORREPORTER_H

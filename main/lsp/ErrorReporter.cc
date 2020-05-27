@@ -132,4 +132,14 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     }
     return fileErrorStatuses[file.id()];
 };
+
+ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
+                       std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
+    : errorReporter(errorReporter), epoch(epoch) {
+    errorReporter.beginEpoch(epoch, move(diagnosticLatencyTimers));
+};
+
+ErrorEpoch::~ErrorEpoch() {
+    errorReporter.endEpoch(epoch, committed);
+};
 } // namespace sorbet::realmain::lsp
