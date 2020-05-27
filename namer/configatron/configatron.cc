@@ -198,6 +198,7 @@ void handleFile(core::GlobalState &gs, const string &file, shared_ptr<Path> root
 
 void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<string> &folders,
                                        const vector<string> &files) {
+    Timer timeit(gs.tracer(), "configatron");
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
         auto files = FileOps::listFilesInDir(folder, {".yaml"}, true, {}, {});
