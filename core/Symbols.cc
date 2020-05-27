@@ -1194,7 +1194,7 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
 }
 Loc Symbol::loc() const {
     if (!locs_.empty()) {
-        return locs_[0];
+        return locs_.back();
     }
     return Loc::none();
 }
@@ -1215,9 +1215,11 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 
     if (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI()) {
-        locs_.insert(locs_.begin(), loc);
-    } else {
+        // Make this the new canonical loc.
         locs_.emplace_back(loc);
+    } else {
+        // If we have other locs, use them as the canonical loc.
+        locs_.insert(locs_.begin(), loc);
     }
 }
 
