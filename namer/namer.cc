@@ -225,28 +225,12 @@ public:
         return _klasses;
     }
 
-    const vector<FoundClassRef> &klassRefs() const {
-        return _klassRefs;
-    }
-
     const vector<FoundMethod> &methods() const {
         return _methods;
     }
 
-    const vector<FoundStaticField> &staticFields() const {
-        return _staticFields;
-    }
-
-    const vector<FoundTypeMember> &typeMembers() const {
-        return _typeMembers;
-    }
-
     const vector<Modifier> &modifiers() const {
         return _modifiers;
-    }
-
-    const vector<core::SymbolRef> &symbols() const {
-        return _symbols;
     }
 
     friend FoundDefinitionRef;
