@@ -496,9 +496,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Rescue *a) {
                 auto bodyRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                auto handlersRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                auto ensureRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                auto elseRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
+                auto handlersRubyBlockId = bodyRubyBlockId + CFG::HANDLERS_BLOCK_OFFSET;
+                auto ensureRubyBlockId = bodyRubyBlockId + CFG::ENSURE_BLOCK_OFFSET;
+                auto elseRubyBlockId = bodyRubyBlockId + CFG::ELSE_BLOCK_OFFSET;
+                cctx.inWhat.maxRubyBlockId = elseRubyBlockId;
+
                 auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a->loc);
                 cctx.rescueScope = rescueHeaderBlock;

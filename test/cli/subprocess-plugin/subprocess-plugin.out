@@ -706,9 +706,8 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi3.rb start=??? end=???}
 
 ------ Bad plugin output on single file
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token kEND https://srb.help/2001
+test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token "end" https://srb.help/2001
      2 |end end end end
             ^^^
 Errors: 1
 ------ Bad plugin output on many files
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token kEND https://srb.help/2001

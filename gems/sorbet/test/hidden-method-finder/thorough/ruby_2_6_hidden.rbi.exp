@@ -9420,8 +9420,6 @@ end
 
 class Module
   def deprecate_constant(*_); end
-
-  def undef_method(*_); end
 end
 
 class Module
@@ -10045,3 +10043,4 @@ end
 module Warning
   extend ::Warning
 end
+

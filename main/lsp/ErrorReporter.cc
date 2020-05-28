@@ -19,6 +19,33 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     return filesUpdatedSince;
 }
 
+void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
+    ENFORCE(epochTimers.find(epoch) == epochTimers.end());
+    vector<Timer> firstDiagnosticLatencyTimers;
+
+    for (auto &timer : diagnosticLatencyTimers) {
+        firstDiagnosticLatencyTimers.emplace_back(timer->clone("first_diagnostic_latency"));
+    }
+
+    epochTimers[epoch] = EpochTimers{move(firstDiagnosticLatencyTimers), move(diagnosticLatencyTimers)};
+}
+
+void ErrorReporter::endEpoch(u4 epoch, bool committed) {
+    auto it = epochTimers.find(epoch);
+    ENFORCE(it != epochTimers.end());
+    if (!committed) {
+        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+            timer->cancel();
+        }
+
+        for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
+            timer.cancel();
+        }
+    }
+
+    epochTimers.erase(it);
+}
+
 void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
@@ -30,6 +57,19 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
 
     fileErrorStatus.lastReportedEpoch = epoch;
 
+    auto it = epochTimers.find(epoch);
+    ENFORCE(it != epochTimers.end());
+    if (!it->second.hasFirstDiagnosticEndTimes) {
+        it->second.hasFirstDiagnosticEndTimes = true;
+        for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
+            timer.setEndTime();
+        }
+
+        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+            timer->setEndTime();
+        }
+    }
+
     // If errors is empty and the file had no errors previously, break
     if (errors.empty() && fileErrorStatus.hasErrors == false) {
         return;
@@ -38,7 +78,6 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
     fileErrorStatus.hasErrors = !errors.empty();
 
     const string uri = config->fileRef2Uri(gs, file);
-    config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
     vector<unique_ptr<Diagnostic>> diagnostics;
     for (auto &error : errors) {
         ENFORCE(!error->isSilenced);
@@ -78,6 +117,10 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         diagnostics.push_back(move(diagnostic));
     }
 
+    config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
+    for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+        timer->setEndTime();
+    }
     auto params = make_unique<PublishDiagnosticsParams>(uri, move(diagnostics));
     config->output->write(make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
@@ -88,5 +131,15 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
         fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, false});
     }
     return fileErrorStatuses[file.id()];
+};
+
+ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
+                       std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
+    : errorReporter(errorReporter), epoch(epoch) {
+    errorReporter.beginEpoch(epoch, move(diagnosticLatencyTimers));
+};
+
+ErrorEpoch::~ErrorEpoch() {
+    errorReporter.endEpoch(epoch, committed);
 };
 } // namespace sorbet::realmain::lsp

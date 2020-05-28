@@ -2,5 +2,5 @@ class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/fuzz_type_member_scope.rb start=2:1 end=3:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/fuzz_type_member_scope.rb start=??? end=???}
-  static-field-type-alias <C <U A>> -> T.untyped @ Loc {file=test/testdata/resolver/fuzz_type_member_scope.rb start=3:1 end=3:2}
+  static-field-type-alias <C <U A>> -> T.untyped @ Loc {file=test/testdata/resolver/fuzz_type_member_scope.rb start=3:1 end=3:14}
 

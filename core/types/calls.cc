@@ -9,6 +9,7 @@
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
+#include "core/errors/resolver.h"
 #include <algorithm> // find_if, sort
 
 #include "absl/strings/str_cat.h"
@@ -1176,6 +1177,12 @@ public:
 
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
+    // This method is actually special: not only is it called from processBinding in infer, it's
+    // also called directly by type_syntax parsing in resolver (because this method checks some
+    // invariants of generics that we want to hold even in `typed: false` files).
+    //
+    // Unfortunately, this means that some errors are double reported (once by resolver, and then
+    // again by infer).
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         SymbolRef attachedClass;
 
@@ -1240,20 +1247,24 @@ public:
                 // Validate type parameter bounds.
                 if (!Types::isSubType(gs, argType, memType->upperBound)) {
                     validBounds = false;
-                    if (auto e = gs.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                         auto argStr = argType->show(gs);
-                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(gs));
-                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", argStr, memType->upperBound->show(gs));
+                        e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
+                                    memData->showFullName(gs));
+                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
+                                       "upper", memType->upperBound->show(gs));
                     }
                 }
 
                 if (!Types::isSubType(gs, memType->lowerBound, argType)) {
                     validBounds = false;
 
-                    if (auto e = gs.beginError(loc, errors::Infer::GenericTypeParamBoundMismatch)) {
+                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                         auto argStr = argType->show(gs);
-                        e.setHeader("`{}` cannot be used for type member `{}`", argStr, memData->showFullName(gs));
-                        e.addErrorLine(loc, "`{}` is not a subtype of `{}`", memType->lowerBound->show(gs), argStr);
+                        e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
+                                    memData->showFullName(gs));
+                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
+                                       "lower", memType->lowerBound->show(gs));
                     }
                 }
 
