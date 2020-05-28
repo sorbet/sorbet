@@ -5648,30 +5648,6 @@ class Gem::ConflictError
   def target(); end
 end
 
-class Gem::ConsoleUI
-  def initialize(); end
-end
-
-class Gem::ConsoleUI
-end
-
-module Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def ui(); end
-
-  def ui=(new_ui); end
-
-  def use_ui(new_ui, &block); end
-end
-
-module Gem::DefaultUserInteraction
-  def self.ui(); end
-
-  def self.ui=(new_ui); end
-
-  def self.use_ui(new_ui); end
-end
-
 class Gem::Dependency
   def ==(other); end
 
@@ -6174,72 +6150,7 @@ class Gem::NameTuple
 end
 
 class Gem::Package
-  include ::Gem::UserInteraction
-  include ::Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def add_checksums(tar); end
-
-  def add_contents(tar); end
-
-  def add_files(tar); end
-
-  def add_metadata(tar); end
-
-  def build(skip_validation=T.unsafe(nil)); end
-
-  def build_time(); end
-
-  def build_time=(build_time); end
-
-  def checksums(); end
-
-  def contents(); end
-
-  def copy_to(path); end
-
-  def digest(entry); end
-
-  def extract_files(destination_dir, pattern=T.unsafe(nil)); end
-
-  def extract_tar_gz(io, destination_dir, pattern=T.unsafe(nil)); end
-
-  def files(); end
-
-  def gzip_to(io); end
-
-  def initialize(gem, security_policy); end
-
-  def install_location(filename, destination_dir); end
-
-  def load_spec(entry); end
-
-  def mkdir_p_safe(mkdir, mkdir_options, destination_dir, file_name); end
-
-  def open_tar_gz(io); end
-
-  def read_checksums(gem); end
-
   def realpath(file); end
-
-  def security_policy(); end
-
-  def security_policy=(security_policy); end
-
-  def setup_signer(); end
-
-  def spec(); end
-
-  def spec=(spec); end
-
-  def verify(); end
-
-  def verify_checksums(digests, checksums); end
-
-  def verify_entry(entry); end
-
-  def verify_files(gem); end
-
-  def verify_gz(entry); end
 end
 
 class Gem::Package::DigestIO
@@ -6252,12 +6163,6 @@ end
 
 class Gem::Package::DigestIO
   def self.wrap(io, digests); end
-end
-
-class Gem::Package::Error
-end
-
-class Gem::Package::Error
 end
 
 class Gem::Package::FileSource
@@ -6275,15 +6180,6 @@ class Gem::Package::FileSource
 end
 
 class Gem::Package::FileSource
-end
-
-class Gem::Package::FormatError
-  def initialize(message, source=T.unsafe(nil)); end
-
-  def path(); end
-end
-
-class Gem::Package::FormatError
 end
 
 class Gem::Package::IOSource
@@ -6305,12 +6201,6 @@ end
 class Gem::Package::IOSource
 end
 
-class Gem::Package::NonSeekableIO
-end
-
-class Gem::Package::NonSeekableIO
-end
-
 class Gem::Package::Old
   def extract_files(destination_dir); end
 
@@ -6322,13 +6212,6 @@ class Gem::Package::Old
 end
 
 class Gem::Package::Old
-end
-
-class Gem::Package::PathError
-  def initialize(destination, destination_dir); end
-end
-
-class Gem::Package::PathError
 end
 
 class Gem::Package::Source
@@ -6388,27 +6271,6 @@ class Gem::Package::TarHeader
   def self.strict_oct(str); end
 end
 
-class Gem::Package::TarInvalidError
-end
-
-class Gem::Package::TarInvalidError
-end
-
-class Gem::Package::TarReader
-  include ::Enumerable
-  def close(); end
-
-  def each(&blk); end
-
-  def each_entry(); end
-
-  def initialize(io); end
-
-  def rewind(); end
-
-  def seek(name); end
-end
-
 class Gem::Package::TarReader::Entry
   def bytes_read(); end
 
@@ -6446,83 +6308,15 @@ end
 class Gem::Package::TarReader::Entry
 end
 
-class Gem::Package::TarReader::UnexpectedEOF
-end
-
-class Gem::Package::TarReader::UnexpectedEOF
-end
-
 class Gem::Package::TarReader
   def self.new(io); end
 end
 
 class Gem::Package::TarWriter
-  def add_file(name, mode); end
-
-  def add_file_digest(name, mode, digest_algorithms); end
-
-  def add_file_signed(name, mode, signer); end
-
-  def add_file_simple(name, mode, size); end
-
-  def add_symlink(name, target, mode); end
-
-  def check_closed(); end
-
-  def close(); end
-
-  def closed?(); end
-
-  def flush(); end
-
-  def initialize(io); end
-
-  def mkdir(name, mode); end
-
-  def split_name(name); end
-end
-
-class Gem::Package::TarWriter::BoundedStream
-  def initialize(io, limit); end
-
-  def limit(); end
-
-  def write(data); end
-
-  def written(); end
-end
-
-class Gem::Package::TarWriter::BoundedStream
-end
-
-class Gem::Package::TarWriter::FileOverflow
-end
-
-class Gem::Package::TarWriter::FileOverflow
-end
-
-class Gem::Package::TarWriter::RestrictedStream
-  def initialize(io); end
-
-  def write(data); end
-end
-
-class Gem::Package::TarWriter::RestrictedStream
-end
-
-class Gem::Package::TarWriter
   def self.new(io); end
 end
 
-class Gem::Package::TooLongFileName
-end
-
-class Gem::Package::TooLongFileName
-end
-
 class Gem::Package
-  def self.build(spec, skip_validation=T.unsafe(nil)); end
-
   def self.new(gem, security_policy=T.unsafe(nil)); end
 end
 
@@ -7994,13 +7788,6 @@ end
 class Gem::RuntimeRequirementNotMetError
 end
 
-class Gem::SilentUI
-  def initialize(); end
-end
-
-class Gem::SilentUI
-end
-
 class Gem::Source
   include ::Comparable
   def ==(other); end
@@ -8619,53 +8406,6 @@ class Gem::Specification
   def self.unresolved_deps(); end
 end
 
-class Gem::StreamUI
-  def _gets_noecho(); end
-
-  def alert(statement, question=T.unsafe(nil)); end
-
-  def alert_error(statement, question=T.unsafe(nil)); end
-
-  def alert_warning(statement, question=T.unsafe(nil)); end
-
-  def ask(question); end
-
-  def ask_for_password(question); end
-
-  def ask_yes_no(question, default=T.unsafe(nil)); end
-
-  def backtrace(exception); end
-
-  def choose_from_list(question, list); end
-
-  def close(); end
-
-  def debug(statement); end
-
-  def download_reporter(*args); end
-
-  def errs(); end
-
-  def initialize(in_stream, out_stream, err_stream=T.unsafe(nil), usetty=T.unsafe(nil)); end
-
-  def ins(); end
-
-  def outs(); end
-
-  def progress_reporter(*args); end
-
-  def require_io_console(); end
-
-  def say(statement=T.unsafe(nil)); end
-
-  def terminate_interaction(status=T.unsafe(nil)); end
-
-  def tty?(); end
-end
-
-class Gem::StreamUI
-end
-
 class Gem::StubSpecification
   def build_extensions(); end
 
@@ -8708,18 +8448,6 @@ class Gem::SystemExitException
   def initialize(exit_code); end
 end
 
-module Gem::Text
-  def clean_text(text); end
-
-  def format_text(text, wrap, indent=T.unsafe(nil)); end
-
-  def levenshtein_distance(str1, str2); end
-
-  def min3(a, b, c); end
-
-  def truncate_text(text, description, max_length=T.unsafe(nil)); end
-end
-
 Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError
 
 class Gem::UnsatisfiableDependencyError
@@ -8749,30 +8477,6 @@ class Gem::UriFormatter
 end
 
 class Gem::UriFormatter
-end
-
-module Gem::UserInteraction
-  include ::Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def alert(statement, question=T.unsafe(nil)); end
-
-  def alert_error(statement, question=T.unsafe(nil)); end
-
-  def alert_warning(statement, question=T.unsafe(nil)); end
-
-  def ask(question); end
-
-  def ask_for_password(prompt); end
-
-  def ask_yes_no(question, default=T.unsafe(nil)); end
-
-  def choose_from_list(question, list); end
-
-  def say(statement=T.unsafe(nil)); end
-
-  def terminate_interaction(exit_code=T.unsafe(nil)); end
-
-  def verbose(msg=T.unsafe(nil)); end
 end
 
 module Gem::Util
