@@ -85,11 +85,13 @@
 module Shellwords
   # Alias for:
   # [`shellescape`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shellescape)
+  sig { params(str: String).returns(String) }
   def self.escape(str); end
 
   # Alias for:
   # [`shelljoin`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shelljoin)
-  def self.join(array); end
+  sig { params(str: T::Array[String]).returns(String) }
+  def self.join(str); end
 
   # Escapes a string so that it can be safely used in a Bourne shell command
   # line. `str` can be a non-string object that responds to `to_s`.
@@ -130,8 +132,9 @@ module Shellwords
   #
   # Also aliased as:
   # [`escape`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-escape)
+  sig { params(str: String).returns(String) }
   def self.shellescape(str); end
-
+  
   # Builds a command line string from an argument list, `array`.
   #
   # All elements are joined into a single string with fields separated by a
@@ -163,7 +166,8 @@ module Shellwords
   #
   # Also aliased as:
   # [`join`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-join)
-  def self.shelljoin(array); end
+  sig { params(str: T::Array[String]).returns(String) }
+  def self.shelljoin(str); end
 
   # Splits a string into an array of tokens in the same way the UNIX Bourne
   # shell does.
@@ -195,13 +199,16 @@ module Shellwords
   # Also aliased as:
   # [`shellwords`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shellwords),
   # [`split`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-split)
-  def self.shellsplit(line); end
+  sig { params(str: String).returns(T::Array[String]) }
+  def self.shellsplit(str); end
 
   # Alias for:
   # [`shellsplit`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-i-shellsplit)
-  def self.shellwords(line); end
+  sig { params(str: String).returns(T::Array[String]) }
+  def self.shellwords(str); end
 
   # Alias for:
   # [`shellsplit`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shellsplit)
-  def self.split(line); end
+  sig { params(str: String).returns(T::Array[String]) }
+  def self.split(str); end
 end
