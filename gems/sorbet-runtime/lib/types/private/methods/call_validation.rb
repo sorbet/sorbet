@@ -185,6 +185,9 @@ module T::Private::Methods::CallValidation
     mod.send(:define_method, method_sig.method_name) do |*args, &blk|
       CallValidation.validate_call(self, original_method, method_sig, args, blk)
     end
+    if mod.respond_to?(:ruby2_keywords, true)
+      mod.send(:ruby2_keywords, method_sig.method_name)
+    end
   end
 
   def self.create_validator_method_fast(mod, original_method, method_sig)

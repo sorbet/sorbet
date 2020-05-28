@@ -1,3 +1,3 @@
 # typed: true
 
-..42 # error: unexpected token tDOT2
+..42 # error: unexpected token ".."

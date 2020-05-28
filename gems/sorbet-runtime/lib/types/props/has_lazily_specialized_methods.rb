@@ -70,6 +70,9 @@ module T::Props
           self.class.decorator.send(:eval_lazily_defined_method!, name)
           send(name, *args)
         end
+        if cls.respond_to?(:ruby2_keywords, true)
+          cls.send(:ruby2_keywords, name)
+        end
         cls.send(:private, name)
       end
 

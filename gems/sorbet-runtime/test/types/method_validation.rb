@@ -476,11 +476,20 @@ module Opus::Types::Test
           assert_match(/wrong number of arguments \(given 0, expected 1..2/, err.message)
         end
 
-        it "fails if a required kwarg is missing" do
-          err = assert_raises(ArgumentError) do
-            @mod.foo({})
+        if RUBY_VERSION >= '2.7'
+          it "fails if a required kwarg is missing" do
+            err = assert_raises(ArgumentError) do
+              @mod.foo({})
+            end
+            assert_equal("missing keyword: :kwreq_int", err.message)
           end
-          assert_equal("missing keyword: kwreq_int", err.message)
+        else
+          it "fails if a required kwarg is missing" do
+            err = assert_raises(ArgumentError) do
+              @mod.foo({})
+            end
+            assert_equal("missing keyword: kwreq_int", err.message)
+          end
         end
       end
     end

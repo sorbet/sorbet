@@ -1,3 +1,3 @@
 # typed: true
 
--> { rescue; } # error: unexpected token kRESCUE
+-> { rescue; } # error: unexpected token "rescue"

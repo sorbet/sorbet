@@ -75,12 +75,11 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     const auto newEditCount = updates->editCount - updates->committedEditCount;
-    typechecker.typecheckOnFastPath(move(*updates));
-    if (latencyTimer != nullptr) {
-        ENFORCE(newEditCount == params->diagnosticLatencyTimers.size());
-        // TODO: Move into pushDiagnostics once we have fast feedback.
-        params->diagnosticLatencyTimers.clear();
-    }
+
+    // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
+    ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
+
+    typechecker.typecheckOnFastPath(move(*updates), move(params->diagnosticLatencyTimers));
     prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
 }
 
@@ -98,21 +97,16 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     typechecker.state().epochManager->startCommitEpoch(updates->epoch);
     startedNotification.Notify();
     const auto newEditCount = updates->editCount - updates->committedEditCount;
+
+    // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
+    ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
+
     // Only report stats if the edit was committed.
-    if (typechecker.typecheck(move(*updates), workers)) {
-        if (latencyTimer != nullptr) {
-            ENFORCE(newEditCount == params->diagnosticLatencyTimers.size());
-            // TODO: Move into pushDiagnostics once we have fast feedback.
-            params->diagnosticLatencyTimers.clear();
-        }
+    if (typechecker.typecheck(move(*updates), workers, move(params->diagnosticLatencyTimers))) {
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
     } else if (latencyTimer != nullptr) {
         // Don't report a latency value for canceled slow paths.
         latencyTimer->cancel();
-        for (auto &timer : params->diagnosticLatencyTimers) {
-            timer->cancel();
-        }
-        params->diagnosticLatencyTimers.clear();
     }
 }
 

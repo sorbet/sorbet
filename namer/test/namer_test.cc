@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "common/concurrency/WorkerPool.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -44,7 +45,8 @@ ast::ParsedFile hello_world(core::GlobalState &gs) {
 vector<ast::ParsedFile> runNamer(core::GlobalState &gs, ast::ParsedFile tree) {
     vector<ast::ParsedFile> v;
     v.emplace_back(move(tree));
-    return namer::Namer::run(gs, move(v));
+    auto workers = WorkerPool::create(0, *logger);
+    return namer::Namer::run(gs, move(v), *workers);
 }
 
 } // namespace

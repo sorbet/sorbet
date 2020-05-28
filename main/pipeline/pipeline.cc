@@ -295,10 +295,11 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
     try {
         {
             Timer timeit(gs.tracer(), "incremental_naming");
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            what = sorbet::namer::Namer::run(gs, move(what));
+            what = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers);
         }
 
         {
@@ -729,7 +730,7 @@ struct typecheck_thread_result {
 };
 
 vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                             bool skipConfigatron) {
+                             WorkerPool &workers, bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
 #ifndef SORBET_REALMAIN_MIN
@@ -742,7 +743,7 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     {
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        what = namer::Namer::run(gs, move(what));
+        what = namer::Namer::run(gs, move(what), workers);
         // Flush all errors if the error queue had a critical error
         if (gs.hadCriticalError()) {
             gs.errorQueue->flushErrors(true);
@@ -836,7 +837,7 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
-        what = name(*gs, move(what), opts, skipConfigatron);
+        what = name(*gs, move(what), opts, workers, skipConfigatron);
         if (gs->epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled();
         }

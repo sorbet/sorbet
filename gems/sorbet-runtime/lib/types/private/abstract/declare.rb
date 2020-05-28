@@ -40,6 +40,9 @@ module T::Private::Abstract::Declare
         end
         super(*args, &blk)
       end
+      if mod.respond_to?(:ruby2_keywords, true)
+        mod.send(:ruby2_keywords, :initialize)
+      end
     end
   end
 end

@@ -1,4 +1,4 @@
 # typed: true
 def foo(&)
-  #      ^ error: unexpected token tRPAREN
+  #      ^ error: unexpected token ")"
 end

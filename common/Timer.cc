@@ -43,7 +43,7 @@ microseconds Timer::clock_gettime_coarse() {
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              microseconds start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, start(start) {
+    : log(log), name(name), prev(prev), self{0}, start(start), endTime{0} {
     if (args.size() != 0) {
         this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
     }
@@ -141,8 +141,12 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     tags->push_back(make_pair(name, value));
 }
 
+void Timer::setEndTime() {
+    endTime = clock_gettime_coarse();
+}
+
 Timer::~Timer() {
-    auto clock = clock_gettime_coarse();
+    auto clock = endTime.usec == 0 ? clock_gettime_coarse() : endTime;
     auto dur = microseconds{clock.usec - start.usec};
     if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
