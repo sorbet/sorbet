@@ -1,1 +1,1 @@
---reserve-mem-kb OK
+--preallocate-symbol-size --preallocate-name-size OK

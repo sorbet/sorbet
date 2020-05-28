@@ -54,9 +54,8 @@ public:
     void initEmpty();
     void installIntrinsics();
 
-    // Expand tables to use approximate `kb` KiB of memory. Can be used prior to
-    // operation to avoid table resizes.
-    void reserveMemory(u4 kb);
+    // Expand tables to the given sizes. Does nothing if the value is <= current capacity.
+    void preallocateTables(u4 symbolSize, u4 nameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -254,7 +253,7 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    void expandNames(int growBy = 2);
+    void expandNames(u4 newSize);
 
     SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);

@@ -314,9 +314,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
-    options.add_options("advanced")("reserve-mem-kb",
-                                    "Preallocate the specified amount of memory for symbol+name tables",
-                                    cxxopts::value<u8>()->default_value(fmt::format("{}", empty.reserveMemKiB)));
+    options.add_options("advanced")(
+        "preallocate-symbol-size", "Preallocate the specified amount of entries in the symbol table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.preallocateSymbolSize)));
+    options.add_options("advanced")("preallocate-name-size",
+                                    "Preallocate the specified amount of entries in the name table",
+                                    cxxopts::value<u4>()->default_value(fmt::format("{}", empty.preallocateNameSize)));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("remove-path-prefix",
                                     "Remove the provided path prefix from all printed paths. Defaults to the input "
@@ -809,7 +812,8 @@ void readOptions(Options &opts,
                 }
             }
         }
-        opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        opts.preallocateNameSize = raw["preallocate-name-size"].as<u4>();
+        opts.preallocateSymbolSize = raw["preallocate-symbol-size"].as<u4>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
