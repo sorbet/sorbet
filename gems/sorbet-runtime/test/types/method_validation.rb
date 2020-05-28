@@ -407,6 +407,70 @@ module Opus::Types::Test
             assert_equal((nil...nil), @mod.foo )
           end
         end
+
+        describe 'return type is nil class' do
+          it 'rejects a range that has integers on both ends' do
+            @mod.sig { returns(T::Range[NilClass] )}
+            def @mod.foo
+              (1...10)
+            end
+
+            err = assert_raises(TypeError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            assert_match(/Return value: Expected type T::Range\[NilClass\], got T::Range\[Integer\]/, lines[0])
+            # Note that the paths here could be relative or absolute depending on how this test was invoked.
+            assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
+            assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+            assert_empty(lines[3..-1])
+          end
+
+          it 'rejects a range that has an integer start and no end' do
+            @mod.sig { returns(T::Range[NilClass] )}
+            def @mod.foo
+              (1...nil)
+            end
+
+            err = assert_raises(TypeError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            assert_match(/Return value: Expected type T::Range\[NilClass\], got T::Range\[Integer\]/, lines[0])
+            # Note that the paths here could be relative or absolute depending on how this test was invoked.
+            assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
+            assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+            assert_empty(lines[3..-1])
+          end
+
+          it 'does not allow us to initialize a range with no start' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (nil...10)
+            end
+
+            err = assert_raises(ArgumentError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            # This test protects us if in the future Ruby supports ranges that are limitless at the start
+            # If this test later fails, we should ensure that we have the appropriate implementation for ranges
+            # that have no start.
+            assert_match('bad value for range', lines[0])
+          end
+
+          it 'permits a range with no start and no end' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (nil...nil)
+            end
+
+            assert_equal((nil...nil), @mod.foo )
+          end
+        end
       end
 
       describe "instance methods" do
