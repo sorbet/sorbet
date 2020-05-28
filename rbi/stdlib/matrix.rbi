@@ -208,7 +208,7 @@ class Vector
   def dot(v); end
 
   # Iterate over the elements of this vector
-  def each(which=:all, &block); end
+  def each(&block); end
 
   # Iterate over the elements of this vector and `v` in conjunction.
   def each2(v); end
@@ -342,7 +342,7 @@ class Matrix
   # ```
   #
   #     Matrix[ [1,2], [3,4] ].each(:strict\_lower).to\_a # => [3]
-  def each(&block); end
+  def each(which=:all, &block); end
 
   # [`Matrix.new`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-new)
   # is private; use
