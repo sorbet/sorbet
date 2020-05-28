@@ -535,6 +535,27 @@ class Thread < Object
   sig {params(priority: Integer).returns(T.untyped)}
   def priority=(priority); end
 
+  # Raises an exception from the given thread. The caller does not have to be
+  # `thr`. See
+  # [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise)
+  # for more information.
+  #
+  # ```ruby
+  # Thread.abort_on_exception = true
+  # a = Thread.new { sleep(200) }
+  # a.raise("Gotcha")
+  # ```
+  #
+  # This will produce:
+  #
+  # ```
+  # prog.rb:3: Gotcha (RuntimeError)
+  #  from prog.rb:2:in `initialize'
+  #  from prog.rb:2:in `new'
+  #  from prog.rb:2
+  # ```
+  def raise(*_); end
+
   # Returns the status of the thread-local "report on exception" condition for
   # this `thr`.
   #
@@ -593,6 +614,13 @@ class Thread < Object
   # check $SAFE.
   sig {returns(Integer)}
   def safe_level; end
+
+  # Establishes *proc* on *thr* as the handler for tracing, or disables tracing
+  # if the parameter is `nil`.
+  #
+  # See
+  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func).
+  def set_trace_func(_); end
 
   # Returns the status of `thr`.
   #

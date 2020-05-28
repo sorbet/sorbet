@@ -253,6 +253,9 @@ class Numeric < Object
   sig {returns(Numeric)}
   def conjugate(); end
 
+  # Returns the receiver. `freeze` cannot be `false`.
+  def clone(*_); end
+
   # Returns the denominator (always positive).
   sig {returns(Integer)}
   def denominator(); end
@@ -322,6 +325,9 @@ class Numeric < Object
     .returns([Numeric, Numeric])
   end
   def divmod(arg0); end
+
+  # Returns the receiver.
+  def dup; end
 
   # Returns `true` if `num` and `numeric` are the same type and have equal
   # values. Contrast this with Numeric#==, which performs type conversions.

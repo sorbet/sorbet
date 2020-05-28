@@ -73,4 +73,31 @@ class Fiber < Object
   # You need to `require 'fiber'` before using this method.
   sig {returns(T::Boolean)}
   def alive?; end
+
+  # Alias for:
+  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html#method-i-to_s)
+  def inspect; end
+
+  # Resumes the fiber from the point at which the last `Fiber.yield` was called,
+  # or starts running it if it is the first call to `resume`. Arguments passed
+  # to resume will be the value of the `Fiber.yield` expression or will be
+  # passed as block parameters to the fiber's block if this is the first
+  # `resume`.
+  #
+  # Alternatively, when resume is called it evaluates to the arguments passed to
+  # the next `Fiber.yield` statement inside the fiber's block or to the block
+  # value if it runs to completion without any `Fiber.yield`
+  def resume(*_); end
+
+  # Returns fiber information string.
+  #
+  # Also aliased as:
+  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html#method-i-inspect)
+  def to_s; end
+
+  # Yields control back to the context that resumed the fiber, passing along any
+  # arguments that were passed to it. The fiber will resume processing at this
+  # point when `resume` is called next. Any arguments passed to the next
+  # `resume` will be the value that this `Fiber.yield` expression evaluates to.
+  def self.yield(*_); end
 end

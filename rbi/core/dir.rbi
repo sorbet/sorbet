@@ -62,6 +62,18 @@ class Dir < Object
   end
   def self.chdir(arg0=T.unsafe(nil), &blk); end
 
+  # Returns an array containing all of the filenames except for "." and ".." in
+  # the given directory. Will raise a `SystemCallError` if the named directory
+  # doesn't exist.
+  #
+  # The optional *encoding* keyword argument specifies the encoding of the
+  # directory. If not specified, the filesystem encoding is used.
+  #
+  # ```ruby
+  # Dir.children("testdir")   #=> ["config.h", "main.rb"]
+  # ```
+  def self.children(*_); end
+
   # Changes this process's idea of the file system root. Only a privileged
   # process may make this call. Not available on all platforms. On Unix systems,
   # see `chroot(2)` for more information.
@@ -82,6 +94,27 @@ class Dir < Object
     .returns(Integer)
   end
   def self.delete(arg0); end
+
+  # Calls the block once for each entry except for "." and ".." in the named
+  # directory, passing the filename of each entry as a parameter to the block.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # Dir.each_child("testdir") {|x| puts "Got #{x}" }
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # Got config.h
+  # Got main.rb
+  # ```
+  def self.each_child(*_); end
+
+  # Returns `true` if the named file is an empty directory, `false` if it is not
+  # a directory or non-empty.
+  def self.empty?(_); end
 
   # Returns an array containing all of the filenames in the given directory.
   # Will raise a `SystemCallError` if the named directory doesn't exist.
@@ -334,6 +367,9 @@ class Dir < Object
     .returns(Integer)
   end
   def self.rmdir(arg0); end
+
+  # Returns the operating system's temporary file path.
+  def self.tmpdir; end
 
   # Deletes the named directory. Raises a subclass of `SystemCallError` if the
   # directory isn't empty.

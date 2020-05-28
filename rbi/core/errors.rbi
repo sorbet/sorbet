@@ -152,6 +152,13 @@ end
 # h.fetch("baz") #=> KeyError: key not found: "baz"
 # ```
 class KeyError < IndexError
+  # Return the key caused this
+  # [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html) exception.
+  def key; end
+
+  # Return the receiver associated with this
+  # [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html) exception.
+  def receiver; end
 end
 
 # Raised when a file required (a Ruby script, extension library, ...) fails to
@@ -167,6 +174,8 @@ end
 # LoadError: no such file to load -- this/file/does/not/exist
 # ```
 class LoadError < ScriptError
+  # the path failed to load
+  def path; end
 end
 
 # Raised when Ruby can't yield as requested.
@@ -201,6 +210,12 @@ end
 # LocalJumpError: unexpected return
 # ```
 class LocalJumpError < StandardError
+  # Returns the exit value associated with this `LocalJumpError`.
+  def exit_value; end
+
+  # The reason this block was terminated: :break, :redo, :retry, :next, :return,
+  # or :noreason.
+  def reason; end
 end
 
 # Raised when a given name is invalid or undefined.
@@ -227,6 +242,26 @@ end
 # NameError: wrong constant name answer
 # ```
 class NameError < StandardError
+  # Construct a new
+  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  # If given the *name* parameter may subsequently be examined using the
+  # `NameError#name` method.
+  def self.new(*_); end
+
+  # Return a list of the local variable names defined where this
+  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception
+  # was raised.
+  #
+  # Internal use only.
+  def local_variables; end
+
+  # Return the name associated with this
+  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  def name; end
+
+  # Return the receiver associated with this
+  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  def receiver; end
 end
 
 # Raised when memory allocation fails.
@@ -246,6 +281,18 @@ end
 # NoMethodError: undefined method `to_ary' for "hello":String
 # ```
 class NoMethodError < NameError
+  # Construct a
+  # [`NoMethodError`](https://docs.ruby-lang.org/en/2.6.0/NoMethodError.html)
+  # exception for a method of the given name called with the given arguments.
+  # The name may be accessed using the `#name` method on the resulting object,
+  # and the arguments using the `#args` method.
+  def self.new(*_); end
+
+  # Return the arguments passed in as the third parameter to the constructor.
+  def args; end
+
+  # Return true if the caused method was called as private.
+  def private_call?; end
 end
 
 # Raised when a feature is not implemented on the current platform. For example,
@@ -350,6 +397,15 @@ end
 # received Exception SIGHUP
 # ```
 class SignalException < Exception
+  # Construct a new
+  # [`SignalException`](https://docs.ruby-lang.org/en/2.6.0/SignalException.html)
+  # object. `sig_name` should be a known signal name.
+  def self.new(*_); end
+
+  def signm; end
+
+  # Returns a signal number.
+  def signo; end
 end
 
 # The most standard error types are subclasses of
@@ -400,6 +456,30 @@ end
 # Done!
 # ```
 class StopIteration < IndexError
+  # Returns the return value of the iterator.
+  #
+  # ```ruby
+  # o = Object.new
+  # def o.each
+  #   yield 1
+  #   yield 2
+  #   yield 3
+  #   100
+  # end
+  #
+  # e = o.to_enum
+  #
+  # puts e.next                   #=> 1
+  # puts e.next                   #=> 2
+  # puts e.next                   #=> 3
+  #
+  # begin
+  #   e.next
+  # rescue StopIteration => ex
+  #   puts ex.result              #=> 100
+  # end
+  # ```
+  def result; end
 end
 
 # Raised when encountering Ruby code with an invalid syntax.
@@ -434,10 +514,31 @@ end
 # Errno::ENOENT: No such file or directory - does/not/exist
 # ```
 class SystemCallError < StandardError
+  # If *errno* corresponds to a known system error code, constructs the
+  # appropriate `Errno` class for that error, otherwise constructs a generic
+  # `SystemCallError` object. The error number is subsequently available via the
+  # `errno` method.
+  def self.new(*_); end
+
+  # Return this SystemCallError's error number.
+  def errno; end
+
+  # Return `true` if the receiver is a generic `SystemCallError`, or if the
+  # error numbers `self` and *other* are the same.
+  def self.===(_); end
 end
 
 # Raised by `exit` to initiate the termination of the script.
 class SystemExit < Exception
+  # Create a new `SystemExit` exception with the given status and message.
+  # Status is true, false, or an integer. If status is not given, true is used.
+  def self.new(*_); end
+
+  # Return the status value associated with this system exit.
+  def status; end
+
+  # Returns `true` if exiting successful, `false` if not.
+  def success?; end
 end
 
 # Raised in case of a stack overflow.
@@ -501,6 +602,31 @@ end
 # UncaughtThrowError: uncaught throw "foo"
 # ```
 class UncaughtThrowError < ArgumentError
+  # Document-class:
+  # [`UncaughtThrowError`](https://docs.ruby-lang.org/en/2.6.0/UncaughtThrowError.html)
+  #
+  # Raised when `throw` is called with a *tag* which does not have corresponding
+  # `catch` block.
+  #
+  # ```ruby
+  # throw "foo", "bar"
+  # ```
+  #
+  # *raises the exception:*
+  #
+  # ```
+  # UncaughtThrowError: uncaught throw "foo"
+  # ```
+  def self.new(*_); end
+
+  # Return the tag object which was called for.
+  def tag; end
+
+  # Returns formatted message with the inspected tag.
+  def to_s; end
+
+  # Return the return value which was called for.
+  def value; end
 end
 
 # Raised when attempting to divide an integer by 0.

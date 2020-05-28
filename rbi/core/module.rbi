@@ -688,6 +688,9 @@ class Module < Object
   end
   def define_method(arg0, arg1=T.unsafe(nil), &blk); end
 
+  # Makes a list of existing constants deprecated.
+  def deprecate_constant(*_); end
+
   sig do
     params(
         other: BasicObject,
@@ -1583,4 +1586,30 @@ class Module < Object
     .returns(NilClass)
   end
   def attr(*arg0); end
+
+  # Returns an array of all modules used in the current scope. The ordering of
+  # modules in the resulting array is not defined.
+  #
+  # ```ruby
+  # module A
+  #   refine Object do
+  #   end
+  # end
+  #
+  # module B
+  #   refine Object do
+  #   end
+  # end
+  #
+  # using A
+  # using B
+  # p Module.used_modules
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # [B, A]
+  # ```
+  def self.used_modules; end
 end

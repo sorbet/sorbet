@@ -657,6 +657,71 @@ class Array < Object
   end
   def at(arg0); end
 
+  # By using binary search, finds a value from this array which meets the given
+  # condition in O(log n) where n is the size of the array.
+  #
+  # You can use this method in two modes: a find-minimum mode and a find-any
+  # mode. In either case, the elements of the array must be monotone (or sorted)
+  # with respect to the block.
+  #
+  # In find-minimum mode (this is a good choice for typical use cases), the
+  # block must always return true or false, and there must be an index i (0 <= i
+  # <= ary.size) so that:
+  #
+  # *   the block returns false for any element whose index is less than i, and
+  # *   the block returns true for any element whose index is greater than or
+  #     equal to i.
+  #
+  #
+  # This method returns the i-th element. If i is equal to ary.size, it returns
+  # nil.
+  #
+  # ```ruby
+  # ary = [0, 4, 7, 10, 12]
+  # ary.bsearch {|x| x >=   4 } #=> 4
+  # ary.bsearch {|x| x >=   6 } #=> 7
+  # ary.bsearch {|x| x >=  -1 } #=> 0
+  # ary.bsearch {|x| x >= 100 } #=> nil
+  # ```
+  #
+  # In find-any mode (this behaves like libc's bsearch(3)), the block must
+  # always return a number, and there must be two indices i and j (0 <= i <= j
+  # <= ary.size) so that:
+  #
+  # *   the block returns a positive number for [ary](k) if 0 <= k < i,
+  # *   the block returns zero for [ary](k) if i <= k < j, and
+  # *   the block returns a negative number for [ary](k) if j <= k < ary.size.
+  #
+  #
+  # Under this condition, this method returns any element whose index is within
+  # i...j.  If i is equal to j (i.e., there is no element that satisfies the
+  # block), this method returns nil.
+  #
+  # ```ruby
+  # ary = [0, 4, 7, 10, 12]
+  # # try to find v such that 4 <= v < 8
+  # ary.bsearch {|x| 1 - x / 4 } #=> 4 or 7
+  # # try to find v such that 8 <= v < 10
+  # ary.bsearch {|x| 4 - x / 2 } #=> nil
+  # ```
+  #
+  # You must not mix the two modes at a time; the block must always return
+  # either true/false, or always return a number. It is undefined which value is
+  # actually picked up at each iteration.
+  def bsearch; end
+
+  # By using binary search, finds an index of a value from this array which
+  # meets the given condition in O(log n) where n is the size of the array.
+  #
+  # It supports two modes, depending on the nature of the block. They are
+  # exactly the same as in the case of the
+  # [`bsearch`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-bsearch)
+  # method, with the only difference being that this method returns the index of
+  # the element instead of the element itself. For more details consult the
+  # documentation for
+  # [`bsearch`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-bsearch).
+  def bsearch_index; end
+
   # Removes all elements from `self`.
   #
   # ```ruby
@@ -940,6 +1005,20 @@ class Array < Object
   end
   def difference(*arrays); end
 
+  # Extracts the nested value specified by the sequence of *idx* objects by
+  # calling `dig` at each step, returning `nil` if any intermediate step is
+  # `nil`.
+  #
+  # ```ruby
+  # a = [[1, [2, 3]]]
+  #
+  # a.dig(0, 1, 1)                    #=> 3
+  # a.dig(1, 2, 3)                    #=> nil
+  # a.dig(0, 0, 0)                    #=> TypeError: Integer does not have #dig method
+  # [42, {foo: :bar}].dig(1, :foo)    #=> :bar
+  # ```
+  def dig(*_); end
+
   # Drops first `n` elements from `ary` and returns the rest of the elements in
   # an array.
   #
@@ -1062,7 +1141,7 @@ class Array < Object
   end
   sig {returns(T::Enumerator[[Elem,Integer]])}
   def each_with_index(&blk); end
-  
+
   # Returns `true` if `self` contains no elements.
   #
   # ```ruby
@@ -1070,6 +1149,11 @@ class Array < Object
   # ```
   sig {returns(T::Boolean)}
   def empty?(); end
+
+  # Returns `true` if `self` and `other` are the same object, or are both arrays
+  # with the same content (according to
+  # [`Object#eql?`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-eql-3F)).
+  def eql?(_); end
 
   # Tries to return the element at position `index`, but throws an
   # [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html)
@@ -1217,6 +1301,32 @@ class Array < Object
   # ```
   sig {params(depth: Integer).returns(T::Array[T.untyped])}
   def flatten(depth = -1); end
+
+  # Flattens `self` in place.
+  #
+  # Returns `nil` if no modifications were made (i.e., the array contains no
+  # subarrays.)
+  #
+  # The optional `level` argument determines the level of recursion to flatten.
+  #
+  # ```ruby
+  # a = [ 1, 2, [3, [4, 5] ] ]
+  # a.flatten!   #=> [1, 2, 3, 4, 5]
+  # a.flatten!   #=> nil
+  # a            #=> [1, 2, 3, 4, 5]
+  # a = [ 1, 2, [3, [4, 5] ] ]
+  # a.flatten!(1) #=> [1, 2, 3, [4, 5]]
+  # ```
+  def flatten!(*_); end
+
+  # Compute a hash-code for this array.
+  #
+  # Two arrays with the same content will have the same hash code (and will
+  # compare using
+  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-eql-3F)).
+  #
+  # See also Object#hash.
+  def hash; end
 
   # Returns `true` if the given `object` is present in `self` (that is, if any
   # element `==` `object`), otherwise returns `false`.
@@ -1472,6 +1582,131 @@ class Array < Object
   end
   def minmax(&blk); end
 
+  # Packs the contents of *arr* into a binary sequence according to the
+  # directives in *aTemplateString* (see the table below) Directives "A," "a,"
+  # and "Z" may be followed by a count, which gives the width of the resulting
+  # field. The remaining directives also may take a count, indicating the number
+  # of array elements to convert. If the count is an asterisk ("`*`"), all
+  # remaining array elements will be converted. Any of the directives "`sSiIlL`"
+  # may be followed by an underscore ("`_`") or exclamation mark ("`!`") to use
+  # the underlying platform's native size for the specified type; otherwise,
+  # they use a platform-independent size. Spaces are ignored in the template
+  # string. See also `String#unpack`.
+  #
+  # ```ruby
+  # a = [ "a", "b", "c" ]
+  # n = [ 65, 66, 67 ]
+  # a.pack("A3A3A3")   #=> "a  b  c  "
+  # a.pack("a3a3a3")   #=> "a\000\000b\000\000c\000\000"
+  # n.pack("ccc")      #=> "ABC"
+  # ```
+  #
+  # If *aBufferString* is specified and its capacity is enough, `pack` uses it
+  # as the buffer and returns it. When the offset is specified by the beginning
+  # of *aTemplateString*, the result is filled after the offset. If original
+  # contents of *aBufferString* exists and it's longer than the offset, the rest
+  # of *offsetOfBuffer* are overwritten by the result. If it's shorter, the gap
+  # is filled with "`\0`".
+  #
+  # Note that "buffer:" option does not guarantee not to allocate memory in
+  # `pack`. If the capacity of *aBufferString* is not enough, `pack` allocates
+  # memory.
+  #
+  # Directives for `pack`.
+  #
+  # ```
+  # Integer       | Array   |
+  # Directive     | Element | Meaning
+  # ----------------------------------------------------------------------------
+  # C             | Integer | 8-bit unsigned (unsigned char)
+  # S             | Integer | 16-bit unsigned, native endian (uint16_t)
+  # L             | Integer | 32-bit unsigned, native endian (uint32_t)
+  # Q             | Integer | 64-bit unsigned, native endian (uint64_t)
+  # J             | Integer | pointer width unsigned, native endian (uintptr_t)
+  #               |         | (J is available since Ruby 2.3.)
+  #               |         |
+  # c             | Integer | 8-bit signed (signed char)
+  # s             | Integer | 16-bit signed, native endian (int16_t)
+  # l             | Integer | 32-bit signed, native endian (int32_t)
+  # q             | Integer | 64-bit signed, native endian (int64_t)
+  # j             | Integer | pointer width signed, native endian (intptr_t)
+  #               |         | (j is available since Ruby 2.3.)
+  #               |         |
+  # S_ S!         | Integer | unsigned short, native endian
+  # I I_ I!       | Integer | unsigned int, native endian
+  # L_ L!         | Integer | unsigned long, native endian
+  # Q_ Q!         | Integer | unsigned long long, native endian (ArgumentError
+  #               |         | if the platform has no long long type.)
+  #               |         | (Q_ and Q! is available since Ruby 2.1.)
+  # J!            | Integer | uintptr_t, native endian (same with J)
+  #               |         | (J! is available since Ruby 2.3.)
+  #               |         |
+  # s_ s!         | Integer | signed short, native endian
+  # i i_ i!       | Integer | signed int, native endian
+  # l_ l!         | Integer | signed long, native endian
+  # q_ q!         | Integer | signed long long, native endian (ArgumentError
+  #               |         | if the platform has no long long type.)
+  #               |         | (q_ and q! is available since Ruby 2.1.)
+  # j!            | Integer | intptr_t, native endian (same with j)
+  #               |         | (j! is available since Ruby 2.3.)
+  #               |         |
+  # S> s> S!> s!> | Integer | same as the directives without ">" except
+  # L> l> L!> l!> |         | big endian
+  # I!> i!>       |         | (available since Ruby 1.9.3)
+  # Q> q> Q!> q!> |         | "S>" is same as "n"
+  # J> j> J!> j!> |         | "L>" is same as "N"
+  #               |         |
+  # S< s< S!< s!< | Integer | same as the directives without "<" except
+  # L< l< L!< l!< |         | little endian
+  # I!< i!<       |         | (available since Ruby 1.9.3)
+  # Q< q< Q!< q!< |         | "S<" is same as "v"
+  # J< j< J!< j!< |         | "L<" is same as "V"
+  #               |         |
+  # n             | Integer | 16-bit unsigned, network (big-endian) byte order
+  # N             | Integer | 32-bit unsigned, network (big-endian) byte order
+  # v             | Integer | 16-bit unsigned, VAX (little-endian) byte order
+  # V             | Integer | 32-bit unsigned, VAX (little-endian) byte order
+  #               |         |
+  # U             | Integer | UTF-8 character
+  # w             | Integer | BER-compressed integer
+  #
+  # Float        | Array   |
+  # Directive    | Element | Meaning
+  # ---------------------------------------------------------------------------
+  # D d          | Float   | double-precision, native format
+  # F f          | Float   | single-precision, native format
+  # E            | Float   | double-precision, little-endian byte order
+  # e            | Float   | single-precision, little-endian byte order
+  # G            | Float   | double-precision, network (big-endian) byte order
+  # g            | Float   | single-precision, network (big-endian) byte order
+  #
+  # String       | Array   |
+  # Directive    | Element | Meaning
+  # ---------------------------------------------------------------------------
+  # A            | String  | arbitrary binary string (space padded, count is width)
+  # a            | String  | arbitrary binary string (null padded, count is width)
+  # Z            | String  | same as ``a'', except that null is added with *
+  # B            | String  | bit string (MSB first)
+  # b            | String  | bit string (LSB first)
+  # H            | String  | hex string (high nibble first)
+  # h            | String  | hex string (low nibble first)
+  # u            | String  | UU-encoded string
+  # M            | String  | quoted printable, MIME encoding (see also RFC2045)
+  #              |         | (text mode but input must use LF and output LF)
+  # m            | String  | base64 encoded string (see RFC 2045, count is width)
+  #              |         | (if count is 0, no line feed are added, see RFC 4648)
+  # P            | String  | pointer to a structure (fixed-length string)
+  # p            | String  | pointer to a null-terminated string
+  #
+  # Misc.        | Array   |
+  # Directive    | Element | Meaning
+  # ---------------------------------------------------------------------------
+  # @            | ---     | moves to absolute position
+  # X            | ---     | back up a byte
+  # x            | ---     | null byte
+  # ```
+  def pack(*_); end
+
   # When invoked with a block, yield all permutations of length `n` of the
   # elements of the array, then return the array itself.
   #
@@ -1725,6 +1960,16 @@ class Array < Object
     .returns(T::Enumerator[T::Array[Elem]])
   end
   def repeated_permutation(arg0, &blk); end
+
+  # Replaces the contents of `self` with the contents of `other_ary`, truncating
+  # or expanding if necessary.
+  #
+  # ```ruby
+  # a = [ "a", "b", "c", "d", "e" ]
+  # a.replace([ "x", "y", "z" ])   #=> ["x", "y", "z"]
+  # a                              #=> ["x", "y", "z"]
+  # ```
+  def replace(_); end
 
   # Returns a new array containing `self`'s elements in reverse order.
   #

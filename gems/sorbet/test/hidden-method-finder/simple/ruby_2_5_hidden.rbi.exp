@@ -5,19 +5,7 @@
 
 class Array
   include ::JSON::Ext::Generator::GeneratorMethods::Array
-  def bsearch(); end
-
-  def bsearch_index(); end
-
   def collect!(); end
-
-  def dig(*_); end
-
-  def flatten!(*_); end
-
-  def pack(*_); end
-
-  def replace(_); end
 
   def shelljoin(); end
 
@@ -4875,14 +4863,6 @@ class Class
   def json_creatable?(); end
 end
 
-class Complex
-  def self.polar(*_); end
-
-  def self.rect(*_); end
-
-  def self.rectangular(*_); end
-end
-
 class Delegator
   def initialize(obj); end
   RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
@@ -4991,15 +4971,8 @@ module DidYouMean
 end
 
 class Dir
-  def self.children(*_); end
-
-  def self.each_child(*_); end
-
-  def self.empty?(_); end
-
   def self.exists?(_); end
 
-  def self.tmpdir(); end
 end
 
 class ERB
@@ -5015,93 +4988,19 @@ class Encoding
 end
 
 class Encoding::Converter
-  def convert(_); end
-
-  def convpath(); end
-
-  def destination_encoding(); end
-
-  def finish(); end
-
   def initialize(*_); end
-
-  def insert_output(_); end
-
-  def last_error(); end
-
-  def primitive_convert(*_); end
-
-  def primitive_errinfo(); end
-
-  def putback(*_); end
-
-  def replacement(); end
-
-  def replacement=(replacement); end
-
-  def source_encoding(); end
-end
-
-class Encoding::Converter
-  def self.asciicompat_encoding(_); end
-
-  def self.search_convpath(*_); end
-end
-
-class Encoding::InvalidByteSequenceError
-  def destination_encoding(); end
-
-  def destination_encoding_name(); end
-
-  def error_bytes(); end
-
-  def incomplete_input?(); end
-
-  def readagain_bytes(); end
-
-  def source_encoding(); end
-
-  def source_encoding_name(); end
-end
-
-class Encoding::UndefinedConversionError
-  def destination_encoding(); end
-
-  def destination_encoding_name(); end
-
-  def error_char(); end
-
-  def source_encoding(); end
-
-  def source_encoding_name(); end
 end
 
 class Encoding
   def self._load(_); end
-
-  def self.locale_charmap(); end
 end
 
 module Enumerable
-  def chunk(); end
-
   def chunk_while(); end
-
-  def each_entry(*_); end
-
-  def grep_v(_); end
-
-  def slice_after(*_); end
-
-  def slice_before(*_); end
-
-  def slice_when(); end
 
   def sum(*_); end
 
   def to_set(klass=T.unsafe(nil), *args, &block); end
-
-  def uniq(); end
 end
 
 class Enumerator
@@ -5112,16 +5011,6 @@ class Enumerator::Generator
   def each(*_, &blk); end
 
   def initialize(*_); end
-end
-
-class Enumerator::Lazy
-  def chunk(*_); end
-
-  def chunk_while(*_); end
-
-  def force(*_); end
-
-  def slice_when(*_); end
 end
 
 Errno::ECAPMODE = Errno::NOERROR
@@ -5186,16 +5075,6 @@ class Etc::Passwd
   def self.members(); end
 end
 
-class Exception
-  def full_message(*_); end
-end
-
-class Exception
-  def self.exception(*_); end
-
-  def self.to_tty?(); end
-end
-
 class ExitCalledError
 end
 
@@ -5206,30 +5085,8 @@ class FalseClass
   include ::JSON::Ext::Generator::GeneratorMethods::FalseClass
 end
 
-class Fiber
-  def resume(*_); end
-end
-
-class Fiber
-  def self.yield(*_); end
-end
-
 class File
-  Separator = ::T.let(nil, ::T.untyped)
-end
-
-class File::Stat
-  def size?(); end
-end
-
-class File
-  def self.empty?(_); end
-
   def self.exists?(_); end
-
-  def self.lutime(*_); end
-
-  def self.mkfifo(*_); end
 end
 
 module FileUtils
@@ -5289,14 +5146,6 @@ end
 
 module GC
   def garbage_collect(*_); end
-end
-
-module GC
-  def self.latest_gc_info(*_); end
-
-  def self.stress=(stress); end
-
-  def self.verify_internal_consistency(); end
 end
 
 module Gem
@@ -9017,43 +8866,6 @@ end
 
 class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
-  def <(_); end
-
-  def <=(_); end
-
-  def >(_); end
-
-  def >=(_); end
-
-  def compact(); end
-
-  def compact!(); end
-
-  def default_proc(); end
-
-  def default_proc=(default_proc); end
-
-  def fetch_values(*_); end
-
-  def flatten(*_); end
-
-  def index(_); end
-
-  def replace(_); end
-
-  def slice(*_); end
-
-  def to_h(); end
-
-  def to_proc(); end
-
-  def transform_keys(); end
-
-  def transform_keys!(); end
-
-  def transform_values!(); end
-
-  def update(_); end
 end
 
 class Hash
@@ -9061,15 +8873,9 @@ class Hash
 end
 
 class IO
-  def external_encoding(); end
-
   def nread(); end
 
   def pathconf(_); end
-
-  def pread(*_); end
-
-  def pwrite(_, _1); end
 
   def ready?(); end
 
@@ -9085,10 +8891,6 @@ end
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
 
 IO::EWOULDBLOCKWaitWritable = IO::EAGAINWaitWritable
-
-class IO
-  def self.foreach(*_); end
-end
 
 class IPAddr
   include ::Comparable
@@ -9199,19 +9001,6 @@ end
 
 class Integer
   include ::JSON::Ext::Generator::GeneratorMethods::Integer
-  def allbits?(_); end
-
-  def anybits?(_); end
-
-  def digits(*_); end
-
-  def nobits?(_); end
-
-  def pow(*_); end
-end
-
-class Integer
-  def self.sqrt(_); end
 end
 
 class JSON::Ext::Generator::State
@@ -9244,31 +9033,6 @@ end
 
 class KeyError
   include ::DidYouMean::Correctable
-  def key(); end
-
-  def receiver(); end
-end
-
-class LoadError
-  def path(); end
-end
-
-class LocalJumpError
-  def exit_value(); end
-
-  def reason(); end
-end
-
-module Marshal
-  def self.restore(*_); end
-end
-
-class Module
-  def deprecate_constant(*_); end
-end
-
-class Module
-  def self.used_modules(); end
 end
 
 class Monitor
@@ -9281,62 +9045,20 @@ end
 
 module MonitorMixin
   def initialize(*args); end
-
-  def mon_enter(); end
-
-  def mon_exit(); end
-
-  def mon_locked?(); end
-
-  def mon_owned?(); end
-
-  def mon_synchronize(); end
-
-  def mon_try_enter(); end
-
-  def new_cond(); end
-
-  def synchronize(); end
-
-  def try_mon_enter(); end
   EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
   EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
 end
 
 class MonitorMixin::ConditionVariable
-  def broadcast(); end
-
   def initialize(monitor); end
-
-  def signal(); end
-
-  def wait(timeout=T.unsafe(nil)); end
-
-  def wait_until(); end
-
-  def wait_while(); end
-end
-
-module MonitorMixin
-  def self.extend_object(obj); end
 end
 
 class NameError
   include ::DidYouMean::Correctable
-  def name(); end
-
-  def receiver(); end
 end
 
 class NilClass
   include ::JSON::Ext::Generator::GeneratorMethods::NilClass
-  def to_i(); end
-end
-
-class NoMethodError
-  def args(); end
-
-  def private_call?(); end
 end
 
 class Object
@@ -9369,111 +9091,13 @@ class Pathname
 end
 
 class Proc
-  def ===(*_); end
-
   def clone(); end
-
-  def yield(*_); end
-end
-
-module Process::Sys
-  def self.getegid(); end
-end
-
-class Process::Tms
-  def cstime(); end
-
-  def cstime=(_); end
-
-  def cutime(); end
-
-  def cutime=(_); end
-
-  def stime(); end
-
-  def stime=(_); end
-
-  def utime(); end
-
-  def utime=(_); end
-end
-
-class Process::Tms
-  def self.[](*_); end
-
-  def self.members(); end
-end
-
-module Process
-  def self.last_status(); end
-
-  def self.setpgrp(); end
-end
-
-module Random::Formatter
-  def alphanumeric(n=T.unsafe(nil)); end
-
-  ALPHANUMERIC = ::T.let(nil, ::T.untyped)
-end
-
-class Random
-  def self.urandom(_); end
 end
 
 module RbConfig
   def self.expand(val, config=T.unsafe(nil)); end
 
   def self.ruby(); end
-end
-
-class RubyVM::InstructionSequence
-  def absolute_path(); end
-
-  def base_label(); end
-
-  def disasm(); end
-
-  def disassemble(); end
-
-  def each_child(); end
-
-  def eval(); end
-
-  def first_lineno(); end
-
-  def label(); end
-
-  def path(); end
-
-  def to_a(); end
-
-  def to_binary(*_); end
-
-  def trace_points(); end
-end
-
-class RubyVM::InstructionSequence
-  def self.compile(*_); end
-
-  def self.compile_file(*_); end
-
-  def self.compile_option(); end
-
-  def self.compile_option=(compile_option); end
-
-  def self.disasm(_); end
-
-  def self.disassemble(_); end
-
-  def self.load_from_binary(_); end
-
-  def self.load_from_binary_extra_data(_); end
-
-  def self.of(_); end
-end
-
-class RubyVM
-  def self.stat(*_); end
 end
 
 class Set
@@ -9497,12 +9121,6 @@ class Set
 
   def reset(); end
   InspectKey = ::T.let(nil, ::T.untyped)
-end
-
-class SignalException
-  def signm(); end
-
-  def signo(); end
 end
 
 class SimpleDelegator
@@ -9529,69 +9147,15 @@ class SortedSet
   def self.setup(); end
 end
 
-class StopIteration
-  def result(); end
-end
-
 class String
   include ::JSON::Ext::Generator::GeneratorMethods::String
-  def []=(*_); end
-
-  def casecmp?(_); end
-
-  def each_grapheme_cluster(); end
-
-  def encode!(*_); end
-
-  def grapheme_clusters(); end
-
-  def reverse!(); end
-
   def shellescape(); end
 
   def shellsplit(); end
-
-  def succ!(); end
-
-  def undump(); end
-
-  def unicode_normalize(*_); end
-
-  def unicode_normalize!(*_); end
-
-  def unicode_normalized?(*_); end
-
-  def unpack1(_); end
 end
 
 class String
   extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
-end
-
-class Struct
-  def [](_); end
-
-  def []=(_, _1); end
-
-  def dig(*_); end
-
-  def each_pair(); end
-
-  def length(); end
-
-  def members(); end
-
-  def select(*_); end
-
-  def size(); end
-
-  def to_a(); end
-
-  def to_h(); end
-
-  def values(); end
-
-  def values_at(*_); end
 end
 
 Struct::Group = Etc::Group
@@ -9599,20 +9163,6 @@ Struct::Group = Etc::Group
 Struct::Passwd = Etc::Passwd
 
 Struct::Tms = Process::Tms
-
-class SystemCallError
-  def errno(); end
-end
-
-class SystemExit
-  def status(); end
-
-  def success?(); end
-end
-
-class TracePoint
-  def event(); end
-end
 
 class TrueClass
   include ::JSON::Ext::Generator::GeneratorMethods::TrueClass
@@ -9693,26 +9243,10 @@ module URI
 
 end
 
-class UnboundMethod
-  def clone(); end
-
-  def original_name(); end
-end
-
-class UncaughtThrowError
-  def tag(); end
-
-  def value(); end
-end
-
 module UnicodeNormalize
 end
 
 module UnicodeNormalize
-end
-
-module Warning
-  def warn(_); end
 end
 
 module Warning

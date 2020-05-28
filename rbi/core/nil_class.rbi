@@ -12,6 +12,12 @@ class NilClass < Object
   end
   def &(obj); end
 
+  # Case Equality -- For class
+  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html), effectively the
+  # same as calling `#==`, but typically overridden by descendants to provide
+  # meaningful semantics in `case` statements.
+  def ===(_); end
+
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
   sig do
@@ -21,6 +27,9 @@ class NilClass < Object
     .returns(T::Boolean)
   end
   def ^(obj); end
+
+  # Always returns the string "nil".
+  def inspect; end
 
   # Returns zero as a rational. The optional argument `eps` is always ignored.
   sig {returns(Rational)}
@@ -53,6 +62,13 @@ class NilClass < Object
   # ```
   sig {returns(T::Hash[T.untyped, T.untyped])}
   def to_h(); end
+
+  # Always returns zero.
+  #
+  # ```ruby
+  # nil.to_i   #=> 0
+  # ```
+  def to_i; end
 
   # Returns zero as a rational.
   sig {returns(Rational)}

@@ -15,6 +15,8 @@ module GC
   # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) build options
   OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
+  def self.compact; end
+
   # The number of times [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html)
   # occurred.
   #
@@ -44,6 +46,9 @@ module GC
   # ```
   sig {returns(T::Boolean)}
   def self.enable(); end
+
+  # Returns information about the most recent garbage collection.
+  def self.latest_gc_info(*_); end
 
   # Initiates garbage collection, unless manually disabled.
   #
@@ -117,6 +122,30 @@ module GC
   # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) stress mode.
   sig {returns(T.any(Integer, TrueClass, FalseClass))}
   def self.stress(); end
+
+  # Updates the [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) stress mode.
+  #
+  # When stress mode is enabled, the
+  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) is invoked at every
+  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) opportunity: all memory
+  # and object allocations.
+  #
+  # Enabling stress mode will degrade performance, it is only for debugging.
+  #
+  # flag can be true, false, or an integer bit-ORed following flags.
+  #
+  # ```ruby
+  # 0x01:: no major GC
+  # 0x02:: no immediate sweep
+  # 0x04:: full mark after malloc/calloc/realloc
+  # ```
+  def self.stress=(_); end
+
+  # Verify internal consistency.
+  #
+  # This method is implementation specific. Now this method checks generational
+  # consistency if RGenGC is supported.
+  def self.verify_internal_consistency; end
 end
 
 # The [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html) profiler provides

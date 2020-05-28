@@ -147,6 +147,74 @@ class Hash < Object
   V = type_member(:out)
   Elem = type_member(:out)
 
+  # Returns `true` if *hash* is subset of *other*.
+  #
+  # ```ruby
+  # h1 = {a:1, b:2}
+  # h2 = {a:1, b:2, c:3}
+  # h1 < h2    #=> true
+  # h2 < h1    #=> false
+  # h1 < h1    #=> false
+  # ```
+  def <(_); end
+
+  # Returns `true` if *hash* is subset of *other* or equals to *other*.
+  #
+  # ```ruby
+  # h1 = {a:1, b:2}
+  # h2 = {a:1, b:2, c:3}
+  # h1 <= h2   #=> true
+  # h2 <= h1   #=> false
+  # h1 <= h1   #=> true
+  # ```
+  def <=(_); end
+
+  # Equality---Two hashes are equal if they each contain the same number of keys
+  # and if each key-value pair is equal to (according to `Object#==`) the
+  # corresponding elements in the other hash.
+  #
+  # ```ruby
+  # h1 = { "a" => 1, "c" => 2 }
+  # h2 = { 7 => 35, "c" => 2, "a" => 1 }
+  # h3 = { "a" => 1, "c" => 2, 7 => 35 }
+  # h4 = { "a" => 1, "d" => 2, "f" => 35 }
+  # h1 == h2   #=> false
+  # h2 == h3   #=> true
+  # h3 == h4   #=> false
+  # ```
+  #
+  # The orders of each hashes are not compared.
+  #
+  # ```ruby
+  # h1 = { "a" => 1, "c" => 2 }
+  # h2 = { "c" => 2, "a" => 1 }
+  # h1 == h2   #=> true
+  # ```
+  sig {params(_: T.untyped).returns(T::Boolean)}
+  def ==(_); end
+
+  # Returns `true` if *other* is subset of *hash*.
+  #
+  # ```ruby
+  # h1 = {a:1, b:2}
+  # h2 = {a:1, b:2, c:3}
+  # h1 > h2    #=> false
+  # h2 > h1    #=> true
+  # h1 > h1    #=> false
+  # ```
+  def >(_); end
+
+  # Returns `true` if *other* is subset of *hash* or equals to *hash*.
+  #
+  # ```ruby
+  # h1 = {a:1, b:2}
+  # h2 = {a:1, b:2, c:3}
+  # h1 >= h2   #=> false
+  # h2 >= h1   #=> true
+  # h1 >= h1   #=> true
+  # ```
+  def >=(_); end
+
   # Creates a new hash populated with the given objects.
   #
   # Similar to the literal `{ key => value, ... }`. In the first form, keys and
@@ -235,6 +303,10 @@ class Hash < Object
   end
   def assoc(arg0); end
 
+  # See also
+  # [`Enumerable#any?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-any-3F)
+  def any?(*_); end
+
   # Removes all key-value pairs from *hsh*.
   #
   # ```ruby
@@ -243,6 +315,24 @@ class Hash < Object
   # ```
   sig {returns(T::Hash[K, V])}
   def clear(); end
+
+  # Returns a new hash with the nil values/key pairs removed
+  #
+  # ```ruby
+  # h = { a: 1, b: false, c: nil }
+  # h.compact     #=> { a: 1, b: false }
+  # h             #=> { a: 1, b: false, c: nil }
+  # ```
+  def compact; end
+
+  # Removes all nil values from the hash. Returns nil if no changes were made,
+  # otherwise returns the hash.
+  #
+  # ```ruby
+  # h = { a: 1, b: false, c: nil }
+  # h.compact!     #=> { a: 1, b: false }
+  # ```
+  def compact!; end
 
   # Makes *hsh* compare its keys by their identity, i.e. it will consider exact
   # same objects as same keys.
@@ -317,6 +407,29 @@ class Hash < Object
     .returns(V)
   end
   def default=(arg0); end
+
+  # If `Hash::new` was invoked with a block, return that block, otherwise return
+  # `nil`.
+  #
+  # ```ruby
+  # h = Hash.new {|h,k| h[k] = k*k }   #=> {}
+  # p = h.default_proc                 #=> #<Proc:0x401b3d08@-:1>
+  # a = []                             #=> []
+  # p.call(a, 2)
+  # a                                  #=> [nil, nil, 4]
+  # ```
+  def default_proc; end
+
+  # Sets the default proc to be executed on each failed key lookup.
+  #
+  # ```ruby
+  # h.default_proc = proc do |hash, key|
+  #   hash[key] = key + key
+  # end
+  # h[2]       #=> 4
+  # h["cat"]   #=> "catcat"
+  # ```
+  def default_proc=(_); end
 
   # Deletes the key-value pair and returns the value from *hsh* whose key is
   # equal to *key*. If the key is not found, it returns *nil*. If the optional
@@ -485,6 +598,10 @@ class Hash < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
+  # Returns `true` if *hash* and *other* are both hashes with the same content.
+  # The orders of each hashes are not compared.
+  def eql?(_); end
+
   # Returns a value from the hash for the given key. If the key can't be found,
   # there are several options: With no other arguments, it will raise a
   # `KeyError` exception; if *default* is given, then that will be returned; if
@@ -534,6 +651,33 @@ class Hash < Object
   end
   def fetch(arg0, arg1=T.unsafe(nil), &blk); end
 
+  # Returns an array containing the values associated with the given keys but
+  # also raises `KeyError` when one of keys can't be found. Also see
+  # `Hash#values_at` and `Hash#fetch`.
+  #
+  # ```ruby
+  # h = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+  #
+  # h.fetch_values("cow", "cat")                   #=> ["bovine", "feline"]
+  # h.fetch_values("cow", "bird")                  # raises KeyError
+  # h.fetch_values("cow", "bird") { |k| k.upcase } #=> ["bovine", "BIRD"]
+  # ```
+  def fetch_values(*_); end
+
+  # Returns a new array that is a one-dimensional flattening of this hash. That
+  # is, for every key or value that is an array, extract its elements into the
+  # new array. Unlike
+  # [`Array#flatten`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-flatten),
+  # this method does not flatten recursively by default. The optional *level*
+  # argument determines the level of recursion to flatten.
+  #
+  # ```ruby
+  # a =  {1=> "one", 2 => [2,"two"], 3 => "three"}
+  # a.flatten    # => [1, "one", 2, [2, "two"], 3, "three"]
+  # a.flatten(2) # => [1, "one", 2, 2, "two", 3, "three"]
+  # ```
+  def flatten(*_); end
+
   # Returns `true` if the given key is present in *hsh*.
   #
   # ```ruby
@@ -569,6 +713,14 @@ class Hash < Object
     .returns(T::Boolean)
   end
   def has_value?(arg0); end
+
+  # Compute a hash-code for this hash. Two hashes with the same content will
+  # have the same hash code (and will compare using `eql?`).
+  #
+  # See also Object#hash.
+  def hash; end
+
+  def index(_); end
 
   sig {void}
   sig {params(default: V).void}
@@ -860,6 +1012,14 @@ class Hash < Object
   end
   def reject!(&blk); end
 
+  # Replaces the contents of *hsh* with the contents of *other\_hash*.
+  #
+  # ```ruby
+  # h = { "a" => 100, "b" => 200 }
+  # h.replace({ "c" => 300, "d" => 400 })   #=> {"c"=>300, "d"=>400}
+  # ```
+  def replace(_); end
+
   # Returns a new hash consisting of entries for which the block returns true.
   #
   # If no block is given, an enumerator is returned instead.
@@ -880,6 +1040,15 @@ class Hash < Object
     .returns(T::Hash[K, V])
   end
   def select(&blk); end
+
+  # Returns a hash containing only the given keys and their values.
+  #
+  # ```ruby
+  # h = { a: 100, b: 200, c: 300 }
+  # h.slice(:a)           #=> {:a=>100}
+  # h.slice(:b, :c, :d)   #=> {:b=>200, :c=>300}
+  # ```
+  def slice(*_); end
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
@@ -1000,14 +1169,65 @@ class Hash < Object
   sig {returns(T::Array[[K, V]])}
   def to_a(); end
 
+  # Returns `self`. If called on a subclass of
+  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html), converts the
+  # receiver to a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # object.
+  #
+  # If a block is given, the results of the block on each pair of the receiver
+  # will be used as pairs.
+  def to_h; end
+
   # Returns `self`.
   sig {returns(T::Hash[K, V])}
   def to_hash(); end
+
+  # Returns a [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) which maps
+  # keys to values.
+  #
+  # ```ruby
+  # h = {a:1, b:2}
+  # hp = h.to_proc
+  # hp.call(:a)          #=> 1
+  # hp.call(:b)          #=> 2
+  # hp.call(:c)          #=> nil
+  # [:a, :b, :c].map(&h) #=> [1, 2, nil]
+  # ```
+  def to_proc; end
 
   # Alias for:
   # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-inspect)
   sig {returns(String)}
   def to_s(); end
+
+  # Returns a new hash with the results of running the block once for every key.
+  # This method does not change the values.
+  #
+  # ```ruby
+  # h = { a: 1, b: 2, c: 3 }
+  # h.transform_keys {|k| k.to_s }  #=> { "a" => 1, "b" => 2, "c" => 3 }
+  # h.transform_keys(&:to_s)        #=> { "a" => 1, "b" => 2, "c" => 3 }
+  # h.transform_keys.with_index {|k, i| "#{k}.#{i}" }
+  #                                 #=> { "a.0" => 1, "b.1" => 2, "c.2" => 3 }
+  # ```
+  #
+  # If no block is given, an enumerator is returned instead.
+  def transform_keys; end
+
+  # Invokes the given block once for each key in *hsh*, replacing it with the
+  # new key returned by the block, and then returns *hsh*. This method does not
+  # change the values.
+  #
+  # ```ruby
+  # h = { a: 1, b: 2, c: 3 }
+  # h.transform_keys! {|k| k.to_s }  #=> { "a" => 1, "b" => 2, "c" => 3 }
+  # h.transform_keys!(&:to_sym)      #=> { a: 1, b: 2, c: 3 }
+  # h.transform_keys!.with_index {|k, i| "#{k}.#{i}" }
+  #                                  #=> { "a.0" => 1, "b.1" => 2, "c.2" => 3 }
+  # ```
+  #
+  # If no block is given, an enumerator is returned instead.
+  def transform_keys!; end
 
   # Return a new with the results of running block once for every value. This
   # method does not change the keys.
@@ -1031,6 +1251,58 @@ class Hash < Object
     returns(T::Enumerator[V])
   end
   def transform_values(&blk); end
+
+  # Invokes the given block once for each value in *hsh*, replacing it with the
+  # new value returned by the block, and then returns *hsh*. This method does
+  # not change the keys.
+  #
+  # ```ruby
+  # h = { a: 1, b: 2, c: 3 }
+  # h.transform_values! {|v| v * v + 1 }  #=> { a: 2, b: 5, c: 10 }
+  # h.transform_values!(&:to_s)           #=> { a: "2", b: "5", c: "10" }
+  # h.transform_values!.with_index {|v, i| "#{v}.#{i}" }
+  #                                       #=> { a: "2.0", b: "5.1", c: "10.2" }
+  # ```
+  #
+  # If no block is given, an enumerator is returned instead.
+  def transform_values!; end
+
+  # Adds the contents of the given hashes to the receiver.
+  #
+  # If no block is given, entries with duplicate keys are overwritten with the
+  # values from each `other_hash` successively, otherwise the value for each
+  # duplicate key is determined by calling the block with the key, its value in
+  # the receiver and its value in each `other_hash`.
+  #
+  # ```ruby
+  # h1 = { "a" => 100, "b" => 200 }
+  # h1.merge!          #=> {"a"=>100, "b"=>200}
+  # h1                 #=> {"a"=>100, "b"=>200}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 246, "c" => 300 }
+  # h1.merge!(h2)      #=> {"a"=>100, "b"=>246, "c"=>300}
+  # h1                 #=> {"a"=>100, "b"=>246, "c"=>300}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 246, "c" => 300 }
+  # h3 = { "b" => 357, "d" => 400 }
+  # h1.merge!(h2, h3)
+  #                    #=> {"a"=>100, "b"=>357, "c"=>300, "d"=>400}
+  # h1                 #=> {"a"=>100, "b"=>357, "c"=>300, "d"=>400}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 246, "c" => 300 }
+  # h3 = { "b" => 357, "d" => 400 }
+  # h1.merge!(h2, h3) {|key, v1, v2| v1 }
+  #                    #=> {"a"=>100, "b"=>200, "c"=>300, "d"=>400}
+  # h1                 #=> {"a"=>100, "b"=>200, "c"=>300, "d"=>400}
+  # ```
+  #
+  # [`Hash#update`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-update)
+  # is an alias for
+  # [`Hash#merge!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-merge-21).
+  def update(*_); end
 
   # Returns `true` if the given value is present for some key in *hsh*.
   #

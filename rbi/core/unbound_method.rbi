@@ -51,6 +51,10 @@
 # um.bind(t).call   #=> :original
 # ```
 class UnboundMethod
+  # Two method objects are equal if they are bound to the same object and refer
+  # to the same method definition and their owners are the same class or module.
+  def ==(_); end
+
   # Returns an indication of the number of arguments accepted by a method.
   # Returns a nonnegative integer for methods that take a fixed number of
   # arguments. For Ruby methods that take a variable number of arguments,
@@ -126,6 +130,40 @@ class UnboundMethod
   sig {params(obj: BasicObject).returns(Method)}
   def bind(obj); end
 
+  # Returns a clone of this method.
+  #
+  # ```ruby
+  # class A
+  #   def foo
+  #     return "bar"
+  #   end
+  # end
+  #
+  # m = A.new.method(:foo)
+  # m.call # => "bar"
+  # n = m.clone.call # => "bar"
+  # ```
+  def clone; end
+
+  # to the same method definition and their owners are the same class or module.
+  def eql?(_); end
+
+  # Returns a hash value corresponding to the method object.
+  #
+  # See also Object#hash.
+  def hash; end
+
+  # Returns a human-readable description of the underlying method.
+  #
+  # ```ruby
+  # "cat".method(:count).inspect   #=> "#<Method: String#count>"
+  # (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map>"
+  # ```
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  def inspect; end
+
   # Returns the name of the method.
   sig {returns(Symbol)}
   def name; end
@@ -137,6 +175,17 @@ class UnboundMethod
   # ```
   sig {returns(Module)}
   def owner; end
+
+  # Returns the original name of the method.
+  #
+  # ```ruby
+  # class C
+  #   def foo; end
+  #   alias bar foo
+  # end
+  # C.instance_method(:bar).original_name # => :foo
+  # ```
+  def original_name; end
 
   # Returns the parameter information of this method.
   #
@@ -166,4 +215,15 @@ class UnboundMethod
   # method on superclass.
   sig {returns(T.nilable(UnboundMethod))}
   def super_method; end
+
+  # Returns a human-readable description of the underlying method.
+  #
+  # ```ruby
+  # "cat".method(:count).inspect   #=> "#<Method: String#count>"
+  # (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map>"
+  # ```
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  def to_s; end
 end

@@ -414,6 +414,39 @@ class Enumerator::Lazy < Enumerator
   extend T::Generic
   Elem = type_member(:out)
 
+  # Creates a new
+  # [`Lazy`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Lazy.html)
+  # enumerator. When the enumerator is actually enumerated (e.g. by calling
+  # [`force`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Lazy.html#method-i-force)),
+  # `obj` will be enumerated and each value passed to the given block. The block
+  # can yield values back using `yielder`. For example, to create a method
+  # `filter_map` in both lazy and non-lazy fashions:
+  #
+  # ```ruby
+  # module Enumerable
+  #   def filter_map(&block)
+  #     map(&block).compact
+  #   end
+  # end
+  #
+  # class Enumerator::Lazy
+  #   def filter_map
+  #     Lazy.new(self) do |yielder, *values|
+  #       result = yield *values
+  #       yielder << result if result
+  #     end
+  #   end
+  # end
+  #
+  # (1..Float::INFINITY).lazy.filter_map{|i| i*i if i.even?}.first(5)
+  #     # => [4, 16, 36, 64, 100]
+  # ```
+  def self.new(*_); end
+
+  def chunk(*_); end
+
+  def chunk_while(*_); end
+
   # Returns a new array with the results of running *block* once for every
   # element in *enum*.
   #
@@ -481,6 +514,29 @@ class Enumerator::Lazy < Enumerator
   end
   sig {returns(Enumerator::Lazy[Elem])}
   def drop_while(&blk); end
+
+  # Similar to Kernel#to\_enum, except it returns a lazy enumerator. This makes
+  # it easy to define
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) methods
+  # that will naturally remain lazy if called from a lazy enumerator.
+  #
+  # For example, continuing from the example in Kernel#to\_enum:
+  #
+  # ```ruby
+  # # See Kernel#to_enum for the definition of repeat
+  # r = 1..Float::INFINITY
+  # r.repeat(2).first(5) # => [1, 1, 2, 2, 3]
+  # r.repeat(2).class # => Enumerator
+  # r.repeat(2).map{|n| n ** 2}.first(5) # => endless loop!
+  # # works naturally on lazy enumerator:
+  # r.lazy.repeat(2).class # => Enumerator::Lazy
+  # r.lazy.repeat(2).map{|n| n ** 2}.first(5) # => [1, 1, 4, 4, 9]
+  # ```
+  def enum_for(*_); end
+
+  # Alias for:
+  # [`to_a`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Lazy.html#method-i-to_a)
+  def force(*_); end
 
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
@@ -554,6 +610,10 @@ class Enumerator::Lazy < Enumerator
   end
   def grep(arg0, &blk); end
 
+  def grep_v(_); end
+
+  def lazy; end
+
   # Returns a new array with the results of running *block* once for every
   # element in *enum*.
   #
@@ -622,6 +682,12 @@ class Enumerator::Lazy < Enumerator
   sig {returns(Enumerator::Lazy[Elem])}
   def select(&blk); end
 
+  def slice_after(*_); end
+
+  def slice_before(*_); end
+
+  def slice_when(*_); end
+
   # Returns first n elements from *enum*.
   #
   # ```ruby
@@ -654,6 +720,29 @@ class Enumerator::Lazy < Enumerator
   end
   sig {returns(Enumerator::Lazy[Elem])}
   def take_while(&blk); end
+
+  # Similar to Kernel#to\_enum, except it returns a lazy enumerator. This makes
+  # it easy to define
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) methods
+  # that will naturally remain lazy if called from a lazy enumerator.
+  #
+  # For example, continuing from the example in Kernel#to\_enum:
+  #
+  # ```ruby
+  # # See Kernel#to_enum for the definition of repeat
+  # r = 1..Float::INFINITY
+  # r.repeat(2).first(5) # => [1, 1, 2, 2, 3]
+  # r.repeat(2).class # => Enumerator
+  # r.repeat(2).map{|n| n ** 2}.first(5) # => endless loop!
+  # # works naturally on lazy enumerator:
+  # r.lazy.repeat(2).class # => Enumerator::Lazy
+  # r.lazy.repeat(2).map{|n| n ** 2}.first(5) # => [1, 1, 4, 4, 9]
+  # ```
+  def to_enum(*_); end
+
+  def uniq; end
+
+  def zip(*_); end
 end
 
 # [`Yielder`](https://docs.ruby-lang.org/en/2.6.0/Enumerator/Yielder.html)
