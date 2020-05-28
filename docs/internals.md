@@ -561,6 +561,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 - pronounced 'lohk' not 'lock'
 - fast / bit hacks
 - philosophy around useful error messages
+- there is a canonical loc, because symbols can have multiple locs, and most
+  code only wants to have to care about the "best" loc.
 
 ### `beginError` and strictness levels
 
