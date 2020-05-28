@@ -315,10 +315,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
     options.add_options("advanced")(
-        "preallocate-symbol-size", "Preallocate the specified amount of entries in the symbol table",
+        "preallocate-symbol-size", "Preallocate the specified number of entries in the symbol table",
         cxxopts::value<u4>()->default_value(fmt::format("{}", empty.preallocateSymbolSize)));
     options.add_options("advanced")("preallocate-name-size",
-                                    "Preallocate the specified amount of entries in the name table",
+                                    "Preallocate the specified number of entries in the name table",
                                     cxxopts::value<u4>()->default_value(fmt::format("{}", empty.preallocateNameSize)));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("remove-path-prefix",

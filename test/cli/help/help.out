@@ -53,10 +53,10 @@ Usage:
                                 about://tracing (default: "")
       --debug-log-file file     Path to debug log file (default: "")
       --preallocate-symbol-size arg
-                                Preallocate the specified amount of entries
+                                Preallocate the specified number of entries
                                 in the symbol table (default: 0)
       --preallocate-name-size arg
-                                Preallocate the specified amount of entries
+                                Preallocate the specified number of entries
                                 in the name table (default: 0)
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
       --remove-path-prefix prefix
