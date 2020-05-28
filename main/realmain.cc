@@ -524,6 +524,7 @@ int realmain(int argc, char *argv[]) {
 #else
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+            gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
