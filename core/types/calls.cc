@@ -1287,6 +1287,31 @@ public:
     }
 } T_Generic_squareBrackets;
 
+class SorbetPrivateStatic_sig : public IntrinsicMethod {
+public:
+    // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        if (args.args.size() < 1) {
+            return;
+        }
+
+        auto callLocsReceiver = args.locs.args[0];
+        auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
+        for (auto loc = args.locs.args.begin() + 1; loc != args.locs.args.end(); ++loc) {
+            callLocsArgs.emplace_back(*loc);
+        }
+        CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
+
+        auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
+        for (auto arg = args.args.begin() + 1; arg != args.args.end(); ++arg) {
+            dispatchArgsArgs.emplace_back(*arg);
+        }
+
+        auto recv = args.args[0]->type;
+        res = recv->dispatchCall(gs, {core::Names::sig(), callLocs, dispatchArgsArgs, recv, recv, args.block});
+    }
+} SorbetPrivateStatic_sig;
+
 class Magic_buildHash : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
@@ -2234,6 +2259,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
+
+    {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},

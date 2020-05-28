@@ -1,5 +1,7 @@
 # typed: true
 
+extend T::Sig
+
 sig {params(a: String).returns(String)}
 def test(a:)
   a

@@ -160,6 +160,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
+    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
@@ -340,6 +342,18 @@ void GlobalState::initEmpty() {
 
     id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
     ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
+
+    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
+    { enterMethodArgumentSymbol(Loc::none(), id, Names::arg0()); }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg1());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
 
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();

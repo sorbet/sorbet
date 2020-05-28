@@ -155,8 +155,10 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
     if (send->block.get() == nullptr) {
         return nullptr;
     }
-    auto nargs = send->args.size();
-    if (nargs != 0 && nargs != 1) {
+    // 0 args is common case
+    // 1 arg  is `sig(:final)`
+    // 2 args is `Sorbet::Private::Static.sig(self, :final)`
+    if (send->args.size() > 2) {
         return nullptr;
     }
     auto block = ast::cast_tree_const<ast::Block>(send->block.get());

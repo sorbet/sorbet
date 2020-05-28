@@ -16,7 +16,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::T2)
         end
         ::Sorbet::Private::Static.keep_def(<self>, :"test_resolve")

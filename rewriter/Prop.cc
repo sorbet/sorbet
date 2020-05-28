@@ -12,20 +12,12 @@ using namespace std;
 namespace sorbet::rewriter {
 namespace {
 
-bool isRootScope(ast::Expression *scope) {
-    if (ast::isa_tree<ast::EmptyTree>(scope)) {
-        return true;
-    }
-    auto root = ast::cast_tree<ast::ConstantLit>(scope);
-    return root != nullptr && root->symbol == core::Symbols::root();
-}
-
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(ast::Expression *expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return t != nullptr && t->cnst == core::Names::Constants::T() && isRootScope(t->scope.get());
+    return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope.get());
 }
 
 bool isTNilable(ast::Expression *expr) {
@@ -53,7 +45,8 @@ bool isChalkODMDocument(ast::Expression *expr) {
         return false;
     }
     auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope.get());
-    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && isRootScope(chalk->scope.get());
+    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() &&
+           ast::MK::isRootScope(chalk->scope.get());
 }
 
 enum class SyntacticSuperClass {
