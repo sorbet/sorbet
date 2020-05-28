@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=31:16})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=3:1 end=31:16}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}

@@ -1208,12 +1208,14 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    if (ref(gs) != Symbols::root()) {
-        for (auto &existing : locs_) {
-            if (existing.file() == loc.file()) {
-                existing = loc;
-                return;
-            }
+    // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number of files)).
+    // Those locs aren't useful, either.
+    ENFORCE(ref(gs) != Symbols::root());
+
+    for (auto &existing : locs_) {
+        if (existing.file() == loc.file()) {
+            existing = loc;
+            return;
         }
     }
 

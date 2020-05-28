@@ -1054,7 +1054,10 @@ class SymbolDefiner {
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
-        symbol.data(ctx)->addLoc(ctx, klass.declLoc);
+        // Don't add locs for root; 1) they aren't useful and 2) it'll end up with O(files in project) locs!
+        if (symbol != core::Symbols::root()) {
+            symbol.data(ctx)->addLoc(ctx, klass.declLoc);
+        }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
