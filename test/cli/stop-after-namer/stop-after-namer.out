@@ -1,5 +1,5 @@
 No errors! Great job.
-class ::<root> < ::<todo sym> () @ test/cli/stop-after-namer/stop-after-namer.rb:3
+class ::<root> < ::<todo sym> ()
   class ::<Class:<root>>[<AttachedClass>] < ::<todo sym> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/stop-after-namer/stop-after-namer.rb:3
       argument <blk><block> @ Loc {file=test/cli/stop-after-namer/stop-after-namer.rb start=??? end=???}

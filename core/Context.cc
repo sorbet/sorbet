@@ -32,14 +32,14 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
     }
     for (auto loc : owner.data(gs)->locs()) {
         auto &file = loc.file().data(gs);
-        constexpr string_view whitelistedTest = "overloads_test.rb"sv;
-        if (((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
-             (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) ||
-            FileOps::getFileName(file.path()) == whitelistedTest) {
+        if ((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
+            (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) {
             return true;
         }
     }
-    return false;
+
+    constexpr string_view whitelistedTest = "overloads_test.rb"sv;
+    return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
 }
 
 bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {

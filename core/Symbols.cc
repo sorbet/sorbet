@@ -1194,7 +1194,7 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
 }
 Loc Symbol::loc() const {
     if (!locs_.empty()) {
-        return locs_[0];
+        return locs_.back();
     }
     return Loc::none();
 }
@@ -1207,6 +1207,11 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
     }
+
+    // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number of files)).
+    // Those locs aren't useful, either.
+    ENFORCE(ref(gs) != Symbols::root());
+
     for (auto &existing : locs_) {
         if (existing.file() == loc.file()) {
             existing = loc;
@@ -1214,10 +1219,13 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         }
     }
 
-    if (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI()) {
-        locs_.insert(locs_.begin(), loc);
-    } else {
+    if (locs_.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
+        // Make this the new canonical loc.
         locs_.emplace_back(loc);
+    } else {
+        // This is an RBI file; continue to use existing loc as the canonical loc.
+        // Insert just before end.
+        locs_.insert(locs_.end() - 1, loc);
     }
 }
 

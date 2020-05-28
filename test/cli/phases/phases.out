@@ -239,14 +239,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
 --- cfg-raw end ---
 --- symbol-table start ---
-class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1)
+class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
 --- symbol-table end ---
 --- symbol-table-raw start ---
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=-e start=1:1 end=1:2})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
       argument <blk><block> @ Loc {file=-e start=??? end=???}
