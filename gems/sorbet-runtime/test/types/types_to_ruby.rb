@@ -45,6 +45,9 @@ class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
 
     # Set:
     [T::Set[Integer], "T::Set[Integer]"],
+
+    # T.type_parameter:
+    [T.type_parameter(:A), "T.type_parameter(:A)"],
   ]
 
   cases.each do |c|

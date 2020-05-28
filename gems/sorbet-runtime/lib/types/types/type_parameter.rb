@@ -17,7 +17,7 @@ module T::Types
     end
 
     def name
-      "T.type_parameter(#{@name})"
+      "T.type_parameter(:#{@name})"
     end
   end
 end
