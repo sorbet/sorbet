@@ -404,16 +404,7 @@ module Opus::Types::Test
               (nil...nil)
             end
 
-            err = assert_raises(TypeError) do
-              @mod.foo
-            end
-
-            lines = err.message.split("\n")
-            assert_match(/Return value: Expected type T::Range\[T.nilable\(Integer\)\], got T::Range\[NilClass\]/, lines[0])
-            # Note that the paths here could be relative or absolute depending on how this test was invoked.
-            assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
-            assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
-            assert_empty(lines[3..-1])
+            assert_equal((nil...nil), @mod.foo )
           end
         end
       end
