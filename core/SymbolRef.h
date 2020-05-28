@@ -38,6 +38,10 @@ public:
     SymbolRef(const GlobalState &from, u4 _id);
     SymbolRef() : _id(0){};
 
+    // From experimentation, in the common case, methods typically have 2 or fewer arguments.
+    // Placed here so it can be used across packages for common case optimizations.
+    static constexpr int EXPECTED_METHOD_ARGS_COUNT = 2;
+
     bool inline exists() const {
         return _id;
     }
