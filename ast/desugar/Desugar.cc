@@ -610,8 +610,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     result = std::move(wrapped);
                 } else if (isa_tree<Reference>(recv)) {
                     auto cond = MK::cpRef(recv);
-                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto elsep = MK::cpRef(recv);
+                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
@@ -672,8 +672,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     result = std::move(wrapped);
                 } else if (isa_tree<Reference>(recv)) {
                     auto cond = MK::cpRef(recv);
-                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto elsep = MK::cpRef(recv);
+                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto iff = MK::If(loc, std::move(cond), std::move(elsep), std::move(body));
                     result = std::move(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
