@@ -190,6 +190,7 @@ class Hash < Object
   # h2 = { "c" => 2, "a" => 1 }
   # h1 == h2   #=> true
   # ```
+  sig {params(_: T.untyped).returns(T::Boolean)}
   def ==(_); end
 
   # Returns `true` if *other* is subset of *hash*.
