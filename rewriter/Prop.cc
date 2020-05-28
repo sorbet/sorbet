@@ -45,8 +45,7 @@ bool isChalkODMDocument(ast::TreePtr &expr) {
         return false;
     }
     auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope);
-    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() &&
-           ast::MK::isRootScope(chalk->scope);
+    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && ast::MK::isRootScope(chalk->scope);
 }
 
 enum class SyntacticSuperClass {
