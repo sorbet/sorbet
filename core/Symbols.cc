@@ -1214,12 +1214,13 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         }
     }
 
-    if (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI()) {
+    if (locs_.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
         // Make this the new canonical loc.
         locs_.emplace_back(loc);
     } else {
-        // If we have other locs, use them as the canonical loc.
-        locs_.insert(locs_.begin(), loc);
+        // This is an RBI file; continue to use existing loc as the canonical loc.
+        // Insert just before end.
+        locs_.insert(locs_.end() - 1, loc);
     }
 }
 
