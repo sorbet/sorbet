@@ -489,6 +489,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     // I guess just keep going into deadcode?
                     unconditionalJump(current, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
+                    auto magic = cctx.newTemporary(core::Names::magic());
+                    synthesizeExpr(current, magic, core::LocOffsets::none(),
+                                   make_unique<Alias>(core::Symbols::Magic()));
+                    auto retryTemp = cctx.newTemporary(core::Names::retryTemp());
+                    InlinedVector<core::LocalVariable, 2> args{};
+                    InlinedVector<core::LocOffsets, 2> argLocs{};
+                    auto isPrivateOk = false;
+                    synthesizeExpr(
+                        current, retryTemp, what->loc,
+                        make_unique<Send>(magic, core::Names::retry(), what->loc, args, argLocs, isPrivateOk));
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a->loc);
                 }
                 ret = cctx.inWhat.deadBlock();

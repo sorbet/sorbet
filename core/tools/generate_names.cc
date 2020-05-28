@@ -74,6 +74,7 @@ NameDef names[] = {
     {"exceptionClassTemp", "<exceptionClassTemp>"},
     {"isaCheckTemp", "<isaCheckTemp>"},
     {"keepForCfgTemp", "<keepForCfgTemp>"},
+    {"retryTemp", "<retryTemp>"},
     {"throwAwayTemp", "<throwAwayTemp>"},
     {"castTemp", "<castTemp>"},
     {"finalReturn", "<finalReturn>"},
@@ -330,6 +331,7 @@ NameDef names[] = {
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
     {"keepForCfg", "<keep-for-cfg>"},
+    {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
 
