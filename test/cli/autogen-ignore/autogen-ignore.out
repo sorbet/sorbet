@@ -130,8 +130,7 @@ requires: []
  scope=[Opus Autogen Proto Com Stripe Payserver Events Privacy]
  name=[NewDeletionManifest RootType]
  nesting=[[Opus Autogen Proto Com Stripe Payserver Events Privacy] [Opus Autogen Proto Com Stripe Payserver Events] [Opus Autogen Proto Com Stripe Payserver] [Opus Autogen Proto Com Stripe] [Opus Autogen Proto Com] [Opus Autogen Proto] [Opus Autogen] [Opus]]
- resolved=[Opus Autogen Proto Com Stripe Payserver Events Privacy NewDeletionManifest RootTypeNo errors! Great job.
-]
+ resolved=[Opus Autogen Proto Com Stripe Payserver Events Privacy NewDeletionManifest RootType]
  loc=test/cli/autogen-ignore/autogen-ignore.rb:12
  is_defining_ref=1
 [ref id=11]
