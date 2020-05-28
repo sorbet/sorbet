@@ -568,7 +568,9 @@ public:
     }
 
     UnorderedMap<NameRef, SymbolRef> members_;
-    std::vector<ArgInfo> arguments_;
+
+    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    ArgumentsStore arguments_;
 
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
@@ -577,12 +579,12 @@ public:
         return members_;
     };
 
-    std::vector<ArgInfo> &arguments() {
+    ArgumentsStore &arguments() {
         ENFORCE(isMethod());
         return arguments_;
     }
 
-    const std::vector<ArgInfo> &arguments() const {
+    const ArgumentsStore &arguments() const {
         ENFORCE(isMethod());
         return arguments_;
     }

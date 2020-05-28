@@ -142,8 +142,7 @@ class MethodDef final : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
 
-    static constexpr int EXPECTED_ARGS_COUNT = 2;
-    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT>;
+    using ARGS_store = InlinedVector<std::unique_ptr<Expression>, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
     ARGS_store args;
 
     core::NameRef name;
