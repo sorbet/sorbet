@@ -3,11 +3,16 @@
 #include "ast/ast.h"
 #include <memory>
 
+namespace sorbet {
+class WorkerPool;
+}
+
 namespace sorbet::namer {
 
 class Namer final {
 public:
-    static std::vector<ast::ParsedFile> run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
+    static std::vector<ast::ParsedFile> run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
+                                            WorkerPool &workers);
 
     Namer() = delete;
 };

@@ -528,6 +528,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :enum_of_enums, T.nilable(T.enum([MyEnum::BAR]))
   end
 
+  class RedundantEnumStruct < T::Struct
+    prop :enum, T.all(MyEnum, T.enum(MyEnum.values))
+  end
+
   describe 'enum' do
     it 'round trips' do
       s = EnumStruct.new(enum: MyEnum::FOO, enum_of_enums: MyEnum::BAR)
@@ -539,6 +543,15 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       roundtripped = EnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.enum)
       assert_equal(MyEnum::BAR, roundtripped.enum_of_enums)
+    end
+
+    it 'does not break during serde when used redundantly with legacy T.enum' do
+      s = RedundantEnumStruct.new(enum: MyEnum::FOO)
+      serialized = s.serialize
+      assert_equal('foo', serialized['enum'])
+
+      roundtripped = RedundantEnumStruct.from_hash(serialized)
+      assert_equal(MyEnum::FOO, roundtripped.enum)
     end
   end
 

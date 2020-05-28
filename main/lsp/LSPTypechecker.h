@@ -118,7 +118,8 @@ public:
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
      * canceled. Distributes work across the given worker pool.
      */
-    bool typecheck(LSPFileUpdates updates, WorkerPool &workers);
+    bool typecheck(LSPFileUpdates updates, WorkerPool &workers,
+                   std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     /**
      * Re-typechecks the provided files to re-produce error messages.
@@ -180,7 +181,7 @@ public:
     /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
      */
-    void typecheckOnFastPath(LSPFileUpdates updates);
+    void typecheckOnFastPath(LSPFileUpdates updates, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     /**
      * Re-typechecks the provided files to re-produce error messages.

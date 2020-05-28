@@ -196,12 +196,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       assert_equal(Integer, foo.fetch(:array), Integer)
       assert(T::Props::Utils.optional_prop?(foo))
     end
-
-    it "validates setting 'optional' argument when defining with 'optional' keyword" do
-      assert_prop_error(/:optional must be one of/, mixin: T::Props::Serializable) do
-        prop :foo, String, optional: :arglebargle
-      end
-    end
   end
 
   class OptionalMigrate
@@ -300,7 +294,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       assert(foo.fetch(:immutable))
     end
 
-    it "validates setting 'optional' argument when defining with 'optional' keyword" do
+    it "validates setting 'immutable' argument when defining with 'immutable' keyword" do
       assert_prop_error(/Cannot pass 'immutable' argument/) do
         const :foo, String, immutable: :false
       end
@@ -358,29 +352,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     assert_nil(MatrixStruct.new.c)
     assert_equal(91, MatrixStruct.new.d)
     assert_nil(MatrixStruct.new.e)
-  end
-
-  it 'hard asserts if `optional` is ever specified' do
-    e = assert_raises do
-      Class.new(T::Struct) do
-        prop :optional_true, T::Boolean, optional: true
-      end
-    end
-    assert_match(/Use of `optional: true` is deprecated/, e.message)
-
-    e = assert_raises do
-      Class.new(T::Struct) do
-        prop :optional_on_load, T::Boolean, optional: :on_load
-      end
-    end
-    assert_match(/Use of `optional: :on_load` is deprecated/, e.message)
-
-    e = assert_raises do
-      Class.new(T::Struct) do
-        prop :optional_existing, T::Boolean, optional: :existing
-      end
-    end
-    assert_match(/Use of `optional: :existing` is not allowed/, e.message)
   end
 
   it 'raises if the word secret appears in a prop without a sensitivity annotation' do

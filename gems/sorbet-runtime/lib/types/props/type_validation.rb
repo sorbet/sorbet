@@ -63,7 +63,16 @@ module T::Props::TypeValidation
       when T::Types::FixedHash
         type.types.values.map {|subtype| find_invalid_subtype(subtype)}.compact.first
       when T::Types::Union, T::Types::FixedArray
+        # `T.any` is valid if all of the members are valid
         type.types.map {|subtype| find_invalid_subtype(subtype)}.compact.first
+      when T::Types::Intersection
+        # `T.all` is valid if at least one of the members is valid
+        invalid = type.types.map {|subtype| find_invalid_subtype(subtype)}.compact
+        if invalid.length == type.types.length
+          invalid.first
+        else
+          nil
+        end
       when T::Types::Enum, T::Types::ClassOf
         nil
       when T::Private::Types::TypeAlias

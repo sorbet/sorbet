@@ -76,6 +76,43 @@
 # *   aamine@loveruby.net
 # *   http://i.loveruby.net
 class Ripper
+  # This array contains name of all ripper events.
+  EVENTS = T.let(T.unsafe(nil), T::Array[Symbol])
+
+  # This array contains name of parser events.
+  PARSER_EVENTS = T.let(T.unsafe(nil), T::Array[Symbol])
+
+  # This array contains name of scanner events.
+  SCANNER_EVENTS = T.let(T.unsafe(nil), T::Array[Symbol])
+
+  # Tokenizes the Ruby program and returns an array of an array, which is
+  # formatted like `[[lineno, column], type, token, state]`.
+  #
+  # ```
+  # require 'ripper'
+  # require 'pp'
+  #
+  # pp Ripper.lex("def m(a) nil end")
+  # #=> [[[1,  0], :on_kw,     "def", Ripper::EXPR_FNAME                   ],
+  #      [[1,  3], :on_sp,     " ",   Ripper::EXPR_FNAME                   ],
+  #      [[1,  4], :on_ident,  "m",   Ripper::EXPR_ENDFN                   ],
+  #      [[1,  5], :on_lparen, "(",   Ripper::EXPR_LABEL | Ripper::EXPR_BEG],
+  #      [[1,  6], :on_ident,  "a",   Ripper::EXPR_ARG                     ],
+  #      [[1,  7], :on_rparen, ")",   Ripper::EXPR_ENDFN                   ],
+  #      [[1,  8], :on_sp,     " ",   Ripper::EXPR_BEG                     ],
+  #      [[1,  9], :on_kw,     "nil", Ripper::EXPR_END                     ],
+  #      [[1, 12], :on_sp,     " ",   Ripper::EXPR_END                     ],
+  #      [[1, 13], :on_kw,     "end", Ripper::EXPR_END                     ]]
+  # ```
+  def self.lex(src, filename = '-', lineno = 1); end
+
+  # Parses the given Ruby program read from `src`. `src` must be a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or an
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) or a object with a
+  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gets)
+  # method.
+  def self.parse(src, filename = '(ripper)', lineno = 1); end
+
   # EXPERIMENTAL
   # :   Parses `src` and create S-exp tree. Returns more readable tree rather
   #     than
@@ -145,4 +182,36 @@ class Ripper
   # ```
   sig {params(src: String, filename: String, lineno: Integer).returns(T::Array[String])}
   def self.tokenize(src, filename = "-", lineno = 1); end
+end
+
+# This class handles only scanner events, which are dispatched in the 'right'
+# order (same with input).
+class Ripper::Filter
+  # Creates a new
+  # [`Ripper::Filter`](https://docs.ruby-lang.org/en/2.6.0/Ripper/Filter.html)
+  # instance, passes parameters `src`, `filename`, and `lineno` to
+  # Ripper::Lexer.new
+  #
+  # The lexer is for internal use only.
+  def self.new(src, filename = '-', lineno = 1); end
+
+  # The column number of the current token. This value starts from 0. This
+  # method is valid only in event handlers.
+  def column; end
+
+  # The file name of the input.
+  def filename; end
+
+  # The line number of the current token. This value starts from 1. This method
+  # is valid only in event handlers.
+  def lineno; end
+
+  # Starts the parser. `init` is a data accumulator and is passed to the next
+  # event handler (as of
+  # [`Enumerable#inject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-inject)).
+  def parse(init = _); end
+
+  # The scanner's state of the current token. This value is the bitwise OR of
+  # zero or more of the `Ripper::EXPR_*` constants.
+  def state; end
 end

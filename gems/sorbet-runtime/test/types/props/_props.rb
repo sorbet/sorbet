@@ -324,4 +324,37 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
   end
 
+  class TypeValidating
+    include T::Props
+    include T::Props::TypeValidation
+  end
+
+  describe 'type validation' do
+    it 'bans plain Object' do
+      assert_raises(T::Props::TypeValidation::UnderspecifiedType) do
+        Class.new(TypeValidating) do
+          prop :object, Object
+        end
+      end
+    end
+
+    it 'allows with DEPRECATED_underspecified_type' do
+      c = Class.new(TypeValidating) do
+        prop :object, Object, DEPRECATED_underspecified_type: true
+      end
+      o = c.new
+      o.object = 1
+      assert_equal(1, o.object)
+    end
+
+    it 'allows T.all' do
+      c = Class.new(TypeValidating) do
+        prop :intersection, T.all(Object, T.enum(["foo"]))
+      end
+      o = c.new
+      o.intersection = "foo"
+      assert_equal("foo", o.intersection)
+    end
+  end
+
 end

@@ -42,7 +42,7 @@ exp_test = rule(
         ),
         "runner": attr.label(
             executable = True,
-            cfg = "host",
+            cfg = "target",
             allow_files = True,
         ),
     },

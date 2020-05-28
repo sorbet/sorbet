@@ -491,5 +491,20 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       err.message,
       "Your definition of `foo` must have `*args` to be compatible with the method it implements",
     )
+
+    parent = Class.new do
+      def initialize(foo:)
+        @foo = foo
+      end
+    end
+
+    abstract = Class.new(parent) do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+    end
+
+    concrete = Class.new(abstract)
+    concrete.new(foo: 1)
   end
 end

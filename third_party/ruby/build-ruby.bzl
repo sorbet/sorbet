@@ -81,8 +81,8 @@ OUTFLAG="-fvisibility=default -o" \
 CC="{cc}" \
 CFLAGS="{copts}" \
 CXXFLAGS="{copts}" \
-CPPFLAGS="${{inc_path[*]:-}} {cppopts}" \
-LDFLAGS="${{lib_path[*]:-}} {linkopts}" \
+CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}" \
+LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}" \
 run_cmd ./configure \
         {configure_flags} \
         --enable-load-relative \
@@ -198,6 +198,7 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             bundler = ctx.files.bundler[0].path,
             configure_flags = " ".join(ctx.attr.configure_flags),
+            sysroot_flag = ctx.attr.sysroot_flag,
         )),
     )
 
@@ -237,6 +238,7 @@ _build_ruby = rule(
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
+        "sysroot_flag": attr.string(),
     },
     fragments = ["cpp"],
     provides = [
@@ -438,6 +440,11 @@ def ruby(bundler, configure_flags = [], copts = [], cppopts = [], linkopts = [],
         cppopts = cppopts,
         linkopts = linkopts,
         deps = deps,
+        # This is a hack because macOS Catalina changed the way that system headers and libraries work.
+        sysroot_flag = select({
+            "@com_stripe_ruby_typer//tools/config:darwin": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+            "//conditions:default": "",
+        }),
     )
 
     _ruby_headers(

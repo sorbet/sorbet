@@ -155,22 +155,25 @@ subgraph "cluster_::TestRescue#multiple_rescue" {
     ];
 
     "bb::TestRescue#multiple_rescue_4" -> "bb::TestRescue#multiple_rescue_3" [style="bold"];
-    "bb::TestRescue#multiple_rescue_4" -> "bb::TestRescue#multiple_rescue_6" [style="tapered"];
+    "bb::TestRescue#multiple_rescue_4" -> "bb::TestRescue#multiple_rescue_5" [style="tapered"];
 
+    "bb::TestRescue#multiple_rescue_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#multiple_rescue_5" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$14: NilClass)\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$14: T.nilable(TrueClass))\l<gotoDeadTemp>$14: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#multiple_rescue_6" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
     "bb::TestRescue#multiple_rescue_6" -> "bb::TestRescue#multiple_rescue_11" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#multiple_rescue_7" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_7" -> "bb::TestRescue#multiple_rescue_11" [style="tapered"];
-
+    "bb::TestRescue#multiple_rescue_7" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_8" [
         label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: TestRescue, <exceptionValue>$3: T.untyped, <magic>$5: T.class_of(<Magic>))\l<exceptionClassTemp>$11: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$12: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<exceptionClassTemp>$11: T.class_of(StandardError))\l<isaCheckTemp>$12: T.untyped\l"
     ];
@@ -179,19 +182,15 @@ subgraph "cluster_::TestRescue#multiple_rescue" {
     "bb::TestRescue#multiple_rescue_8" -> "bb::TestRescue#multiple_rescue_10" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_9" [
-        label = "block[id=9, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$14: NilClass\l"
+        label = "block[id=9, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_11" [style="tapered"];
-
+    "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_10" [
-        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$14: TrueClass(true) = true\l<gotoDeadTemp>$14: TrueClass(true)\l"
+        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$14: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_11" [style="tapered"];
-
+    "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_11" [
         label = "block[id=11, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -229,22 +228,25 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     ];
 
     "bb::TestRescue#multiple_rescue_classes_4" -> "bb::TestRescue#multiple_rescue_classes_3" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_4" -> "bb::TestRescue#multiple_rescue_classes_6" [style="tapered"];
+    "bb::TestRescue#multiple_rescue_classes_4" -> "bb::TestRescue#multiple_rescue_classes_5" [style="tapered"];
 
+    "bb::TestRescue#multiple_rescue_classes_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#multiple_rescue_classes_5" -> "bb::TestRescue#multiple_rescue_classes_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass)\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass))\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#multiple_rescue_classes_6" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_6" -> "bb::TestRescue#multiple_rescue_classes_10" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_classes_7" [
-        label = "block[id=7, rubyBlockId=2](<magic>$5: T.class_of(<Magic>), baz: T.untyped)\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = baz\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$5: T.class_of(<Magic>), baz: T.untyped)\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = baz\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#multiple_rescue_classes_7" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_7" -> "bb::TestRescue#multiple_rescue_classes_10" [style="tapered"];
-
+    "bb::TestRescue#multiple_rescue_classes_7" -> "bb::TestRescue#multiple_rescue_classes_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_8" [
         label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <magic>$5: T.class_of(<Magic>), baz: T.untyped)\l<exceptionClassTemp>$9: T.untyped = alias <C T.untyped>\l<isaCheckTemp>$10: T.untyped = baz: T.untyped.is_a?(<exceptionClassTemp>$9: T.untyped)\l<isaCheckTemp>$10: T.untyped\l"
     ];
@@ -253,12 +255,10 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     "bb::TestRescue#multiple_rescue_classes_8" -> "bb::TestRescue#multiple_rescue_classes_9" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_classes_9" [
-        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_10" [style="tapered"];
-
+    "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_10" [
         label = "block[id=10, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -296,8 +296,13 @@ subgraph "cluster_::TestRescue#parse_rescue_ensure" {
     ];
 
     "bb::TestRescue#parse_rescue_ensure_4" -> "bb::TestRescue#parse_rescue_ensure_3" [style="bold"];
-    "bb::TestRescue#parse_rescue_ensure_4" -> "bb::TestRescue#parse_rescue_ensure_6" [style="tapered"];
+    "bb::TestRescue#parse_rescue_ensure_4" -> "bb::TestRescue#parse_rescue_ensure_5" [style="tapered"];
 
+    "bb::TestRescue#parse_rescue_ensure_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped, <self>: TestRescue)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_rescue_ensure_5" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
     "bb::TestRescue#parse_rescue_ensure_6" [
         label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: TestRescue, <gotoDeadTemp>$10: T.nilable(TrueClass))\l<throwAwayTemp>$11: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$10: T.nilable(TrueClass)\l"
     ];
@@ -352,29 +357,30 @@ subgraph "cluster_::TestRescue#parse_bug_rescue_empty_else" {
     ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_4" -> "bb::TestRescue#parse_bug_rescue_empty_else_3" [style="bold"];
-    "bb::TestRescue#parse_bug_rescue_empty_else_4" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="tapered"];
+    "bb::TestRescue#parse_bug_rescue_empty_else_4" -> "bb::TestRescue#parse_bug_rescue_empty_else_5" [style="tapered"];
 
+    "bb::TestRescue#parse_bug_rescue_empty_else_5" [
+        label = "block[id=5, rubyBlockId=4]()\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_bug_rescue_empty_else_5" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_6" [
-        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$8: NilClass)\l<gotoDeadTemp>$8: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$8: T.nilable(TrueClass))\l<gotoDeadTemp>$8: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_6" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_6" -> "bb::TestRescue#parse_bug_rescue_empty_else_9" [style="tapered"];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_7" [
-        label = "block[id=7, rubyBlockId=2](<magic>$4: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$5: Sorbet::Private::Static::Void = <magic>$4: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<gotoDeadTemp>$8: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$4: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$5: Sorbet::Private::Static::Void = <magic>$4: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="bold"];
-    "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_9" [style="tapered"];
-
+    "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_8" [
-        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$8: TrueClass(true) = true\l<gotoDeadTemp>$8: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$8: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_bug_rescue_empty_else_8" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="bold"];
-    "bb::TestRescue#parse_bug_rescue_empty_else_8" -> "bb::TestRescue#parse_bug_rescue_empty_else_9" [style="tapered"];
-
+    "bb::TestRescue#parse_bug_rescue_empty_else_8" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_9" [
         label = "block[id=9, rubyBlockId=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
@@ -412,29 +418,30 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_4" -> "bb::TestRescue#parse_ruby_bug_12686_3" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_4" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="tapered"];
+    "bb::TestRescue#parse_ruby_bug_12686_4" -> "bb::TestRescue#parse_ruby_bug_12686_5" [style="tapered"];
 
+    "bb::TestRescue#parse_ruby_bug_12686_5" [
+        label = "block[id=5, rubyBlockId=4](<statTemp>$4: T.untyped, <self>: TestRescue)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_ruby_bug_12686_5" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_6" [
-        label = "block[id=6, rubyBlockId=3](<statTemp>$4: T.untyped, <self>: TestRescue, <gotoDeadTemp>$11: NilClass)\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<statTemp>$4: T.untyped, <self>: TestRescue, <gotoDeadTemp>$11: T.nilable(TrueClass))\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_6" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_6" -> "bb::TestRescue#parse_ruby_bug_12686_9" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12686_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$7: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: NilClass = nil\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$7: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: NilClass = nil\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$4: T.untyped, <self>: TestRescue)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$4: T.untyped, <self>: TestRescue)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_9" [
         label = "block[id=9, rubyBlockId=0](<statTemp>$4: T.untyped, <self>: TestRescue)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -472,29 +479,30 @@ subgraph "cluster_::TestRescue#parse_rescue_mod" {
     ];
 
     "bb::TestRescue#parse_rescue_mod_4" -> "bb::TestRescue#parse_rescue_mod_3" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_4" -> "bb::TestRescue#parse_rescue_mod_6" [style="tapered"];
+    "bb::TestRescue#parse_rescue_mod_4" -> "bb::TestRescue#parse_rescue_mod_5" [style="tapered"];
 
+    "bb::TestRescue#parse_rescue_mod_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_rescue_mod_5" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass)\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: T.nilable(TrueClass))\l<gotoDeadTemp>$10: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_6" -> "bb::TestRescue#parse_rescue_mod_1" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_6" -> "bb::TestRescue#parse_rescue_mod_9" [style="tapered"];
 
     "bb::TestRescue#parse_rescue_mod_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -532,29 +540,30 @@ subgraph "cluster_::TestRescue#parse_resbody_list_var" {
     ];
 
     "bb::TestRescue#parse_resbody_list_var_4" -> "bb::TestRescue#parse_resbody_list_var_3" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_4" -> "bb::TestRescue#parse_resbody_list_var_6" [style="tapered"];
+    "bb::TestRescue#parse_resbody_list_var_4" -> "bb::TestRescue#parse_resbody_list_var_5" [style="tapered"];
 
+    "bb::TestRescue#parse_resbody_list_var_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_resbody_list_var_5" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass)\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass))\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_resbody_list_var_6" -> "bb::TestRescue#parse_resbody_list_var_1" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_6" -> "bb::TestRescue#parse_resbody_list_var_9" [style="tapered"];
 
     "bb::TestRescue#parse_resbody_list_var_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -653,29 +662,30 @@ subgraph "cluster_::TestRescue#parse_rescue" {
     ];
 
     "bb::TestRescue#parse_rescue_4" -> "bb::TestRescue#parse_rescue_3" [style="bold"];
-    "bb::TestRescue#parse_rescue_4" -> "bb::TestRescue#parse_rescue_6" [style="tapered"];
+    "bb::TestRescue#parse_rescue_4" -> "bb::TestRescue#parse_rescue_5" [style="tapered"];
 
+    "bb::TestRescue#parse_rescue_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_rescue_5" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
     "bb::TestRescue#parse_rescue_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass)\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: T.nilable(TrueClass))\l<gotoDeadTemp>$10: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_rescue_6" -> "bb::TestRescue#parse_rescue_1" [style="bold"];
     "bb::TestRescue#parse_rescue_6" -> "bb::TestRescue#parse_rescue_9" [style="tapered"];
 
     "bb::TestRescue#parse_rescue_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
     "bb::TestRescue#parse_rescue_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
     "bb::TestRescue#parse_rescue_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -713,29 +723,30 @@ subgraph "cluster_::TestRescue#parse_resbody_var" {
     ];
 
     "bb::TestRescue#parse_resbody_var_4" -> "bb::TestRescue#parse_resbody_var_3" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_4" -> "bb::TestRescue#parse_resbody_var_6" [style="tapered"];
+    "bb::TestRescue#parse_resbody_var_4" -> "bb::TestRescue#parse_resbody_var_5" [style="tapered"];
 
+    "bb::TestRescue#parse_resbody_var_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_resbody_var_5" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass)\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: T.nilable(TrueClass))\l<gotoDeadTemp>$10: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_6" -> "bb::TestRescue#parse_resbody_var_1" [style="bold"];
     "bb::TestRescue#parse_resbody_var_6" -> "bb::TestRescue#parse_resbody_var_9" [style="tapered"];
 
     "bb::TestRescue#parse_resbody_var_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$10: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<gotoDeadTemp>$10: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -773,29 +784,30 @@ subgraph "cluster_::TestRescue#parse_resbody_var_1" {
     ];
 
     "bb::TestRescue#parse_resbody_var_1_4" -> "bb::TestRescue#parse_resbody_var_1_3" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_4" -> "bb::TestRescue#parse_resbody_var_1_6" [style="tapered"];
+    "bb::TestRescue#parse_resbody_var_1_4" -> "bb::TestRescue#parse_resbody_var_1_5" [style="tapered"];
 
+    "bb::TestRescue#parse_resbody_var_1_5" [
+        label = "block[id=5, rubyBlockId=4](<returnMethodTemp>$2: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_resbody_var_1_5" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: NilClass)\l<gotoDeadTemp>$12: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: T.nilable(TrueClass))\l<gotoDeadTemp>$12: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_1_6" -> "bb::TestRescue#parse_resbody_var_1_1" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_6" -> "bb::TestRescue#parse_resbody_var_1_9" [style="tapered"];
 
     "bb::TestRescue#parse_resbody_var_1_7" [
-        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), @ex$10: T.nilable(StandardError), <rescueTemp>$2: T.untyped)\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l@ex$10: T.untyped = <rescueTemp>$2\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$12: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), @ex$10: T.nilable(StandardError), <rescueTemp>$2: T.untyped)\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\l@ex$10: T.untyped = <rescueTemp>$2\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<gotoDeadTemp>$12: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_9" [style="tapered"];
-
+    "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_9" [
         label = "block[id=9, rubyBlockId=0](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -833,29 +845,30 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_4" -> "bb::TestRescue#parse_rescue_mod_op_assign_3" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_4" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="tapered"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_4" -> "bb::TestRescue#parse_rescue_mod_op_assign_5" [style="tapered"];
 
+    "bb::TestRescue#parse_rescue_mod_op_assign_5" [
+        label = "block[id=5, rubyBlockId=4](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_rescue_mod_op_assign_5" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_6" [
-        label = "block[id=6, rubyBlockId=3](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: NilClass)\l<gotoDeadTemp>$12: NilClass\l"
+        label = "block[id=6, rubyBlockId=3](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: T.nilable(TrueClass))\l<gotoDeadTemp>$12: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_6" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_6" -> "bb::TestRescue#parse_rescue_mod_op_assign_9" [style="tapered"];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_7" [
-        label = "block[id=7, rubyBlockId=2](<statTemp>$3: NilClass, <self>: TestRescue, <magic>$7: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: T.untyped = <self>: TestRescue.bar()\l<gotoDeadTemp>$12: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<statTemp>$3: NilClass, <self>: TestRescue, <magic>$7: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: T.untyped = <self>: TestRescue.bar()\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<gotoDeadTemp>$12: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_9" [style="tapered"];
-
+    "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_9" [
         label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.untyped = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -893,29 +906,30 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_4" -> "bb::TestRescue#parse_ruby_bug_12402_3" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_4" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="tapered"];
+    "bb::TestRescue#parse_ruby_bug_12402_4" -> "bb::TestRescue#parse_ruby_bug_12402_5" [style="tapered"];
 
+    "bb::TestRescue#parse_ruby_bug_12402_5" [
+        label = "block[id=5, rubyBlockId=4](foo: NilClass)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_ruby_bug_12402_5" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_6" [
-        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$11: NilClass, foo: NilClass)\l<gotoDeadTemp>$11\l"
+        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$11: T.nilable(TrueClass), foo: NilClass)\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_6" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_6" -> "bb::TestRescue#parse_ruby_bug_12402_9" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_7" [
-        label = "block[id=7, rubyBlockId=2](<magic>$7: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\lfoo: NilClass = nil\l<gotoDeadTemp>$11: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<magic>$7: T.class_of(<Magic>))\l<exceptionValue>$3: NilClass = nil\l<keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)\lfoo: NilClass = nil\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_8" [
-        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<gotoDeadTemp>$11: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_9" [
         label = "block[id=9, rubyBlockId=0](foo: NilClass)\l<returnMethodTemp>$2: NilClass = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
@@ -953,29 +967,30 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_4" -> "bb::TestRescue#parse_ruby_bug_12402_1_3" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_4" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="tapered"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_4" -> "bb::TestRescue#parse_ruby_bug_12402_1_5" [style="tapered"];
 
+    "bb::TestRescue#parse_ruby_bug_12402_1_5" [
+        label = "block[id=5, rubyBlockId=4](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_ruby_bug_12402_1_5" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_6" [
-        label = "block[id=6, rubyBlockId=3](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$13: NilClass)\l<gotoDeadTemp>$13\l"
+        label = "block[id=6, rubyBlockId=3](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$13: T.nilable(TrueClass))\l<gotoDeadTemp>$13: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_6" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_6" -> "bb::TestRescue#parse_ruby_bug_12402_1_9" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_7" [
-        label = "block[id=7, rubyBlockId=2](<statTemp>$3: NilClass, <magic>$9: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: NilClass = nil\l<gotoDeadTemp>$13: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<statTemp>$3: NilClass, <magic>$9: T.class_of(<Magic>))\l<exceptionValue>$5: NilClass = nil\l<keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)\l<statTemp>$4: NilClass = nil\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<gotoDeadTemp>$13: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_9" [
         label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: NilClass)\l<returnMethodTemp>$2: T.untyped = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
@@ -1013,29 +1028,30 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_3" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="tapered"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_5" [style="tapered"];
 
+    "bb::TestRescue#parse_ruby_bug_12402_2_5" [
+        label = "block[id=5, rubyBlockId=4](<statTemp>$9: NilClass, <statTemp>$12: NilClass, []$3: NilClass, []$4: NilClass)\l<unconditional>\l"
+    ];
+
+    "bb::TestRescue#parse_ruby_bug_12402_2_5" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_6" [
-        label = "block[id=6, rubyBlockId=3](<statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$21: NilClass, []$3: NilClass, []$4: NilClass)\l<gotoDeadTemp>$21\l"
+        label = "block[id=6, rubyBlockId=3](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, <gotoDeadTemp>$21: T.nilable(TrueClass), []$3: T.untyped, []$4: Integer(0))\l<gotoDeadTemp>$21: T.nilable(TrueClass)\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_6" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_6" -> "bb::TestRescue#parse_ruby_bug_12402_2_9" [style="tapered"];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_7" [
-        label = "block[id=7, rubyBlockId=2](<statTemp>$9: T.untyped, <magic>$17: T.class_of(<Magic>), []$3: T.untyped, []$4: Integer(0))\l<exceptionValue>$13: NilClass = nil\l<keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$13: NilClass)\l<statTemp>$12: NilClass = nil\l<gotoDeadTemp>$21: NilClass\l"
+        label = "block[id=7, rubyBlockId=2](<statTemp>$9: T.untyped, <magic>$17: T.class_of(<Magic>), []$3: T.untyped, []$4: Integer(0))\l<exceptionValue>$13: NilClass = nil\l<keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$13: NilClass)\l<statTemp>$12: NilClass = nil\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<gotoDeadTemp>$21: TrueClass(true) = true\l<gotoDeadTemp>$21: TrueClass(true)\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<gotoDeadTemp>$21: TrueClass(true) = true\l<unconditional>\l"
     ];
 
-    "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_9" [style="tapered"];
-
+    "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_9" [
         label = "block[id=9, rubyBlockId=0](<statTemp>$9: T.untyped, <statTemp>$12: NilClass, []$3: T.untyped, []$4: Integer(0))\l<statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)\l<returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: Integer(0), <statTemp>$8: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
