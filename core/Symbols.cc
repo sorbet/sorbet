@@ -1207,10 +1207,13 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
     }
-    for (auto &existing : locs_) {
-        if (existing.file() == loc.file()) {
-            existing = loc;
-            return;
+
+    if (ref(gs) != Symbols::root()) {
+        for (auto &existing : locs_) {
+            if (existing.file() == loc.file()) {
+                existing = loc;
+                return;
+            }
         }
     }
 
