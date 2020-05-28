@@ -208,7 +208,7 @@ class Vector
   def dot(v); end
 
   # Iterate over the elements of this vector
-  def each(&block); end
+  def each(which=:all, &block); end
 
   # Iterate over the elements of this vector and `v` in conjunction.
   def each2(v); end
