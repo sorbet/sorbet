@@ -13,8 +13,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Ripper`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L660: Did you mean: `Enumerator::Yielder`?
-     660 |class Enumerator::Yielder < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L749: Did you mean: `Enumerator::Yielder`?
+     749 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/shell.rbi#L77: Did you mean: `Shell`?
     77 |class Shell
