@@ -369,29 +369,25 @@ module Opus::Types::Test
           t.describe_obj(10...20))
       end
 
-      it 'works if the type is right' do
+      it 'works if the range has a start and end' do
         type = T::Range[Integer]
         value = (3...10)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
       end
 
-      it 'works if the range has no start' do
-        type = T::Range[Integer]
-        value = (nil...10)
-        msg = type.error_message_for_obj(value)
-        assert_nil(msg)
-      end
+      # Note: `(nil...10)` is not a valid range (you'll get `ArguemntError: bad value for range`)
+      # but leaving this comment to be explicit about why this case is not covered
 
       it 'works if the range has no end' do
-        type = T::Range[Integer]
+        type = T::Range[T.nilable(Integer)]
         value = (1...nil)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
       end
 
       it 'works if the range has no start or end' do
-        type = T::Range[Integer]
+        type = T::Range[NilClass]
         value = (nil...nil)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)

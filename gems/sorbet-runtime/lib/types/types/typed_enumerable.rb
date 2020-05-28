@@ -50,7 +50,11 @@ module T::Types
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         return true
       when Range
-        @type.valid?(obj.begin) && @type.valid?(obj.end)
+        if obj.end.nil?
+          @type.valid?(obj.begin)
+        else
+          @type.valid?(obj.begin) && @type.valid?(obj.end)
+        end
       when Set
         obj.each do |item|
           return false unless @type.valid?(item)
@@ -124,7 +128,13 @@ module T::Types
         inferred_val = type_from_instances(obj.values)
         T::Hash[inferred_key, inferred_val]
       when Range
-        T::Range[type_from_instances([obj.begin, obj.end])]
+        # If the range end is limitless, we cannot call `Range#last`, and the static type checker should consider
+        # it a range of the type of the start of the range.
+        if !obj.begin.nil? && obj.end.nil?
+          T::Range[type_from_instances([obj.begin])]
+        else
+          T::Range[type_from_instances([obj.begin, obj.end])]
+        end
       when Enumerator
         T::Enumerator[type_from_instances(obj)]
       when Set

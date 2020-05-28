@@ -306,6 +306,118 @@ module Opus::Types::Test
         assert_empty(lines[3..-1])
       end
 
+      describe 'ranges' do
+        describe 'return type is non-nilable integer' do
+          it 'permits a range that has integers on start and end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (1...10)
+            end
+
+            assert_equal((1...10), @mod.foo )
+          end
+
+          it 'permits a range that has an integer start and no end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (1...nil)
+            end
+
+            assert_equal((1...nil), @mod.foo )
+          end
+
+          it 'does not allow us to initialize a range with no start' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (nil...10)
+            end
+
+            err = assert_raises(ArgumentError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            # This test protects us if in the future Ruby supports ranges that are limitless at the start
+            # If this test later fails, we should ensure that we have the appropriate implementation for ranges
+            # that have no start.
+            assert_match('bad value for range', lines[0])
+          end
+
+          it 'rejects a range with no start and no end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (nil...nil)
+            end
+
+            err = assert_raises(TypeError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            assert_match(/Return value: Expected type T::Range\[Integer\], got T::Range\[NilClass\]/, lines[0])
+            # Note that the paths here could be relative or absolute depending on how this test was invoked.
+            assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
+            assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+            assert_empty(lines[3..-1])
+          end
+        end
+
+        describe 'return type is nilable integer' do
+          it 'permits a range that has integers on start and end' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (1...10)
+            end
+
+            assert_equal((1...10), @mod.foo )
+          end
+
+          it 'permits a range that has an integer start and no end' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (1...nil)
+            end
+
+            assert_equal((1...nil), @mod.foo )
+          end
+
+          it 'does not allow us to initialize a range with no start' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (nil...10)
+            end
+
+            err = assert_raises(ArgumentError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            # This test protects us if in the future Ruby supports ranges that are limitless at the start
+            # If this test later fails, we should ensure that we have the appropriate implementation for ranges
+            # that have no start.
+            assert_match('bad value for range', lines[0])
+          end
+
+          it 'rejects a range with no start and no end' do
+            @mod.sig { returns(T::Range[T.nilable(Integer)] )}
+            def @mod.foo
+              (nil...nil)
+            end
+
+            err = assert_raises(TypeError) do
+              @mod.foo
+            end
+
+            lines = err.message.split("\n")
+            assert_match(/Return value: Expected type T::Range\[T.nilable\(Integer\)\], got T::Range\[NilClass\]/, lines[0])
+            # Note that the paths here could be relative or absolute depending on how this test was invoked.
+            assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
+            assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+            assert_empty(lines[3..-1])
+          end
+        end
+      end
+
       describe "instance methods" do
         it "raises an error when the return value is the wrong type " do
           klass = Class.new do
