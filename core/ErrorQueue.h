@@ -17,7 +17,7 @@ private:
     std::vector<std::unique_ptr<ErrorQueueMessage>> drainAll();
     std::vector<std::unique_ptr<ErrorQueueMessage>> drainFlushed();
     void collectForFile(core::FileRef whatFile, std::vector<std::unique_ptr<core::ErrorQueueMessage>> &out);
-    std::unique_ptr<ErrorFlusher> errorFlusher;
+    std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<core::ErrorQueueMessage>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;

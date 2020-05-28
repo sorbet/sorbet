@@ -15,15 +15,11 @@ private:
 
 public:
     ErrorFlusherStdout() = default;
-    ~ErrorFlusherStdout(){};
-    using ErrorFlusher::flushErrors;
-    virtual void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> error);
+    ~ErrorFlusherStdout() = default;
 
-    using ErrorFlusher::flushErrorCount;
-    virtual void flushErrorCount(spdlog::logger &logger, int count);
-
-    using ErrorFlusher::flushAutocorrects;
-    virtual void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
+    void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> error) override;
+    void flushErrorCount(spdlog::logger &logger, int count) override;
+    void flushAutocorrects(const GlobalState &gs, FileSystem &fs) override;
 };
 
 } // namespace sorbet::core
