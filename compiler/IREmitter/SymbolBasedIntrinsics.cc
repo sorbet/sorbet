@@ -153,6 +153,25 @@ public:
     }
 } DefineMethodIntrinsic;
 
+class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
+public:
+    SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
+        auto &builder = builderCast(build);
+        return Payload::rubyNil(cs, builder);
+    }
+
+    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+        return {core::Symbols::Sorbet_Private_Static().data(cs)->lookupSingletonClass(cs)};
+    };
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::sig()};
+    }
+} SorbetPrivateStaticSigIntrinsic;
+
 /* Reuse logic from typeTest to speedup SomeClass === someVal */
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
@@ -295,7 +314,12 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
-    vector<const SymbolBasedIntrinsicMethod *> res{&DefineMethodIntrinsic, &Module_tripleEq, &Regexp_new};
+    vector<const SymbolBasedIntrinsicMethod *> res{
+        &DefineMethodIntrinsic,
+        &SorbetPrivateStaticSigIntrinsic,
+        &Module_tripleEq,
+        &Regexp_new,
+    };
     for (auto &method : knownCMethodsInstance) {
         res.emplace_back(&method);
     }
