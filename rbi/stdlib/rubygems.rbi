@@ -690,3 +690,346 @@ class Gem::Version < Object
   end
   def initialize(version); end
 end
+
+class Gem::Package
+  include Gem::UserInteraction
+
+  def build_time; end
+
+  def build_time=(build_time); end
+
+  def checksums; end
+
+  def files; end
+
+  def security_policy; end
+
+  def security_policy=(security_policy); end
+
+  def spec=(spec); end
+
+  def dir_mode; end
+
+  def dir_mode=(dir_mode); end
+
+  def prog_mode; end
+
+  def prog_mode=(prog_mode); end
+
+  def data_mode; end
+
+  def data_mode=(data_mode); end
+
+  def self.build(spec, skip_validation = false, strict_validation = false, file_name = nil); end
+
+  def initialize(gem, security_policy = nil); end
+
+  def copy_to(path); end
+
+  def add_checksums(tar); end
+
+  def add_contents(tar); end
+
+  def add_files(tar); end
+
+  def add_metadata(tar); end
+
+  def build(skip_validation = false, strict_validation = false); end
+
+  def contents; end
+
+  def digest(entry); end
+
+  def extract_files(destination_dir, pattern = "*"); end
+
+  def extract_tar_gz(io, destination_dir, pattern = "*"); end
+
+  def file_mode(mode); end
+
+  def gzip_to(io); end
+
+  def install_location(filename, destination_dir); end
+
+  def normalize_path(pathname); end
+
+  def mkdir_p_safe(mkdir, mkdir_options, destination_dir, file_name); end
+
+  def load_spec(entry); end
+
+  def open_tar_gz(io); end
+
+  def read_checksums(gem); end
+
+  def setup_signer(signer_options: {}); end
+
+  def spec; end
+
+  def verify; end
+
+  def verify_checksums(digests, checksums); end
+
+  def verify_entry(entry); end
+
+  def verify_files(gem); end
+
+  def verify_gz(entry); end
+end
+
+class Gem::Package::Error < Gem::Exception; end
+
+class Gem::Package::FormatError < Gem::Package::Error
+  def path; end
+
+  def initialize(message, source = nil); end
+end
+
+class Gem::Package::PathError < Gem::Package::Error
+  def initialize(destination, destination_dir); end
+end
+
+class Gem::Package::NonSeekableIO < Gem::Package::Error
+end
+
+class Gem::Package::TooLongFileName < Gem::Package::Error
+end
+
+class Gem::Package::TarInvalidError < Gem::Package::Error
+end
+
+class Gem::Package::TarReader
+  include Enumerable
+
+  Elem = type_member(fixed: T.untyped)
+
+  def initialize(io); end
+
+  def close; end
+
+  def each; end
+
+  def each_entry; end
+
+  def rewind; end
+
+  def seek(name); end
+end
+
+class Gem::Package::TarReader::UnexpectedEOF < StandardError
+end
+
+class Gem::Package::TarWriter
+  def initialize(io); end
+
+  def add_file(name, mode); end
+
+  def add_file_digest(name, mode, digest_algorithms); end
+
+  def add_file_signed(name, mode, signer); end
+
+  def add_file_simple(name, mode, size); end
+
+  def add_symlink(name, target, mode); end
+
+  def check_closed; end
+
+  def close; end
+
+  def closed?; end
+
+  def flush; end
+
+  def mkdir(name, mode); end
+
+  def split_name(name); end
+end
+
+class Gem::Package::TarWriter::FileOverflow < StandardError
+end
+
+class Gem::Package::TarWriter::BoundedStream
+  def limit; end
+
+  def written; end
+
+  def initialize(io, limit); end
+
+  def write(data); end
+end
+
+class Gem::Package::TarWriter::RestrictedStream
+  def initialize(io); end
+
+  def write(data); end
+end
+
+module Gem::DefaultUserInteraction
+  include Gem::Text
+
+  def self.ui; end
+
+  def self.ui=(new_ui); end
+
+  def self.use_ui(new_ui); end
+
+  def ui; end
+
+  def ui=(new_ui); end
+
+  def use_ui(new_ui, &block); end
+end
+
+module Gem::UserInteraction
+  include Gem::DefaultUserInteraction
+
+  def alert(statement, question = nil); end
+
+  def alert_error(statement, question = nil); end
+
+  def alert_warning(statement, question = nil); end
+
+  def ask(question); end
+
+  def ask_for_password(prompt); end
+
+  def ask_yes_no(question, default = nil); end
+
+  def choose_from_list(question, list); end
+
+  def say(statement = ''); end
+
+  def terminate_interaction(exit_code = 0); end
+
+  def verbose(msg = nil); end
+end
+
+class Gem::StreamUI
+  extend Gem::Deprecate
+
+  def ins; end
+
+  def outs; end
+
+  def errs; end
+
+  def initialize(in_stream, out_stream, err_stream=STDERR, usetty=true); end
+
+  def tty?; end
+
+  def backtrace(exception); end
+
+  def choose_from_list(question, list); end
+
+  def ask_yes_no(question, default=nil); end
+
+  def ask(question); end
+
+  def ask_for_password(question); end
+
+  def require_io_console; end
+
+  def _gets_noecho; end
+
+  def say(statement=""); end
+
+  def alert(statement, question=nil); end
+
+  def alert_warning(statement, question=nil); end
+
+  def alert_error(statement, question=nil); end
+
+  def debug(statement); end
+
+  def terminate_interaction(status = 0); end
+
+  def close; end
+
+  def progress_reporter(*args); end
+
+  def download_reporter(*args); end
+end
+
+class Gem::Stream::UI::SilentProgressReporter
+  def count; end
+
+  def initialize(out_stream, size, initial_message, terminal_message = nil); end
+
+  def updated(message); end
+
+  def done; end
+end
+
+class Gem::Stream::UI::SimpleProgressReporter
+  include Gem::DefaultUserInteraction
+
+  def count; end
+
+  def initialize(out_stream, size, initial_message, terminal_message = "complete"); end
+
+  def updated(message); end
+
+  def done; end
+end
+
+class Gem::Stream::UI::VerboseProgressReporter
+  include Gem::DefaultUserInteraction
+
+  def count; end
+
+  def initialize(out_stream, size, initial_message, terminal_message = 'complete'); end
+
+  def updated(message); end
+
+  def done; end
+end
+
+class Gem::Stream::UI::SilentDownloadReporter
+  def initialize(out_stream, *args); end
+
+  def fetch(filename, filesize); end
+
+  def update(current); end
+
+  def done; end
+end
+
+class Gem::Stream::UI::ThreadedDownloadReporter
+  MUTEX = Mutex.new
+
+  def file_name; end
+
+  def initialize(out_stream, *args); end
+
+  def fetch(file_name, *args); end
+
+  def update(bytes); end
+
+  def done; end
+end
+
+class Gem::ConsoleUI < Gem::StreamUI
+  def initialize; end
+end
+
+class Gem::SilentUI < Gem::StreamUI
+  def initialize; end
+
+  def close; end
+
+  def download_reporter(*args);
+  end
+
+  def progress_reporter(*args);
+  end
+end
+
+module Gem::Text
+  def clean_text(text); end
+
+  def truncate_text(text, description, max_length = 100_000); end
+
+  def format_text(text, wrap, indent=0); end
+
+  def min3(a, b, c); end
+
+  def levenshtein_distance(str1, str2); end
+end
