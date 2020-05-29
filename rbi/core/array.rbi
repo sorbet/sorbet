@@ -1113,7 +1113,7 @@ class Array < Object
     )
     .returns(T::Array[Elem])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(T::Enumerator[Integer])}
   def each_index(&blk); end
 
   # Same as Enumerator#with_index(0), i.e. there is no starting offset.
