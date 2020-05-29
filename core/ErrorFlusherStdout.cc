@@ -1,4 +1,4 @@
-#include "core/ErrorFlusher.h"
+#include "core/ErrorFlusherStdout.h"
 #include "common/FileSystem.h"
 #include "core/lsp/QueryResponse.h"
 
@@ -6,7 +6,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
+void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
     fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
@@ -47,7 +47,7 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
     }
 }
 
-void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
+void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
     if (count == 0) {
         logger.log(spdlog::level::err, "No errors! Great job.", count);
     } else {
@@ -55,7 +55,7 @@ void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
     }
 }
 
-void ErrorFlusher::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
+void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
         for (auto &edit : autocorrect.edits) {
