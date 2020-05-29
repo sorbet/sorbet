@@ -5011,8 +5011,6 @@ end
 module Enumerable
   def chain(*_); end
 
-  def chunk_while(); end
-
   def sum(*_); end
 
   def to_set(klass=T.unsafe(nil), *args, &block); end
