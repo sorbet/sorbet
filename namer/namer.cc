@@ -15,6 +15,7 @@
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
+#include "core/lsp/TypecheckEpochManager.h"
 
 using namespace std;
 
@@ -1724,11 +1725,15 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
-vector<ast::ParsedFile> defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions) {
+ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
+    const auto &epochManager = *gs.epochManager;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
+        if (epochManager.wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
         SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names));
         output.emplace_back(move(fileFoundDefinitions.tree));
@@ -1782,10 +1787,16 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 
 } // namespace
 
-vector<ast::ParsedFile> Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
-    trees = defineSymbols(gs, move(foundDefs));
-    trees = symbolizeTrees(gs, move(trees), workers);
+    if (gs.epochManager->wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled();
+    }
+    auto result = defineSymbols(gs, move(foundDefs));
+    if (!result.hasResult()) {
+        return result;
+    }
+    trees = symbolizeTrees(gs, move(result.result()), workers);
     return trees;
 }
 

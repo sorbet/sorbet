@@ -299,7 +299,10 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            what = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers);
+            auto result = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers);
+            // Cancellation cannot occur during incremental namer.
+            ENFORCE(result.hasResult());
+            what = move(result.result());
         }
 
         {
@@ -732,8 +735,8 @@ struct typecheck_thread_result {
     CounterState counters;
 };
 
-vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                             WorkerPool &workers, bool skipConfigatron) {
+ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+                                 WorkerPool &workers, bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
     if (!skipConfigatron) {
 #ifndef SORBET_REALMAIN_MIN
@@ -746,13 +749,13 @@ vector<ast::ParsedFile> name(core::GlobalState &gs, vector<ast::ParsedFile> what
     {
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        what = namer::Namer::run(gs, move(what), workers);
+        auto result = namer::Namer::run(gs, move(what), workers);
         // Flush all errors if the error queue had a critical error
         if (gs.hadCriticalError()) {
             gs.errorQueue->flushErrors(true);
         }
+        return result;
     }
-    return what;
 }
 class GatherUnresolvedConstantsWalk {
 public:
@@ -840,10 +843,11 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
-        what = name(*gs, move(what), opts, workers, skipConfigatron);
-        if (gs->epochManager->wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled();
+        auto result = name(*gs, move(what), opts, workers, skipConfigatron);
+        if (!result.hasResult()) {
+            return result;
         }
+        what = move(result.result());
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
