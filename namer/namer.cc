@@ -1730,8 +1730,11 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
     const auto &epochManager = *gs.epochManager;
+    u4 count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
-        if (epochManager.wasTypecheckingCanceled()) {
+        count++;
+        // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
+        if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled();
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
