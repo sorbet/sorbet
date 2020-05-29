@@ -2287,10 +2287,11 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = resolveMixesInClassMethods(gs, std::move(trees));
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+    auto result = resolveMixesInClassMethods(gs, std::move(trees));
+    if (!result.hasResult()) {
+        return result;
     }
+    trees = move(result.result());
     finalizeSymbols(gs);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
@@ -2299,19 +2300,23 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = resolveSigs(gs, std::move(trees));
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled();
+    result = resolveSigs(gs, std::move(trees));
+    if (!result.hasResult()) {
+        return result;
     }
-    sanityCheck(gs, trees);
+    sanityCheck(gs, result.result());
 
-    return ast::ParsedFilesOrCancelled(move(trees));
+    return result;
 }
 
-vector<ast::ParsedFile> Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     ResolveSignaturesWalk sigs;
+    const auto &epochManager = gs.epochManager;
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
+        if (epochManager->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
         core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
         tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
     }
@@ -2319,10 +2324,14 @@ vector<ast::ParsedFile> Resolver::resolveSigs(core::GlobalState &gs, vector<ast:
     return trees;
 }
 
-vector<ast::ParsedFile> Resolver::resolveMixesInClassMethods(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::resolveMixesInClassMethods(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     ResolveMixesInClassMethodsWalk mixesInClassMethods;
+    const auto &epochManager = gs.epochManager;
     Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
     for (auto &tree : trees) {
+        if (epochManager->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled();
+        }
         core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
         tree.tree = ast::TreeMap::apply(ctx, mixesInClassMethods, std::move(tree.tree));
     }
@@ -2340,19 +2349,26 @@ void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees
     }
 }
 
-vector<ast::ParsedFile> Resolver::runTreePasses(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::runTreePasses(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    trees = resolveMixesInClassMethods(gs, std::move(trees));
+    auto result = resolveMixesInClassMethods(gs, std::move(trees));
+    if (!result.hasResult()) {
+        return result;
+    }
+    trees = move(result.result());
     computeLinearization(gs);
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
-    trees = resolveSigs(gs, std::move(trees));
-    sanityCheck(gs, trees);
+    result = resolveSigs(gs, std::move(trees));
+    if (!result.hasResult()) {
+        return result;
+    }
+    sanityCheck(gs, result.result());
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
 
-    return trees;
+    return result;
 }
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,

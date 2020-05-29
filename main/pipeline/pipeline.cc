@@ -308,7 +308,10 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            what = sorbet::resolver::Resolver::runTreePasses(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runTreePasses(gs, move(what));
+            // incrementalResolve is not cancelable.
+            ENFORCE(result.hasResult());
+            what = move(result.result());
         }
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
