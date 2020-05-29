@@ -1485,7 +1485,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->namesByHash.reserve(this->namesByHash.size());
     result->namesByHash = this->namesByHash;
 
-    result->symbols.reserve(this->symbols.size());
+    result->symbols.reserve(this->symbols.capacity());
     for (auto &sym : this->symbols) {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }
