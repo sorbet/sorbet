@@ -4,7 +4,7 @@ require 'csv'
 T.assert_type!(CSV.foreach('source.csv', headers: true), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
 T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
 CSV.foreach('source.csv') do |row|
-  T.assert_type!(row, T.any(T::Array[T.nilable(String)], CSV::Row))
+  T.assert_type!(row, T.any(T::Array[T.nilable(BasicObject)], CSV::Row))
 end
 
 csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'], [2, 3])])

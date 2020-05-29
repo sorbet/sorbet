@@ -270,7 +270,7 @@ class CSV < Object
     params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
         options: T::Hash[Symbol, BasicObject],
-        blk: T.proc.params(arg0: T.any(T::Array[T.nilable(String)], CSV::Row)).void,
+        blk: T.proc.params(arg0: T.any(T::Array[T.nilable(BasicObject)], CSV::Row)).void,
     )
     .void
   end
