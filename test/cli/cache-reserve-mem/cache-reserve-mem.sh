@@ -5,6 +5,6 @@ cleanup() {
 }
 trap cleanup EXIT
 set -e
-main/sorbet --silence-dev-message -vvv --reserve-mem-kb 128000 --cache-dir "$dir" test/cli/cache-reserve-mem/input.rb
-main/sorbet --silence-dev-message -vvv --reserve-mem-kb 128000 --cache-dir "$dir" test/cli/cache-reserve-mem/input.rb
-echo "--reserve-mem-kb OK"
+main/sorbet --silence-dev-message -vvv --reserve-symbol-table-capacity 4000 --reserve-name-table-capacity 4000 --cache-dir "$dir" test/cli/cache-reserve-mem/input.rb
+main/sorbet --silence-dev-message -vvv --reserve-symbol-table-capacity 4000 --reserve-name-table-capacity 4000 --cache-dir "$dir" test/cli/cache-reserve-mem/input.rb
+echo "--reserve-symbol-table-capacity --reserve-name-table-capacity OK"

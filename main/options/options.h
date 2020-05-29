@@ -157,7 +157,8 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
-    u4 reserveMemKiB = 0;
+    u4 reserveSymbolTableCapacity = 0;
+    u4 reserveNameTableCapacity = 0;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
