@@ -1111,9 +1111,9 @@ class Array < Object
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(T::Array[Elem])
+    .returns(T::Array[Integer])
   end
-  sig {returns(T::Enumerator[Elem])}
+  sig {returns(T::Enumerator[Integer])}
   def each_index(&blk); end
 
   # Same as Enumerator#with_index(0), i.e. there is no starting offset.
