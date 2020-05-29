@@ -380,7 +380,7 @@ module Opus::Types::Test
       # but leaving this comment to be explicit about why this case is not covered
 
       it 'works if the range has no end' do
-        type = T::Range[T.nilable(Integer)]
+        type = T::Range[Integer]
         value = (1...nil)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
