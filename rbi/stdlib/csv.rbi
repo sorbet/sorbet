@@ -486,17 +486,23 @@ class CSV < Object
   sig do
     params(
         str: String,
-        options: T.untyped,
-        blk: T.nilable(T.proc.params(arg0: T::Array[T.nilable(String)]).void)
+        options: T::Hash[Symbol, T.untyped],
     )
     .returns(
       T.any(
         CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)],
-        T::Array[T::Array[T.nilable(String)]],
+        T::Array[T::Array[T.nilable(BasicObject)]],
       )
     )
   end
-  def self.parse(str, **options, &blk); end
+  sig do
+    params(
+        str: String,
+        options: T::Hash[Symbol, T.untyped],
+        blk: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.nilable(BasicObject)])).void
+    ).void
+  end
+  def self.parse(str, options=T.unsafe(nil), &blk); end
 
   # This method is a shortcut for converting a single line of a
   # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
