@@ -1395,9 +1395,6 @@ class CSV::Table < Object
   end
   def push(*rows); end
 
-  # Internal data format used to compare equality.
-  def table; end
-
   # Returns the table as an
   # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays. Headers
   # will be the first row, then all of the field rows will follow.

@@ -62,7 +62,7 @@ if csv.is_a?(CSV::Table)
 
   T.assert_type!(csv.mode, Symbol)
 
-  T.assert_type!(csv.push([[1, {}, nil, '1'], CSV::Row.new(['1', '2'], [1, 2])]), CSV::Table)
+  T.assert_type!(csv.push([[1, {}, nil, '1'], CSV::Row.new(['1', '2'], [1, 2])]), CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)])
   
   T.assert_type!(csv.to_a, T::Array[T::Array[T.nilable(BasicObject)]])
 
@@ -70,6 +70,9 @@ if csv.is_a?(CSV::Table)
   T.assert_type!(csv.to_s, String)
 
   T.assert_type!(csv.values_at(0, {}), T.any(T.nilable(CSV::Row), T::Array[T.nilable(BasicObject)], T::Array[T.nilable(CSV::Row)], T::Array[T::Array[T.nilable(BasicObject)]]))
+
+  # errors
+  csv.table # error: Method `table` does not exist on `CSV::Table[T.any(CSV::Row, T::Array[BasicObject])]`
 else
   T.assert_type!(csv, T::Array[T::Array[T.nilable(BasicObject)]])
 end
