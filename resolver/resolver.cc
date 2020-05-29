@@ -2313,8 +2313,11 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     ResolveSignaturesWalk sigs;
     const auto &epochManager = gs.epochManager;
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
+    u4 count = 0;
     for (auto &tree : trees) {
-        if (epochManager->wasTypecheckingCanceled()) {
+        count++;
+        // Don't check every turn of the loop. We want to be responsive to cancelation without harming throughput.
+        if (count % 250 == 0 && epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled();
         }
         core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
@@ -2328,8 +2331,11 @@ ast::ParsedFilesOrCancelled Resolver::resolveMixesInClassMethods(core::GlobalSta
     ResolveMixesInClassMethodsWalk mixesInClassMethods;
     const auto &epochManager = gs.epochManager;
     Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
+    u4 count = 0;
     for (auto &tree : trees) {
-        if (epochManager->wasTypecheckingCanceled()) {
+        count++;
+        // Don't check every turn of the loop. We want to be responsive to cancelation without harming throughput.
+        if (count % 250 == 0 && epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled();
         }
         core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
