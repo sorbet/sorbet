@@ -1362,6 +1362,8 @@ class CSV::Table < Object
   # If no block is given, an
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
   # returned.
+  sig { params(block: T.proc.params(arg0: T.untyped).void).returns(T.self_type) }
+  sig { returns(T::Enumerator[T.untyped]) }
   def each(&block); end
 
   # Returns the headers for the first row of this table (assumed to match all

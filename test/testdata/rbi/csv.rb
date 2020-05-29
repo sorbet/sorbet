@@ -71,6 +71,18 @@ if csv.is_a?(CSV::Table)
 
   T.assert_type!(csv.values_at(0, {}), T.any(T.nilable(CSV::Row), T::Array[T.nilable(BasicObject)], T::Array[T.nilable(CSV::Row)], T::Array[T::Array[T.nilable(BasicObject)]]))
 
+  csv.by_col.each do |header, entry|
+  end
+
+  csv.each do |entry|
+  end
+
+  csv.each do |header, entry|
+  end
+
+  csv.by_row.each do |entry|
+  end
+
   # errors
   csv.table # error: Method `table` does not exist on `CSV::Table[T.any(CSV::Row, T::Array[BasicObject])]`
 else
