@@ -241,7 +241,7 @@ module Psych
   #
   sig do
     params(
-      yaml: T.any(String, StringIO),
+      yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
@@ -297,7 +297,7 @@ module Psych
   #
   sig do
     params(
-      yaml: T.any(String, StringIO),
+      yaml: T.any(String, StringIO, IO),
       legacy_permitted_classes: Object,
       legacy_permitted_symbols: Object,
       legacy_aliases: Object,
@@ -334,7 +334,7 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   sig do
     params(
-      yaml: T.any(String, StringIO),
+      yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
@@ -392,7 +392,7 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   sig do
     params(
-      yaml: T.any(String, StringIO),
+      yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
       filename: T.nilable(String),
       block: T.nilable(T.proc.params(node: Psych::Nodes::Document).void),
@@ -484,7 +484,7 @@ module Psych
   #
   sig do
     params(
-      yaml: T.any(String, StringIO),
+      yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
       filename: T.nilable(String),
       fallback: T.untyped,
@@ -497,36 +497,1032 @@ module Psych
   # Load the document contained in +filename+.  Returns the yaml contained in
   # +filename+ as a Ruby object, or if the file is empty, it returns
   # the specified +fallback+ return value, which defaults to +false+.
-  sig { params(filename: String, fallback: T.untyped).returns(T.untyped) }
+  sig { params(filename: T.any(String, Pathname), fallback: T.untyped).returns(T.untyped) }
   def self.load_file(filename, fallback: false); end
 end
 
-class Psych::Handler
+class Psych::Exception < RuntimeError
 end
 
-class Psych::Nodes::Node
+class Psych::BadAlias < Psych::Exception
+end
+
+class Psych::ClassLoader
+  BIG_DECIMAL = ::T.unsafe(nil)
+  CACHE = ::T.unsafe(nil)
+  COMPLEX = ::T.unsafe(nil)
+  DATE = ::T.unsafe(nil)
+  DATE_TIME = ::T.unsafe(nil)
+  EXCEPTION = ::T.unsafe(nil)
+  OBJECT = ::T.unsafe(nil)
+  PSYCH_OMAP = ::T.unsafe(nil)
+  PSYCH_SET = ::T.unsafe(nil)
+  RANGE = ::T.unsafe(nil)
+  RATIONAL = ::T.unsafe(nil)
+  REGEXP = ::T.unsafe(nil)
+  STRUCT = ::T.unsafe(nil)
+  SYMBOL = ::T.unsafe(nil)
+
+
+  def big_decimal(); end
+
+
+  def complex(); end
+
+
+  def date(); end
+
+
+  def date_time(); end
+
+
+  def exception(); end
+
+
+  def initialize(); end
+
+
+  def load(klassname); end
+
+
+  def object(); end
+
+
+  def psych_omap(); end
+
+
+  def psych_set(); end
+
+
+  def range(); end
+
+
+  def rational(); end
+
+
+  def regexp(); end
+
+
+  def struct(); end
+
+
+  def symbol(); end
+
+
+  def symbolize(sym); end
+end
+
+class Psych::ClassLoader::Restricted < Psych::ClassLoader
+
+  def initialize(classes, symbols); end
+
+
+  def symbolize(sym); end
+end
+
+class Psych::Coder
+
+  def [](k); end
+
+
+  def []=(k, v); end
+
+
+  def add(k, v); end
+
+
+  def implicit(); end
+
+
+  def implicit=(implicit); end
+
+
+  def initialize(tag); end
+
+
+  def map(tag=T.unsafe(nil), style=T.unsafe(nil)); end
+
+
+  def map=(map); end
+
+
+  def object(); end
+
+
+  def object=(object); end
+
+
+  def represent_map(tag, map); end
+
+
+  def represent_object(tag, obj); end
+
+
+  def represent_scalar(tag, value); end
+
+
+  def represent_seq(tag, list); end
+
+
+  def scalar(*args); end
+
+
+  def scalar=(value); end
+
+
+  def seq(); end
+
+
+  def seq=(list); end
+
+
+  def style(); end
+
+
+  def style=(style); end
+
+
+  def tag(); end
+
+
+  def tag=(tag); end
+
+
+  def type(); end
+end
+
+class Psych::DisallowedClass < Psych::Exception
+
+  def initialize(klass_name); end
+end
+
+class Psych::Emitter < Psych::Handler
+
+  def alias(_); end
+
+
+  def canonical(); end
+
+
+  def canonical=(canonical); end
+
+
+  def end_document(_); end
+
+
+  def end_mapping(); end
+
+
+  def end_sequence(); end
+
+
+  def end_stream(); end
+
+
+  def indentation(); end
+
+
+  def indentation=(indentation); end
+
+
+  def initialize(*_); end
+
+
+  def line_width(); end
+
+
+  def line_width=(line_width); end
+
+
+  def scalar(_, _1, _2, _3, _4, _5); end
+
+
+  def start_document(_, _1, _2); end
+
+
+  def start_mapping(_, _1, _2, _3); end
+
+
+  def start_sequence(_, _1, _2, _3); end
+
+
+  def start_stream(_); end
+end
+
+class Psych::Handler
+  EVENTS = ::T.unsafe(nil)
+  OPTIONS = ::T.unsafe(nil)
+
+
+  def alias(anchor); end
+
+
+  def empty(); end
+
+
+  def end_document(implicit); end
+
+
+  def end_mapping(); end
+
+
+  def end_sequence(); end
+
+
+  def end_stream(); end
+
+
+  def event_location(start_line, start_column, end_line, end_column); end
+
+
+  def scalar(value, anchor, tag, plain, quoted, style); end
+
+
+  def start_document(version, tag_directives, implicit); end
+
+
+  def start_mapping(anchor, tag, implicit, style); end
+
+
+  def start_sequence(anchor, tag, implicit, style); end
+
+
+  def start_stream(encoding); end
+
+
+  def streaming?(); end
+end
+
+class Psych::Handler::DumperOptions
+
+  def canonical(); end
+
+
+  def canonical=(canonical); end
+
+
+  def indentation(); end
+
+
+  def indentation=(indentation); end
+
+
+  def initialize(); end
+
+
+  def line_width(); end
+
+
+  def line_width=(line_width); end
+end
+
+module Psych::Handlers
+end
+
+class Psych::Handlers::DocumentStream < Psych::TreeBuilder
+
+  def end_document(implicit_end=T.unsafe(nil)); end
+
+
+  def initialize(&block); end
+
+
+  def start_document(version, tag_directives, implicit); end
+end
+
+module Psych::JSON
+end
+
+module Psych::JSON::RubyEvents
+
+  def visit_DateTime(o); end
+
+
+  def visit_String(o); end
+
+
+  def visit_Symbol(o); end
+
+
+  def visit_Time(o); end
+end
+
+class Psych::JSON::Stream < Psych::Visitors::JSONTree
+  include ::Psych::Streaming
+  extend ::Psych::Streaming::ClassMethods
+end
+
+class Psych::JSON::Stream::Emitter < Psych::Stream::Emitter
+  include ::Psych::JSON::YAMLEvents
+end
+
+class Psych::JSON::TreeBuilder < Psych::TreeBuilder
+  include ::Psych::JSON::YAMLEvents
+end
+
+module Psych::JSON::YAMLEvents
+
+  def end_document(implicit_end=T.unsafe(nil)); end
+
+
+  def scalar(value, anchor, tag, plain, quoted, style); end
+
+
+  def start_document(version, tag_directives, implicit); end
+
+
+  def start_mapping(anchor, tag, implicit, style); end
+
+
+  def start_sequence(anchor, tag, implicit, style); end
+end
+
+module Psych::Nodes
+end
+
+class Psych::Nodes::Alias < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+
+  def alias?(); end
+
+
+  def anchor(); end
+
+
+  def anchor=(anchor); end
+
+
+  def initialize(anchor); end
 end
 
 class Psych::Nodes::Document < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+
+  def document?(); end
+
+
+  def implicit(); end
+
+
+  def implicit=(implicit); end
+
+
+  def implicit_end(); end
+
+
+  def implicit_end=(implicit_end); end
+
+
+  def initialize(version=T.unsafe(nil), tag_directives=T.unsafe(nil), implicit=T.unsafe(nil)); end
+
+
+  def root(); end
+
+
+  def tag_directives(); end
+
+
+  def tag_directives=(tag_directives); end
+
+
+  def version(); end
+
+
+  def version=(version); end
+end
+
+class Psych::Nodes::Mapping < Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+
+  ANY = ::T.unsafe(nil)
+  BLOCK = ::T.unsafe(nil)
+  FLOW = ::T.unsafe(nil)
+
+
+  def anchor(); end
+
+
+  def anchor=(anchor); end
+
+
+  def implicit(); end
+
+
+  def implicit=(implicit); end
+
+
+  def initialize(anchor=T.unsafe(nil), tag=T.unsafe(nil), implicit=T.unsafe(nil), style=T.unsafe(nil)); end
+
+
+  def mapping?(); end
+
+
+  def style(); end
+
+
+  def style=(style); end
+
+
+  def tag(); end
+
+
+  def tag=(tag); end
+end
+
+class Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+
+
+  def alias?(); end
+
+
+  def children(); end
+
+
+  def document?(); end
+
+
+  def each(&block); end
+
+
+  def end_column(); end
+
+
+  def end_column=(end_column); end
+
+
+  def end_line(); end
+
+
+  def end_line=(end_line); end
+
+
+  def initialize(); end
+
+
+  def mapping?(); end
+
+
+  def scalar?(); end
+
+
+  def sequence?(); end
+
+
+  def start_column(); end
+
+
+  def start_column=(start_column); end
+
+
+  def start_line(); end
+
+
+  def start_line=(start_line); end
+
+
+  def stream?(); end
+
+
+  def tag(); end
+
+
+  def to_ruby(); end
+
+
+  def to_yaml(io=T.unsafe(nil), options=T.unsafe(nil)); end
+
+
+  def transform(); end
+
+
+  def yaml(io=T.unsafe(nil), options=T.unsafe(nil)); end
+end
+
+class Psych::Nodes::Scalar < Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+
+  ANY = ::T.unsafe(nil)
+  DOUBLE_QUOTED = ::T.unsafe(nil)
+  FOLDED = ::T.unsafe(nil)
+  LITERAL = ::T.unsafe(nil)
+  PLAIN = ::T.unsafe(nil)
+  SINGLE_QUOTED = ::T.unsafe(nil)
+
+
+  def anchor(); end
+
+
+  def anchor=(anchor); end
+
+
+  def initialize(value, anchor=T.unsafe(nil), tag=T.unsafe(nil), plain=T.unsafe(nil), quoted=T.unsafe(nil), style=T.unsafe(nil)); end
+
+
+  def plain(); end
+
+
+  def plain=(plain); end
+
+
+  def quoted(); end
+
+
+  def quoted=(quoted); end
+
+
+  def scalar?(); end
+
+
+  def style(); end
+
+
+  def style=(style); end
+
+
+  def tag(); end
+
+
+  def tag=(tag); end
+
+
+  def value(); end
+
+
+  def value=(value); end
+end
+
+class Psych::Nodes::Sequence < Psych::Nodes::Node
+  include Enumerable
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.untyped)
+
+  ANY = ::T.unsafe(nil)
+  BLOCK = ::T.unsafe(nil)
+  FLOW = ::T.unsafe(nil)
+
+
+  def anchor(); end
+
+
+  def anchor=(anchor); end
+
+
+  def implicit(); end
+
+
+  def implicit=(implicit); end
+
+
+  def initialize(anchor=T.unsafe(nil), tag=T.unsafe(nil), implicit=T.unsafe(nil), style=T.unsafe(nil)); end
+
+
+  def sequence?(); end
+
+
+  def style(); end
+
+
+  def style=(style); end
+
+
+  def tag(); end
+
+
+  def tag=(tag); end
 end
 
 class Psych::Nodes::Stream < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+  ANY = ::T.unsafe(nil)
+  UTF16BE = ::T.unsafe(nil)
+  UTF16LE = ::T.unsafe(nil)
+  UTF8 = ::T.unsafe(nil)
+
+
+  def encoding(); end
+
+
+  def encoding=(encoding); end
+
+
+  def initialize(encoding=T.unsafe(nil)); end
+
+
+  def stream?(); end
+end
+
+class Psych::Omap < Hash
+  include Enumerable
+  extend T::Generic
+  K = type_member(:out)
+  V = type_member(:out)
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
 class Psych::Parser
+  ANY = ::T.unsafe(nil)
+  UTF16BE = ::T.unsafe(nil)
+  UTF16LE = ::T.unsafe(nil)
+  UTF8 = ::T.unsafe(nil)
+
+
+  def external_encoding=(external_encoding); end
+
+
+  def handler(); end
+
+
+  def handler=(handler); end
+
+
+  def initialize(handler=T.unsafe(nil)); end
+
+
+  def mark(); end
+
+
+  def parse(*_); end
 end
 
-class Psych::Visitors::Visitor
+class Psych::Parser::Mark
+
+  def column(); end
+
+
+  def column=(_); end
+
+
+  def index(); end
+
+
+  def index=(_); end
+
+
+  def line(); end
+
+
+  def line=(_); end
+end
+
+class Psych::ScalarScanner
+  FLOAT = ::T.unsafe(nil)
+  INTEGER = ::T.unsafe(nil)
+  TIME = ::T.unsafe(nil)
+
+
+  def class_loader(); end
+
+
+  def initialize(class_loader); end
+
+
+  def parse_int(string); end
+
+
+  def parse_time(string); end
+
+
+  def tokenize(string); end
+end
+
+class Psych::Set < Hash
+  include Enumerable
+  extend T::Generic
+  K = type_member(:out)
+  V = type_member(:out)
+  Elem = type_member(:out, fixed: T.untyped)
+end
+
+class Psych::Stream < Psych::Visitors::YAMLTree
+  include ::Psych::Streaming
+  extend ::Psych::Streaming::ClassMethods
+end
+
+class Psych::Stream::Emitter < Psych::Emitter
+
+  def end_document(implicit_end=T.unsafe(nil)); end
+
+
+  def streaming?(); end
+end
+
+module Psych::Streaming
+
+  def start(encoding=T.unsafe(nil)); end
+end
+
+module Psych::Streaming::ClassMethods
+
+  def new(io); end
+end
+
+class Psych::SyntaxError < Psych::Exception
+
+  def column(); end
+
+
+  def context(); end
+
+
+  def file(); end
+
+
+  def initialize(file, line, col, offset, problem, context); end
+
+
+  def line(); end
+
+
+  def offset(); end
+
+
+  def problem(); end
+end
+
+class Psych::TreeBuilder < Psych::Handler
+
+  def alias(anchor); end
+
+
+  def end_document(implicit_end=T.unsafe(nil)); end
+
+
+  def end_mapping(); end
+
+
+  def end_sequence(); end
+
+
+  def end_stream(); end
+
+
+  def event_location(start_line, start_column, end_line, end_column); end
+
+
+  def initialize(); end
+
+
+  def root(); end
+
+
+  def scalar(value, anchor, tag, plain, quoted, style); end
+
+
+  def start_document(version, tag_directives, implicit); end
+
+
+  def start_mapping(anchor, tag, implicit, style); end
+
+
+  def start_sequence(anchor, tag, implicit, style); end
+
+
+  def start_stream(encoding); end
+end
+
+class Psych::UnsafeYAML < StandardError
+end
+
+module Psych::Visitors
+end
+
+class Psych::Visitors::DepthFirst < Psych::Visitors::Visitor
+
+  def initialize(block); end
+end
+
+class Psych::Visitors::Emitter < Psych::Visitors::Visitor
+
+  def initialize(io, options=T.unsafe(nil)); end
+
+
+  def visit_Psych_Nodes_Alias(o); end
+
+
+  def visit_Psych_Nodes_Document(o); end
+
+
+  def visit_Psych_Nodes_Mapping(o); end
+
+
+  def visit_Psych_Nodes_Scalar(o); end
+
+
+  def visit_Psych_Nodes_Sequence(o); end
+
+
+  def visit_Psych_Nodes_Stream(o); end
+end
+
+class Psych::Visitors::JSONTree < Psych::Visitors::YAMLTree
+  include ::Psych::JSON::RubyEvents
+
+  def accept(target); end
+
+
+  def self.create(options=T.unsafe(nil)); end
+end
+
+class Psych::Visitors::NoAliasRuby < Psych::Visitors::ToRuby
+
+  def visit_Psych_Nodes_Alias(o); end
 end
 
 class Psych::Visitors::ToRuby < Psych::Visitors::Visitor
+  SHOVEL = ::T.unsafe(nil)
+
+
+  def accept(target); end
+
+
+  def class_loader(); end
+
+
+  def initialize(ss, class_loader); end
+
+
+  def visit_Psych_Nodes_Alias(o); end
+
+
+  def visit_Psych_Nodes_Document(o); end
+
+
+  def visit_Psych_Nodes_Mapping(o); end
+
+
+  def visit_Psych_Nodes_Scalar(o); end
+
+
+  def visit_Psych_Nodes_Sequence(o); end
+
+
+  def visit_Psych_Nodes_Stream(o); end
+
+
+  def self.create(); end
+end
+
+class Psych::Visitors::Visitor
+  DISPATCH = ::T.unsafe(nil)
+
+
+  def accept(target); end
+end
+
+class Psych::Visitors::YAMLTree < Psych::Visitors::Visitor
+
+  def <<(object); end
+
+
+  def accept(target); end
+
+
+  def finish(); end
+
+
+  def finished(); end
+
+
+  def finished?(); end
+
+
+  def initialize(emitter, ss, options); end
+
+
+  def push(object); end
+
+
+  def start(encoding=T.unsafe(nil)); end
+
+
+  def started(); end
+
+
+  def started?(); end
+
+
+  def tree(); end
+
+
+  def visit_Array(o); end
+
+
+  def visit_BasicObject(o); end
+
+
+  def visit_BigDecimal(o); end
+
+
+  def visit_Class(o); end
+
+
+  def visit_Complex(o); end
+
+
+  def visit_Date(o); end
+
+
+  def visit_DateTime(o); end
+
+
+  def visit_Delegator(o); end
+
+
+  def visit_Encoding(o); end
+
+
+  def visit_Enumerator(o); end
+
+
+  def visit_Exception(o); end
+
+
+  def visit_FalseClass(o); end
+
+
+  def visit_Float(o); end
+
+
+  def visit_Hash(o); end
+
+
+  def visit_Integer(o); end
+
+
+  def visit_Module(o); end
+
+
+  def visit_NameError(o); end
+
+
+  def visit_NilClass(o); end
+
+
+  def visit_Object(o); end
+
+
+  def visit_Psych_Omap(o); end
+
+
+  def visit_Psych_Set(o); end
+
+
+  def visit_Range(o); end
+
+
+  def visit_Rational(o); end
+
+
+  def visit_Regexp(o); end
+
+
+  def visit_String(o); end
+
+
+  def visit_Struct(o); end
+
+
+  def visit_Symbol(o); end
+
+
+  def visit_Time(o); end
+
+
+  def visit_TrueClass(o); end
+
+
+  def self.create(options=T.unsafe(nil), emitter=T.unsafe(nil)); end
+end
+
+class Psych::Visitors::YAMLTree::Registrar
+
+  def id_for(target); end
+
+
+  def initialize(); end
+
+
+  def key?(target); end
+
+
+  def node_for(target); end
+
+
+  def register(target, node); end
 end
