@@ -7,7 +7,6 @@
 
 # // Multiple symbols from same rbi file?
 # symbol-search: "encoding", name="encoding", container="::Regexp", uri="regexp.rbi"
-# symbol-search: "encoding", name="fixed_encoding?", container="::Regexp", uri="regexp.rbi"
 
 # // Extremely common
 # symbol-search: "hash", name="hash", container="::Kernel", uri="kernel.rbi"
