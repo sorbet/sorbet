@@ -376,8 +376,15 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
-      # Note: `(nil...10)` is not a valid range (you'll get `ArguemntError: bad value for range`)
-      # but leaving this comment to be explicit about why this case is not covered
+      # Ruby 2.6 does not support ranges with boundless starts
+      if RUBY_VERSION >= '2.7'
+        it 'works if the range has no beginning' do
+          type = T::Range[Integer]
+          value = (nil...10)
+          msg = type.error_message_for_obj(value)
+          assert_nil(msg)
+        end
+      end
 
       it 'works if the range has no end' do
         type = T::Range[Integer]

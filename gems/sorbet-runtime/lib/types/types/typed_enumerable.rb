@@ -50,11 +50,11 @@ module T::Types
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         return true
       when Range
-        if obj.end.nil?
-          @type.valid?(obj.begin)
-        else
-          @type.valid?(obj.begin) && @type.valid?(obj.end)
-        end
+        # A nil beginning or a nil end does not provide any type information. That is, nil in a range represents
+        # boundlessness, it does not express a type. For example `(nil...nil)` is not a T::Range[NilClass], its a range
+        # of unknown types (T::Range[T.untyped]).
+        # Similarly, `(nil...1)` is not a `T::Range[T.nilable(Integer)]`, it's a boundless range of Integer.
+        (obj.begin.nil? || @type.valid?(obj.begin)) && (obj.end.nil? || @type.valid?(obj.end))
       when Set
         obj.each do |item|
           return false unless @type.valid?(item)
@@ -128,12 +128,12 @@ module T::Types
         inferred_val = type_from_instances(obj.values)
         T::Hash[inferred_key, inferred_val]
       when Range
-        # If the range end is limitless, we cannot call `Range#last`, and the static type checker should consider
-        # it a range of the type of the start of the range.
-        if !obj.begin.nil? && obj.end.nil?
-          T::Range[type_from_instances([obj.begin])]
+        # We can't get any information from `NilClass` in ranges (since nil is used to represent boundlessness).
+        typeable_objects = [obj.begin, obj.end].compact
+        if typeable_objects.empty?
+          T::Range[T.untyped]
         else
-          T::Range[type_from_instances([obj.begin, obj.end])]
+          T::Range[type_from_instances(typeable_objects)]
         end
       when Enumerator
         T::Enumerator[type_from_instances(obj)]
