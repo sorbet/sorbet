@@ -270,7 +270,7 @@ class CSV < Object
     type_parameters(:U).params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
         options: T::Hash[Symbol, T.type_parameter(:U)],
-        blk: T.proc.params(arg0: T::Array[T.nilable(String)]).void,
+        blk: T.proc.params(arg0: T.any(T::Array[T.nilable(String)], CSV::Row)).void,
     )
     .void
   end
@@ -479,7 +479,7 @@ class CSV < Object
   sig do
     params(
         str: String,
-        options: T::Hash[Symbol, T.untyped],
+        options: T.untyped,
         blk: T.nilable(T.proc.params(arg0: T::Array[T.nilable(String)]).void)
     )
     .returns(
@@ -489,7 +489,7 @@ class CSV < Object
       )
     )
   end
-  def self.parse(str, options=T.unsafe(nil), &blk); end
+  def self.parse(str, **options, &blk); end
 
   # This method is a shortcut for converting a single line of a
   # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
