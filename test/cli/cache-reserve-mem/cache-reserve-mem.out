@@ -1,1 +1,1 @@
---preallocate-symbol-size --preallocate-name-size OK
+--reserve-symbol-table-capacity --reserve-name-table-capacity OK
