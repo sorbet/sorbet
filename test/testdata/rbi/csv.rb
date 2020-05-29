@@ -59,6 +59,10 @@ if csv.is_a?(CSV::Table)
   T.assert_type!(csv.headers, T::Array[BasicObject])
 
   T.assert_type!(csv.inspect, String)
+
+  T.assert_type!(csv.mode, Symbol)
+
+  T.assert_type!(csv.push([[1, {}, nil, '1'], CSV::Row.new(['1', '2'], [1, 2])]), CSV::Table)
   
   T.assert_type!(csv.to_a, T::Array[T::Array[T.nilable(BasicObject)]])
 

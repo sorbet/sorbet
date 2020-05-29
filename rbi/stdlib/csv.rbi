@@ -1378,6 +1378,7 @@ class CSV::Table < Object
   def inspect; end
 
   # The current access mode for indexing and iteration.
+  sig { returns(Symbol) }
   def mode; end
 
   # A shortcut for appending multiple rows. Equivalent to:
@@ -1387,6 +1388,11 @@ class CSV::Table < Object
   # ```
   #
   # This method returns the table for chaining.
+  sig do
+    params(
+      rows: T.any(CSV::Row, T::Array[T.nilable(BasicObject)])
+    ).returns(T.self_type)
+  end
   def push(*rows); end
 
   # Internal data format used to compare equality.
