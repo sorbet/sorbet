@@ -267,12 +267,19 @@ class CSV < Object
   # would read UTF-32BE data from the file but transcode it to UTF-8 before
   # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) parses it.
   sig do
-    type_parameters(:U).params(
+    params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
-        options: T::Hash[Symbol, T.type_parameter(:U)],
+        options: T::Hash[Symbol, BasicObject],
         blk: T.proc.params(arg0: T.any(T::Array[T.nilable(String)], CSV::Row)).void,
     )
     .void
+  end
+  sig do
+    params(
+        path: T.any(String, ::Sorbet::Private::Static::IOLike),
+        options: T::Hash[Symbol, BasicObject],
+    )
+    .returns(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
   end
   def self.foreach(path, options=T.unsafe(nil), &blk); end
 
