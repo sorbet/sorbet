@@ -1,7 +1,6 @@
 #ifndef SORBET_ERROR_FLUSHER_H
 #define SORBET_ERROR_FLUSHER_H
 
-#include "core/AutocorrectSuggestion.h"
 #include "core/ErrorQueueMessage.h"
 #include <vector>
 
