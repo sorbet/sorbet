@@ -52,10 +52,10 @@ Usage:
       --web-trace-file file     Web trace file. For use with chrome
                                 about://tracing (default: "")
       --debug-log-file file     Path to debug log file (default: "")
-      --preallocate-symbol-size arg
+      --reserve-symbol-table-capacity arg
                                 Preallocate the specified number of entries
                                 in the symbol table (default: 0)
-      --preallocate-name-size arg
+      --reserve-name-table-capacity arg
                                 Preallocate the specified number of entries
                                 in the name table (default: 0)
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup

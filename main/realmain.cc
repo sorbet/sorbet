@@ -443,7 +443,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateTables(opts.preallocateSymbolSize, opts.preallocateNameSize);
+    gs->preallocateTables(opts.reserveSymbolTableCapacity, opts.reserveNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }
