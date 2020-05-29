@@ -30,7 +30,10 @@ class AutogenWalk {
     vector<Reference> refs;
     vector<core::NameRef> requires;
     vector<DefinitionRef> nesting;
+
+    enum class ScopeType { Class, Block };
     vector<ast::Send *> ignoring;
+    vector<ScopeType> scopeTypes;
 
     UnorderedMap<ast::Expression *, ReferenceRef> refMap;
 
@@ -68,6 +71,7 @@ public:
         if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
             return original;
         }
+        scopeTypes.emplace_back(ScopeType::Class);
 
         // cerr << "preTransformClassDef(" << original->toString(ctx) << ")\n";
 
@@ -89,7 +93,7 @@ public:
         ENFORCE(it != refMap.end());
         def.defining_ref = it->second;
         refs[it->second.id()].is_defining_ref = true;
-        refs[it->second.id()].definitionLoc = original->loc;
+        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original->loc);
 
         auto ait = original->ancestors.begin();
         if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
@@ -134,8 +138,19 @@ public:
         }
 
         nesting.pop_back();
+        scopeTypes.pop_back();
 
         return original;
+    }
+
+    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        scopeTypes.emplace_back(ScopeType::Block);
+        return block;
+    }
+
+    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+        scopeTypes.pop_back();
+        return block;
     }
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
@@ -166,11 +181,11 @@ public:
             ref.nesting.pop_back();
             ref.scope = nesting.back();
         }
-        ref.loc = original->loc;
+        ref.loc = core::Loc(ctx.file, original->loc);
 
         // This will get overridden if this loc is_defining_ref at the point
         // where we set that flag.
-        ref.definitionLoc = original->loc;
+        ref.definitionLoc = core::Loc(ctx.file, original->loc);
         ref.name = constantName(ctx, original.get());
         auto sym = original->symbol;
         if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
@@ -208,7 +223,7 @@ public:
         auto &ref = refs[refMap[lhs].id()];
         def.defining_ref = ref.id;
         ref.is_defining_ref = true;
-        ref.definitionLoc = original->loc;
+        ref.definitionLoc = core::Loc(ctx.file, original->loc);
 
         def.defines_behavior = true;
         def.is_empty = false;
@@ -217,8 +232,13 @@ public:
     }
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (original->fun == core::Names::keepForIde() || original->fun == core::Names::include() ||
-            original->fun == core::Names::extend()) {
+        bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
+        // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
+        // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
+        // block scope so that we a ref to the included module is still rendered.
+        if (original->fun == core::Names::keepForIde() ||
+            (!inBlock && original->recv->isSelfReference() &&
+             (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
             ignoring.emplace_back(original.get());
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
@@ -237,6 +257,8 @@ public:
     }
 
     ParsedFile parsedFile() {
+        ENFORCE(scopeTypes.empty());
+
         ParsedFile out;
         out.refs = move(refs);
         out.defs = move(defs);

@@ -125,9 +125,7 @@ const shared_ptr<const FileHash> &File::getFileHash() const {
     return hash_;
 }
 
-FileRef::FileRef(unsigned int id) : _id(id) {
-    ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
-}
+FileRef::FileRef(unsigned int id) : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]);

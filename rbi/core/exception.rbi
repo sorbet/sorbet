@@ -167,6 +167,20 @@ class Exception < Object
   end
   def exception(arg0=T.unsafe(nil)); end
 
+  # Returns formatted string of *exception*. The returned string is formatted
+  # using the same format that Ruby uses when printing an uncaught exceptions to
+  # stderr.
+  #
+  # If *highlight* is `true` the default error handler will send the messages to
+  # a tty.
+  #
+  # *order* must be either of `:top` or `:bottom`, and places the error message
+  # and the innermost backtrace come at the top or the bottom.
+  #
+  # The default values of these options depend on `$stderr` and its `tty?` at
+  # the timing of a call.
+  def full_message(*_); end
+
   sig do
     params(
         arg0: T.any(String, NilClass),
@@ -202,4 +216,12 @@ class Exception < Object
   # set).
   sig {returns(String)}
   def to_s(); end
+
+  # With no argument, or if the argument is the same as the receiver, return the
+  # receiver. Otherwise, create a new exception object of the same class as the
+  # receiver, but with a message equal to `string.to_str`.
+  def self.exception(*_); end
+
+  # Returns `true` if exception messages will be sent to a tty.
+  def self.to_tty?; end
 end

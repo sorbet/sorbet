@@ -13,6 +13,7 @@ class Test
 
   # NOTE, there are two errors raised here, one for each bound not satisfied.
   sig {params(x: A[String]).void}
-                 # ^^^^^^ error-with-dupes: `String` cannot be used for type member
+                 # ^^^^^^ error: `String` is not a supertype of lower bound of type member `::A::X`
+                 # ^^^^^^ error: `String` is not a subtype of upper bound of type member `::A::X`
   def foo(x); end
 end

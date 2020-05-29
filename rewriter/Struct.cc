@@ -73,7 +73,7 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
         return empty;
     }
 
-    core::Loc loc = asgn->loc;
+    auto loc = asgn->loc;
 
     ast::MethodDef::ARGS_store newArgs;
     ast::Hash::ENTRY_store sigKeys;
@@ -104,21 +104,22 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
         }
         core::NameRef name = sym->asSymbol(ctx);
         auto symLoc = sym->loc;
-        if (symLoc.exists() && absl::StartsWith(symLoc.source(ctx), ":")) {
-            symLoc = core::Loc{symLoc.file(), symLoc.beginPos() + 1, symLoc.endPos()};
+        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx), ":")) {
+            symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
         }
 
         sigKeys.emplace_back(ast::MK::Symbol(symLoc, name));
         sigValues.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
-        auto argName = ast::MK::Local(symLoc, name);
+        unique_ptr<ast::Reference> argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
             argName = ast::MK::KeywordArg(symLoc, move(argName));
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
-        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::EmptyTree()));
-        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
-                                                    ast::MK::Local(symLoc, name)));
+        body.emplace_back(
+            ast::MK::SyntheticMethod0(symLoc, core::Loc(ctx.file, symLoc), name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, core::Loc(ctx.file, symLoc), name.addEq(ctx),
+                                                    ast::MK::Local(symLoc, name), ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Elem = type_member(fixed: T.untyped)
@@ -142,15 +143,16 @@ vector<unique_ptr<ast::Expression>> Struct::run(core::MutableContext ctx, ast::A
     }
 
     body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
-    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                               ast::MK::Cast(loc, dupName(asgn->lhs.get()))));
+    body.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
+                                               std::move(newArgs), ast::MK::RaiseUnimplemented(loc)));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                                        core::Names::Constants::Struct()));
 
     vector<unique_ptr<ast::Expression>> stats;
-    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    stats.emplace_back(
+        ast::MK::Class(loc, core::Loc(ctx.file, loc), std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 

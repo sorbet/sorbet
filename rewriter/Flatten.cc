@@ -279,11 +279,11 @@ class FlattenWalk {
 
         // generate the nested `class << self` blocks as needed and add them to the class
         for (auto &body : nestedClassBodies) {
-            auto classDef =
-                ast::MK::Class(loc, loc,
-                               make_unique<ast::UnresolvedIdent>(core::Loc::none(), ast::UnresolvedIdent::Kind::Class,
-                                                                 core::Names::singleton()),
-                               {}, std::move(body));
+            auto classDef = ast::MK::Class(loc.offsets(), loc,
+                                           make_unique<ast::UnresolvedIdent>(core::LocOffsets::none(),
+                                                                             ast::UnresolvedIdent::Kind::Class,
+                                                                             core::Names::singleton()),
+                                           {}, std::move(body));
             rhs.emplace_back(std::move(classDef));
         }
 
@@ -307,7 +307,8 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        classDef->rhs = addClassDefMethods(ctx, std::move(classDef->rhs), classDef->loc);
+        classDef->rhs =
+            addClassDefMethods(ctx, std::move(classDef->rhs), core::Loc(classDef->declLoc.file(), classDef->loc));
         auto &methods = curMethodSet();
         if (curMethodSet().stack.empty()) {
             return classDef;
@@ -365,8 +366,8 @@ public:
 
         methods.addExpr(*md, move(methodDef));
 
-        return ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
-                              ast::MK::Self(loc), ast::MK::Symbol(loc, name));
+        return ast::MK::Send2(loc.offsets(), ast::MK::Constant(loc.offsets(), core::Symbols::Sorbet_Private_Static()),
+                              keepName, ast::MK::Self(loc.offsets()), ast::MK::Symbol(loc.offsets(), name));
     };
 
     unique_ptr<ast::Expression> addTopLevelMethods(core::Context ctx, unique_ptr<ast::Expression> tree) {

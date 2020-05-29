@@ -242,24 +242,23 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
 
 core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
-    core::Context ctx(gs, inWhat);
     auto resultType = type;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
         receiver = proxy->underlying();
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
         /* instantiate generic classes */
-        resultType = core::Types::resultTypeAsSeenFrom(ctx, resultType, inWhat.data(ctx)->enclosingClass(ctx),
+        resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.data(gs)->enclosingClass(gs),
                                                        applied->klass, applied->targs);
     }
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
     if (receiver) {
-        resultType = core::Types::replaceSelfType(ctx, resultType, receiver); // instantiate self types
+        resultType = core::Types::replaceSelfType(gs, resultType, receiver); // instantiate self types
     }
     if (constr) {
-        resultType = core::Types::instantiate(ctx, resultType, *constr); // instantiate generic methods
+        resultType = core::Types::instantiate(gs, resultType, *constr); // instantiate generic methods
     }
     return resultType;
 }

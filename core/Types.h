@@ -670,9 +670,10 @@ public:
 CheckSize(TypeAndOrigins, 40, 8);
 
 struct CallLocs final {
-    Loc call;
-    Loc receiver;
-    InlinedVector<Loc, 2> &args;
+    FileRef file;
+    LocOffsets call;
+    LocOffsets receiver;
+    InlinedVector<LocOffsets, 2> &args;
 };
 
 struct DispatchArgs {

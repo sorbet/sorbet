@@ -139,12 +139,6 @@ ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash, core::NameR
     return make_pair(nullptr, nullptr);
 }
 
-void ASTUtil::putBackHashValue(core::MutableContext ctx, ast::Hash &hash, unique_ptr<ast::Expression> key,
-                               unique_ptr<ast::Expression> value) {
-    hash.keys.emplace_back(move(key));
-    hash.values.emplace_back(move(value));
-}
-
 // This will return nullptr if the argument is not the right shape as a sig (i.e. a send to a method called `sig` with 0
 // or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
 // against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
@@ -161,8 +155,10 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
     if (send->block.get() == nullptr) {
         return nullptr;
     }
-    auto nargs = send->args.size();
-    if (nargs != 0 && nargs != 1) {
+    // 0 args is common case
+    // 1 arg  is `sig(:final)`
+    // 2 args is `Sorbet::Private::Static.sig(self, :final)`
+    if (send->args.size() > 2) {
         return nullptr;
     }
     auto block = ast::cast_tree_const<ast::Block>(send->block.get());
@@ -178,20 +174,23 @@ const ast::Send *ASTUtil::castSig(const ast::Expression *expr, core::NameRef ret
     return send;
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
-}
-
-unique_ptr<ast::Expression> ASTUtil::mkSet(core::Loc loc, core::NameRef name, core::Loc argLoc,
+unique_ptr<ast::Expression> ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
                                            unique_ptr<ast::Expression> rhs) {
-    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
+    return ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, move(rhs));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
+unique_ptr<ast::Expression> ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                           core::LocOffsets argLoc, unique_ptr<ast::Expression> rhs) {
+    return ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), name, ast::MK::Local(argLoc, core::Names::arg0()),
+                                     move(rhs));
+}
+
+unique_ptr<ast::Expression> ASTUtil::mkNilable(core::LocOffsets loc, unique_ptr<ast::Expression> type) {
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
-unique_ptr<ast::Expression> ASTUtil::mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className) {
+unique_ptr<ast::Expression> ASTUtil::mkMutator(core::MutableContext ctx, core::LocOffsets loc,
+                                               core::NameRef className) {
     auto chalk = ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                              core::Names::Constants::Chalk());
     auto odm = ast::MK::UnresolvedConstant(loc, move(chalk), core::Names::Constants::ODM());

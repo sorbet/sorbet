@@ -554,7 +554,7 @@ end;
 class Kick;module Down;
 end;end;
 ------ Multi file symbol table
-class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subprocess-plugin/multi1.rb:3, test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1, test/cli/subprocess-plugin/multi2.rb:3, test/cli/subprocess-plugin/multi2.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi2.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi3.rb:3, test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi4.rb:3, test/cli/subprocess-plugin/multi4.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi4.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi5.rb:3, test/cli/subprocess-plugin/multi5.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi5.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi6.rb:3, test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1)
+class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
@@ -600,10 +600,10 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi start=??? end=???}
-  module ::Fish < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi2.rb:3, test/cli/subprocess-plugin/multi2.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi2.rb//plugin-generated|1.rbi:1)
+  module ::Fish < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi2.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi2.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi2.rb:3)
     method ::Fish#foo (<blk>) @ test/cli/subprocess-plugin/multi2.rb//plugin-generated|0.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi2.rb//plugin-generated|0.rbi start=??? end=???}
-  class ::<Class:Fish>[<AttachedClass>] < ::Module () @ (test/cli/subprocess-plugin/multi2.rb:5, test/cli/subprocess-plugin/multi2.rb//plugin-generated|1.rbi:1)
+  class ::<Class:Fish>[<AttachedClass>] < ::Module () @ (test/cli/subprocess-plugin/multi2.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi2.rb:5)
     type-member(+) ::<Class:Fish>::<AttachedClass> -> T.attached_class (of Fish) @ test/cli/subprocess-plugin/multi2.rb:3
     method ::<Class:Fish>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi2.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi2.rb start=??? end=???}
@@ -614,7 +614,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     type-member(+) ::<Class:<Class:Fish>>::<AttachedClass> -> T.attached_class (of T.class_of(Fish)) @ test/cli/subprocess-plugin/multi2.rb:5
     method ::<Class:<Class:Fish>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi2.rb:5
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi2.rb start=??? end=???}
-  class ::Haze < ::Object () @ (test/cli/subprocess-plugin/multi4.rb:3, test/cli/subprocess-plugin/multi4.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi4.rb//plugin-generated|1.rbi:1)
+  class ::Haze < ::Object () @ (test/cli/subprocess-plugin/multi4.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi4.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi4.rb:3)
     static-field ::Haze::Lion -> TrueClass @ test/cli/subprocess-plugin/multi4.rb//plugin-generated|1.rbi:3
     method ::Haze#bar (<blk>) @ test/cli/subprocess-plugin/multi4.rb//plugin-generated|0.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi4.rb//plugin-generated|0.rbi start=??? end=???}
@@ -624,20 +624,20 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     type-member(+) ::<Class:Haze>::<AttachedClass> -> T.attached_class (of Haze) @ test/cli/subprocess-plugin/multi4.rb:3
     method ::<Class:Haze>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi4.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi4.rb start=??? end=???}
-  module ::Hi < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi1.rb:15, test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1)
+  module ::Hi < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1, test/cli/subprocess-plugin/multi1.rb:15)
     static-field ::Hi::Bird -> TrueClass @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi:3
     static-field ::Hi::Penguin -> TrueClass @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi:3
     method ::Hi#bird (<blk>) @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb//plugin-generated|0.rbi start=??? end=???}
     method ::Hi#penguin (<blk>) @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb//plugin-generated|1.rbi start=??? end=???}
-  class ::<Class:Hi>[<AttachedClass>] < ::Module () @ (test/cli/subprocess-plugin/multi1.rb:17, test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1)
+  class ::<Class:Hi>[<AttachedClass>] < ::Module () @ (test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:1, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1, test/cli/subprocess-plugin/multi1.rb:17)
     type-member(+) ::<Class:Hi>::<AttachedClass> -> T.attached_class (of Hi) @ test/cli/subprocess-plugin/multi1.rb:15
     method ::<Class:Hi>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:15
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
     static-field ::<Class:Hi>::Cat -> TrueClass @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|3.rbi:3
     static-field ::<Class:Hi>::Fish -> TrueClass @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|2.rbi:3
-    class ::<Class:Hi>::Hello < ::Object () @ (test/cli/subprocess-plugin/multi1.rb:19, test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1)
+    class ::<Class:Hi>::Hello < ::Object () @ (test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:1, test/cli/subprocess-plugin/multi1.rb:19)
       static-field ::<Class:Hi>::Hello::Rabbit -> TrueClass @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:3
       method ::<Class:Hi>::Hello#rabbit (<blk>) @ test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi:2
         argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb//plugin-generated|4.rbi start=??? end=???}
@@ -653,8 +653,8 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     type-member(+) ::<Class:<Class:Hi>>::<AttachedClass> -> T.attached_class (of T.class_of(Hi)) @ test/cli/subprocess-plugin/multi1.rb:17
     method ::<Class:<Class:Hi>>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi1.rb:17
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
-  class ::Kick < ::Object () @ (test/cli/subprocess-plugin/multi6.rb:3, test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1)
-    module ::Kick::Down < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi6.rb:4, test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1)
+  class ::Kick < ::Object () @ (test/cli/subprocess-plugin/multi6.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi6.rb:3)
+    module ::Kick::Down < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi6.rb:4)
       static-field ::Kick::Down::Whale -> TrueClass @ test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:3
       method ::Kick::Down#whale (<blk>) @ test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi:2
         argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb//plugin-generated|1.rbi start=??? end=???}
@@ -668,10 +668,10 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     type-member(+) ::<Class:Kick>::<AttachedClass> -> T.attached_class (of Kick) @ test/cli/subprocess-plugin/multi6.rb:3
     method ::<Class:Kick>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi6.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi6.rb start=??? end=???}
-  class ::Nope < ::Object () @ (test/cli/subprocess-plugin/multi5.rb:3, test/cli/subprocess-plugin/multi5.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi5.rb//plugin-generated|1.rbi:1)
+  class ::Nope < ::Object () @ (test/cli/subprocess-plugin/multi5.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi5.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi5.rb:3)
     method ::Nope#foo (<blk>) @ test/cli/subprocess-plugin/multi5.rb//plugin-generated|0.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi5.rb//plugin-generated|0.rbi start=??? end=???}
-  class ::<Class:Nope>[<AttachedClass>] < ::<Class:Object> () @ (test/cli/subprocess-plugin/multi5.rb:4, test/cli/subprocess-plugin/multi5.rb//plugin-generated|1.rbi:1)
+  class ::<Class:Nope>[<AttachedClass>] < ::<Class:Object> () @ (test/cli/subprocess-plugin/multi5.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi5.rb:4)
     type-member(+) ::<Class:Nope>::<AttachedClass> -> T.attached_class (of Nope) @ test/cli/subprocess-plugin/multi5.rb:3
     method ::<Class:Nope>#<static-init> (<blk>) @ test/cli/subprocess-plugin/multi5.rb:3
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi5.rb start=??? end=???}
@@ -692,7 +692,7 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
     method ::Object#gen : private (_arg, <blk>) @ test/cli/subprocess-plugin/multi1.rb:3
       argument _arg<> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=3:9 end=3:13}
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi1.rb start=??? end=???}
-  class ::Something < ::Object () @ (test/cli/subprocess-plugin/multi3.rb:3, test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|2.rbi:1)
+  class ::Something < ::Object () @ (test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|1.rbi:1, test/cli/subprocess-plugin/multi3.rb//plugin-generated|2.rbi:1, test/cli/subprocess-plugin/multi3.rb:3)
     static-field ::Something::Camel -> TrueClass @ test/cli/subprocess-plugin/multi3.rb//plugin-generated|2.rbi:3
     method ::Something#bar (<blk>) @ test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi:2
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi3.rb//plugin-generated|0.rbi start=??? end=???}
@@ -706,9 +706,8 @@ class ::<root> < ::Object () @ (... removed core rbi locs ..., test/cli/subproce
       argument <blk><block> @ Loc {file=test/cli/subprocess-plugin/multi3.rb start=??? end=???}
 
 ------ Bad plugin output on single file
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token kEND https://srb.help/2001
+test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token "end" https://srb.help/2001
      2 |end end end end
             ^^^
 Errors: 1
 ------ Bad plugin output on many files
-test/cli/subprocess-plugin/trigger_bad_plugin.rb//plugin-generated|0.rbi:2: unexpected token kEND https://srb.help/2001

@@ -160,6 +160,24 @@ out-of-bounds. If you would rather raise an exception than handle `nil`, use the
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## Why is `super` is untyped, even when the parent method has a `sig`?
+
+Sorbet can't know what the "parent method" is 100% of the time. For example,
+when calling `super` from a method defined in a module, the `super` method will
+be deterined only once we know which class or module this module has been mixed
+into. That's a lot of words, so here's an example:
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Amodule%20MyModule%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20foo%0A%20%20%20%20%23%20Can't%20know%20super%20until%20we%20know%20which%20module%20we're%20mixed%20into%0A%20%20%20%20res%20%3D%20super%0A%20%20%20%20T.reveal_type(res)%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Amodule%20ParentModule1%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Amodule%20ParentModule2%0A%20%20sig%20%7Breturns(String)%7D%0A%20%20def%20foo%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20MyClass1%0A%20%20include%20ParentModule1%0A%20%20include%20MyModule%0Aend%0A%0Aclass%20MyClass2%0A%20%20include%20ParentModule2%0A%20%20include%20MyModule%0Aend%0A%0AMyClass1.new.foo%0AMyClass2.new.foo%0A">→
+View on sorbet.run</a>
+
+To typecheck this example, Sorbet would have to typecheck `MyModule#foo`
+multiple times, once for each place that method might be used from, or place
+restrictions on how and where this module can be included.
+
+Sorbet might adopt a more sophisticated approach in the future, but for now it
+falls back to treating `super` as a method call that accepts anything and
+returns anything.
+
 ## Does Sorbet work with Rake and Rakefiles?
 
 Kind of, with some effort. Rake monkey patches the global `main` object (i.e.,
@@ -234,13 +252,17 @@ bundle exec srb rbi suggest-typed
 
 ## What platforms does Sorbet support?
 
-The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.4. We
-expect it to work on Ruby 2.3 through 2.6.
+The `sorbet` and `sorbet-runtime` gems are currently only tested on Ruby 2.5 and
+Ruby 2.6.
 
-The static check is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
+Ruby 2.7 has
+[known issues](https://github.com/sorbet/sorbet/issues?q=is%3Aissue+2.7+) and is
+[not being worked on yet](https://github.com/sorbet/sorbet/issues/2771#issuecomment-599761098)
+(as of May 2020) but PRs are welcome!
+
+The static checker is only tested on macOS 10.14 (Mojave) and Ubuntu 18 (Bionic
 Beaver). We expect it to work on macOS 10.10 (Yosemite) and most Linux
-distributions where `glibc`, `git` and `bash` are present. We use static linking
-on both platforms, so it should not depend on system libraries.
+distributions where `glibc`, `git` and `bash` are present.
 
 If you are using one of the official minimal Ruby Docker images you will need to
 install the extra dependencies yourself:
@@ -331,3 +353,16 @@ a smooth transition to Ruby 3:
 For more information, watch [this section](https://youtu.be/2g9R7PUCEXo?t=2022)
 from Matz's RubyConf 2019 keynote, which talks about his plans for typing in
 Ruby 3.
+
+## Can I use Sorbet for duck typed code?
+
+No. You can use an [interface](abstract.md) instead, or `T.untyped` if you do
+not control all of the code.
+
+Duck typing (or, more formally, Structural typing) specifies types by their
+structure. For example, Rack middleware accepts any object that has a `call`
+method which takes one argument and returns a tuple representing an HTTP
+response.
+
+Sorbet does not support duck typing either for static analysis or runtime
+checking.

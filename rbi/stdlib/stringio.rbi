@@ -197,6 +197,9 @@ class StringIO
   sig {returns(T::Boolean)}
   def isatty(); end
 
+  # Returns the size of the buffer string.
+  def length; end
+
   # Returns the current line number in **strio**. The stringio must be opened
   # for reading. `lineno` counts the number of times  `gets` is called, rather
   # than the number of newlines  encountered. The two values will differ if
@@ -437,6 +440,10 @@ class StringIO
   # Returns the current offset (in bytes) of **strio**.
   sig {returns(Integer)}
   def tell(); end
+
+  # Truncates the buffer string to at most *integer* bytes. The **strio** must
+  # be opened for writing.
+  def truncate(_); end
 
   # Returns `false`. Just for compatibility to
   # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).

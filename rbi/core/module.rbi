@@ -297,7 +297,7 @@ class Module < Object
   # ```
   sig do
     params(
-        name: Symbol,
+        name: T.any(Symbol, String),
     )
     .returns(T.nilable(String))
   end
@@ -687,6 +687,9 @@ class Module < Object
     .returns(Symbol)
   end
   def define_method(arg0, arg1=T.unsafe(nil), &blk); end
+
+  # Makes a list of existing constants deprecated.
+  def deprecate_constant(*_); end
 
   sig do
     params(
@@ -1510,13 +1513,53 @@ class Module < Object
   sig {returns(String)}
   def to_s(); end
 
+  # Prevents the current class from responding to calls to the named method.
+  # Contrast this with `remove_method`, which deletes the method from the
+  # particular class; Ruby will still search superclasses and mixed-in modules
+  # for a possible receiver.
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) arguments are
+  # converted to symbols.
+  #
+  # ```ruby
+  # class Parent
+  #   def hello
+  #     puts "In parent"
+  #   end
+  # end
+  # class Child < Parent
+  #   def hello
+  #     puts "In child"
+  #   end
+  # end
+  #
+  # c = Child.new
+  # c.hello
+  #
+  # class Child
+  #   remove_method :hello  # remove from child, still in parent
+  # end
+  # c.hello
+  #
+  # class Child
+  #   undef_method :hello   # prevent any calls to 'hello'
+  # end
+  # c.hello
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # In child
+  # In parent
+  # prog.rb:23: undefined method `hello' for #<Child:0x401b3bb4> (NoMethodError)
+  # ```
   sig do
     params(
         arg0: T.any(Symbol, String),
     )
     .returns(T.self_type)
   end
-  def undefMethod(arg0); end
+  def undef_method(arg0); end
 
   # Import class refinements from *module* into the current class or module
   # definition.
@@ -1543,4 +1586,30 @@ class Module < Object
     .returns(NilClass)
   end
   def attr(*arg0); end
+
+  # Returns an array of all modules used in the current scope. The ordering of
+  # modules in the resulting array is not defined.
+  #
+  # ```ruby
+  # module A
+  #   refine Object do
+  #   end
+  # end
+  #
+  # module B
+  #   refine Object do
+  #   end
+  # end
+  #
+  # using A
+  # using B
+  # p Module.used_modules
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # [B, A]
+  # ```
+  def self.used_modules; end
 end

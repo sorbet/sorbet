@@ -26,11 +26,56 @@ static void throw_mdb_error(string_view what, int err) {
     throw invalid_argument(string(what));
 }
 
-static atomic<u4> globalSessionId = 0;
+// Only one kvstore can be created per process -- the DBI is shared. Used to enforce that we never create
+// multiple simultaneous kvstores.
+// From the docs for mdb_dbi_open:
+// > This function must not be called from multiple concurrent transactions in the same process. A transaction that
+// > uses this function must finish (either commit or abort) before any other transaction in the process may use
+// > this function.
+// http://www.lmdb.tech/doc/group__mdb.html#gac08cad5b096925642ca359a6d6f0562a
+// That function is called in OwnedKeyValueStore.
+static atomic<bool> kvstoreInUse = false;
+
+// Callback to `mdb_reader_list`. `msg` is the lock table contents in human-readable form, `ctx` is a `string*` passed
+// in at the `mdb_reader_list` callsite. It copies `msg` into `ctx` to pass the lock table back to the callsite, and
+// returns 0 to indicate success.
+int mdbReaderListCallback(const char *msg, void *ctx) {
+    string *output = (string *)ctx;
+    *output = string(msg);
+    return 0;
+}
+
+bool hasNoOutstandingReaders(MDB_env *env) {
+    string ctxString;
+    /*
+     * LMDB only has two APIs to grok the reader list
+     * (http://www.lmdb.tech/doc/group__mdb.html#ga8550000cd0501a44f57ee6dff0188744)
+     *
+     * - `mdb_reader_check`, which checks for stale transactions. Unfortunately a reader isn't stale if the owning
+     * thread is still alive, and LMDB seems to clean up stale transactions automatically somehow prior to me calling
+     * this function, so it doesn't work.
+     * - `mdb_reader_list`, which produces a human-readable string containing the lock table contents (used in mdb_stat
+     * CLI tool). It accepts a callback.
+     *
+     * I use the latter, as it's the only way to check if the lock table contains contents when we expect that it
+     * doesn't.
+     */
+    const int err = mdb_reader_list(env, mdbReaderListCallback, &ctxString);
+    if (err < 0) {
+        throw_mdb_error("Failure checking for stale readers", err);
+    }
+    return ctxString.find("(no active readers)") != string::npos;
+}
 } // namespace
 
 KeyValueStore::KeyValueStore(string version, string path, string flavor)
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
+    ENFORCE(!this->version.empty());
+    bool expected = false;
+    if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+    }
+
     int rc = mdb_env_create(&dbState->env);
     if (rc != 0) {
         goto fail;
@@ -43,7 +88,13 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_open(dbState->env, this->path.c_str(), 0, 0664);
+    // _disable_ thread local storage so that the writer thread can close/abort a reader transaction.
+    // MDB_NOTLS instructs LMDB to store transactions into the `MDB_txn` objects rather than thread-local storage.
+    // It allows read-only transactions to migrate across threads (letting the writer thread clean up reader
+    // transactions), but users are expected to manage concurrent access. We already restrict concurrent access by
+    // manually maintaining a map from thread to transaction.
+    // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
+    rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
     if (rc != 0) {
         goto fail;
     }
@@ -53,6 +104,14 @@ fail:
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     mdb_env_close(dbState->env);
+    bool expected = true;
+    if (!kvstoreInUse.compare_exchange_strong(expected, false)) {
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+    }
+}
+
+void KeyValueStore::enforceNoOutstandingReaders() const {
+    ENFORCE(hasNoOutstandingReaders(dbState->env));
 }
 
 OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
@@ -72,15 +131,16 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     }
 }
 
-u4 OwnedKeyValueStore::sessionId() const {
-    return _sessionId;
-}
-
-void OwnedKeyValueStore::abort() {
+void OwnedKeyValueStore::abort() const {
     // Note: txn being null indicates that the transaction has already ended, perhaps due to a commit.
     if (txnState->txn == nullptr) {
         return;
     }
+
+    if (writerId != this_thread::get_id()) {
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+    }
+
     for (auto &txn : txnState->readers) {
         mdb_txn_abort(txn.second);
     }
@@ -95,6 +155,11 @@ int OwnedKeyValueStore::commit() {
     if (txnState->txn == nullptr) {
         return 0;
     }
+
+    if (writerId != this_thread::get_id()) {
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+    }
+
     int rc = 0;
     for (auto &txn : txnState->readers) {
         rc = mdb_txn_commit(txn.second) || rc;
@@ -216,8 +281,6 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    // Increment session. Used for debug assertions.
-    _sessionId = globalSessionId++;
 
     // Per the docs for mdb_dbi_open:
     //
@@ -248,7 +311,7 @@ fail:
     throw_mdb_error("failed to create transaction"sv, rc);
 }
 
-unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<OwnedKeyValueStore> ownedKvstore) {
+unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<const OwnedKeyValueStore> ownedKvstore) {
     if (ownedKvstore == nullptr) {
         return nullptr;
     }

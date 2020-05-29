@@ -22,7 +22,6 @@ cc_test(
     name = "serialize_test",
     size = "small",
     srcs = glob(["test/*.cc"]) + ["pickler.h"],
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -30,7 +29,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":serialize",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

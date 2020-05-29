@@ -67,6 +67,9 @@ class Symbol < Object
   end
   def ==(obj); end
 
+  # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
+  def ===(_); end
+
   # Returns `sym.to_s =~ obj`.
   sig do
     params(

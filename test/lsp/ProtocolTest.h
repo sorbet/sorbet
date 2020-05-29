@@ -1,12 +1,13 @@
 #ifndef TEST_LSP_PROTOCOLTEST_H
 #define TEST_LSP_PROTOCOLTEST_H
 
-#include "gtest/gtest.h"
+#include "doctest.h"
 // ^ Violates linting rules, so include first.
 #include "common/Counters.h"
 #include "common/Counters_impl.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
+#include "test/helpers/CounterStateDatabase.h"
 #include "test/helpers/MockFileSystem.h"
 
 namespace sorbet::test::lsp {
@@ -18,36 +19,13 @@ struct ExpectedDiagnostic {
     std::string message;
 };
 
-class CounterStateDatabase final {
-    const CounterState counters;
-
-public:
-    CounterStateDatabase(CounterState counters);
-
-    // Get counter value or 0.
-    CounterImpl::CounterType getCounter(ConstExprStr counter) const;
-
-    CounterImpl::CounterType getCategoryCounter(ConstExprStr counter, ConstExprStr category) const;
-
-    CounterImpl::CounterType getCategoryCounterSum(ConstExprStr counter) const;
-
-    CounterImpl::CounterType getHistogramCount(ConstExprStr histogram) const;
-
-    std::vector<CounterImpl::Timing> getTimings(ConstExprStr counter,
-                                                std::vector<std::pair<ConstExprStr, ConstExprStr>> tags = {}) const;
-};
-
-struct ProtocolTestConfig {
-    bool useMultithreading = false;
-    // Should the test use kvstore?
-    bool useCache = false;
-};
-
 /**
  * If parameter is 'true', LSP is configured in multithreaded mode.
  */
-class ProtocolTest : public testing::TestWithParam<ProtocolTestConfig> {
+class ProtocolTest {
 protected:
+    const bool useMultithreading;
+    const bool useCache;
     std::unique_ptr<LSPWrapper> lspWrapper;
     std::string rootPath;
     std::string rootUri;
@@ -64,11 +42,9 @@ protected:
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
 
-    ~ProtocolTest() override = default;
+    ProtocolTest(bool useMultithreading = false, bool useCache = false);
 
-    void SetUp() override;
-
-    void TearDown() override;
+    ~ProtocolTest();
 
     /** Reset lspWrapper and other internal state. */
     void resetState();

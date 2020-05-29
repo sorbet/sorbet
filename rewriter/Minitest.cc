@@ -20,15 +20,15 @@ class ConstantMover {
 public:
     unique_ptr<ast::Expression> createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
-        auto unsafeNil = ast::MK::Unsafe(loc, ast::MK::Nil(loc));
+        auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
         if (auto send = ast::cast_tree<ast::Send>(asgn.rhs.get())) {
             if (send->fun == core::Names::let() && send->args.size() == 2) {
-                auto rhs = ast::MK::Let(loc, move(unsafeNil), send->args[1]->deepCopy());
+                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1]->deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
             }
         }
 
-        return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(unsafeNil));
+        return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(raiseUnimplemented));
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
@@ -89,7 +89,7 @@ public:
         return move(movedConstants);
     }
 
-    unique_ptr<ast::Expression> addConstantsToExpression(core::Loc loc, unique_ptr<ast::Expression> expr) {
+    unique_ptr<ast::Expression> addConstantsToExpression(core::LocOffsets loc, unique_ptr<ast::Expression> expr) {
         auto consts = getMovedConstants();
 
         if (consts.empty()) {
@@ -169,7 +169,7 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
     if (canMoveIntoMethodDef(exp)) {
         return exp->deepCopy();
     } else {
-        return ast::MK::Unsafe(exp->loc, ast::MK::Nil(exp->loc));
+        return ast::MK::RaiseUnimplemented(exp->loc);
     }
 }
 
@@ -200,13 +200,14 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee->deepCopy(), core::Names::each(), move(blk));
             // put that into a method def named the appropriate thing
-            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, move(name), move(each)));
+            auto method = addSigVoid(
+                ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.state.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
+    if (auto e = ctx.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
     }
 
@@ -244,7 +245,7 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         send->block != nullptr) {
         if ((send->fun == core::Names::testEach() && send->block->args.size() != 1) ||
             (send->fun == core::Names::testEachHash() && send->block->args.size() != 2)) {
-            if (auto e = ctx.state.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
+            if (auto e = ctx.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
                 e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
                             1, send->block->args.size());
             }
@@ -267,8 +268,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
-        auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, std::move(send->block->body))));
+        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), name,
+                                                           prepareBody(ctx, std::move(send->block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -285,12 +286,13 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
+        return ast::MK::Class(send->loc, core::Loc(ctx.file, send->loc), std::move(name), std::move(ancestors),
+                              std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
         send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),
+        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), std::move(name),
                                                            prepareBody(ctx, std::move(send->block->body))));
         method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));

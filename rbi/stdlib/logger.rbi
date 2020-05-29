@@ -429,7 +429,7 @@ class Logger
 
   sig do
     params(
-      logdev: T.any(String, IO),
+      logdev: T.any(String, IO, StringIO),
       shift_age: Integer,
       shift_size: Integer,
       level: Integer,
@@ -463,7 +463,7 @@ class Logger
   # ### Description
   #
   # Reopen a log device.
-  sig { params(logdev: T.any(NilClass, String, IO)).returns(T.self_type) }
+  sig { params(logdev: T.any(NilClass, String, IO, StringIO)).returns(T.self_type) }
   def reopen(logdev = nil); end
 
   # ### Args

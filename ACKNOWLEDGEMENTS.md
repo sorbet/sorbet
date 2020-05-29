@@ -6,12 +6,10 @@ contribute up until the process of open sourcing it:
 
 The current Sorbet team:
 
-- Ariel Davis
 - Trevor Elliott
 - James Iry
 - Dmitry Petrashko
 - Getty Ritter
-- Paul Tarjan
 - John Vilk
 - Jake Zimmerman
 
@@ -20,6 +18,8 @@ Former Sorbet team members:
 - Russell Davis
 - Nelson Elhage
 - Neil Parikh
+- Ariel Davis
+- Paul Tarjan
 
 Stripes who helped open source Sorbet:
 
@@ -44,7 +44,7 @@ Our collaborators on the Ruby Types working group:
 
 - Yusuke Endoh (Cookpad)
 - Jeff Foster (Tufts University)
-- Soutaro Matsumoto (Sider)
+- Soutaro Matsumoto (Square)
 - Yukihiro "Matz" Matsumoto (Ruby creator)
 - Koichi Sasada (Cookpad)
 

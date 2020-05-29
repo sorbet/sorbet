@@ -16,4 +16,7 @@
 # is overridden, super can be called to get the default behavior of printing the
 # warning to $stderr.
 module Warning
+  # Writes warning message `msg` to $stderr. This method is called by Ruby for
+  # all emitted warnings.
+  def warn(msg); end
 end

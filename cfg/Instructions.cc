@@ -70,9 +70,9 @@ string LoadSelf::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::Loc, 2> argLocs, bool isPrivateOk,
-           const shared_ptr<core::SendAndBlockLink> &link)
+Send::Send(core::LocalVariable recv, core::NameRef fun, core::LocOffsets receiverLoc,
+           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs,
+           bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
       link(move(link)) {
     this->args.resize(args.size());
@@ -168,20 +168,12 @@ string LoadYieldParams::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("LoadYieldParams {{ link = {0} }}", this->link->fun.showRaw(gs));
 }
 
-string Unanalyzable::toString(const core::GlobalState &gs) const {
-    return "<unanalyzable>";
+string GetCurrentException::toString(const core::GlobalState &gs) const {
+    return "<get-current-exception>";
 }
 
-string Unanalyzable::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("Unanalyzable {{}}", spacesForTabLevel(tabs));
-}
-
-string NotSupported::toString(const core::GlobalState &gs) const {
-    return fmt::format("NotSupported({})", why);
-}
-
-string NotSupported::showRaw(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("NotSupported {{\n{0}&nbsp;why = {1},\n{0}}}", spacesForTabLevel(tabs), why);
+string GetCurrentException::showRaw(const core::GlobalState &gs, int tabs) const {
+    return fmt::format("GetCurrentException {{}}", spacesForTabLevel(tabs));
 }
 
 string Cast::toString(const core::GlobalState &gs) const {
@@ -204,14 +196,15 @@ string TAbsurd::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs) const {
-    if (this->type) {
+    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
+        return this->variable.toString(gs);
+    } else {
         return fmt::format("{}: {}", this->variable.toString(gs), this->type->show(gs));
     }
-    return this->variable.toString(gs);
 }
 
 string VariableUseSite::showRaw(const core::GlobalState &gs, int tabs) const {
-    if (this->type == nullptr) {
+    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
         return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs));
     } else {
         return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",

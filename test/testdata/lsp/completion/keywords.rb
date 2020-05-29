@@ -134,7 +134,7 @@ class A; end
 A.new.the # error: does not exist
 #        ^ completion: then
 
-# undefMethod comes before undef because undef is a method on Kernel
-# but undefMethod is a method on Module (Module < Object < Kernel)
+# undef_method comes before undef because undef is a method on Kernel
+# but undef_method is a method on Module (Module < Object < Kernel)
 unde # error: does not exist
-#   ^ completion: undefMethod, undef
+#   ^ completion: undef_method, undef

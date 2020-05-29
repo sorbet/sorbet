@@ -519,6 +519,11 @@ class IO < Object
   sig {returns(T::Boolean)}
   def eof(); end
 
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+  # object that represents the encoding of the file. If *io* is in write mode
+  # and no encoding is specified, returns `nil`.
+  def external_encoding; end
+
   # Provides a mechanism for issuing low-level commands to control or query
   # file-oriented I/O streams. Arguments and results are platform dependent. If
   # *arg* is a number, its value is passed directly. If it is a string, it is
@@ -639,6 +644,183 @@ class IO < Object
   end
   def gets(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
+  # Returns a new [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object (a
+  # stream) for the given integer file descriptor `fd` and `mode` string. `opt`
+  # may be used to specify parts of `mode` in a more readable fashion. See also
+  # [`IO.sysopen`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-sysopen)
+  # and
+  # [`IO.for_fd`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-for_fd).
+  #
+  # [`IO.new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new) is
+  # called by various [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)
+  # and [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) opening methods such
+  # as [`IO::open`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-open),
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open),
+  # and
+  # [`File::open`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-open).
+  #
+  # ### Open Mode
+  #
+  # When `mode` is an integer it must be combination of the modes defined in
+  # File::Constants (`File::RDONLY`, `File::WRONLY|File::CREAT`). See the
+  # open(2) man page for more information.
+  #
+  # When `mode` is a string it must be in one of the following forms:
+  #
+  # ```
+  # fmode
+  # fmode ":" ext_enc
+  # fmode ":" ext_enc ":" int_enc
+  # fmode ":" "BOM|UTF-*"
+  # ```
+  #
+  # `fmode` is an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) open mode
+  # string, `ext_enc` is the external encoding for the
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) and `int_enc` is the
+  # internal encoding.
+  #
+  # #### [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) Open Mode
+  #
+  # Ruby allows the following open modes:
+  #
+  # ```
+  # "r"  Read-only, starts at beginning of file  (default mode).
+  #
+  # "r+" Read-write, starts at beginning of file.
+  #
+  # "w"  Write-only, truncates existing file
+  #      to zero length or creates a new file for writing.
+  #
+  # "w+" Read-write, truncates existing file to zero length
+  #      or creates a new file for reading and writing.
+  #
+  # "a"  Write-only, each write call appends data at end of file.
+  #      Creates a new file for writing if file does not exist.
+  #
+  # "a+" Read-write, each write call appends data at end of file.
+  #      Creates a new file for reading and writing if file does
+  #      not exist.
+  # ```
+  #
+  # The following modes must be used separately, and along with one or more of
+  # the modes seen above.
+  #
+  # ```
+  # "b"  Binary file mode
+  #      Suppresses EOL <-> CRLF conversion on Windows. And
+  #      sets external encoding to ASCII-8BIT unless explicitly
+  #      specified.
+  #
+  # "t"  Text file mode
+  # ```
+  #
+  # The exclusive access mode ("x") can be used together with "w" to ensure the
+  # file is created. `Errno::EEXIST` is raised when it already exists. It may
+  # not be supported with all kinds of streams (e.g. pipes).
+  #
+  # When the open mode of original
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) is read only, the mode
+  # cannot be changed to be writable. Similarly, the open mode cannot be changed
+  # from write only to readable.
+  #
+  # When such a change is attempted the error is raised in different locations
+  # according to the platform.
+  #
+  # ### [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+  #
+  # When `ext_enc` is specified, strings read will be tagged by the encoding
+  # when reading, and strings output will be converted to the specified encoding
+  # when writing.
+  #
+  # When `ext_enc` and `int_enc` are specified read strings will be converted
+  # from `ext_enc` to `int_enc` upon input, and written strings will be
+  # converted from `int_enc` to `ext_enc` upon output. See
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) for further
+  # details of transcoding on input and output.
+  #
+  # If "BOM|UTF-8", "BOM|UTF-16LE" or "BOM|UTF16-BE" are used, Ruby checks for a
+  # Unicode BOM in the input document to help determine the encoding. For UTF-16
+  # encodings the file open mode must be binary. When present, the BOM is
+  # stripped and the external encoding from the BOM is used. When the BOM is
+  # missing the given Unicode encoding is used as `ext_enc`. (The BOM-set
+  # encoding option is case insensitive, so "bom|utf-8" is also valid.)
+  #
+  # ### Options
+  #
+  # `opt` can be used instead of `mode` for improved readability. The following
+  # keys are supported:
+  #
+  # :mode
+  # :   Same as `mode` parameter
+  #
+  # :flags
+  # :   Specifies file open flags as integer. If `mode` parameter is given, this
+  #     parameter will be bitwise-ORed.
+  #
+  # :external\_encoding
+  # :   External encoding for the
+  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  #
+  # :internal\_encoding
+  # :   Internal encoding for the
+  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html). "-" is a synonym
+  #     for the default internal encoding.
+  #
+  #     If the value is `nil` no conversion occurs.
+  #
+  # :encoding
+  # :   Specifies external and internal encodings as "extern:intern".
+  #
+  # :textmode
+  # :   If the value is truth value, same as "t" in argument `mode`.
+  #
+  # :binmode
+  # :   If the value is truth value, same as "b" in argument `mode`.
+  #
+  # :autoclose
+  # :   If the value is `false`, the `fd` will be kept open after this
+  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) instance gets
+  #     finalized.
+  #
+  #
+  # Also, `opt` can have same keys in
+  # [`String#encode`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-encode)
+  # for controlling conversion between the external encoding and the internal
+  # encoding.
+  #
+  # ### Example 1
+  #
+  # ```ruby
+  # fd = IO.sysopen("/dev/tty", "w")
+  # a = IO.new(fd,"w")
+  # $stderr.puts "Hello"
+  # a.puts "World"
+  # ```
+  #
+  # Produces:
+  #
+  # ```ruby
+  # Hello
+  # World
+  # ```
+  #
+  # ### Example 2
+  #
+  # ```ruby
+  # require 'fcntl'
+  #
+  # fd = STDERR.fcntl(Fcntl::F_DUPFD)
+  # io = IO.new(fd, mode: 'w:UTF-16LE', cr_newline: true)
+  # io.puts "Hello, World!"
+  #
+  # fd = STDERR.fcntl(Fcntl::F_DUPFD)
+  # io = IO.new(fd, mode: 'w', cr_newline: true,
+  #             external_encoding: Encoding::UTF_16LE)
+  # io.puts "Hello, World!"
+  # ```
+  #
+  # Both of above print "Hello, World!" in UTF-16LE to standard error output
+  # with converting EOL generated by `puts` to CR.
   sig do
     params(
         fd: Integer,
@@ -730,6 +912,51 @@ class IO < Object
     .returns(Integer)
   end
   def lineno=(arg0); end
+
+  # Reads *maxlen* bytes from *ios* using the pread system call and returns them
+  # as a string without modifying the underlying descriptor offset. This is
+  # advantageous compared to combining
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-seek) and
+  # [`IO#read`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-read) in
+  # that it is atomic, allowing multiple threads/process to share the same
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object for reading the
+  # file at various locations. This bypasses any userspace buffering of the
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) layer. If the optional
+  # *outbuf* argument is present, it must reference a
+  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), which will
+  # receive the data. Raises `SystemCallError` on error, `EOFError` at end of
+  # file and `NotImplementedError` if platform does not implement the system
+  # call.
+  #
+  # ```ruby
+  # File.write("testfile", "This is line one\nThis is line two\n")
+  # File.open("testfile") do |f|
+  #   p f.read           # => "This is line one\nThis is line two\n"
+  #   p f.pread(12, 0)   # => "This is line"
+  #   p f.pread(9, 8)    # => "line one\n"
+  # end
+  # ```
+  def pread(*_); end
+
+  # Writes the given string to *ios* at *offset* using pwrite() system call.
+  # This is advantageous to combining
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-seek) and
+  # [`IO#write`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write) in
+  # that it is atomic, allowing multiple threads/process to share the same
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object for reading the
+  # file at various locations. This bypasses any userspace buffering of the
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) layer. Returns the
+  # number of bytes written. Raises `SystemCallError` on error and
+  # `NotImplementedError` if platform does not implement the system call.
+  #
+  # ```ruby
+  # File.open("out", "w") do |f|
+  #   f.pwrite("ABCDEF", 3)   #=> 6
+  # end
+  #
+  # File.read("out")          #=> "\u0000\u0000\u0000ABCDEF"
+  # ```
+  def pwrite(_, _); end
 
   # With no associated block, `IO.open` is a synonym for
   # [`::new`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-new).
@@ -1589,6 +1816,31 @@ class IO < Object
   end
   def self.copy_stream(src, dst, copy_length=T.unsafe(nil), src_offset=T.unsafe(nil)); end
 
+  # Executes the block for every line in the named I/O port, where lines are
+  # separated by *sep*.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # IO.foreach("testfile") {|x| print "GOT ", x }
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # GOT This is line one
+  # GOT This is line two
+  # GOT This is line three
+  # GOT And so on...
+  # ```
+  #
+  # If the last argument is a hash, it's the keyword argument to open. See
+  # [`IO.readlines`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-readlines)
+  # for details about getline\_args. And see also
+  # [`IO.read`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-read) for
+  # details about open\_args.
+  def self.foreach(*_); end
+
   ### https://ruby-doc.org/core-2.3.0/IO.html#method-c-popen
   ### This signature is very hard to type. I'm giving up and making it untyped.
   ### As far as I can tell, at least one arg is required, and it must be an array,
@@ -1788,10 +2040,11 @@ class IO < Object
         binmode: BasicObject,
         autoclose: BasicObject,
         mode: String,
+        chomp: T::Boolean
     )
     .returns(T::Array[String])
   end
-  def self.readlines(name, sep=T.unsafe(nil), limit=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
+  def self.readlines(name, sep=T.unsafe(nil), limit=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil), chomp: T.unsafe(nil)); end
 
   # Calls select(2) system call. It monitors given arrays of `IO` objects, waits
   # until one or more of `IO` objects are ready for reading, are ready for

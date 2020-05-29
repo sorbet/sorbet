@@ -9,14 +9,30 @@ namespace sorbet::realmain::lsp {
 CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
+namespace {
+vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+                                              const vector<core::AutocorrectSuggestion::Edit> &edits) {
+    UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
+    for (auto &edit : edits) {
+        auto range = Range::fromLoc(gs, edit.loc);
+        if (range != nullptr) {
+            editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
+                make_unique<TextEdit>(std::move(range), edit.replacement));
+        }
+    }
+
+    vector<unique_ptr<TextDocumentEdit>> documentEdits;
+    for (auto &it : editsByFile) {
+        // TODO: Document version
+        documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+            make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
+    }
+    return documentEdits;
+}
+} // namespace
+
 unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
-
-    if (!config.opts.lspQuickFixEnabled) {
-        response->error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidRequest, "The `Quick Fix` LSP feature is experimental and disabled by default.");
-        return response;
-    }
 
     vector<unique_ptr<CodeAction>> result;
 
@@ -33,8 +49,15 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto run = typechecker.retypecheck({file});
     auto loc = params->range->toLoc(gs, file);
+    vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &error : run.errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
+            // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
+            // the whole file.
+            for (auto &autocorrect : error->autocorrects) {
+                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+            }
+
             // We return code actions corresponding to any error that encloses the request's range. Matching request
             // ranges against error ranges exactly prevents VSCode's quick fix shortcut (Cmd+.) from matching any
             // actions since it sends a 0 length range (i.e. the cursor). VSCode's request does include matching
@@ -45,29 +68,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             }
 
             for (auto &autocorrect : error->autocorrects) {
-                UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
-                for (auto &edit : autocorrect.edits) {
-                    auto range = Range::fromLoc(gs, edit.loc);
-                    if (range != nullptr) {
-                        editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
-                            make_unique<TextEdit>(std::move(range), edit.replacement));
-                    }
-                }
-
-                vector<unique_ptr<TextDocumentEdit>> documentEdits;
-                for (auto &it : editsByFile) {
-                    // TODO: Document version
-                    documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-                        make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
-                }
-
-                auto workspaceEdit = make_unique<WorkspaceEdit>();
-                workspaceEdit->documentChanges = move(documentEdits);
-
                 auto action = make_unique<CodeAction>(autocorrect.title);
                 action->kind = CodeActionKind::Quickfix;
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = getEdits(config, gs, autocorrect.edits);
                 action->edit = move(workspaceEdit);
-
                 result.emplace_back(move(action));
             }
         }
@@ -80,6 +85,25 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     auto last =
         unique(result.begin(), result.end(), [](const auto &l, const auto &r) -> bool { return l->title == r->title; });
     result.erase(last, result.end());
+
+    // Perform _after_ sorting so these appear at the end of the list.
+    if (!allEdits.empty()) {
+        // Make a source autocorrect that appears in the "source" menu, and an autocorrect that appears in the
+        // quickfix dropdown if there are other quickfixes at this location.
+        vector<CodeActionKind> kinds = {CodeActionKind::SourceFixAllSorbet};
+        if (!result.empty()) {
+            kinds.push_back(CodeActionKind::Quickfix);
+        }
+
+        for (auto kind : kinds) {
+            auto action = make_unique<CodeAction>("Apply all Sorbet fixes for file");
+            action->kind = kind;
+            auto workspaceEdit = make_unique<WorkspaceEdit>();
+            workspaceEdit->documentChanges = getEdits(config, gs, allEdits);
+            action->edit = move(workspaceEdit);
+            result.emplace_back(move(action));
+        }
+    }
 
     response->result = move(result);
     return response;

@@ -224,12 +224,12 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = Integer(1),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(1) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = Integer(1),\l&nbsp;&nbsp;},\l&nbsp;},\l}\l<unconditional>\l"
+        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = Integer(1),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(1) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = Integer(1),\l&nbsp;&nbsp;},\l&nbsp;},\l}\lVariableUseSite { variable = <U <unconditional>> }\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
+        label = "block[id=1]()\lVariableUseSite { variable = <U <unconditional>> }\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -239,14 +239,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
 --- cfg-raw end ---
 --- symbol-table start ---
-class ::<root> < ::Object () @ (... removed core rbi locs ..., -e:1)
+class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
 --- symbol-table end ---
 --- symbol-table-raw start ---
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=-e start=1:1 end=1:2})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=-e start=1:1 end=1:2}
       argument <blk><block> @ Loc {file=-e start=??? end=???}

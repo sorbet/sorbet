@@ -32,21 +32,21 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
     }
     for (auto loc : owner.data(gs)->locs()) {
         auto &file = loc.file().data(gs);
-        constexpr string_view whitelistedTest = "overloads_test.rb"sv;
-        if (((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
-             (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) ||
-            FileOps::getFileName(file.path()) == whitelistedTest) {
+        if ((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
+            (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) {
             return true;
         }
     }
-    return false;
+
+    constexpr string_view whitelistedTest = "overloads_test.rb"sv;
+    return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
 }
 
 bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {
     return Context::permitOverloadDefinitions(state, sigLoc, owner);
 }
 
-Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
+Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner), file(other.file) {}
 
 void Context::trace(string_view msg) const {
     state.trace(msg);
@@ -56,8 +56,20 @@ void MutableContext::trace(string_view msg) const {
     state.trace(msg);
 }
 
+Context Context::withFile(FileRef file) const {
+    return Context(state, owner, file);
+}
+
 Context Context::withOwner(SymbolRef sym) const {
-    return Context(state, sym);
+    return Context(state, sym, file);
+}
+
+MutableContext MutableContext::withFile(FileRef file) const {
+    return MutableContext(state, owner, file);
+}
+
+MutableContext MutableContext::withOwner(SymbolRef sym) const {
+    return MutableContext(state, sym, file);
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
@@ -144,4 +156,10 @@ bool GlobalSubstitution::useFastPath() const {
     return fastPath;
 }
 
+ErrorBuilder MutableContext::beginError(LocOffsets loc, ErrorClass what) const {
+    return state.beginError(Loc(file, loc), what);
+}
+ErrorBuilder Context::beginError(LocOffsets loc, ErrorClass what) const {
+    return state.beginError(Loc(file, loc), what);
+}
 } // namespace sorbet::core

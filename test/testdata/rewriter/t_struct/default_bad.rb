@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # TODO enable on the fast path
 
 class DefaultBad < T::Struct

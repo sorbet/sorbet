@@ -83,9 +83,11 @@ class Test
   sig {params(arg1: A2[Animal], arg2: A2[Cat], arg3: A2[Persian]).void}
   def test1(arg1, arg2, arg3); end
 
+  # There are duplicate errors here because both resolver and infer report the same error. This is not intentional.
   # should fail: Integer is not within the Animal/Persian bounds.
   sig {params(arg1: A2[Integer], arg2: A2[BasicObject]).void}
-                     # ^^^^^^^ error-with-dupes: `Integer` cannot be used for type member `::A2::X`
-                                        # ^^^^^^^^^^^ error-with-dupes: `BasicObject` cannot be used for type member `::A2::X`
+  #                    ^^^^^^^ error-with-dupes: `Integer` is not a subtype of upper bound of type member `::A2::X`
+  #                    ^^^^^^^ error-with-dupes: `Integer` is not a supertype of lower bound of type member `::A2::X`
+  #                                       ^^^^^^^^^^^ error-with-dupes: `BasicObject` is not a subtype of upper bound of type member `::A2::X`
   def test2(arg1, arg2); end
 end

@@ -54,7 +54,7 @@ public:
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
 private:
-    unsigned int _id : 24;
+    u4 _id;
 };
 CheckSize(FileRef, 4, 4);
 

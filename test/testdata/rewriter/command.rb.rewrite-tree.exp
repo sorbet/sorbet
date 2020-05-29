@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C String>)
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       x.to_s()
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C String>)
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
 
   class <emptyTree>::<C OtherCommand><<C <todo sym>>> < (::<root>::<C Opus>::<C Command>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.Integer(x)
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C OtherCommand>.call("8"), <emptyTree>::<C Integer>)
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
     end
 

@@ -35,10 +35,10 @@ struct CounterImpl {
         // and https://docs.google.com/document/d/1La_0PPfsTqHJihazYhff96thhjPtvq1KjAUOJu0dvEg/edit
         int id;
         char const *measure;
-        std::chrono::time_point<std::chrono::steady_clock> start, end;
+        microseconds start, end;
         int threadId;
-        std::vector<std::pair<char const *, std::string>> args;
-        std::vector<std::pair<char const *, char const *>> tags;
+        std::unique_ptr<std::vector<std::pair<char const *, std::string>>> args;
+        std::unique_ptr<std::vector<std::pair<char const *, char const *>>> tags;
         FlowId self;
         FlowId prev;
     };

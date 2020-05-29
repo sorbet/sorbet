@@ -4,6 +4,8 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/StrictLevel.h"
+#include "spdlog/spdlog.h"
+// spdlog.h must be included before fmt.h https://github.com/sorbet/sorbet/pull/2839
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
 #include <memory>
@@ -84,24 +86,6 @@ public:
         ENFORCE(this->header.empty() || this->header.back() != '.');
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
-};
-
-/*
- * Used to batch errors in an RAII fashion:
- *
- * {
- *   ErrorRegion errs(gs);
- *   runNamer();
- * }
- */
-class ErrorRegion {
-public:
-    ErrorRegion(const GlobalState &gs, FileRef f) : gs(gs), f(f){};
-    ~ErrorRegion();
-
-private:
-    const GlobalState &gs;
-    FileRef f;
 };
 
 class ErrorBuilder {

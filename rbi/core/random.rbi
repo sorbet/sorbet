@@ -123,6 +123,7 @@ class Random < Object
   # Both the beginning and ending values of the range must respond to subtract
   # (`-`) and add (`+`)methods, or rand will raise an
   # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  sig {returns(Float)}
   sig do
     params(
         max: T.any(Integer, T::Range[Integer]),
@@ -163,11 +164,18 @@ class Random < Object
   def self.new_seed(); end
 
   # Alias of Random::DEFAULT.rand.
+  sig {returns(Float)}
   sig do
     params(
-        max: Integer,
+        max: T.any(Integer, T::Range[Integer]),
     )
-    .returns(Numeric)
+    .returns(Integer)
+  end
+  sig do
+    params(
+        max: T.any(Float, T::Range[Float]),
+    )
+    .returns(Float)
   end
   def self.rand(max=T.unsafe(nil)); end
 
@@ -198,11 +206,49 @@ class Random < Object
     .returns(Numeric)
   end
   def self.srand(number=T.unsafe(nil)); end
+
+  # Returns a string, using platform providing features. Returned value is
+  # expected to be a cryptographically secure pseudo-random number in binary
+  # form. This method raises a
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) if
+  # the feature provided by platform failed to prepare the result.
+  #
+  # In 2017, Linux manpage random(7) writes that "no cryptographic primitive
+  # available today can hope to promise more than 256 bits of security". So it
+  # might be questionable to pass size > 32 to this method.
+  #
+  # ```ruby
+  # Random.urandom(8)  #=> "\x78\x41\xBA\xAF\x7D\xEA\xD8\xEA"
+  # ```
+  def self.urandom(_); end
 end
 
 # Format raw random number as
 # [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html) does
 module Random::Formatter
+  ALPHANUMERIC = T.let(T.unsafe(nil), T::Array[T.untyped])
+
+  # SecureRandom.alphanumeric generates a random alphanumeric string.
+  #
+  # The argument *n* specifies the length, in characters, of the alphanumeric
+  # string to be generated.
+  #
+  # If *n* is not specified or is nil, 16 is assumed. It may be larger in the
+  # future.
+  #
+  # The result may contain A-Z, a-z and 0-9.
+  #
+  # ```ruby
+  # require 'securerandom'
+  #
+  # SecureRandom.alphanumeric     #=> "2BuBuLf3WfSKyQbR"
+  # SecureRandom.alphanumeric(10) #=> "i6K93NdqiH"
+  # ```
+  #
+  # If a secure random number generator is not available, `NotImplementedError`
+  # is raised.
+  def alphanumeric(n = _); end
+
   # SecureRandom.base64 generates a random base64 string.
   #
   # The argument *n* specifies the length, in bytes, of the random number to be

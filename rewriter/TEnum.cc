@@ -56,10 +56,11 @@ ast::Send *asEnumsDo(ast::Expression *stat) {
     }
 }
 
-vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::Loc headerLoc, core::Loc line1Loc) {
-    if (auto e = ctx.state.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
+vector<unique_ptr<ast::Expression>> badConst(core::MutableContext ctx, core::LocOffsets headerLoc,
+                                             core::LocOffsets line1Loc) {
+    if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
-        e.addErrorLine(line1Loc, "Enclosing definition here");
+        e.addErrorLine(core::Loc(ctx.file, line1Loc), "Enclosing definition here");
     }
     return {};
 }
@@ -116,7 +117,7 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     // So we're good to process this thing as a new T::Enum value.
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.state.beginError(stat->loc, core::errors::Rewriter::TEnumOutsideEnumsDo)) {
+        if (auto e = ctx.beginError(stat->loc, core::errors::Rewriter::TEnumOutsideEnumsDo)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(klass->declLoc, "Enclosing definition here");
@@ -131,7 +132,8 @@ vector<unique_ptr<ast::Expression>> processStat(core::MutableContext ctx, ast::C
     classRhs.emplace_back(ast::MK::Send1(stat->loc, ast::MK::Self(stat->loc), core::Names::include(),
                                          ast::MK::Constant(stat->loc, core::Symbols::Singleton())));
     classRhs.emplace_back(ast::MK::Send0(stat->loc, ast::MK::Self(stat->loc), core::Names::declareFinal()));
-    auto classDef = ast::MK::Class(stat->loc, stat->loc, classCnst->deepCopy(), std::move(parent), std::move(classRhs));
+    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst->deepCopy(), std::move(parent),
+                                   std::move(classRhs));
 
     auto singletonAsgn =
         ast::MK::Assign(stat->loc, std::move(asgn->lhs),
@@ -173,10 +175,11 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     auto loc = klass->declLoc;
-    klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(),
-                                           ast::MK::Constant(loc, core::Symbols::T_Helpers())));
-    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
-    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
+    klass->rhs.emplace_back(ast::MK::Send1(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::extend(),
+                                           ast::MK::Constant(loc.offsets(), core::Symbols::T_Helpers())));
+    klass->rhs.emplace_back(
+        ast::MK::Send0(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::declareAbstract()));
+    klass->rhs.emplace_back(ast::MK::Send0(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat.get())) {
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(enumsDo->block->body.get())) {

@@ -2,6 +2,17 @@
 module Sorbet::Private::Static
   sig do
     params(
+        arg0: T.untyped,
+        arg1: T.nilable(Symbol),
+        blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
+    )
+    .void
+  end
+  def self.sig(arg0, arg1=nil, &blk)
+  end
+
+  sig do
+    params(
         expr: T.untyped,
     )
     .void
@@ -130,6 +141,42 @@ class Sorbet::Private::Static::ENVClass
   sig {returns(T::Enumerator[Elem])}
   def delete_if(&blk); end
 
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_key(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(name: String, value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_pair(&blk); end
+
+  sig do
+    params(
+        blk: T.proc.params(value: String).returns(BasicObject),
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def each_value(&blk); end
+
   sig {returns(T::Boolean)}
   def empty?(); end
 
@@ -174,6 +221,22 @@ class Sorbet::Private::Static::ENVClass
   end
   sig {returns(T::Enumerator[Elem])}
   def filter!(&blk); end
+
+  sig do
+    params(
+        key: String
+    )
+    .returns(T::Boolean)
+  end
+  def has_key?(key); end
+
+  sig do
+    params(
+        value: String
+    )
+    .returns(T::Boolean)
+  end
+  def has_value?(value); end
 
   sig do
     params(
@@ -231,6 +294,14 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        other: T.any(Sorbet::Private::Static::ENVClass, T::Hash[String, T.nilable(String)])
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  def replace(other); end
+
+  sig do
+    params(
         blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(T::Hash[String, String])
@@ -261,6 +332,14 @@ class Sorbet::Private::Static::ENVClass
     .returns(T::Hash[String, T.nilable(String)])
   end
   def update(key, &blk); end
+
+  sig do
+    params(
+        value: String
+    )
+    .returns(T::Boolean)
+  end
+  def value?(value); end
 end
 # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) is a hash-like accessor
 # for environment variables.

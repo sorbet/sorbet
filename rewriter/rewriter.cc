@@ -20,10 +20,10 @@
 #include "rewriter/ModuleFunction.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
-#include "rewriter/ProtobufDescriptorPool.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
+#include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -64,12 +64,6 @@ public:
                     }
 
                     nodes = ClassNew::run(ctx, assign);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = ProtobufDescriptorPool::run(ctx, assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
@@ -168,6 +162,10 @@ public:
 
         if (auto expr = SelfNew::run(ctx, send.get())) {
             return expr;
+        }
+
+        if (SigRewriter::run(ctx, send.get())) {
+            return send;
         }
 
         return send;

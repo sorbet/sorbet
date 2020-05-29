@@ -62,71 +62,6 @@ def _fetch_gem(repo_ctx, package_name, sha256):
 
     return result.sha256
 
-BUNDLER_VERSIONS = {
-    "2.0.1": {
-        "sha256": "c7e38039993c9c2edc27397aef4a3370a4b35c7fae3d93e434e501c4bd7656ea",
-    },
-}
-
-def _setup_bundler(repo_ctx):
-    """
-    Download and configure the specified version of bundler.
-    """
-
-    bundler_version = repo_ctx.attr.bundler_version
-
-    bundler_info = BUNDLER_VERSIONS.get(bundler_version)
-    if bundler_info == None:
-        fail(msg = "Unknown bundler version: {}".format(bundler_version))
-
-    sha256 = bundler_info.get("sha256", "")
-
-    bundler = "bundler"
-
-    repo_ctx.download_and_extract(
-        output = "{}/extracted".format(bundler),
-        url = "https://rubygems.org/downloads/bundler-{}.gem".format(bundler_version),
-        sha256 = sha256,
-        type = "tar",
-    )
-
-    site_bin = "bin"
-
-    site_ruby_glob = ", ".join([
-        "\"lib/ruby/site_ruby/{}/**/*.rb\"".format(version)
-        for version in RUBY_VERSIONS
-    ])
-
-    substitutions = {
-        "{{workspace}}": repo_ctx.name,
-        "{{bundler}}": bundler,
-        "{{site_bin}}": site_bin,
-        "{{site_ruby_glob}}": site_ruby_glob,
-    }
-
-    repo_ctx.template(
-        "setup_bundler.sh",
-        Label("//third_party/gems:setup_bundler.sh"),
-        executable = True,
-        substitutions = substitutions,
-    )
-
-    repo_ctx.execute(["./setup_bundler.sh"] + RUBY_VERSIONS)
-
-    repo_ctx.template(
-        "bundler/BUILD",
-        Label("//third_party/gems:bundler.BUILD"),
-        executable = False,
-        substitutions = substitutions,
-    )
-
-    repo_ctx.template(
-        "bundler/bundle.sh",
-        Label("//third_party/gems:bundle.sh"),
-        executable = True,
-        substitutions = substitutions,
-    )
-
 def _setup_build_defs(repo_ctx):
     """
     Install build_defs provided by this package.
@@ -164,60 +99,11 @@ def _setup_gem_export(repo_ctx, fetched_gems):
         executable = False,
     )
 
-def _setup_tests(repo_ctx):
-    """
-    Download requirements for testing the bundler implementation.
-    """
-
-    # one gem to support the testing
-    repo_ctx.download(
-        output = "test/vendor/cache/cantor-1.2.1.gem",
-        url = "https://rubygems.org/downloads/cantor-1.2.1.gem",
-        sha256 = "f9c2c3d2ff23f07908990a891d4d4d53e6ad157f3fe8194ce06332fa4037d8bb",
-    )
-
-    repo_ctx.template(
-        "test/smoke_test.bzl",
-        Label("//third_party/gems:test/smoke_test.bzl"),
-        executable = False,
-    )
-
-    repo_ctx.template(
-        "test/BUILD",
-        Label("//third_party/gems:test/test.BUILD"),
-        executable = False,
-    )
-
-    repo_ctx.template(
-        "test/smoke_test.sh",
-        Label("//third_party/gems:test/smoke_test.sh"),
-        executable = True,
-        substitutions = {
-            "{{workspace}}": repo_ctx.name,
-        },
-    )
-
-    repo_ctx.template(
-        "test/Gemfile",
-        Label("//third_party/gems:test/Gemfile"),
-        executable = False,
-    )
-
-    repo_ctx.template(
-        "test/Gemfile.lock",
-        Label("//third_party/gems:test/Gemfile.lock"),
-        executable = False,
-    )
-
 def _impl(repo_ctx):
     fetched = False
     gemfile_deps = {}
 
     _setup_build_defs(repo_ctx)
-
-    _setup_tests(repo_ctx)
-
-    _setup_bundler(repo_ctx)
 
     gems_to_fetch = {}
 
@@ -254,7 +140,6 @@ def _impl(repo_ctx):
             "name": repo_ctx.attr.name,
             "gemfile_locks": repo_ctx.attr.gemfile_locks,
             "gems": known_shas,
-            "bundler_version": repo_ctx.attr.bundler_version,
         }
     else:
         return None
@@ -270,10 +155,6 @@ gemfile_lock_deps = repository_rule(
         "gems": attr.string_dict(
             default = {},
             doc = "Specific gem versions and sha256 values",
-        ),
-        "bundler_version": attr.string(
-            default = "2.0.1",
-            doc = "The version of bundler to install",
         ),
         "debug": attr.bool(
             default = False,

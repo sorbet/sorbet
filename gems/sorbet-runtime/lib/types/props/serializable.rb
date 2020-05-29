@@ -25,7 +25,7 @@ module T::Props::Serializable
         :generate_serialize_source
       )
       if msg
-        raise T::Props::InvalidValueError.new(msg)
+        raise TypeError.new(msg)
       else
         raise
       end
@@ -62,7 +62,7 @@ module T::Props::Serializable
         :generate_deserialize_source
       )
       if msg
-        raise T::Props::InvalidValueError.new(msg)
+        raise TypeError.new(msg)
       else
         raise
       end
@@ -138,7 +138,7 @@ module T::Props::Serializable
         prop: prop, class: self.class.name, id: self.class.decorator.get_id(self)
       )
     else
-      raise T::Props::InvalidValueError.new("#{self.class.name}.#{prop} not set for non-optional prop")
+      raise TypeError.new("#{self.class.name}.#{prop} not set for non-optional prop")
     end
   end
 
@@ -218,7 +218,7 @@ module T::Props::Serializable::DecoratorMethods
 
     source_lines = self.send(generate_source_method).split("\n")
     previous_blank = source_lines[0...line_num].rindex(&:empty?) || 0
-    next_blank = line_num + (source_lines[line_num..-1].find_index(&:empty?) || 0)
+    next_blank = line_num + (source_lines[line_num..-1]&.find_index(&:empty?) || 0)
     context = "  " + source_lines[(previous_blank + 1)...(next_blank)].join("\n  ")
     <<~MSG
       Error in #{decorated_class.name}##{generated_method}: #{error.message}

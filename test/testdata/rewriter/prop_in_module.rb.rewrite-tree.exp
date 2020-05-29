@@ -1,0 +1,37 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C BagOfProps><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({}).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+    end
+
+    def foo=<<C <todo sym>>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:"foo", <emptyTree>::<C String>, {:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+  end
+
+  class <emptyTree>::<C MyClass><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C BagOfProps>)
+  end
+
+  my_class = <emptyTree>::<C MyClass>.new()
+
+  <self>.p(my_class.foo=("hello"))
+
+  <self>.p(my_class.foo())
+end

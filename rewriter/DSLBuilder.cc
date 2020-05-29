@@ -30,7 +30,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
     bool skipGetter = false;
     bool skipSetter = false;
     unique_ptr<ast::Expression> type;
-    core::NameRef name = core::NameRef::noName();
+    core::NameRef name;
 
     if (send->fun == core::Names::dslOptional()) {
         nilable = true;
@@ -48,8 +48,8 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
     }
     name = sym->asSymbol(ctx);
 
-    ENFORCE(!sym->loc.source(ctx).empty() && sym->loc.source(ctx)[0] == ':');
-    auto nameLoc = core::Loc(sym->loc.file(), sym->loc.beginPos() + 1, sym->loc.endPos());
+    ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() && core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+    auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
 
     type = ASTUtil::dupType(send->args[1].get());
     if (!type) {
@@ -88,7 +88,8 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
             auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
-        auto defSelfProp = ast::MK::SyntheticMethod1(loc, loc, name, move(arg), ast::MK::EmptyTree());
+        auto defSelfProp =
+            ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), name, move(arg), ast::MK::EmptyTree());
         defSelfProp->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfProp));
     }
@@ -101,13 +102,15 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::run(core::MutableContext ctx, as
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->show(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-        auto defSelfGetProp = ast::MK::SyntheticMethod(loc, loc, getName, {}, ast::MK::Unsafe(loc, ast::MK::Nil(loc)));
+        auto defSelfGetProp =
+            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), getName, {}, ast::MK::RaiseUnimplemented(loc));
         defSelfGetProp->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfGetProp));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-        stats.emplace_back(ast::MK::SyntheticMethod(loc, loc, name, {}, ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+        stats.emplace_back(
+            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, {}, ast::MK::RaiseUnimplemented(loc)));
     }
 
     return stats;

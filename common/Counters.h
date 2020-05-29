@@ -4,7 +4,6 @@
 #include "common/ConstExprStr.h"
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/spdlog.h"
-#include <chrono>
 #include <string>
 
 namespace sorbet {
@@ -47,6 +46,12 @@ namespace test::lsp {
 class CounterStateDatabase;
 }
 
+// We are explicitly not using <chrono> in this file, because we profiled it and realized that
+// using its abstractions for computing on and gathering times were a substantial overhead.
+struct microseconds {
+    int64_t usec;
+};
+
 struct CounterState {
     CounterState();
     ~CounterState();
@@ -70,10 +75,6 @@ private:
     std::unique_ptr<CounterImpl> counters;
 };
 
-struct Counters {
-    static const std::vector<std::string> ALL_COUNTERS;
-};
-
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
@@ -95,14 +96,13 @@ struct FlowId {
     int id;
 };
 
-void timingAdd(ConstExprStr measure, std::chrono::time_point<std::chrono::steady_clock> start,
-               std::chrono::time_point<std::chrono::steady_clock> end,
-               std::vector<std::pair<ConstExprStr, std::string>> args,
-               std::vector<std::pair<ConstExprStr, ConstExprStr>> tags, FlowId self, FlowId previous,
-               std::vector<int> histogramBuckets);
+void timingAdd(ConstExprStr measure, microseconds start, microseconds end,
+               std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args,
+               std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags, FlowId self, FlowId previous,
+               std::unique_ptr<std::vector<int>> histogramBuckets);
 
 absl::flat_hash_map<long, long> getAndClearHistogram(ConstExprStr histogram);
-std::string getCounterStatistics(std::vector<std::string> names);
+std::string getCounterStatistics();
 
 } // namespace sorbet
 #endif // SORBET_COUNTERS_H

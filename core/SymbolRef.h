@@ -38,6 +38,10 @@ public:
     SymbolRef(const GlobalState &from, u4 _id);
     SymbolRef() : _id(0){};
 
+    // From experimentation, in the common case, methods typically have 2 or fewer arguments.
+    // Placed here so it can be used across packages for common case optimizations.
+    static constexpr int EXPECTED_METHOD_ARGS_COUNT = 2;
+
     bool inline exists() const {
         return _id;
     }
@@ -229,192 +233,228 @@ public:
         return SymbolRef(nullptr, 42);
     }
 
+    static SymbolRef Sorbet_Private_StaticSingleton() {
+        return SymbolRef(nullptr, 43);
+    }
+
+    // 44 is the attached class of Sorbet_Private_StaticSingleton
+
     // Used as the superclass for symbols created to populate unresolvable ruby
     // constants
     static SymbolRef StubModule() {
-        return SymbolRef(nullptr, 43);
+        return SymbolRef(nullptr, 45);
     }
 
     // Used to mark the presence of a mixin that we were unable to
     // statically resolve to a module
     static SymbolRef StubMixin() {
-        return SymbolRef(nullptr, 44);
+        return SymbolRef(nullptr, 46);
     }
 
     // Used to mark the presence of a superclass that we were unable to
     // statically resolve to a class
     static SymbolRef StubSuperClass() {
-        return SymbolRef(nullptr, 45);
-    }
-
-    static SymbolRef T_Enumerable() {
-        return SymbolRef(nullptr, 46);
-    }
-
-    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 47);
     }
 
-    static SymbolRef T_Set() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 48);
     }
 
-    static SymbolRef Configatron() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 49);
     }
 
-    static SymbolRef Configatron_Store() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 50);
     }
 
-    static SymbolRef Configatron_RootStore() {
+    static SymbolRef Configatron() {
         return SymbolRef(nullptr, 51);
     }
 
-    static SymbolRef void_() {
+    static SymbolRef Configatron_Store() {
         return SymbolRef(nullptr, 52);
+    }
+
+    static SymbolRef Configatron_RootStore() {
+        return SymbolRef(nullptr, 53);
+    }
+
+    static SymbolRef void_() {
+        return SymbolRef(nullptr, 54);
     }
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 53);
-    }
-
-    static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 54);
-    }
-
-    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 55);
     }
 
-    static SymbolRef Chalk_Tools_Accessible() {
+    static SymbolRef Chalk() {
         return SymbolRef(nullptr, 56);
     }
 
-    static SymbolRef T_Generic() {
+    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 57);
     }
 
-    static SymbolRef Tuple() {
+    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 58);
     }
 
-    static SymbolRef Shape() {
+    static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Tuple() {
         return SymbolRef(nullptr, 60);
     }
 
-    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
+    static SymbolRef Shape() {
         return SymbolRef(nullptr, 61);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
+    static SymbolRef Subclasses() {
         return SymbolRef(nullptr, 62);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef Sorbet_Private_Static_ImplicitModuleSuperClass() {
         return SymbolRef(nullptr, 63);
+    }
+
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference() {
+        return SymbolRef(nullptr, 64);
+    }
+
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return SymbolRef(nullptr, 65);
     }
 
     static SymbolRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return SymbolRef(nullptr, 64);
-    }
-
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
-        return SymbolRef(nullptr, 65);
-    }
-
-    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 66);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub() {
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 67);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
+    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 68);
     }
 
-    static SymbolRef T_Helpers() {
+    static SymbolRef Magic_undeclaredFieldStub() {
         return SymbolRef(nullptr, 69);
     }
 
-    static SymbolRef DeclBuilderForProcs() {
+    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
         return SymbolRef(nullptr, 70);
     }
 
-    static SymbolRef DeclBuilderForProcsSingleton() {
+    static SymbolRef T_Helpers() {
         return SymbolRef(nullptr, 71);
     }
 
-    static SymbolRef Net() {
+    static SymbolRef DeclBuilderForProcs() {
+        return SymbolRef(nullptr, 72);
+    }
+
+    static SymbolRef DeclBuilderForProcsSingleton() {
         return SymbolRef(nullptr, 73);
     }
 
-    static SymbolRef Net_IMAP() {
-        return SymbolRef(nullptr, 74);
-    }
+    // 74 is the attached class of DeclBuilderForProcsSingleton
 
-    static SymbolRef Net_Protocol() {
+    static SymbolRef Net() {
         return SymbolRef(nullptr, 75);
     }
 
-    static SymbolRef T_Sig_WithoutRuntime() {
+    static SymbolRef Net_IMAP() {
         return SymbolRef(nullptr, 76);
     }
 
-    static SymbolRef Enumerator() {
+    static SymbolRef Net_Protocol() {
         return SymbolRef(nullptr, 77);
     }
 
-    static SymbolRef T_Enumerator() {
+    static SymbolRef T_Sig_WithoutRuntime() {
         return SymbolRef(nullptr, 78);
     }
 
-    static SymbolRef T_Struct() {
+    static SymbolRef Enumerator() {
         return SymbolRef(nullptr, 79);
     }
 
-    static SymbolRef Singleton() {
+    static SymbolRef T_Enumerator() {
         return SymbolRef(nullptr, 80);
     }
 
-    static SymbolRef T_Enum() {
+    static SymbolRef T_Struct() {
         return SymbolRef(nullptr, 81);
     }
 
-    static SymbolRef sig() {
+    static SymbolRef Singleton() {
         return SymbolRef(nullptr, 82);
     }
 
-    static SymbolRef Enumerator_Lazy() {
+    static SymbolRef T_Enum() {
         return SymbolRef(nullptr, 83);
     }
 
-    static SymbolRef T_Private() {
+    static SymbolRef sig() {
         return SymbolRef(nullptr, 84);
     }
 
-    static SymbolRef T_Private_Types() {
+    static SymbolRef Enumerator_Lazy() {
         return SymbolRef(nullptr, 85);
     }
 
-    static SymbolRef T_Private_Types_Void() {
+    static SymbolRef T_Private() {
         return SymbolRef(nullptr, 86);
     }
 
-    static SymbolRef T_Private_Types_Void_VOID() {
+    static SymbolRef T_Private_Types() {
         return SymbolRef(nullptr, 87);
     }
 
-    static SymbolRef T_Private_Types_Void_VOIDSingleton() {
+    static SymbolRef T_Private_Types_Void() {
         return SymbolRef(nullptr, 88);
+    }
+
+    static SymbolRef T_Private_Types_Void_VOID() {
+        return SymbolRef(nullptr, 89);
+    }
+
+    static SymbolRef T_Private_Types_Void_VOIDSingleton() {
+        return SymbolRef(nullptr, 90);
+    }
+
+    // 91 is the attached class of VOIDSingleton
+
+    static SymbolRef T_Sig_WithoutRuntimeSingleton() {
+        return SymbolRef(nullptr, 92);
+    }
+
+    // 93 is the attached class of T_Sig_WithoutRuntimeSingleton
+
+    static SymbolRef sigWithoutRuntime() {
+        return SymbolRef(nullptr, 94);
+    }
+
+    static SymbolRef T_NonForcingConstants() {
+        return SymbolRef(nullptr, 95);
+    }
+
+    static SymbolRef Chalk_ODM() {
+        return SymbolRef(nullptr, 96);
+    }
+
+    static SymbolRef Chalk_ODM_DocumentDecoratorHelper() {
+        return SymbolRef(nullptr, 97);
+    }
+
+    static SymbolRef SorbetPrivateStaticSingleton_sig() {
+        return SymbolRef(nullptr, 98);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

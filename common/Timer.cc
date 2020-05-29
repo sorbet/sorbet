@@ -1,13 +1,61 @@
 #include "common/Timer.h"
 using namespace std;
 namespace sorbet {
+
+namespace {
+
+// We are using <time.h> instead of similar APIs from the C++ <chrono> library,
+// because this was measured to make timers noticably faster.
+//
+// https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
+clockid_t clock_monotonic_coarse() {
+#ifdef __linux__
+    // This is faster, as measured via the benchmark above, but is not portable.
+    return CLOCK_MONOTONIC_COARSE;
+#elif __APPLE__
+    return CLOCK_MONOTONIC_RAW_APPROX;
+#else
+    return CLOCK_MONOTONIC;
+#endif
+}
+
+microseconds get_clock_threshold_coarse() {
+    timespec tp;
+    clock_getres(clock_monotonic_coarse(), &tp);
+    auto usec = 2 * (tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L);
+    if (usec < 1'000) { // 1ms
+        return {1'000};
+    } else {
+        return {usec};
+    }
+}
+
+// Don't want to have to measure the resolution of the clock every time we ask for the time.
+const microseconds clock_threshold_coarse = get_clock_threshold_coarse();
+
+} // namespace
+
+microseconds Timer::clock_gettime_coarse() {
+    timespec tp;
+    clock_gettime(clock_monotonic_coarse(), &tp);
+    return {(tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L)};
+}
+
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
-             chrono::time_point<chrono::steady_clock> start, initializer_list<int> histogramBuckets)
-    : log(log), name(name), prev(prev), self{0}, args(args), start(start), histogramBuckets(histogramBuckets) {}
+             microseconds start, initializer_list<int> histogramBuckets)
+    : log(log), name(name), prev(prev), self{0}, start(start), endTime{0} {
+    if (args.size() != 0) {
+        this->args = make_unique<vector<pair<ConstExprStr, string>>>(args);
+    }
+
+    if (histogramBuckets.size() != 0) {
+        this->histogramBuckets = make_unique<vector<int>>(histogramBuckets);
+    }
+}
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
-    : Timer(log, name, prev, args, chrono::steady_clock::now(), histogramBuckets){};
+    : Timer(log, name, prev, args, clock_gettime_coarse(), histogramBuckets){};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
     : Timer(log, name, FlowId{0}, args, {}){};
@@ -62,33 +110,48 @@ Timer Timer::clone() const {
 
 Timer Timer::clone(ConstExprStr name) const {
     Timer forked(log, name, prev, {}, start, {});
-    forked.args = args;
-    forked.tags = tags;
+    if (this->args != nullptr) {
+        forked.args = make_unique<vector<pair<ConstExprStr, string>>>(*args);
+    }
+    if (this->tags != nullptr) {
+        forked.tags = make_unique<vector<pair<ConstExprStr, ConstExprStr>>>(*tags);
+    }
     forked.canceled = canceled;
-    forked.histogramBuckets = histogramBuckets;
+    if (this->histogramBuckets != nullptr) {
+        forked.histogramBuckets = make_unique<vector<int>>(*histogramBuckets);
+    }
     return forked;
 }
 
 void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     // Check if tag is already set; if so, update value.
-    for (auto &tag : tags) {
-        const auto tagName = tag.first;
-        if (tagName.size == name.size && strncmp(tagName.str, name.str, tagName.size) == 0) {
-            tag.second = value;
-            return;
+    if (tags != nullptr) {
+        for (auto &tag : *tags) {
+            const auto tagName = tag.first;
+            if (tagName.size == name.size && strncmp(tagName.str, name.str, tagName.size) == 0) {
+                tag.second = value;
+                return;
+            }
         }
     }
     // Add new tag.
-    tags.push_back(make_pair(name, value));
+    if (tags == nullptr) {
+        tags = make_unique<vector<pair<ConstExprStr, ConstExprStr>>>();
+    }
+    tags->push_back(make_pair(name, value));
+}
+
+void Timer::setEndTime() {
+    endTime = clock_gettime_coarse();
 }
 
 Timer::~Timer() {
-    auto clock = chrono::steady_clock::now();
-    auto dur = clock - start;
-    if (!canceled && dur > std::chrono::milliseconds(1)) {
+    auto clock = endTime.usec == 0 ? clock_gettime_coarse() : endTime;
+    auto dur = microseconds{clock.usec - start.usec};
+    if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
-        auto dur = std::chrono::duration<double, std::milli>(clock - start);
-        log.debug("{}: {}ms", this->name.str, dur.count());
+        auto durMs = (clock.usec - start.usec) / 1'000;
+        log.debug("{}: {}ms", this->name.str, durMs);
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
     }
 }

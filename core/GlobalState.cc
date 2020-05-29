@@ -160,6 +160,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
+    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
@@ -316,11 +318,47 @@ void GlobalState::initEmpty() {
     id = id.data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::T_Private_Types_Void_VOIDSingleton());
 
+    // T.class_of(T::Sig::WithoutRuntime)
+    id = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
+
+    // T::Sig::WithoutRuntime.sig
+    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::sigWithoutRuntime());
+
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
+    ENFORCE(id == Symbols::T_NonForcingConstants());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk(), Names::Constants::ODM());
+    ENFORCE(id == Symbols::Chalk_ODM());
+
+    id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
+    ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
+
+    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
+    { enterMethodArgumentSymbol(Loc::none(), id, Names::arg0()); }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg1());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
-    Context ctx(*this, Symbols::root());
 
     // Synthesize <Magic>#<build-hash>(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
@@ -366,7 +404,7 @@ void GlobalState::initEmpty() {
         arg.flags.isRepeated = true;
         arg.type = Types::String();
     }
-    method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
+    method.data(*this)->resultType = Types::any(*this, Types::nilClass(), Types::String());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
@@ -468,6 +506,24 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
     }
+    method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<keep-for-cfg>(arg: T.untyped) => Void
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::keepForCfg());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    // Synthesize <Magic>#<retry>() => Void
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::retry());
     method.data(*this)->resultType = Types::void_();
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
@@ -1076,6 +1132,48 @@ NameRef GlobalState::enterNameConstant(string_view original) {
     return enterNameConstant(enterNameUTF8(original));
 }
 
+NameRef GlobalState::lookupNameConstant(NameRef original) const {
+    if (!original.exists()) {
+        return core::NameRef::noName();
+    }
+    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
+                (original.data(*this)->kind == NameKind::UNIQUE &&
+                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
+            "looking up a constant name over wrong name kind");
+
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
+    unsigned int hashTableSize = namesByHash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probeCount = 1;
+
+    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+        auto &bucket = namesByHash[bucketId];
+        if (bucket.first == hs) {
+            auto &nm2 = names[bucket.second];
+            if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
+                counterInc("names.constant.hit");
+                return nm2.ref(*this);
+            } else {
+                counterInc("names.hash_collision.constant");
+            }
+        }
+        bucketId = (bucketId + probeCount) & mask;
+        probeCount++;
+    }
+
+    return core::NameRef::noName();
+}
+
+NameRef GlobalState::lookupNameConstant(string_view original) const {
+    auto utf8 = lookupNameUTF8(original);
+    if (!utf8.exists()) {
+        return core::NameRef::noName();
+    }
+    return lookupNameConstant(utf8);
+}
+
 void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,
                unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
@@ -1371,7 +1469,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
-    result->kvstoreSessionId = this->kvstoreSessionId;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
@@ -1487,17 +1584,22 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     if (this->silenceErrors) {
         return false;
     }
-    StrictLevel level = StrictLevel::Strong;
-    if (loc.file().exists()) {
-        level = loc.file().data(*this).strictLevel;
-    }
     if (suppressedErrorClasses.count(what.code) != 0) {
         return false;
     }
     if (!onlyErrorClasses.empty() && onlyErrorClasses.count(what.code) == 0) {
         return false;
     }
+    if (!lspQuery.isEmpty()) {
+        // LSP queries throw away the errors anyways (only cares about the QueryResponses)
+        // so it's no use spending time computing better error messages.
+        return false;
+    }
 
+    StrictLevel level = StrictLevel::Strong;
+    if (loc.file().exists()) {
+        level = loc.file().data(*this).strictLevel;
+    }
     if (level >= StrictLevel::Max) {
         // Custom rules
         if (level == StrictLevel::Autogenerated) {

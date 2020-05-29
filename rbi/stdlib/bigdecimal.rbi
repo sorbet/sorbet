@@ -1445,6 +1445,17 @@ class BigDecimal < Numeric
   sig {returns(Float)}
   def to_f(); end
 
+  # Returns self.
+  #
+  # ```ruby
+  # require 'bigdecimal/util'
+  #
+  # d = BigDecimal("3.14")
+  # d.to_d                       # => 0.314e1
+  # ```
+  sig { returns(BigDecimal) }
+  def to_d; end
+
   # Returns the value as an
   # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
   #
@@ -1534,4 +1545,153 @@ class BigDecimal < Numeric
   # Returns True if the value is zero.
   sig {returns(T::Boolean)}
   def zero?(); end
+end
+
+module Jacobian
+
+  # Computes the derivative of `f` at `x`. `fx` is the value of `f` at `x`.
+  def self.dfdxi(f, fx, x, i); end
+
+  # Determines the equality of two numbers by comparing to zero, or using the epsilon value
+  def self.isEqual(a, b, zero = 0.0, e = _); end
+
+  # Computes the
+  # [`Jacobian`](https://docs.ruby-lang.org/en/2.6.0/Jacobian.html)
+  # of `f` at `x`. `fx` is the value of `f` at `x`.
+  def self.jacobian(f, fx, x); end
+end
+
+# Solves a\*x = b for x, using LU decomposition.
+module LUSolve
+  # Performs LU decomposition of the `n` by `n` matrix `a`.
+  def self.ludecomp(a, n, zero = 0, one = 1); end
+
+  # Solves `a*x = b` for `x`, using LU decomposition.
+  #
+  # `a` is a matrix, `b` is a constant vector, `x` is the solution vector.
+  #
+  # `ps` is the pivot, a vector which indicates the permutation of rows
+  # performed during LU decomposition.
+  def self.lusolve(a, b, ps, zero = 0.0); end
+end
+
+# newton.rb
+#
+# Solves the nonlinear algebraic equation system f = 0 by Newton's method. This
+# program is not dependent on
+# [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html).
+#
+# To call:
+#
+# ```
+#   n = nlsolve(f,x)
+# where n is the number of iterations required,
+#       x is the initial value vector
+#       f is an Object which is used to compute the values of the equations to be solved.
+# ```
+#
+# It must provide the following methods:
+#
+# f.values(x)
+# :   returns the values of all functions at x
+#
+# f.zero
+# :   returns 0.0
+# f.one
+# :   returns 1.0
+# f.two
+# :   returns 2.0
+# f.ten
+# :   returns 10.0
+#
+# f.eps
+# :   returns the convergence criterion (epsilon value) used to determine
+#     whether two values are considered equal. If |a-b| < epsilon, the two
+#     values are considered equal.
+#
+#
+# On exit, x is the solution vector.
+module Newton
+  include(::Jacobian)
+  include(::LUSolve)
+
+  def self.nlsolve(f, x); end
+
+  def self.norm(fv, zero = _); end
+end
+
+class Float < ::Numeric
+  # Returns the value of `float` as a
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html). The
+  # `precision` parameter is used to determine the number of significant digits
+  # for the result (the default is Float::DIG).
+  #
+  # ```ruby
+  # require 'bigdecimal'
+  # require 'bigdecimal/util'
+  #
+  # 0.5.to_d         # => 0.5e0
+  # 1.234.to_d(2)    # => 0.12e1
+  # ```
+  #
+  # See also
+  # [`BigDecimal::new`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-new).
+  sig { params(precision: Integer).returns(BigDecimal) }
+  def to_d(precision = _); end
+end
+
+class Integer < ::Numeric
+  # Returns the value of `int` as a
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html).
+  #
+  # ```ruby
+  # require 'bigdecimal'
+  # require 'bigdecimal/util'
+  #
+  # 42.to_d   # => 0.42e2
+  # ```
+  #
+  # See also
+  # [`BigDecimal::new`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-new).
+  sig { returns(BigDecimal) }
+  def to_d; end
+end
+
+class Rational < ::Numeric
+  # Returns the value as a
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html).
+  #
+  # The required `precision` parameter is used to determine the number of
+  # significant digits for the result.
+  #
+  # ```ruby
+  # require 'bigdecimal'
+  # require 'bigdecimal/util'
+  #
+  # Rational(22, 7).to_d(3)   # => 0.314e1
+  # ```
+  #
+  # See also
+  # [`BigDecimal::new`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-new).
+  sig { params(precision: Integer).returns(BigDecimal) }
+  def to_d(precision); end
+end
+
+class String
+  # Returns the result of interpreting leading characters in `str` as a
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html).
+  #
+  # ```ruby
+  # require 'bigdecimal'
+  # require 'bigdecimal/util'
+  #
+  # "0.5".to_d             # => 0.5e0
+  # "123.45e1".to_d        # => 0.12345e4
+  # "45.67 degrees".to_d   # => 0.4567e2
+  # ```
+  #
+  # See also
+  # [`BigDecimal::new`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-new).
+  sig { returns(BigDecimal) }
+  def to_d; end
 end

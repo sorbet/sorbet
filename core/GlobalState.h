@@ -18,7 +18,6 @@ class NameRef;
 class Symbol;
 class SymbolRef;
 class GlobalSubstitution;
-class ErrorRegion;
 class ErrorQueue;
 struct GlobalStateHash;
 
@@ -40,7 +39,6 @@ class GlobalState final {
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
-    friend ErrorRegion;
     friend ErrorBuilder;
     friend serialize::Serializer;
     friend serialize::SerializerImpl;
@@ -75,20 +73,20 @@ public:
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
-    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);
     }
-    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
     }
-    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
     }
     SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, std::vector<u4> methodHash) const;
-    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) {
+    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
@@ -107,6 +105,8 @@ public:
 
     NameRef enterNameConstant(NameRef original);
     NameRef enterNameConstant(std::string_view original);
+    NameRef lookupNameConstant(NameRef original) const;
+    NameRef lookupNameConstant(std::string_view original) const;
 
     FileRef enterFile(std::string_view path, std::string_view source);
     FileRef enterFile(const std::shared_ptr<File> &file);
@@ -190,9 +190,6 @@ public:
     // Contains a location / symbol / variable reference that various Sorbet passes are looking for.
     // See ErrorQueue#queryResponse
     lsp::Query lspQuery;
-
-    // Stores the ID of the kvstore session that created this GlobalState (if any). Is used in debug assertions.
-    u4 kvstoreSessionId = 0;
 
     // Stores a UUID that uniquely identifies this GlobalState in kvstore.
     u4 kvstoreUuid = 0;

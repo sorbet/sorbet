@@ -289,9 +289,8 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     auto &blkArg = method.data(gs)->arguments().back();
     ENFORCE(blkArg.flags.isBlock);
 
-    auto ctx = core::Context{gs, core::Symbols::root()};
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type->isUntyped();
-    if (hasBlockType && !core::Types::isSubType(ctx, core::Types::nilClass(), blkArg.type)) {
+    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
         string blkArgs;
         if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type.get())) {
             if (appliedType->targs.size() >= 2) {
@@ -466,8 +465,8 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
 
     // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
     LocalVarFinder localVarFinder(method);
-    auto ctx = core::Context{gs, core::Symbols::root()};
     for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
     }
 
@@ -493,8 +492,8 @@ core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const
     auto resolved = typechecker.getResolved(files);
 
     NextMethodFinder nextMethodFinder(queryLoc);
-    auto ctx = core::Context{gs, core::Symbols::root()};
     for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, nextMethodFinder, move(t.tree));
     }
 
@@ -534,6 +533,12 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
                                          size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
+    // Completion with T::Sig::WithoutRuntime.sig / Sorbet::Private::Static.sig won't work because
+    // this code path relies on the DispatchResult's receiver type being the `self` of the module
+    // where the completion is happening, which isn't true for those two.  Luckily, this won't
+    // happen in practice, because SigSuggestion.cc short circuits if the method already has a sig.
+    ENFORCE(what == core::Symbols::sig());
+
     const auto &gs = typechecker.state();
     const auto markupKind = clientConfig.clientCompletionItemMarkupKind;
     const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
@@ -558,6 +563,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
         receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
     }
     auto methodOwner = targetMethod.data(gs)->owner;
+
     if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
         // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
         return nullptr;

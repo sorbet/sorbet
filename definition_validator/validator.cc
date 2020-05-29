@@ -346,8 +346,8 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     }
 }
 
-core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
-                         const core::SymbolRef ancestor) {
+core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
+                                const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
@@ -364,17 +364,17 @@ core::Loc getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::Clas
     return classDef->loc;
 }
 
-void validateFinalAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass,
                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
                                  const string_view verb) {
-    for (const auto &mixin : klass.data(gs)->mixins()) {
-        if (!mixin.data(gs)->isClassOrModuleFinal()) {
+    for (const auto &mixin : klass.data(ctx)->mixins()) {
+        if (!mixin.data(ctx)->isClassOrModuleFinal()) {
             continue;
         }
-        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
-            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
-                        errMsgClass.data(gs)->show(gs));
-            e.addErrorLine(mixin.data(gs)->loc(), "`{}` defined here", mixin.data(gs)->show(gs));
+        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(ctx)->show(ctx), verb,
+                        errMsgClass.data(ctx)->show(ctx));
+            e.addErrorLine(mixin.data(ctx)->loc(), "`{}` defined here", mixin.data(ctx)->show(ctx));
         }
     }
 }
@@ -403,67 +403,67 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(const core::GlobalState &gs, const core::SymbolRef klass,
-                   const unique_ptr<ast::ClassDef> &classDef) {
-    const auto superClass = klass.data(gs)->superClass();
-    if (superClass.exists() && superClass.data(gs)->isClassOrModuleFinal()) {
-        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
-            e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
-                        klass.data(gs)->show(gs));
-            e.addErrorLine(superClass.data(gs)->loc(), "`{}` defined here", superClass.data(gs)->show(gs));
+void validateFinal(core::Context ctx, const core::SymbolRef klass, const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(ctx)->superClass();
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
+        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
+                        klass.data(ctx)->show(ctx));
+            e.addErrorLine(superClass.data(ctx)->loc(), "`{}` defined here", superClass.data(ctx)->show(ctx));
         }
     }
-    validateFinalAncestorHelper(gs, klass, classDef, klass, "included");
-    validateFinalMethodHelper(gs, klass, klass);
-    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
-    validateFinalAncestorHelper(gs, singleton, classDef, klass, "extended");
-    validateFinalMethodHelper(gs, singleton, klass);
+    validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
+    validateFinalMethodHelper(ctx, klass, klass);
+    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+    validateFinalAncestorHelper(ctx, singleton, classDef, klass, "extended");
+    validateFinalMethodHelper(ctx, singleton, klass);
 }
 
-void validateSealedAncestorHelper(const core::GlobalState &gs, const core::SymbolRef klass,
+void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass,
                                   const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
                                   const string_view verb) {
-    auto klassFile = klass.data(gs)->loc().file();
-    for (const auto &mixin : klass.data(gs)->mixins()) {
-        if (!mixin.data(gs)->isClassOrModuleSealed()) {
+    auto klassFile = klass.data(ctx)->loc().file();
+    for (const auto &mixin : klass.data(ctx)->mixins()) {
+        if (!mixin.data(ctx)->isClassOrModuleSealed()) {
             continue;
         }
         // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
         // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
-        if (absl::c_any_of(mixin.data(gs)->sealedLocs(gs), [klassFile](auto loc) { return loc.file() == klassFile; })) {
+        if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
+                           [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
         }
-        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, mixin), core::errors::Resolver::SealedAncestor)) {
-            e.setHeader("`{}` is sealed and cannot be {} in `{}`", mixin.data(gs)->show(gs), verb,
-                        errMsgClass.data(gs)->show(gs));
-            for (auto loc : mixin.data(gs)->sealedLocs(gs)) {
-                e.addErrorLine(loc, "`{}` was marked sealed and can only be {} in this file", mixin.data(gs)->show(gs),
-                               verb);
+        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be {} in `{}`", mixin.data(ctx)->show(ctx), verb,
+                        errMsgClass.data(ctx)->show(ctx));
+            for (auto loc : mixin.data(ctx)->sealedLocs(ctx)) {
+                e.addErrorLine(loc, "`{}` was marked sealed and can only be {} in this file",
+                               mixin.data(ctx)->show(ctx), verb);
             }
         }
     }
 }
 
-void validateSealed(const core::GlobalState &gs, const core::SymbolRef klass,
-                    const unique_ptr<ast::ClassDef> &classDef) {
-    const auto superClass = klass.data(gs)->superClass();
+void validateSealed(core::Context ctx, const core::SymbolRef klass, const unique_ptr<ast::ClassDef> &classDef) {
+    const auto superClass = klass.data(ctx)->superClass();
     // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
     // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
-    auto file = klass.data(gs)->loc().file();
-    if (superClass.exists() && superClass.data(gs)->isClassOrModuleSealed() &&
-        !absl::c_any_of(superClass.data(gs)->sealedLocs(gs), [file](auto loc) { return loc.file() == file; })) {
-        if (auto e = gs.beginError(getAncestorLoc(gs, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
-            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(gs)->show(gs),
-                        klass.data(gs)->show(gs));
-            for (auto loc : superClass.data(gs)->sealedLocs(gs)) {
+    auto file = klass.data(ctx)->loc().file();
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed() &&
+        !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
+        if (auto e =
+                ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
+            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
+                        klass.data(ctx)->show(ctx));
+            for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
                 e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
-                               superClass.data(gs)->show(gs));
+                               superClass.data(ctx)->show(ctx));
             }
         }
     }
-    validateSealedAncestorHelper(gs, klass, classDef, klass, "included");
-    const auto singleton = klass.data(gs)->lookupSingletonClass(gs);
-    validateSealedAncestorHelper(gs, singleton, classDef, klass, "extended");
+    validateSealedAncestorHelper(ctx, klass, classDef, klass, "included");
+    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+    validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
 class ValidateWalk {

@@ -1,7 +1,7 @@
 #include "common/FileSystem.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
-#include "test/helpers/lsp.h"
 #include <iostream>
 #include <memory>
 
@@ -51,10 +51,57 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
 int printDocumentSymbols(string_view filePath) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
-    int nextId = 1;
+    int nextId = 0;
     int fileId = 1;
     auto [fileUri, fileEdits] = findEditsToApply(filePath);
-    test::initializeLSP("", uriPrefix, *lspWrapper, nextId);
+
+    // Send 'initialize' message.
+    {
+        auto initializeParams = make_unique<InitializeParams>("", make_unique<ClientCapabilities>());
+        {
+            auto workspaceCapabilities = make_unique<WorkspaceClientCapabilities>();
+            // The following client config options were cargo-culted from existing tests.
+            // TODO(jvilk): Prune these down to only the ones we care about.
+            workspaceCapabilities->applyEdit = true;
+            auto workspaceEdit = make_unique<WorkspaceEditCapabilities>();
+            workspaceEdit->documentChanges = true;
+            workspaceCapabilities->workspaceEdit = unique_ptr<WorkspaceEditCapabilities>(std::move(workspaceEdit));
+            initializeParams->capabilities->workspace = move(workspaceCapabilities);
+        }
+        {
+            auto docCapabilities = make_unique<TextDocumentClientCapabilities>();
+
+            auto publishDiagnostics = make_unique<PublishDiagnosticsCapabilities>();
+            publishDiagnostics->relatedInformation = true;
+            docCapabilities->publishDiagnostics = std::move(publishDiagnostics);
+
+            auto documentSymbol = std::make_unique<DocumentSymbolCapabilities>();
+            documentSymbol->dynamicRegistration = true;
+            auto symbolKind = make_unique<SymbolKindOptions>();
+            auto supportedSymbols = vector<SymbolKind>();
+            for (int i = (int)SymbolKind::File; i <= (int)SymbolKind::TypeParameter; i++) {
+                supportedSymbols.push_back((SymbolKind)i);
+            }
+            symbolKind->valueSet = move(supportedSymbols);
+            documentSymbol->symbolKind = move(symbolKind);
+            docCapabilities->documentSymbol = move(documentSymbol);
+            initializeParams->capabilities->textDocument = move(docCapabilities);
+        }
+
+        initializeParams->trace = TraceKind::Off;
+
+        auto message = make_unique<LSPMessage>(
+            make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
+        lspWrapper->getLSPResponsesFor(move(message));
+    }
+
+    // Complete initialization handshake with an 'initialized' message.
+    {
+        auto initialized =
+            make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>());
+        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(initialized)));
+    }
+
     {
         // Initialize empty file.
         auto params =
@@ -103,5 +150,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    return sorbet::test::printDocumentSymbols(argv[1]);
+    return sorbet::realmain::lsp::printDocumentSymbols(argv[1]);
 }

@@ -273,7 +273,7 @@ private:
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         // They are guaranteed to be simple trees in the desugarer.
         for (auto &def : v->rhs) {
-            def = mapIt(move(def), ctx.withOwner(v->symbol));
+            def = mapIt(move(def), ctx.withOwner(v->symbol).withFile(v->declLoc.file()));
         }
 
         if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
@@ -295,7 +295,7 @@ private:
                 optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
             }
         }
-        v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol));
+        v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol).withFile(v->declLoc.file()));
 
         if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
             return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
@@ -683,7 +683,7 @@ private:
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
 
-            throw ReportedRubyException{e, loc};
+            throw ReportedRubyException{e, core::Loc(ctx.file, loc)};
         }
     }
 };
@@ -1144,7 +1144,7 @@ private:
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
 
-            throw ReportedRubyException{e, loc};
+            throw ReportedRubyException{e, core::Loc(ctx.file, loc)};
         }
     }
 };

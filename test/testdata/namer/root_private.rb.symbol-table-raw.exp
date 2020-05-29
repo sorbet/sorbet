@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/namer/root_private.rb start=5:1 end=16:18})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/root_private.rb start=5:1 end=16:18}
       argument <blk><block> @ Loc {file=test/testdata/namer/root_private.rb start=??? end=???}

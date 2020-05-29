@@ -413,6 +413,7 @@ end
 
 class Integer
   def to_bn(); end
+  GMP_VERSION = nil
 end
 
 module Gem::Security

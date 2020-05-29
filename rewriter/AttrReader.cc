@@ -15,15 +15,15 @@ namespace sorbet::rewriter {
 
 namespace {
 
-pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression *name) {
-    core::Loc loc;
-    core::NameRef res = core::NameRef::noName();
+pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Expression *name) {
+    core::LocOffsets loc;
+    core::NameRef res;
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol(ctx)) {
             res = lit->asSymbol(ctx);
             loc = lit->loc;
-            ENFORCE(loc.source(ctx).size() > 1 && loc.source(ctx)[0] == ':');
-            loc = core::Loc(loc.file(), loc.beginPos() + 1, loc.endPos());
+            ENFORCE(core::Loc(ctx.file, loc).source(ctx).size() > 1 && core::Loc(ctx.file, loc).source(ctx)[0] == ':');
+            loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);
             auto shortName = nameRef.data(ctx)->shortName(ctx);
@@ -32,7 +32,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
             if (validAttr) {
                 res = nameRef;
             } else {
-                if (auto e = ctx.state.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+                if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
@@ -41,7 +41,7 @@ pair<core::NameRef, core::Loc> getName(core::MutableContext ctx, ast::Expression
         }
     }
     if (!res.exists()) {
-        if (auto e = ctx.state.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+        if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
@@ -105,7 +105,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const 
     ast::Send *cur = body;
     while (cur != nullptr) {
         if (cur->fun == core::Names::typeParameters()) {
-            if (auto e = ctx.state.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
+            if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
             body->args[0] = ast::MK::Untyped(body->args[0]->loc);
@@ -117,7 +117,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, const 
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
-                                               const core::NameRef name, core::Loc nameLoc) {
+                                               const core::NameRef name, core::LocOffsets nameLoc) {
     ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
             "We weren't given a send node that's a valid signature");
 
@@ -233,7 +233,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
                 }
             }
 
-            stats.emplace_back(ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName)));
+            stats.emplace_back(
+                ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, ast::MK::Instance(argLoc, varName)));
         }
     }
 
@@ -266,7 +267,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::run(core::MutableContext ctx, as
             } else {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
-            stats.emplace_back(ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body)));
+            stats.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), setName,
+                                                         ast::MK::Local(argLoc, name), move(body)));
         }
     }
 

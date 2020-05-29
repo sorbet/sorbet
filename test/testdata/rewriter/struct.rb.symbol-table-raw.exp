@@ -1,4 +1,4 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=101:19})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=101:19}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}

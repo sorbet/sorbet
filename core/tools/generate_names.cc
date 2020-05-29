@@ -69,17 +69,18 @@ NameDef names[] = {
     {"hashTemp", "<hashTemp>"},
     {"arrayTemp", "<arrayTemp>"},
     {"rescueTemp", "<rescueTemp>"},
-    {"rescueStartTemp", "<rescueStartTemp>"},
-    {"rescueEndTemp", "<rescueEndTemp>"},
+    {"exceptionValue", "<exceptionValue>"},
     {"gotoDeadTemp", "<gotoDeadTemp>"},
     {"exceptionClassTemp", "<exceptionClassTemp>"},
     {"isaCheckTemp", "<isaCheckTemp>"},
+    {"keepForCfgTemp", "<keepForCfgTemp>"},
+    {"retryTemp", "<retryTemp>"},
     {"throwAwayTemp", "<throwAwayTemp>"},
     {"castTemp", "<castTemp>"},
     {"finalReturn", "<finalReturn>"},
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
-    {"tConstTemp", "<tConstTemp>"},
+    {"unconditional", "<unconditional>"},
     // end CFG temporaries
 
     {"include"},
@@ -134,6 +135,7 @@ NameDef names[] = {
     {"declareSealed", "sealed!"},
     {"revealType", "reveal_type"},
     {"absurd"},
+    {"nonForcingIsA_p", "non_forcing_is_a?"},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -182,16 +184,27 @@ NameDef names[] = {
     {"created"},
     {"merchant"},
     {"foreign"},
+    {"ifunset"},
+    {"withoutAccessors", "without_accessors"},
+    {"instanceVariableGet", "instance_variable_get"},
+    {"instanceVariableSet", "instance_variable_set"},
+    {"decorator"},
+    {"propGetLogic", "prop_get_logic"},
+    {"softFreezeLogic", "soft_freeze_logic"},
     {"computedBy", "computed_by"},
     {"factory"},
+    {"InexactStruct", "InexactStruct", true},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
+    {"Document", "Document", true},
     {"Mutator", "Mutator", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
     {"HashMutator", "HashMutator", true},
     {"ArrayMutator", "ArrayMutator", true},
     {"DocumentMutator", "DocumentMutator", true},
+    {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
+    {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
     {"to"},
@@ -240,19 +253,14 @@ NameDef names[] = {
     {"Command", "Command", true},
     {"Enum", "Enum", true},
 
-    {"Google", "Google", true},
-    {"Protobuf", "Protobuf", true},
-    {"DescriptorPool", "DescriptorPool", true},
-    {"generatedPool", "generated_pool"},
-    {"lookup"},
-    {"msgclass"},
-    {"enummodule"},
-
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
 
     {"instance"},
+
+    {"raise"},
+    {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
@@ -314,6 +322,8 @@ NameDef names[] = {
     {"keepForTypechecking", "keep_for_typechecking"},
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
+    {"keepForCfg", "<keep-for-cfg>"},
+    {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
 
@@ -426,6 +436,7 @@ NameDef names[] = {
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
+    {"NonForcingConstants", "NonForcingConstants", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

@@ -26,6 +26,16 @@ const users = [
     infoLink: 'https://chanzuckerberg.com/',
   },
   {
+    caption: 'Factorial',
+    image: 'img/factorial-logo.png',
+    infoLink: 'https://factorialhr.com/',
+  },
+  {
+    caption: 'Grailed',
+    image: 'img/grailed-logo.png',
+    infoLink: 'https://www.grailed.com/',
+  },
+  {
     caption: 'Gusto',
     image: 'img/gusto-logo.jpg',
     infoLink: 'https://gusto.com/',

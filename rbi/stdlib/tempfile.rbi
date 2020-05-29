@@ -121,26 +121,16 @@ class Tempfile < File
   # end
   # ```
   sig do
-    type_parameters(:U)
-    .params(
-      basename: T.any(String, [String, String]),
-      tmpdir: T.nilable(String),
-      mode: String,
-      options: T::Hash[Symbol, T.untyped],
-      blk: T.proc.params(arg0: File).returns(T.type_parameter(:U)),
-    )
-    .returns(T.type_parameter(:U))
-  end
-  sig do
     params(
       basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
-      mode: String,
-      options: T::Hash[Symbol, T.untyped],
+      mode: Integer,
+      options: T.untyped,
+      blk: T.nilable(T.proc.params(arg0: File).returns(T.untyped)),
     )
-    .returns(File)
+    .returns(T.untyped)
   end
-  def self.create(basename="", tmpdir=nil, mode='o', options={}, &blk); end
+  def self.create(basename="", tmpdir=nil, mode: 0, **options, &blk); end
 
   # Creates a new
   # [`Tempfile`](https://docs.ruby-lang.org/en/2.6.0/Tempfile.html).
@@ -172,37 +162,27 @@ class Tempfile < File
   # end
   # ```
   sig do
-    type_parameters(:U)
-    .params(
-      basename: T.any(String, [String, String]),
-      tmpdir: T.nilable(String),
-      mode: String,
-      options: T::Hash[Symbol, T.untyped],
-      blk: T.proc.params(arg0: Tempfile).returns(T.type_parameter(:U)),
-    )
-    .returns(T.type_parameter(:U))
-  end
-  sig do
     params(
       basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
-      mode: String,
-      options: T::Hash[Symbol, T.untyped],
+      mode: Integer,
+      options: T.untyped,
+      blk: T.nilable(T.proc.params(arg0: Tempfile).returns(T.untyped)),
     )
-    .returns(Tempfile)
+    .returns(T.untyped)
   end
-  def self.open(basename='', tmpdir=nil, mode='o', options={}, &blk); end
+  def self.open(basename='', tmpdir=nil, mode: 0, **options, &blk); end
 
   sig do
     params(
       basename: T.any(String, [String, String]),
       tmpdir: T.nilable(String),
-      mode: String,
-      options: T::Hash[Symbol, T.untyped],
+      mode: Integer,
+      options: T.untyped,
     )
     .void
   end
-  def initialize(basename='', tmpdir=nil, mode='o', options={}); end
+  def initialize(basename='', tmpdir=nil, mode: 0, **options); end
 
   # Closes the file. If `unlink_now` is true, then the file will be unlinked
   # (deleted) after closing. Of course, you can choose to later call

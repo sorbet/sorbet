@@ -19,100 +19,13 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
-CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
-    EXPECT_FALSE(this->counters.hasNullCounters());
-    // Combines counters with the same name but different char* pointers.
-    this->counters.counters->canonicalize();
-}
-
-// Get counter value or 0.
-CounterImpl::CounterType CounterStateDatabase::getCounter(ConstExprStr counter) const {
-    auto internedCounter = counters.counters->internKey(counter.str);
-    const auto &it = counters.counters->counters.find(internedCounter);
-    if (it != counters.counters->counters.end()) {
-        return it->second;
-    }
-    return 0;
-}
-
-CounterImpl::CounterType CounterStateDatabase::getCategoryCounter(ConstExprStr counter, ConstExprStr category) const {
-    auto internedCounter = counters.counters->internKey(counter.str);
-    const auto &it = counters.counters->countersByCategory.find(internedCounter);
-    if (it == counters.counters->countersByCategory.end()) {
-        return 0;
-    }
-    auto internedCategory = counters.counters->internKey(category.str);
-    const auto &catIt = it->second.find(internedCategory);
-    if (catIt == it->second.end()) {
-        return 0;
-    }
-    return catIt->second;
-}
-
-CounterImpl::CounterType CounterStateDatabase::getCategoryCounterSum(ConstExprStr counter) const {
-    auto internedCounter = counters.counters->internKey(counter.str);
-    const auto &it = counters.counters->countersByCategory.find(internedCounter);
-    CounterImpl::CounterType total = 0;
-    if (it != counters.counters->countersByCategory.end()) {
-        for (const auto &catIt : it->second) {
-            total += catIt.second;
-        }
-    }
-    return total;
-}
-
-CounterImpl::CounterType CounterStateDatabase::getHistogramCount(ConstExprStr histogram) const {
-    auto internedHistogram = counters.counters->internKey(histogram.str);
-    CounterImpl::CounterType rv = 0;
-    const auto &it = counters.counters->histograms.find(internedHistogram);
-    if (it != counters.counters->histograms.end()) {
-        const auto &map = it->second;
-        for (const auto &entry : map) {
-            rv += entry.second;
-        }
-    }
-    return rv;
-}
-
-vector<CounterImpl::Timing> CounterStateDatabase::getTimings(ConstExprStr counter,
-                                                             vector<pair<ConstExprStr, ConstExprStr>> tags) const {
-    // Note: Timers don't have interned names.
-    vector<CounterImpl::Timing> rv;
-    for (const auto &timing : counters.counters->timings) {
-        if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing.tags.size() >= tags.size()) {
-            UnorderedMap<std::string, const char *> timingTags;
-            for (const auto &tag : timing.tags) {
-                timingTags[tag.first] = tag.second;
-            }
-
-            int tagsMatched = 0;
-            for (const auto &tag : tags) {
-                auto it = timingTags.find(tag.first.str);
-                if (it == timingTags.end()) {
-                    break;
-                }
-                if (strncmp(it->second, tag.second.str, tag.second.size + 1) != 0) {
-                    break;
-                }
-                tagsMatched++;
-            }
-
-            if (tagsMatched == tags.size()) {
-                rv.push_back(timing);
-            }
-        }
-    }
-    return rv;
-}
-
 void ProtocolTest::resetState() {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
-    auto config = GetParam();
     auto opts = make_shared<realmain::options::Options>();
     opts->disableWatchman = true;
-    if (config.useCache) {
+    if (useCache) {
         // Only recreate the cacheDir if we haven't created one before.
         if (cacheDir.empty()) {
             cacheDir = absl::StripAsciiWhitespace(exec("mktemp -d"));
@@ -120,7 +33,7 @@ void ProtocolTest::resetState() {
         opts->cacheDir = cacheDir;
     }
 
-    if (config.useMultithreading) {
+    if (useMultithreading) {
         lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
     } else {
         lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
@@ -129,13 +42,13 @@ void ProtocolTest::resetState() {
     lspWrapper->enableAllExperimentalFeatures();
 }
 
-void ProtocolTest::SetUp() {
-    rootPath = "/Users/jvilk/stripe/pay-server";
-    rootUri = fmt::format("file://{}", rootPath);
+ProtocolTest::ProtocolTest(bool useMultithreading, bool useCache)
+    : useMultithreading(useMultithreading), useCache(useCache), rootPath("/Users/jvilk/stripe/pay-server"),
+      rootUri(fmt::format("file://{}", rootPath)) {
     resetState();
 }
 
-void ProtocolTest::TearDown() {
+ProtocolTest::~ProtocolTest() {
     if (!cacheDir.empty()) {
         // Shut down lspwrapper before cleaning up database on disk.
         lspWrapper = nullptr;
@@ -268,7 +181,7 @@ unique_ptr<LSPMessage> ProtocolTest::readAsync() {
     if (msg) {
         updateDiagnostics(*msg);
     } else {
-        ADD_FAILURE() << "Timeout waiting for LSP response.";
+        FAIL_CHECK("Timeout waiting for LSP response.");
     }
     return msg;
 }
@@ -295,10 +208,10 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
 std::string ProtocolTest::readFile(std::string_view uri) {
     auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
-    EXPECT_EQ(readFileResponses.size(), 1);
+    CHECK_EQ(readFileResponses.size(), 1);
     if (readFileResponses.size() == 1) {
         auto &readFileResponse = readFileResponses.at(0);
-        EXPECT_TRUE(readFileResponse->isResponse());
+        CHECK(readFileResponse->isResponse());
         auto &readFileResult = get<unique_ptr<TextDocumentItem>>(*readFileResponse->asResponse().result);
         return readFileResult->text;
     }
@@ -307,10 +220,10 @@ std::string ProtocolTest::readFile(std::string_view uri) {
 
 vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
     auto defResponses = send(*getDefinition(uri, line, character));
-    EXPECT_EQ(defResponses.size(), 1);
+    CHECK_EQ(defResponses.size(), 1);
     if (defResponses.size() == 1) {
         auto &defResponse = defResponses.at(0);
-        EXPECT_TRUE(defResponse->isResponse());
+        CHECK(defResponse->isResponse());
         auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
         return move(get<vector<unique_ptr<Location>>>(defResult));
     }
@@ -321,7 +234,7 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
         if (!isTypecheckRun(*msg) && !isSorbetFence(*msg)) {
-            ASSERT_NO_FATAL_FAILURE(assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg));
+            assertNotificationMessage(LSPMethod::TextDocumentPublishDiagnostics, *msg);
         }
     }
 
@@ -339,9 +252,9 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
 const CounterStateDatabase ProtocolTest::getCounters() {
     auto results = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
                                                        "2.0", nextId++, LSPMethod::GETCOUNTERS, nullopt)));
-    EXPECT_EQ(results.size(), 1);
+    CHECK_EQ(results.size(), 1);
     auto &result = results.at(0);
-    EXPECT_TRUE(result->isResponse());
+    CHECK(result->isResponse());
     auto &response = result->asResponse();
     auto &counters = get<unique_ptr<SorbetCounters>>(response.result.value());
     return CounterStateDatabase(move(counters->counters));

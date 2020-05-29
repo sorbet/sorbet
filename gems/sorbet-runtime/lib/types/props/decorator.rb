@@ -12,7 +12,7 @@ class T::Props::Decorator
 
   Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
   DecoratedInstance = T.type_alias {Object} # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias {T.any(T::Types::Base, T::Props::CustomType)}
+  PropType = T.type_alias {T::Types::Base}
   PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
 
   class NoRulesError < StandardError; end
@@ -66,7 +66,6 @@ class T::Props::Decorator
     without_accessors
     clobber_existing_method!
     extra
-    optional
     setter_validate
     _tnilable
   }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
@@ -118,6 +117,21 @@ class T::Props::Decorator
     instance.instance_exec(val, &rules.fetch(:setter_proc))
   end
   alias_method :set, :prop_set
+
+  # Only Models have any custom get logic but we need to call this on
+  # non-Models since we don't know at code gen time what we have.
+  sig do
+    params(
+      instance: DecoratedInstance,
+      prop: Symbol,
+      value: T.untyped
+    )
+    .returns(T.untyped)
+    .checked(:never)
+  end
+  def prop_get_logic(instance, prop, value)
+    value
+  end
 
   # For performance, don't use named params here.
   # Passing in rules here is purely a performance optimization.
@@ -205,12 +219,6 @@ class T::Props::Decorator
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
-    if (array = rules[:array])
-      unless array.is_a?(Module)
-        raise ArgumentError.new("Bad class as subtype in prop #{@class.name}.#{name}: #{array.inspect}")
-      end
-    end
-
     if !(rules[:clobber_existing_method!]) && !(rules[:without_accessors])
       if BANNED_METHOD_NAMES.include?(name.to_sym)
         raise ArgumentError.new(
@@ -280,47 +288,6 @@ class T::Props::Decorator
   end
   def prop_defined(name, cls, rules={})
     cls = T::Utils.resolve_alias(cls)
-    if rules[:optional] == true
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: true` is deprecated, please use `T.nilable(...)` instead.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == false
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :false` is deprecated as it\'s the default value.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == :on_load
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :on_load` is deprecated. You probably want `T.nilable(...)` with :raise_on_nil_write instead.',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    elsif rules[:optional] == :existing
-      T::Configuration.hard_assert_handler(
-        'Use of `optional: :existing` is not allowed: you should use use T.nilable (http://go/optional)',
-        storytime: {
-          name: name,
-          cls_or_args: cls.to_s,
-          args: rules,
-          klass: decorated_class.name,
-        },
-      )
-    end
 
     if T::Utils::Nilable.is_union_with_nilclass(cls)
       # :_tnilable is introduced internally for performance purpose so that clients do not need to call
@@ -335,10 +302,7 @@ class T::Props::Decorator
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
     end
-    type_object = type
-    if !(type_object.singleton_class < T::Props::CustomType)
-      type_object = smart_coerce(type_object, array: rules[:array], enum: rules[:enum])
-    end
+    type_object = smart_coerce(type, enum: rules[:enum])
 
     prop_validate_definition!(name, cls, rules, type_object)
 
@@ -429,27 +393,21 @@ class T::Props::Decorator
   end
 
   sig do
-    params(type: PropTypeOrClass, array: T.untyped, enum: T.untyped)
+    params(type: PropTypeOrClass, enum: T.untyped)
     .returns(T::Types::Base)
   end
-  private def smart_coerce(type, array:, enum:)
+  private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
-    if !array.nil? && !enum.nil?
-      raise ArgumentError.new("Cannot specify both :array and :enum options")
-    elsif !array.nil?
-      if type == Set
-        T::Set[array]
-      else
-        T::Array[array]
-      end
-    elsif !enum.nil?
-      if T::Utils.unwrap_nilable(type)
-        T.nilable(T.enum(enum))
-      else
-        T.enum(enum)
-      end
+    type = T::Utils.coerce(type)
+    if enum.nil?
+      type
     else
-      T::Utils.coerce(type)
+      nonnil_type = T::Utils.unwrap_nilable(type)
+      if nonnil_type
+        T.nilable(T.all(nonnil_type, T.enum(enum)))
+      else
+        T.all(type, T.enum(enum))
+      end
     end
   end
 
@@ -607,14 +565,6 @@ class T::Props::Decorator
         )
       end
       loaded_foreign
-    end
-
-    @class.send(:define_method, "#{prop_name}_record") do |allow_direct_mutation: nil|
-      T::Configuration.soft_assert_handler(
-        "Using deprecated 'model.#{prop_name}_record' foreign key syntax. You should replace this with 'model.#{prop_name}_'",
-        notify: 'vasi'
-      )
-      send(fk_method, allow_direct_mutation: allow_direct_mutation)
     end
   end
 

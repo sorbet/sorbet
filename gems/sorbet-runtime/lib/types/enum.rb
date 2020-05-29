@@ -97,17 +97,8 @@ class T::Enum
     @mapping.include?(serialized_val)
   end
 
-
-  ## T::Props::CustomType
-
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {params(value: T.untyped).returns(T::Boolean).checked(:never)}
-  def self.instance?(value)
-    value.is_a?(self)
-  end
-
-  # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {params(instance: T.nilable(T::Enum)).returns(SerializedVal).checked(:never)}
+  sig {override.params(instance: T.nilable(T::Enum)).returns(SerializedVal).checked(:never)}
   def self.serialize(instance)
     # This is needed otherwise if a Chalk::ODM::Document with a property of the shape
     # T::Hash[T.nilable(MyEnum), Integer] and a value that looks like {nil => 0} is
@@ -124,7 +115,7 @@ class T::Enum
   end
 
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {params(mongo_value: SerializedVal).returns(T.attached_class).checked(:never)}
+  sig {override.params(mongo_value: SerializedVal).returns(T.attached_class).checked(:never)}
   def self.deserialize(mongo_value)
     if self == T::Enum
       raise "Cannot call T::Enum.deserialize directly. You must call on a specific child class."

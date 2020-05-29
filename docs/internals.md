@@ -561,6 +561,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 - pronounced 'lohk' not 'lock'
 - fast / bit hacks
 - philosophy around useful error messages
+- there is a canonical loc, because symbols can have multiple locs, and most
+  code only wants to have to care about the "best" loc.
 
 ### `beginError` and strictness levels
 
@@ -623,6 +625,8 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
   - `toString` is "internal representation" (like Rust `Debug` trait)
 - `gems/sorbet/` (`srb init`)
 - `gems/sorbet-runtime/`
+- `bazel build //foo --copt=-ftime-trace --spawn_strategy=standalone`
+  - generates <chrome://tracing> profiles for clang
 
 <!-- -- Links -------------------------------------------------------------- -->
 

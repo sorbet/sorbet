@@ -71,6 +71,9 @@ class File < IO
   TRUNC = T.let(T.unsafe(nil), Integer)
   WRONLY = T.let(T.unsafe(nil), Integer)
 
+  # separates directory parts in path
+  Separator = T.let(T.unsafe(nil), String)
+
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
@@ -298,6 +301,12 @@ class File < IO
     .returns(String)
   end
   def self.dirname(file); end
+
+  # Returns `true` if the named file exists and has a zero size.
+  #
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # object.
+  def self.empty?(_); end
 
   # Returns `true` if the named file is executable by the effective user and
   # group id of this process. See eaccess(3).
@@ -644,6 +653,18 @@ class File < IO
     .returns(File::Stat)
   end
   def self.lstat(file); end
+
+  # Sets the access and modification times of each named file to the first two
+  # arguments. If a file is a symlink, this method acts upon the link itself as
+  # opposed to its referent; for the inverse behavior, see
+  # [`File.utime`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-utime).
+  # Returns the number of file names in the argument list.
+  def self.lutime(*_); end
+
+  # Creates a FIFO special file with name *file\_name*. *mode* specifies the
+  # FIFO's permissions. It is modified by the process's umask in the usual way:
+  # the permissions of the created file are (mode & ~umask).
+  def self.mkfifo(*_); end
 
   # Returns the modification time for the named file as a
   # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object.
@@ -1060,7 +1081,7 @@ class File < IO
     params(
         file: T.any(String, Pathname, IO),
     )
-    .returns(T.nilable(Integer))
+    .returns(T::Boolean)
   end
   def self.zero?(file); end
 
@@ -1774,6 +1795,13 @@ class File::Stat < Object
   # ```
   sig {returns(Integer)}
   def size(); end
+
+  # Returns the size of *stat* in bytes.
+  #
+  # ```ruby
+  # File.stat("testfile").size   #=> 66
+  # ```
+  def size?(); end
 
   # Returns `true` if *stat* is a socket, `false` if it isn't or if the
   # operating system doesn't support this feature.

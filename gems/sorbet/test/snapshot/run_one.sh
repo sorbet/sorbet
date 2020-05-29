@@ -45,6 +45,9 @@ test_dir="${repo_root}/gems/sorbet/test/snapshot/${test_name}"
 # shellcheck disable=SC1090
 source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/logging.sh)"
 
+# shellcheck disable=SC1090
+source "$(rlocation com_stripe_ruby_typer/gems/sorbet/test/snapshot/hermetic_tar.sh)"
+
 
 # ----- Environment setup and validation -----
 
@@ -91,7 +94,7 @@ info "├─ ruby:           $(command -v ruby)"
 info "├─ ruby --version: $(ruby --version)"
 
 # Add bundler to the path
-BUNDLER_LOC="$(dirname "$(rlocation gems/bundler/bundle)")"
+BUNDLER_LOC="$(dirname "$(rlocation "${ruby_package}/bundle")")"
 PATH="$BUNDLER_LOC:$PATH"
 export PATH
 
@@ -144,7 +147,7 @@ fi
   mkdir vendor
   ln -sf "$GEMS_LOC" "vendor/cache"
 
-  ruby_loc=$(bundle exec which ruby)
+  ruby_loc=$(bundle exec which ruby | sed -e 's,toolchain/bin/,,')
   if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
     info "├─ Bundle was able to find ruby"
   else 
@@ -155,10 +158,11 @@ fi
   fi
 
   # Configuring output to vendor/bundle
+  # Setting no-prune to not delete unused gems in vendor/cache
   # Passing --local to never consult rubygems.org
-  # Passing --no-prune to not delete unused gems in vendor/cache
   info "├─ Installing dependencies to BUNDLE_PATH"
-  bundle install --verbose --local --no-prune
+  bundle config set no_prune true
+  bundle install --verbose --local
 
   info "├─ Checking installation"
   bundle check
@@ -202,7 +206,10 @@ fi
   info "├─ archiving results"
 
   # archive the test
-  tar -cz -f "$output_archive" sorbet err.log out.log
+  output="$(mktemp -d)"
+  cp -r sorbet err.log out.log "$output"
+  hermetic_tar "$output" "$output_archive"
+  rm -rf "$output"
 )
 
 # cleanup

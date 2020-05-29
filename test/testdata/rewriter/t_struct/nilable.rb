@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 class Nilable < T::Struct
   prop :foo, T.nilable(Integer)

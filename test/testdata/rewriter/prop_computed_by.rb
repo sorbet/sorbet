@@ -2,6 +2,7 @@
 
 class ComputingProps
   extend T::Sig
+  include T::Props
 
   const :num_ok, Integer, computed_by: :compute_num_ok
   sig {params(n: Integer).returns(Integer)}
@@ -27,7 +28,11 @@ class ComputingProps
   end
 
   const :not_a_symbol, String, computed_by: 'not_a_symbol'
-                                          # ^^^^^^^^^^^^^^ error: Argument does not have asserted type `Symbol`
+                                          # ^^^^^^^^^^^^^^ error: Value for `computed_by` must be a symbol literal
+
+  symbol_in_variable = :symbol_in_variable
+  const :symbol_in_variable, String, computed_by: symbol_in_variable
+                                                # ^^^^^^^^^^^^^^^^^^ error: Value for `computed_by` must be a symbol literal
 
   const :num_unknown_type, Integer, computed_by: :compute_num_unknown_type
                                                # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The typechecker was unable to infer the type of the asserted value

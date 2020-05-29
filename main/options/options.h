@@ -23,8 +23,8 @@ public:
     bool supportsFlush = false;
 
     void print(const std::string_view &contents) const;
-    template <typename... Args> void fmt(const ConstExprStr msg, const Args &... args) const {
-        print(fmt::format(msg.str, args...));
+    template <typename... Args> void fmt(const ConstExprStr msg, Args &&... args) const {
+        print(fmt::format(msg.str, std::forward<Args>(args)...));
     }
     void flush();
 
@@ -151,7 +151,6 @@ struct Options {
     std::vector<std::string> dslRubyExtraArgs;
     std::string storeState = "";
     bool enableCounters = false;
-    std::vector<std::string> someCounters;
     std::string errorUrlBase = "https://srb.help/";
     std::set<int> errorCodeWhiteList;
     std::set<int> errorCodeBlackList;
@@ -169,6 +168,7 @@ struct Options {
     std::string metricsPrefix = "ruby_typer.unknown.";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
+    std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
 
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions;
@@ -194,7 +194,6 @@ struct Options {
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
-    bool lspQuickFixEnabled = false;
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;

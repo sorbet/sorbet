@@ -9,19 +9,7 @@ end
 
 class Array
   include ::JSON::Ext::Generator::GeneratorMethods::Array
-  def bsearch(); end
-
-  def bsearch_index(); end
-
   def collect!(); end
-
-  def dig(*_); end
-
-  def flatten!(*_); end
-
-  def pack(*_); end
-
-  def replace(_); end
 
   def shelljoin(); end
 
@@ -4891,46 +4879,8 @@ class Class
   def json_creatable?(); end
 end
 
-class Complex
-  def self.polar(*_); end
-
-  def self.rect(*_); end
-
-  def self.rectangular(*_); end
-end
-
 class Delegator
-  def !=(obj); end
-
-  def ==(obj); end
-
-  def __getobj__(); end
-
-  def __setobj__(obj); end
-
-  def eql?(obj); end
-
   def initialize(obj); end
-
-  def marshal_dump(); end
-
-  def marshal_load(data); end
-
-  def method_missing(m, *args, &block); end
-
-  def methods(all=T.unsafe(nil)); end
-
-  def protected_methods(all=T.unsafe(nil)); end
-
-  def public_methods(all=T.unsafe(nil)); end
-end
-
-class Delegator
-  def self.const_missing(n); end
-
-  def self.delegating_block(mid); end
-
-  def self.public_api(); end
 end
 
 class DidYouMean::ClassNameChecker
@@ -5034,15 +4984,8 @@ class Dir
 end
 
 class Dir
-  def self.children(*_); end
-
-  def self.each_child(*_); end
-
-  def self.empty?(_); end
-
   def self.exists?(_); end
 
-  def self.tmpdir(); end
 end
 
 class ERB
@@ -5058,95 +5001,21 @@ class Encoding
 end
 
 class Encoding::Converter
-  def convert(_); end
-
-  def convpath(); end
-
-  def destination_encoding(); end
-
-  def finish(); end
-
   def initialize(*_); end
-
-  def insert_output(_); end
-
-  def last_error(); end
-
-  def primitive_convert(*_); end
-
-  def primitive_errinfo(); end
-
-  def putback(*_); end
-
-  def replacement(); end
-
-  def replacement=(replacement); end
-
-  def source_encoding(); end
-end
-
-class Encoding::Converter
-  def self.asciicompat_encoding(_); end
-
-  def self.search_convpath(*_); end
-end
-
-class Encoding::InvalidByteSequenceError
-  def destination_encoding(); end
-
-  def destination_encoding_name(); end
-
-  def error_bytes(); end
-
-  def incomplete_input?(); end
-
-  def readagain_bytes(); end
-
-  def source_encoding(); end
-
-  def source_encoding_name(); end
-end
-
-class Encoding::UndefinedConversionError
-  def destination_encoding(); end
-
-  def destination_encoding_name(); end
-
-  def error_char(); end
-
-  def source_encoding(); end
-
-  def source_encoding_name(); end
 end
 
 class Encoding
   def self._load(_); end
-
-  def self.locale_charmap(); end
 end
 
 module Enumerable
   def chain(*_); end
 
-  def chunk(); end
-
   def chunk_while(); end
-
-  def each_entry(*_); end
-
-  def grep_v(_); end
-
-  def slice_after(*_); end
-
-  def slice_before(*_); end
-
-  def slice_when(); end
 
   def sum(*_); end
 
   def to_set(klass=T.unsafe(nil), *args, &block); end
-
-  def uniq(); end
 end
 
 class Enumerator
@@ -5182,16 +5051,6 @@ class Enumerator::Generator
   def each(*_, &blk); end
 
   def initialize(*_); end
-end
-
-class Enumerator::Lazy
-  def chunk(*_); end
-
-  def chunk_while(*_); end
-
-  def force(*_); end
-
-  def slice_when(*_); end
 end
 
 Errno::ECAPMODE = Errno::NOERROR
@@ -5256,16 +5115,6 @@ class Etc::Passwd
   def self.members(); end
 end
 
-class Exception
-  def full_message(*_); end
-end
-
-class Exception
-  def self.exception(*_); end
-
-  def self.to_tty?(); end
-end
-
 class ExitCalledError
 end
 
@@ -5276,30 +5125,8 @@ class FalseClass
   include ::JSON::Ext::Generator::GeneratorMethods::FalseClass
 end
 
-class Fiber
-  def resume(*_); end
-end
-
-class Fiber
-  def self.yield(*_); end
-end
-
 class File
-  Separator = ::T.let(nil, ::T.untyped)
-end
-
-class File::Stat
-  def size?(); end
-end
-
-class File
-  def self.empty?(_); end
-
   def self.exists?(_); end
-
-  def self.lutime(*_); end
-
-  def self.mkfifo(*_); end
 end
 
 module FileUtils
@@ -5356,12 +5183,6 @@ module GC
 end
 
 module GC
-  def self.latest_gc_info(*_); end
-
-  def self.stress=(stress); end
-
-  def self.verify_internal_consistency(); end
-
   def self.verify_transient_heap_internal_consistency(); end
 end
 
@@ -5722,30 +5543,6 @@ class Gem::ConflictError
   def initialize(target, conflicts); end
 
   def target(); end
-end
-
-class Gem::ConsoleUI
-  def initialize(); end
-end
-
-class Gem::ConsoleUI
-end
-
-module Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def ui(); end
-
-  def ui=(new_ui); end
-
-  def use_ui(new_ui, &block); end
-end
-
-module Gem::DefaultUserInteraction
-  def self.ui(); end
-
-  def self.ui=(new_ui); end
-
-  def self.use_ui(new_ui); end
 end
 
 class Gem::Dependency
@@ -6239,89 +6036,6 @@ class Gem::NameTuple
   def self.to_basic(list); end
 end
 
-class Gem::Package
-  include ::Gem::UserInteraction
-  include ::Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def add_checksums(tar); end
-
-  def add_contents(tar); end
-
-  def add_files(tar); end
-
-  def add_metadata(tar); end
-
-  def build(skip_validation=T.unsafe(nil), strict_validation=T.unsafe(nil)); end
-
-  def build_time(); end
-
-  def build_time=(build_time); end
-
-  def checksums(); end
-
-  def contents(); end
-
-  def copy_to(path); end
-
-  def data_mode(); end
-
-  def data_mode=(data_mode); end
-
-  def digest(entry); end
-
-  def dir_mode(); end
-
-  def dir_mode=(dir_mode); end
-
-  def extract_files(destination_dir, pattern=T.unsafe(nil)); end
-
-  def extract_tar_gz(io, destination_dir, pattern=T.unsafe(nil)); end
-
-  def file_mode(mode); end
-
-  def files(); end
-
-  def gzip_to(io); end
-
-  def initialize(gem, security_policy); end
-
-  def install_location(filename, destination_dir); end
-
-  def load_spec(entry); end
-
-  def mkdir_p_safe(mkdir, mkdir_options, destination_dir, file_name); end
-
-  def normalize_path(pathname); end
-
-  def open_tar_gz(io); end
-
-  def prog_mode(); end
-
-  def prog_mode=(prog_mode); end
-
-  def read_checksums(gem); end
-
-  def security_policy(); end
-
-  def security_policy=(security_policy); end
-
-  def setup_signer(signer_options: T.unsafe(nil)); end
-
-  def spec(); end
-
-  def spec=(spec); end
-
-  def verify(); end
-
-  def verify_checksums(digests, checksums); end
-
-  def verify_entry(entry); end
-
-  def verify_files(gem); end
-
-  def verify_gz(entry); end
-end
-
 class Gem::Package::DigestIO
   def digests(); end
 
@@ -6332,12 +6046,6 @@ end
 
 class Gem::Package::DigestIO
   def self.wrap(io, digests); end
-end
-
-class Gem::Package::Error
-end
-
-class Gem::Package::Error
 end
 
 class Gem::Package::FileSource
@@ -6355,15 +6063,6 @@ class Gem::Package::FileSource
 end
 
 class Gem::Package::FileSource
-end
-
-class Gem::Package::FormatError
-  def initialize(message, source=T.unsafe(nil)); end
-
-  def path(); end
-end
-
-class Gem::Package::FormatError
 end
 
 class Gem::Package::IOSource
@@ -6385,12 +6084,6 @@ end
 class Gem::Package::IOSource
 end
 
-class Gem::Package::NonSeekableIO
-end
-
-class Gem::Package::NonSeekableIO
-end
-
 class Gem::Package::Old
   def extract_files(destination_dir); end
 
@@ -6402,13 +6095,6 @@ class Gem::Package::Old
 end
 
 class Gem::Package::Old
-end
-
-class Gem::Package::PathError
-  def initialize(destination, destination_dir); end
-end
-
-class Gem::Package::PathError
 end
 
 class Gem::Package::Source
@@ -6469,27 +6155,6 @@ class Gem::Package::TarHeader
   def self.strict_oct(str); end
 end
 
-class Gem::Package::TarInvalidError
-end
-
-class Gem::Package::TarInvalidError
-end
-
-class Gem::Package::TarReader
-  include ::Enumerable
-  def close(); end
-
-  def each(&blk); end
-
-  def each_entry(); end
-
-  def initialize(io); end
-
-  def rewind(); end
-
-  def seek(name); end
-end
-
 class Gem::Package::TarReader::Entry
   def bytes_read(); end
 
@@ -6531,83 +6196,15 @@ end
 class Gem::Package::TarReader::Entry
 end
 
-class Gem::Package::TarReader::UnexpectedEOF
-end
-
-class Gem::Package::TarReader::UnexpectedEOF
-end
-
 class Gem::Package::TarReader
   def self.new(io); end
 end
 
 class Gem::Package::TarWriter
-  def add_file(name, mode); end
-
-  def add_file_digest(name, mode, digest_algorithms); end
-
-  def add_file_signed(name, mode, signer); end
-
-  def add_file_simple(name, mode, size); end
-
-  def add_symlink(name, target, mode); end
-
-  def check_closed(); end
-
-  def close(); end
-
-  def closed?(); end
-
-  def flush(); end
-
-  def initialize(io); end
-
-  def mkdir(name, mode); end
-
-  def split_name(name); end
-end
-
-class Gem::Package::TarWriter::BoundedStream
-  def initialize(io, limit); end
-
-  def limit(); end
-
-  def write(data); end
-
-  def written(); end
-end
-
-class Gem::Package::TarWriter::BoundedStream
-end
-
-class Gem::Package::TarWriter::FileOverflow
-end
-
-class Gem::Package::TarWriter::FileOverflow
-end
-
-class Gem::Package::TarWriter::RestrictedStream
-  def initialize(io); end
-
-  def write(data); end
-end
-
-class Gem::Package::TarWriter::RestrictedStream
-end
-
-class Gem::Package::TarWriter
   def self.new(io); end
 end
 
-class Gem::Package::TooLongFileName
-end
-
-class Gem::Package::TooLongFileName
-end
-
 class Gem::Package
-  def self.build(spec, skip_validation=T.unsafe(nil), strict_validation=T.unsafe(nil), file_name=T.unsafe(nil)); end
-
   def self.new(gem, security_policy=T.unsafe(nil)); end
 end
 
@@ -8096,13 +7693,6 @@ class Gem::Security::Signer
   def self.re_sign_cert(expired_cert, expired_cert_path, private_key); end
 end
 
-class Gem::SilentUI
-  def initialize(); end
-end
-
-class Gem::SilentUI
-end
-
 class Gem::Source
   include ::Comparable
   def ==(other); end
@@ -8753,52 +8343,6 @@ end
 
 class Gem::StreamUI
   def _deprecated_debug(statement); end
-
-  def _gets_noecho(); end
-
-  def alert(statement, question=T.unsafe(nil)); end
-
-  def alert_error(statement, question=T.unsafe(nil)); end
-
-  def alert_warning(statement, question=T.unsafe(nil)); end
-
-  def ask(question); end
-
-  def ask_for_password(question); end
-
-  def ask_yes_no(question, default=T.unsafe(nil)); end
-
-  def backtrace(exception); end
-
-  def choose_from_list(question, list); end
-
-  def close(); end
-
-  def debug(*args, &block); end
-
-  def download_reporter(*args); end
-
-  def errs(); end
-
-  def initialize(in_stream, out_stream, err_stream=T.unsafe(nil), usetty=T.unsafe(nil)); end
-
-  def ins(); end
-
-  def outs(); end
-
-  def progress_reporter(*args); end
-
-  def require_io_console(); end
-
-  def say(statement=T.unsafe(nil)); end
-
-  def terminate_interaction(status=T.unsafe(nil)); end
-
-  def tty?(); end
-end
-
-class Gem::StreamUI
-  extend ::Gem::Deprecate
 end
 
 class Gem::StubSpecification
@@ -8843,18 +8387,6 @@ class Gem::SystemExitException
   def initialize(exit_code); end
 end
 
-module Gem::Text
-  def clean_text(text); end
-
-  def format_text(text, wrap, indent=T.unsafe(nil)); end
-
-  def levenshtein_distance(str1, str2); end
-
-  def min3(a, b, c); end
-
-  def truncate_text(text, description, max_length=T.unsafe(nil)); end
-end
-
 class Gem::UninstallError
   def spec(); end
 
@@ -8893,30 +8425,6 @@ class Gem::UriFormatter
 end
 
 class Gem::UriFormatter
-end
-
-module Gem::UserInteraction
-  include ::Gem::DefaultUserInteraction
-  include ::Gem::Text
-  def alert(statement, question=T.unsafe(nil)); end
-
-  def alert_error(statement, question=T.unsafe(nil)); end
-
-  def alert_warning(statement, question=T.unsafe(nil)); end
-
-  def ask(question); end
-
-  def ask_for_password(prompt); end
-
-  def ask_yes_no(question, default=T.unsafe(nil)); end
-
-  def choose_from_list(question, list); end
-
-  def say(statement=T.unsafe(nil)); end
-
-  def terminate_interaction(exit_code=T.unsafe(nil)); end
-
-  def verbose(msg=T.unsafe(nil)); end
 end
 
 module Gem::Util
@@ -9170,43 +8678,6 @@ end
 
 class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
-  def <(_); end
-
-  def <=(_); end
-
-  def >(_); end
-
-  def >=(_); end
-
-  def compact(); end
-
-  def compact!(); end
-
-  def default_proc(); end
-
-  def default_proc=(default_proc); end
-
-  def fetch_values(*_); end
-
-  def flatten(*_); end
-
-  def index(_); end
-
-  def replace(_); end
-
-  def slice(*_); end
-
-  def to_h(); end
-
-  def to_proc(); end
-
-  def transform_keys(); end
-
-  def transform_keys!(); end
-
-  def transform_values!(); end
-
-  def update(*_); end
 end
 
 class Hash
@@ -9214,15 +8685,9 @@ class Hash
 end
 
 class IO
-  def external_encoding(); end
-
   def nread(); end
 
   def pathconf(_); end
-
-  def pread(*_); end
-
-  def pwrite(_, _1); end
 
   def ready?(); end
 
@@ -9238,10 +8703,6 @@ end
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
 
 IO::EWOULDBLOCKWaitWritable = IO::EAGAINWaitWritable
-
-class IO
-  def self.foreach(*_); end
-end
 
 class IPAddr
   include ::Comparable
@@ -9352,19 +8813,6 @@ end
 
 class Integer
   include ::JSON::Ext::Generator::GeneratorMethods::Integer
-  def allbits?(_); end
-
-  def anybits?(_); end
-
-  def digits(*_); end
-
-  def nobits?(_); end
-
-  def pow(*_); end
-end
-
-class Integer
-  def self.sqrt(_); end
 end
 
 class JSON::Ext::Generator::State
@@ -9399,33 +8847,6 @@ end
 
 class KeyError
   include ::DidYouMean::Correctable
-  def key(); end
-
-  def receiver(); end
-end
-
-class LoadError
-  def path(); end
-end
-
-class LocalJumpError
-  def exit_value(); end
-
-  def reason(); end
-end
-
-module Marshal
-  def self.restore(*_); end
-end
-
-class Module
-  def deprecate_constant(*_); end
-
-  def undef_method(*_); end
-end
-
-class Module
-  def self.used_modules(); end
 end
 
 class Monitor
@@ -9438,62 +8859,20 @@ end
 
 module MonitorMixin
   def initialize(*args); end
-
-  def mon_enter(); end
-
-  def mon_exit(); end
-
-  def mon_locked?(); end
-
-  def mon_owned?(); end
-
-  def mon_synchronize(); end
-
-  def mon_try_enter(); end
-
-  def new_cond(); end
-
-  def synchronize(); end
-
-  def try_mon_enter(); end
   EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
   EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
 end
 
 class MonitorMixin::ConditionVariable
-  def broadcast(); end
-
   def initialize(monitor); end
-
-  def signal(); end
-
-  def wait(timeout=T.unsafe(nil)); end
-
-  def wait_until(); end
-
-  def wait_while(); end
-end
-
-module MonitorMixin
-  def self.extend_object(obj); end
 end
 
 class NameError
   include ::DidYouMean::Correctable
-  def name(); end
-
-  def receiver(); end
 end
 
 class NilClass
   include ::JSON::Ext::Generator::GeneratorMethods::NilClass
-  def to_i(); end
-end
-
-class NoMethodError
-  def args(); end
-
-  def private_call?(); end
 end
 
 class Object
@@ -9517,43 +8896,7 @@ class Object
   TOPLEVEL_BINDING = ::T.let(nil, ::T.untyped)
 end
 
-class ObjectSpace::WeakMap
-  def [](_); end
-
-  def []=(_, _1); end
-
-  def each(&blk); end
-
-  def each_key(); end
-
-  def each_pair(); end
-
-  def each_value(); end
-
-  def key?(_); end
-
-  def keys(); end
-
-  def length(); end
-
-  def size(); end
-
-  def values(); end
-end
-
-module ObjectSpace
-  def self.count_objects(*_); end
-
-  def self.define_finalizer(*_); end
-
-  def self.garbage_collect(*_); end
-
-  def self.undefine_finalizer(_); end
-end
-
 class Pathname
-  def empty?(); end
-
   def fnmatch?(*_); end
 
   def glob(*_); end
@@ -9564,59 +8907,13 @@ end
 class Proc
   def <<(_); end
 
-  def ===(*_); end
-
   def >>(_); end
 
   def clone(); end
-
-  def yield(*_); end
-end
-
-module Process::Sys
-  def self.getegid(); end
-end
-
-class Process::Tms
-  def cstime(); end
-
-  def cstime=(_); end
-
-  def cutime(); end
-
-  def cutime=(_); end
-
-  def stime(); end
-
-  def stime=(_); end
-
-  def utime(); end
-
-  def utime=(_); end
-end
-
-class Process::Tms
-  def self.[](*_); end
-
-  def self.members(); end
-end
-
-module Process
-  def self.last_status(); end
-
-  def self.setpgrp(); end
-end
-
-module Random::Formatter
-  def alphanumeric(n=T.unsafe(nil)); end
-
-  ALPHANUMERIC = ::T.let(nil, ::T.untyped)
 end
 
 class Random
   def self.bytes(_); end
-
-  def self.urandom(_); end
 end
 
 class Range
@@ -9663,52 +8960,6 @@ module RubyVM::AbstractSyntaxTree
   def self.parse_file(_); end
 end
 
-class RubyVM::InstructionSequence
-  def absolute_path(); end
-
-  def base_label(); end
-
-  def disasm(); end
-
-  def disassemble(); end
-
-  def each_child(); end
-
-  def eval(); end
-
-  def first_lineno(); end
-
-  def label(); end
-
-  def path(); end
-
-  def to_a(); end
-
-  def to_binary(*_); end
-
-  def trace_points(); end
-end
-
-class RubyVM::InstructionSequence
-  def self.compile(*_); end
-
-  def self.compile_file(*_); end
-
-  def self.compile_option(); end
-
-  def self.compile_option=(compile_option); end
-
-  def self.disasm(_); end
-
-  def self.disassemble(_); end
-
-  def self.load_from_binary(_); end
-
-  def self.load_from_binary_extra_data(_); end
-
-  def self.of(_); end
-end
-
 module RubyVM::MJIT
 end
 
@@ -9722,8 +8973,6 @@ end
 
 class RubyVM
   def self.resolve_feature_path(_); end
-
-  def self.stat(*_); end
 end
 
 class Set
@@ -9749,12 +8998,6 @@ class Set
   InspectKey = ::T.let(nil, ::T.untyped)
 end
 
-class SignalException
-  def signm(); end
-
-  def signo(); end
-end
-
 class Socket
   IPV6_DONTFRAG = ::T.let(nil, ::T.untyped)
   IPV6_PATHMTU = ::T.let(nil, ::T.untyped)
@@ -9775,77 +9018,19 @@ class SortedSet
   def self.setup(); end
 end
 
-class StopIteration
-  def result(); end
-end
-
 class String
   include ::JSON::Ext::Generator::GeneratorMethods::String
-  def []=(*_); end
-
-  def casecmp?(_); end
-
-  def each_grapheme_cluster(); end
-
-  def encode!(*_); end
-
-  def grapheme_clusters(); end
-
-  def reverse!(); end
-
   def shellescape(); end
 
   def shellsplit(); end
-
-  def succ!(); end
-
-  def undump(); end
-
-  def unicode_normalize(*_); end
-
-  def unicode_normalize!(*_); end
-
-  def unicode_normalized?(*_); end
-
-  def unpack1(_); end
 end
 
 class String
   extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
 end
 
-class StringIO
-  def length(); end
-
-  def truncate(_); end
-end
-
 class Struct
-  def [](_); end
-
-  def []=(_, _1); end
-
-  def dig(*_); end
-
-  def each_pair(); end
-
   def filter(*_); end
-
-  def length(); end
-
-  def members(); end
-
-  def select(*_); end
-
-  def size(); end
-
-  def to_a(); end
-
-  def to_h(); end
-
-  def values(); end
-
-  def values_at(*_); end
 end
 
 Struct::Group = Etc::Group
@@ -9854,22 +9039,10 @@ Struct::Passwd = Etc::Passwd
 
 Struct::Tms = Process::Tms
 
-class SystemCallError
-  def errno(); end
-end
-
-class SystemExit
-  def status(); end
-
-  def success?(); end
-end
-
 class TracePoint
   def __enable(_, _1); end
 
   def eval_script(); end
-
-  def event(); end
 
   def instruction_sequence(); end
 
@@ -9882,24 +9055,6 @@ end
 
 module URI
   include ::URI::RFC2396_REGEXP
-end
-
-module URI::Escape
-  def decode(*arg); end
-
-  def encode(*arg); end
-
-  def escape(*arg); end
-
-  def unescape(*arg); end
-end
-
-class URI::FTP
-  def set_typecode(v); end
-
-  def typecode(); end
-
-  def typecode=(typecode); end
 end
 
 class URI::FTP
@@ -9956,23 +9111,7 @@ class URI::LDAP
 end
 
 class URI::MailTo
-  def headers(); end
-
-  def headers=(v); end
-
   def initialize(*arg); end
-
-  def set_headers(v); end
-
-  def set_to(v); end
-
-  def to(); end
-
-  def to=(v); end
-
-  def to_mailtext(); end
-
-  def to_rfc822text(); end
 end
 
 URI::Parser = URI::RFC2396_Parser
@@ -9980,25 +9119,7 @@ URI::Parser = URI::RFC2396_Parser
 URI::REGEXP = URI::RFC2396_REGEXP
 
 class URI::RFC2396_Parser
-  def escape(str, unsafe=T.unsafe(nil)); end
-
-  def extract(str, schemes=T.unsafe(nil)); end
-
   def initialize(opts=T.unsafe(nil)); end
-
-  def join(*uris); end
-
-  def make_regexp(schemes=T.unsafe(nil)); end
-
-  def parse(uri); end
-
-  def pattern(); end
-
-  def regexp(); end
-
-  def split(uri); end
-
-  def unescape(str, escaped=T.unsafe(nil)); end
 end
 
 class URI::RFC3986_Parser
@@ -10022,28 +9143,13 @@ module URI
 
 end
 
-class UnboundMethod
-  def clone(); end
-
-  def original_name(); end
-end
-
-class UncaughtThrowError
-  def tag(); end
-
-  def value(); end
-end
-
 module UnicodeNormalize
 end
 
 module UnicodeNormalize
-end
-
-module Warning
-  def warn(_); end
 end
 
 module Warning
   extend ::Warning
 end
+

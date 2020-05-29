@@ -7,7 +7,6 @@ cc_library(
     hdrs = glob([
         "*.h",
     ]),
-    copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -16,6 +15,7 @@ cc_library(
     deps = [
         "//core",
         "//main/lsp",
-        "@com_google_googletest//:gtest",
+        "@doctest",
+        "@dtl",
     ],
 )

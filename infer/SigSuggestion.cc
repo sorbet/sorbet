@@ -69,7 +69,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     return to;
 }
 
-void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
+void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, cfg::Send *snd,
                                   const UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>> &blockLocals,
                                   UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
@@ -84,6 +84,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
     }
 
     core::CallLocs locs{
+        ctx.file,
         bindLoc,
         snd->receiverLoc,
         snd->argLocs,

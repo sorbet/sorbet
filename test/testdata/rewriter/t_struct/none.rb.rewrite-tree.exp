@@ -1,11 +1,11 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C None><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).void()
     end
 
     def initialize<<C <todo sym>>>(&<blk>)
-      <emptyTree>
+      <self>.super(ZSuperArgs)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")

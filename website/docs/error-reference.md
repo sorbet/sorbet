@@ -126,6 +126,27 @@ class Main
 end
 ```
 
+## 4012
+
+A `class` was redefined as a `module` or _vice versa_ in two separate locations.
+
+```ruby
+# file_a.rb
+class Foo
+end
+
+# file_b.rb
+module Foo
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20file_a.rb%0Aclass%20Foo%0Aend%0A%0A%23%20file_b.rb%0Amodule%20Foo%0Aend">→
+View on sorbet.run</a>
+
+You can fix this error by ensuring that both definitions are declared as
+`class`es, ensuring both definitions are declared as `module`s, or renaming
+either definition so they no longer conflict.
+
 ## 4015
 
 This error usually comes when a class or module is dynamically defined and

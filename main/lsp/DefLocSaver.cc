@@ -27,11 +27,12 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
             auto &argType = argTypes[i];
             auto *localExp = ast::MK::arg2Local(arg.get());
             // localExp should never be null, but guard against the possibility.
-            if (localExp && lspQuery.matchesLoc(localExp->loc)) {
+            if (localExp && lspQuery.matchesLoc(core::Loc(ctx.file, localExp->loc))) {
                 tp.type = argType.type;
-                tp.origins.emplace_back(localExp->loc);
+                tp.origins.emplace_back(core::Loc(ctx.file, localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(localExp->loc, localExp->localVariable, tp, methodDef->symbol));
+                    ctx, core::lsp::IdentResponse(core::Loc(ctx.file, localExp->loc), localExp->localVariable, tp,
+                                                  methodDef->symbol));
                 return methodDef;
             }
         }
@@ -63,11 +64,12 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
 
         auto sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(id->loc))) {
+        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id->loc)))) {
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx)->resultType;
             tp.origins.emplace_back(sym.data(ctx)->loc());
-            core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::FieldResponse(sym, id->loc, id->name, tp));
+            core::lsp::QueryResponse::pushQueryResponse(
+                ctx, core::lsp::FieldResponse(sym, core::Loc(ctx.file, id->loc), id->name, tp));
         }
     }
     return id;
@@ -76,7 +78,7 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery, core::SymbolRef symbol) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     while (lit && symbol.exists() && lit->original) {
-        if (lspQuery.matchesLoc(lit->loc) || lspQuery.matchesSymbol(symbol)) {
+        if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
             tp.origins.emplace_back(symbol.data(ctx)->loc());
@@ -95,7 +97,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 scopes = {symbol.data(ctx)->owner};
             }
 
-            auto resp = core::lsp::ConstantResponse(symbol, lit->loc, scopes, lit->original->cnst, tp);
+            auto resp =
+                core::lsp::ConstantResponse(symbol, core::Loc(ctx.file, lit->loc), scopes, lit->original->cnst, tp);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(lit->original->scope.get());

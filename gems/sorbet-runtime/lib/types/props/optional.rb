@@ -14,19 +14,9 @@ end
 module T::Props::Optional::DecoratorMethods
   extend T::Sig
 
-  # TODO: clean this up. This set of options is confusing, and some of them are not universally
-  # applicable (e.g., :on_load only applies when using T::Serializable).
-  VALID_OPTIONAL_RULES = Set[
-    :existing, # deprecated
-    :on_load,
-    false,
-    true,
-  ].freeze
-
   VALID_RULE_KEYS = {
     default: true,
     factory: true,
-    optional: true,
   }.freeze
   private_constant :VALID_RULE_KEYS
 
@@ -73,12 +63,6 @@ module T::Props::Optional::DecoratorMethods
 
   def prop_validate_definition!(name, cls, rules, type)
     result = super
-
-    if (rules_optional = rules[:optional])
-      if !VALID_OPTIONAL_RULES.include?(rules_optional)
-        raise ArgumentError.new(":optional must be one of #{VALID_OPTIONAL_RULES.inspect}")
-      end
-    end
 
     if rules.key?(:default) && rules.key?(:factory)
       raise ArgumentError.new("Setting both :default and :factory is invalid. See: go/chalk-docs")

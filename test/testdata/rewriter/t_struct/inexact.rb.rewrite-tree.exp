@@ -1,40 +1,44 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Inexact><<C <todo sym>>> < (<emptyTree>::<C T>::<C InexactStruct>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).returns(<emptyTree>::<C Integer>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
+      <self>.instance_variable_get(:"@foo")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<C Integer>)
+      <self>.instance_variable_set(:"@foo", arg0)
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({}).returns(<emptyTree>::<C String>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+      <self>.instance_variable_get(:"@bar")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
-      ::T.cast(::T.unsafe(nil), <emptyTree>::<C String>)
+      <self>.instance_variable_set(:"@bar", arg0)
     end
+
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+
+    <self>.prop(:"bar", <emptyTree>::<C String>, {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
@@ -46,4 +50,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C Inexact>.new({:"foo" => 3, :"bar" => "hey"})
 
   <emptyTree>::<C Inexact>.new({:"foo" => false, :"quz" => [1, 2, 5]})
+
+  class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Inexact>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({}).returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux<<C <todo sym>>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:"@qux")
+        <self>.class().decorator().prop_get_logic(<self>, :"qux", arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Symbol>}).returns(<emptyTree>::<C Symbol>)
+    end
+
+    def qux=<<C <todo sym>>>(arg0, &<blk>)
+      begin
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"qux")
+        else
+          <emptyTree>
+        end
+        <self>.instance_variable_set(:"@qux", arg0)
+      end
+    end
+
+    <self>.prop(:"qux", <emptyTree>::<C Symbol>, {:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"qux")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"qux=")
+  end
 end

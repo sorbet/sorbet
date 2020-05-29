@@ -353,6 +353,10 @@ class Complex < Numeric
   end
   def equal?(arg0); end
 
+  # Returns `true` if `cmp`'s real and imaginary parts are both finite numbers,
+  # otherwise returns `false`.
+  def finite?; end
+
   # Performs division as each part is a float, never returns a float.
   #
   # ```ruby
@@ -386,6 +390,17 @@ class Complex < Numeric
   # ```
   sig {returns(T.any(Integer, Float, Rational, BigDecimal))}
   def imaginary(); end
+
+  # Returns `1` if `cmp`'s real or imaginary part is an infinite number,
+  # otherwise returns `nil`.
+  #
+  # ```ruby
+  # For example:
+  #
+  #    (1+1i).infinite?                   #=> nil
+  #    (Float::INFINITY + 1i).infinite?   #=> 1
+  # ```
+  def infinite?; end
 
   # Returns the value as a string for inspection.
   #
@@ -590,4 +605,28 @@ class Complex < Numeric
 
   sig {returns(T::Boolean)}
   def zero?(); end
+
+  # Returns a complex object which denotes the given polar form.
+  #
+  # ```ruby
+  # Complex.polar(3, 0)            #=> (3.0+0.0i)
+  # Complex.polar(3, Math::PI/2)   #=> (1.836909530733566e-16+3.0i)
+  # Complex.polar(3, Math::PI)     #=> (-3.0+3.673819061467132e-16i)
+  # Complex.polar(3, -Math::PI/2)  #=> (1.836909530733566e-16-3.0i)
+  # ```
+  def self.polar(*_); end
+
+  # Returns a complex object which denotes the given rectangular form.
+  #
+  # ```ruby
+  # Complex.rectangular(1, 2)  #=> (1+2i)
+  # ```
+  def self.rect(*_); end
+
+  # Returns a complex object which denotes the given rectangular form.
+  #
+  # ```ruby
+  # Complex.rectangular(1, 2)  #=> (1+2i)
+  # ```
+  def self.rectangular(*_); end
 end

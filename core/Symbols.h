@@ -130,7 +130,7 @@ public:
     void addMixin(SymbolRef sym) {
         ENFORCE(isClassOrModule());
         mixins_.emplace_back(sym);
-        unsetClassLinearizationComputed();
+        unsetClassOrModuleLinearizationComputed();
     }
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
@@ -427,27 +427,27 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
-    inline void setClassAbstract() {
+    inline void setClassOrModuleAbstract() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_ABSTRACT;
     }
 
-    inline void setClassInterface() {
+    inline void setClassOrModuleInterface() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_INTERFACE;
     }
 
-    inline void setClassLinearizationComputed() {
+    inline void setClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
 
-    inline void setClassFinal() {
+    inline void setClassOrModuleFinal() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_FINAL;
     }
 
-    inline void setClassSealed() {
+    inline void setClassOrModuleSealed() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_SEALED;
     }
@@ -559,8 +559,7 @@ public:
     }
 
     u4 flags = Flags::NONE;
-    u4 uniqueCounter = 1; // used as a counter inside the namer
-    NameRef name;         // todo: move out? it should not matter but it's important for name resolution
+    NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
     bool hasSig() const {
@@ -569,7 +568,9 @@ public:
     }
 
     UnorderedMap<NameRef, SymbolRef> members_;
-    std::vector<ArgInfo> arguments_;
+
+    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    ArgumentsStore arguments_;
 
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
@@ -578,12 +579,12 @@ public:
         return members_;
     };
 
-    std::vector<ArgInfo> &arguments() {
+    ArgumentsStore &arguments() {
         ENFORCE(isMethod());
         return arguments_;
     }
 
-    const std::vector<ArgInfo> &arguments() const {
+    const ArgumentsStore &arguments() const {
         ENFORCE(isMethod());
         return arguments_;
     }
@@ -631,7 +632,7 @@ private:
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 
-    inline void unsetClassLinearizationComputed() {
+    inline void unsetClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());
         flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }

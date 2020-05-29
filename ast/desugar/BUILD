@@ -26,7 +26,6 @@ cc_test(
     srcs = glob([
         "test/*.cc",
     ]),
-    copts = ["-Iexternal/gtest/include"],
     data = glob([
         "fixtures/*.rb",
         "fixtures/*.rb.exp",
@@ -38,7 +37,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )

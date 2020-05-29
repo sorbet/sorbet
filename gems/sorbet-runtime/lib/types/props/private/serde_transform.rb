@@ -26,7 +26,7 @@ module T::Props
 
       sig do
         params(
-          type: T.any(T::Types::Base, Module),
+          type: T::Types::Base,
           mode: ModeType,
           varname: String,
         )
@@ -99,15 +99,42 @@ module T::Props
               "T::Props::Utils.deep_clone_object(#{varname})"
             end
           end
+        when T::Types::Intersection
+          dynamic_fallback = "T::Props::Utils.deep_clone_object(#{varname})"
+
+          # Transformations for any members of the intersection type where we
+          # know what we need to do and did not have to fall back to the
+          # dynamic deep clone method.
+          #
+          # NB: This deliberately does include `nil`, which means we know we
+          # don't need to do any transforming.
+          inner_known = type.types
+            .map {|t| generate(t, mode, varname)}
+            .reject {|t| t == dynamic_fallback}
+            .uniq
+
+          if inner_known.size != 1
+            # If there were no cases where we could tell what we need to do,
+            # e.g. if this is `T.all(SomethingWeird, WhoKnows)`, just use the
+            # dynamic fallback.
+            #
+            # If there were multiple cases and they weren't consistent, e.g.
+            # if this is `T.all(String, T::Array[Integer])`, the type is probably
+            # bogus/uninhabited, but use the dynamic fallback because we still
+            # don't have a better option, and this isn't the place to raise that
+            # error.
+            dynamic_fallback
+          else
+            # This is probably something like `T.all(String, SomeMarker)` or
+            # `T.all(SomeEnum, T.enum(SomeEnum::FOO))` and we should treat it
+            # like String or SomeEnum even if we don't know what to do with
+            # the rest of the type.
+            inner_known.first
+          end
         when T::Types::Enum
           generate(T::Utils.lift_enum(type), mode, varname)
         else
-          if type.singleton_class < T::Props::CustomType
-            # Sometimes this comes wrapped in a T::Types::Simple and sometimes not
-            handle_custom_type(varname, T.unsafe(type), mode)
-          else
-            "T::Props::Utils.deep_clone_object(#{varname})"
-          end
+          "T::Props::Utils.deep_clone_object(#{varname})"
         end
       end
 
@@ -128,8 +155,7 @@ module T::Props
       private_class_method def self.handle_custom_type(varname, type, mode)
         case mode
         when Serialize
-          type_name = T.must(module_name(type))
-          "T::Props::CustomType.checked_serialize(#{type_name}, #{varname})"
+          "T::Props::CustomType.checked_serialize(#{varname})"
         when Deserialize
           type_name = T.must(module_name(type))
           "#{type_name}.deserialize(#{varname})"

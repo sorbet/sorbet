@@ -219,7 +219,15 @@ class Time < Object
     )
     .returns(Time)
   end
-  def self.at(seconds, microseconds_with_frac=T.unsafe(nil)); end
+  sig do
+    params(
+        seconds: Numeric,
+        microseconds_with_frac: Numeric,
+        fractional_precision: Symbol
+    )
+    .returns(Time)
+  end
+  def self.at(seconds, microseconds_with_frac=T.unsafe(nil), fractional_precision=T.unsafe(nil)); end
 
   # Creates a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object
   # based on given values, interpreted as UTC (GMT). The year must be specified.
@@ -603,7 +611,7 @@ class Time < Object
   # ```
   sig do
     params(
-        utc_offset: Integer,
+        utc_offset: T.any(Integer, String),
     )
     .returns(Time)
   end

@@ -13,11 +13,30 @@ namespace sorbet::local_vars {
 class LocalNameInserter {
     friend class LocalVars;
 
+    struct ArgFlags {
+        bool keyword : 1;
+        bool block : 1;
+        bool repeated : 1;
+        bool shadow : 1;
+
+        // In C++20 we can replace this with bit field initialzers
+        ArgFlags() : keyword(false), block(false), repeated(false), shadow(false) {}
+
+        bool isPositional() const {
+            return !this->keyword && !this->block && !this->repeated && !this->shadow;
+        }
+        bool isKeyword() const {
+            return this->keyword && !this->repeated;
+        }
+    };
+    CheckSize(ArgFlags, 1, 1);
+
     struct NamedArg {
         core::NameRef name;
         core::LocalVariable local;
-        core::Loc loc;
+        core::LocOffsets loc;
         unique_ptr<ast::Reference> expr;
+        ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
@@ -36,10 +55,12 @@ class LocalNameInserter {
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
                 named.expr = ast::MK::RestArg(arg->loc, move(named.expr));
+                named.flags.repeated = true;
             },
             [&](ast::KeywordArg *kw) {
                 named = nameArg(move(kw->expr));
                 named.expr = ast::MK::KeywordArg(arg->loc, move(named.expr));
+                named.flags.keyword = true;
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
@@ -48,10 +69,12 @@ class LocalNameInserter {
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));
                 named.expr = ast::MK::BlockArg(arg->loc, move(named.expr));
+                named.flags.block = true;
             },
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(move(shadow->expr));
                 named.expr = ast::MK::ShadowArg(arg->loc, move(named.expr));
+                named.flags.shadow = true;
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;
@@ -82,18 +105,20 @@ class LocalNameInserter {
     }
 
     struct LocalFrame {
+        struct Arg {
+            core::LocalVariable arg;
+            ArgFlags flags;
+        };
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
-        vector<core::LocalVariable> args;
-        core::Loc loc;
+        vector<Arg> args;
         std::optional<u4> oldBlockCounter = nullopt;
         u4 localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;
     };
 
-    LocalFrame &pushBlockFrame(core::Loc loc, bool insideMethod) {
+    LocalFrame &pushBlockFrame(bool insideMethod) {
         auto &frame = scopeStack.emplace_back();
-        frame.loc = loc;
         frame.localId = blockCounter;
         frame.insideBlock = true;
         frame.insideMethod = insideMethod;
@@ -101,25 +126,23 @@ class LocalNameInserter {
         return frame;
     }
 
-    LocalFrame &enterBlock(core::Loc loc) {
+    LocalFrame &enterBlock() {
         // NOTE: the base-case for this being a valid initialization is setup by
         // the `create()` static method.
-        return pushBlockFrame(loc, scopeStack.back().insideMethod);
+        return pushBlockFrame(scopeStack.back().insideMethod);
     }
 
-    LocalFrame &enterMethod(core::Loc loc) {
+    LocalFrame &enterMethod() {
         auto &frame = scopeStack.emplace_back();
-        frame.loc = loc;
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
         blockCounter = 1;
         return frame;
     }
 
-    LocalFrame &enterClass(core::Loc loc) {
+    LocalFrame &enterClass() {
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
-        frame.loc = loc;
         blockCounter = 1;
         return frame;
     }
@@ -166,7 +189,7 @@ class LocalNameInserter {
             args.emplace_back(move(named.expr));
             auto frame = scopeStack.back();
             scopeStack.back().locals[named.name] = named.local;
-            scopeStack.back().args.emplace_back(named.local);
+            scopeStack.back().args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
 
         return args;
@@ -183,7 +206,7 @@ class LocalNameInserter {
 
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        enterClass(klass->declLoc);
+        enterClass();
         return klass;
     }
 
@@ -193,7 +216,7 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        enterMethod(method->declLoc);
+        enterMethod();
 
         method->args = fillInArgs(nameArgs(ctx, method->args));
         return method;
@@ -208,11 +231,30 @@ public:
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
             if (scopeStack.back().insideMethod) {
+                ast::Hash::ENTRY_store keywordArgKeys;
+                ast::Hash::ENTRY_store keywordArgVals;
                 for (auto arg : scopeStack.back().args) {
-                    original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
+                    if (arg.flags.isPositional()) {
+                        ENFORCE(keywordArgKeys.empty(), "Saw positional arg after keyword arg");
+                        original->args.emplace_back(make_unique<ast::Local>(original->loc, arg.arg));
+                    } else if (arg.flags.isKeyword()) {
+                        keywordArgKeys.emplace_back(ast::MK::Symbol(original->loc, arg.arg._name));
+                        keywordArgVals.emplace_back(make_unique<ast::Local>(original->loc, arg.arg));
+                    } else if (arg.flags.repeated || arg.flags.block) {
+                        // Explicitly skip for now.
+                        // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
+                    } else if (arg.flags.shadow) {
+                        ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
+                    } else {
+                        ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
+                    }
+                }
+                if (!keywordArgKeys.empty()) {
+                    original->args.emplace_back(
+                        ast::MK::Hash(original->loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
                 }
             } else {
-                if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
+                if (auto e = ctx.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
                     e.setHeader("`{}` outside of method", "super");
                 }
             }
@@ -223,7 +265,7 @@ public:
 
     unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         auto outerArgs = scopeStack.back().args;
-        auto &frame = enterBlock(blk->loc);
+        auto &frame = enterBlock();
         frame.args = std::move(outerArgs);
         auto &parent = *(scopeStack.end() - 2);
 
@@ -263,12 +305,13 @@ private:
     LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
-        pushBlockFrame(core::Loc::none(), false);
+        pushBlockFrame(false);
     }
 };
 
-ast::ParsedFile LocalVars::run(core::MutableContext ctx, ast::ParsedFile tree) {
+ast::ParsedFile LocalVars::run(core::GlobalState &gs, ast::ParsedFile tree) {
     LocalNameInserter localNameInserter;
+    sorbet::core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
     tree.tree = ast::TreeMap::apply(ctx, localNameInserter, move(tree.tree));
     return tree;
 }

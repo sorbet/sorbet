@@ -50,7 +50,7 @@ unique_ptr<ast::Expression> extractClassInit(core::Context ctx, unique_ptr<ast::
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
+    return ast::MK::InsSeq(klass->declLoc.offsets(), std::move(inits), ast::MK::EmptyTree());
 }
 
 class ClassFlattenWalk {
@@ -65,10 +65,19 @@ public:
         classStack.emplace_back(classes.size());
         classes.emplace_back();
 
+        return classDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+        ENFORCE(!classStack.empty());
+        ENFORCE(classes.size() > classStack.back());
+        ENFORCE(classes[classStack.back()] == nullptr);
+
         auto inits = extractClassInit(ctx, classDef);
 
         core::SymbolRef sym;
         auto loc = classDef->declLoc;
+        std::unique_ptr<ast::Expression> replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -76,8 +85,15 @@ public:
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.lookupStaticInitForFile(loc);
+
+            // Skip emitting a place-holder for the root object.
+            replacement = ast::MK::EmptyTree();
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
+
+            // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
+            // available to the containing static-init
+            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc.offsets(), classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
@@ -87,29 +103,22 @@ public:
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
         // methods and block arguments before us.
-        auto blkLoc = core::Loc::none(loc.file());
+        auto blkLoc = core::LocOffsets::none();
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
         args.emplace_back(make_unique<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = make_unique<ast::MethodDef>(loc, loc, sym, core::Names::staticInit(), std::move(args),
+        auto init = make_unique<ast::MethodDef>(loc.offsets(), loc, sym, core::Names::staticInit(), std::move(args),
                                                 std::move(inits), ast::MethodDef::Flags());
         init->flags.isRewriterSynthesized = false;
         init->flags.isSelfMethod = true;
 
         classDef->rhs.emplace_back(std::move(init));
 
-        return classDef;
-    }
-
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
-        ENFORCE(!classStack.empty());
-        ENFORCE(classes.size() > classStack.back());
-        ENFORCE(classes[classStack.back()] == nullptr);
-
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
-        return ast::MK::EmptyTree();
+
+        return replacement;
     };
 
     unique_ptr<ast::Expression> addClasses(core::Context ctx, unique_ptr<ast::Expression> tree) {

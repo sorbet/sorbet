@@ -46,9 +46,10 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
-                bb->bexit.cond = core::LocalVariable::noVariable();
+                bb->bexit.cond = core::LocalVariable::unconditional();
             }
-            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
+            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
+                bb->rubyBlockId == thenb->rubyBlockId) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));
@@ -79,8 +80,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && thenb->exprs.empty() && thenb->bexit.thenb == thenb->bexit.elseb &&
-                bb->bexit.thenb != thenb->bexit.thenb) {
+            if (thenb != cfg.deadBlock() && bb->rubyBlockId == thenb->rubyBlockId && thenb->exprs.empty() &&
+                thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.emplace_back(bb);
@@ -90,8 +91,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && elseb->exprs.empty() && elseb->bexit.thenb == elseb->bexit.elseb &&
-                bb->bexit.elseb != elseb->bexit.elseb) {
+            if (elseb != cfg.deadBlock() && bb->rubyBlockId == thenb->rubyBlockId && elseb->exprs.empty() &&
+                elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
                 // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
@@ -213,7 +214,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 current[bind.bind.variable] = i->what;
             }
         }
-        if (bb->bexit.cond.variable.exists()) {
+        if (bb->bexit.cond.variable != core::LocalVariable::unconditional()) {
             bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond.variable, current);
         }
     }
@@ -283,6 +284,10 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (const auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+
         for (const core::LocalVariable what : RnW.reads[bb->id]) {
             const auto minIt = cfg.minLoops.find(what);
             int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
@@ -293,6 +298,10 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
         }
     }
     for (const auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
             const auto minIt = cfg.minLoops.find(what);

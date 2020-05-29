@@ -73,7 +73,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
-                retType = core::Types::instantiate(core::Context(gs, core::Symbols::root()), retType, *constraint);
+                retType = core::Types::instantiate(gs, retType, *constraint);
             }
             string typeString;
             if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {

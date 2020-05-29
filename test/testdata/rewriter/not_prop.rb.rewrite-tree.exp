@@ -1,0 +1,69 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ThingsWhichUsedToBePropSyntax><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit<<C <todo sym>>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:"@array_of_explicit")
+        <self>.class().decorator().prop_get_logic(<self>, :"array_of_explicit", arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+    end
+
+    def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+      begin
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"array_of_explicit")
+        else
+          <emptyTree>
+        end
+        <self>.instance_variable_set(:"@array_of_explicit", arg0)
+      end
+    end
+
+    <self>.prop(:"type", {:"type" => <emptyTree>::<C String>})
+
+    <self>.prop(:"object")
+
+    <self>.prop(:"array_of", {:"array" => <emptyTree>::<C String>})
+
+    <self>.prop(:"array_of_explicit", <emptyTree>::<C Array>, {:"array" => <emptyTree>::<C String>, :"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array_of_explicit<<C <todo sym>>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
+    end
+
+    <self>.prop(:"no_class_arg", {:"type" => <emptyTree>::<C Array>, :"immutable" => true, :"array" => <emptyTree>::<C String>})
+
+    <self>.prop(:"proc_type", {:"type" => <emptyTree>::<C T>.proc().params({:"x" => <emptyTree>::<C Integer>}).void()})
+
+    <self>.prop(:"enum_prop", {:"enum" => ["hello", "goodbye"]})
+  end
+end

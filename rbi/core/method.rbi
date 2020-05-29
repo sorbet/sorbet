@@ -25,6 +25,10 @@
 # #=> [#<Date: 2017-03-01 ((2457814j,0s,0n),+0s,2299161j)>, #<Date: 2017-03-02 ((2457815j,0s,0n),+0s,2299161j)>]
 # ```
 class Method < Object
+  # Two method objects are equal if they are bound to the same object and refer
+  # to the same method definition and their owners are the same class or module.
+  def ==(_); end
+
   # Returns a `Proc` object corresponding to this method.
   sig {returns(Proc)}
   def to_proc; end
@@ -186,6 +190,26 @@ class Method < Object
   sig {params(args: T.untyped).returns(T.untyped)}
   def curry(*args); end
 
+  # Two method objects are equal if they are bound to the same object and refer
+  # to the same method definition and their owners are the same class or module.
+  def eql?(_); end
+
+  # Returns a hash value corresponding to the method object.
+  #
+  # See also Object#hash.
+  def hash; end
+
+  # Returns a human-readable description of the underlying method.
+  #
+  # ```ruby
+  # "cat".method(:count).inspect   #=> "#<Method: String#count>"
+  # (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map>"
+  # ```
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  def inspect; end
+
   # Returns the name of the method.
   sig {returns(Symbol)}
   def name; end
@@ -246,6 +270,17 @@ class Method < Object
   # method on superclass.
   sig {returns(T.nilable(Method))}
   def super_method; end
+
+  # Returns a human-readable description of the underlying method.
+  #
+  # ```ruby
+  # "cat".method(:count).inspect   #=> "#<Method: String#count>"
+  # (1..3).method(:map).inspect    #=> "#<Method: Range(Enumerable)#map>"
+  # ```
+  #
+  # In the latter case, the method description includes the "owner" of the
+  # original method (`Enumerable` module, which is included into `Range`).
+  def to_s; end
 
   # Dissociates *meth* from its current receiver. The resulting `UnboundMethod`
   # can subsequently be bound to a new object of the same class (see

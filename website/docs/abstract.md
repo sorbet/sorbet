@@ -124,7 +124,7 @@ class A
 end
 
 # runtime error as `bar` is not defined on A
-A.foo
+A.bar
 ```
 
 This is hard to statically analyze, as it involves looking into the body of the

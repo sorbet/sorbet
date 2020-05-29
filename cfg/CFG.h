@@ -27,9 +27,9 @@ public:
     VariableUseSite cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
-    core::Loc loc;
+    core::LocOffsets loc;
     bool isCondSet() {
-        return cond.variable._name.id() >= 0;
+        return cond.variable.exists();
     }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
@@ -37,11 +37,11 @@ public:
 class Binding final {
 public:
     VariableUseSite bind;
-    core::Loc loc;
+    core::LocOffsets loc;
 
     std::unique_ptr<Instruction> value;
 
-    Binding(core::LocalVariable bind, core::Loc loc, std::unique_ptr<Instruction> value);
+    Binding(core::LocalVariable bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
@@ -84,6 +84,7 @@ public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
+    core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
      *
@@ -113,6 +114,11 @@ public:
     static constexpr int MIN_LOOP_FIELD = -1;
     static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
+
+    // special ruby block id offsets for exception handling
+    static constexpr int HANDLERS_BLOCK_OFFSET = 1;
+    static constexpr int ENSURE_BLOCK_OFFSET = 2;
+    static constexpr int ELSE_BLOCK_OFFSET = 3;
 
     UnorderedMap<core::LocalVariable, int> minLoops;
     UnorderedMap<core::LocalVariable, int> maxLoopWrite;

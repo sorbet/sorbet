@@ -29,7 +29,7 @@ unique_ptr<ast::MethodDef> LocalVarFinder::preTransformMethodDef(core::Context c
     auto currentMethod = methodDef->symbol;
 
     if (currentMethod == this->targetMethod) {
-        auto parsedArgs = ast::ArgParsing::parseArgs(ctx, methodDef->args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(methodDef->args);
         for (const auto &parsedArg : parsedArgs) {
             this->result_.emplace_back(parsedArg.local);
         }
@@ -51,7 +51,7 @@ unique_ptr<ast::ClassDef> LocalVarFinder::preTransformClassDef(core::Context ctx
     ENFORCE(classDef->symbol != core::Symbols::todo());
 
     auto currentMethod = classDef->symbol == core::Symbols::root()
-                             ? ctx.state.lookupStaticInitForFile(classDef->loc)
+                             ? ctx.state.lookupStaticInitForFile(classDef->declLoc)
                              : ctx.state.lookupStaticInitForClass(classDef->symbol);
 
     this->methodStack.emplace_back(currentMethod);

@@ -11,7 +11,7 @@ well as give some rough tips for how to interpret it.
 
 > **Note**: Making sense of the output of Sorbet's trace information involves
 > general familiarity with the architecture of Sorbet. If you haven't already,
-> you'll want to read [pipeline.md](../pipeline.md), which contains a high-level
+> you'll want to read [pipeline.md](pipeline.md), which contains a high-level
 > overview of the various phases of Sorbet.
 
 ## Collecting a trace
@@ -79,7 +79,7 @@ up close to the top of the trace:
 ![pipeline in trace](img/chrome-tracing-pipeline.png)
 
 The boxes like `index`, `name`, `resolving`, and `typecheck` map up with the
-phases of Sorbet that are outlined in [pipeline.md](../pipeline.md).
+phases of Sorbet that are outlined in [pipeline.md](pipeline.md).
 
 If you click on an individual box, you'll see metadata associated with that
 event. For example, clicking on this `typecheckOne` box shows the name of the

@@ -5,6 +5,7 @@
 
 namespace sorbet {
 class KeyValueStore;
+class OwnedKeyValueStore;
 namespace ast {
 struct ParsedFile;
 }
@@ -18,11 +19,14 @@ struct Options;
 
 namespace sorbet::realmain::cache {
 // If cacheDir is specified, creates a KeyValueStore. Otherwise, returns nullptr.
-std::unique_ptr<KeyValueStore> maybeCreateKeyValueStore(const options::Options &opts);
+std::unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &opts);
+
+// Returns an owned key value store if kvstore is unchanged since gs was created, or false otherwise.
+std::unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, std::unique_ptr<KeyValueStore> kvstore);
 
 // If kvstore is not null, caches global state and the given files to disk if they have changed. Can silently fail to
 // cache
-void maybeCacheGlobalStateAndFiles(std::unique_ptr<KeyValueStore> &kvstore, const options::Options &opts,
+void maybeCacheGlobalStateAndFiles(std::unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
                                    core::GlobalState &gs, std::vector<ast::ParsedFile> &indexed);
 } // namespace sorbet::realmain::cache
 

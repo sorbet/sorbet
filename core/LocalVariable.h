@@ -65,6 +65,10 @@ public:
     static inline LocalVariable selfVariable() {
         return LocalVariable(Names::selfLocal(), 0);
     }
+
+    static inline LocalVariable unconditional() {
+        return LocalVariable(Names::unconditional(), 0);
+    }
 };
 
 CheckSize(LocalVariable, 8, 4);

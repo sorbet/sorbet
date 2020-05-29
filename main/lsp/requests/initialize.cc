@@ -28,11 +28,9 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
 
-    if (opts.lspQuickFixEnabled) {
-        auto codeActionProvider = make_unique<CodeActionOptions>();
-        codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix};
-        serverCap->codeActionProvider = move(codeActionProvider);
-    }
+    auto codeActionProvider = make_unique<CodeActionOptions>();
+    codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};
+    serverCap->codeActionProvider = move(codeActionProvider);
 
     if (opts.lspSignatureHelpEnabled) {
         auto sigHelpProvider = make_unique<SignatureHelpOptions>();

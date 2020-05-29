@@ -12,7 +12,7 @@ namespace sorbet::rewriter {
 
 vector<unique_ptr<ast::Expression>> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
-    core::Loc loc = asgn->loc;
+    auto loc = asgn->loc;
 
     if (ctx.state.runningUnderAutogen) {
         // This is not safe to run under autogen, because we'd be outputing
@@ -77,7 +77,8 @@ vector<unique_ptr<ast::Expression>> ClassNew::run(core::MutableContext ctx, ast:
     }
 
     vector<unique_ptr<ast::Expression>> stats;
-    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    stats.emplace_back(
+        ast::MK::Class(loc, core::Loc(ctx.file, loc), std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 

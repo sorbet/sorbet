@@ -159,7 +159,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         raise "#{msg} #{extra.inspect}"
       end
 
-      e = assert_raises(T::Props::InvalidValueError) do
+      e = assert_raises(TypeError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
@@ -171,7 +171,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'includes relevant generated code on serialize' do
       m = a_serializable
       m.instance_variable_set(:@foo, "Won't respond like hash")
-      e = assert_raises(T::Props::InvalidValueError) do
+      e = assert_raises(TypeError) do
         m.serialize
       end
 
@@ -309,7 +309,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'throws exception on nil serialize' do
       foo = NilFieldStruct.allocate
-      ex = assert_raises(T::Props::InvalidValueError) do
+      ex = assert_raises(TypeError) do
         foo.serialize
       end
       assert_includes(ex.message, 'Opus::Types::Test::Props::SerializableTest::NilFieldStruct.foo not set for non-optional prop')
@@ -338,7 +338,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       it 'throws exception on nil serialize' do
         struct = NilFieldWeakConstructor.new
-        assert_raises(T::Props::InvalidValueError) do
+        assert_raises(TypeError) do
           struct.serialize
         end
       end
@@ -364,7 +364,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       it 'throws exception on nil serialize' do
         struct = NilDefaultStruct.new
-        assert_raises(T::Props::InvalidValueError) do
+        assert_raises(TypeError) do
           struct.serialize
         end
       end
@@ -473,16 +473,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   class CustomType
     extend T::Props::CustomType
 
-    def self.instance?(value)
-      value.is_a?(String)
-    end
+    attr_accessor :value
 
     def self.deserialize(value)
-      value.clone.freeze
+      result = new
+      result.value = value.clone.freeze
+      result
     end
 
     def self.serialize(instance)
-      instance
+      instance.value
     end
   end
 
@@ -528,6 +528,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :enum_of_enums, T.nilable(T.enum([MyEnum::BAR]))
   end
 
+  class RedundantEnumStruct < T::Struct
+    prop :enum, T.all(MyEnum, T.enum(MyEnum.values))
+  end
+
   describe 'enum' do
     it 'round trips' do
       s = EnumStruct.new(enum: MyEnum::FOO, enum_of_enums: MyEnum::BAR)
@@ -539,6 +543,15 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       roundtripped = EnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.enum)
       assert_equal(MyEnum::BAR, roundtripped.enum_of_enums)
+    end
+
+    it 'does not break during serde when used redundantly with legacy T.enum' do
+      s = RedundantEnumStruct.new(enum: MyEnum::FOO)
+      serialized = s.serialize
+      assert_equal('foo', serialized['enum'])
+
+      roundtripped = RedundantEnumStruct.from_hash(serialized)
+      assert_equal(MyEnum::FOO, roundtripped.enum)
     end
   end
 
@@ -720,7 +733,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :hash_of_substruct, T::Hash[String, MySerializable]
     prop :custom_type, CustomType
     prop :nilable_custom_type, T.nilable(CustomType)
-    prop :default_custom_type, CustomType, default: ''
+    prop :default_custom_type, CustomType, default: CustomType.new
     prop :array_of_custom_type, T::Array[CustomType]
     prop :hash_of_custom_type_to_substruct, T::Hash[CustomType, MySerializable]
     prop :unidentified_type, Object
@@ -728,6 +741,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :array_of_unidentified_type, T::Array[Object]
     prop :defaulted_unidentified_type, Object, default: Object.new
     prop :hash_with_unidentified_types, T::Hash[Object, Object]
+    prop :infinity_float, Float, default: Float::INFINITY
   end
 
   describe 'generated code' do

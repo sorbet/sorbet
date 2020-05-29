@@ -343,7 +343,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-lsp-quick-fix", "Enable experimental LSP feature: Quick Fix");
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -464,6 +463,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value(empty.metricsSha), "sha1");
     options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
+    options.add_options("dev")("metrics-extra-tags", "Extra tags to report, comma separated",
+                               cxxopts::value<string>()->default_value(""), "key1=value1,key2=value2");
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
@@ -676,7 +677,6 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
-        opts.lspQuickFixEnabled = opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-quick-fix"].as<bool>();
         opts.lspDocumentSymbolEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspDocumentHighlightEnabled =
@@ -760,10 +760,6 @@ void readOptions(Options &opts,
             logger->info("{}", options.help(options.groups()));
             throw EarlyReturnWithCode(0);
         }
-        if (raw["version"].as<bool>()) {
-            fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
-            throw EarlyReturnWithCode(0);
-        }
         if (raw["license"].as<bool>()) {
             fmt::print(
                 "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
@@ -804,6 +800,15 @@ void readOptions(Options &opts,
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
+        {
+            // parse extra sfx/datadog tags
+            auto stringToParse = raw["metrics-extra-tags"].as<string>();
+            if (stringToParse != "") {
+                for (absl::string_view sp : absl::StrSplit(stringToParse, ',')) {
+                    opts.metricsExtraTags.insert(absl::StrSplit(sp, absl::MaxSplits('=', 1)));
+                }
+            }
+        }
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
@@ -831,7 +836,8 @@ void readOptions(Options &opts,
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
 
-        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
+            opts.storeState.empty()) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
                           options.help({""}));
             throw EarlyReturnWithCode(1);
@@ -885,6 +891,12 @@ void readOptions(Options &opts,
             if (maybeExtension) {
                 configuredExtensions.emplace_back(move(maybeExtension));
             }
+        }
+
+        // Allow semanticExtensionProviders to print something when --version is given before we throw.
+        if (raw["version"].as<bool>()) {
+            fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
+            throw EarlyReturnWithCode(0);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());

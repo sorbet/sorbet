@@ -176,7 +176,7 @@ If instead you want to explore your files locally, here are some things to try:
 - Check whether things that show up in the TODO RBI file actually exist in your project.
   It's possible some of these constants are typos.
 - Upgrade a file marked #{cyan("# typed: ignore")} to #{cyan("# typed: false")}.
-  Then, run #{cyan("srb tc")} and try to fix any errors.
+  Then, run #{cyan("srb rbi hidden-definitions && srb tc")} and try to fix any errors.
 
 #{emojify("🙌", "Please don't hesitate to give us your feedback!")}
     "

@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -27,173 +27,161 @@ namespace sorbet::infer::test {
 auto logger = spd::stderr_color_mt("infer_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-class InferFixture : public ::testing::Test {
-public:
-    void SetUp() override {
-        ctxPtr = make_unique<core::GlobalState>(errorQueue);
-        ctxPtr->initEmpty();
-    }
-    core::MutableContext getCtx() {
-        return core::MutableContext(*ctxPtr, core::Symbols::root());
-    }
-
-private:
-    unique_ptr<core::GlobalState> ctxPtr;
-};
-
 void processSource(core::GlobalState &cb, string str) {
     sorbet::core::UnfreezeNameTable nt(cb);
     sorbet::core::UnfreezeSymbolTable st(cb);
     sorbet::core::UnfreezeFileTable ft(cb);
-    auto ast = parser::Parser::run(cb, "<test>", str);
-    sorbet::core::MutableContext ctx(cb, core::Symbols::root());
-    auto fileId = ast->loc.file();
+    core::FileRef fileId = cb.enterFile("<test>", str);
+    auto ast = parser::Parser::run(cb, fileId);
+    sorbet::core::MutableContext ctx(cb, core::Symbols::root(), fileId);
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
     tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
     tree = local_vars::LocalVars::run(ctx, move(tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
-    trees = namer::Namer::run(ctx, move(trees));
     auto workers = WorkerPool::create(0, *logger);
-    resolver::Resolver::run(ctx, move(trees), *workers);
-    for (auto &tree : trees) {
+    trees = namer::Namer::run(cb, move(trees), *workers);
+    auto resolved = resolver::Resolver::run(cb, move(trees), *workers);
+    for (auto &tree : resolved.result()) {
+        sorbet::core::MutableContext ctx(cb, core::Symbols::root(), tree.file);
         tree = class_flatten::runOne(ctx, move(tree));
     }
 }
 
-TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
-    auto ctx = getCtx();
-    auto intLit = core::make_type<core::LiteralType>(int64_t(1));
-    auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
-    auto floatLit = core::make_type<core::LiteralType>(1.0f);
-    auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
-    auto trueLit = core::make_type<core::LiteralType>(true);
-    auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
-    auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
-    auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
-    EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intClass));
-    EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatClass));
-    EXPECT_TRUE(core::Types::isSubType(ctx, trueLit, trueClass));
-    EXPECT_TRUE(core::Types::isSubType(ctx, stringLit, stringClass));
+TEST_CASE("Infer") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
 
-    EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intLit));
-    EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatLit));
-    EXPECT_TRUE(core::Types::isSubType(ctx, trueLit, trueLit));
-    EXPECT_TRUE(core::Types::isSubType(ctx, stringLit, stringLit));
+    SUBCASE("LiteralsSubtyping") {
+        auto intLit = core::make_type<core::LiteralType>(int64_t(1));
+        auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
+        auto floatLit = core::make_type<core::LiteralType>(1.0f);
+        auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
+        auto trueLit = core::make_type<core::LiteralType>(true);
+        auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
+        auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
+        auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
+        REQUIRE(core::Types::isSubType(gs, intLit, intClass));
+        REQUIRE(core::Types::isSubType(gs, floatLit, floatClass));
+        REQUIRE(core::Types::isSubType(gs, trueLit, trueClass));
+        REQUIRE(core::Types::isSubType(gs, stringLit, stringClass));
 
-    EXPECT_FALSE(core::Types::isSubType(ctx, intClass, intLit));
-    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::top(), core::Types::untypedUntracked()));
-    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::untypedUntracked(), core::Types::top()));
-}
+        REQUIRE(core::Types::isSubType(gs, intLit, intLit));
+        REQUIRE(core::Types::isSubType(gs, floatLit, floatLit));
+        REQUIRE(core::Types::isSubType(gs, trueLit, trueLit));
+        REQUIRE(core::Types::isSubType(gs, stringLit, stringLit));
 
-TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
-    auto ctx = getCtx();
-    processSource(ctx, "class Bar; end; class Foo < Bar; end");
-    const auto &rootScope = core::Symbols::root().data(ctx);
+        REQUIRE_FALSE(core::Types::isSubType(gs, intClass, intLit));
+        REQUIRE(core::Types::isSubType(gs, core::Types::top(), core::Types::untypedUntracked()));
+        REQUIRE(core::Types::isSubType(gs, core::Types::untypedUntracked(), core::Types::top()));
+    }
 
-    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto fooSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
-    ASSERT_EQ("<C <U Foo>>", fooSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    SUBCASE("ClassesSubtyping") {
+        processSource(gs, "class Bar; end; class Foo < Bar; end");
+        const auto &rootScope = core::Symbols::root().data(gs);
 
-    auto barType = core::make_type<core::ClassType>(barSymbol);
-    auto fooType = core::make_type<core::ClassType>(fooSymbol);
+        auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
+        auto fooSymbol = rootScope->findMember(gs, gs.enterNameConstant("Foo"));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.data(gs)->showRaw(gs));
 
-    ASSERT_TRUE(core::Types::isSubType(ctx, fooType, barType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, fooType, fooType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, barType, barType));
-    ASSERT_FALSE(core::Types::isSubType(ctx, barType, fooType));
-}
+        auto barType = core::make_type<core::ClassType>(barSymbol);
+        auto fooType = core::make_type<core::ClassType>(fooSymbol);
 
-TEST_F(InferFixture, ClassesLubs) { // NOLINT
-    auto ctx = getCtx();
-    processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    const auto &rootScope = core::Symbols::root().data(ctx);
+        REQUIRE(core::Types::isSubType(gs, fooType, barType));
+        REQUIRE(core::Types::isSubType(gs, fooType, fooType));
+        REQUIRE(core::Types::isSubType(gs, barType, barType));
+        REQUIRE_FALSE(core::Types::isSubType(gs, barType, fooType));
+    }
 
-    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
-    auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
-    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
-    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    SUBCASE("ClassesLubs") {
+        processSource(gs, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
+        const auto &rootScope = core::Symbols::root().data(gs);
 
-    auto barType = core::make_type<core::ClassType>(barSymbol);
-    auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-    auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
+        auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
+        auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
 
-    auto barNfoo1 = core::Types::any(ctx, barType, foo1Type);
-    auto foo1Nbar = core::Types::any(ctx, foo1Type, barType);
-    auto barNfoo2 = core::Types::any(ctx, barType, foo2Type);
-    auto foo2Nbar = core::Types::any(ctx, foo2Type, barType);
-    auto foo1Nfoo2 = core::Types::any(ctx, foo1Type, foo2Type);
-    auto foo2Nfoo1 = core::Types::any(ctx, foo2Type, foo1Type);
+        auto barType = core::make_type<core::ClassType>(barSymbol);
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
 
-    ASSERT_EQ("ClassType", barNfoo1->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barType, barNfoo1));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Type, barNfoo1));
-    ASSERT_EQ("ClassType", barNfoo2->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barType, barNfoo2));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Type, barNfoo2));
-    ASSERT_EQ("ClassType", foo1Nbar->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barType, foo1Nbar));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Type, foo1Nbar));
-    ASSERT_EQ("ClassType", foo2Nbar->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barType, foo2Nbar));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Type, foo2Nbar));
+        auto barNfoo1 = core::Types::any(gs, barType, foo1Type);
+        auto foo1Nbar = core::Types::any(gs, foo1Type, barType);
+        auto barNfoo2 = core::Types::any(gs, barType, foo2Type);
+        auto foo2Nbar = core::Types::any(gs, foo2Type, barType);
+        auto foo1Nfoo2 = core::Types::any(gs, foo1Type, foo2Type);
+        auto foo2Nfoo1 = core::Types::any(gs, foo2Type, foo1Type);
 
-    ASSERT_TRUE(core::Types::equiv(ctx, barNfoo2, foo2Nbar));
-    ASSERT_TRUE(core::Types::equiv(ctx, barNfoo1, foo1Nbar));
-    ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
+        REQUIRE_EQ("ClassType", barNfoo1->typeName());
+        REQUIRE(core::Types::isSubType(gs, barType, barNfoo1));
+        REQUIRE(core::Types::isSubType(gs, foo1Type, barNfoo1));
+        REQUIRE_EQ("ClassType", barNfoo2->typeName());
+        REQUIRE(core::Types::isSubType(gs, barType, barNfoo2));
+        REQUIRE(core::Types::isSubType(gs, foo2Type, barNfoo2));
+        REQUIRE_EQ("ClassType", foo1Nbar->typeName());
+        REQUIRE(core::Types::isSubType(gs, barType, foo1Nbar));
+        REQUIRE(core::Types::isSubType(gs, foo1Type, foo1Nbar));
+        REQUIRE_EQ("ClassType", foo2Nbar->typeName());
+        REQUIRE(core::Types::isSubType(gs, barType, foo2Nbar));
+        REQUIRE(core::Types::isSubType(gs, foo2Type, foo2Nbar));
 
-    auto intType = core::make_type<core::ClassType>(core::Symbols::Integer());
-    auto intNfoo1 = core::Types::any(ctx, foo1Type, intType);
-    auto intNbar = core::Types::any(ctx, barType, intType);
-    auto intNfoo1Nbar = core::Types::any(ctx, intNfoo1, barType);
-    ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nbar, intNbar));
-    auto intNfoo1Nfoo2 = core::Types::any(ctx, intNfoo1, foo2Type);
-    auto intNfoo1Nfoo2Nbar = core::Types::any(ctx, intNfoo1Nfoo2, barType);
-    ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nfoo2Nbar, intNbar));
-}
+        REQUIRE(core::Types::equiv(gs, barNfoo2, foo2Nbar));
+        REQUIRE(core::Types::equiv(gs, barNfoo1, foo1Nbar));
+        REQUIRE(core::Types::equiv(gs, foo1Nfoo2, foo2Nfoo1));
 
-TEST_F(InferFixture, ClassesGlbs) { // NOLINT
-    auto ctx = getCtx();
-    processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    const auto &rootScope = core::Symbols::root().data(ctx);
+        auto intType = core::make_type<core::ClassType>(core::Symbols::Integer());
+        auto intNfoo1 = core::Types::any(gs, foo1Type, intType);
+        auto intNbar = core::Types::any(gs, barType, intType);
+        auto intNfoo1Nbar = core::Types::any(gs, intNfoo1, barType);
+        REQUIRE(core::Types::equiv(gs, intNfoo1Nbar, intNbar));
+        auto intNfoo1Nfoo2 = core::Types::any(gs, intNfoo1, foo2Type);
+        auto intNfoo1Nfoo2Nbar = core::Types::any(gs, intNfoo1Nfoo2, barType);
+        REQUIRE(core::Types::equiv(gs, intNfoo1Nfoo2Nbar, intNbar));
+    }
 
-    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
-    auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<C <U Bar>>", barSymbol.data(ctx)->name.data(ctx)->showRaw(ctx));
-    ASSERT_EQ("<C <U Foo1>>", foo1Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
-    ASSERT_EQ("<C <U Foo2>>", foo2Symbol.data(ctx)->name.data(ctx)->showRaw(ctx));
+    SUBCASE("ClassesGlbs") {
+        processSource(gs, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
+        const auto &rootScope = core::Symbols::root().data(gs);
 
-    auto barType = core::make_type<core::ClassType>(barSymbol);
-    auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-    auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
+        auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
+        auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
 
-    auto barOrfoo1 = core::Types::all(ctx, barType, foo1Type);
-    auto foo1Orbar = core::Types::all(ctx, foo1Type, barType);
-    auto barOrfoo2 = core::Types::all(ctx, barType, foo2Type);
-    auto foo2Orbar = core::Types::all(ctx, foo2Type, barType);
-    auto foo1Orfoo2 = core::Types::all(ctx, foo1Type, foo2Type);
-    auto foo2Orfoo1 = core::Types::all(ctx, foo2Type, foo1Type);
+        auto barType = core::make_type<core::ClassType>(barSymbol);
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
 
-    ASSERT_EQ("ClassType", barOrfoo1->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo1, barType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo1, foo1Type));
-    ASSERT_EQ("ClassType", barOrfoo2->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo2, barType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo2, foo2Type));
-    ASSERT_EQ("ClassType", foo1Orbar->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Orbar, barType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Orbar, foo1Type));
-    ASSERT_EQ("ClassType", foo2Orbar->typeName());
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Orbar, barType));
-    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Orbar, foo2Type));
+        auto barOrfoo1 = core::Types::all(gs, barType, foo1Type);
+        auto foo1Orbar = core::Types::all(gs, foo1Type, barType);
+        auto barOrfoo2 = core::Types::all(gs, barType, foo2Type);
+        auto foo2Orbar = core::Types::all(gs, foo2Type, barType);
+        auto foo1Orfoo2 = core::Types::all(gs, foo1Type, foo2Type);
+        auto foo2Orfoo1 = core::Types::all(gs, foo2Type, foo1Type);
 
-    ASSERT_TRUE(core::Types::equiv(ctx, barOrfoo2, foo2Orbar));
-    ASSERT_TRUE(core::Types::equiv(ctx, barOrfoo1, foo1Orbar));
-    ASSERT_TRUE(core::Types::equiv(ctx, foo1Orfoo2, foo2Orfoo1));
+        REQUIRE_EQ("ClassType", barOrfoo1->typeName());
+        REQUIRE(core::Types::isSubType(gs, barOrfoo1, barType));
+        REQUIRE(core::Types::isSubType(gs, barOrfoo1, foo1Type));
+        REQUIRE_EQ("ClassType", barOrfoo2->typeName());
+        REQUIRE(core::Types::isSubType(gs, barOrfoo2, barType));
+        REQUIRE(core::Types::isSubType(gs, barOrfoo2, foo2Type));
+        REQUIRE_EQ("ClassType", foo1Orbar->typeName());
+        REQUIRE(core::Types::isSubType(gs, foo1Orbar, barType));
+        REQUIRE(core::Types::isSubType(gs, foo1Orbar, foo1Type));
+        REQUIRE_EQ("ClassType", foo2Orbar->typeName());
+        REQUIRE(core::Types::isSubType(gs, foo2Orbar, barType));
+        REQUIRE(core::Types::isSubType(gs, foo2Orbar, foo2Type));
+
+        REQUIRE(core::Types::equiv(gs, barOrfoo2, foo2Orbar));
+        REQUIRE(core::Types::equiv(gs, barOrfoo1, foo1Orbar));
+        REQUIRE(core::Types::equiv(gs, foo1Orfoo2, foo2Orfoo1));
+    }
 }
 
 } // namespace sorbet::infer::test
