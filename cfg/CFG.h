@@ -84,6 +84,7 @@ public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
+    int maxVariableId = 0;
     core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
@@ -120,20 +121,20 @@ public:
     static constexpr int ENSURE_BLOCK_OFFSET = 2;
     static constexpr int ELSE_BLOCK_OFFSET = 3;
 
-    UnorderedMap<core::LocalVariable, int> minLoops;
-    UnorderedMap<core::LocalVariable, int> maxLoopWrite;
+    std::vector<int> minLoops;
+    std::vector<int> maxLoopWrite;
 
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        std::vector<UnorderedSet<core::LocalVariable>> reads;
-        std::vector<UnorderedSet<core::LocalVariable>> writes;
+        std::vector<std::vector<bool>> reads;
+        std::vector<std::vector<bool>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        std::vector<UnorderedSet<core::LocalVariable>> dead;
+        std::vector<std::vector<bool>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 

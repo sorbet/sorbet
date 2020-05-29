@@ -11,18 +11,39 @@
 
 namespace sorbet::cfg {
 
+class LocalRef {
+public:
+    core::LocalVariable _variable;
+    LocalRef() : _variable(){};
+    LocalRef(core::LocalVariable id) : _variable(id){};
+    core::LocalVariable data(const CFG &) const;
+    int minLoops(const CFG &) const;
+    int maxLoopWrite(const CFG &) const;
+    int id() const;
+    bool exists() const;
+    bool isBlockCall() const;
+    bool isAliasForGlobal(const CFG &, const core::GlobalState &gs) const;
+    bool isSyntheticTemporary(const CFG &, const core::GlobalState &gs) const;
+    std::string toString(const CFG &cfg, const core::GlobalState &gs) const;
+    std::string showRaw(const CFG &cfg, const core::GlobalState &gs) const;
+
+    static LocalRef none();
+    static LocalRef finalReturn();
+    static LocalRef selfVariable();
+};
+
 class VariableUseSite {
 public:
-    core::LocalVariable variable;
+    LocalRef variable;
     core::TypePtr type;
     VariableUseSite() = default;
-    VariableUseSite(core::LocalVariable local) : variable(local){};
+    VariableUseSite(LocalRef local) : variable(local){};
     VariableUseSite(const VariableUseSite &) = delete;
     const VariableUseSite &operator=(const VariableUseSite &rhs) = delete;
     VariableUseSite(VariableUseSite &&) = default;
     VariableUseSite &operator=(VariableUseSite &&rhs) = default;
-    std::string toString(const core::GlobalState &gs) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 
 // TODO: convert it to implicitly numbered instead of explicitly bound
