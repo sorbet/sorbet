@@ -158,7 +158,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
 
     // If this class has no type members, fix attached class early.
     if (sym.data(gs)->typeMembers().empty()) {
-        auto singleton = sym.data(gs)->lookupSingletonClass(gs);
+        auto singleton = sym.data(gs)->lookupSingletonClass(gs, sym);
         if (singleton.exists()) {
             // AttachedClass doesn't exist on `T.untyped`, which is a problem
             // with RuntimeProfiled.
@@ -168,7 +168,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                 ENFORCE(lambdaParam != nullptr);
 
                 lambdaParam->lowerBound = core::Types::bottom();
-                lambdaParam->upperBound = sym.data(gs)->externalType(gs);
+                lambdaParam->upperBound = sym.data(gs)->externalType(gs, sym);
             }
         }
     }
@@ -208,7 +208,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             continue;
         }
 
-        auto attached = ref.data(gs)->attachedClass(gs);
+        auto attached = ref.data(gs)->attachedClass(gs, ref);
         bool isSingleton = attached.exists() && attached != core::Symbols::untyped();
         if (isSingleton) {
             if (attached == core::Symbols::BasicObject()) {
@@ -219,7 +219,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
-                ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
+                auto attachedSuperClass = attached.data(gs)->superClass();
+                ref.data(gs)->setSuperClass(attachedSuperClass.data(gs)->singletonClass(gs, attachedSuperClass));
             }
         } else {
             if (ref.data(gs)->isClassOrModuleClass()) {
@@ -383,7 +384,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
                 continue;
             }
             if (!singleton.exists()) {
-                singleton = sym.data(gs)->singletonClass(gs);
+                singleton = sym.data(gs)->singletonClass(gs, sym);
             }
             singleton.data(gs)->addMixin(classMethods);
         }

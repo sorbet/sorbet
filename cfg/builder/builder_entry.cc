@@ -28,9 +28,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     if (!selfClaz.exists()) {
         selfClaz = md.symbol;
     }
+    auto selfClazEnclosingClass = selfClaz.data(ctx)->enclosingClass(ctx);
     synthesizeExpr(entry, core::LocalVariable::selfVariable(), md.loc,
                    make_unique<Cast>(core::LocalVariable::selfVariable(),
-                                     selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
+                                     selfClazEnclosingClass.data(ctx)->selfType(ctx, selfClazEnclosingClass),
                                      core::Names::cast()));
     int i = -1;
     for (auto &argExpr : md.args) {

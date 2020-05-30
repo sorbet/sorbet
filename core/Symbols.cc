@@ -44,34 +44,35 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     }
     return targs;
 }
-TypePtr Symbol::selfType(const GlobalState &gs) const {
+TypePtr Symbol::selfType(const GlobalState &gs, const SymbolRef self) const {
     ENFORCE(isClassOrModule());
+    ENFORCE(this->ref(gs) == self);
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return externalType(gs);
+        return externalType(gs, self);
     } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(self, selfTypeArgs(gs));
     }
 }
 
-TypePtr Symbol::externalType(const GlobalState &gs) const {
+TypePtr Symbol::externalType(const GlobalState &gs, const SymbolRef self) const {
     ENFORCE(isClassOrModule());
+    ENFORCE(this->ref(gs) == self);
     if (!resultType) {
         // note that sometimes resultType is set externally to not be a result of this computation
         // this happens e.g. in case this is a stub class
         TypePtr newResultType;
-        auto ref = this->ref(gs);
         if (typeMembers().empty()) {
-            newResultType = make_type<ClassType>(ref);
+            newResultType = make_type<ClassType>(self);
         } else {
             vector<TypePtr> targs;
             targs.reserve(typeMembers().size());
 
             // Special-case covariant stdlib generics to have their types
             // defaulted to `T.untyped`. This set *should not* grow over time.
-            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
-                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+            bool isStdlibGeneric = self == core::Symbols::Hash() || self == core::Symbols::Array() ||
+                                   self == core::Symbols::Set() || self == core::Symbols::Range() ||
+                                   self == core::Symbols::Enumerable() || self == core::Symbols::Enumerator();
 
             for (auto &tm : typeMembers()) {
                 auto tmData = tm.data(gs);
@@ -81,7 +82,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                 if (isStdlibGeneric) {
                     // For backwards compatibility, instantiate stdlib generics
                     // with T.untyped.
-                    targs.emplace_back(Types::untyped(gs, ref));
+                    targs.emplace_back(Types::untyped(gs, self));
                 } else if (tmData->isFixed() || tmData->isCovariant()) {
                     // Default fixed or covariant parameters to their upper
                     // bound.
@@ -90,7 +91,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                     // We instantiate Invariant type members as T.untyped as
                     // this will behave a bit like a unification variable with
                     // Types::glb.
-                    targs.emplace_back(Types::untyped(gs, ref));
+                    targs.emplace_back(Types::untyped(gs, self));
                 } else {
                     // The remaining case is a contravariant parameter, which
                     // gets defaulted to its lower bound.
@@ -98,7 +99,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                 }
             }
 
-            newResultType = make_type<AppliedType>(ref, targs);
+            newResultType = make_type<AppliedType>(self, targs);
         }
         {
             // this method is supposed to be idempotent. The lines below implement "safe publication" of a value that is
@@ -107,7 +108,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
             shared_ptr<core::Type> current(nullptr);
             atomic_compare_exchange_weak(&mutableThis->resultType.store, &current, newResultType.store);
         }
-        return externalType(gs);
+        return externalType(gs, self);
     }
     return resultType;
 }
@@ -289,8 +290,9 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     return Symbols::noSymbol();
 }
 
-vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
+vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState &gs, SymbolRef self, NameRef name,
                                                                int betterThan) const {
+    ENFORCE(this->ref(gs) == self);
     vector<Symbol::FuzzySearchResult> res;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
@@ -300,23 +302,23 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
     }
 
     if (name.data(gs)->kind == NameKind::UTF8) {
-        auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
+        auto sym = findMemberFuzzyMatchUTF8(gs, self, name, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
             // For the error when you use a instance method but wanted the
             // singleton one
-            auto singleton = lookupSingletonClass(gs);
+            auto singleton = lookupSingletonClass(gs, self);
             if (singleton.exists()) {
-                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, singleton, name, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
             } else {
                 // For the error when you use a singleton method but wanted the
                 // instance one
-                auto attached = attachedClass(gs);
-                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                auto attached = attachedClass(gs, self);
+                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, attached, name, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -324,17 +326,19 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         }
         auto shortName = name.data(gs)->shortName(gs);
         if (!shortName.empty() && std::isupper(shortName.front())) {
-            vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
+            vector<Symbol::FuzzySearchResult> constant_matches =
+                findMemberFuzzyMatchConstant(gs, self, name, betterThan);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
         }
     } else if (name.data(gs)->kind == NameKind::CONSTANT) {
-        res = findMemberFuzzyMatchConstant(gs, name, betterThan);
+        res = findMemberFuzzyMatchConstant(gs, self, name, betterThan);
     }
     return res;
 }
 
-vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
-                                                                       int betterThan) const {
+vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const GlobalState &gs, const SymbolRef self,
+                                                                       NameRef name, int betterThan) const {
+    ENFORCE(this->ref(gs) == self);
     // Performance of this method is bad, to say the least.
     // It's written under assumption that it's called rarely
     // and that it's worth spending a lot of time finding a good candidate in ALL scopes.
@@ -353,7 +357,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
     // Find the closest by following outer scopes
     {
-        SymbolRef base = ref(gs);
+        SymbolRef base = self;
         do {
             // follow outer scopes
 
@@ -446,7 +450,9 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     return result;
 }
 
-Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan) const {
+Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs, SymbolRef self, NameRef name,
+                                                           int betterThan) const {
+    ENFORCE(this->ref(gs) == self);
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
@@ -476,7 +482,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, *it, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
@@ -484,7 +490,8 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         }
     }
     if (this->superClass().exists()) {
-        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult =
+            this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, this->superClass(), name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
@@ -511,8 +518,9 @@ string Symbol::showFullName(const GlobalState &gs) const {
     return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
 }
 
-bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
-    if (ref(gs).isSynthetic()) {
+bool Symbol::isHiddenFromPrinting(const GlobalState &gs, SymbolRef self) const {
+    ENFORCE(this->ref(gs) == self);
+    if (self.isSynthetic()) {
         return true;
     }
     if (locs_.empty()) {
@@ -686,10 +694,10 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             continue;
         }
 
-        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs, pair.second)) {
             bool hadPrintableChild = false;
             for (auto childPair : pair.second.data(gs)->members()) {
-                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs, childPair.second)) {
                     hadPrintableChild = true;
                     break;
                 }
@@ -754,7 +762,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
 
 string Symbol::show(const GlobalState &gs) const {
     if (isClassOrModule() && isSingletonClass(gs)) {
-        auto attached = this->attachedClass(gs);
+        auto attached = this->attachedClass(gs, this->ref(gs));
         if (attached.exists()) {
             return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
         }
@@ -765,13 +773,13 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (this->name == core::Names::Constants::AttachedClass()) {
-        auto attached = this->owner.data(gs)->attachedClass(gs);
+        auto attached = this->owner.data(gs)->attachedClass(gs, this->owner);
         ENFORCE(attached.exists());
         return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
     }
 
     if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
+        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs, this->owner).data(gs)->show(gs),
                            this->name.data(gs)->show(gs));
     }
 
@@ -810,20 +818,20 @@ bool Symbol::isSingletonClass(const GlobalState &gs) const {
     bool isSingleton = isClassOrModule() && (isSingletonName(gs, name) || isMangledSingletonName(gs, name));
     DEBUG_ONLY(if (ref(gs) != Symbols::untyped()) { // Symbol::untyped is attached to itself
         if (isSingleton) {
-            ENFORCE(attachedClass(gs).exists());
+            ENFORCE(attachedClass(gs, this->ref(gs)).exists());
         } else {
-            ENFORCE(!attachedClass(gs).exists());
+            ENFORCE(!attachedClass(gs, this->ref(gs)).exists());
         }
     });
     return isSingleton;
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &gs) {
-    auto singleton = lookupSingletonClass(gs);
+SymbolRef Symbol::singletonClass(GlobalState &gs, SymbolRef self) {
+    ENFORCE(this->ref(gs) == self);
+    auto singleton = lookupSingletonClass(gs, self);
     if (singleton.exists()) {
         return singleton;
     }
-    SymbolRef selfRef = this->ref(gs);
 
     // avoid using `this` after the call to gs.enterTypeMember
     auto selfLoc = this->loc();
@@ -833,7 +841,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     SymbolData singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
-    singletonInfo->members()[Names::attached()] = selfRef;
+    singletonInfo->members()[Names::attached()] = self;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
@@ -845,25 +853,26 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     auto todo = make_type<ClassType>(Symbols::todo());
     tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
-    selfRef.data(gs)->members()[Names::singleton()] = singleton;
+    self.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
 }
 
-SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
+SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs, SymbolRef self) const {
     ENFORCE(this->isClassOrModule());
     ENFORCE(this->name.data(gs)->isClassName(gs));
+    ENFORCE(this->ref(gs) == self);
 
-    SymbolRef selfRef = this->ref(gs);
-    if (selfRef == Symbols::untyped()) {
+    if (self == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
     return findMember(gs, Names::singleton());
 }
 
-SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
+SymbolRef Symbol::attachedClass(const GlobalState &gs, SymbolRef self) const {
     ENFORCE(this->isClassOrModule());
-    if (this->ref(gs) == Symbols::untyped()) {
+    ENFORCE(this->ref(gs) == self);
+    if (self == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
@@ -871,11 +880,12 @@ SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
     return singleton;
 }
 
-SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
-    auto classSymbol = this->ref(gs);
+SymbolRef Symbol::topAttachedClass(const GlobalState &gs, SymbolRef self) const {
+    ENFORCE(this->ref(gs) == self);
+    auto classSymbol = self;
 
     while (true) {
-        auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
+        auto attachedClass = classSymbol.data(gs)->attachedClass(gs, classSymbol);
         if (!attachedClass.exists()) {
             break;
         }
@@ -885,7 +895,8 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef self, SymbolRef subclass) {
+    ENFORCE(this->ref(ctx) == self);
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
     ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
@@ -895,8 +906,9 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     // Note: We had hoped to ALSO implement this method in the runtime, but we couldn't think of a way to make it work
     // that didn't require running with the help of Stripe's autoloader, specifically because we might want to allow
     // subclassing a sealed class across multiple files, not just one file.
-    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
-    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx, subclass);
+    auto sealedSubclasses =
+        this->lookupSingletonClass(ctx, self).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
@@ -926,18 +938,22 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     }
 }
 
-const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
+const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs, SymbolRef self) const {
+    ENFORCE(this->ref(gs) == self);
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto sealedSubclasses =
+        this->lookupSingletonClass(gs, self).data(gs)->findMember(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
     return result;
 }
 
-TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
+TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs, SymbolRef self) const {
+    ENFORCE(this->ref(gs) == self);
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
 
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
+    auto sealedSubclasses =
+        this->lookupSingletonClass(gs, self).data(gs)->findMember(gs, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
@@ -955,14 +971,14 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     while (auto orType = cast_type<OrType>(currentClasses.get())) {
         auto classType = cast_type<ClassType>(orType->right.get());
         ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
+        auto subclass = classType->symbol.data(gs)->attachedClass(gs, classType->symbol);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
     auto lastClassType = cast_type<ClassType>(currentClasses.get());
     ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
+    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs, lastClassType->symbol);
     ENFORCE(subclass.exists());
     result = Types::any(gs, make_type<ClassType>(subclass), result);
 

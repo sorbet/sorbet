@@ -21,7 +21,7 @@ namespace sorbet::core {
 SymbolRef MutableContext::selfClass() {
     SymbolData data = this->owner.data(this->state);
     if (data->isClassOrModule()) {
-        return data->singletonClass(this->state);
+        return data->singletonClass(this->state, this->owner);
     }
     return data->enclosingClass(this->state);
 }

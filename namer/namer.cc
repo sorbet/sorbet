@@ -300,7 +300,7 @@ core::SymbolRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flag
 
     if (flags.isSelfMethod) {
         if (owner.data(ctx)->isClassOrModule()) {
-            owner = owner.data(ctx)->lookupSingletonClass(ctx);
+            owner = owner.data(ctx)->lookupSingletonClass(ctx, owner);
         }
     }
     ENFORCE(owner.exists());
@@ -320,7 +320,7 @@ core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat
             break;
         }
         if (data->name == core::Names::staticInit()) {
-            owner = data->owner.data(gs)->attachedClass(gs);
+            owner = data->owner.data(gs)->attachedClass(gs, data->owner);
         } else {
             owner = data->owner;
         }
@@ -714,21 +714,22 @@ class SymbolDefiner {
         auto scopeName = scope.data(ctx)->name;
         ctx.state.mangleRenameSymbol(scope, scopeName);
         scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
-        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        scope.data(ctx)->singletonClass(ctx, scope); // force singleton class into existance
         return scope;
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
     core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
         if (name == core::Names::singleton()) {
-            return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
+            auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            return enclosingClass.data(ctx)->singletonClass(ctx, enclosingClass);
         }
 
         auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
-            existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
+            existing.data(ctx)->singletonClass(ctx, existing); // force singleton class into existance
         }
 
         return existing;
@@ -973,7 +974,7 @@ class SymbolDefiner {
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (mod.name._id == core::Names::privateClassMethod()._id) {
-            owner = owner.data(ctx)->singletonClass(ctx);
+            owner = owner.data(ctx)->singletonClass(ctx, owner);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.methodName);
         if (method.exists()) {
@@ -1015,7 +1016,7 @@ class SymbolDefiner {
             symbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.symbolsUsed();
-            auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            auto newSingleton = symbol.data(ctx)->singletonClass(ctx, symbol); // force singleton class into existence
             ENFORCE(newSingleton._id >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return symbol;
@@ -1059,7 +1060,7 @@ class SymbolDefiner {
         if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, klass.declLoc);
         }
-        symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+        symbol.data(ctx)->singletonClass(ctx, symbol); // force singleton class into existence
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
@@ -1077,12 +1078,12 @@ class SymbolDefiner {
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
             symbolData->setClassOrModuleFinal();
-            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
+            symbolData->singletonClass(ctx, ctx.owner).data(ctx)->setClassOrModuleFinal();
         }
         if (fun == core::Names::declareSealed()) {
             symbolData->setClassOrModuleSealed();
 
-            auto classOfKlass = symbolData->singletonClass(ctx);
+            auto classOfKlass = symbolData->singletonClass(ctx, ctx.owner);
             auto sealedSubclasses = ctx.state.enterMethodSymbol(core::Loc(ctx.file, mod.loc), classOfKlass,
                                                                 core::Names::sealedSubclasses());
             auto &blkArg =
@@ -1095,7 +1096,7 @@ class SymbolDefiner {
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
             symbolData->setClassOrModuleAbstract();
-            symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleAbstract();
+            symbolData->singletonClass(ctx, ctx.owner).data(ctx)->setClassOrModuleAbstract();
         }
         if (fun == core::Names::declareInterface()) {
             symbolData->setClassOrModuleInterface();
@@ -1159,7 +1160,7 @@ class SymbolDefiner {
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx, ctx.owner) : ctx.owner;
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1421,7 +1422,8 @@ public:
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
-            klass->symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
+            auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            klass->symbol = enclosingClass.data(ctx)->lookupSingletonClass(ctx, enclosingClass);
             ENFORCE(klass->symbol.exists());
         } else {
             if (klass->symbol == core::Symbols::todo()) {
@@ -1456,7 +1458,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> klass) {
         // NameDefiner should have forced this class's singleton class into existence.
-        ENFORCE(klass->symbol.data(ctx)->lookupSingletonClass(ctx).exists());
+        ENFORCE(klass->symbol.data(ctx)->lookupSingletonClass(ctx, klass->symbol).exists());
 
         for (auto &exp : klass->rhs) {
             addAncestor(ctx, klass, exp);
@@ -1596,7 +1598,7 @@ public:
             }
 
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-            auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
+            auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->lookupSingletonClass(ctx, ctx.owner) : ctx.owner;
             ENFORCE(onSymbol.exists());
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
             ENFORCE(sym.exists());

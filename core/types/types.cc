@@ -185,7 +185,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
                 result = from;
             } else if (cdata->isClassOrModuleSealed() &&
                        (cdata->isClassOrModuleAbstract() || cdata->isClassOrModuleModule())) {
-                auto subclasses = cdata->sealedSubclassesToUnion(gs);
+                auto subclasses = cdata->sealedSubclassesToUnion(gs, c->symbol);
                 ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
                 result = dropSubtypesOf(gs, subclasses, klass);
             } else {
@@ -942,7 +942,7 @@ core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const core::Ty
 
         singleton = at->klass;
     }
-    return singleton.data(gs)->attachedClass(gs);
+    return singleton.data(gs)->attachedClass(gs, singleton);
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {

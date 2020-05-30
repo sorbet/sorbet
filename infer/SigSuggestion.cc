@@ -13,7 +13,7 @@ namespace {
 
 bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
-    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
+    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx, enclosingClass);
     ENFORCE(enclosingSingletonClass.exists());
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
@@ -21,7 +21,8 @@ bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
 optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
-    auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
+    auto self = method->enclosingClass(ctx);
+    auto enclosingClass = self.data(ctx)->topAttachedClass(ctx, self);
     if (extendsTSig(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;

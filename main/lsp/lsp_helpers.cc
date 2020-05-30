@@ -16,7 +16,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     auto data = sym.data(gs);
-    if (data->isClassOrModule() && data->attachedClass(gs).exists()) {
+    if (data->isClassOrModule() && data->attachedClass(gs, sym).exists()) {
         return true;
     }
     if (data->isClassOrModule() && data->superClass() == core::Symbols::StubModule()) {
@@ -156,7 +156,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     }
     string methodNamePrefix = "";
     if (methodData->owner.exists() && methodData->owner.data(gs)->isClassOrModule() &&
-        methodData->owner.data(gs)->attachedClass(gs).exists()) {
+        methodData->owner.data(gs)->attachedClass(gs, methodData->owner).exists()) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
@@ -224,10 +224,10 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     core::TypePtr result;
     if (constant.data(gs)->isClassOrModule()) {
         auto targetClass = constant;
-        if (!targetClass.data(gs)->attachedClass(gs).exists()) {
-            targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
+        if (!targetClass.data(gs)->attachedClass(gs, targetClass).exists()) {
+            targetClass = targetClass.data(gs)->lookupSingletonClass(gs, targetClass);
         }
-        result = targetClass.data(gs)->externalType(gs);
+        result = targetClass.data(gs)->externalType(gs, targetClass);
     } else {
         auto resultType = constant.data(gs)->resultType;
         result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;

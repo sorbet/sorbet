@@ -272,7 +272,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     }
 
     if (method.data(ctx)->isAbstract() && klassData->isClassOrModule() && klassData->isSingletonClass(ctx)) {
-        auto attached = klassData->attachedClass(ctx);
+        auto attached = klassData->attachedClass(ctx, klass);
         if (attached.exists() && attached.data(ctx)->isClassOrModuleModule()) {
             if (auto e =
                     ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
@@ -414,7 +414,7 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const unique_
     }
     validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
     validateFinalMethodHelper(ctx, klass, klass);
-    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx, klass);
     validateFinalAncestorHelper(ctx, singleton, classDef, klass, "extended");
     validateFinalMethodHelper(ctx, singleton, klass);
 }
@@ -429,14 +429,14 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
         }
         // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
         // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
-        if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
+        if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx, mixin),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
         }
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::SealedAncestor)) {
             e.setHeader("`{}` is sealed and cannot be {} in `{}`", mixin.data(ctx)->show(ctx), verb,
                         errMsgClass.data(ctx)->show(ctx));
-            for (auto loc : mixin.data(ctx)->sealedLocs(ctx)) {
+            for (auto loc : mixin.data(ctx)->sealedLocs(ctx, mixin)) {
                 e.addErrorLine(loc, "`{}` was marked sealed and can only be {} in this file",
                                mixin.data(ctx)->show(ctx), verb);
             }
@@ -450,19 +450,20 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const unique
     // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
     auto file = klass.data(ctx)->loc().file();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed() &&
-        !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
+        !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx, superClass),
+                        [file](auto loc) { return loc.file() == file; })) {
         if (auto e =
                 ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
             e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
                         klass.data(ctx)->show(ctx));
-            for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
+            for (auto loc : superClass.data(ctx)->sealedLocs(ctx, superClass)) {
                 e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
                                superClass.data(ctx)->show(ctx));
             }
         }
     }
     validateSealedAncestorHelper(ctx, klass, classDef, klass, "included");
-    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+    const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx, klass);
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
@@ -556,7 +557,7 @@ private:
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
         auto sym = classDef->symbol;
-        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx, sym);
         validateTStructNotGrandparent(ctx, sym);
         validateAbstract(ctx, sym);
         validateAbstract(ctx, singleton);

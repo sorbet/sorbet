@@ -86,7 +86,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::bottom());
     id = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE(id == Symbols::root());
-    id = core::Symbols::root().data(*this)->singletonClass(*this);
+    id = core::Symbols::root().data(*this)->singletonClass(*this, core::Symbols::root());
     ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
@@ -128,7 +128,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Regexp());
     id = synthesizeClass(core::Names::Constants::Magic());
     ENFORCE(id == Symbols::Magic());
-    id = Symbols::Magic().data(*this)->singletonClass(*this);
+    id = Symbols::Magic().data(*this)->singletonClass(*this, Symbols::Magic());
     ENFORCE(id == Symbols::MagicSingleton());
     id = synthesizeClass(core::Names::Constants::Module());
     ENFORCE(id == Symbols::Module());
@@ -160,7 +160,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
-    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
+    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this, Symbols::Sorbet_Private_Static());
     ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
@@ -259,7 +259,7 @@ void GlobalState::initEmpty() {
     // SigBuilder magic class
     id = synthesizeClass(core::Names::Constants::DeclBuilderForProcs());
     ENFORCE(id == Symbols::DeclBuilderForProcs());
-    id = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
+    id = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this, Symbols::DeclBuilderForProcs());
     ENFORCE(id == Symbols::DeclBuilderForProcsSingleton());
 
     // Ruby 2.5 Hack
@@ -315,11 +315,11 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Private_Types_Void());
     id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
     ENFORCE(id == Symbols::T_Private_Types_Void_VOID());
-    id = id.data(*this)->singletonClass(*this);
+    id = id.data(*this)->singletonClass(*this, id);
     ENFORCE(id == Symbols::T_Private_Types_Void_VOIDSingleton());
 
     // T.class_of(T::Sig::WithoutRuntime)
-    id = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
+    id = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this, Symbols::T_Sig_WithoutRuntime());
     ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
 
     // T::Sig::WithoutRuntime.sig
@@ -606,7 +606,7 @@ void GlobalState::initEmpty() {
         }
     }
     for (auto sym : needSingletons) {
-        sym.data(*this)->singletonClass(*this);
+        sym.data(*this)->singletonClass(*this, sym);
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
@@ -622,7 +622,7 @@ void GlobalState::initEmpty() {
         auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id);
         ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id._id,
                 Symbols::Proc(arity)._id);
-        id.data(*this)->singletonClass(*this);
+        id.data(*this)->singletonClass(*this, id);
     }
 
     ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
@@ -659,7 +659,7 @@ void GlobalState::installIntrinsics() {
                 symbol = entry.symbol;
                 break;
             case Intrinsic::Kind::Singleton:
-                symbol = entry.symbol.data(*this)->singletonClass(*this);
+                symbol = entry.symbol.data(*this)->singletonClass(*this, entry.symbol);
                 break;
         }
         auto countBefore = symbolsUsed();
@@ -1339,7 +1339,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ownerMembers[name] = what;
     whatData->name = name;
     if (whatData->isClassOrModule()) {
-        auto singleton = whatData->lookupSingletonClass(*this);
+        auto singleton = whatData->lookupSingletonClass(*this, what);
         if (singleton.exists()) {
             mangleRenameSymbol(singleton, singleton.data(*this)->name);
         }
@@ -1703,7 +1703,7 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
 
 SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
     auto prevCount = symbolsUsed();
-    auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
+    auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this, klass), core::Names::staticInit());
     if (prevCount != symbolsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
@@ -1715,7 +1715,7 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
 SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
     auto &classData = klass.data(*this);
     ENFORCE(classData->isClassOrModule());
-    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
+    auto ref = classData->lookupSingletonClass(*this, klass).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref;
 }

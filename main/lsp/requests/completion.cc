@@ -560,11 +560,11 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
 
     if (receiverSym == core::Symbols::rootSingleton()) {
-        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
+        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs, core::Symbols::Object());
     }
     auto methodOwner = targetMethod.data(gs)->owner;
 
-    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
+    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs, receiverSym))) {
         // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
         return nullptr;
     }

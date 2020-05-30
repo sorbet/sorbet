@@ -534,14 +534,14 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 return core::Types::untypedUntracked();
             }
 
-            auto singleton = sym.data(ctx)->singletonClass(ctx);
+            auto singleton = sym.data(ctx)->singletonClass(ctx, sym);
             if (!singleton.exists()) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
                 }
                 return core::Types::untypedUntracked();
             }
-            return singleton.data(ctx)->externalType(ctx);
+            return singleton.data(ctx)->externalType(ctx, singleton);
         }
         case core::Names::untyped()._id:
             return core::Types::untyped(ctx, args.untypedBlame);
@@ -703,7 +703,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                     result.type =
                         core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
                 } else {
-                    result.type = sym.data(ctx)->externalType(ctx);
+                    result.type = sym.data(ctx)->externalType(ctx, sym);
                 }
             } else if (sym.data(ctx)->isTypeMember()) {
                 auto symData = sym.data(ctx);
@@ -719,8 +719,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                     // the context, and the singleton class of the type member's
                     // owner.
                     core::SymbolRef symOwnerSingleton =
-                        isTypeTemplate ? symData->owner : symOwner->lookupSingletonClass(ctx);
-                    core::SymbolRef ctxSingleton = ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx);
+                        isTypeTemplate ? symData->owner : symOwner->lookupSingletonClass(ctx, symData->owner);
+                    core::SymbolRef ctxSingleton =
+                        ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx, ctx.owner);
                     bool usedOnSourceClass = symOwnerSingleton == ctxSingleton;
 
                     // For this to be a valid use of a member or template type, this
@@ -907,7 +908,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 return;
             }
 
-            auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
+            auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx, corrected);
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             core::CallLocs locs{
                 ctx.file,
@@ -943,7 +944,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
         },
         [&](ast::Local *slf) {
             if (slf->isSelfReference()) {
-                result.type = ctxOwnerData->selfType(ctx);
+                result.type = ctxOwnerData->selfType(ctx, ctx.owner);
             } else {
                 if (auto e = ctx.beginError(slf->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unsupported type syntax");

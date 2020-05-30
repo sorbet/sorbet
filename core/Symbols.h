@@ -114,8 +114,9 @@ public:
     // selfType and externalType return the type of an instance of this Symbol
     // (which must be isClassOrModule()), if instantiated without specific type
     // parameters, as seen from inside or outside of the class, respectively.
-    TypePtr selfType(const GlobalState &gs) const;
-    TypePtr externalType(const GlobalState &gs) const;
+    // It must be that this->ref(gs) == self. We take it as an argument for perf.
+    TypePtr selfType(const GlobalState &gs, const SymbolRef self) const;
+    TypePtr externalType(const GlobalState &gs, const SymbolRef self) const;
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClassOrModule());
@@ -484,13 +485,15 @@ public:
         int distance;
     };
 
-    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    // self must be this->ref(gs). Taken as an argument for performance.
+    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, const SymbolRef self, NameRef name,
+                                                        int betterThan = -1) const;
 
     std::string toStringFullName(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
 
     // Not printed when showing name table
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
+    bool isHiddenFromPrinting(const GlobalState &gs, SymbolRef self) const;
 
     std::string showRaw(const GlobalState &gs) const {
         bool showFull = false;
@@ -508,19 +511,19 @@ public:
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
-    SymbolRef singletonClass(GlobalState &gs);
+    SymbolRef singletonClass(GlobalState &gs, SymbolRef self);
 
     // Returns the singleton class or noSymbol
-    SymbolRef lookupSingletonClass(const GlobalState &gs) const;
+    SymbolRef lookupSingletonClass(const GlobalState &gs, SymbolRef self) const;
 
     // Returns attached class or noSymbol if it does not exist
-    SymbolRef attachedClass(const GlobalState &gs) const;
+    SymbolRef attachedClass(const GlobalState &gs, SymbolRef self) const;
 
-    SymbolRef topAttachedClass(const GlobalState &gs) const;
+    SymbolRef topAttachedClass(const GlobalState &gs, SymbolRef self) const;
 
-    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
-    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
-    TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
+    void recordSealedSubclass(MutableContext ctx, SymbolRef self, SymbolRef subclass);
+    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs, SymbolRef self) const;
+    TypePtr sealedSubclassesToUnion(const GlobalState &ctx, SymbolRef self) const;
 
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
@@ -608,8 +611,9 @@ private:
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
                                     bool showRaw = false) const;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
-    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
+    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, SymbolRef self, NameRef name,
+                                               int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, SymbolRef self, NameRef name,
                                                                 int betterThan = -1) const;
 
     /*

@@ -57,8 +57,8 @@ unique_ptr<ast::UnresolvedIdent> DefLocSaver::postTransformUnresolvedIdent(core:
         } else {
             // Class var.
             klass = ctx.owner.data(ctx)->enclosingClass(ctx);
-            while (klass.data(ctx)->attachedClass(ctx).exists()) {
-                klass = klass.data(ctx)->attachedClass(ctx);
+            while (klass.data(ctx)->attachedClass(ctx, klass).exists()) {
+                klass = klass.data(ctx)->attachedClass(ctx, klass);
             }
         }
 
@@ -84,7 +84,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             tp.origins.emplace_back(symbol.data(ctx)->loc());
 
             if (symbol.data(ctx)->isClassOrModule()) {
-                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
+                auto singletonClass = symbol.data(ctx)->lookupSingletonClass(ctx, symbol);
+                tp.type = singletonClass.data(ctx)->externalType(ctx, singletonClass);
             } else {
                 auto resultType = symbol.data(ctx)->resultType;
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;

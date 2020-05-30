@@ -310,7 +310,8 @@ private:
                                            "may need to re-generate the .rbi. Try running:\n"
                                            "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
                 } else if (suggestDidYouMean && suggestScope.exists() && suggestScope.data(ctx)->isClassOrModule()) {
-                    auto suggested = suggestScope.data(ctx)->findMemberFuzzyMatch(ctx, job.out->original->cnst);
+                    auto suggested =
+                        suggestScope.data(ctx)->findMemberFuzzyMatch(ctx, suggestScope, job.out->original->cnst);
                     if (suggested.size() > 3) {
                         suggested.resize(3);
                     }
@@ -521,7 +522,7 @@ private:
         }
         Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
 
-        ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
+        ancestorSym.data(ctx)->recordSealedSubclass(ctx, ancestorSym, job.klass);
     }
 
     void transformAncestor(core::Context ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
@@ -606,7 +607,7 @@ public:
             transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isSuperclass);
         }
 
-        auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+        auto singleton = klass.data(ctx)->lookupSingletonClass(ctx, klass);
         for (auto &ancst : original->singletonAncestors) {
             ENFORCE(singleton.exists());
             transformAncestor(ctx.withOwner(klass), singleton, ancst);
@@ -1088,7 +1089,7 @@ class ResolveTypeMembersWalk {
     static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym) {
         ENFORCE(sym.data(ctx)->isClassOrModule());
 
-        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
+        auto singleton = sym.data(ctx)->lookupSingletonClass(ctx, sym);
         if (!singleton.exists()) {
             return;
         }
@@ -1105,7 +1106,7 @@ class ResolveTypeMembersWalk {
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
-            lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
+            lambdaParam->upperBound = sym.data(ctx)->externalType(ctx, sym);
             lambdaParam->lowerBound = core::Types::bottom();
         }
 
@@ -1116,7 +1117,7 @@ class ResolveTypeMembersWalk {
         if (isGenericResolved(ctx, singleton)) {
             // Since we've resolved the singleton's AttachedClass type member, check
             // to see if there's another singleton above that must also be resolved.
-            auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
+            auto parent = singleton.data(ctx)->lookupSingletonClass(ctx, singleton);
             if (parent.exists()) {
                 resolveAttachedClass(ctx, singleton);
             }
@@ -1215,7 +1216,7 @@ public:
                     // ignore this as a potential dependency if the singleton
                     // doesn't exist -- this is an indication that there are no type
                     // members on the singleton.
-                    symbol = symbol.data(ctx)->lookupSingletonClass(ctx);
+                    symbol = symbol.data(ctx)->lookupSingletonClass(ctx, symbol);
                     if (!symbol.exists()) {
                         return lit;
                     }
@@ -1635,7 +1636,7 @@ private:
                     // the current method is a self method.
                     core::SymbolRef sigOwner;
                     if (mdef->flags.isSelfMethod) {
-                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
+                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx, ctx.owner);
                     } else {
                         sigOwner = ctx.owner;
                     }

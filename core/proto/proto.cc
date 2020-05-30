@@ -133,10 +133,10 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             continue;
         }
 
-        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs, pair.second)) {
             bool hadPrintableChild = false;
             for (auto childPair : pair.second.data(gs)->members()) {
-                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs, childPair.second)) {
                     hadPrintableChild = true;
                     break;
                 }

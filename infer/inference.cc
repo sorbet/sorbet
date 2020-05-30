@@ -66,7 +66,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
                                               enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx)),
             *constr);
-        methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
+        methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType,
+                                                        enclosingClass.data(ctx)->selfType(ctx, enclosingClass));
     }
 
     vector<Environment> outEnvironments;
