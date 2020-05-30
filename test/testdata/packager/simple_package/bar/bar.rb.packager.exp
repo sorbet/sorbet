@@ -1,0 +1,143 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C Project>::<C Foo>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C Bar>)
+
+    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C Bar>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>
+
+      <emptyTree>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
+      end
+
+      def self.build_foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Bar>)
+      end
+
+      def self.build_bar<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>::<C Foo>.build_bar()
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+      end
+
+      def initialize<<C <todo sym>>>(value, &<blk>)
+        @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"build_foo")
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"build_bar")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C Project>::<C Bar>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>)
+
+    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C Bar>
+
+      <emptyTree>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C Bar>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
+      end
+
+      def self.build_bar<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Bar>::<C Bar>.new(10)
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Foo>)
+      end
+
+      def self.build_foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Bar>::<C Bar>.build_foo()
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+      end
+
+      def initialize<<C <todo sym>>>(value, &<blk>)
+        @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"build_bar")
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"build_foo")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
+    end
+
+    def self.import<<C <todo sym>>>(x, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
+    end
+
+    def self.export<<C <todo sym>>>(x, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
+    end
+
+    def self.export_methods<<C <todo sym>>>(*x, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"import")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"export")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"export_methods")
+  end
+end

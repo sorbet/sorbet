@@ -31,6 +31,7 @@ cc_library(
         "//namer",
         "//namer/configatron",
         "//parser",
+        "//packager",
         "//payload/binary",
         "//payload/text",
         "//plugin",

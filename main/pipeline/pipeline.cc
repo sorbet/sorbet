@@ -4,6 +4,7 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
 #include "namer/configatron/configatron.h"
+#include "packager/packager.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
 #include <sstream>
@@ -726,6 +727,16 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         }
     }
     return result;
+}
+
+vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+                                WorkerPool &workers) {
+#ifdef SORBET_REALMAIN_MIN
+    return what;
+#else
+    // TODO: Disable unless in stripe mode?
+    return packager::Packager::run(gs, workers, move(what));
+#endif
 }
 
 struct typecheck_thread_result {

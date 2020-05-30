@@ -34,6 +34,7 @@ compilation_database(
         "//payload/binary:gen_state_payload",
         "//parser:parser_test",
         "//parser:generate_ast",
+        "//packager:packager",
         "//namer:namer_test",
         "//main/options:options_test",
         "//main/lsp:lsp_test",
