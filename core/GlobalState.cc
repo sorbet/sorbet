@@ -355,6 +355,9 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
 
+    id = enterClassSymbol(Loc::none(), core::Symbols::todo(), core::Names::Constants::PackageRegistry());
+    ENFORCE(id == Symbols::PackageRegistry());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

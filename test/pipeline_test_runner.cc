@@ -28,6 +28,7 @@
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
 #include "namer/namer.h"
+#include "packager/packager.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
@@ -78,7 +79,7 @@ UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
     "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
     "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols"};
+    "cfg-raw",          "autogen",         "document-symbols",      "packager"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -226,11 +227,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree->toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
-        ast::ParsedFile rewriten;
         ast::ParsedFile localNamed;
 
         if (!test.expectations.contains("autogen")) {
             // Rewriter
+            ast::ParsedFile rewriten;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
@@ -254,14 +255,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 FAIL_CHECK("Running Rewriter passes with autogen isn't supported");
             }
         }
+        trees.emplace_back(move(localNamed));
+    }
 
+    // Packager runs over all trees.
+    trees = packager::Packager::run(*gs, *workers, move(trees));
+    for (auto &tree : trees) {
+        handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
+    }
+
+    for (auto &tree : trees) {
         // Namer
         ast::ParsedFile namedTree;
         {
             core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
             vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(localNamed));
+            vTmp.emplace_back(move(tree));
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
@@ -269,7 +279,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree->toString(*gs); });
         handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
 
-        trees.emplace_back(move(namedTree));
+        tree = move(namedTree);
     }
 
     if (test.expectations.contains("autogen")) {
@@ -503,7 +513,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         INFO("the incremental resolver should not add new symbols");
         CHECK_EQ(symbolsBefore, gs->symbolsUsed());
     }
-}
+} // namespace sorbet::test
 } // namespace sorbet::test
 
 int main(int argc, char *argv[]) {

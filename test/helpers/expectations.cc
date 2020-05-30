@@ -68,53 +68,94 @@ string rbFile2BaseTestName(string rbFileName) {
     return testName;
 }
 
-vector<Expectations> listDir(const char *name) {
-    vector<Expectations> result;
+bool addToExpectations(Expectations &exp, string_view parentDir, string_view filePath) {
+    if (!absl::StartsWith(filePath, exp.basename)) {
+        return false;
+    }
 
-    vector<string> names = sorbet::FileOps::listFilesInDir(name, {".rb", ".rbi", ".rbupdate", ".exp"}, false, {}, {});
-    const int prefixLen = strnlen(name, 1024) + 1;
+    if (absl::EndsWith(filePath, ".rb") || absl::EndsWith(filePath, ".rbi")) {
+        exp.sourceFiles.emplace_back(filePath);
+        return true;
+    } else if (absl::EndsWith(filePath, ".exp")) {
+        auto kind_start = filePath.rfind(".", filePath.size() - strlen(".exp") - 1);
+        auto kind = filePath.substr(kind_start + 1, filePath.size() - kind_start - strlen(".exp") - 1);
+        string source_file_path = absl::StrCat(parentDir, "/", filePath.substr(0, kind_start));
+        exp.expectations[kind][source_file_path] = filePath;
+        return true;
+    } else if (absl::EndsWith(filePath, ".rbupdate")) {
+        // Should be `.[number].rbupdate`
+        auto pos = filePath.rfind('.', filePath.length() - 10);
+        if (pos != string::npos) {
+            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - 9)));
+            exp.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
+        } else {
+            cout << "Ignoring " << filePath << ": No version number provided (expected .[number].rbupdate).\n";
+        }
+        return true;
+    }
+
+    return false;
+}
+
+vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
+    vector<string> names =
+        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".exp"}, recursive, {}, {});
+    const int prefixLen = dir.length() + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
               [&prefixLen](auto &name) -> string { return name.substr(prefixLen); });
     fast_sort(names, compareNames);
+    return names;
+}
+
+void populateSourceFileContents(Expectations &exp) {
+    for (auto &file : exp.sourceFiles) {
+        string filename = exp.folder + file;
+        string fileContents = FileOps::read(filename);
+        exp.sourceFileContents[filename] =
+            make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
+    }
+}
+
+Expectations getExpectationsForFolderTest(string_view dir) {
+    vector<string> names = listTrimmedTestFilesInDir(dir, true);
+    ENFORCE(dir.back() == '/');
+
+    Expectations exp;
+    // No basename; all of these files belong to this expectations.
+    exp.basename = "";
+    exp.folder = dir;
+    exp.testName = string(dir.substr(0, dir.length() - 1));
+
+    for (auto &s : names) {
+        addToExpectations(exp, dir, s);
+    }
+
+    populateSourceFileContents(exp);
+    return exp;
+}
+
+vector<Expectations> listDir(string_view name) {
+    vector<Expectations> result;
+    vector<string> names = listTrimmedTestFilesInDir(name, false);
 
     Expectations current;
     for (auto &s : names) {
-        if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
-            auto basename = rbFile2BaseTestName(s);
-            if (basename != s) {
-                if (basename == current.basename) {
-                    current.sourceFiles.emplace_back(s);
-                    continue;
+        if (current.basename.empty() || !addToExpectations(current, name, s)) {
+            // `s` doesn't belong to current Expectations, _or_ Expectations is new.
+            if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
+                auto basename = rbFile2BaseTestName(s);
+                if (!current.basename.empty()) {
+                    // End of previously found test.
+                    result.emplace_back(current);
+                    current = Expectations();
                 }
-            }
-
-            if (!current.basename.empty()) {
-                result.emplace_back(current);
-                current = Expectations();
-            }
-            current.basename = basename;
-            current.sourceFiles.emplace_back(s);
-            current.folder = name;
-            current.folder += "/";
-            current.testName = current.folder + current.basename;
-        } else if (absl::EndsWith(s, ".exp")) {
-            if (absl::StartsWith(s, current.basename)) {
-                auto kind_start = s.rfind(".", s.size() - strlen(".exp") - 1);
-                string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
-                string source_file_path = string(name) + "/" + s.substr(0, kind_start);
-                current.expectations[kind][source_file_path] = s;
-            }
-        } else if (absl::EndsWith(s, ".rbupdate")) {
-            if (absl::StartsWith(s, current.basename)) {
-                // Should be `.[number].rbupdate`
-                auto pos = s.rfind('.', s.length() - 10);
-                if (pos != string::npos) {
-                    int version = stoi(s.substr(pos + 1, s.length() - 9));
-                    current.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(s.substr(0, pos), ".rb"), s);
-                } else {
-                    cout << "Ignoring " << s << ": No version number provided (expected .[number].rbupdate).\n";
-                }
+                // Start of new test.
+                current.basename = basename;
+                current.sourceFiles.emplace_back(s);
+                current.folder = name;
+                current.folder += "/";
+                current.testName = current.folder + current.basename;
             }
         }
     }
@@ -134,6 +175,10 @@ Expectations Expectations::getExpectations(std::string singleTest) {
         Exception::raise("No test specified. Pass one with --single_test=<test_path>");
     }
 
+    if (FileOps::dirExists(singleTest)) {
+        return getExpectationsForFolderTest(singleTest);
+    }
+
     string parentDir;
     {
         auto lastDirSeparator = singleTest.find_last_of("/");
@@ -143,16 +188,11 @@ Expectations Expectations::getExpectations(std::string singleTest) {
             parentDir = singleTest.substr(0, lastDirSeparator);
         }
     }
-    auto scan = listDir(parentDir.c_str());
+    auto scan = listDir(parentDir);
     auto lookingFor = rbFile2BaseTestName(singleTest);
     for (Expectations &f : scan) {
         if (f.testName == lookingFor) {
-            for (auto &file : f.sourceFiles) {
-                string filename = f.folder + file;
-                string fileContents = FileOps::read(filename);
-                f.sourceFileContents[filename] =
-                    make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
-            }
+            populateSourceFileContents(f);
             result.emplace_back(f);
         }
     }

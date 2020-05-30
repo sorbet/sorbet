@@ -25,6 +25,9 @@ std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::
                                    const options::Options &opts, WorkerPool &workers,
                                    const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
+std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                     const options::Options &opts, WorkerPool &workers);
+
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
