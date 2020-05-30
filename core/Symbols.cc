@@ -818,18 +818,15 @@ bool Symbol::isSingletonClass(const GlobalState &gs) const {
     return isSingleton;
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &gs) {
-    auto singleton = lookupSingletonClass(gs);
-    if (singleton.exists()) {
-        return singleton;
-    }
+SymbolRef Symbol::defineSingletonClass(GlobalState &gs) {
+    ENFORCE(!lookupSingletonClass(gs).exists());
     SymbolRef selfRef = this->ref(gs);
 
     // avoid using `this` after the call to gs.enterTypeMember
     auto selfLoc = this->loc();
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    SymbolRef singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
@@ -847,6 +844,14 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
+}
+
+SymbolRef Symbol::singletonClass(GlobalState &gs) {
+    auto singleton = lookupSingletonClass(gs);
+    if (singleton.exists()) {
+        return singleton;
+    }
+    return defineSingletonClass(gs);
 }
 
 SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {

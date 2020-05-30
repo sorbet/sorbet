@@ -636,6 +636,8 @@ private:
         ENFORCE(isClassOrModule());
         flags &= ~Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED;
     }
+
+    SymbolRef defineSingletonClass(GlobalState &gs);
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 

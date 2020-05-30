@@ -713,8 +713,7 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.data(ctx)->name;
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
-        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName, true);
         return scope;
     }
 
@@ -727,8 +726,7 @@ class SymbolDefiner {
         auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
-            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
-            existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
+            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name, true);
         }
 
         return existing;
@@ -1011,12 +1009,10 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName);
-            symbol.data(ctx)->setIsModule(isModule);
-
             auto oldSymCount = ctx.state.symbolsUsed();
-            auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton._id >= oldSymCount,
+            symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName, true);
+            symbol.data(ctx)->setIsModule(isModule);
+            ENFORCE(symbol.data(ctx)->lookupSingletonClass(ctx)._id >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return symbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
@@ -1059,7 +1055,6 @@ class SymbolDefiner {
         if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, klass.declLoc);
         }
-        symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {

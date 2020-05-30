@@ -62,7 +62,7 @@ public:
 
     ~GlobalState() = default;
 
-    SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name, bool createSingleton = false);
     SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
@@ -255,7 +255,8 @@ private:
 
     void expandNames(u4 newSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
+    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false,
+                              bool createSingleton = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;

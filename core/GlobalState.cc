@@ -28,7 +28,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
+SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule, bool createSingleton) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
     SymbolRef symRef = SymbolRef(this, symbols.size());
@@ -43,6 +43,9 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
 
     if (symRef._id > Symbols::root()._id) {
         Symbols::root().dataAllowingNone(*this)->members()[nameId] = symRef;
+    }
+    if (createSingleton) {
+        symRef.data(*this)->defineSingletonClass(*this);
     }
     return symRef;
 }
@@ -84,10 +87,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::top());
     id = synthesizeClass(core::Names::Constants::Bottom(), 0);
     ENFORCE(id == Symbols::bottom());
-    id = synthesizeClass(core::Names::Constants::Root(), 0);
+    id = synthesizeClass(core::Names::Constants::Root(), 0, false, true);
     ENFORCE(id == Symbols::root());
-    id = core::Symbols::root().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::rootSingleton());
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
     id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject()._id);
@@ -126,10 +128,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Range());
     id = synthesizeClass(core::Names::Constants::Regexp());
     ENFORCE(id == Symbols::Regexp());
-    id = synthesizeClass(core::Names::Constants::Magic());
+    id = synthesizeClass(core::Names::Constants::Magic(), Symbols::todo()._id, false, true);
     ENFORCE(id == Symbols::Magic());
-    id = Symbols::Magic().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::MagicSingleton());
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::MagicSingleton());
     id = synthesizeClass(core::Names::Constants::Module());
     ENFORCE(id == Symbols::Module());
     id = synthesizeClass(core::Names::Constants::StandardError());
@@ -158,10 +159,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE(id == Symbols::Sorbet_Private());
-    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static(), true);
     ENFORCE(id == Symbols::Sorbet_Private_Static());
-    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
@@ -257,10 +257,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Helpers());
 
     // SigBuilder magic class
-    id = synthesizeClass(core::Names::Constants::DeclBuilderForProcs());
+    id = synthesizeClass(core::Names::Constants::DeclBuilderForProcs(), Symbols::todo()._id, false, true);
     ENFORCE(id == Symbols::DeclBuilderForProcs());
-    id = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::DeclBuilderForProcsSingleton());
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::DeclBuilderForProcsSingleton());
 
     // Ruby 2.5 Hack
     id = synthesizeClass(core::Names::Constants::Net(), 0, true);
@@ -272,8 +271,10 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Net_Protocol());
     Symbols::Net_Protocol().data(*this)->setIsModule(false);
 
-    id = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    id = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime(), true);
     ENFORCE(id == Symbols::T_Sig_WithoutRuntime());
+    // T.class_of(T::Sig::WithoutRuntime)
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::T_Sig_WithoutRuntimeSingleton());
 
     id = synthesizeClass(core::Names::Constants::Enumerator());
     ENFORCE(id == Symbols::Enumerator());
@@ -313,14 +314,9 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::T_Private_Types_Void());
-    id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    id = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID(), true);
     ENFORCE(id == Symbols::T_Private_Types_Void_VOID());
-    id = id.data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::T_Private_Types_Void_VOIDSingleton());
-
-    // T.class_of(T::Sig::WithoutRuntime)
-    id = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
-    ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
+    ENFORCE(id.data(*this)->lookupSingletonClass(*this) == Symbols::T_Private_Types_Void_VOIDSingleton());
 
     // T::Sig::WithoutRuntime.sig
     id = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
@@ -619,10 +615,9 @@ void GlobalState::initEmpty() {
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
-        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id);
+        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc()._id, false, true);
         ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id._id,
                 Symbols::Proc(arity)._id);
-        id.data(*this)->singletonClass(*this);
     }
 
     ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
@@ -833,11 +828,17 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     return ret;
 }
 
-SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name, bool createSingleton) {
     ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
             owner.data(*this)->isClassOrModule());
     ENFORCE(name.data(*this)->isClassName(*this));
-    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    auto symsUsed = symbolsUsed();
+    SymbolRef sym = enterSymbol(loc, owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    if (createSingleton && (sym._id >= symsUsed)) {
+        // New symbol (and thus has no singleton class)
+        sym.data(*this)->defineSingletonClass(*this);
+    }
+    return sym;
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {

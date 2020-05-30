@@ -381,61 +381,61 @@ public:
         return SymbolRef(nullptr, 78);
     }
 
-    static SymbolRef Enumerator() {
+    static SymbolRef T_Sig_WithoutRuntimeSingleton() {
         return SymbolRef(nullptr, 79);
     }
 
-    static SymbolRef T_Enumerator() {
-        return SymbolRef(nullptr, 80);
-    }
+    // 80 is the attached class of T_Sig_WithoutRuntimeSingleton
 
-    static SymbolRef T_Struct() {
+    static SymbolRef Enumerator() {
         return SymbolRef(nullptr, 81);
     }
 
-    static SymbolRef Singleton() {
+    static SymbolRef T_Enumerator() {
         return SymbolRef(nullptr, 82);
     }
 
-    static SymbolRef T_Enum() {
+    static SymbolRef T_Struct() {
         return SymbolRef(nullptr, 83);
     }
 
-    static SymbolRef sig() {
+    static SymbolRef Singleton() {
         return SymbolRef(nullptr, 84);
     }
 
-    static SymbolRef Enumerator_Lazy() {
+    static SymbolRef T_Enum() {
         return SymbolRef(nullptr, 85);
     }
 
-    static SymbolRef T_Private() {
+    static SymbolRef sig() {
         return SymbolRef(nullptr, 86);
     }
 
-    static SymbolRef T_Private_Types() {
+    static SymbolRef Enumerator_Lazy() {
         return SymbolRef(nullptr, 87);
     }
 
-    static SymbolRef T_Private_Types_Void() {
+    static SymbolRef T_Private() {
         return SymbolRef(nullptr, 88);
     }
 
-    static SymbolRef T_Private_Types_Void_VOID() {
+    static SymbolRef T_Private_Types() {
         return SymbolRef(nullptr, 89);
     }
 
-    static SymbolRef T_Private_Types_Void_VOIDSingleton() {
+    static SymbolRef T_Private_Types_Void() {
         return SymbolRef(nullptr, 90);
     }
 
-    // 91 is the attached class of VOIDSingleton
+    static SymbolRef T_Private_Types_Void_VOID() {
+        return SymbolRef(nullptr, 91);
+    }
 
-    static SymbolRef T_Sig_WithoutRuntimeSingleton() {
+    static SymbolRef T_Private_Types_Void_VOIDSingleton() {
         return SymbolRef(nullptr, 92);
     }
 
-    // 93 is the attached class of T_Sig_WithoutRuntimeSingleton
+    // 93 is the attached class of VOIDSingleton
 
     static SymbolRef sigWithoutRuntime() {
         return SymbolRef(nullptr, 94);
