@@ -394,7 +394,7 @@ module Opus::Types::Test
       end
 
       it 'works if the range has no start or end' do
-        type = T::Range[NilClass]
+        type = T::Range[T.untyped]
         value = (nil...nil)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
