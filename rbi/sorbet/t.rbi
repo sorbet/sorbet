@@ -182,6 +182,7 @@ module T::Utils::Nilable
   def self.get_type_info(prop_type); end
   def self.get_underlying_type(prop_type); end
   def self.get_underlying_type_object(prop_type); end
+  def self.is_union_with_nilclass(prop_type); end
 end
 
 module T::NonForcingConstants
