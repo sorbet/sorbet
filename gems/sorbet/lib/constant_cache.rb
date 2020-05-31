@@ -107,7 +107,10 @@ class Sorbet::Private::ConstantLookupCache
           # an alias that exists at the top-level
           next false if prefix == ""
 
-          # ignore aliases whose owners are the same, but syntactically different
+          # if the prefix is the same syntactically, then this is a good alias
+          next false if prefix == struct.owner.primary_name
+
+          # skip the alias if the owner is the same
           other_owner_const = Sorbet::Private::RealStdlib.real_const_get(Object, prefix, false)
           struct.owner.const == other_owner_const
         end
