@@ -97,7 +97,24 @@ class Sorbet::Private::ConstantLookupCache
 
     @all_constants.map do |_key, struct|
       next if struct.nil? || !Sorbet::Private::RealStdlib.real_is_a?(struct.const, Module) || struct.aliases.size < 2
-      ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name}
+      if struct.owner != nil
+        ret[struct.primary_name] = struct.aliases.reject do |name|
+          # ignore the primary
+          next true if name == struct.primary_name
+
+          prefix, _, _ = name.rpartition('::')
+
+          # an alias that exists at the top-level
+          next false if prefix == ""
+
+          # ignore aliases whose owners are the same, but syntactically different
+          other_owner_const = Sorbet::Private::RealStdlib.real_const_get(Object, prefix, false)
+          struct.owner.const == other_owner_const
+        end
+      else
+        # top-level names
+        ret[struct.primary_name] = struct.aliases.reject {|name| name == struct.primary_name }
+      end
     end
     ret
   end
@@ -155,6 +172,7 @@ class Sorbet::Private::ConstantLookupCache
         if maybe_seen_already
           if nested_name != maybe_seen_already.primary_name
             maybe_seen_already.aliases << nested_name
+            maybe_seen_already.owner = owner
           end
           if maybe_seen_already.primary_name.nil? && Sorbet::Private::RealStdlib.real_is_a?(nested_constant, Module)
             realName = Sorbet::Private::RealStdlib.real_name(nested_constant)
