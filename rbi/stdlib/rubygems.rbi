@@ -1958,7 +1958,9 @@ class Gem::AvailableSet
   def to_request_set(development=T.unsafe(nil)); end
 end
 
-class Gem::AvailableSet::Tuple
+class Gem::AvailableSet::Tuple < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def source(); end
 
   def source=(_); end
@@ -2365,15 +2367,15 @@ class Gem::Ext::Builder
   def self.run(command, results, command_name=T.unsafe(nil)); end
 end
 
-class Gem::Ext::CmakeBuilder
+class Gem::Ext::CmakeBuilder < Gem::Ext::Builder
   def self.build(extension, dest_path, results, args=T.unsafe(nil), lib_dir=T.unsafe(nil)); end
 end
 
-class Gem::Ext::ConfigureBuilder
+class Gem::Ext::ConfigureBuilder < Gem::Ext::Builder
   def self.build(extension, dest_path, results, args=T.unsafe(nil), lib_dir=T.unsafe(nil)); end
 end
 
-class Gem::Ext::RakeBuilder
+class Gem::Ext::RakeBuilder < Gem::Ext::Builder
   def self.build(extension, dest_path, results, args=T.unsafe(nil), lib_dir=T.unsafe(nil)); end
 end
 
@@ -2650,7 +2652,7 @@ class Gem::Request::HTTPPool
   def proxy_uri(); end
 end
 
-class Gem::Request::HTTPSPool
+class Gem::Request::HTTPSPool < Gem::Request::HTTPPool
 end
 
 class Gem::RequestSet
@@ -2804,7 +2806,7 @@ class Gem::RequestSet::Lockfile
   def self.requests_to_deps(requests); end
 end
 
-class Gem::RequestSet::Lockfile::ParseError
+class Gem::RequestSet::Lockfile::ParseError < Gem::Exception
   def column(); end
 
   def initialize(message, column, line, path); end
@@ -2860,7 +2862,9 @@ class Gem::RequestSet::Lockfile::Tokenizer
   EOF = ::T.let(nil, ::T.untyped)
 end
 
-class Gem::RequestSet::Lockfile::Tokenizer::Token
+class Gem::RequestSet::Lockfile::Tokenizer::Token < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def column(); end
 
   def column=(_); end
@@ -2933,7 +2937,7 @@ class Gem::Resolver
   def self.for_current_gems(needed); end
 end
 
-class Gem::Resolver::APISet
+class Gem::Resolver::APISet < Gem::Resolver::Set
   def dep_uri(); end
 
   def initialize(dep_uri=T.unsafe(nil)); end
@@ -2947,7 +2951,7 @@ class Gem::Resolver::APISet
   def versions(name); end
 end
 
-class Gem::Resolver::APISpecification
+class Gem::Resolver::APISpecification < Gem::Resolver::Specification
   def ==(other); end
 
   def initialize(set, api_data); end
@@ -2981,7 +2985,7 @@ class Gem::Resolver::ActivationRequest
   def version(); end
 end
 
-class Gem::Resolver::BestSet
+class Gem::Resolver::BestSet < Gem::Resolver::ComposedSet
   def initialize(sources=T.unsafe(nil)); end
 
   def pick_sets(); end
@@ -2989,7 +2993,7 @@ class Gem::Resolver::BestSet
   def replace_failed_api_set(error); end
 end
 
-class Gem::Resolver::ComposedSet
+class Gem::Resolver::ComposedSet < Gem::Resolver::Set
   def initialize(*sets); end
 
   def prerelease=(allow_prerelease); end
@@ -3051,7 +3055,7 @@ class Gem::Resolver::DependencyRequest
   def type(); end
 end
 
-class Gem::Resolver::GitSet
+class Gem::Resolver::GitSet < Gem::Resolver::Set
   def add_git_gem(name, repository, reference, submodules); end
 
   def add_git_spec(name, version, repository, reference, submodules); end
@@ -3067,25 +3071,25 @@ class Gem::Resolver::GitSet
   def specs(); end
 end
 
-class Gem::Resolver::GitSpecification
+class Gem::Resolver::GitSpecification < Gem::Resolver::SpecSpecification
   def ==(other); end
 
   def add_dependency(dependency); end
 end
 
-class Gem::Resolver::IndexSet
+class Gem::Resolver::IndexSet < Gem::Resolver::Set
   def initialize(source=T.unsafe(nil)); end
 end
 
-class Gem::Resolver::IndexSpecification
+class Gem::Resolver::IndexSpecification < Gem::Resolver::Specification
   def initialize(set, name, version, source, platform); end
 end
 
-class Gem::Resolver::InstalledSpecification
+class Gem::Resolver::InstalledSpecification < Gem::Resolver::SpecSpecification
   def ==(other); end
 end
 
-class Gem::Resolver::InstallerSet
+class Gem::Resolver::InstallerSet < Gem::Resolver::Set
   def add_always_install(dependency); end
 
   def add_local(dep_name, spec, source); end
@@ -3117,7 +3121,7 @@ class Gem::Resolver::InstallerSet
   def remote_set(); end
 end
 
-class Gem::Resolver::LockSet
+class Gem::Resolver::LockSet < Gem::Resolver::Set
   def add(name, version, platform); end
 
   def initialize(sources); end
@@ -3127,7 +3131,7 @@ class Gem::Resolver::LockSet
   def specs(); end
 end
 
-class Gem::Resolver::LockSpecification
+class Gem::Resolver::LockSpecification < Gem::Resolver::Specification
   def add_dependency(dependency); end
 
   def initialize(set, name, version, sources, platform); end
@@ -3139,7 +3143,7 @@ module Gem::Resolver::Molinillo
   VERSION = ::T.let(nil, ::T.untyped)
 end
 
-class Gem::Resolver::Molinillo::CircularDependencyError
+class Gem::Resolver::Molinillo::CircularDependencyError < Gem::Resolver::Molinillo::ResolverError
   def dependencies(); end
 
   def initialize(nodes); end
@@ -3219,6 +3223,8 @@ class Gem::Resolver::Molinillo::DependencyGraph
   def vertex_named(name); end
 
   def vertices(); end
+
+  def self.tsort(vertices); end
 end
 
 class Gem::Resolver::Molinillo::DependencyGraph::Action
@@ -3237,7 +3243,7 @@ class Gem::Resolver::Molinillo::DependencyGraph::Action
   def self.action_name(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::AddEdgeNoCircular
+class Gem::Resolver::Molinillo::DependencyGraph::AddEdgeNoCircular < Gem::Resolver::Molinillo::DependencyGraph::Action
   def destination(); end
 
   def initialize(origin, destination, requirement); end
@@ -3249,7 +3255,7 @@ class Gem::Resolver::Molinillo::DependencyGraph::AddEdgeNoCircular
   def requirement(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::AddVertex
+class Gem::Resolver::Molinillo::DependencyGraph::AddVertex < Gem::Resolver::Molinillo::DependencyGraph::Action
   def initialize(name, payload, root); end
 
   def name(); end
@@ -3259,7 +3265,7 @@ class Gem::Resolver::Molinillo::DependencyGraph::AddVertex
   def root(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge
+class Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge < Gem::Resolver::Molinillo::DependencyGraph::Action
   def destination_name(); end
 
   def initialize(origin_name, destination_name, requirement); end
@@ -3271,13 +3277,15 @@ class Gem::Resolver::Molinillo::DependencyGraph::DeleteEdge
   def requirement(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::DetachVertexNamed
+class Gem::Resolver::Molinillo::DependencyGraph::DetachVertexNamed < Gem::Resolver::Molinillo::DependencyGraph::Action
   def initialize(name); end
 
   def name(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::Edge
+class Gem::Resolver::Molinillo::DependencyGraph::Edge < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def destination(); end
 
   def destination=(_); end
@@ -3295,29 +3303,7 @@ class Gem::Resolver::Molinillo::DependencyGraph::Edge
   def self.members(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::Log
-  def add_edge_no_circular(graph, origin, destination, requirement); end
-
-  def add_vertex(graph, name, payload, root); end
-
-  def delete_edge(graph, origin_name, destination_name, requirement); end
-
-  def detach_vertex_named(graph, name); end
-
-  def each(&blk); end
-
-  def pop!(graph); end
-
-  def reverse_each(); end
-
-  def rewind_to(graph, tag); end
-
-  def set_payload(graph, name, payload); end
-
-  def tag(graph, tag); end
-end
-
-class Gem::Resolver::Molinillo::DependencyGraph::SetPayload
+class Gem::Resolver::Molinillo::DependencyGraph::SetPayload < Gem::Resolver::Molinillo::DependencyGraph::Action
   def initialize(name, payload); end
 
   def name(); end
@@ -3325,7 +3311,7 @@ class Gem::Resolver::Molinillo::DependencyGraph::SetPayload
   def payload(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph::Tag
+class Gem::Resolver::Molinillo::DependencyGraph::Tag < Gem::Resolver::Molinillo::DependencyGraph::Action
   def down(_graph); end
 
   def initialize(tag); end
@@ -3387,16 +3373,14 @@ class Gem::Resolver::Molinillo::DependencyGraph::Vertex
   def successors(); end
 end
 
-class Gem::Resolver::Molinillo::DependencyGraph
-  def self.tsort(vertices); end
-end
+class Gem::Resolver::Molinillo::DependencyState < Gem::Resolver::Molinillo::ResolutionState
+  Elem = type_member(:out, fixed: T.untyped)
 
-class Gem::Resolver::Molinillo::DependencyState
   def pop_possibility_state(); end
 end
 
 
-class Gem::Resolver::Molinillo::NoSuchDependencyError
+class Gem::Resolver::Molinillo::NoSuchDependencyError < Gem::Resolver::Molinillo::ResolverError
   def dependency(); end
 
   def dependency=(dependency); end
@@ -3408,10 +3392,13 @@ class Gem::Resolver::Molinillo::NoSuchDependencyError
   def required_by=(required_by); end
 end
 
-class Gem::Resolver::Molinillo::PossibilityState
+class Gem::Resolver::Molinillo::PossibilityState < Gem::Resolver::Molinillo::ResolutionState
+  Elem = type_member(:out, fixed: T.untyped)
 end
 
-class Gem::Resolver::Molinillo::ResolutionState
+class Gem::Resolver::Molinillo::ResolutionState < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def activated(); end
 
   def activated=(_); end
@@ -3480,7 +3467,9 @@ class Gem::Resolver::Molinillo::Resolver::Resolution
   def states=(states); end
 end
 
-class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict
+class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def activated_by_name(); end
 
   def activated_by_name=(_); end
@@ -3514,7 +3503,7 @@ class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict
   def self.members(); end
 end
 
-class Gem::Resolver::Molinillo::ResolverError
+class Gem::Resolver::Molinillo::ResolverError < StandardError
 end
 
 module Gem::Resolver::Molinillo::SpecificationProvider
@@ -3551,7 +3540,7 @@ module Gem::Resolver::Molinillo::UI
   def progress_rate(); end
 end
 
-class Gem::Resolver::Molinillo::VersionConflict
+class Gem::Resolver::Molinillo::VersionConflict < Gem::Resolver::Molinillo::ResolverError
   def conflicts(); end
 
   def initialize(conflicts); end
@@ -3595,11 +3584,11 @@ class Gem::Resolver::Set
   def remote?(); end
 end
 
-class Gem::Resolver::SourceSet
+class Gem::Resolver::SourceSet < Gem::Resolver::Set
   def add_source_gem(name, source); end
 end
 
-class Gem::Resolver::SpecSpecification
+class Gem::Resolver::SpecSpecification < Gem::Resolver::Specification
   def initialize(set, spec, source=T.unsafe(nil)); end
 end
 
@@ -3647,7 +3636,7 @@ class Gem::Resolver::Stats
   def requirement!(); end
 end
 
-class Gem::Resolver::VendorSet
+class Gem::Resolver::VendorSet < Gem::Resolver::Set
   def add_vendor_gem(name, directory); end
 
   def load_spec(name, version, platform, source); end
@@ -3655,7 +3644,7 @@ class Gem::Resolver::VendorSet
   def specs(); end
 end
 
-class Gem::Resolver::VendorSpecification
+class Gem::Resolver::VendorSpecification < Gem::Resolver::SpecSpecification
   def ==(other); end
 end
 
@@ -3719,7 +3708,7 @@ module Gem::Security
   SigningPolicy = ::T.let(nil, ::T.untyped)
 end
 
-class Gem::Security::DIGEST_ALGORITHM
+class Gem::Security::DIGEST_ALGORITHM < OpenSSL::Digest
   def initialize(data=T.unsafe(nil)); end
 
   def self.digest(data); end
@@ -3764,7 +3753,7 @@ class Gem::Source
   def uri(); end
 end
 
-class Gem::Source::Git
+class Gem::Source::Git < Gem::Source
   def base_dir(); end
 
   def cache(); end
@@ -3804,13 +3793,13 @@ class Gem::Source::Git
   def uri_hash(); end
 end
 
-class Gem::Source::Installed
+class Gem::Source::Installed < Gem::Source
   def download(spec, path); end
 
   def initialize(); end
 end
 
-class Gem::Source::Local
+class Gem::Source::Local < Gem::Source
   def download(spec, cache_dir=T.unsafe(nil)); end
 
   def fetch_spec(name); end
@@ -3820,13 +3809,13 @@ class Gem::Source::Local
   def initialize(); end
 end
 
-class Gem::Source::Lock
+class Gem::Source::Lock < Gem::Source
   def initialize(source); end
 
   def wrapped(); end
 end
 
-class Gem::Source::SpecificFile
+class Gem::Source::SpecificFile < Gem::Source
   def fetch_spec(name); end
 
   def initialize(file); end
@@ -3838,7 +3827,7 @@ class Gem::Source::SpecificFile
   def spec(); end
 end
 
-class Gem::Source::Vendor
+class Gem::Source::Vendor < Gem::Source::Installed
   def initialize(path); end
 end
 
