@@ -172,7 +172,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                         indexed);
+                                         workers, indexed);
 
     // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
     // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
