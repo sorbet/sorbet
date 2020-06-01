@@ -1635,7 +1635,7 @@ private:
                     // the current method is a self method.
                     core::SymbolRef sigOwner;
                     if (mdef->flags.isSelfMethod) {
-                        sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
+                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
                     } else {
                         sigOwner = ctx.owner;
                     }
