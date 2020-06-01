@@ -1222,25 +1222,62 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
     }
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
     }
 
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
-    int i = -1;
-    bool written = false;
-    for (auto &pfile : parsedFiles) {
-        i++;
-        if (!pfile.file.exists()) {
-            continue;
+
+    // Compress files in parallel.
+    shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile *>> fileq =
+        make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
+    for (auto &parsedFile : parsedFiles) {
+        auto ptr = &parsedFile;
+        fileq->push(move(ptr), 1);
+    }
+
+    shared_ptr<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
+    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
+        vector<pair<string, vector<u1>>> threadResult;
+        int processedByThread = 0;
+        ast::ParsedFile *job = nullptr;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    if (!job->file.exists()) {
+                        continue;
+                    }
+
+                    auto &file = job->file.data(gs);
+                    if (!file.cached && !file.hasParseErrors) {
+                        threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeFile(file, *job));
+                    }
+                }
+            }
         }
 
-        auto &file = pfile.file.data(gs);
-        if (!file.cached && !file.hasParseErrors) {
-            kvstore->write(fileKey(file), core::serialize::Serializer::storeFile(file, pfile));
-            written = true;
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    bool written = false;
+    {
+        vector<pair<string, vector<u1>>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    kvstore->write(move(a.first), move(a.second));
+                    written = true;
+                }
+            }
         }
     }
     return written;

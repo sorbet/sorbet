@@ -513,7 +513,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, indexed);
+        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
