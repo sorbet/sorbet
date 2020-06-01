@@ -1231,15 +1231,13 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
-    shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile *>> fileq =
-        make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
     for (auto &parsedFile : parsedFiles) {
         auto ptr = &parsedFile;
         fileq->push(move(ptr), 1);
     }
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
+    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
     workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
         vector<pair<string, vector<u1>>> threadResult;
         int processedByThread = 0;
