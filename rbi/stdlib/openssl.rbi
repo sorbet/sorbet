@@ -2343,7 +2343,7 @@ module OpenSSL::Buffering
     )
     .returns(::T.untyped)
   end
-  def write(s); end
+  def write(*s); end
 
   # Writes *s* in the non-blocking manner.
   #
