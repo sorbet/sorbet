@@ -490,7 +490,7 @@ class CSV < Object
     )
     .returns(
       T.any(
-        CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)],
+        CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])],
         T::Array[T::Array[T.nilable(BasicObject)]],
       )
     )
@@ -1184,11 +1184,6 @@ end
 #
 # All tables returned by [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
 # will be constructed from this class, if header row processing is activated.
-CSVRowModeElem = T.type_alias { CSV::Row }
-CSVColumnModeElem = T.type_alias { T::Array[T.nilable(BasicObject)] }
-CSVRowModeTable = T.type_alias { CSV::Table[CSVRowModeElem] }
-CSVColumnModeTable = T.type_alias { CSV::Table[CSVColumnModeElem] }
-
 class CSV::Table < Object
   include Enumerable
 
@@ -1216,7 +1211,7 @@ class CSV::Table < Object
   # *   empty?()
   # *   length()
   # *   size()
-  sig { params(array_of_rows: T::Array[CSV::Row], headers: T::Array[BasicObject]).returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
+  sig { params(array_of_rows: T::Array[CSV::Row], headers: T::Array[BasicObject]).returns(CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])]) }
   def self.new(array_of_rows, headers: nil); end
 
   # Adds a new row to the bottom end of this table. You can provide an
@@ -1235,7 +1230,7 @@ class CSV::Table < Object
   def <<(row_or_array); end
 
   # Returns `true` if all rows of this table ==() `other`'s rows.
-  sig { params(other: CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]).returns(T::Boolean) }
+  sig { params(other: CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])]).returns(T::Boolean) }
   def ==(other); end
 
   # In the default mixed mode, this method returns rows for index access and
@@ -1251,7 +1246,7 @@ class CSV::Table < Object
   # no effect on the table.
   sig { params(index_or_header: Integer).returns(T.nilable(Elem)) }
   sig { params(index_or_header: T::Range[Integer]).returns(T::Array[Elem]) }
-  sig { params(index_or_header: BasicObject).returns(CSVColumnModeElem) }
+  sig { params(index_or_header: BasicObject).returns(T::Array[T.nilable(BasicObject)]) }
   def [](index_or_header); end
 
   # In the default mixed mode, this method assigns rows for index access and
@@ -1285,14 +1280,14 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
-  sig { returns(CSVColumnModeTable) }
+  sig { returns(CSV::Table[T::Array[T.nilable(BasicObject)]]) }
   def by_col; end
 
   # Switches the mode of this table to column mode. All calls to indexing and
   # iteration methods will work with columns until the mode is changed again.
   #
   # This method returns the table and is safe to chain.
-  sig { returns(CSVColumnModeTable) }
+  sig { returns(CSV::Table[T::Array[T.nilable(BasicObject)]]) }
   def by_col!; end
 
   # Returns a duplicate table object, in mixed mode. This is handy for chaining
@@ -1302,7 +1297,7 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
-  sig { returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
+  sig { returns(CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])]) }
   def by_col_or_row; end
 
   # Switches the mode of this table to mixed mode. All calls to indexing and
@@ -1311,7 +1306,7 @@ class CSV::Table < Object
   # reference while anything else is assumed to be column access by headers.
   #
   # This method returns the table and is safe to chain.
-  sig { returns(CSV::Table[T.any(CSVRowModeElem, CSVColumnModeElem)]) }
+  sig { returns(CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])]) }
   def by_col_or_row!; end
 
   # Returns a duplicate table object, in row mode. This is handy for chaining in
@@ -1321,14 +1316,14 @@ class CSV::Table < Object
   # This method returns the duplicate table for chaining. Don't chain
   # destructive methods (like []=()) this way though, since you are working with
   # a duplicate.
-  sig { returns(CSVRowModeTable) }
+  sig { returns(CSV::Table[CSV::Row]) }
   def by_row; end
 
   # Switches the mode of this table to row mode. All calls to indexing and
   # iteration methods will work with rows until the mode is changed again.
   #
   # This method returns the table and is safe to chain.
-  sig { returns(CSVRowModeTable) }
+  sig { returns(CSV::Table[CSV::Row]) }
   def by_row!; end
 
   # Removes and returns the indicated columns or rows. In the default mixed mode
