@@ -100,3 +100,8 @@ class Timeout::Error < RuntimeError
   sig {returns(::T.untyped)}
   def thread(); end
 end
+
+# Raised by
+# [`Timeout.timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html#method-c-timeout)
+# when the block times out.
+TimeoutError = Timeout::Error
