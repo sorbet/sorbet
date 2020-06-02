@@ -9176,3 +9176,7 @@ class Net::WriteAdapter
   # [`print`](https://docs.ruby-lang.org/en/2.6.0/Net/WriteAdapter.html#method-i-print)
   def write(str); end
 end
+
+# WriteTimeout, a subclass of Timeout::Error, is raised if a chunk of the
+# response cannot be written within the write_timeout. Not raised on Windows.
+class Net::WriteTimeout < ::Timeout::Error; end
