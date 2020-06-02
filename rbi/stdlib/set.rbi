@@ -988,3 +988,16 @@ class Array
   sig {returns(T::Set[T.untyped])}
   def to_set; end
 end
+
+# The `Enumerable` mixin provides collection classes with several traversal and
+# searching methods, and with the ability to sort. The class must provide a
+# method `each`, which yields successive members of the collection. If
+# `Enumerable#max`, `#min`, or `#sort` is used, the objects in the collection
+# must also implement a meaningful `<=>` operator, as these methods rely on an
+# ordering between members of the collection.
+# ensure that the module and class exist
+module Enumerable
+  # Makes a set from the enumerable object with given arguments. Needs to
+  # +require "set"+ to use this method.
+  def to_set(klass = _, *args, &block); end
+end
