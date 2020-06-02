@@ -16,9 +16,10 @@ module Kernel
       # Our paths are terrible...
       root_name = root_name.gsub(%r{.*test/testdata}, 'test/testdata')
 
-      if RUBY_PLATFORM == "x86_64-linux"
+      case RUBY_PLATFORM
+      when "x86_64-linux"
         suffix = '.so'
-      elsif RUBY_PLATFORM == "x86_64-darwin18"
+      when "x86_64-darwin18", "x86_64-darwin19"
         suffix = '.bundle'
       else
         raise "unknown platform: #{RUBY_PLATFORM}"
