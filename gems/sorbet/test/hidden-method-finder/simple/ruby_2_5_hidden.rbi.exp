@@ -5168,25 +5168,7 @@ class Gem::DependencyInstaller
   def gems_to_install(*args, &block); end
 end
 
-class Gem::Resolver
-end
-
-Gem::DependencyResolver::Conflict = Gem::Resolver::Conflict
-
-Gem::DependencyResolver::DependencyConflict = Gem::Resolver::Conflict
-
-module Gem::Resolver::Molinillo
-end
-
-Gem::DependencyResolver::Molinillo::SpecificationProvider = Gem::Resolver::Molinillo::SpecificationProvider
-
-Gem::DependencyResolver::Molinillo::UI = Gem::Resolver::Molinillo::UI
-
-module Gem::Resolver::Molinillo
-end
-
-class Gem::Resolver
-end
+Gem::DependencyResolver = Gem::Resolver
 
 class Gem::Ext::BuildError
 end
