@@ -4867,10 +4867,6 @@ class Class
   def json_creatable?(); end
 end
 
-class Delegator
-  def initialize(obj); end
-end
-
 class DidYouMean::ClassNameChecker
   def class_name(); end
 

@@ -4864,7 +4864,6 @@ class Class
 end
 
 class Delegator
-  def initialize(obj); end
   RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
 end
 
