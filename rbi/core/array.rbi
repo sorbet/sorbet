@@ -502,6 +502,32 @@ class Array < Object
   end
   def <<(arg0); end
 
+  # Comparison --- Returns an integer (`-1`, `0`, or `+1`) if this array is less
+  # than, equal to, or greater than `other_ary`.
+  #
+  # Each object in each array is compared (using the <=> operator).
+  #
+  # Arrays are compared in an "element-wise" manner; the first element of `ary`
+  # is compared with the first one of `other_ary` using the <=> operator, then
+  # each of the second elements, etc... As soon as the result of any such
+  # comparison is non zero (i.e. the two corresponding elements are not equal),
+  # that result is returned for the whole array comparison.
+  #
+  # If all the elements are equal, then the result is based on a comparison of
+  # the array lengths. Thus, two arrays are "equal" according to Array#<=> if,
+  # and only if, they have the same length and the value of each element is
+  # equal to the value of the corresponding element in the other array.
+  #
+  # `nil` is returned if the `other_ary` is not an array or if the comparison of
+  # two elements returned `nil`.
+  #
+  # ```ruby
+  # [ "a", "a", "c" ]    <=> [ "a", "b", "c" ]   #=> -1
+  # [ 1, 2, 3, 4, 5, 6 ] <=> [ 1, 2 ]            #=> +1
+  # [ 1, 2 ]             <=> [ 1, :two ]         #=> nil
+  # ```
+  def <=>(_); end
+
   # Element Reference --- Returns the element at `index`, or returns a subarray
   # starting at the `start` index and continuing for `length` elements, or
   # returns a subarray specified by `range` of indices.
@@ -756,6 +782,25 @@ class Array < Object
   end
   sig {returns(T::Enumerator[Elem])}
   def collect(&blk); end
+
+  # Invokes the given block once for each element of `self`, replacing the
+  # element with the value returned by the block.
+  #
+  # See also
+  # [`Enumerable#collect`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-collect).
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # a = [ "a", "b", "c", "d" ]
+  # a.map! {|x| x + "!" }
+  # a #=>  [ "a!", "b!", "c!", "d!" ]
+  # a.collect!.with_index {|x, i| x[0...i] }
+  # a #=>  ["", "b", "c!", "d!"]
+  # ```
+  def collect!(&blk); end
 
   # When invoked with a block, yields all combinations of length `n` of elements
   # from the array and then returns the array itself.

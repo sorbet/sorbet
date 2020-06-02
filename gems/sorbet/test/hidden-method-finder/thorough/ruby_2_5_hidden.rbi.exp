@@ -5,8 +5,6 @@
 
 class Array
   include ::JSON::Ext::Generator::GeneratorMethods::Array
-  def collect!(); end
-
   def shelljoin(); end
 
   def to_h(); end
