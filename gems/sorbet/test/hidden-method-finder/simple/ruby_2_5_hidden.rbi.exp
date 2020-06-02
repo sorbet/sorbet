@@ -4997,8 +4997,6 @@ end
 
 module Enumerable
   def sum(*_); end
-
-  def to_set(klass=T.unsafe(nil), *args, &block); end
 end
 
 class Enumerator
