@@ -281,8 +281,5 @@ module T
       end
     end
   end
-
-  # A special singleton used for static analysis of exceptions.
-  RETRY = Object.new
 end
 # rubocop:enable PrisonGuard/UseOpusTypesShortcut
