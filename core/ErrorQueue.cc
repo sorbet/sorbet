@@ -33,8 +33,8 @@ u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
 
 using namespace std;
 
-ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer)
-    : errorFlusher(make_shared<ErrorFlusherStdout>()), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
+    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
 ErrorQueue::~ErrorQueue() {
     if (owner == this_thread::get_id()) {

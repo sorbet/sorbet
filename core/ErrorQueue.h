@@ -3,6 +3,7 @@
 
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorFlusher.h"
+#include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
 #include "core/lsp/QueryResponse.h"
 #include <atomic>
@@ -30,7 +31,8 @@ public:
     std::atomic<int> filesFlushedCount{0};
     bool ignoreFlushes{false};
 
-    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);
+    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
+               std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
     ~ErrorQueue();
 
     /** register a new error to be reported */
