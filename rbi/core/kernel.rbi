@@ -81,6 +81,40 @@ module Kernel
   sig {params.returns(T::Array[String])}
   def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
+  # Returns the current execution stack---an array containing strings in the
+  # form `file:line` or `file:line: in `method'`.
+  #
+  # The optional *start* parameter determines the number of initial stack
+  # entries to omit from the top of the stack.
+  #
+  # A second optional `length` parameter can be used to limit how many entries
+  # are returned from the stack.
+  #
+  # Returns `nil` if *start* is greater than the size of current execution
+  # stack.
+  #
+  # Optionally you can pass a range, which will return an array containing the
+  # entries within the specified range.
+  #
+  # ```ruby
+  # def a(skip)
+  #   caller(skip)
+  # end
+  # def b(skip)
+  #   a(skip)
+  # end
+  # def c(skip)
+  #   b(skip)
+  # end
+  # c(0)   #=> ["prog:2:in `a'", "prog:5:in `b'", "prog:8:in `c'", "prog:10:in `<main>'"]
+  # c(1)   #=> ["prog:5:in `b'", "prog:8:in `c'", "prog:11:in `<main>'"]
+  # c(2)   #=> ["prog:8:in `c'", "prog:12:in `<main>'"]
+  # c(3)   #=> ["prog:13:in `<main>'"]
+  # c(4)   #=> []
+  # c(5)   #=> nil
+  # ```
+  def self.caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+
   # Returns the current execution stack---an array containing backtrace location
   # objects.
   #
