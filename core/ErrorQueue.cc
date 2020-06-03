@@ -36,12 +36,6 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-ErrorQueue::~ErrorQueue() {
-    if (owner == this_thread::get_id()) {
-        flushErrors(true);
-    }
-}
-
 pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
 ErrorQueue::drainWithQueryResponses() {
     checkOwned();
@@ -87,7 +81,7 @@ vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
     return move(drainWithQueryResponses().first);
 }
 
-void ErrorQueue::flushErrors(bool all) {
+void ErrorQueue::flushErrors(const GlobalState &gs, bool all) {
     checkOwned();
     if (ignoreFlushes) {
         return;
@@ -100,7 +94,7 @@ void ErrorQueue::flushErrors(bool all) {
     } else {
         errors = drainFlushed();
     }
-    errorFlusher->flushErrors(logger, move(errors));
+    errorFlusher->flushErrors(logger, move(errors), gs);
 }
 
 void ErrorQueue::flushErrorCount() {

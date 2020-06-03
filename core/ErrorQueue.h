@@ -33,7 +33,6 @@ public:
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
                std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
-    ~ErrorQueue();
 
     /** register a new error to be reported */
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);
@@ -47,7 +46,7 @@ public:
     /** Extract all errors. This discards all query responses currently present in error Queue */
     std::vector<std::unique_ptr<core::Error>> drainAllErrors();
 
-    void flushErrors(bool all = false);
+    void flushErrors(const GlobalState &gs, bool all = false);
     void flushErrorCount();
     void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
 

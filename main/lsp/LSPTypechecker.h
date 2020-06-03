@@ -68,7 +68,7 @@ class LSPTypechecker final {
     /** Used for assertions. Indicates if `initialize` has been run. */
     bool initialized = false;
 
-    ErrorReporter errorReporter;
+    std::shared_ptr<ErrorReporter> errorReporter;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */

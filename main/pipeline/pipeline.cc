@@ -522,7 +522,7 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
             progress.reportProgress(input->doneEstimate());
             // Flush all errors if the error queue had a critical error
             if (ret.gs->hadCriticalError()) {
-                ret.gs->errorQueue->flushErrors(true);
+                ret.gs->errorQueue->flushErrors(*ret.gs, true);
             }
         }
     }
@@ -752,7 +752,7 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
         auto result = namer::Namer::run(gs, move(what), workers);
         // Flush all errors if the error queue had a critical error
         if (gs.hadCriticalError()) {
-            gs.errorQueue->flushErrors(true);
+            gs.errorQueue->flushErrors(gs, true);
         }
         return result;
     }
@@ -902,7 +902,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
     // Flush all errors if the error queue had a critical error
     if (gs->hadCriticalError()) {
-        gs->errorQueue->flushErrors(true);
+        gs->errorQueue->flushErrors(*gs, true);
     }
 
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
@@ -1016,7 +1016,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                                 make_move_iterator(threadResult.trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    gs->errorQueue->flushErrors();
+                    gs->errorQueue->flushErrors(*gs);
                     if (preemptionManager) {
                         (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }

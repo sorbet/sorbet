@@ -10,6 +10,7 @@
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/DefLocSaver.h"
+#include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
@@ -67,7 +68,7 @@ bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameH
 LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
                                shared_ptr<core::lsp::PreemptionTaskManager> preemptManager)
     : typecheckerThreadId(this_thread::get_id()), config(move(config)), preemptManager(move(preemptManager)),
-      errorReporter(this->config) {}
+      errorReporter(make_shared<ErrorReporter>(this->config)) {}
 
 LSPTypechecker::~LSPTypechecker() {}
 
@@ -82,7 +83,7 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
     {
-        ErrorEpoch epoch(errorReporter, updates.epoch, {});
+        ErrorEpoch epoch(*errorReporter, updates.epoch, {});
         committed = runSlowPath(move(updates), workers, /* cancelable */ false);
         epoch.committed = committed;
     }
@@ -104,7 +105,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             // Prune the new files from list of files to be re-typechecked
             vector<core::FileRef> oldFilesWithErrors;
             u4 maxFileId = gs->getFiles().size();
-            for (auto &file : errorReporter.filesWithErrorsSince(cancellationUndoState->epoch)) {
+            for (auto &file : errorReporter->filesWithErrorsSince(cancellationUndoState->epoch)) {
                 if (file.id() < maxFileId) {
                     oldFilesWithErrors.push_back(file);
                 }
@@ -127,7 +128,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     const bool isFastPath = updates.canTakeFastPath;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     {
-        ErrorEpoch epoch(errorReporter, updates.epoch, move(diagnosticLatencyTimers));
+        ErrorEpoch epoch(*errorReporter, updates.epoch, move(diagnosticLatencyTimers));
 
         if (isFastPath) {
             auto run = runFastPath(move(updates), workers);
@@ -325,8 +326,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
     vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
+    auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
     // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer);
+    finalGS->errorQueue =
+        make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
     finalGS->errorQueue->ignoreFlushes = true;
     auto &epochManager = *finalGS->epochManager;
     const u4 epoch = updates.epoch;
@@ -454,7 +457,7 @@ void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTyp
     for (auto &file : filesTypechecked) {
         auto it = errorsAccumulated.find(file);
         vector<unique_ptr<core::Error>> &errors = it == errorsAccumulated.end() ? emptyErrorList : it->second;
-        errorReporter.pushDiagnostics(epoch, file, errors, *gs);
+        errorReporter->pushDiagnostics(epoch, file, errors, *gs);
     }
 }
 
