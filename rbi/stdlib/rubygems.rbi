@@ -3662,15 +3662,17 @@ class Gem::S3URISigner
   def uri=(uri); end
 end
 
-class Gem::S3URISigner::ConfigurationError
+class Gem::S3URISigner::ConfigurationError < Gem::Exception
   def initialize(message); end
 end
 
-class Gem::S3URISigner::InstanceProfileError
+class Gem::S3URISigner::InstanceProfileError < Gem::Exception
   def initialize(message); end
 end
 
-class Gem::S3URISigner::S3Config
+class Gem::S3URISigner::S3Config < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def access_key_id(); end
 
   def access_key_id=(_); end
