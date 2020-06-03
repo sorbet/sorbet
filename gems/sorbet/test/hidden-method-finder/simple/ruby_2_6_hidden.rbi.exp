@@ -5730,7 +5730,6 @@ class IO
 
   def wait_writable(*_); end
 
-  def write_nonblock(buf, exception: T.unsafe(nil)); end
 end
 
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
