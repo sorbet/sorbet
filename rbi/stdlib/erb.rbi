@@ -396,6 +396,10 @@ class ERB
   end
   def result(b=T.unsafe(nil)); end
 
+  # Render a template on a new toplevel binding with local variables specified
+  # by a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object.
+  def result_with_hash(hash); end
+
   # Generate results and print them. (see
   # [`ERB#result`](https://docs.ruby-lang.org/en/2.6.0/ERB.html#method-i-result))
   sig do
@@ -818,6 +822,30 @@ end
 
 # A utility module for conversion routines, often handy in HTML generation.
 module ERB::Util
+  # Alias for:
+  # [`html_escape`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-html_escape)
+  def h(s); end
+
+  # A utility method for escaping HTML tag characters in *s*.
+  #
+  # ```ruby
+  # require "erb"
+  # include ERB::Util
+  #
+  # puts html_escape("is a > 0 & a < 10?")
+  # ```
+  #
+  # *Generates*
+  #
+  # ```
+  # is a &gt; 0 &amp; a &lt; 10?
+  # ```
+  #
+  #
+  # Also aliased as:
+  # [`h`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-h)
+  def html_escape(s); end
+
   # Alias for:
   # [`html_escape`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-html_escape)
   sig do
