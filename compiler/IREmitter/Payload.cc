@@ -476,6 +476,29 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
     return {pc, iseq_encoded};
 }
 
+// Ensure that the retry singleton is present during module initialization, and store it in a module-local global.
+llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &build, const BasicBlockMap &blockMap) {
+    auto tp = llvm::Type::getInt64Ty(cs);
+    string rawName = "<retry-singleton>";
+    auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
+        auto global =
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        auto *singletonValue =
+            globalInitBuilder.CreateCall(cs.module->getFunction("sorbet_getTRetry"), {}, "retrySingleton");
+
+        globalInitBuilder.CreateStore(singletonValue, global);
+
+        return global;
+    });
+
+    return builderCast(build).CreateLoad(global, "<retry-singleton>");
+}
+
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym,
                                  core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {

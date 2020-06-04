@@ -63,6 +63,8 @@ public:
     static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
                        int rubyBlockId);
+
+    static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap);
 };
 } // namespace sorbet::compiler
 #endif

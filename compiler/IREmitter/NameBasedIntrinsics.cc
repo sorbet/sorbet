@@ -184,6 +184,30 @@ public:
     }
 } CallWithBlock;
 
+class ExceptionRetry : public NameBasedIntrinsicMethod {
+public:
+    ExceptionRetry() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const BasicBlockMap &blockMap,
+                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                  llvm::Function *blk) const override {
+        llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+        auto *retrySingleton = Payload::retrySingleton(cs, builder, blockMap);
+        builder.CreateRet(retrySingleton);
+
+        auto *dead = llvm::BasicBlock::Create(cs, "dead-retry", blockMap.rubyBlocks2Functions[rubyBlockId]);
+        builder.SetInsertPoint(dead);
+
+        return retrySingleton;
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::retry()};
+    }
+} ExceptionRetry;
+
 enum ShouldTakeReciever {
     TakesReciever,
     NoReciever,
@@ -260,11 +284,7 @@ static const vector<CallCMethod> knownCMethods{
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic,
-        &DefineClassIntrinsic,
-        &IdentityIntrinsic,
-        &CallWithBlock,
-
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock, &ExceptionRetry,
     };
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);

@@ -1430,6 +1430,10 @@ VALUE sorbet_callFunc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) 
 // ****                       Exceptions
 // ****
 
+VALUE sorbet_getTRetry() {
+    return sorbet_getConstant("T::Private::Retry::RETRY", 24);
+}
+
 struct ExceptionClosure {
     ExceptionFFIType body;
     VALUE **pc;
@@ -1456,9 +1460,11 @@ static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
     return sorbet_rubyUndef();
 }
 
-// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised. Returns 1 if an
-// exception was raised, and 0 otherwise.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env, VALUE *exceptionValue) {
+extern void rb_set_errinfo(VALUE);
+
+// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
+VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env, VALUE exceptionContext,
+                 VALUE *exceptionValue) {
     VALUE returnValue = sorbet_rubyUndef();
 
     struct ExceptionClosure closure;
@@ -1468,75 +1474,32 @@ VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE e
     closure.env = env;
     closure.returnValue = &returnValue;
 
-    *exceptionValue = sorbet_rubyNil();
+    *exceptionValue = RUBY_Qnil;
+
+    // Restore the exception context. When running the body of an excep
+    if (exceptionContext != RUBY_Qnil) {
+        rb_set_errinfo(exceptionContext);
+    }
+
     rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
                rb_eException, 0);
 
     return returnValue;
 }
 
-struct RestoreErrinfoClosure {
-    struct ExceptionClosure exceptionClosure;
-    VALUE previousException;
-};
+// Raise the exception value, unless it's nil.
+void sorbet_raiseIfNotNil(VALUE exception) {
+    if (exception == RUBY_Qnil) {
+        return;
+    }
 
-extern void rb_set_errinfo(VALUE);
-
-static VALUE sorbet_applyRestoreErrinfoClosure(VALUE arg) {
-    struct RestoreErrinfoClosure *closure = (struct RestoreErrinfoClosure *)arg;
-
-    sorbet_applyExceptionClosure((VALUE)(&closure->exceptionClosure));
-
-    // Restore the previous exception. If the body raises an exception, this will skipped when rb_raise does a long jump
-    // out of the body function, and any outer error-handling code will be responsible for setting up the error info.
-    rb_set_errinfo(closure->previousException);
-
-    return sorbet_rubyUndef();
+    rb_exc_raise(exception);
 }
 
 // This is a function that can be used in place of any exception function, and does nothing except for return nil.
 VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
     return sorbet_rubyUndef();
 }
-
-// Run the body block, making sure that the ensure block gets called afterwords. The exceptionValue argument is used to
-// determine whether or not to overwrite the current VM exception state, and `env` is the closure to provide to both
-// body and ensure.
-VALUE sorbet_ensure(ExceptionFFIType body, ExceptionFFIType ensure, VALUE previousException, VALUE exceptionValue,
-                    VALUE **pc, VALUE *iseq_encoded, VALUE env) {
-    VALUE returnValue = sorbet_rubyUndef();
-
-    struct RestoreErrinfoClosure bodyClosure;
-    bodyClosure.exceptionClosure.body = body;
-    bodyClosure.exceptionClosure.pc = pc;
-    bodyClosure.exceptionClosure.iseq_encoded = iseq_encoded;
-    bodyClosure.exceptionClosure.env = env;
-    bodyClosure.exceptionClosure.returnValue = &returnValue;
-    bodyClosure.previousException = previousException;
-
-    struct ExceptionClosure ensureClosure;
-    ensureClosure.body = ensure;
-    ensureClosure.pc = pc;
-    ensureClosure.iseq_encoded = iseq_encoded;
-    ensureClosure.env = env;
-    ensureClosure.returnValue = &returnValue;
-
-    // If the exception value is non-nil, then ensure is being called to handle that exception. Calling `rb_set_errinfo`
-    // with a nil value causes it to forget the current exception, so we avoid that explicitly here to preserve the
-    // behavior of `raise` with no arguments.
-    if (exceptionValue != sorbet_rubyNil()) {
-        rb_set_errinfo(exceptionValue);
-    }
-
-    rb_ensure(sorbet_applyRestoreErrinfoClosure, (VALUE)(&bodyClosure), sorbet_applyExceptionClosure,
-              (VALUE)(&ensureClosure));
-
-    return returnValue;
-}
-
-// We use this instead of `rb_raise` to re-raise an exception, because we already have the exception value that we want
-// to raise.
-__attribute__((noreturn)) extern void rb_exc_raise(VALUE);
 
 // ****
 // ****                       Compile-time only intrinsics. These should be eliminated by passes.
