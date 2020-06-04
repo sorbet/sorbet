@@ -171,7 +171,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'includes relevant generated code on serialize' do
       m = a_serializable
       m.instance_variable_set(:@foo, "Won't respond like hash")
-      e = assert_raises(TypeError) do
+      e = assert_raises(NoMethodError) do
         m.serialize
       end
 
