@@ -13,6 +13,18 @@ def _rubygems_urls(gem):
         "https://intgems.local.corp.stripe.com:446/gems/{}".format(gem),
     ]
 
+def _zlib_urls(path):
+    return [
+        "https://zlib.net/{}".format(path),
+        "https://https://artifactory.corp.stripe.com/artifactory/zlib-cache/{}".format(path),
+    ]
+
+def _ruby_urls(path):
+    return [
+        "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
+        "https://artifactory.corp.stripe.com/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
+    ]
+
 # We define our externals here instead of directly in WORKSPACE
 def sorbet_llvm_externals():
     # WARNING: if you're using a local version of sorbet you won't get patches
@@ -45,7 +57,7 @@ def sorbet_llvm_externals():
 
     http_archive(
         name = "zlib_archive",
-        url = "https://zlib.net/zlib-1.2.11.tar.gz",
+        urls = _zlib_urls("zlib-1.2.11.tar.gz"),
         build_file = "@com_stripe_sorbet_llvm//third_party:zlib.BUILD",
         sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
         strip_prefix = "zlib-1.2.11",
@@ -64,7 +76,7 @@ def sorbet_llvm_externals():
     )
 
     for apply_patch in [True, False]:
-        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz"
+        urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz")
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d"
         strip_prefix = "ruby-2.6.5"
         build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD"
@@ -72,7 +84,7 @@ def sorbet_llvm_externals():
         if apply_patch:
             http_archive(
                 name = "sorbet_ruby",
-                url = url,
+                urls = urls,
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
                 build_file = build_file,
@@ -84,7 +96,7 @@ def sorbet_llvm_externals():
         else:
             http_archive(
                 name = "sorbet_ruby_unpatched",
-                url = url,
+                urls = urls,
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
                 build_file = build_file,
