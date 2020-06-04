@@ -25,7 +25,11 @@ module T::Props::Serializable
         :generate_serialize_source
       )
       if msg
-        raise e.class.new(msg)
+        begin
+          raise e.class.new(msg)
+        rescue ArgumentError
+          raise TypeError.new(msg)
+        end
       else
         raise
       end
@@ -62,7 +66,11 @@ module T::Props::Serializable
         :generate_deserialize_source
       )
       if msg
-        raise e.class.new(msg)
+        begin
+          raise e.class.new(msg)
+        rescue ArgumentError
+          raise TypeError.new(msg)
+        end
       else
         raise
       end
