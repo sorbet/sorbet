@@ -999,6 +999,7 @@ class String < Object
   end
   def force_encoding(arg0); end
 
+  sig {returns(String)}
   def freeze; end
 
   # returns the *index*th byte as an integer.
