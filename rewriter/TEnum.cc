@@ -180,7 +180,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
-            auto &block = ast::ref_tree<ast::Block>(enumsDo->block);
+            auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
                 for (auto &stat : insSeq->stats) {
                     collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside);

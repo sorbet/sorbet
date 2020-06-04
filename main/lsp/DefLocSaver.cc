@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-    auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     bool lspQueryMatch = lspQuery.matchesLoc(methodDef.declLoc) || lspQuery.matchesSymbol(methodDef.symbol);
@@ -48,7 +48,7 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
 }
 
 ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
-    auto &id = ast::ref_tree<ast::UnresolvedIdent>(tree);
+    auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::SymbolRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
@@ -79,7 +79,7 @@ ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::T
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery, core::SymbolRef symbol) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     while (lit && symbol.exists() && lit->original) {
-        auto &unresolved = ast::ref_tree<ast::UnresolvedConstantLit>(lit->original);
+        auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
         if (lspQuery.matchesLoc(core::Loc(ctx.file, lit->loc)) || lspQuery.matchesSymbol(symbol)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
@@ -110,7 +110,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 }
 
 ast::TreePtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
-    auto &lit = ast::ref_tree<ast::ConstantLit>(tree);
+    auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     auto symbol = lit.symbol.data(ctx)->dealias(ctx);
     matchesQuery(ctx, &lit, lspQuery, symbol);

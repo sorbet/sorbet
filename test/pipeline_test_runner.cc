@@ -55,7 +55,7 @@ class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &m = ast::ref_tree<ast::MethodDef>(tree);
+        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         if (m.symbol.data(ctx)->isOverloaded()) {
             return tree;

@@ -73,9 +73,9 @@ bool hasNilableReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
             "We weren't given a send node that's a valid signature");
 
-    auto &send = ast::ref_tree<ast::Send>(sharedSig);
-    auto &block = ast::ref_tree<ast::Block>(send.block);
-    auto &body = ast::ref_tree<ast::Send>(block.body);
+    auto &send = ast::cast_tree_nonnull<ast::Send>(sharedSig);
+    auto &block = ast::cast_tree_nonnull<ast::Block>(send.block);
+    auto &body = ast::cast_tree_nonnull<ast::Send>(block.body);
 
     ENFORCE(body.fun == core::Names::returns());
     if (body.args.size() != 1) {

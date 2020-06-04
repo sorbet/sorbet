@@ -111,8 +111,8 @@ public:
 
         auto init = ast::make_tree<ast::MethodDef>(loc.offsets(), loc, sym, core::Names::staticInit(), std::move(args),
                                                    std::move(inits), ast::MethodDef::Flags());
-        ast::ref_tree<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
-        ast::ref_tree<ast::MethodDef>(init).flags.isSelfMethod = true;
+        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
+        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 
         classDef->rhs.emplace_back(std::move(init));
 

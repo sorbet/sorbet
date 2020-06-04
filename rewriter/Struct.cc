@@ -112,7 +112,7 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
                        ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
 
     if (send->block != nullptr) {
-        auto &block = ast::ref_tree<ast::Block>(send->block);
+        auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
 
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {

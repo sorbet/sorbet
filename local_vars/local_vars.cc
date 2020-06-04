@@ -216,7 +216,7 @@ public:
     ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         enterMethod();
 
-        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         method.args = fillInArgs(nameArgs(ctx, method.args));
         return tree;
     }
@@ -227,7 +227,7 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::Send>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
             original.args.clear();
             if (scopeStack.back().insideMethod) {
@@ -264,7 +264,7 @@ public:
     }
 
     ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &blk = ast::ref_tree<ast::Block>(tree);
+        auto &blk = ast::cast_tree_nonnull<ast::Block>(tree);
         auto outerArgs = scopeStack.back().args;
         auto &frame = enterBlock();
         frame.args = std::move(outerArgs);
@@ -288,7 +288,7 @@ public:
     }
 
     ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &nm = ast::ref_tree<ast::UnresolvedIdent>(tree);
+        auto &nm = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (nm.kind == ast::UnresolvedIdent::Kind::Local) {
             auto &frame = scopeStack.back();
             core::LocalVariable &cur = frame.locals[nm.name];

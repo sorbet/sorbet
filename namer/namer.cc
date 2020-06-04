@@ -400,7 +400,7 @@ public:
     }
 
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         FoundClass found;
         found.owner = getOwner();
@@ -430,7 +430,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
@@ -443,7 +443,7 @@ public:
     }
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         FoundMethod foundMethod;
         foundMethod.owner = getOwner();
         foundMethod.name = method.name;
@@ -462,7 +462,7 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::Send>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         if (original.args.size() == 1) {
             // Common case: Send is not to a modifier.
@@ -522,7 +522,7 @@ public:
     }
 
     FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
-        auto &lhs = ast::ref_tree_const<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto &lhs = ast::cast_tree_nonnull_const<ast::UnresolvedConstantLit>(asgn.lhs);
 
         FoundStaticField found;
         found.owner = getOwner();
@@ -584,7 +584,7 @@ public:
     }
 
     FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
-        auto &send = ast::ref_tree_const<ast::Send>(asgn.rhs);
+        auto &send = ast::cast_tree_nonnull_const<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
@@ -593,7 +593,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
@@ -1420,7 +1420,7 @@ class TreeSymbolizer {
 
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
@@ -1460,7 +1460,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
@@ -1534,7 +1534,7 @@ public:
     }
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         core::SymbolRef owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
@@ -1547,15 +1547,15 @@ public:
     }
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &method = ast::ref_tree<ast::MethodDef>(tree);
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments().size());
         return tree;
     }
 
     ast::TreePtr handleAssignment(core::Context ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
-        auto &lhs = ast::ref_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!scope.data(ctx)->isClassOrModule()) {
@@ -1573,7 +1573,7 @@ public:
 
     ast::TreePtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::TreePtr tree,
                                             const ast::UnresolvedConstantLit *typeName) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         ENFORCE(asgn.lhs.get() == typeName &&
                 asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
@@ -1658,7 +1658,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {

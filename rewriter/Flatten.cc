@@ -307,7 +307,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &classDef = ast::ref_tree<ast::ClassDef>(tree);
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         classDef.rhs =
             addClassDefMethods(ctx, std::move(classDef.rhs), core::Loc(classDef.declLoc.file(), classDef.loc));
         auto &methods = curMethodSet();
@@ -323,7 +323,7 @@ public:
     };
 
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we might want to move sigs, so we mostly use the same logic that we use for methods. The one exception is
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
         // method has a `self.` or not), so we'll fill that information in later
@@ -335,7 +335,7 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         auto &methods = curMethodSet();
         // if it's not a send, then we didn't make a stack frame for it
         if (send.fun != core::Names::sig()) {
@@ -350,7 +350,7 @@ public:
     }
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         // add a new scope for this method def
         curMethodSet().pushScope(computeScopeInfo(methodDef.flags.isSelfMethod ? ScopeType::StaticMethodScope
                                                                                : ScopeType::InstanceMethodScope));
@@ -358,7 +358,7 @@ public:
     }
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
         auto md = methods.popScope();

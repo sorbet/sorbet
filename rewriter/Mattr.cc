@@ -93,7 +93,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
             auto sig = ast::MK::Sig0(loc, ast::MK::Untyped(loc));
             auto def =
                 ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx), ast::MK::EmptyTree());
-            ast::ref_tree<ast::MethodDef>(def).flags.isSelfMethod = true;
+            ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader) {
                 addInstanceCounterPart(result, sig, def);
             }
@@ -105,7 +105,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
                                      ast::MK::Untyped(loc));
             auto def = ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx).addEq(ctx),
                                                  ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
-            ast::ref_tree<ast::MethodDef>(def).flags.isSelfMethod = true;
+            ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceWriter) {
                 addInstanceCounterPart(result, sig, def);
             }
@@ -119,7 +119,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
                 loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
             auto def = ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx).addQuestion(ctx),
                                                  ast::MK::False(loc));
-            ast::ref_tree<ast::MethodDef>(def).flags.isSelfMethod = true;
+            ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader && instancePredicate) {
                 addInstanceCounterPart(result, sig, def);
             }

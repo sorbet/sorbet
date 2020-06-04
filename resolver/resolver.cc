@@ -191,7 +191,7 @@ private:
         bool seenUnresolved = false;
 
         ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
-            auto &original = ast::ref_tree<ast::ConstantLit>(tree);
+            auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
             seenUnresolved |= !isAlreadyResolved(ctx, original);
             return tree;
         };
@@ -240,7 +240,7 @@ private:
 
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, bool suggestDidYouMean) {
-        auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(job.out->original);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
 
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.data(ctx)->isTypeAlias()) {
@@ -334,7 +334,7 @@ private:
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
-        auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(job.out->original);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
@@ -549,8 +549,10 @@ private:
                 return;
             }
             ENFORCE(sym.exists() ||
-                    ast::isa_tree<ast::ConstantLit>(ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original).scope) ||
-                    ast::isa_tree<ast::EmptyTree>(ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original).scope));
+                    ast::isa_tree<ast::ConstantLit>(
+                        ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope) ||
+                    ast::isa_tree<ast::EmptyTree>(
+                        ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 return;
             }
@@ -575,12 +577,12 @@ public:
     ResolveConstantsWalk() : nesting_(nullptr) {}
 
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::ref_tree<ast::ClassDef>(tree).symbol);
+        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
 
     ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
-        auto &c = ast::ref_tree<ast::UnresolvedConstantLit>(tree);
+        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         if (ast::isa_tree<ast::UnresolvedConstantLit>(c.scope)) {
             c.scope = postTransformUnresolvedConstantLit(ctx, std::move(c.scope));
         }
@@ -596,7 +598,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::SymbolRef klass = original.symbol;
 
@@ -617,7 +619,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.dataAllowingNone(ctx)->isStaticField()) {
@@ -641,7 +643,7 @@ public:
                     CorrectTypeAlias::eagerToLazy(ctx, e, send);
                 }
             }
-            auto &block = ast::ref_tree<ast::Block>(send->block);
+            auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
             auto typeAliasItem = TypeAliasResolutionItem{id->symbol, ctx.file, &block.body};
             this->todoTypeAliases_.emplace_back(std::move(typeAliasItem));
 
@@ -1130,7 +1132,7 @@ class ResolveTypeMembersWalk {
     static void resolveTypeAlias(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
         // this is provided by ResolveConstantsWalk
         ENFORCE(ast::isa_tree<ast::Block>(rhs->block));
-        auto &block = ast::ref_tree<ast::Block>(rhs->block);
+        auto &block = ast::cast_tree_nonnull<ast::Block>(rhs->block);
         ENFORCE(block.body);
 
         auto allowSelfType = true;
@@ -1170,7 +1172,7 @@ class ResolveTypeMembersWalk {
 
 public:
     ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // If this is a class with no type members defined, resolve attached
         // class immediately. Otherwise, it will be resolved once all type
@@ -1183,7 +1185,7 @@ public:
     }
 
     ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun._id) {
             case core::Names::typeAlias()._id:
             case core::Names::typeMember()._id:
@@ -1210,7 +1212,7 @@ public:
     }
 
     ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &lit = ast::ref_tree<ast::ConstantLit>(tree);
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
             core::SymbolRef symbol = lit.symbol.data(ctx)->dealias(ctx);
@@ -1243,7 +1245,7 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun._id) {
             case core::Names::typeMember()._id:
@@ -1263,7 +1265,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.exists()) {
@@ -1987,7 +1989,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &asgn = ast::ref_tree<ast::Assign>(tree);
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         if (handleDeclaration(ctx, asgn)) {
             return tree;
@@ -2038,7 +2040,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &klass = ast::ref_tree<ast::ClassDef>(tree);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
         return tree;
     }
@@ -2064,12 +2066,12 @@ public:
     }
 
     ast::TreePtr postTransformInsSeq(core::MutableContext ctx, ast::TreePtr tree) {
-        processInSeq(ctx, ast::ref_tree<ast::InsSeq>(tree));
+        processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
         return tree;
     }
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
             if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
@@ -2251,7 +2253,7 @@ class ResolveMixesInClassMethodsWalk {
 
 public:
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::ref_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, send);
             return ast::MK::EmptyTree();
@@ -2263,7 +2265,7 @@ public:
 class ResolveSanityCheckWalk {
 public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original.toString(ctx));
         if (original.symbol == core::Symbols::root()) {
@@ -2274,24 +2276,24 @@ public:
         return tree;
     }
     ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::MethodDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         ENFORCE(false, "These should have all been removed: {}", original.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::UnresolvedIdent>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 original.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ConstantLit>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
         return tree;
     }

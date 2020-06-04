@@ -6,7 +6,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr tree) {
-    auto &local = ast::ref_tree<ast::Local>(tree);
+    auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
 
     core::SymbolRef owner;
     if (ctx.owner.data(ctx)->isMethod()) {
@@ -39,7 +39,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
 }
 
 ast::TreePtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-    auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     // Check args.
     for (auto &arg : methodDef.args) {

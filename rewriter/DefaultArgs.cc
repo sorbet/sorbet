@@ -33,7 +33,7 @@ ast::TreePtr mangleSig(core::Context ctx, ast::TreePtr expr, ast::TreePtr &param
         return ast::MK::EmptyTree();
     }
 
-    auto &sigBlock = ast::ref_tree<ast::Block>(sig->block);
+    auto &sigBlock = ast::cast_tree_nonnull<ast::Block>(sig->block);
     auto send = ast::cast_tree<ast::Send>(sigBlock.body);
     if (!send) {
         return ast::MK::EmptyTree();
@@ -181,7 +181,7 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     auto defaultArgDef =
                         ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, std::move(args), std::move(rhs));
                     {
-                        auto &defaultDef = ast::ref_tree<ast::MethodDef>(defaultArgDef);
+                        auto &defaultDef = ast::cast_tree_nonnull<ast::MethodDef>(defaultArgDef);
                         defaultDef.flags.isSelfMethod = mdef->flags.isSelfMethod;
                     }
                     newMethods.emplace_back(move(defaultArgDef));

@@ -50,7 +50,7 @@ class AutogenWalk {
     vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
         vector<core::NameRef> out;
         while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original);
+            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             out.emplace_back(original.cnst);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
@@ -69,7 +69,7 @@ public:
     }
 
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
             return tree;
@@ -136,7 +136,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
             return tree;
@@ -160,7 +160,7 @@ public:
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
         while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(cnst->original);
+            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         if (cnst && cnst->symbol == core::Symbols::root()) {
@@ -212,7 +212,7 @@ public:
     }
 
     ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::Assign>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {

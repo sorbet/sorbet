@@ -53,7 +53,7 @@ public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &m = ast::ref_tree<ast::MethodDef>(tree);
+        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m.symbol.data(ctx)->isOverloaded()) {
             return tree;
         }
@@ -759,7 +759,7 @@ class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
     ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto unresolvedPath = ast::ref_tree<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
+        auto unresolvedPath = ast::cast_tree_nonnull<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}",
@@ -821,11 +821,11 @@ public:
     };
 
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        checkSym(ctx, ast::ref_tree<ast::ClassDef>(tree).symbol);
+        checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        checkSym(ctx, ast::ref_tree<ast::MethodDef>(tree).symbol);
+        checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
         return tree;
     }
 };
@@ -1090,12 +1090,12 @@ class AllNamesCollector {
 public:
     core::UsageHash acc;
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
-        acc.sends.emplace_back(ctx, ast::ref_tree<ast::Send>(tree).fun.data(ctx));
+        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun.data(ctx));
         return tree;
     }
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::MethodDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         acc.constants.emplace_back(ctx, original.name.data(ctx));
         return tree;
     }
@@ -1109,7 +1109,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::ClassDef>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name.data(ctx));
         original.name->showRaw(ctx);
 
@@ -1124,13 +1124,13 @@ public:
     }
 
     ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
-        auto &original = ast::ref_tree<ast::UnresolvedConstantLit>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         handleUnresolvedConstantLit(ctx, &original);
         return tree;
     }
 
     ast::TreePtr postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
-        auto &id = ast::ref_tree<ast::UnresolvedIdent>(tree);
+        auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
             acc.constants.emplace_back(ctx, id.name.data(ctx));
         }

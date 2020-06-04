@@ -13,7 +13,7 @@ namespace sorbet::rewriter {
 // sequences of expressions where they are not a return value)
 struct CleanupWalk {
     ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
-        auto &insSeq = ast::ref_tree<ast::InsSeq>(tree);
+        auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
 
         ast::InsSeq::STATS_store newStore;
         for (auto &m : insSeq.stats) {
@@ -29,7 +29,7 @@ struct CleanupWalk {
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto &classDef = ast::ref_tree<ast::ClassDef>(tree);
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ast::ClassDef::RHS_store newStore;
         for (auto &m : classDef.rhs) {

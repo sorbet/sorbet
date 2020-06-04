@@ -135,7 +135,7 @@ vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *se
             args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
             auto methodDef = ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), methodName, std::move(args),
                                                       ast::MK::EmptyTree());
-            ast::ref_tree<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
+            ast::cast_tree_nonnull<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {
             if (auto e = ctx.beginError(arg->loc, core::errors::Rewriter::BadModuleFunction)) {

@@ -9,7 +9,7 @@ namespace sorbet::realmain::lsp {
 ast::TreePtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::TreePtr tree) {
     ENFORCE(!methodStack.empty());
 
-    auto &assign = ast::ref_tree<ast::Assign>(tree);
+    auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
 
     auto *local = ast::cast_tree<ast::Local>(assign.lhs);
     if (local == nullptr) {
@@ -24,7 +24,7 @@ ast::TreePtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::TreePtr
 }
 
 ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-    auto &methodDef = ast::ref_tree<ast::MethodDef>(tree);
+    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todo());
@@ -49,7 +49,7 @@ ast::TreePtr LocalVarFinder::postTransformMethodDef(core::Context ctx, ast::Tree
 }
 
 ast::TreePtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-    auto &classDef = ast::ref_tree<ast::ClassDef>(tree);
+    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
