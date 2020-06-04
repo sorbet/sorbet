@@ -159,7 +159,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         raise "#{msg} #{extra.inspect}"
       end
 
-      e = assert_raises(TypeError) do
+      e = assert_raises(RuntimeError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 

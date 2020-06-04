@@ -62,7 +62,7 @@ module T::Props::Serializable
         :generate_deserialize_source
       )
       if msg
-        raise TypeError.new(msg)
+        raise e.class.new(msg)
       else
         raise
       end
