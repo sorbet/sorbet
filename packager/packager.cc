@@ -402,16 +402,25 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> allPackages,
+                                                 vector<ast::ParsedFile> changedFiles) {
     // Debug: We can't run incrementally over package changes.
-    for (auto &file : files) {
+    for (auto &file : changedFiles) {
         ENFORCE(file.file.data(gs).sourceType != core::File::Type::Package);
     }
 
-    // TODO: Get package info, run core of run()...
-    Exception::raise("Unsupported.");
+    // Just run all packages w/ the changed files through Packager again. It should not define any new names.
+    auto namesUsed = gs.namesUsed();
+    vector<ast::ParsedFile> combined;
+    combined.reserve(changedFiles.size() + allPackages.size());
+    combined.insert(combined.end(), make_move_iterator(allPackages.begin()), make_move_iterator(allPackages.end()));
+    combined.insert(combined.end(), make_move_iterator(changedFiles.begin()), make_move_iterator(changedFiles.end()));
+    changedFiles.clear();
 
-    return files;
+    auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+    changedFiles = Packager::run(gs, *emptyWorkers, move(combined));
+    ENFORCE(gs.namesUsed() == namesUsed);
+    return changedFiles;
 }
 
 } // namespace sorbet::packager

@@ -1,5 +1,4 @@
 # typed: strict
-# disable-stress-incremental: true
 
 class Project::Foo < PackageSpec
   import Project::Bar
