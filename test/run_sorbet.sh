@@ -19,6 +19,10 @@ fi
 
 if [ -z "${llvmir:-}" ]; then
   llvmir=$(mktemp -d)
+  cleanup() {
+    rm -rf "$llvmir"
+  }
+  trap cleanup EXIT
 fi
 
 echo

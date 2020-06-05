@@ -23,10 +23,17 @@ if [ -z "$rb_file" ]; then
   exit 1
 fi
 
-# Export llvmir so that run_sorbet picks it up. Real argument parsing in
-# run_sorbet.sh would probably be better.
-llvmir="$(mktemp -d)"
-export llvmir
+if [ -z "${llvmir:-}" ]; then
+  llvmir=$(mktemp -d)
+  cleanup() {
+    rm -rf "$llvmir"
+  }
+  trap cleanup EXIT
+
+  # Export llvmir so that run_sorbet picks it up. Real argument parsing in
+  # run_sorbet.sh would probably be better.
+  export llvmir
+fi
 
 # ensure that the extension is built
 "test/run_sorbet.sh" "$rb_file"

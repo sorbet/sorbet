@@ -10,7 +10,7 @@ source "test/logging.sh"
 # Argument Parsing #############################################################
 
 # Positional arguments
-build_archive=${1/--build_archive=/}
+build_dir=${1/--build_dir=/}
 shift 1
 
 # sources make up the remaining argumenets
@@ -21,22 +21,22 @@ rb=( "$@" )
 root=$PWD
 
 llvm_diff_path=$root/external/llvm_toolchain/bin/llvm-diff
-# The directory to unpack the build archive to
-target="$(mktemp -d)"
 
 diff_dir="$(mktemp -d)"
 
+cleanup() {
+  rm -rf "$diff_dir"
+}
+trap cleanup EXIT
+
 # Main #########################################################################
 
-info "--- Unpacking Build ---"
-tar -xvf "${build_archive}" -C "${target}"
-
-info "--- Checking Build ---"
-pushd "$target" > /dev/null
+info "Checking Build:"
+pushd "$build_dir/" > /dev/null
 for ext in "llo"; do
   exp="$root/${rb[0]%.rb}.$ext.exp"
   if [ -f "$exp" ]; then
-    actual="$target/${rb[0]}.$ext"
+    actual="${rb[0]}.$ext"
     if [ ! -f "$actual" ]; then
       fatal "No LLVMIR found at" "$actual"
     fi
@@ -57,8 +57,5 @@ for ext in "llo"; do
   fi
 done
 popd > /dev/null
-
-info "Cleaning up temp files"
-rm -r "$target" "$diff_dir"
 
 success "Test passed"

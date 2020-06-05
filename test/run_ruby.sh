@@ -17,9 +17,6 @@ shift
 
 if [ -z "$rb_file" ]; then
   echo "Usage: test/run_ruby.sh <test_file>"
-
-
-
   exit 1
 fi
 

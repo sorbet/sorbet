@@ -58,3 +58,19 @@ sh_binary(
         "@bazel_tools//tools/bash/runfiles",
     ],
 )
+
+sh_binary(
+    name = "test_corpus_runner",
+    srcs = ["test_corpus_runner.sh"],
+    deps = [
+        ":logging",
+    ],
+)
+
+sh_binary(
+    name = "validate_exp",
+    srcs = ["validate_exp.sh"],
+    deps = [
+        ":logging",
+    ],
+)

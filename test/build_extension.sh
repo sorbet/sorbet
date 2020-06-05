@@ -37,8 +37,10 @@ source "$(rlocation com_stripe_sorbet_llvm/test/hermetic_tar.sh)"
 # Argument Parsing #############################################################
 
 # Positional arguments
-output_archive=$1
-shift 1
+output_dir=$1
+stdout=$2
+exitcode=$3
+shift 3
 
 # Sources make up the remaining input
 ruby_source=( "$@" )
@@ -47,15 +49,12 @@ ruby_source=( "$@" )
 
 sorbet="$(rlocation com_stripe_sorbet_llvm/main/sorbet)"
 
-# The script is always run from the repo root
-root="$PWD"
-
-# Temporary directory for llvm output
-target="$(mktemp -d)"
-
-output=$(mktemp)
-
 # Main #########################################################################
+
+if [ ! -d "$output_dir" ]; then
+  info "Creating output dir $output_dir"
+  mkdir "$output_dir"
+fi
 
 indent_and_nest() {
   sed -e 's/^/       │/'
@@ -75,21 +74,14 @@ done
 
 echo
 info "Using Sorbet to generate llvm-ir-folder..."
-llvm_ir_folder_flag="--llvm-ir-folder=$target"
+llvm_ir_folder_flag="--llvm-ir-folder=$output_dir"
 info "├─ Using $llvm_ir_folder_flag"
 set +e
 $sorbet --silence-dev-message --no-error-count \
-  "$llvm_ir_folder_flag" "${ruby_source[@]}" > "$output" 2>&1
-echo "$?" > "$target/sorbet.exit"
+  "$llvm_ir_folder_flag" "${ruby_source[@]}" > "$stdout" 2>&1
+echo "$?" > "$exitcode"
 set -e
-success "└─ done."
-
-echo
-info "Building tar archive..."
-cp "$output" "$target/sorbet.outerr"
-hermetic_tar "$target" "$root/$output_archive"
 
 success "└─ done."
-echo
 
 # vim:fdm=marker

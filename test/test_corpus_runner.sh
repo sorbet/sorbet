@@ -16,15 +16,17 @@ rbout=${1/--expected_output=/}
 rberr=${2/--expected_err=/}
 rbexit=${3/--expected_exit_code=/}
 rbcode=$(< "$rbexit")
-build_archive=${4/--build_archive=/}
+build_dir=${4/--build_dir=/}
 ruby=${5/--ruby=/}
 expect_fail=
-case "${6/--expect-fail=/}" in
+case "${6/--expect_fail=/}" in
   True) expect_fail=1;;
   False) ;; #ok
   *) fatal "Expected --expect-fail=(True|False), got $6" ;;
 esac
-shift 6
+sorbet_exit=${7/--sorbet_exit=}
+sorbet_out=${8/--sorbet_out=}
+shift 8
 
 # sources make up the remaining argumenets
 rbmain=$1
@@ -34,15 +36,17 @@ rb=( "$@" )
 
 root="$PWD"
 
-# The directory to unpack the build archive to
-target="$(mktemp -d)"
-
 # Test stdout/stderr logs
 stdout="$(mktemp)"
 stderr="$(mktemp)"
 
 # Test wrapper
 runfile="$(mktemp)"
+
+cleanup() {
+  rm -f "$stdout" "$stderr" "$runfile"
+}
+trap cleanup EXIT
 
 # Main #########################################################################
 
@@ -91,23 +95,22 @@ something_failed() {
 }
 
 echo    ""
-info    "Unpacking compiled artifact (.so/.bundle, .ll, .llo)..."
-info    "├─ from:        bazel-out/k8-opt/bin/${build_archive}"
-tar -xf "${build_archive}" -C "${target}"
+info    "Compiled artifacts (.so/.bundle, .ll, .llo)..."
+info    "├─ from:        ${build_dir}"
 info    "├─ contents:"
-find "$target" -type f | indent_and_nest
+find "$build_dir/" -type f | indent_and_nest
 success "└─ done."
 
 echo      ""
-info      "Checking unpacked archive..."
-if [ "$(< "$target/sorbet.exit")" -ne 0 ]; then
+info      "Checking sorbet build dir..."
+if [ "$(< "$sorbet_exit")" -ne 0 ]; then
   error  "├─ Sorbet failed when generating archive:"
-  < "$target/sorbet.outerr" indent_and_nest
+  < "$sorbet_exit" indent_and_nest
   error  "└─ output is above."
 
   something_failed
 fi
-if [ -z "$(find "$target" -name '*.so' -o -name '*.bundle')" ]; then
+if [ -z "$(find "$build_dir/" -name '*.so' -o -name '*.bundle')" ]; then
   if ! grep -q '# typed:' "${rb[@]}"; then
     attn "├─ No '# typed: ...' sigil(s) in input files"
   fi
@@ -117,7 +120,7 @@ if [ -z "$(find "$target" -name '*.so' -o -name '*.bundle')" ]; then
   fi
 
   info   "├─ console output:"
-  < "$target/sorbet.outerr" indent_and_nest
+  < "$sorbet_out" indent_and_nest
 
   error  '└─ no shared object produced. See above for potential reasons why.'
 
@@ -137,7 +140,7 @@ echo "require './$rbmain'" > "$runfile"
 set +e
 # NOTE: the llvmir environment variable must have a leading `./`, otherwise the
 # require will trigger path search.
-force_compile=1 llvmir="${target}" $ruby \
+force_compile=1 llvmir="$PWD/${build_dir}/" $ruby \
   --disable=gems \
   --disable=did_you_mean \
   -r "${root}/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb" \

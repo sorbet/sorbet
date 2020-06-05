@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# --- begin runfiles.bash initialization ---
+# --- begin runfiles.bash initialization --- {{{
 # Copy-pasted from Bazel's Bash runfiles library https://github.com/bazelbuild/bazel/blob/defd737761be2b154908646121de47c30434ed51/tools/bash/runfiles/runfiles.bash
 if [[ ! -d "${RUNFILES_DIR:-/dev/null}" && ! -f "${RUNFILES_MANIFEST_FILE:-/dev/null}" ]]; then
   if [[ -f "$0.runfiles_manifest" ]]; then
@@ -23,7 +23,7 @@ else
   echo >&2 "ERROR: cannot find @bazel_tools//tools/bash/runfiles:runfiles.bash"
   exit 1
 fi
-# --- end runfiles.bash initialization ---
+# --- end runfiles.bash initialization --- }}}
 
 # Find logging with rlocation, as this script is run from a genrule
 # shellcheck disable=SC1090
@@ -71,6 +71,7 @@ echo "require './$rb';" > "$rbrunfile"
 llvmir=$(mktemp -d)
 cleanup() {
     rm -r "$llvmir"
+    rm "$rbrunfile"
 }
 trap cleanup EXIT
 
@@ -85,8 +86,5 @@ llvmir="$llvmir" "$ruby" \
   "$rbrunfile" > "$rbout" 2> "$rberr"
 echo "$?" > "$rbexit"
 set -e
-
-info "Cleaning up"
-rm "$rbrunfile"
 
 success "* Captured output for ${rb}"
