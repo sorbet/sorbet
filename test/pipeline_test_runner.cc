@@ -485,18 +485,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     {
-        // packager
-        vector<ast::ParsedFile> packages;
-        vector<ast::ParsedFile> files;
-        for (auto &tree : newTrees) {
-            if (tree.file.data(*gs).sourceType == core::File::Type::Package) {
-                packages.emplace_back(move(tree));
-            } else {
-                files.emplace_back(move(tree));
-            }
+        trees = packager::Packager::runIncremental(*gs, move(newTrees));
+        for (auto &tree : trees) {
+            handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
         }
-
-        trees = packager::Packager::runIncremental(*gs, move(packages), move(files));
     }
 
     {
