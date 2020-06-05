@@ -481,22 +481,40 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "index-tree", [&]() { return file.tree->toString(*gs); });
         handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
-        // namer
-        {
-            core::UnfreezeSymbolTable symbolTableAccess(*gs);
-            vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(file));
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
-            file = testSerialize(*gs, move(vTmp[0]));
-        }
-
-        handler.addObserved(*gs, "name-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved(*gs, "name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
         newTrees.emplace_back(move(file));
     }
 
+    {
+        // packager
+        vector<ast::ParsedFile> packages;
+        vector<ast::ParsedFile> files;
+        for (auto &tree : newTrees) {
+            if (tree.file.data(*gs).sourceType == core::File::Type::Package) {
+                packages.emplace_back(move(tree));
+            } else {
+                files.emplace_back(move(tree));
+            }
+        }
+
+        trees = packager::Packager::runIncremental(*gs, move(packages), move(files));
+    }
+
+    {
+        // namer
+        for (auto &tree : trees) {
+            core::UnfreezeSymbolTable symbolTableAccess(*gs);
+            vector<ast::ParsedFile> vTmp;
+            vTmp.emplace_back(move(tree));
+            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
+            tree = testSerialize(*gs, move(vTmp[0]));
+
+            handler.addObserved("name-tree", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved("name-tree-raw", [&]() { return tree.tree->showRaw(*gs); });
+        }
+    }
+
     // resolver
-    trees = move(resolver::Resolver::runTreePasses(*gs, move(newTrees)).result());
+    trees = move(resolver::Resolver::runTreePasses(*gs, move(trees)).result());
 
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
