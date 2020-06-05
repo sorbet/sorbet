@@ -4208,6 +4208,8 @@ class Bundler::HTTPError < Bundler::BundlerError
   def status_code(); end
 end
 
+module Bundler::Fetcher; end
+
 # This error is raised if HTTP authentication is required, but not provided.
 class Bundler::Fetcher::AuthenticationRequiredError < Bundler::HTTPError
 end
