@@ -301,11 +301,14 @@ def _validate_exp_test_impl(ctx):
     ctx.actions.write(
         ctx.outputs.executable,
         content = """
-        cat {log}
+        cat "{build_log}"
+
+        cat "{sorbet_log}"
 
         {validate_exp} --build_dir="{build_dir}" {sources}
         """.format(
-            log = output.log.short_path,
+            build_log = output.log.short_path,
+            sorbet_log = output.stdout.short_path,
             validate_exp = ctx.executable._validate_exp.short_path,
             build_dir = output.build.short_path,
             sources = " ".join([file.short_path for file in ctx.files.srcs]),
@@ -351,6 +354,8 @@ def _validate_sorbet_output_test_impl(ctx):
         content = """
         cat "{build_log}"
 
+        cat "{sorbet_log}"
+
         cat "{oracle_log}"
 
         {test_corpus_runner} \\
@@ -365,6 +370,7 @@ def _validate_sorbet_output_test_impl(ctx):
           {sources}
         """.format(
             build_log = build.log.short_path,
+            sorbet_log = build.stdout.short_path,
             oracle_log = oracle.log.short_path,
             test_corpus_runner = ctx.executable._test_corpus_runner.short_path,
             expected_outfile = oracle.stdout.short_path,
