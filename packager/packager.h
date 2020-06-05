@@ -72,9 +72,9 @@ public:
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files);
 
-    // Run packager incrementally. Note: Cannot run incrementally on package file changes.
-    static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> allPackages,
-                                                       std::vector<ast::ParsedFile> changedFiles);
+    // Run packager incrementally. Note: `files` must contain all packages files that regular files in `files` belong
+    // to. Does not support package changes.
+    static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
 
     Packager() = delete;
 };

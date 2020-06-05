@@ -402,25 +402,13 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> allPackages,
-                                                 vector<ast::ParsedFile> changedFiles) {
-    // Debug: We can't run incrementally over package changes.
-    for (auto &file : changedFiles) {
-        ENFORCE(file.file.data(gs).sourceType != core::File::Type::Package);
-    }
-
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
     auto namesUsed = gs.namesUsed();
-    vector<ast::ParsedFile> combined;
-    combined.reserve(changedFiles.size() + allPackages.size());
-    combined.insert(combined.end(), make_move_iterator(allPackages.begin()), make_move_iterator(allPackages.end()));
-    combined.insert(combined.end(), make_move_iterator(changedFiles.begin()), make_move_iterator(changedFiles.end()));
-    changedFiles.clear();
-
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-    changedFiles = Packager::run(gs, *emptyWorkers, move(combined));
+    files = Packager::run(gs, *emptyWorkers, move(files));
     ENFORCE(gs.namesUsed() == namesUsed);
-    return changedFiles;
+    return files;
 }
 
 } // namespace sorbet::packager
