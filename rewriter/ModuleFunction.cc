@@ -78,17 +78,19 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
         return stats;
     }
 
-    auto sig = ast::cast_tree_const<ast::Send>(*prevStat);
-    bool hasSig = sig && sig->fun == core::Names::sig();
     auto loc = expr->loc;
 
     // this creates a private copy of the method
     auto privateCopy = expr->deepCopy();
     stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
 
-    // as well as a public static copy of the method
-    if (hasSig) {
-        stats.emplace_back(sig->deepCopy());
+    // as well as a public static copy of the method signature
+    if (prevStat) {
+        if (auto *sig = ast::cast_tree_const<ast::Send>(*prevStat)) {
+            if (sig->fun == core::Names::sig()) {
+                stats.emplace_back(sig->deepCopy());
+            }
+        }
     }
     auto moduleCopy = expr->deepCopy();
     ENFORCE(moduleCopy, "Should be non-nil.");
