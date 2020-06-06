@@ -68,18 +68,18 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
                 # This is a folder test.
                 final_dirsep = path.find("/", packager_pos + len(folder_test_dir))
                 if final_dirsep >= 0:
-                    # Test name includes trailing '/'
-                    test_name = path[0:final_dirsep + 1]
+                    test_name = path[0:final_dirsep]
                     current = tests.get(test_name)
                     if None == current:
                         data = {
                             "path": test_name,
-                            "prefix": test_name,
+                            "prefix": test_name + "/",
                             "sentinel": test_name,
                             "isMultiFile": True,
                             "disabled": "disabled" in test_name,
                         }
-                        continue
+                        tests[test_name] = data
+                    continue
 
             # This is not a folder test (common case)
             prefix = dropExtension(basename(path).partition("__")[0])

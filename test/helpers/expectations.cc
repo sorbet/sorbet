@@ -176,6 +176,9 @@ Expectations Expectations::getExpectations(std::string singleTest) {
     }
 
     if (FileOps::dirExists(singleTest)) {
+        if (singleTest.back() != '/') {
+            singleTest += '/';
+        }
         return getExpectationsForFolderTest(singleTest);
     }
 
