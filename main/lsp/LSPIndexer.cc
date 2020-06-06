@@ -102,6 +102,12 @@ bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> 
             return false;
         } else {
             const auto &oldFile = getOldFile(fref, *initialGS, evictedFilesRef);
+            if (oldFile.sourceType == core::File::Type::Package) {
+                // We do not support package file changes on the fast path.
+                logger.debug("Taking slow path because {} is a package file", f->path());
+                prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
+                return false;
+            }
             ENFORCE(oldFile.getFileHash() != nullptr);
             ENFORCE(f->getFileHash() != nullptr);
             auto oldHash = *oldFile.getFileHash();
