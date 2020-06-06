@@ -10,29 +10,31 @@ namespace sorbet::packager {
 /**
  * This pass transforms package files (`foo/__package.rb`) from
  *
- *   class Opus::Foo < PackageSpec
- *    import Bar
- *    import OtherPkg::X
+ *   class Project::Foo < PackageSpec
+ *    import Project::Bar
  *
  *    export Baz
+ *    export_methods FooClassWithMethods
+ *   end
+ *
+ * given
+ *
+ *   class Project::Bar < PackageSpec
+ *     export SomeClassInBar
+ *     export Inner::SomeOtherClassInBar
+ *     export_methods SomeClassWithMethods, SomeOtherClassWithMethods
  *   end
  *
  * to:
  *
- *   module <PACKAGE_REGISTRY>::Opus_Foo_Package
- *     module Bar
- *       # Import methods exported on Bar (TODO: This seems incorrect?
- *       # _Any_ top-level package method will then be available)
- *       extend <PACKAGE_REGISTRY>::Bar_Package
+ *   module <PACKAGE_REGISTRY>::Project_Foo_Package
+ *     module Project::Bar
+ *       # Import methods exported on Bar
+ *       extend <PACKAGE_REGISTRY>::Bar_Package::SomeClassWithMethods
+ *       extend <PACKAGE_REGISTRY>::Bar_Package::SomeOtherClassWithMethods
  *       # Import each class exported by Bar
  *       SomeClassInBar = <PACKAGE_REGISTRY>::Bar_Package::SomeClassInBar
- *     end
- *
- *     module OtherPkg
- *       module X
- *         extend <PACKAGE_REGISTRY>::OtherPkg__X_Package::<PackageMethods>
- *         SomeClassInX = <PACKAGE_REGISTRY>::OtherPkg__X_Package::SomeClassInX
- *       end
+ *       SomeOtherClassInBar = <PACKAGE_REGISTRY>::Bar_Package::SomeOtherClassInBar
  *     end
  *   end
  *
@@ -40,7 +42,8 @@ namespace sorbet::packager {
  *    import Bar
  *    import OtherPkg::X
  *
- *    export Baz
+ *    export <PACKAGE_REGISTRY>::Project_Foo_Package::Baz
+ *    export_methods <PACKAGE_REGISTRY>::Project_Foo_Package::FooClassWithMethods
  *   end
  *
  * It also rewrites files in the package, like `foo/baz.rb`, from:
