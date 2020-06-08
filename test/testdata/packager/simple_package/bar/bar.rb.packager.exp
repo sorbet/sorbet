@@ -106,38 +106,3 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
-    end
-
-    def self.import<<C <todo sym>>>(x, &<blk>)
-      <emptyTree>
-    end
-
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
-    end
-
-    def self.export<<C <todo sym>>>(x, &<blk>)
-      <emptyTree>
-    end
-
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C T>.untyped()}).void()
-    end
-
-    def self.export_methods<<C <todo sym>>>(*x, &<blk>)
-      <emptyTree>
-    end
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"import")
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"export")
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"export_methods")
-  end
-end
