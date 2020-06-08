@@ -358,6 +358,39 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), core::Symbols::todo(), core::Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
 
+    // PackageSpec is a class that can be subclassed.
+    id = enterClassSymbol(Loc::none(), core::Symbols::Object(), core::Names::Constants::PackageSpec());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::PackageSpec());
+
+    id = id.data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::PackageSpecSingleton());
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import_());
+    ENFORCE(id == Symbols::PackageSpec_import());
+    {
+        enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::export_());
+    ENFORCE(id == Symbols::PackageSpec_export());
+    {
+        enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::exportMethods());
+    ENFORCE(id == Symbols::PackageSpec_export_methods());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isRepeated = true;
+        auto &blkArg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        blkArg.flags.isBlock = true;
+    }
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -663,7 +696,7 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
-}
+} // namespace sorbet::core
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
