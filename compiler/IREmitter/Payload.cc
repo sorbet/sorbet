@@ -390,8 +390,7 @@ llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
 
-llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::MethodDef> &md,
-                                            llvm::GlobalVariable *store) {
+llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const ast::MethodDef &md, llvm::GlobalVariable *store) {
     std::vector<llvm::Type *> argTys{llvm::Type::getInt64Ty(cs)};
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), argTys, false);
     auto constr =
@@ -410,8 +409,8 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
     auto cs1 = cs;
     cs1.functionEntryInitializers = bei;
 
-    auto loc = core::Loc(md->declLoc.file(), md->loc);
-    auto sym = md->symbol;
+    auto loc = core::Loc(md.declLoc.file(), md.loc);
+    auto sym = md.symbol;
     auto funcName =
         IREmitterHelpers::isStaticInit(cs1, sym) ? "<top (required)>"sv : sym.data(cs)->name.data(cs)->shortName(cs);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
@@ -432,10 +431,10 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, unique_ptr<ast::M
     return constr;
 }
 
-llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, unique_ptr<ast::MethodDef> &md) {
+llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const ast::MethodDef &md) {
     auto tp = llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cs));
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    auto name = IREmitterHelpers::getFunctionName(cs, md->symbol);
+    auto name = IREmitterHelpers::getFunctionName(cs, md.symbol);
     llvm::Constant *indices[] = {zero};
     string rawName = "stackFramePrecomputed_" + name;
     llvm::IRBuilder<> globalInitBuilder(cs);
@@ -468,7 +467,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 }
 
 std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                                   unique_ptr<ast::MethodDef> &md) {
+                                                                   const ast::MethodDef &md) {
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, md);
     auto pc = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {stackFrame});

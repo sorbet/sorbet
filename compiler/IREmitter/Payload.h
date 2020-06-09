@@ -46,7 +46,7 @@ public:
                                  const core::TypePtr &type);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
     static std::pair<llvm::Value *, llvm::Value *> setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                                                     std::unique_ptr<ast::MethodDef> &md);
+                                                                     const ast::MethodDef &md);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);

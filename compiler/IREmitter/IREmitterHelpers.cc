@@ -92,7 +92,7 @@ void trackBlockUsage(CompilerState &cs, cfg::CFG &cfg, core::LocalVariable lv, c
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
 tuple<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>, bool>
-findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg) {
+findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg) {
     UnorderedMap<core::LocalVariable, optional<int>> ret;
     UnorderedMap<core::LocalVariable, int> escapedVariableIndexes;
     bool usesBlockArg = false;
@@ -100,13 +100,14 @@ findCaptures(CompilerState &cs, unique_ptr<ast::MethodDef> &mdef, cfg::CFG &cfg)
 
     int idx = 0;
     int argId = -1;
-    for (auto &arg : mdef->args) {
+    for (auto &arg : mdef.args) {
         argId += 1;
-        ast::Expression *maybeLocal = arg.get();
-        if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg.get())) {
-            maybeLocal = opt->expr.get();
+        ast::Local const *local = nullptr;
+        if (auto *opt = ast::cast_tree_const<ast::OptionalArg>(arg)) {
+            local = ast::cast_tree_const<ast::Local>(opt->expr);
+        } else {
+            local = ast::cast_tree_const<ast::Local>(arg);
         }
-        auto local = ast::cast_tree<ast::Local>(maybeLocal);
         ENFORCE(local);
         trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), ret, escapedVariableIndexes, idx, usesBlockArg,
                         blkArg);
@@ -293,7 +294,7 @@ void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector
 }
 
 BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
-                                                                 unique_ptr<ast::MethodDef> &md,
+                                                                 const ast::MethodDef &md,
                                                                  UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                                  llvm::Function *mainFunc) {
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
@@ -398,8 +399,8 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
 
     {
         // fill in data about args for main function
-        for (auto &treeArg : md->args) {
-            auto *a = ast::MK::arg2Local(treeArg.get());
+        for (auto &treeArg : md.args) {
+            auto *a = ast::MK::arg2Local(treeArg);
             rubyBlockArgs[0].emplace_back(a->localVariable);
         }
     }

@@ -124,9 +124,8 @@ public:
         compiler::Names::init(ctx);
     };
 
-    virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg,
-                           std::unique_ptr<ast::MethodDef> &md) const override {
-        auto loc = md->declLoc;
+    virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg, ast::MethodDef &md) const override {
+        auto loc = md.declLoc;
         if (!shouldCompile(gs, loc.file())) {
             return;
         }

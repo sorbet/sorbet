@@ -44,7 +44,7 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
     return res;
 }
 
-void setupStackFrame(CompilerState &cs, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
+void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const BasicBlockMap &blockMap,
                      llvm::IRBuilderBase &build, int rubyBlockId) {
     llvm::IRBuilder<> builder = static_cast<llvm::IRBuilder<> &>(build);
 
@@ -73,7 +73,7 @@ void setupStackFrame(CompilerState &cs, unique_ptr<ast::MethodDef> &md, const Ba
     }
 }
 
-void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md, const BasicBlockMap &blockMap,
+void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const BasicBlockMap &blockMap,
                     UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
@@ -289,7 +289,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                     }
                     const auto a = blockMap.rubyBlockArgs[rubyBlockId][i];
                     if (!a._name.exists()) {
-                        cs.failCompilation(md->declLoc,
+                        cs.failCompilation(md.declLoc,
                                            "this method has a block argument construct that's not supported");
                     }
 
@@ -333,8 +333,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                 for (auto i = 0; i < numOptionalArgs; i++) {
                     auto &block = fillFromDefaultBlocks[i];
                     builder.SetInsertPoint(block);
-                    if (!isBlock && md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-                        md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
+                    if (!isBlock && md.name.data(cs)->kind == core::NameKind::UNIQUE &&
+                        md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
                         // This method is already a default method so don't fill in
                         // another other defaults for it or else it is turtles all the
                         // way down
@@ -343,10 +343,10 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                         if (!isBlock) {
                             optionalMethodIndex++;
                             auto argMethodName =
-                                cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name, optionalMethodIndex);
-                            ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md.name, optionalMethodIndex);
+                            ENFORCE(argMethodName.exists(), "Default argument method for " + md.name.toString(cs) +
                                                                 to_string(optionalMethodIndex) + " does not exist");
-                            auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                            auto argMethod = md.symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                             ENFORCE(argMethod.exists());
                             auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
                             rawValue = builder.CreateCall(
@@ -390,8 +390,8 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                             builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
                             builder.SetInsertPoint(kwArgDefault);
                             llvm::Value *defaultValue;
-                            if ((md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-                                 md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
+                            if ((md.name.data(cs)->kind == core::NameKind::UNIQUE &&
+                                 md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
                                 !argsFlags[argId].isDefault) {
                                 // This method is already a default method so don't fill in
                                 // another other defaults for it or else it is turtles all the
@@ -400,11 +400,11 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef>
                                 defaultValue = Payload::rubyNil(cs, builder);
                             } else {
                                 optionalMethodIndex++;
-                                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md->name,
+                                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md.name,
                                                                             optionalMethodIndex);
-                                ENFORCE(argMethodName.exists(), "Default argument method for " + md->name.toString(cs) +
+                                ENFORCE(argMethodName.exists(), "Default argument method for " + md.name.toString(cs) +
                                                                     to_string(optionalMethodIndex) + " does not exist");
-                                auto argMethod = md->symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
+                                auto argMethod = md.symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
                                 ENFORCE(argMethod.exists());
                                 auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
                                 defaultValue = builder.CreateCall(
@@ -765,14 +765,14 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const BasicBlockMap &bloc
     builder.CreateRet(var);
 }
 
-void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md,
-                         const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases) {
+void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const BasicBlockMap &blockMap,
+                         const UnorderedMap<core::LocalVariable, Alias> &aliases) {
     cs.functionEntryInitializers = blockMap.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(blockMap.sigVerificationBlock);
 
-    if (!(md->name.data(cs)->kind == core::NameKind::UNIQUE &&
-          md->name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg)) {
+    if (!(md.name.data(cs)->kind == core::NameKind::UNIQUE &&
+          md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg)) {
         int argId = -1;
         for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
             argId += 1;
@@ -804,15 +804,15 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::Metho
 
 } // namespace
 
-void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, unique_ptr<ast::MethodDef> &md) {
+void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
 
     llvm::Function *func;
 
-    if (md->symbol.data(cs)->name != core::Names::staticInit()) {
-        func = IREmitterHelpers::getOrCreateFunction(cs, md->symbol);
+    if (md.symbol.data(cs)->name != core::Names::staticInit()) {
+        func = IREmitterHelpers::getOrCreateFunction(cs, md.symbol);
     } else {
-        func = IREmitterHelpers::getOrCreateStaticInit(cs, md->symbol, md->declLoc);
+        func = IREmitterHelpers::getOrCreateStaticInit(cs, md.symbol, md.declLoc);
     }
     func = IREmitterHelpers::cleanFunctionBody(cs, func);
     {

@@ -86,8 +86,7 @@ public:
                                                 const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                 int rubyBlockId, llvm::Function *blk);
 
-    static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
-                                                          std::unique_ptr<ast::MethodDef> &md,
+    static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
                                                           UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                           llvm::Function *mainFunc);
 
