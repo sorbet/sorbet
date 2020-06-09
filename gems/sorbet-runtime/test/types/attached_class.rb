@@ -8,11 +8,10 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :make)
         sig {returns(T.attached_class)}
-        T::Configuration.without_ruby_warnings do
-          def self.make
-            new
-          end
+        def self.make
+          new
         end
       end
 
@@ -27,11 +26,10 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :make)
         sig {returns(T.attached_class)}
-        T::Configuration.without_ruby_warnings do
-          def self.make
-            new
-          end
+        def self.make
+          new
         end
       end
 
@@ -46,11 +44,10 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :make)
         sig {returns(T.attached_class)}
-        T::Configuration.without_ruby_warnings do
-          def self.make
-            self.new
-          end
+        def self.make
+          self.new
         end
       end
 
@@ -65,12 +62,10 @@ module Opus::Types::Test
       class Base
         extend T::Sig
 
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :make)
         sig {returns(T.attached_class)}
-
-        T::Configuration.without_ruby_warnings do
-          def self.make
-            10
-          end
+        def self.make
+          10
         end
       end
 

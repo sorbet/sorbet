@@ -31,7 +31,7 @@ module T::Private::Abstract::Declare
         raise "You must call `abstract!` *before* defining an initialize method"
       end
 
-      # Don't need to silence warnings via without_ruby_warnings when calling
+      # Don't need to silence warnings via silence_redefinition_of_method when calling
       # define_method because of the guard above
 
       mod.send(:define_method, :initialize) do |*args, &blk|

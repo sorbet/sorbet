@@ -33,10 +33,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def foo; end
+
+        T::Private::ClassUtils.silence_redefinition_of_method(self, :foo)
         sig(:final) {void}
-        T::Configuration.without_ruby_warnings do
-          def foo; end
-        end
+        def foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
@@ -48,10 +48,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def self.foo; end
+
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :foo)
         sig(:final) {void}
-        T::Configuration.without_ruby_warnings do
-          def self.foo; end
-        end
+        def self.foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
@@ -63,10 +63,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def foo; end
+
+        T::Private::ClassUtils.silence_redefinition_of_method(self, :foo)
         sig {void}
-        T::Configuration.without_ruby_warnings do
-          def foo; end
-        end
+        def foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
@@ -78,10 +78,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def self.foo; end
+
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :foo)
         sig {void}
-        T::Configuration.without_ruby_warnings do
-          def self.foo; end
-        end
+        def self.foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
@@ -93,9 +93,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def foo; end
-        T::Configuration.without_ruby_warnings do
-          def foo; end
-        end
+        
+        T::Private::ClassUtils.silence_redefinition_of_method(self, :foo)
+        def foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
@@ -107,9 +107,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend T::Sig
         sig(:final) {void}
         def self.foo; end
-        T::Configuration.without_ruby_warnings do
-          def self.foo; end
-        end
+
+        T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :foo)
+        def self.foo; end
       end
     end
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
@@ -119,10 +119,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     Class.new do
       extend T::Sig
       def foo; end
+
+      T::Private::ClassUtils.silence_redefinition_of_method(self, :foo)
       sig(:final) {void}
-      T::Configuration.without_ruby_warnings do
-        def foo; end
-      end
+      def foo; end
     end
   end
 
@@ -130,10 +130,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     Class.new do
       extend T::Sig
       def self.foo; end
+
+      T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :foo)
       sig(:final) {void}
-      T::Configuration.without_ruby_warnings do
-        def self.foo; end
-      end
+      def self.foo; end
     end
   end
 

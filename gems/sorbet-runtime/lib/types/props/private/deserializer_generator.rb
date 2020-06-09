@@ -94,12 +94,11 @@ module T::Props
         end
 
         <<~RUBY
-          T::Configuration.without_ruby_warnings do
-            def __t_props_generated_deserialize(hash)
-              found = #{stored_props.size}
-              #{parts.join("\n\n")}
-              found
-            end
+          T::Private::ClassUtils.silence_redefinition_of_method(self, :__t_props_generated_deserialize)
+          def __t_props_generated_deserialize(hash)
+            found = #{stored_props.size}
+            #{parts.join("\n\n")}
+            found
           end
         RUBY
       end

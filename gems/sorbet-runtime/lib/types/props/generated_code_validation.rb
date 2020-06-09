@@ -17,7 +17,7 @@ module T::Props
     def self.validate_deserialize(source)
       parsed = parse(source)
       
-      parsed = parsed.children[2] # Ignore the T::Configuration.without_ruby_warnings do
+      parsed = parsed.children[1]
 
       # def %<name>(hash)
       #   ...
@@ -51,8 +51,7 @@ module T::Props
 
     def self.validate_serialize(source)
       parsed = parse(source)
-      
-      parsed = parsed.children[2] # Ignore the T::Configuration.without_ruby_warnings do
+      parsed = parsed.children[1]
 
       # def %<name>(strict)
       # ...

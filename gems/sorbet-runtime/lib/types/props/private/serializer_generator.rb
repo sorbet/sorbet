@@ -64,12 +64,11 @@ module T::Props
         end
 
         <<~RUBY
-          T::Configuration.without_ruby_warnings do
-            def __t_props_generated_serialize(strict)
-              h = {}
-              #{parts.join("\n\n")}
-              h
-            end
+          T::Private::ClassUtils.silence_redefinition_of_method(self, :__t_props_generated_serialize)
+          def __t_props_generated_serialize(strict)
+            h = {}
+            #{parts.join("\n\n")}
+            h
           end
         RUBY
       end

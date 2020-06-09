@@ -373,26 +373,24 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig {params(name: Symbol, rules: Rules).void.checked(:never)}
   private def define_getter_and_setter(name, rules)
-    T::Configuration.without_ruby_warnings do
-      if !rules[:immutable]
-        if method(:prop_set).owner != T::Props::Decorator
-          @class.send(:define_method, "#{name}=") do |val|
-            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
-          end
-        else
-          # Fast path (~4x faster as of Ruby 2.6)
-          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
-        end
-      end
-
-      if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
-        @class.send(:define_method, name) do
-          T.unsafe(self.class).decorator.prop_get(self, name, rules)
+    if !rules[:immutable]
+      if method(:prop_set).owner != T::Props::Decorator
+        T::Private::ClassUtils.redefine_method(@class, "#{name}=") do |val|
+          T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
         end
       else
-        # Fast path (~30x faster as of Ruby 2.6)
-        @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
+        # Fast path (~4x faster as of Ruby 2.6)
+        T::Private::ClassUtils.redefine_method(@class, "#{name}=", &rules.fetch(:setter_proc))
       end
+    end
+
+    if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
+      T::Private::ClassUtils.redefine_method(@class, name) do
+        T.unsafe(self.class).decorator.prop_get(self, name, rules)
+      end
+    else
+      # Fast path (~30x faster as of Ruby 2.6)
+      @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
     end
   end
 

@@ -32,9 +32,7 @@ module T::Private::ClassUtils
 
       if @overwritten
         # The original method was overwritten. Overwrite again to restore it.
-        T::Configuration.without_ruby_warnings do
-          @mod.send(:define_method, @old_method.name, @old_method) # rubocop:disable PrisonGuard/UsePublicSend
-        end
+        T::Private::ClassUtils.redefine_method(@mod, @old_method.name, @old_method)
       else
         # The original method was in an ancestor. Restore it by removing the overriding method.
         @mod.send(:remove_method, @old_method.name) # rubocop:disable PrisonGuard/UsePublicSend
@@ -69,6 +67,23 @@ module T::Private::ClassUtils
     end
   end
 
+  def self.silence_redefinition_of_method(mod, name)
+    if mod.method_defined?(name) || mod.private_method_defined?(name)
+      # This suppresses the "method redefined" warning; the self-alias
+      # looks odd, but means we don't need to generate a unique name
+      mod.send(:alias_method, name, name) # rubocop:disable PrisonGuard/UsePublicSend
+    end
+  end
+
+  def self.redefine_method(mod, name, method = nil, &block)
+    silence_redefinition_of_method(mod, name)
+    if method
+      mod.send(:define_method, name, method) # rubocop:disable PrisonGuard/UsePublicSend
+    else
+      mod.send(:define_method, name, &block) # rubocop:disable PrisonGuard/UsePublicSend
+    end
+  end
+
   # Replaces a method, either by overwriting it (if it is defined directly on `mod`) or by
   # overriding it (if it is defined by one of mod's ancestors). Returns a ReplacedMethod instance
   # on which you can call `bind(...).call(...)` to call the original method, or `restore` to
@@ -95,12 +110,10 @@ module T::Private::ClassUtils
     end
 
     overwritten = original_owner == mod
-    T::Configuration.without_ruby_warnings do
-      T::Private::DeclState.current.without_on_method_added do
-        mod.send(:define_method, name, &blk) # rubocop:disable PrisonGuard/UsePublicSend
-        if blk.arity < 0 && mod.respond_to?(:ruby2_keywords, true)
-          mod.send(:ruby2_keywords, name)
-        end
+    T::Private::DeclState.current.without_on_method_added do
+      redefine_method(mod, name, &blk)
+      if blk.arity < 0 && mod.respond_to?(:ruby2_keywords, true)
+        mod.send(:ruby2_keywords, name)
       end
     end
     mod.send(original_visibility, name) # rubocop:disable PrisonGuard/UsePublicSend

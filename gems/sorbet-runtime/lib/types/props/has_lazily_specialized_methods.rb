@@ -65,11 +65,9 @@ module T::Props
         lazily_defined_methods[name] = blk
 
         cls = decorated_class
-        T::Configuration.without_ruby_warnings do
-          cls.send(:define_method, name) do |*args|
-            self.class.decorator.send(:eval_lazily_defined_method!, name)
-            send(name, *args)
-          end
+        T::Private::ClassUtils.redefine_method(cls, name) do |*args|
+          self.class.decorator.send(:eval_lazily_defined_method!, name)
+          send(name, *args)
         end
         if cls.respond_to?(:ruby2_keywords, true)
           cls.send(:ruby2_keywords, name)

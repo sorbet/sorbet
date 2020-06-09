@@ -35,13 +35,11 @@ module T::Private::Methods::CallValidation
     elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
       create_validator_method(mod, original_method, method_sig, original_visibility)
     else
-      T::Configuration.without_ruby_warnings do
-        # get all the shims out of the way and put back the original method
-        T::Private::DeclState.current.without_on_method_added do
-          mod.send(:define_method, method_sig.method_name, original_method)
-        end
-        mod.send(original_visibility, method_sig.method_name)
+      # get all the shims out of the way and put back the original method
+      T::Private::DeclState.current.without_on_method_added do
+        T::Private::ClassUtils.redefine_method(mod, method_sig.method_name, original_method)
       end
+      mod.send(original_visibility, method_sig.method_name)
     end
     # Return the newly created method (or the original one if we didn't replace it)
     mod.instance_method(method_sig.method_name)
@@ -167,22 +165,20 @@ module T::Private::Methods::CallValidation
     has_simple_method_types =  all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
     has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
-    T::Configuration.without_ruby_warnings do
-      T::Private::DeclState.current.without_on_method_added do
-        if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-          create_validator_method_fast(mod, original_method, method_sig)
-        elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
-          create_validator_procedure_fast(mod, original_method, method_sig)
-        else
-          create_validator_slow(mod, original_method, method_sig)
-        end
+    T::Private::DeclState.current.without_on_method_added do
+      if has_fixed_arity && has_simple_method_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        create_validator_method_fast(mod, original_method, method_sig)
+      elsif has_fixed_arity && has_simple_procedure_types && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        create_validator_procedure_fast(mod, original_method, method_sig)
+      else
+        create_validator_slow(mod, original_method, method_sig)
       end
     end
     mod.send(original_visibility, method_sig.method_name)
   end
 
   def self.create_validator_slow(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |*args, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |*args, &blk|
       CallValidation.validate_call(self, original_method, method_sig, args, blk)
     end
     if mod.respond_to?(:ruby2_keywords, true)
@@ -221,7 +217,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method_fast0(mod, original_method, method_sig, return_type)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |&blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -293,7 +289,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method_fast1(mod, original_method, method_sig, return_type, arg0_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -378,7 +374,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method_fast2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -475,7 +471,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method_fast3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -585,7 +581,7 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast4(mod, original_method, method_sig, return_type,
       arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -734,7 +730,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_procedure_fast0(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |&blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -786,8 +782,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_procedure_fast1(mod, original_method, method_sig, arg0_type)
-
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -850,7 +845,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_procedure_fast2(mod, original_method, method_sig, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -926,7 +921,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_procedure_fast3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -1015,7 +1010,7 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast4(mod, original_method, method_sig,
     arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+    T::Private::ClassUtils.redefine_method(mod, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This block is called for every `sig`. It's critical to keep it fast and
       # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
