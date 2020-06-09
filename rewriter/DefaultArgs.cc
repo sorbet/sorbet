@@ -133,6 +133,8 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
             stat.get(),
             [&](ast::Send *send) {
                 if (send->fun != core::Names::sig()) {
+                    isOverload = false;
+                    lastSig = nullptr;
                     return;
                 }
                 if (lastSig != nullptr) {
@@ -149,6 +151,8 @@ void DefaultArgs::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     // defaults and how is super hard. This is one of the
                     // reasons we don't let users write them, and only have them
                     // in the stdlib.
+                    isOverload = false;
+                    lastSig = nullptr;
                     return;
                 }
                 auto i = -1;
