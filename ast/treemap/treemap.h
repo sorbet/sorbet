@@ -419,17 +419,8 @@ private:
         int i = 0;
         while (i < cast_tree<Rescue>(v)->rescueCases.size()) {
             auto &el = cast_tree<Rescue>(v)->rescueCases[i];
-            auto *oldRef = el.get();
-            auto narg = mapRescueCase(std::move(el), ctx);
-            if (el.get() != narg.get()) {
-                auto *nargCase = cast_tree<RescueCase>(narg);
-                ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
-                el.reset(nargCase);
-                narg.release();
-            } else {
-                narg.release();
-                el.reset(oldRef);
-            }
+            el = mapRescueCase(std::move(el), ctx);
+            ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-a rescue case");
             i++;
         }
 
@@ -878,17 +869,8 @@ private:
         int i = 0;
         while (i < cast_tree<Rescue>(v)->rescueCases.size()) {
             auto &el = cast_tree<Rescue>(v)->rescueCases[i];
-            auto *oldRef = el.get();
-            auto narg = mapRescueCase(std::move(el), ctx);
-            if (el.get() != narg.get()) {
-                auto *nargCase = cast_tree<RescueCase>(narg);
-                ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
-                el.reset(nargCase);
-                narg.release();
-            } else {
-                narg.release();
-                el.reset(oldRef);
-            }
+            el = mapRescueCase(std::move(el), ctx);
+            ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-a rescue case");
             i++;
         }
 
