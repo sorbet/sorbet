@@ -148,12 +148,12 @@ template <class To> bool isa_tree(const TreePtr &what) {
 
 template <class To> To &cast_tree_nonnull(TreePtr &what) {
     ENFORCE(what != nullptr);
-    ENFORCE(isa_tree<To>(what), "ref_tree failed!");
+    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
 
 template <class To> const To &cast_tree_nonnull_const(const TreePtr &what) {
-    ENFORCE(isa_tree<To>(what), "ref_tree failed!");
+    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull_const failed!");
     return *reinterpret_cast<To *>(what.get());
 }
 
