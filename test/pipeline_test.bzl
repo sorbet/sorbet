@@ -75,7 +75,8 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
                             "path": test_name,
                             "prefix": test_name + "/",
                             "sentinel": test_name,
-                            "isMultiFile": True,
+                            "isMultiFile": False,
+                            "isDirectory": True,
                             "disabled": "disabled" in test_name,
                         }
                         tests[test_name] = data
@@ -93,6 +94,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
                     "prefix": "{}/{}".format(dirname(path), prefix),
                     "sentinel": path,
                     "isMultiFile": "__" in path,
+                    "isDirectory": False,
                     "disabled": "disabled" in path,
                 }
                 tests[test_name] = data
@@ -118,7 +120,9 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             enabled_tests.append(test_name)
 
         data = []
-        if tests[name]["isMultiFile"]:
+        if tests[name]["isDirectory"]:
+            data += native.glob(["{}**/*".format(prefix)])
+        elif tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
         else:
             data += [sentinel]
