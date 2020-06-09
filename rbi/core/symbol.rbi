@@ -218,7 +218,7 @@ class Symbol < Object
     params(
         obj: BasicObject,
     )
-    .returns(T.nilable(Integer))
+    .returns(T.nilable(MatchData))
   end
   def match(obj); end
 
@@ -226,7 +226,7 @@ class Symbol < Object
   sig do
     params(
         args: T.untyped
-    ).returns(T.untyped)
+    ).returns(T::Boolean)
   end
   def match?(*args); end
 
