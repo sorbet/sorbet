@@ -158,6 +158,10 @@ public:
         return saved;
     }
 
+    void reset() noexcept {
+        resetTagged(nullptr);
+    }
+
     void reset(std::nullptr_t) noexcept {
         resetTagged(nullptr);
     }
