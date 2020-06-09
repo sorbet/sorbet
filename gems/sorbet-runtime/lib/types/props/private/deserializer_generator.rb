@@ -94,10 +94,12 @@ module T::Props
         end
 
         <<~RUBY
-          def __t_props_generated_deserialize(hash)
-            found = #{stored_props.size}
-            #{parts.join("\n\n")}
-            found
+          T::Configuration.without_ruby_warnings do
+            def __t_props_generated_deserialize(hash)
+              found = #{stored_props.size}
+              #{parts.join("\n\n")}
+              found
+            end
           end
         RUBY
       end

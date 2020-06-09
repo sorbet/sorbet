@@ -16,10 +16,13 @@ module T::Props
 
     def self.validate_deserialize(source)
       parsed = parse(source)
+      
+      parsed = parsed.children[2] # Ignore the T::Configuration.without_ruby_warnings do
 
       # def %<name>(hash)
       #   ...
       # end
+      
       assert_equal(:def, parsed.type)
       name, args, body = parsed.children
       assert_equal(:__t_props_generated_deserialize, name)
@@ -48,6 +51,8 @@ module T::Props
 
     def self.validate_serialize(source)
       parsed = parse(source)
+      
+      parsed = parsed.children[2] # Ignore the T::Configuration.without_ruby_warnings do
 
       # def %<name>(strict)
       # ...
@@ -76,8 +81,16 @@ module T::Props
       condition, if_body, else_body = clause.children
 
       # if @%<accessor_key>.nil?
-      assert_equal(:send, condition.type)
-      receiver, method = condition.children
+      assert_equal(:or, condition.type)
+
+      guard, guard_receiver = condition.children
+
+      assert_equal(:send, guard.type)
+      assert_equal(:defined?, guard.children.first.type)
+
+      assert_equal(:send, guard_receiver.type)
+      receiver, method = guard_receiver.children
+
       assert_equal(:ivar, receiver.type)
       assert_equal(:nil?, method)
 

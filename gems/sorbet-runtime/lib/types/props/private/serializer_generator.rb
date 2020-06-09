@@ -55,7 +55,7 @@ module T::Props
           # nil value itself and the field name in the serialized BSON
           # document)
           <<~RUBY
-            if #{ivar_name}.nil?
+            if !defined?(#{ivar_name}) || #{ivar_name}.nil?
               #{nil_asserter}
             else
               h[#{hash_key.inspect}] = #{transformed_val}
@@ -64,10 +64,12 @@ module T::Props
         end
 
         <<~RUBY
-          def __t_props_generated_serialize(strict)
-            h = {}
-            #{parts.join("\n\n")}
-            h
+          T::Configuration.without_ruby_warnings do
+            def __t_props_generated_serialize(strict)
+              h = {}
+              #{parts.join("\n\n")}
+              h
+            end
           end
         RUBY
       end

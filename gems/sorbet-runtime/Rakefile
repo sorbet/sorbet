@@ -15,3 +15,5 @@ begin
 rescue LoadError
   # Expected when using packaged gem
 end
+
+task default: :test

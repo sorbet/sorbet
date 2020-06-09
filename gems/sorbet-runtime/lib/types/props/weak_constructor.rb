@@ -30,6 +30,8 @@ module T::Props::WeakConstructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_without_defaults(instance, hash)
+    return 0 unless defined?(@props_without_defaults)
+
     @props_without_defaults&.count do |p, setter_proc|
       if hash.key?(p)
         instance.instance_exec(hash[p], &setter_proc)
@@ -49,6 +51,8 @@ module T::Props::WeakConstructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_with_defaults(instance, hash)
+    return 0 unless defined?(@props_with_defaults)
+
     @props_with_defaults&.count do |p, default_struct|
       if hash.key?(p)
         instance.instance_exec(hash[p], &default_struct.setter_proc)

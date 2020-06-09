@@ -83,6 +83,7 @@ module T::Configuration
     raise error
   end
 
+  @inline_type_error_handler = nil
   def self.inline_type_error_handler(error)
     if @inline_type_error_handler
       @inline_type_error_handler.call(error)
@@ -123,6 +124,7 @@ module T::Configuration
     raise ArgumentError.new("#{location.path}:#{location.lineno}: Error interpreting `sig`:\n  #{error.message}\n\n")
   end
 
+  @sig_builder_error_handler = nil
   def self.sig_builder_error_handler(error, location)
     if @sig_builder_error_handler
       @sig_builder_error_handler.call(error, location)
@@ -173,6 +175,7 @@ module T::Configuration
     raise error
   end
 
+  @sig_validation_error_handler = nil
   def self.sig_validation_error_handler(error, opts={})
     if @sig_validation_error_handler
       @sig_validation_error_handler.call(error, opts)
@@ -219,6 +222,7 @@ module T::Configuration
     raise TypeError.new(opts[:pretty_message])
   end
 
+  @call_validation_error_handler = nil
   def self.call_validation_error_handler(signature, opts={})
     if @call_validation_error_handler
       @call_validation_error_handler.call(signature, opts)
@@ -319,6 +323,7 @@ module T::Configuration
     raise str
   end
 
+  @hard_assert_handler = nil
   def self.hard_assert_handler(str, extra={})
     if @hard_assert_handler
       @hard_assert_handler.call(str, extra)
@@ -347,6 +352,7 @@ module T::Configuration
     end
   end
 
+  @scalar_types = nil
   @default_scalar_types = Set.new(%w{
     NilClass
     TrueClass
@@ -358,7 +364,6 @@ module T::Configuration
     Time
     T::Enum
   }).freeze
-
   def self.scalar_types
     @scalar_types || @default_scalar_types
   end
@@ -383,12 +388,15 @@ module T::Configuration
     end
   end
 
+  @legacy_t_enum_migration_mode = false
   def self.enable_legacy_t_enum_migration_mode
     @legacy_t_enum_migration_mode = true
   end
+
   def self.disable_legacy_t_enum_migration_mode
     @legacy_t_enum_migration_mode = false
   end
+
   def self.legacy_t_enum_migration_mode?
     @legacy_t_enum_migration_mode || false
   end
@@ -416,6 +424,8 @@ module T::Configuration
 
     @sealed_violation_whitelist = sealed_violation_whitelist
   end
+
+  @sealed_violation_whitelist = nil
   def self.sealed_violation_whitelist
     @sealed_violation_whitelist
   end

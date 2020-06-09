@@ -9,8 +9,10 @@ module Opus::Types::Test
         extend T::Sig
 
         sig {returns(T.attached_class)}
-        def self.make
-          new
+        T::Configuration.without_ruby_warnings do
+          def self.make
+            new
+          end
         end
       end
 
@@ -26,8 +28,10 @@ module Opus::Types::Test
         extend T::Sig
 
         sig {returns(T.attached_class)}
-        def self.make
-          new
+        T::Configuration.without_ruby_warnings do
+          def self.make
+            new
+          end
         end
       end
 
@@ -43,8 +47,10 @@ module Opus::Types::Test
         extend T::Sig
 
         sig {returns(T.attached_class)}
-        def self.make
-          self.new
+        T::Configuration.without_ruby_warnings do
+          def self.make
+            self.new
+          end
         end
       end
 
@@ -60,8 +66,11 @@ module Opus::Types::Test
         extend T::Sig
 
         sig {returns(T.attached_class)}
-        def self.make
-          10
+
+        T::Configuration.without_ruby_warnings do
+          def self.make
+            10
+          end
         end
       end
 

@@ -37,7 +37,7 @@ module T::Props
 
     sig {returns(T::Boolean)}
     def self.lazy_evaluation_enabled?
-      !@lazy_evaluation_disabled
+      !(defined?(@lazy_evaluation_disabled) && @lazy_evaluation_disabled)
     end
 
     module DecoratorMethods
@@ -55,9 +55,8 @@ module T::Props
         end
 
         source = lazily_defined_methods.fetch(name).call
-
         cls = decorated_class
-        cls.class_eval(source.to_s)
+        cls.class_eval(source.to_s, "eval(#{name})")
         cls.send(:private, name)
       end
 
@@ -66,9 +65,11 @@ module T::Props
         lazily_defined_methods[name] = blk
 
         cls = decorated_class
-        cls.send(:define_method, name) do |*args|
-          self.class.decorator.send(:eval_lazily_defined_method!, name)
-          send(name, *args)
+        T::Configuration.without_ruby_warnings do
+          cls.send(:define_method, name) do |*args|
+            self.class.decorator.send(:eval_lazily_defined_method!, name)
+            send(name, *args)
+          end
         end
         if cls.respond_to?(:ruby2_keywords, true)
           cls.send(:ruby2_keywords, name)
