@@ -1061,8 +1061,9 @@ class SymbolDefiner {
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
-        // Don't add locs for root; 1) they aren't useful and 2) it'll end up with O(files in project) locs!
-        if (symbol != core::Symbols::root()) {
+        // Don't add locs for <root> or <PackageRegistry>; 1) they aren't useful and 2) they'll end up with O(files in
+        // project) locs!
+        if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry()) {
             symbol.data(ctx)->addLoc(ctx, klass.declLoc);
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
