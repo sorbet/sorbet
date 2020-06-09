@@ -121,6 +121,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       assert_equal(false, CardSuitCustom.has_serialized?('spade'))
       assert_equal(false, CardSuitCustom.has_serialized?('blerg'))
     end
+
+    it 'does not break for arbitrary objects' do
+      assert_equal(false, CardSuitCustom.has_serialized?(Class.new.new))
+    end
   end
 
   describe 'try_deserialize' do
