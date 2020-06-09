@@ -36,26 +36,28 @@ class Rewriterer {
     friend class Rewriter;
 
 public:
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
-        Command::run(ctx, classDef.get());
-        Rails::run(ctx, classDef.get());
-        TEnum::run(ctx, classDef.get());
-        Flatfiles::run(ctx, classDef.get());
-        Prop::run(ctx, classDef.get());
-        TypeMembers::run(ctx, classDef.get());
-        DefaultArgs::run(ctx, classDef.get());
+    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+
+        Command::run(ctx, classDef);
+        Rails::run(ctx, classDef);
+        TEnum::run(ctx, classDef);
+        Flatfiles::run(ctx, classDef);
+        Prop::run(ctx, classDef);
+        TypeMembers::run(ctx, classDef);
+        DefaultArgs::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
-            extension->run(ctx, classDef.get());
+            extension->run(ctx, classDef);
         }
 
-        ast::Expression *prevStat = nullptr;
-        UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+        ast::TreePtr *prevStat = nullptr;
+        UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat.get(),
                 [&](ast::Assign *assign) {
-                    vector<unique_ptr<ast::Expression>> nodes;
+                    vector<ast::TreePtr> nodes;
 
                     nodes = Struct::run(ctx, assign);
                     if (!nodes.empty()) {
@@ -77,7 +79,7 @@ public:
                 },
 
                 [&](ast::Send *send) {
-                    vector<unique_ptr<ast::Expression>> nodes;
+                    vector<ast::TreePtr> nodes;
 
                     nodes = MixinEncryptedProp::run(ctx, send);
                     if (!nodes.empty()) {
@@ -128,11 +130,11 @@ public:
 
                 [&](ast::Expression *e) {});
 
-            prevStat = stat.get();
+            prevStat = &stat;
         }
         if (replaceNodes.empty()) {
-            ModuleFunction::run(ctx, classDef.get());
-            return classDef;
+            ModuleFunction::run(ctx, classDef);
+            return tree;
         }
 
         auto oldRHS = std::move(classDef->rhs);
@@ -140,42 +142,45 @@ public:
         classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
-            if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+            auto replacement = replaceNodes.find(stat.get());
+            if (replacement == replaceNodes.end()) {
                 classDef->rhs.emplace_back(std::move(stat));
             } else {
-                for (auto &newNode : replaceNodes.at(stat.get())) {
+                for (auto &newNode : replacement->second) {
                     classDef->rhs.emplace_back(std::move(newNode));
                 }
             }
         }
-        ModuleFunction::run(ctx, classDef.get());
+        ModuleFunction::run(ctx, classDef);
 
-        return classDef;
+        return tree;
     }
 
     // NOTE: this case differs from the `Send` typecase branch in `postTransformClassDef` above, as it will apply to all
     // sends, not just those that are present in the RHS of a `ClassDef`.
-    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        if (auto expr = InterfaceWrapper::run(ctx, send.get())) {
+    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *send = ast::cast_tree<ast::Send>(tree);
+
+        if (auto expr = InterfaceWrapper::run(ctx, send)) {
             return expr;
         }
 
-        if (auto expr = SelfNew::run(ctx, send.get())) {
+        if (auto expr = SelfNew::run(ctx, send)) {
             return expr;
         }
 
-        if (SigRewriter::run(ctx, send.get())) {
-            return send;
+        if (SigRewriter::run(ctx, send)) {
+            return tree;
         }
 
-        return send;
+        return tree;
     }
 
 private:
     Rewriterer() = default;
 };
 
-unique_ptr<ast::Expression> Rewriter::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+ast::TreePtr Rewriter::run(core::MutableContext ctx, ast::TreePtr tree) {
     auto ast = std::move(tree);
 
     Rewriterer rewriter;

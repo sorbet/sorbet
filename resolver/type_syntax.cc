@@ -13,10 +13,10 @@ namespace sorbet::resolver {
 // Forward declarations for the local versions of getResultType, getResultTypeAndBind, and parseSig that skolemize type
 // members.
 namespace {
-core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::TreePtr &expr,
                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
-TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::TreePtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args);
 
 ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
@@ -38,20 +38,20 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
     return result;
 }
 
-core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::Expression &expr,
-                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, ast::TreePtr &expr, const ParsedSig &sigBeingParsed,
+                                        TypeSyntaxArgs args) {
     return core::Types::unwrapSelfTypeParam(
         ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr,
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx, ast::TreePtr &expr,
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
     result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
     return result;
 }
 
-core::TypePtr getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+core::TypePtr getResultLiteral(core::Context ctx, ast::TreePtr &expr) {
     core::TypePtr result;
     typecase(
         expr.get(), [&](ast::Literal *lit) { result = lit->value; },
@@ -69,12 +69,11 @@ core::TypePtr getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &e
 bool isTProc(core::Context ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
-            auto recv = send->recv.get();
-            if (auto *rcv = ast::cast_tree<ast::ConstantLit>(recv)) {
+            if (auto *rcv = ast::cast_tree<ast::ConstantLit>(send->recv)) {
                 return rcv->symbol == core::Symbols::T();
             }
         }
-        send = ast::cast_tree<ast::Send>(send->recv.get());
+        send = ast::cast_tree<ast::Send>(send->recv);
     }
     return false;
 }
@@ -91,7 +90,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
         return false;
     }
 
-    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
     if (recv && recv->symbol == core::Symbols::Sorbet_Private_Static()) {
         return true;
     }
@@ -112,22 +111,22 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend->fun == core::Names::sig());
-        auto block = ast::cast_tree<ast::Block>(sigSend->block.get());
+        auto block = ast::cast_tree<ast::Block>(sigSend->block);
         ENFORCE(block);
-        auto send = ast::cast_tree<ast::Send>(block->body.get());
+        auto send = ast::cast_tree<ast::Send>(block->body);
         if (send) {
             sends.emplace_back(send);
         } else {
-            auto insseq = ast::cast_tree<ast::InsSeq>(block->body.get());
+            auto insseq = ast::cast_tree<ast::InsSeq>(block->body);
             if (insseq) {
                 for (auto &stat : insseq->stats) {
-                    send = ast::cast_tree<ast::Send>(stat.get());
+                    send = ast::cast_tree<ast::Send>(stat);
                     if (!send) {
                         return sig;
                     }
                     sends.emplace_back(send);
                 }
-                send = ast::cast_tree<ast::Send>(insseq->expr.get());
+                send = ast::cast_tree<ast::Send>(insseq->expr);
                 if (!send) {
                     return sig;
                 }
@@ -140,7 +139,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
     ENFORCE(!sends.empty());
 
     if (sigSend->args.size() == 2) {
-        auto lit = ast::cast_tree<ast::Literal>(sigSend->args[1].get());
+        auto lit = ast::cast_tree<ast::Literal>(sigSend->args[1]);
         if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
             sig.seen.final = true;
         }
@@ -158,7 +157,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     break;
                 }
                 for (auto &arg : tsend->args) {
-                    if (auto c = ast::cast_tree<ast::Literal>(arg.get())) {
+                    if (auto c = ast::cast_tree<ast::Literal>(arg)) {
                         if (c->isSymbol(ctx)) {
                             auto name = c->asSymbol(ctx);
                             auto &typeArgSpec = sig.enterTypeArgByName(name);
@@ -182,7 +181,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     }
                 }
             }
-            tsend = ast::cast_tree<ast::Send>(tsend->recv.get());
+            tsend = ast::cast_tree<ast::Send>(tsend->recv);
         }
     }
     if (parent == nullptr) {
@@ -215,7 +214,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     }
 
                     bool validBind = false;
-                    auto bind = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
+                    auto bind = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
                     if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
                         sig.bind = classType->symbol;
                         validBind = true;
@@ -258,7 +257,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         }
                     }
 
-                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
                     if (hash == nullptr) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             auto paramsStr = send->fun.show(ctx);
@@ -272,11 +271,11 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     int i = 0;
                     for (auto &key : hash->keys) {
                         auto &value = hash->values[i++];
-                        auto lit = ast::cast_tree<ast::Literal>(key.get());
+                        auto lit = ast::cast_tree<ast::Literal>(key);
                         if (lit && lit->isSymbol(ctx)) {
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
-                                getResultTypeAndBindWithSelfTypeParams(ctx, *value, *parent, args.withRebind());
+                                getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
                             sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key->loc), name,
                                                                          resultAndBind.type, resultAndBind.rebind});
                         }
@@ -300,7 +299,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     }
 
                     if (send->args.size() == 1) {
-                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
                         if (hash == nullptr) {
                             if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                                 auto paramsStr = send->fun.show(ctx);
@@ -312,10 +311,10 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         int i = 0;
                         for (auto &key : hash->keys) {
                             auto &value = hash->values[i++];
-                            auto lit = ast::cast_tree<ast::Literal>(key.get());
+                            auto lit = ast::cast_tree<ast::Literal>(key);
                             if (lit && lit->isSymbol(ctx)) {
                                 if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
-                                    auto val = ast::cast_tree<ast::Literal>(value.get());
+                                    auto val = ast::cast_tree<ast::Literal>(value);
                                     if (val && val->isTrue(ctx)) {
                                         sig.seen.incompatibleOverride = true;
                                     }
@@ -350,7 +349,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         break;
                     }
 
-                    auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
+                    auto nil = ast::cast_tree<ast::Literal>(send->args[0]);
                     if (nil && nil->isNil(ctx)) {
                         const auto loc = core::Loc(ctx.file, send->args[0]->loc);
                         if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -361,7 +360,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         break;
                     }
 
-                    sig.returns = getResultTypeWithSelfTypeParams(ctx, *(send->args.front()), *parent, args);
+                    sig.returns = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
 
                     break;
                 }
@@ -389,7 +388,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                                        "Consult https://sorbet.org/docs/sigs for signature syntax");
                     }
             }
-            auto recv = ast::cast_tree<ast::Send>(send->recv.get());
+            auto recv = ast::cast_tree<ast::Send>(send->recv);
 
             // we only report this error if we haven't reported another unknown method error
             if (!recv && !reportedInvalidMethod) {
@@ -419,18 +418,17 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             if (send->args.size() != 1) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
-            return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args),
+            return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send->args[0], sig, args),
                                     core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, send->args[0], sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result =
-                    core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
+                result = core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, send->args[i], sig, args));
                 i++;
             }
             return result;
@@ -440,11 +438,10 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto result = getResultTypeWithSelfTypeParams(ctx, *(send->args[0]), sig, args);
+            auto result = getResultTypeWithSelfTypeParams(ctx, send->args[0], sig, args);
             int i = 1;
             while (i < send->args.size()) {
-                result =
-                    core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, *(send->args[i]), sig, args));
+                result = core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, send->args[i], sig, args));
                 i++;
             }
             return result;
@@ -454,7 +451,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto arr = ast::cast_tree<ast::Literal>(send->args[0].get());
+            auto arr = ast::cast_tree<ast::Literal>(send->args[0]);
             if (!arr || !arr->isSymbol(ctx)) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("type_parameter requires a symbol");
@@ -475,7 +472,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
             }
-            auto arr = ast::cast_tree<ast::Array>(send->args[0].get());
+            auto arr = ast::cast_tree<ast::Array>(send->args[0]);
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
                 { return core::Types::Object(); }
@@ -504,9 +501,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                 return core::Types::untypedUntracked();
             }
 
-            auto arg = send->args[0].get();
-
-            auto *obj = ast::cast_tree<ast::ConstantLit>(arg);
+            auto *obj = ast::cast_tree<ast::ConstantLit>(send->args[0]);
             if (!obj) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of needs a Class as its argument");
@@ -587,12 +582,12 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
     }
 }
 
-core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+core::TypePtr getResultTypeWithSelfTypeParams(core::MutableContext ctx, ast::TreePtr &expr,
                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::Expression &expr,
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableContext ctx, ast::TreePtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     auto ctxOwnerData = ctx.owner.data(ctx);
@@ -600,11 +595,11 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
     TypeSyntax::ResultType result;
     typecase(
-        &expr,
+        expr.get(),
         [&](ast::Array *arr) {
             vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, *el, sigBeingParsed, args.withoutSelfType()));
+                elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, el, sigBeingParsed, args.withoutSelfType()));
             }
             result.type = core::TupleType::build(ctx, elems);
         },
@@ -614,8 +609,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultTypeWithSelfTypeParams(ctx, *vtree, sigBeingParsed, args.withoutSelfType());
-                auto lit = ast::cast_tree<ast::Literal>(ktree.get());
+                auto val = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
+                auto lit = ast::cast_tree<ast::Literal>(ktree);
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
                     keys.emplace_back(lit->value);
@@ -819,9 +814,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 result.type = core::make_type<core::AppliedType>(sym, targs);
                 return;
             }
-            auto recv = s->recv.get();
 
-            auto *recvi = ast::cast_tree<ast::ConstantLit>(recv);
+            auto *recvi = ast::cast_tree<ast::ConstantLit>(s->recv);
             if (recvi == nullptr) {
                 if (auto e = ctx.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
@@ -861,7 +855,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(core::Loc(ctx.file, arg->loc));
                 ty.type = core::make_type<core::MetaType>(
-                    getResultTypeWithSelfTypeParams(ctx, *arg, sigBeingParsed, args.withoutSelfType()));
+                    getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);

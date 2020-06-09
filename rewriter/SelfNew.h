@@ -19,7 +19,7 @@ namespace sorbet::rewriter {
  */
 class SelfNew final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, ast::Send *send);
+    static ast::TreePtr run(core::MutableContext ctx, ast::Send *send);
     SelfNew() = delete;
 };
 

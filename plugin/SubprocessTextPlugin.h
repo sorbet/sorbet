@@ -6,8 +6,7 @@ namespace sorbet::plugin {
 
 class SubprocessTextPlugin final {
 public:
-    static std::pair<std::unique_ptr<ast::Expression>, std::vector<std::shared_ptr<core::File>>>
-    run(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    static std::pair<ast::TreePtr, std::vector<std::shared_ptr<core::File>>> run(core::Context ctx, ast::TreePtr tree);
 
     SubprocessTextPlugin() = delete;
 };

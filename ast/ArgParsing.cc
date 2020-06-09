@@ -8,29 +8,29 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-ParsedArg parseArg(const ast::Reference &arg) {
+ParsedArg parseArg(const ast::TreePtr &arg) {
     ParsedArg parsedArg;
 
     typecase(
-        &arg,
+        arg.get(),
         [&](const ast::RestArg *rest) {
-            parsedArg = parseArg(*rest->expr);
+            parsedArg = parseArg(rest->expr);
             parsedArg.flags.isRepeated = true;
         },
         [&](const ast::KeywordArg *kw) {
-            parsedArg = parseArg(*kw->expr);
+            parsedArg = parseArg(kw->expr);
             parsedArg.flags.isKeyword = true;
         },
         [&](const ast::OptionalArg *opt) {
-            parsedArg = parseArg(*opt->expr);
+            parsedArg = parseArg(opt->expr);
             parsedArg.flags.isDefault = true;
         },
         [&](const ast::BlockArg *blk) {
-            parsedArg = parseArg(*blk->expr);
+            parsedArg = parseArg(blk->expr);
             parsedArg.flags.isBlock = true;
         },
         [&](const ast::ShadowArg *shadow) {
-            parsedArg = parseArg(*shadow->expr);
+            parsedArg = parseArg(shadow->expr);
             parsedArg.flags.isShadow = true;
         },
         [&](const ast::Local *local) {
@@ -41,12 +41,12 @@ ParsedArg parseArg(const ast::Reference &arg) {
     return parsedArg;
 }
 
-unique_ptr<ast::Expression> getDefaultValue(unique_ptr<ast::Expression> arg) {
-    auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
+TreePtr getDefaultValue(TreePtr arg) {
+    auto *refExp = ast::cast_tree<ast::Reference>(arg);
     if (!refExp) {
         Exception::raise("Must be a reference!");
     }
-    unique_ptr<ast::Expression> default_;
+    TreePtr default_;
     typecase(
         refExp, [&](ast::RestArg *rest) { default_ = getDefaultValue(move(rest->expr)); },
         [&](ast::KeywordArg *kw) { default_ = getDefaultValue(move(kw->expr)); },
@@ -65,11 +65,10 @@ unique_ptr<ast::Expression> getDefaultValue(unique_ptr<ast::Expression> arg) {
 vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
     vector<ParsedArg> parsedArgs;
     for (auto &arg : args) {
-        auto *refExp = ast::cast_tree<ast::Reference>(arg.get());
-        if (!refExp) {
+        if (!ast::isa_tree<ast::Reference>(arg)) {
             Exception::raise("Must be a reference!");
         }
-        parsedArgs.emplace_back(parseArg(*refExp));
+        parsedArgs.emplace_back(parseArg(arg));
     }
 
     return parsedArgs;
@@ -103,7 +102,7 @@ std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<Parsed
     return result;
 }
 
-unique_ptr<ast::Expression> ArgParsing::getDefault(const ParsedArg &parsedArg, unique_ptr<ast::Expression> arg) {
+TreePtr ArgParsing::getDefault(const ParsedArg &parsedArg, TreePtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }

@@ -4,7 +4,7 @@ using namespace std;
 
 namespace sorbet::ast {
 
-bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
+bool definesBehavior(const TreePtr &expr) {
     if (BehaviorHelpers::checkEmptyDeep(expr)) {
         return false;
     }
@@ -14,7 +14,7 @@ bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
         expr.get(),
 
         [&](ast::ClassDef *klass) {
-            auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
+            auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name);
             if (id && id->name == core::Names::singleton()) {
                 // class << self; We consider this
                 // behavior-defining. We could opt to recurse inside
@@ -28,7 +28,7 @@ bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
         },
 
         [&](ast::Assign *asgn) {
-            if (ast::isa_tree<ast::ConstantLit>(asgn->lhs.get())) {
+            if (ast::isa_tree<ast::ConstantLit>(asgn->lhs)) {
                 result = false;
             } else {
                 result = true;
@@ -49,23 +49,29 @@ bool definesBehavior(const unique_ptr<ast::Expression> &expr) {
     return result;
 }
 
-bool BehaviorHelpers::checkClassDefinesBehavior(const unique_ptr<ast::ClassDef> &klass) {
-    for (auto &ancst : klass->ancestors) {
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-        if (cnst && cnst->original != nullptr) {
-            return true;
-        }
-    }
-    for (auto &ancst : klass->singletonAncestors) {
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
-        if (cnst && cnst->original != nullptr) {
-            return true;
-        }
-    }
-    return absl::c_any_of(klass->rhs, [](auto &tree) { return definesBehavior(tree); });
+bool BehaviorHelpers::checkClassDefinesBehavior(const TreePtr &expr) {
+    auto *klass = ast::cast_tree_const<ast::ClassDef>(expr);
+    ENFORCE(klass);
+    return BehaviorHelpers::checkClassDefinesBehavior(*klass);
 }
 
-bool BehaviorHelpers::checkEmptyDeep(const unique_ptr<ast::Expression> &expr) {
+bool BehaviorHelpers::checkClassDefinesBehavior(const ast::ClassDef &klass) {
+    for (auto &ancst : klass.ancestors) {
+        auto *cnst = ast::cast_tree_const<ast::ConstantLit>(ancst);
+        if (cnst && cnst->original != nullptr) {
+            return true;
+        }
+    }
+    for (auto &ancst : klass.singletonAncestors) {
+        auto *cnst = ast::cast_tree_const<ast::ConstantLit>(ancst);
+        if (cnst && cnst->original != nullptr) {
+            return true;
+        }
+    }
+    return absl::c_any_of(klass.rhs, [](auto &tree) { return definesBehavior(tree); });
+}
+
+bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
     bool result = false;
 
     typecase(

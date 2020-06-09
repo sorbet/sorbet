@@ -225,7 +225,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 }
 
                 if (a->original) {
-                    if (auto nested = ast::cast_tree<ast::ConstantLit>(a->original->scope.get())) {
+                    auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a->original);
+                    if (auto nested = ast::cast_tree<ast::ConstantLit>(orig->scope)) {
                         core::LocalVariable deadSym = cctx.newTemporary(core::Names::keepForIde());
                         current = walk(cctx.withTarget(deadSym), nested, current);
                     }
@@ -239,11 +240,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
             [&](ast::Assign *a) {
                 core::LocalVariable lhs;
-                if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
+                if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs)) {
                     lhs = global2Local(cctx, lhsIdent->symbol);
-                } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
+                } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs)) {
                     lhs = lhsLocal->localVariable;
-                } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs.get())) {
+                } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs)) {
                     lhs = unresolvedIdent2Local(cctx, ident);
                     ENFORCE(lhs.exists());
                 } else {
@@ -265,7 +266,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable recv;
 
                 if (s->fun == core::Names::absurd()) {
-                    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv.get())) {
+                    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s->recv)) {
                         if (cnst->symbol == core::Symbols::T()) {
                             if (s->args.size() != 1) {
                                 if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
@@ -276,7 +277,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                 return;
                             }
 
-                            if (ast::isa_tree<ast::Send>(s->args[0].get())) {
+                            if (ast::isa_tree<ast::Send>(s->args[0])) {
                                 // Providing a send is the most common way T.absurd is misused
                                 if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
                                     e.setHeader("`{}` expects to be called on a variable, not a method call",
@@ -311,7 +312,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 if (s->block != nullptr) {
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
-                    vector<ast::ParsedArg> blockArgs = ast::ArgParsing::parseArgs(s->block->args);
+                    vector<ast::ParsedArg> blockArgs =
+                        ast::ArgParsing::parseArgs(ast::cast_tree<ast::Block>(s->block)->args);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgs) {
                         auto &target = argFlags.emplace_back();
@@ -383,7 +385,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                               .withBlockBreakTarget(cctx.target)
                                               .withLoopScope(headerBlock, postBlock, true)
                                               .withSendAndBlockLink(link),
-                                          s->block->body.get(), bodyBlock);
+                                          ast::cast_tree<ast::Block>(s->block)->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
                         synthesizeExpr(blockLast, dead, s->block->loc, make_unique<BlockReturn>(link, blockrv));
@@ -544,11 +546,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
 
-                for (auto &rescueCase : a->rescueCases) {
+                for (auto &expr : a->rescueCases) {
+                    auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyBlockId);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
-                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
+                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
                     rescueHandlersBlock->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
                                                             make_unique<Ident>(exceptionValue));

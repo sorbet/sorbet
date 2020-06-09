@@ -43,89 +43,86 @@ TEST_CASE("CountTrees") {
     class Counter {
     public:
         int count = 0;
-        unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
+        ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
-        unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx,
-                                                         unique_ptr<ast::MethodDef> original) {
-            count++;
-            return original;
-        }
-
-        unique_ptr<ast::If> preTransformIf(core::MutableContext ctx, unique_ptr<ast::If> original) {
+        ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::While> preTransformWhile(core::MutableContext ctx, unique_ptr<ast::While> original) {
+        ast::TreePtr preTransformIf(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Break> postTransformBreak(core::MutableContext ctx, unique_ptr<ast::Break> original) {
+        ast::TreePtr preTransformWhile(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Next> postTransformNext(core::MutableContext ctx, unique_ptr<ast::Next> original) {
+        ast::TreePtr postTransformBreak(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Return> preTransformReturn(core::MutableContext ctx, unique_ptr<ast::Return> original) {
+        ast::TreePtr postTransformNext(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<ast::Rescue> original) {
+        ast::TreePtr preTransformReturn(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
-                                                              unique_ptr<ast::ConstantLit> original) {
+        ast::TreePtr preTransformRescue(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> original) {
+        ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
+        ast::TreePtr preTransformAssign(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Hash> preTransformHash(core::MutableContext ctx, unique_ptr<ast::Hash> original) {
+        ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Array> preTransformArray(core::MutableContext ctx, unique_ptr<ast::Array> original) {
+        ast::TreePtr preTransformHash(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Literal> postTransformLiteral(core::MutableContext ctx, unique_ptr<ast::Literal> original) {
+        ast::TreePtr preTransformArray(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::UnresolvedConstantLit>
-        postTransformUnresolvedConstantLit(core::MutableContext ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
+        ast::TreePtr postTransformLiteral(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
+        ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
 
-        unique_ptr<ast::InsSeq> preTransformInsSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> original) {
+        ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr original) {
+            count++;
+            return original;
+        }
+
+        ast::TreePtr preTransformInsSeq(core::MutableContext ctx, ast::TreePtr original) {
             count++;
             return original;
         }
@@ -150,23 +147,22 @@ TEST_CASE("CountTrees") {
 
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
-    unique_ptr<ast::Expression> rhs(ast::MK::Int(loc.offsets(), 5));
-    unique_ptr<ast::Expression> arg = make_unique<ast::Local>(loc.offsets(), argumentSym);
+    auto rhs(ast::MK::Int(loc.offsets(), 5));
+    auto arg = ast::make_tree<ast::Local>(loc.offsets(), argumentSym);
     ast::MethodDef::ARGS_store args;
     args.emplace_back(std::move(arg));
 
     ast::MethodDef::Flags flags;
-    unique_ptr<ast::Expression> methodDef =
-        make_unique<ast::MethodDef>(loc.offsets(), loc, methodSym, name, std::move(args), std::move(rhs), flags);
-    unique_ptr<ast::Expression> emptyTree = ast::MK::EmptyTree();
-    unique_ptr<ast::Expression> cnst =
-        make_unique<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
+    auto methodDef =
+        ast::make_tree<ast::MethodDef>(loc.offsets(), loc, methodSym, name, std::move(args), std::move(rhs), flags);
+    auto emptyTree = ast::MK::EmptyTree();
+    auto cnst = ast::make_tree<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(std::move(methodDef));
-    unique_ptr<ast::Expression> tree =
-        make_unique<ast::ClassDef>(loc.offsets(), loc, classSym, std::move(cnst), ast::ClassDef::ANCESTORS_store(),
-                                   std::move(classrhs), ast::ClassDef::Kind::Class);
+    auto tree =
+        ast::make_tree<ast::ClassDef>(loc.offsets(), loc, classSym, std::move(cnst), ast::ClassDef::ANCESTORS_store(),
+                                      std::move(classrhs), ast::ClassDef::Kind::Class);
     Counter c;
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), loc.file());
 

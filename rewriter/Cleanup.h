@@ -6,7 +6,7 @@ namespace sorbet::rewriter {
 
 class Cleanup final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    static ast::TreePtr run(core::Context ctx, ast::TreePtr tree);
 
     Cleanup() = delete;
 };
