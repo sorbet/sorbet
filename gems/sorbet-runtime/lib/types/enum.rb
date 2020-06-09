@@ -88,7 +88,7 @@ class T::Enum
 
   # Note: It would have been nice to make this method final before people started overriding it.
   # @return [Boolean] Does the given serialized value correspond with any of this enum's values.
-  sig {overridable.params(serialized_val: SerializedVal).returns(T::Boolean)}
+  sig {overridable.params(serialized_val: SerializedVal).returns(T::Boolean).checked(:never)}
   def self.has_serialized?(serialized_val)
     if @mapping.nil?
       raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
