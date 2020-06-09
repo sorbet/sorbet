@@ -207,7 +207,7 @@ module Marshal
   # Please see the overview for further details.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, IO),
         arg1: Proc,
     )
     .returns(Object)
