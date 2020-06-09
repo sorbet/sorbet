@@ -252,10 +252,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees.emplace_back(move(localNamed));
     }
 
-    // Packager runs over all trees.
-    trees = packager::Packager::run(*gs, *workers, move(trees));
-    for (auto &tree : trees) {
-        handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
+    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+    if (enablePackager) {
+        // Packager runs over all trees.
+        trees = packager::Packager::run(*gs, *workers, move(trees));
+        for (auto &tree : trees) {
+            handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
+        }
     }
 
     for (auto &tree : trees) {
@@ -477,8 +480,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         newTrees.emplace_back(move(file));
     }
 
-    {
-        trees = packager::Packager::runIncremental(*gs, move(newTrees));
+    trees = move(newTrees);
+    if (enablePackager) {
+        trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
             handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
         }

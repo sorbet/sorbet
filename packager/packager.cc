@@ -326,11 +326,6 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         return a->packagePathPrefix.size() > b->packagePathPrefix.size();
     });
 
-    if (packageInfoByFile.empty()) {
-        // No packages.
-        return files;
-    }
-
     {
         Timer timeit(gs.tracer(), "packager.rewritePackages");
         // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
@@ -367,11 +362,21 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                         // Check if file path is part of a package.
                         // TODO(jvilk): Could use a radix tree to make this lookup more efficient.
                         auto path = job.file.data(gs).path();
+                        bool packaged = false;
+                        core::Context ctx(gs, core::Symbols::root(), job.file);
                         for (const auto &pkg : packages) {
                             if (absl::StartsWith(path, pkg->packagePathPrefix)) {
-                                core::Context ctx(gs, core::Symbols::root(), job.file);
                                 job = rewritePackagedFile(ctx, move(job), pkg->mangledName);
+                                packaged = true;
                                 break;
+                            }
+                        }
+                        if (!packaged) {
+                            // Don't transform, but raise an error.
+                            if (auto e = ctx.beginError(job.tree->loc, core::errors::Packager::UnpackagedFile)) {
+                                e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
+                                            "of its parent directories",
+                                            ctx.file.data(gs).path());
                             }
                         }
                     }

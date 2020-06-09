@@ -142,6 +142,7 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool stripeMode = false;
+    bool stripePackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;

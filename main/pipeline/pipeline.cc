@@ -294,7 +294,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
                                            const options::Options &opts) {
     try {
 #ifndef SORBET_REALMAIN_MIN
-        {
+        if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             what = packager::Packager::runIncremental(gs, move(what));
         }
@@ -737,13 +737,14 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
 
 vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                 WorkerPool &workers) {
-#ifdef SORBET_REALMAIN_MIN
-    return what;
-#else
-    // TODO: Disable unless in stripe mode?
-    Timer timeit(gs.tracer(), "package");
-    return packager::Packager::run(gs, workers, move(what));
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.stripePackages) {
+        // TODO: Disable unless in stripe mode?
+        Timer timeit(gs.tracer(), "package");
+        return packager::Packager::run(gs, workers, move(what));
+    }
 #endif
+    return what;
 }
 
 struct typecheck_thread_result {
