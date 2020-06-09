@@ -9,15 +9,12 @@ module T::Sig
     # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
     def self.sig(arg0=nil, &blk); end # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
 
-    original_verbose = $VERBOSE
-    $VERBOSE = false
 
+    T::Private::ClassUtils.silence_redefinition_of_method(singleton_class, :sig)
     # At runtime, does nothing, but statically it is treated exactly the same
     # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
     T::Sig::WithoutRuntime.sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
     def self.sig(arg0=nil, &blk); end # rubocop:disable PrisonGuard/BanBuiltinMethodOverride, Lint/DuplicateMethods
-
-    $VERBOSE = original_verbose
   end
 
   # Declares a method with type signatures and/or
