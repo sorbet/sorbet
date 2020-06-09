@@ -33,7 +33,8 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
                 }
                 tests[test_name] = data
 
-    enabled_tests = []
+    oracle_tests = []
+    validate_tests = []
     too_slow_tests = []
     for name in tests.keys():
         test_name = "test_{}".format(name)
@@ -101,8 +102,6 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
             tags = tags + extra_tags,
         )
 
-        defined_tests = [test_name]
-
         validate_sorbet_output_test(
             name = test_name,
             srcs = sources_name,
@@ -112,29 +111,42 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
             tags = tags + extra_tags,
         )
 
+        exp_tests = []
         if len(exp_sources) > 0:
             validate_exp_test(
-                name = "validate_exp_{}".format(name),
+                name = validate_exp,
                 srcs = sources_name,
                 exp_files = exps_name,
                 extension = extension,
                 tags = tags + extra_tags,
             )
 
-            defined_tests.append(validate_exp)
+            exp_tests = [validate_exp]
 
         if tests[name]["too_slow"]:
-            too_slow_tests.extend(defined_tests)
+            too_slow_tests.append(test_name)
+            too_slow_tests.extend(exp_tests)
         else:
-            enabled_tests.extend(defined_tests)
+            oracle_tests.append(test_name)
+            validate_tests.extend(exp_tests)
 
     native.test_suite(
         name = suite_name,
-        tests = enabled_tests,
+        tests = oracle_tests + validate_tests,
     )
 
     native.test_suite(
-        name = "{}_disabled".format(suite_name),
+        name = "{}_oracle".format(suite_name),
+        tests = oracle_tests,
+    )
+
+    native.test_suite(
+        name = "{}_validate_exp".format(suite_name),
+        tests = validate_tests,
+    )
+
+    native.test_suite(
+        name = "{}_too_slow".format(suite_name),
         tests = too_slow_tests,
         tags = ["manual"],
     )
