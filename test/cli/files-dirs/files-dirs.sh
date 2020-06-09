@@ -11,6 +11,9 @@ main/sorbet --silence-dev-message -p file-table-json --no-stdlib foo.rb
 rm foo.rb
 
 echo '------------------------------------------------------------------------'
+main/sorbet --silence-dev-message -p file-table-json --no-stdlib --dir . 2>&1 || true
+
+echo '------------------------------------------------------------------------'
 touch foo.rb
 main/sorbet --silence-dev-message -p file-table-json --no-stdlib --dir .
 rm foo.rb
