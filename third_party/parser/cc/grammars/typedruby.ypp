@@ -2429,7 +2429,7 @@ regexp_contents: // nothing
                       $$ = driver.build.symbol(self, $1);
                     }
 
-            dsym: tSYMBEG xstring_contents tSTRING_END
+            dsym: tSYMBEG string_contents tSTRING_END
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol_compose(self, $1, $2, $3);
