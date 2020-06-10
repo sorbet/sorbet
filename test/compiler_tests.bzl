@@ -244,7 +244,7 @@ def _build_extension_impl(ctx):
 
     ctx.actions.run_shell(
         command = """
-        if ! "{build_extension}" "{output}" "{stdout}" "{exit}" {inputs} 2>&1 > "{log}"; then
+        if ! "{build_extension}" "{output}" "{stdout}" "{exit}" {inputs} 2>&1 > "{log}" 2>&1 ; then
           cat "{log}"
           exit 1
         fi
@@ -379,7 +379,7 @@ def _validate_sorbet_output_test_impl(ctx):
           --expect_fail="{expect_fail}" \\
           --sorbet_exit="{sorbet_exitfile}" \\
           --sorbet_out="{sorbet_out}" \\
-          {sources}
+          {sources} 2>&1
         """.format(
             build_log = build.log.short_path,
             sorbet_log = build.stdout.short_path,
