@@ -9,9 +9,8 @@ namespace sorbet::realmain::lsp {
 
 class LocalVarSaver {
 public:
-    std::unique_ptr<ast::Local> postTransformLocal(core::Context ctx, std::unique_ptr<ast::Local> local);
-    std::unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx,
-                                                           std::unique_ptr<ast::MethodDef> methodDef);
+    ast::TreePtr postTransformLocal(core::Context ctx, ast::TreePtr local);
+    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr methodDef);
 };
 }; // namespace sorbet::realmain::lsp
 

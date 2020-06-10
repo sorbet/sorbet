@@ -5,7 +5,7 @@
 
 namespace sorbet::rewriter {
 
-std::unique_ptr<ast::Expression> SelfNew::run(core::MutableContext ctx, ast::Send *send) {
+ast::TreePtr SelfNew::run(core::MutableContext ctx, ast::Send *send) {
     if (send->fun != core::Names::new_() || !send->recv->isSelfReference()) {
         return nullptr;
     }

@@ -12,8 +12,7 @@ public:
     static std::vector<ParsedArg> parseArgs(const ast::MethodDef::ARGS_store &args);
     static std::vector<u4> hashArgs(core::Context ctx, const std::vector<ParsedArg> &args);
     // Returns the default argument value for the given argument, or nullptr if not specified. Mutates arg.
-    static std::unique_ptr<ast::Expression> getDefault(const ParsedArg &parsedArg,
-                                                       std::unique_ptr<ast::Expression> arg);
+    static TreePtr getDefault(const ParsedArg &parsedArg, TreePtr arg);
 };
 }; // namespace sorbet::ast
 

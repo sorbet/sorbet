@@ -246,7 +246,7 @@ NameData NameRef::data(GlobalState &gs) const {
 }
 
 const NameData NameRef::data(const GlobalState &gs) const {
-    ENFORCE(_id < gs.names.size(), "name id out of bounds");
+    ENFORCE(_id < gs.names.size(), "name {} id out of bounds {}", _id, gs.names.size());
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
     return NameData(const_cast<Name &>(gs.names[_id]), gs);

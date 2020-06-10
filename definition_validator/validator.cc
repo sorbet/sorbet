@@ -346,16 +346,16 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     }
 }
 
-core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const unique_ptr<ast::ClassDef> &classDef,
+core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *classDef,
                                 const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
-        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        const auto ancConst = ast::cast_tree_const<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
     }
     for (const auto &anc : classDef->singletonAncestors) {
-        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc.get());
+        const auto ancConst = ast::cast_tree_const<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc->loc;
         }
@@ -364,9 +364,8 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const unique_ptr<as
     return classDef->loc;
 }
 
-void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass,
-                                 const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
-                                 const string_view verb) {
+void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+                                 const core::SymbolRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleFinal()) {
             continue;
@@ -403,7 +402,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(core::Context ctx, const core::SymbolRef klass, const unique_ptr<ast::ClassDef> &classDef) {
+void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
@@ -419,9 +418,8 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const unique_
     validateFinalMethodHelper(ctx, singleton, klass);
 }
 
-void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass,
-                                  const unique_ptr<ast::ClassDef> &classDef, const core::SymbolRef errMsgClass,
-                                  const string_view verb) {
+void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+                                  const core::SymbolRef errMsgClass, const string_view verb) {
     auto klassFile = klass.data(ctx)->loc().file();
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
@@ -444,7 +442,7 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
     }
 }
 
-void validateSealed(core::Context ctx, const core::SymbolRef klass, const unique_ptr<ast::ClassDef> &classDef) {
+void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
     // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
@@ -554,7 +552,8 @@ private:
     }
 
 public:
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto *classDef = ast::cast_tree_const<ast::ClassDef>(tree);
         auto sym = classDef->symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);
@@ -562,10 +561,11 @@ public:
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
-        return classDef;
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef) {
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto *methodDef = ast::cast_tree<ast::MethodDef>(tree);
         auto methodData = methodDef->symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
 
@@ -579,7 +579,7 @@ public:
         }
 
         validateOverriding(ctx, methodDef->symbol);
-        return methodDef;
+        return tree;
     }
 };
 

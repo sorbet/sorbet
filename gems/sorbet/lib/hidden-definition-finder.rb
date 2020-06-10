@@ -109,6 +109,8 @@ class Sorbet::Private::HiddenMethodFinder
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
+        '-e', # this is additive with any files / dirs
+        '""',
       ],
       err: SOURCE_CONSTANTS_ERR
     )

@@ -15,38 +15,37 @@ namespace {
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
-bool isT(ast::Expression *expr) {
+bool isT(ast::TreePtr &expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope.get());
+    return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
 }
 
-bool isTNilable(ast::Expression *expr) {
+bool isTNilable(ast::TreePtr &expr) {
     auto *nilable = ast::cast_tree<ast::Send>(expr);
-    return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv.get());
+    return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
-bool isTStruct(ast::Expression *expr) {
+bool isTStruct(ast::TreePtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope.get());
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
 }
 
-bool isTInexactStruct(ast::Expression *expr) {
+bool isTInexactStruct(ast::TreePtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope.get());
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope);
 }
 
-bool isChalkODMDocument(ast::Expression *expr) {
+bool isChalkODMDocument(ast::TreePtr &expr) {
     auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
         return false;
     }
-    auto *odm = ast::cast_tree<ast::UnresolvedConstantLit>(document->scope.get());
+    auto *odm = ast::cast_tree<ast::UnresolvedConstantLit>(document->scope);
     if (odm == nullptr || odm->cnst != core::Names::Constants::ODM()) {
         return false;
     }
-    auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope.get());
-    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() &&
-           ast::MK::isRootScope(chalk->scope.get());
+    auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope);
+    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && ast::MK::isRootScope(chalk->scope);
 }
 
 enum class SyntacticSuperClass {
@@ -100,17 +99,17 @@ struct PropInfo {
     bool hasWithoutAccessors = false;
     core::NameRef name;
     core::LocOffsets nameLoc;
-    unique_ptr<ast::Expression> type;
-    unique_ptr<ast::Expression> default_;
+    ast::TreePtr type;
+    ast::TreePtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
-    unique_ptr<ast::Expression> foreign;
-    unique_ptr<ast::Expression> enum_;
-    unique_ptr<ast::Expression> ifunset;
+    ast::TreePtr foreign;
+    ast::TreePtr enum_;
+    ast::TreePtr ifunset;
 };
 
 struct NodesAndPropInfo {
-    vector<unique_ptr<ast::Expression>> nodes;
+    vector<ast::TreePtr> nodes;
     PropInfo propInfo;
 };
 
@@ -164,7 +163,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (send->args.empty()) {
             return nullopt;
         }
-        auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
+        auto *sym = ast::cast_tree_const<ast::Literal>(send->args[0]);
         if (!sym || !sym->isSymbol(ctx)) {
             return nullopt;
         }
@@ -181,32 +180,32 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // been given in second argument.
             return nullopt;
         } else {
-            ret.type = ASTUtil::dupType(send->args[1].get());
+            ret.type = ASTUtil::dupType(send->args[1]);
             if (ret.type == nullptr) {
                 return nullopt;
             }
         }
     }
 
-    ENFORCE(ASTUtil::dupType(ret.type.get()) != nullptr, "No obvious type AST for this prop");
+    ENFORCE(ASTUtil::dupType(ret.type) != nullptr, "No obvious type AST for this prop");
 
     // ----- Does the prop have any extra options? -----
-    unique_ptr<ast::Hash> rules;
+    ast::TreePtr rulesTree;
     if (!send->args.empty()) {
-        if (auto back = ast::cast_tree<ast::Hash>(send->args.back().get())) {
+        if (auto back = ast::cast_tree_const<ast::Hash>(send->args.back())) {
             // Deep copy the rules hash so that we can destruct it at will to parse things,
             // without having to worry about whether we stole things from the tree.
-            rules.reset(ast::cast_tree<ast::Hash>(back->deepCopy().release()));
+            rulesTree = back->deepCopy();
         }
     }
-    if (rules == nullptr && send->args.size() >= 3) {
+    if (rulesTree == nullptr && send->args.size() >= 3) {
         // No rules, but 3 args including name and type. Also not a T::Props
         return std::nullopt;
     }
 
     // ----- Parse any extra options -----
-
-    if (rules) {
+    if (rulesTree) {
+        auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
         }
@@ -225,7 +224,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         // e.g. `const :foo, type, computed_by: :method_name`
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
-            auto lit = ast::cast_tree<ast::Literal>(val.get());
+            auto lit = ast::cast_tree<ast::Literal>(val);
             if (lit != nullptr && lit->isSymbol(ctx)) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol(ctx);
@@ -239,7 +238,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
         if (foreignTree != nullptr) {
             ret.foreign = move(foreignTree);
-            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign.get())) {
+            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
                 if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
@@ -261,29 +260,28 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         }
     }
 
-    if (ret.default_ == nullptr && isTNilable(ret.type.get())) {
+    if (ret.default_ == nullptr && isTNilable(ret.type)) {
         ret.default_ = ast::MK::Nil(ret.loc);
     }
 
     return ret;
 }
 
-vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const PropInfo &ret,
-                                                PropContext propContext) {
-    vector<unique_ptr<ast::Expression>> nodes;
+vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
+    vector<ast::TreePtr> nodes;
 
     const auto loc = ret.loc;
     const auto name = ret.name;
     const auto nameLoc = ret.nameLoc;
 
-    const auto getType = ASTUtil::dupType(ret.type.get());
+    const auto getType = ASTUtil::dupType(ret.type);
 
     const auto computedByMethodName = ret.computedByMethodName;
     const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
 
     auto ivarName = name.addAt(ctx);
 
-    nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
+    nodes.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType)));
 
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
@@ -293,8 +291,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(computedByMethodNameLoc);
         auto sendComputedMethod = ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass),
                                                  computedByMethodName, std::move(raiseUnimplemented));
-        auto assertTypeMatches = ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod),
-                                                     ASTUtil::dupType(getType.get()));
+        auto assertTypeMatches =
+            ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
@@ -337,10 +335,10 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
     // Compute the setter
     if (!ret.isImmutable) {
-        auto setType = ASTUtil::dupType(ret.type.get());
+        auto setType = ASTUtil::dupType(ret.type);
         nodes.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
-            ASTUtil::dupType(setType.get())));
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType)),
+            ASTUtil::dupType(setType)));
 
         if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
@@ -384,15 +382,15 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
     // Compute the `_` foreign accessor
     if (ret.foreign) {
-        unique_ptr<ast::Expression> type;
-        unique_ptr<ast::Expression> nonNilType;
-        if (ASTUtil::dupType(ret.foreign.get()) == nullptr) {
+        ast::TreePtr type;
+        ast::TreePtr nonNilType;
+        if (ASTUtil::dupType(ret.foreign) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
             nonNilType = ast::MK::Untyped(loc);
         } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign.get()));
-            nonNilType = ASTUtil::dupType(ret.foreign.get());
+            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
+            nonNilType = ASTUtil::dupType(ret.foreign);
         }
 
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
@@ -405,7 +403,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
 
         auto fkMethod = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
 
-        unique_ptr<ast::Expression> arg =
+        ast::TreePtr arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethod, std::move(arg),
                                                      ast::MK::RaiseUnimplemented(loc)));
@@ -419,7 +417,7 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
-        unique_ptr<ast::Expression> arg2 =
+        ast::TreePtr arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethodBang, std::move(arg2),
                                                      ast::MK::RaiseUnimplemented(loc)));
@@ -428,42 +426,42 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     // Compute the Mutator
     {
         // Compute a setter
-        auto setType = ASTUtil::dupType(ret.type.get());
+        auto setType = ASTUtil::dupType(ret.type);
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
-            ASTUtil::dupType(setType.get())));
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType)),
+            ASTUtil::dupType(setType)));
         rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         // Maybe make a getter
-        unique_ptr<ast::Expression> mutator;
-        if (ASTUtil::isProbablySymbol(ctx, ret.type.get(), core::Symbols::Hash())) {
+        ast::TreePtr mutator;
+        if (ASTUtil::isProbablySymbol(ctx, ret.type, core::Symbols::Hash())) {
             mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::HashMutator());
-            auto send = ast::cast_tree<ast::Send>(ret.type.get());
+            auto *send = ast::cast_tree_const<ast::Send>(ret.type);
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 2) {
                 mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(),
-                                         ASTUtil::dupType(send->args[0].get()), ASTUtil::dupType(send->args[1].get()));
+                                         ASTUtil::dupType(send->args[0]), ASTUtil::dupType(send->args[1]));
             } else {
                 mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc),
                                          ast::MK::Untyped(loc));
             }
-        } else if (ASTUtil::isProbablySymbol(ctx, ret.type.get(), core::Symbols::Array())) {
+        } else if (ASTUtil::isProbablySymbol(ctx, ret.type, core::Symbols::Array())) {
             mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::ArrayMutator());
-            auto send = ast::cast_tree<ast::Send>(ret.type.get());
+            auto *send = ast::cast_tree_const<ast::Send>(ret.type);
             if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 1) {
                 mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(),
-                                         ASTUtil::dupType(send->args[0].get()));
+                                         ASTUtil::dupType(send->args[0]));
             } else {
                 mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc));
             }
-        } else if (ast::isa_tree<ast::UnresolvedConstantLit>(ret.type.get())) {
+        } else if (ast::isa_tree<ast::UnresolvedConstantLit>(ret.type)) {
             // In a perfect world we could know if there was a Mutator we could reference instead, like this:
             // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()),
             // core::Names::Constants::Mutator()); For now we're just going to leave these in method_missing.rbi
         }
 
         if (mutator.get()) {
-            rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
+            rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator)));
             rhs.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
             ast::ClassDef::ANCESTORS_store ancestors;
@@ -477,10 +475,8 @@ vector<unique_ptr<ast::Expression>> processProp(core::MutableContext ctx, const 
     return nodes;
 }
 
-unique_ptr<ast::Send> ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
-    // Typed deepCopy
-    unique_ptr<ast::Send> result;
-    result.reset(ast::cast_tree<ast::Send>(send->deepCopy().release()));
+ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
+    ast::TreePtr result = send->deepCopy();
 
     if (prop.hasWithoutAccessors) {
         return result;
@@ -488,21 +484,22 @@ unique_ptr<ast::Send> ensureWithoutAccessors(const PropInfo &prop, const ast::Se
         auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
         auto true_ = ast::MK::True(send->loc);
 
-        if (result->args.empty()) {
-            result->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
-        } else if (auto rules = ast::cast_tree<ast::Hash>(result->args.back().get())) {
+        auto *copy = ast::cast_tree<ast::Send>(result);
+        if (copy->args.empty()) {
+            copy->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
+        } else if (auto rules = ast::cast_tree<ast::Hash>(copy->args.back())) {
             rules->keys.emplace_back(std::move(withoutAccessors));
             rules->values.emplace_back(std::move(true_));
         } else {
-            result->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
+            copy->args.emplace_back(ast::MK::Hash1(send->loc, std::move(withoutAccessors), std::move(true_)));
         }
 
         return result;
     }
 }
 
-vector<unique_ptr<ast::Expression>> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                                      const vector<PropInfo> &props) {
+vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                       const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Hash::ENTRY_store sigKeys;
     ast::Hash::ENTRY_store sigVals;
@@ -542,7 +539,7 @@ vector<unique_ptr<ast::Expression>> mkTypedInitialize(core::MutableContext ctx, 
     }
     auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
 
-    vector<unique_ptr<ast::Expression>> result;
+    vector<ast::TreePtr> result;
     result.emplace_back(ast::MK::SigVoid(klassLoc, ast::MK::Hash(klassLoc, std::move(sigKeys), std::move(sigVals))));
     result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
                                                  std::move(args), std::move(body)));
@@ -557,7 +554,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
     auto syntacticSuperClass = SyntacticSuperClass::Unknown;
     if (!klass->ancestors.empty()) {
-        auto superClass = klass->ancestors[0].get();
+        auto &superClass = klass->ancestors[0];
         if (isTStruct(superClass)) {
             syntacticSuperClass = SyntacticSuperClass::TStruct;
         } else if (isTInexactStruct(superClass)) {
@@ -567,10 +564,11 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
     }
     auto propContext = PropContext{syntacticSuperClass, klass->kind};
-    UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+    UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
+    replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
-        auto *send = ast::cast_tree<ast::Send>(stat.get());
+        auto *send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
             continue;
         }
@@ -581,7 +579,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto processed = processProp(ctx, propInfo.value(), propContext);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
-        vector<unique_ptr<ast::Expression>> nodes;
+        vector<ast::TreePtr> nodes;
         nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
         nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);
@@ -599,10 +597,11 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
-        if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
+        auto replacement = replaceNodes.find(stat.get());
+        if (replacement == replaceNodes.end()) {
             klass->rhs.emplace_back(std::move(stat));
         } else {
-            for (auto &newNode : replaceNodes.at(stat.get())) {
+            for (auto &newNode : replacement->second) {
                 klass->rhs.emplace_back(std::move(newNode));
             }
         }
