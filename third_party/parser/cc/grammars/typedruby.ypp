@@ -212,7 +212,6 @@ using namespace std::string_literals;
   f_opt
   fitem
   for_var
-  fsym
   keyword_variable
   lhs
   literal
@@ -230,6 +229,7 @@ using namespace std::string_literals;
   qsymbols
   qwords
   regexp
+  ssym
   simple_numeric
   singleton
   stmt
@@ -976,14 +976,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                 | op
                 | reswords
 
-            fsym: fname
+            fitem: fname
                     {
                       $$ = driver.build.symbol(self, $1);
                     }
                 | symbol
-
-           fitem: fsym
-                | dsym
 
       undef_list: fitem
                     {
@@ -2235,7 +2232,6 @@ opt_block_args_tail:
 
          literal: numeric
                 | symbol
-                | dsym
 
          strings: string
                     {
@@ -2424,7 +2420,10 @@ regexp_contents: // nothing
                 | backref
 
 
-          symbol: tSYMBOL
+          symbol: ssym
+                | dsym
+
+            ssym: tSYMBOL
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol(self, $1);
