@@ -19,4 +19,8 @@ class B
     @foo = "test"
     @x = x
   end
+
+  sig {params(x: Integer).void}
+  puts "hi"
+  def test(x=297); end
 end
