@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnTemp>$3: Integer(5) = 5\l<block-break-assign>$4: Integer(5) = <returnTemp>$3\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<returnTemp>$3: Integer(5) = 5\l<block-break-assign>$4: Integer(5) = <returnTemp>$3\l<magic>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$6: T.untyped = <magic>$5: T.class_of(<Magic>).<block-break>(<returnTemp>$3: Integer(5))\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
