@@ -1,0 +1,25 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C B>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C B>::<C BClass>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)    end
+  end
+end
