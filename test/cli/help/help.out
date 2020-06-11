@@ -149,8 +149,9 @@ Usage:
                                 resolve-tree, resolve-tree-raw, flatten-tree,
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
                                 symbol-table, symbol-table-raw, symbol-table-json,
-                                symbol-table-full, symbol-table-full-raw,
-                                symbol-table-full-json, file-table-json,
+                                symbol-table-proto, symbol-table-full,
+                                symbol-table-full-raw, symbol-table-full-json,
+                                symbol-table-full-proto, file-table-json,
                                 missing-constants, plugin-generated-code, autogen,
                                 autogen-msgpack, autogen-classlist,
                                 autogen-autoloader, autogen-subclasses]
