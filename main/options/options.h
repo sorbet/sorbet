@@ -72,6 +72,7 @@ struct Printers {
     PrinterConfig SymbolTableFullProto;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
+    PrinterConfig FileTableProto;
     PrinterConfig MissingConstants;
     PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;

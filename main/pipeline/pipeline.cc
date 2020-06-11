@@ -1085,6 +1085,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
 #ifndef SORBET_REALMAIN_MIN
+        if (opts.print.FileTableProto.enabled) {
+            auto files = core::Proto::filesToProto(*gs);
+            if (opts.print.FileTableProto.outputPath.empty()) {
+                files.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                files.SerializeToString(&buf);
+                opts.print.FileTableProto.print(buf);
+            }
+        }
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
             if (opts.print.FileTableJson.outputPath.empty()) {
