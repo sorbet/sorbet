@@ -19,12 +19,6 @@ using namespace std;
 string singleTest;
 string webTraceFile;
 
-UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
-    "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols"};
-
 bool isTestMessage(const LSPMessage &msg) {
     return msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo;
 }
@@ -287,6 +281,7 @@ TEST_CASE("LSPTest") {
     {
         shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
         opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+        opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
         lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
         lspWrapper->enableAllExperimentalFeatures();
     }
