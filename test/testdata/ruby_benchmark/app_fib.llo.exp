@@ -202,7 +202,7 @@ BB4.thread:                                       ; preds = %sorbet_rb_int_lt.ex
   store i64* %27, i64** %19, align 8, !tbaa !5
   br label %typeTestSuccess98
 
-sorbet_rb_int_minus.exit121:                      ; preds = %sorbet_rb_int_lt.exit
+sorbet_rb_int_minus.exit117:                      ; preds = %sorbet_rb_int_lt.exit
   %1 = getelementptr inbounds i64, i64* %24, i64 5
   store i64* %1, i64** %19, align 8, !tbaa !5
   %2 = add nsw i64 %rawArg_n, -2
@@ -223,7 +223,7 @@ BB4:                                              ; preds = %51, %46, %55, %"alt
   store i64* %27, i64** %19, align 8, !tbaa !5
   %8 = and i64 %"<returnMethodTemp>.sroa.0.0", 1
   %9 = icmp eq i64 %8, 0
-  br i1 %9, label %codeRepl127, label %typeTestSuccess98, !prof !7
+  br i1 %9, label %codeRepl123, label %typeTestSuccess98, !prof !7
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 1, i32 1)
@@ -281,12 +281,12 @@ typeTestSuccess21:                                ; preds = %fillRequiredArgs
   %37 = load i64, i64* @rb_cModule, align 8, !tbaa !0
   %38 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %37) #7
   %39 = icmp eq i64 %38, 0
-  br i1 %39, label %codeRepl128, label %sorbet_isa_class_of.exit, !prof !27
+  br i1 %39, label %codeRepl124, label %sorbet_isa_class_of.exit, !prof !27
 
 sorbet_isa_class_of.exit:                         ; preds = %36
   %40 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %32) #7
   %41 = icmp eq i64 %40, 0
-  br i1 %41, label %codeRepl128, label %sorbet_rb_int_lt.exit, !prof !7
+  br i1 %41, label %codeRepl124, label %sorbet_rb_int_lt.exit, !prof !7
 
 sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of.exit, %31
   %42 = getelementptr inbounds i64, i64* %24, i64 2
@@ -294,17 +294,17 @@ sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of
   %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0
   store i64 7, i64* %callArgsAddr, align 8
   %43 = icmp sgt i64 %rawArg_n, 5
-  br i1 %43, label %sorbet_rb_int_minus.exit121, label %BB4.thread
+  br i1 %43, label %sorbet_rb_int_minus.exit117, label %BB4.thread
 
-codeRepl128:                                      ; preds = %36, %sorbet_isa_class_of.exit
+codeRepl124:                                      ; preds = %36, %sorbet_isa_class_of.exit
   tail call fastcc void @func_HasFib.fib.cold.3(i64 %selfRaw) #17
   unreachable
 
-"alternativeCallIntrinsic_Integer_+":             ; preds = %sorbet_rb_int_minus.exit121
+"alternativeCallIntrinsic_Integer_+":             ; preds = %sorbet_rb_int_minus.exit117
   %"call_via_vm_+" = call i64 @sorbet_callFunc(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+")
   br label %BB4
 
-"fastSymCallIntrinsic_Integer_+":                 ; preds = %sorbet_rb_int_minus.exit121
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %sorbet_rb_int_minus.exit117
   %44 = and i64 %directSendResult78, %6
   %45 = icmp eq i64 %44, 0
   br i1 %45, label %55, label %46, !prof !28
@@ -327,10 +327,10 @@ codeRepl128:                                      ; preds = %36, %sorbet_isa_cla
   br label %BB4
 
 typeTestSuccess98:                                ; preds = %BB4, %BB4.thread
-  %"<returnMethodTemp>.sroa.0.0124" = phi i64 [ 3, %BB4.thread ], [ %"<returnMethodTemp>.sroa.0.0", %BB4 ]
-  ret i64 %"<returnMethodTemp>.sroa.0.0124"
+  %"<returnMethodTemp>.sroa.0.0120" = phi i64 [ 3, %BB4.thread ], [ %"<returnMethodTemp>.sroa.0.0", %BB4 ]
+  ret i64 %"<returnMethodTemp>.sroa.0.0120"
 
-codeRepl127:                                      ; preds = %BB4
+codeRepl123:                                      ; preds = %BB4
   tail call fastcc void @func_HasFib.fib.cold.2(i64 %"<returnMethodTemp>.sroa.0.0") #17
   unreachable
 }

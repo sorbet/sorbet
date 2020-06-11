@@ -314,7 +314,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %callArgsAddr.i = getelementptr inbounds <2 x i64>, <2 x i64>* %callArgs.i, i64 0, i64 0
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %callArgs.i, align 16
   %62 = call i64 @rb_ary_new_from_values(i64 2, i64* nonnull %callArgsAddr.i) #11
-  %63 = call i64 @rb_block_call(i64 %62, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$153$block_1" to i64 (...)*), i64 %31) #11
+  %63 = call i64 @rb_block_call(i64 %62, i64 %rubyId_map.i, i32 0, i64* null, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$153$block_1" to i64 (...)*), i64 %31) #11
   store i64* %54, i64** %48, align 8, !tbaa !5
   store i64 %63, i64* %callArgsAddr.i, align 16
   %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %57, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #11

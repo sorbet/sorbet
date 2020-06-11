@@ -67,20 +67,7 @@ public:
                                   llvm::Function *blk) const override {
         auto &builder = builderCast(build);
 
-        // fill in args
-        {
-            int argId = -1;
-            for (auto &arg : send->args) {
-                argId += 1;
-                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-                auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
-                builder.CreateStore(
-                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
-            }
-        }
-        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
-                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, blockMap, aliases, rubyBlockId, send->args);
 
         auto recv = Payload::varGet(cs, send->recv.variable, builder, blockMap, aliases, rubyBlockId);
         llvm::Value *blkPtr;
@@ -91,7 +78,6 @@ public:
         }
 
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
-        auto argv = builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices);
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {recv, fun, argc, argv, blkPtr, blockMap.escapedClosure[rubyBlockId]},

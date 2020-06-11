@@ -190,6 +190,9 @@ llvm::Value *IREmitterHelpers::fillSendArgArray(CompilerState &cs, llvm::IRBuild
                                                 const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                 int rubyBlockId, const InlinedVector<cfg::VariableUseSite, 2> &args) {
     auto &builder = builderCast(build);
+    if (args.empty()) {
+        return llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs));
+    }
 
     // fill in args
     int argId = -1;

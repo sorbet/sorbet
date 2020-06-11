@@ -261,7 +261,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone
   %50 = and i64 %el2.sroa.0.0, 1
   %51 = icmp eq i64 %50, 0
-  br i1 %51, label %codeRepl64, label %typeTestSuccess37, !prof !7
+  br i1 %51, label %codeRepl63, label %typeTestSuccess37, !prof !7
 
 codeRepl:                                         ; preds = %fillFromDefaultBlockDone
   tail call fastcc void @"func_<root>.<static-init>$153$block_1.cold.1"(i64 %el1.sroa.0.1) #12
@@ -272,7 +272,7 @@ typeTestSuccess37:                                ; preds = %typeTestSuccess
   %53 = icmp eq i64 %52, 0
   br i1 %53, label %63, label %54, !prof !28
 
-codeRepl64:                                       ; preds = %typeTestSuccess
+codeRepl63:                                       ; preds = %typeTestSuccess
   tail call void @sorbet_cast_failure(i64 %el2.sroa.0.0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)) #11
   unreachable
 
@@ -418,7 +418,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   unreachable
 
 alternativeCallIntrinsic_Array_each.i:            ; preds = %sorbet_isa_Array.exit.i, %typeTestSuccess.i
-  %74 = call i64 @rb_block_call(i64 %63, i64 %rubyId_each.i, i32 0, i64* nonnull %callArgsAddr.i, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$153$block_1" to i64 (...)*), i64 %31) #11
+  %74 = call i64 @rb_block_call(i64 %63, i64 %rubyId_each.i, i32 0, i64* null, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_<root>.<static-init>$153$block_1" to i64 (...)*), i64 %31) #11
   br label %"func_<root>.<static-init>$153.exit"
 
 fastSymCallIntrinsic_Array_each.i:                ; preds = %sorbet_isa_Array.exit.i

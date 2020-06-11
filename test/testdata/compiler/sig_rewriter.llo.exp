@@ -388,11 +388,11 @@ codeRepl4:                                        ; preds = %sorbet_readRealpath
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %62) #13
   %113 = getelementptr inbounds i64, i64* %47, i64 9
   store i64* %113, i64** %42, align 8, !tbaa !6
-  %114 = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
-  %call_via_vm_new.i = call i64 @sorbet_callFunc(i64 %59, i64 %rubyId_new.i, i32 0, i64* nonnull %114, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new) #13
-  %call_via_vm_foo.i = call i64 @sorbet_callFunc(i64 %call_via_vm_new.i, i64 %rubyId_foo.i, i32 0, i64* nonnull %114, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo) #13
-  store i64 %call_via_vm_foo.i, i64* %114, align 8
-  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %31, i64 %rubyId_puts.i, i32 1, i64* nonnull %114, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #13
+  %call_via_vm_new.i = tail call i64 @sorbet_callFunc(i64 %59, i64 %rubyId_new.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new) #13
+  %call_via_vm_foo.i = tail call i64 @sorbet_callFunc(i64 %call_via_vm_new.i, i64 %rubyId_foo.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo) #13
+  %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %call_via_vm_foo.i, i64* %callArgsAddr.i, align 8
+  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %31, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #13
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %32)
   ret void
 }

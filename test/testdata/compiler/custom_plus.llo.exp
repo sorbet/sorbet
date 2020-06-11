@@ -391,16 +391,16 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %62, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_A#+" to i64 (...)*), i32 -1) #13
   %81 = getelementptr inbounds i64, i64* %50, i64 7
   store i64* %81, i64** %45, align 8, !tbaa !5
-  %82 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  %call_via_vm_new.i = call i64 @sorbet_callFunc(i64 %62, i64 %rubyId_new.i, i32 0, i64* nonnull %82, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new) #13
-  %83 = getelementptr inbounds i64, i64* %50, i64 9
-  store i64* %83, i64** %45, align 8, !tbaa !5
+  %call_via_vm_new.i = tail call i64 @sorbet_callFunc(i64 %62, i64 %rubyId_new.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new) #13
+  %82 = getelementptr inbounds i64, i64* %50, i64 9
+  store i64* %82, i64** %45, align 8, !tbaa !5
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_delegate.i) #13
   tail call void @rb_define_method(i64 %56, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_delegate, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#delegate" to i64 (...)*), i32 -1) #13
-  %84 = getelementptr inbounds i64, i64* %50, i64 17
-  store i64* %84, i64** %45, align 8, !tbaa !5
-  store i64 %call_via_vm_new.i, i64* %82, align 8
-  %call_via_vm_delegate.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_delegate.i, i32 1, i64* nonnull %82, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_delegate) #13
+  %83 = getelementptr inbounds i64, i64* %50, i64 17
+  store i64* %83, i64** %45, align 8, !tbaa !5
+  %callArgsAddr39.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %call_via_vm_new.i, i64* %callArgsAddr39.i, align 8
+  %call_via_vm_delegate.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_delegate.i, i32 1, i64* nonnull %callArgsAddr39.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_delegate) #13
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %35)
   ret void
 }
