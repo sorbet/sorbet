@@ -137,11 +137,11 @@ public:
     TreePtr &operator=(const TreePtr &) = delete;
 
     TreePtr(TreePtr &&other) noexcept : ptr(nullptr) {
-        std::swap(ptr, other.ptr);
+        ptr = other.releaseTagged();
     }
 
     TreePtr &operator=(TreePtr &&other) noexcept {
-        std::swap(ptr, other.ptr);
+        resetTagged(other.releaseTagged());
         return *this;
     }
 
