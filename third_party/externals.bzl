@@ -185,11 +185,11 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
-        name = "com_github_msgpack_msgpack",
-        urls = _github_public_urls("msgpack/msgpack-c/archive/7893d4d8c9ba8a8699c5c33152deaabf409250b3.zip"),
-        sha256 = "72dadac3def5180a701a3b251e9f1105c2b126907dc384d933370b7df5b73951",
-        build_file = "@com_stripe_ruby_typer//third_party:msgpack.BUILD",
-        strip_prefix = "msgpack-c-7893d4d8c9ba8a8699c5c33152deaabf409250b3",
+        name = "com_github_ludocode_mpack",
+        urls = _github_public_urls("ludocode/mpack/archive/6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c.zip"),
+        sha256 = "fb184dc169722cecf9b47bece308f70861787f4615ebdbee7383b6434cfdbc0d",
+        build_file = "@com_stripe_ruby_typer//third_party:mpack.BUILD",
+        strip_prefix = "mpack-6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c",
     )
 
     http_archive(

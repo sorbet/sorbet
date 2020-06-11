@@ -1,5 +1,5 @@
 // has to go first because it violates our poisons
-#include "msgpack.hpp"
+#include "mpack/mpack.h"
 
 #include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
@@ -392,63 +392,58 @@ private:
         } else {
             id = it->second;
         }
-        packer.pack_uint32(id);
+        mpack_write_u32(&writer, id);
     }
 
     void packNames(vector<core::NameRef> &names) {
-        packer.pack_array(names.size());
+        mpack_start_array(&writer, names.size());
         for (auto nm : names) {
             packName(nm);
         }
+        mpack_finish_array(&writer);
     }
 
     void packString(string_view str) {
-        packer.pack_str(str.size());
-        packer.pack_str_body(str.data(), str.size());
-    }
-
-    void packString(msgpack::packer<msgpack::sbuffer> &packer, string_view str) {
-        packer.pack_str(str.size());
-        packer.pack_str_body(str.data(), str.size());
+        mpack_write_str(&writer, str.data(), str.size());
     }
 
     void packBool(bool b) {
         if (b) {
-            packer.pack_true();
+            mpack_write_true(&writer);
         } else {
-            packer.pack_false();
+            mpack_write_false(&writer);
         }
     }
 
     void packReferenceRef(ReferenceRef ref) {
         if (!ref.exists()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
-            packer.pack_uint16(ref.id());
+            mpack_write_u16(&writer, ref.id());
         }
     }
 
     void packDefinitionnRef(DefinitionRef ref) {
         if (!ref.exists()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
-            packer.pack_uint16(ref.id());
+            mpack_write_u16(&writer, ref.id());
         }
     }
 
     void packRange(u4 begin, u4 end) {
-        packer.pack_uint64(((u8)begin << 32) | end);
+        mpack_write_u64(&writer, ((u8)begin << 32) | end);
     }
 
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
-        packer.pack_array(def_attrs[version].size());
+        mpack_start_array(&writer, def_attrs[version].size());
 
         // raw_full_name
         auto raw_full_name = pf.showFullName(ctx, def.id);
         packNames(raw_full_name);
 
         // type
-        packer.pack_uint8(static_cast<u8>(def.type));
+        mpack_write_u8(&writer, static_cast<u8>(def.type));
 
         // defines_behavior
         packBool(def.defines_behavior);
@@ -464,10 +459,11 @@ private:
 
         // defining_ref
         packReferenceRef(def.defining_ref);
+        mpack_finish_array(&writer);
     }
 
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref) {
-        packer.pack_array(ref_attrs[version].size());
+        mpack_start_array(&writer, ref_attrs[version].size());
 
         // scope
         packDefinitionnRef(ref.scope.id());
@@ -476,10 +472,11 @@ private:
         packNames(ref.name);
 
         // nesting
-        packer.pack_array(ref.nesting.size());
+        mpack_start_array(&writer, ref.nesting.size());
         for (auto &scope : ref.nesting) {
             packDefinitionnRef(scope.id());
         }
+        mpack_finish_array(&writer);
 
         // expression_range
         auto expression_range = ref.definitionLoc.position(ctx);
@@ -489,7 +486,7 @@ private:
 
         // resolved
         if (ref.resolved.empty()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
             packNames(ref.resolved);
         }
@@ -499,6 +496,7 @@ private:
 
         // parent_of
         packDefinitionnRef(ref.parent_of);
+        mpack_finish_array(&writer);
     }
 
     static int assert_valid_version(int version) {
@@ -515,37 +513,50 @@ public:
     // symbols[0..3] are reserved for the Type aliases
     MsgpackWriter(int version)
         : version(assert_valid_version(version)), ref_attrs(ref_attr_map.at(version)),
-          def_attrs(def_attr_map.at(version)), packer(payload), symbols(4) {}
+          def_attrs(def_attr_map.at(version)), symbols(4) {}
 
     string pack(core::Context ctx, ParsedFile &pf) {
-        packer.pack_array(6);
+        char *data;
+        size_t size;
+        mpack_writer_init_growable(&writer, &data, &size);
+        mpack_start_array(&writer, 6);
 
-        packer.pack_true(); // did_resolution
+        mpack_write_true(&writer); // did_resolution
         packString(pf.path);
-        packer.pack_uint32(pf.cksum);
+        mpack_write_u32(&writer, pf.cksum);
 
         // requires
-        packer.pack_array(pf.requires.size());
+        mpack_start_array(&writer, pf.requires.size());
         for (auto nm : pf.requires) {
             packString(nm.data(ctx)->show(ctx));
         }
+        mpack_finish_array(&writer);
 
-        packer.pack_array(pf.defs.size());
+        mpack_start_array(&writer, pf.defs.size());
         for (auto &def : pf.defs) {
             packDefinition(ctx, pf, def);
         }
-        packer.pack_array(pf.refs.size());
+
+        mpack_finish_array(&writer);
+        mpack_start_array(&writer, pf.refs.size());
         for (auto &ref : pf.refs) {
             packReference(ctx, pf, ref);
         }
+        mpack_finish_array(&writer);
+        mpack_finish_array(&writer);
 
-        msgpack::sbuffer out;
-        msgpack::packer<msgpack::sbuffer> header(out);
-        header.pack_map(5);
+        mpack_writer_destroy(&writer);
+        auto body = string(data, size);
+        MPACK_FREE(data);
 
-        packString(header, "symbols");
+        // write header
+        mpack_writer_init_growable(&writer, &data, &size);
+
+        mpack_start_map(&writer, 5);
+
+        packString("symbols");
         int i = -1;
-        header.pack_array(symbols.size());
+        mpack_start_array(&writer, symbols.size());
         for (auto sym : symbols) {
             ++i;
             string str;
@@ -565,35 +576,44 @@ public:
                 default:
                     str = sym.data(ctx)->show(ctx);
             }
-            packString(header, str);
+            packString(str);
         }
+        mpack_finish_array(&writer);
 
-        packString(header, "ref_count");
-        header.pack_uint32(pf.refs.size());
-        packString(header, "def_count");
-        header.pack_uint32(pf.defs.size());
+        packString("ref_count");
+        mpack_write_u32(&writer, pf.refs.size());
+        packString("def_count");
+        mpack_write_u32(&writer, pf.defs.size());
 
-        packString(header, "ref_attrs");
-        header.pack_array(ref_attrs.size());
+        packString("ref_attrs");
+        mpack_start_array(&writer, ref_attrs.size());
         for (auto attr : ref_attrs) {
-            packString(header, attr);
+            packString(attr);
         }
+        mpack_finish_array(&writer);
 
-        packString(header, "def_attrs");
-        header.pack_array(def_attrs.size());
+        packString("def_attrs");
+        mpack_start_array(&writer, def_attrs.size());
         for (auto attr : def_attrs) {
-            packString(header, attr);
+            packString(attr);
         }
-        out.write(payload.data(), payload.size());
-        return string(out.data(), out.size());
+        mpack_finish_array(&writer);
+
+        mpack_write_object_bytes(&writer, body.data(), body.size());
+
+        mpack_writer_destroy(&writer);
+
+        auto ret = string(data, size);
+        MPACK_FREE(data);
+
+        return ret;
     }
 
 private:
     int version;
     const vector<string> &ref_attrs;
     const vector<string> &def_attrs;
-    msgpack::sbuffer payload;
-    msgpack::packer<msgpack::sbuffer> packer;
+    mpack_writer_t writer;
 
     vector<core::NameRef> symbols;
     UnorderedMap<core::NameRef, u4> symbolIds;
