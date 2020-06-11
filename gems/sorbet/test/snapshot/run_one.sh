@@ -186,6 +186,10 @@ fi
   # FIXME: Removing hidden-definitions in actual to hide them from diff output.
   rm -rf "sorbet/rbi/hidden-definitions"
 
+  # Remove empty folders inside sorbet, because they can't be checked into git,
+  # so they'll always show up as present in actual but absent in expected.
+  find ./sorbet -empty -type d -delete
+
   # Fix up the logs to not have sandbox directories present.
 
   info "├─ Fixing up err.log"
