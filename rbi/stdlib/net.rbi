@@ -8769,19 +8769,7 @@ module Net::SSH::Transport::Kex
   MAP = ::T.unsafe(nil)
 end
 
-class Net::SSH::Transport::Kex::DiffieHellmanGroup14SHA1 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
-  G = ::T.unsafe(nil)
-  P_r = ::T.unsafe(nil)
-  P_s = ::T.unsafe(nil)
-end
-
-class Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
-  include ::Net::SSH::Transport::Constants
-  include ::Net::SSH::Loggable
-  G = ::T.unsafe(nil)
-  P_r = ::T.unsafe(nil)
-  P_s = ::T.unsafe(nil)
-
+class Net::SSH::Transport::Kex::Abstract
   def algorithms(); end
 
   def connection(); end
@@ -8790,13 +8778,30 @@ class Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
 
   def dh(); end
 
-  def digester(); end
-
   def exchange_keys(); end
 
-  def g(); end
-
   def initialize(algorithms, connection, data); end
+end
+
+class Net::SSH::Transport::Kex::Abstract5656 < Net::SSH::Transport::Kex::Abstract
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroup14SHA1 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+  G = ::T.unsafe(nil)
+  P_r = ::T.unsafe(nil)
+  P_s = ::T.unsafe(nil)
+end
+
+class Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1 < Net::SSH::Transport::Kex::Abstract
+  include ::Net::SSH::Transport::Constants
+  include ::Net::SSH::Loggable
+  G = ::T.unsafe(nil)
+  P_r = ::T.unsafe(nil)
+  P_s = ::T.unsafe(nil)
+
+  def digester(); end
+
+  def g(); end
 
   def p(); end
 end
@@ -8814,14 +8819,12 @@ class Net::SSH::Transport::Kex::DiffieHellmanGroupExchangeSHA256 < Net::SSH::Tra
   def initialize(*args); end
 end
 
-class Net::SSH::Transport::Kex::EcdhSHA2NistP256 < Net::SSH::Transport::Kex::DiffieHellmanGroup1SHA1
+class Net::SSH::Transport::Kex::EcdhSHA2NistP256 < Net::SSH::Transport::Kex::Abstract5656
   def curve_name(); end
 
   def digester(); end
 
   def ecdh(); end
-
-  def initialize(algorithms, connection, data); end
 end
 
 class Net::SSH::Transport::Kex::EcdhSHA2NistP384 < Net::SSH::Transport::Kex::EcdhSHA2NistP256
