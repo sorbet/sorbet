@@ -535,6 +535,8 @@ void GlobalState::initEmpty() {
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
+        auto &argBlock = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        argBlock.flags.isBlock = true;
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
 
