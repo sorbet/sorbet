@@ -1467,11 +1467,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 Rescue::RESCUE_CASE_store cases;
                 cases.reserve(rescue->rescue.size());
                 for (auto &node : rescue->rescue) {
-                    TreePtr rescueCaseExpr = node2TreeImpl(dctx, std::move(node));
-                    auto rescueCase = cast_tree<RescueCase>(rescueCaseExpr);
-                    ENFORCE(rescueCase != nullptr, "rescue case cast failed");
-                    cases.emplace_back(rescueCase);
-                    rescueCaseExpr.release();
+                    cases.emplace_back(node2TreeImpl(dctx, std::move(node)));
+                    ENFORCE(isa_tree<RescueCase>(cases.back()), "node2TreeImpl failed to produce a rescue case");
                 }
                 TreePtr res = make_tree<Rescue>(loc, node2TreeImpl(dctx, std::move(rescue->body)), std::move(cases),
                                                 node2TreeImpl(dctx, std::move(rescue->else_)), MK::EmptyTree());
