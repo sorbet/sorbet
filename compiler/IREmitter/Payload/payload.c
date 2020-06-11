@@ -1487,6 +1487,11 @@ VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE e
     return returnValue;
 }
 
+__attribute__((__noreturn__)) VALUE sorbet_block_break(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                                       BlockFFIType blk, VALUE closure) {
+    rb_iter_break_value(argv[0]);
+}
+
 // Raise the exception value, unless it's nil.
 void sorbet_raiseIfNotNil(VALUE exception) {
     if (exception == RUBY_Qnil) {

@@ -17,3 +17,5 @@ loop do
 end
 
 puts "block break is working fine"
+
+puts ([1].map {|x| break x})
