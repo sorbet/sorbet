@@ -666,7 +666,6 @@ int realmain(int argc, char *argv[]) {
         returnCode = 1;
     }
 
-    gs->errorQueue->flushAllErrors(*gs);
     opts.flushPrinters();
 
     if (!sorbet::emscripten_build) {

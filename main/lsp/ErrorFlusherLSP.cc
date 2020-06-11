@@ -1,6 +1,4 @@
 #include "main/lsp/ErrorFlusherLSP.h"
-#include "common/FileSystem.h"
-#include "core/lsp/QueryResponse.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {

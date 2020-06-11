@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPTYPECHECKER_H
 
 #include "ast/ast.h"
+#include "core/ErrorFlusher.h"
 #include "core/core.h"
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -23,24 +24,6 @@ struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
     // (Optional) Error that occurred during the query that you can pass on to the client.
     std::unique_ptr<ResponseError> error;
-};
-
-class TypecheckRun final {
-public:
-    // Errors encountered during typechecking.
-    std::vector<std::unique_ptr<core::Error>> errors;
-    // The set of files that were typechecked for errors.
-    std::vector<core::FileRef> filesTypechecked;
-    // The edit applied to `gs`.
-    LSPFileUpdates updates;
-    // Specifies if the typecheck run took the fast or slow path.
-    bool tookFastPath = false;
-    // If update took the slow path, contains a new global state that should be used moving forward.
-    std::optional<std::unique_ptr<core::GlobalState>> newGS;
-
-    TypecheckRun(std::vector<std::unique_ptr<core::Error>> errors = {},
-                 std::vector<core::FileRef> filesTypechecked = {}, LSPFileUpdates updates = {},
-                 bool tookFastPath = false, std::optional<std::unique_ptr<core::GlobalState>> newGS = std::nullopt);
 };
 
 class UndoState;
@@ -75,14 +58,11 @@ class LSPTypechecker final {
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
 
     /** Runs incremental typechecking on the provided updates. */
-    TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
+    std::vector<core::FileRef> runFastPath(LSPFileUpdates updates, WorkerPool &workers,
+                                           std::shared_ptr<core::ErrorFlusher> errorFlusher);
 
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
-
-    /** Officially 'commits' the output of a `TypecheckRun` by updating the relevant state on LSPTypechecker and sending
-     * diagnostics to the editor. */
-    void commitTypecheckRun(TypecheckRun run);
 
     /**
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
@@ -117,7 +97,7 @@ public:
     /**
      * Re-typechecks the provided files to re-produce error messages.
      */
-    TypecheckRun retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers);
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
@@ -179,7 +159,7 @@ public:
     /**
      * Re-typechecks the provided files to re-produce error messages.
      */
-    TypecheckRun retypecheck(std::vector<core::FileRef> frefs) const;
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs);
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;

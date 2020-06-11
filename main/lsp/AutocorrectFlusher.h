@@ -1,19 +1,15 @@
-#ifndef SORBET_ERROR_FLUSHER_LSP_H
-#define SORBET_ERROR_FLUSHER_LSP_H
+#ifndef SORBET_AUTOCORRECT_FLUSHER_H
+#define SORBET_AUTOCORRECT_FLUSHER_H
 
 #include "core/ErrorFlusher.h"
-#include "main/lsp/ErrorReporter.h"
 
 namespace sorbet::realmain::lsp {
 
-class ErrorFlusherLSP : public core::ErrorFlusher {
-private:
-    u4 epoch;
-    std::shared_ptr<ErrorReporter> errorReporter;
-
+class AutocorrectFlusher : public core::ErrorFlusher {
 public:
-    ErrorFlusherLSP(const u4 epoch, std::shared_ptr<ErrorReporter> errorReporter);
-    ~ErrorFlusherLSP() = default;
+    std::vector<std::unique_ptr<core::Error>> collectedErrors;
+    AutocorrectFlusher() = default;
+    ~AutocorrectFlusher() = default;
 
     void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors,
                      const core::GlobalState &gs, core::FileRef file) override;
