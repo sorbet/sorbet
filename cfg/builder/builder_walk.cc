@@ -471,6 +471,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 afterBreak->exprs.emplace_back(blockBreakAssign, a->loc, make_unique<Ident>(exprSym));
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a->loc, make_unique<Ident>(blockBreakAssign));
 
+                // call intrinsic for break
+                auto magic = cctx.newTemporary(core::Names::magic());
+                auto ignored = cctx.newTemporary(core::Names::blockBreak());
+                synthesizeExpr(afterBreak, magic, a->loc, make_unique<Alias>(core::Symbols::Magic()));
+                InlinedVector<core::LocalVariable, 2> args{exprSym};
+                InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
+                auto isPrivateOk = false;
+
+                synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(), make_unique<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(), args, locs, isPrivateOk));
+
                 if (cctx.breakScope == nullptr) {
                     if (auto e = cctx.ctx.beginError(a->loc, core::errors::CFG::NoNextScope)) {
                         e.setHeader("No `{}` block around `{}`", "do", "break");
