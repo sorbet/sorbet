@@ -70,22 +70,22 @@ class Expression;
 
 class TreePtr {
 private:
-    static constexpr long TAG_MASK = 0xffff000000000007;
+    static constexpr long long TAG_MASK = 0xffff000000000007;
 
-    static constexpr long PTR_MASK = ~TAG_MASK;
+    static constexpr long long PTR_MASK = ~TAG_MASK;
 
     void *ptr;
 
     template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
 
     static void *tagPtr(Tag tag, void *expr) {
-        auto val = static_cast<long>(tag);
+        auto val = static_cast<long long>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
             val <<= 48;
         }
 
-        auto maskedPtr = reinterpret_cast<long>(expr) & PTR_MASK;
+        auto maskedPtr = reinterpret_cast<long long>(expr) & PTR_MASK;
 
         return reinterpret_cast<void *>(maskedPtr | val);
     }
@@ -166,7 +166,7 @@ public:
     Tag tag() const noexcept {
         ENFORCE(ptr != nullptr);
 
-        auto value = reinterpret_cast<long>(ptr) & TAG_MASK;
+        auto value = reinterpret_cast<long long>(ptr) & TAG_MASK;
         if (value <= 7) {
             return static_cast<Tag>(value);
         } else {
@@ -175,7 +175,7 @@ public:
     }
 
     Expression *get() const noexcept {
-        auto val = reinterpret_cast<long>(ptr) & PTR_MASK;
+        auto val = reinterpret_cast<long long>(ptr) & PTR_MASK;
 
         // sign extension for the upper 16 bits
         return reinterpret_cast<Expression *>((val << 16) >> 16);
