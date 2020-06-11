@@ -1,14 +1,14 @@
 cc_library(
-    name = "com_github_msgpack_msgpack",
+    name = "com_github_ludocode_mpack",
     srcs = glob([
-        "include/msgpack/**/*.hpp",
-        "include/msgpack/**/*.h",
+        "src/mpack/*.c",
+        "src/mpack/*.h",
     ]),
-    hdrs = [
-        "include/msgpack.hpp",
-    ],
+    hdrs = glob([
+        "src/mpack/*.h",
+    ]),
     includes = [
-        "include",
+        "src",
     ],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
