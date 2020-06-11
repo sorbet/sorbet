@@ -190,15 +190,6 @@ ast::TreePtr ASTUtil::mkNilable(core::LocOffsets loc, ast::TreePtr type) {
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
-ast::TreePtr ASTUtil::mkMutator(core::MutableContext ctx, core::LocOffsets loc, core::NameRef className) {
-    auto chalk = ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                             core::Names::Constants::Chalk());
-    auto odm = ast::MK::UnresolvedConstant(loc, move(chalk), core::Names::Constants::ODM());
-    auto mutator = ast::MK::UnresolvedConstant(loc, move(odm), core::Names::Constants::Mutator());
-    auto private_ = ast::MK::UnresolvedConstant(loc, move(mutator), core::Names::Constants::Private());
-    return ast::MK::UnresolvedConstant(loc, move(private_), className);
-}
-
 ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
     auto *send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
@@ -218,37 +209,6 @@ ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
         return nullptr;
     }
     return std::move(block->body);
-}
-
-bool ASTUtil::isProbablySymbol(core::MutableContext ctx, ast::TreePtr &type, core::SymbolRef sym) {
-    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(type);
-    if (cnst) {
-        if (cnst->cnst != sym.data(ctx)->name) {
-            return false;
-        }
-        if (ast::isa_tree<ast::EmptyTree>(cnst->scope)) {
-            return true;
-        }
-
-        auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
-        if (scopeCnst && ast::isa_tree<ast::EmptyTree>(scopeCnst->scope) &&
-            scopeCnst->cnst == core::Symbols::T().data(ctx)->name) {
-            return true;
-        }
-
-        auto scopeCnstLit = ast::cast_tree<ast::ConstantLit>(cnst->scope);
-        if (scopeCnstLit && scopeCnstLit->symbol == core::Symbols::root()) {
-            return true;
-        }
-        return false;
-    }
-
-    auto *send = ast::cast_tree<ast::Send>(type);
-    if (send && send->fun == core::Names::squareBrackets() && isProbablySymbol(ctx, send->recv, sym)) {
-        return true;
-    }
-
-    return false;
 }
 
 } // namespace sorbet::rewriter
