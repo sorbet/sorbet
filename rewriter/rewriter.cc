@@ -45,7 +45,6 @@ public:
         Flatfiles::run(ctx, classDef);
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
-        DefaultArgs::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
@@ -188,7 +187,8 @@ ast::TreePtr Rewriter::run(core::MutableContext ctx, ast::TreePtr tree) {
     // This AST flattening pass requires that we mutate the AST in a way that our previous DSL passes were not designed
     // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This
     // is a rare case: in general, we should *not* add new DSL passes here.
-    auto flattened = Flatten::run(ctx, std::move(ast));
+    auto defaulted = DefaultArgs::run(ctx, std::move(ast));
+    auto flattened = Flatten::run(ctx, std::move(defaulted));
     auto cleaned = Cleanup::run(ctx, std::move(flattened));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(cleaned));
     return verifiedResult;

@@ -2705,7 +2705,6 @@ class IO
   def wait_readable(*_); end
 
   def wait_writable(*_); end
-
 end
 
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
@@ -2957,7 +2956,6 @@ end
 module URI
   extend ::URI::Escape
   def self.get_encoding(label); end
-
 end
 
 module UnicodeNormalize
