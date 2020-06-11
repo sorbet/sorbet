@@ -45,12 +45,14 @@ ErrorQueue::drainWithQueryResponses() {
     auto collected = drainAll();
 
     out.reserve(collected.size());
-    for (auto &msg : collected) {
-        if (msg->kind == ErrorQueueMessage::Kind::QueryResponse) {
-            outResponses.emplace_back(move(msg->queryResponse));
-        }
-        if (msg->kind == ErrorQueueMessage::Kind::Error) {
-            out.emplace_back(move(msg->error));
+    for (auto &it : collected) {
+        for (auto &msg : it.second) {
+            if (msg->kind == ErrorQueueMessage::Kind::QueryResponse) {
+                outResponses.emplace_back(move(msg->queryResponse));
+            }
+            if (msg->kind == ErrorQueueMessage::Kind::Error) {
+                out.emplace_back(move(msg->error));
+            }
         }
     }
 
@@ -81,20 +83,43 @@ vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
     return move(drainWithQueryResponses().first);
 }
 
-void ErrorQueue::flushErrors(const GlobalState &gs, bool all) {
+void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
     if (ignoreFlushes) {
         return;
     }
 
-    Timer timeit(tracer, "ErrorQueue::flushErrors");
-    vector<unique_ptr<ErrorQueueMessage>> errors;
-    if (all) {
-        errors = drainAll();
-    } else {
-        errors = drainFlushed();
+    Timer timeit(tracer, "ErrorQueue::flushAllErrors");
+    auto collectedErrors = drainAll();
+
+    for (auto &it : collectedErrors) {
+        errorFlusher->flushErrors(logger, move(it.second), gs, it.first);
     }
-    errorFlusher->flushErrors(logger, move(errors), gs);
+}
+
+void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
+    checkOwned();
+    if (ignoreFlushes) {
+        return;
+    }
+
+    filesFlushedCount.fetch_add(1);
+    Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
+
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        collected[msg.whatFile].emplace_back(move(msg));
+    }
+
+    vector<unique_ptr<core::ErrorQueueMessage>> errors;
+    for (auto &error : collected[file]) {
+        errors.emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
+    }
+    collected[file].clear();
+    // Clears errors that aren't attributed to any file
+    collected[core::FileRef()].clear();
+
+    errorFlusher->flushErrors(logger, move(errors), gs, file);
 }
 
 void ErrorQueue::flushErrorCount() {
@@ -118,46 +143,10 @@ void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> 
     this->queue.push(move(msg), 1);
 }
 
-void ErrorQueue::collectForFile(core::FileRef whatFile, vector<unique_ptr<core::ErrorQueueMessage>> &out) {
-    auto it = collected.find(whatFile);
-    if (it == collected.end()) {
-        return;
-    }
-    for (auto &error : it->second) {
-        out.emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
-    }
-    collected[whatFile].clear();
-};
-
-vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainFlushed() {
-    checkOwned();
-
-    vector<unique_ptr<core::ErrorQueueMessage>> ret;
-
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        if (msg.kind == core::ErrorQueueMessage::Kind::Flush) {
-            collectForFile(msg.whatFile, ret);
-            collectForFile(core::FileRef(), ret);
-        } else {
-            collected[msg.whatFile].emplace_back(move(msg));
-        }
-    }
-
-    return ret;
-}
-
-void ErrorQueue::markFileForFlushing(core::FileRef file) {
-    filesFlushedCount.fetch_add(1);
-    core::ErrorQueueMessage msg;
-    msg.kind = core::ErrorQueueMessage::Kind::Flush;
-    msg.whatFile = file;
-    this->queue.push(move(msg), 1);
-}
-
 void ErrorQueue::pushQueryResponse(unique_ptr<core::lsp::QueryResponse> queryResponse) {
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::QueryResponse;
+    msg.whatFile = queryResponse->getLoc().file();
     msg.queryResponse = move(queryResponse);
     this->queue.push(move(msg), 1);
 }
@@ -170,15 +159,22 @@ bool ErrorQueue::isEmpty() {
     checkOwned();
     return collected.empty();
 }
-vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
+
+UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQueue::drainAll() {
     checkOwned();
-    auto out = drainFlushed();
+    UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> out;
+
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        collected[msg.whatFile].emplace_back(move(msg));
+    }
 
     for (auto &part : collected) {
         for (auto &error : part.second) {
-            out.emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
+            out[part.first].emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
         }
     }
+
     collected.clear();
 
     return out;

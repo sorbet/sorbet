@@ -147,8 +147,6 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 }
 
 TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &workers) const {
-    // The error queue should not have any errors in it from previous operations.
-    ENFORCE(gs->errorQueue->queueIsEmptyApprox());
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
@@ -163,6 +161,9 @@ TypecheckRun LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &wor
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
     vector<core::NameHash> changedHashes;
+    // Replace error queue with one that is owned by this thread.
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer,
+                                                   make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter));
     {
         vector<pair<core::NameHash, u4>> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
@@ -324,15 +325,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     }
     logger->debug("Taking slow path");
 
-    vector<core::FileRef> affectedFiles;
     auto finalGS = move(updates.updatedGS.value());
-    auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-    // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue =
-        make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
-    finalGS->errorQueue->ignoreFlushes = true;
-    auto &epochManager = *finalGS->epochManager;
     const u4 epoch = updates.epoch;
+    // Replace error queue with one that is owned by this thread.
+    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer,
+                                                        make_shared<ErrorFlusherLSP>(epoch, errorReporter));
+    auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     const bool committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
@@ -378,7 +376,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         auto &resolved = maybeResolved.result();
         for (auto &tree : resolved) {
             ENFORCE(tree.file.exists());
-            affectedFiles.push_back(tree.file);
         }
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
@@ -426,8 +423,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         timeit.setTag("canceled", "false");
         // No need to keep around cancelation state!
         cancellationUndoState = nullptr;
-        // Send diagnostics to client (we already committed file updates earlier).
-        pushAllDiagnostics(updates.epoch, move(affectedFiles), move(out.first));
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
@@ -438,27 +433,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
     return committed;
-}
-
-void LSPTypechecker::pushAllDiagnostics(u4 epoch, vector<core::FileRef> filesTypechecked,
-                                        vector<std::unique_ptr<core::Error>> errors) {
-    config->logger->debug("[Typechecker] Sending diagnostics for epoch {}", epoch);
-    UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
-
-    for (auto &e : errors) {
-        if (e->isSilenced) {
-            continue;
-        }
-        auto file = e->loc.file();
-        errorsAccumulated[file].emplace_back(std::move(e));
-    }
-
-    vector<unique_ptr<core::Error>> emptyErrorList;
-    for (auto &file : filesTypechecked) {
-        auto it = errorsAccumulated.find(file);
-        vector<unique_ptr<core::Error>> &errors = it == errorsAccumulated.end() ? emptyErrorList : it->second;
-        errorReporter->pushDiagnostics(epoch, file, errors, *gs);
-    }
 }
 
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
@@ -504,7 +478,6 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
 void LSPTypechecker::commitTypecheckRun(TypecheckRun run) {
     Timer timeit(config->logger, "commitTypecheckRun");
     commitFileUpdates(run.updates, false);
-    pushAllDiagnostics(run.updates.epoch, move(run.filesTypechecked), move(run.errors));
 }
 
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
@@ -541,6 +514,12 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
+
+    // Replace error queue with one that is owned by this thread.
+    // TODO: Replace with an error flusher for queries
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer,
+                                                   make_shared<ErrorFlusherLSP>(0, errorReporter));
+    gs->errorQueue->ignoreFlushes = true;
 
     Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");

@@ -572,7 +572,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        gs->errorQueue->flushErrors(*gs, /*all*/ true);
+        gs->errorQueue->flushAllErrors(*gs);
 
         if (!opts.noErrorCount) {
             gs->errorQueue->flushErrorCount();
@@ -666,7 +666,7 @@ int realmain(int argc, char *argv[]) {
         returnCode = 1;
     }
 
-    gs->errorQueue->flushErrors(*gs, true);
+    gs->errorQueue->flushAllErrors(*gs);
     opts.flushPrinters();
 
     if (!sorbet::emscripten_build) {

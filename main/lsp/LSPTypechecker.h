@@ -77,13 +77,6 @@ class LSPTypechecker final {
     /** Runs incremental typechecking on the provided updates. */
     TypecheckRun runFastPath(LSPFileUpdates updates, WorkerPool &workers) const;
 
-    /**
-     * Builds a map of files to errors that are not silenced and passes them one file at a time to
-     * ErrorReporter::PushDiagnostics
-     */
-    void pushAllDiagnostics(u4 epoch, std::vector<core::FileRef> filesTypechecked,
-                            std::vector<std::unique_ptr<core::Error>> errors);
-
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
 
