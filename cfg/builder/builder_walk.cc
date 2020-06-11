@@ -479,7 +479,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
                 auto isPrivateOk = false;
 
-                synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(), make_unique<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(), args, locs, isPrivateOk));
+                synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
+                               make_unique<Send>(magic, core::Names::blockBreak(), core::LocOffsets::none(), args, locs,
+                                                 isPrivateOk));
 
                 if (cctx.breakScope == nullptr) {
                     if (auto e = cctx.ctx.beginError(a->loc, core::errors::CFG::NoNextScope)) {
@@ -509,7 +511,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     InlinedVector<core::LocOffsets, 2> argLocs{};
                     auto isPrivateOk = false;
                     synthesizeExpr(
-                        current, retryTemp, what->loc,
+                        current, retryTemp, core::LocOffsets::none(),
                         make_unique<Send>(magic, core::Names::retry(), what->loc, args, argLocs, isPrivateOk));
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a->loc);
                 }
@@ -567,7 +569,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                                             make_unique<Ident>(exceptionValue));
 
                     // Mark the exception as handled
-                    synthesizeExpr(caseBody, exceptionValue, what->loc, make_unique<Literal>(core::Types::nilClass()));
+                    synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
+                                   make_unique<Literal>(core::Types::nilClass()));
 
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
                     auto isPrivateOk = false;
