@@ -809,32 +809,33 @@ functionEntryInitializers:
   %"call_via_vm_is_a?" = call i64 @sorbet_callFunc(i64 %6, i64 %"rubyId_is_a?", i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_is_a?")
   %8 = and i64 %"call_via_vm_is_a?", -9
   %9 = icmp eq i64 %8, 0
-  %10 = getelementptr inbounds i64, i64* %iseq_encoded, i64 3
-  store i64* %10, i64** %pc, align 8, !tbaa !13
-  %11 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
   br i1 %9, label %BB11, label %BB10
 
 blockExit:                                        ; preds = %BB10, %BB11
   ret i64 52
 
 BB10:                                             ; preds = %functionEntryInitializers
-  %12 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %11, i64 0, i32 1, i64 0
-  store i64 8, i64* %12, align 8
-  %13 = getelementptr inbounds i64, i64* %iseq_encoded, i64 9
-  store i64* %13, i64** %pc, align 8, !tbaa !13
+  %10 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
+  %11 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %10, i64 0, i32 1, i64 0
+  store i64 8, i64* %11, align 8
+  %12 = getelementptr inbounds i64, i64* %iseq_encoded, i64 9
+  store i64* %12, i64** %pc, align 8, !tbaa !13
   store i64 %6, i64* %callArgsAddr, align 8
-  %14 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
-  %15 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %14, i64 0, i32 1, i64 1
-  %16 = load i64, i64* %15, align 8
-  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %16, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.6)
-  %17 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
-  %18 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %17, i64 0, i32 1, i64 3
-  store i64 %call_via_vm_puts, i64* %18, align 8
+  %13 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
+  %14 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %13, i64 0, i32 1, i64 1
+  %15 = load i64, i64* %14, align 8
+  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %15, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.6)
+  %16 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
+  %17 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %16, i64 0, i32 1, i64 3
+  store i64 %call_via_vm_puts, i64* %17, align 8
   br label %blockExit
 
 BB11:                                             ; preds = %functionEntryInitializers
-  %19 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %11, i64 0, i32 1, i64 5
-  store i64 20, i64* %19, align 8
+  %18 = getelementptr inbounds i64, i64* %iseq_encoded, i64 3
+  store i64* %18, i64** %pc, align 8, !tbaa !13
+  %19 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %3, align 8, !tbaa !44
+  %20 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %19, i64 0, i32 1, i64 5
+  store i64 20, i64* %20, align 8
   br label %blockExit
 }
 
