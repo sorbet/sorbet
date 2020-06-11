@@ -6,7 +6,6 @@
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
-#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -66,12 +65,6 @@ template <typename T> struct TreeToTag;
 
 // A mapping from tag value to the tree it represents.
 template <Tag T> struct TagToTree;
-
-#define TREE(name)                                                                  \
-    class name;                                                                     \
-    template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
-    template <> struct TagToTree<Tag::name> { using value = name; };                \
-    class name final
 
 class Expression;
 
@@ -313,6 +306,12 @@ public:
     Declaration(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol);
 };
 CheckSize(Declaration, 32, 8);
+
+#define TREE(name)                                                                  \
+    class name;                                                                     \
+    template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
+    template <> struct TagToTree<Tag::name> { using value = name; };                \
+    class name final
 
 TREE(ClassDef) : public Declaration {
 public:
