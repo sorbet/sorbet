@@ -27,7 +27,7 @@ cc_library(
         "LSPTypecheckerCoordinator.h",
         "UndoState.h",
         "ErrorReporter.h",
-        "ErrorFlusherLSP.h"
+        "ErrorFlusherLSP.h",
     ],
     hdrs = [
         "LSPConfiguration.h",
