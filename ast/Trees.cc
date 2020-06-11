@@ -161,7 +161,6 @@ void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
         case Tag::InsSeq:
             delete reinterpret_cast<InsSeq *>(ptr);
             break;
-
     }
 }
 
@@ -174,7 +173,6 @@ bool isa_reference(const TreePtr &what) {
 bool isa_declaration(const TreePtr &what) {
     return isa_tree<MethodDef>(what) || isa_tree<ClassDef>(what);
 }
-
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

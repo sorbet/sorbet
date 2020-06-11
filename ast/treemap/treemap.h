@@ -416,7 +416,7 @@ private:
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
 
-        for(auto &el : cast_tree<Rescue>(v)->rescueCases) {
+        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
             el = mapRescueCase(std::move(el), ctx);
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
@@ -864,7 +864,7 @@ private:
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
 
-        for(auto &el : cast_tree<Rescue>(v)->rescueCases) {
+        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
             el = mapRescueCase(std::move(el), ctx);
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
