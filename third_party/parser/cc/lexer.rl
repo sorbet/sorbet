@@ -1181,6 +1181,25 @@ void lexer::set_state_expr_value() {
     fcall expr_variable;
   }
 
+  # Special case for Ruby > 2.7
+  # If interpolated instance/class variable starts with a digit we parse it as a plain substring
+  # However, "#$1" is still a regular interpolation
+  interp_digit_var = '#' ('@' | '@@') digit c_alpha*;
+
+  action extend_interp_digit_var {
+    if (version >= ruby_version::RUBY_27) {
+      auto& current_literal = literal_();
+      std::string str = tok();
+      current_literal.extend_string(str, ts, te);
+    } else {
+      if (ts[0] == '#' && ts[1] == '@' && ts[2] == '@') {
+        diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
+      } else {
+        diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
+      }
+    }
+  }
+
   # Interpolations with code blocks must match nested curly braces, as
   # interpolation ending is ambiguous with a block ending. So, every
   # opening and closing brace should be matched with e_[lr]brace rules,
@@ -1247,60 +1266,64 @@ void lexer::set_state_expr_value() {
   # above.
 
   interp_words := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      e_bs escape => extend_string_escaped;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      e_bs escape       => extend_string_escaped;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_string := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      e_bs escape => extend_string_escaped;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      e_bs escape       => extend_string_escaped;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_words := |*
-      e_bs c_any  => extend_string_escaped;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      e_bs c_any        => extend_string_escaped;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_string := |*
-      '\\' c_nl   => extend_string_eol;
-      e_bs c_any  => extend_string_escaped;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      '\\' c_nl         => extend_string_eol;
+      e_bs c_any        => extend_string_escaped;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_backslash_delimited := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_backslash_delimited := |*
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_backslash_delimited_words := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_backslash_delimited_words := |*
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   regexp_modifiers := |*
