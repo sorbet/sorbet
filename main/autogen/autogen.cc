@@ -513,11 +513,45 @@ public:
     // symbols[0..3] are reserved for the Type aliases
     MsgpackWriter(int version)
         : version(assert_valid_version(version)), ref_attrs(ref_attr_map.at(version)),
-          def_attrs(def_attr_map.at(version)), symbols(4) {
-        mpack_writer_init_growable(&writer, &data, &size);
-    }
+          def_attrs(def_attr_map.at(version)), symbols(4) {}
 
     string pack(core::Context ctx, ParsedFile &pf) {
+        char *data;
+        size_t size;
+        mpack_writer_init_growable(&writer, &data, &size);
+        mpack_start_array(&writer, 6);
+
+        mpack_write_true(&writer); // did_resolution
+        packString(pf.path);
+        mpack_write_u32(&writer, pf.cksum);
+
+        // requires
+        mpack_start_array(&writer, pf.requires.size());
+        for (auto nm : pf.requires) {
+            packString(nm.data(ctx)->show(ctx));
+        }
+        mpack_finish_array(&writer);
+
+        mpack_start_array(&writer, pf.defs.size());
+        for (auto &def : pf.defs) {
+            packDefinition(ctx, pf, def);
+        }
+
+        mpack_finish_array(&writer);
+        mpack_start_array(&writer, pf.refs.size());
+        for (auto &ref : pf.refs) {
+            packReference(ctx, pf, ref);
+        }
+        mpack_finish_array(&writer);
+        mpack_finish_array(&writer);
+
+        mpack_writer_destroy(&writer);
+        auto body = string(data, size);
+        MPACK_FREE(data);
+
+        // write header
+        mpack_writer_init_growable(&writer, &data, &size);
+
         mpack_start_map(&writer, 5);
 
         packString("symbols");
@@ -564,36 +598,14 @@ public:
             packString(attr);
         }
         mpack_finish_array(&writer);
-        //// all above is header
-        mpack_start_array(&writer, 6);
 
-        mpack_write_true(&writer); // did_resolution
-        packString(pf.path);
-        mpack_write_u32(&writer, pf.cksum);
-
-        // requires
-        mpack_start_array(&writer, pf.requires.size());
-        for (auto nm : pf.requires) {
-            packString(nm.data(ctx)->show(ctx));
-        }
-        mpack_finish_array(&writer);
-
-        mpack_start_array(&writer, pf.defs.size());
-        for (auto &def : pf.defs) {
-            packDefinition(ctx, pf, def);
-        }
-
-        mpack_finish_array(&writer);
-        mpack_start_array(&writer, pf.refs.size());
-        for (auto &ref : pf.refs) {
-            packReference(ctx, pf, ref);
-        }
-        mpack_finish_array(&writer);
-        mpack_finish_array(&writer);
+        mpack_write_object_bytes(&writer, body.data(), body.size());
 
         mpack_writer_destroy(&writer);
+
         auto ret = string(data, size);
         MPACK_FREE(data);
+
         return ret;
     }
 
@@ -601,8 +613,6 @@ private:
     int version;
     const vector<string> &ref_attrs;
     const vector<string> &def_attrs;
-    char *data;
-    size_t size;
     mpack_writer_t writer;
 
     vector<core::NameRef> symbols;
