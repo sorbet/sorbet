@@ -2,8 +2,9 @@
 // minimal build to speedup compilation. Remove extra features
 #else
 // has to go first, as it violates poisons
-#include "common/json2msgpack/json2msgpack.h"
 #include "core/proto/proto.h"
+// ^^ has to go first
+#include "common/json2msgpack/json2msgpack.h"
 #include "namer/configatron/configatron.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
