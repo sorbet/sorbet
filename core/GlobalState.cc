@@ -369,7 +369,9 @@ void GlobalState::initEmpty() {
     id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import_());
     ENFORCE(id == Symbols::PackageSpec_import());
     {
-        enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &importArg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        // T.class_of(PackageSpec)
+        importArg.type = make_type<ClassType>(Symbols::PackageSpecSingleton());
         auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
         arg.flags.isBlock = true;
     }

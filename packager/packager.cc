@@ -17,20 +17,20 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-struct ImportedPackage {
+struct PackageName {
     core::LocOffsets loc;
-    core::NameRef mangledPackageName;
+    core::NameRef mangledName = core::NameRef::noName();
+    vector<core::NameRef> fullName;
 };
 
 struct PackageInfo {
     // The path prefix before every file in the package, including path separator at end.
     std::string packagePathPrefix;
-    // The mangled package name. Used to define the (internal) module name for its implementation.
-    core::NameRef mangledName = core::NameRef::noName();
+    PackageName name;
     // loc for the package definition. Used for error messages.
     core::Loc loc;
     // The mangled names of each package imported by this package.
-    vector<ImportedPackage> importedPackageNames;
+    vector<PackageName> importedPackageNames;
     // An AST expression that contains a module definition containing the exported items from this package.
     // Is copied into every package that imports this package.
     unique_ptr<ast::Expression> exportModule = ast::MK::EmptyTree();
@@ -47,23 +47,26 @@ public:
     }
 };
 
-// Foo::Bar => Foo_Bar_Package
-// Returns a nonexistant name if `name` is not a valid name.
-core::NameRef manglePackageName(core::MutableContext ctx, std::unique_ptr<ast::Expression> &name) {
-    vector<core::NameRef> rv;
+// Gets the package name in `name` if applicable.
+PackageName getPackageName(core::MutableContext ctx, std::unique_ptr<ast::Expression> &name) {
+    PackageName pName;
+    pName.loc = name->loc;
 
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(name.get());
     while (constLit != nullptr) {
-        rv.emplace_back(constLit->cnst);
+        pName.fullName.emplace_back(constLit->cnst);
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope.get());
     }
-    reverse(rv.begin(), rv.end());
-    if (!rv.empty()) {
-        auto mangledName = absl::StrCat(absl::StrJoin(rv, "_", NameFormatter(ctx)), "_Package");
-        return ctx.state.enterNameConstant(mangledName);
+    reverse(pName.fullName.begin(), pName.fullName.end());
+    if (!pName.fullName.empty()) {
+        // Foo::Bar => Foo_Bar_Package
+        auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName, "_", NameFormatter(ctx)), "_Package");
+        pName.mangledName = ctx.state.enterNameConstant(mangledName);
     } else {
-        return core::NameRef::noName();
+        // Not a valid name.
+        pName.mangledName = core::NameRef::noName();
     }
+    return pName;
 }
 
 bool isReferenceToPackageSpec(core::Context ctx, std::unique_ptr<ast::Expression> &expr) {
@@ -81,37 +84,36 @@ unique_ptr<ast::UnresolvedConstantLit> copyConstantLit(ast::UnresolvedConstantLi
     return rv;
 }
 
-ast::UnresolvedConstantLit *verifyConstantLit(core::Context ctx, core::NameRef fun, unique_ptr<ast::Expression> &expr) {
-    auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr.get());
-    if (target == nullptr) {
-        if (auto e = ctx.beginError(expr->loc, core::errors::Packager::InvalidImportOrExport)) {
-            e.setHeader("Argument passed to `{}` must be a constant literal", fun.data(ctx)->shortName(ctx));
-        }
-        return nullptr;
-    }
-
-    return target;
-}
-
 unique_ptr<ast::UnresolvedConstantLit> name2Expr(core::NameRef name,
                                                  unique_ptr<ast::Expression> scope = ast::MK::EmptyTree()) {
     return ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(scope), name);
 }
 
+ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::Expression *expr) {
+    auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (target == nullptr) {
+        if (auto e = ctx.beginError(expr->loc, core::errors::Packager::InvalidImportOrExport)) {
+            e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
+        }
+    }
+    return target;
+}
+
 struct PackageInfoFinder {
-    shared_ptr<PackageInfo> info = make_shared<PackageInfo>();
+    shared_ptr<PackageInfo> info = nullptr;
     unique_ptr<ast::Expression> packageModuleName;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exported;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exportedMethods;
+    core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
     unique_ptr<ast::Send> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        if (!info->mangledName.exists()) {
+        if (info == nullptr) {
             // We haven't yet entered the package class.
             return send;
         }
 
         if (send->fun == core::Names::export_() && send->args.size() == 1) {
-            auto target = verifyConstantLit(ctx, send->fun, send->args[0]);
+            auto target = verifyConstant(ctx, core::Names::export_(), send->args[0].get());
             // null indicates an invalid export.
             if (target != nullptr) {
                 exported.emplace_back(copyConstantLit(target));
@@ -121,24 +123,25 @@ struct PackageInfoFinder {
         }
 
         if (send->fun == core::Names::import_() && send->args.size() == 1) {
-            auto target = verifyConstantLit(ctx, send->fun, send->args[0]);
+            auto target = verifyConstant(ctx, core::Names::import_(), send->args[0].get());
             // null indicates an invalid import.
             if (target != nullptr) {
-                auto name = manglePackageName(ctx, send->args[0]);
-                if (name.exists()) {
-                    info->importedPackageNames.emplace_back(ImportedPackage{send->args[0]->loc, name});
+                auto name = getPackageName(ctx, send->args[0]);
+                if (name.mangledName.exists()) {
+                    info->importedPackageNames.emplace_back(move(name));
                 }
             }
         }
 
         if (send->fun == core::Names::exportMethods()) {
+            exportMethodsLoc = send->loc;
             for (auto &arg : send->args) {
-                auto target = verifyConstantLit(ctx, send->fun, arg);
+                auto target = verifyConstant(ctx, core::Names::exportMethods(), arg.get());
                 if (target != nullptr) {
                     exportedMethods.emplace_back(copyConstantLit(target));
+                    // Transform the constant lit to refer to the target within the mangled package namespace.
+                    arg = prependInternalPackageNameToScope(move(arg));
                 }
-                // Transform the constant lit to refer to the target within the mangled package namespace.
-                arg = prependInternalPackageNameToScope(move(arg));
             }
         }
 
@@ -155,17 +158,48 @@ struct PackageInfoFinder {
             if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
-        } else {
-            info->mangledName = manglePackageName(ctx, classDef->name);
+        } else if (info == nullptr) {
+            info = make_shared<PackageInfo>();
+            // TODO(jvilk): Can getPackageName fail? e.g. empty name?
+            info->name = getPackageName(ctx, classDef->name);
             packageModuleName = classDef->name->deepCopy();
             info->loc = core::Loc(ctx.file, classDef->loc);
+        } else {
+            if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::MultiplePackagesInOneFile)) {
+                e.setHeader("Package files can only declare one package");
+                e.addErrorLine(info->loc, "Previous package declaration found here");
+            }
         }
+
+        return classDef;
+    }
+
+    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+        if (classDef->symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
+            return classDef;
+        }
+
+        // Inject <PackageRegistry>::Name_Package::<PackageMethods> within the <root> class
+        ast::ClassDef::RHS_store extendStatements;
+        for (auto &klass : exportedMethods) {
+            // include <PackageRegistry>::MangledPackageName::Path::To::Item
+            extendStatements.emplace_back(
+                ast::MK::Send1(klass->loc, ast::MK::Self(klass->loc), core::Names::include(),
+                               name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
+        }
+        // Use the loc of the `export_methods` call so `include` errors goes to the right place.
+        classDef->rhs.emplace_back(ast::MK::ClassOrModule(
+            exportMethodsLoc, core::Loc(ctx.file, exportMethodsLoc),
+            name2Expr(core::Names::Constants::PackageMethods(),
+                      name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
+            {}, std::move(extendStatements), ast::ClassDef::Kind::Module));
 
         return classDef;
     }
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
     unique_ptr<ast::Expression> prependInternalPackageNameToScope(unique_ptr<ast::Expression> scope) {
+        ENFORCE(info != nullptr);
         // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
         ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope.get());
         if (lastConstLit != nullptr) {
@@ -177,7 +211,8 @@ struct PackageInfoFinder {
         // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
         ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope.get()) != nullptr);
 
-        auto scopeToPrepend = name2Expr(this->info->mangledName, name2Expr(core::Names::Constants::PackageRegistry()));
+        auto scopeToPrepend =
+            name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()));
         if (lastConstLit == nullptr) {
             return scopeToPrepend;
         } else {
@@ -189,11 +224,12 @@ struct PackageInfoFinder {
     // Generates `exportModule`, which dependent packages copy to set up their namespaces.
     // For package Foo::Bar:
     //   module Foo::Bar
-    //     ExportedItem1 = <PackageRegistry>::Path::To::ExportedItem1
-    //     extend <PackageRegistry>::Path::To::ExportedMethodsClass
+    //     ExportedItem1 = <PackageRegistry>::Foo_Bar_Package::Path::To::ExportedItem1
+    //     extend <PackageRegistry>::Foo_Bar_Package::<PackageMethods>
     //   end
     void finalize(core::MutableContext ctx) {
-        if (!this->info->mangledName.exists()) {
+        // TODO: Error if no package spec.
+        if (info == nullptr) {
             return;
         }
         ENFORCE(this->packageModuleName != nullptr);
@@ -202,6 +238,8 @@ struct PackageInfoFinder {
         ast::ClassDef::RHS_store exportedItems;
         // Prepend to scope
 
+        // NOTE: Don't assign locs to the code generated below. They encode offsets to __package.rb, but will be
+        // transplanted into other __package.rbs and may no longer be valid.
         for (auto &klass : exported) {
             // Item = <PackageRegistry>::MangledPackageName::Path::To::Item
             exportedItems.emplace_back(
@@ -209,12 +247,13 @@ struct PackageInfoFinder {
                                 name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
         }
 
-        for (auto &klass : exportedMethods) {
-            // extend <PackageRegistry>::MangledPackageName::Path::To::Item
-            // TODO(jvilk): What's the recv?
+        if (!exportedMethods.empty()) {
+            // Extend <PackageRegistry>::Name_of_package::<PackageMethods>
             exportedItems.emplace_back(
-                ast::MK::Send1(core::LocOffsets::none(), ast::MK::EmptyTree(), core::Names::extend(),
-                               name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
+                ast::MK::Send1(core::LocOffsets::none(), ast::MK::Self(core::LocOffsets::none()), core::Names::extend(),
+                               name2Expr(core::Names::Constants::PackageMethods(),
+                                         name2Expr(this->info->name.mangledName,
+                                                   name2Expr(core::Names::Constants::PackageRegistry())))));
         }
 
         this->info->exportModule = ast::MK::ClassOrModule(
@@ -223,16 +262,22 @@ struct PackageInfoFinder {
     }
 };
 
+// Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
+// builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
 shared_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
+    // Assumption: Root of AST is <root> class.
+    ENFORCE(static_cast<ast::ClassDef *>(package.tree.get()) != nullptr);
+    ENFORCE(static_cast<ast::ClassDef *>(package.tree.get())->symbol == core::Symbols::root());
     auto packageFilePath = package.file.data(ctx).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     PackageInfoFinder finder;
-    // TODO(jvilk): Test - root level package.
-    finder.info->packagePathPrefix = packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1);
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
+    if (finder.info) {
+        finder.info->packagePathPrefix = packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1);
+    }
     return move(finder.info);
 }
 
@@ -249,11 +294,10 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     // TODO: Don't allow duplicate imports.
     for (auto imported : package.importedPackageNames) {
-        auto it = packageInfoByMangledName.find(imported.mangledPackageName);
+        auto it = packageInfoByMangledName.find(imported.mangledName);
         if (it == packageInfoByMangledName.end()) {
             if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
-                // TODO: Would be nice to pretty print the imported package name.
-                e.setHeader("Cannot find package {}", imported.mangledPackageName.data(ctx)->show(ctx));
+                e.setHeader("Cannot find package `{}`", absl::StrJoin(imported.fullName, "::", NameFormatter(ctx)));
             }
             continue;
         }
@@ -262,10 +306,10 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         importedPackages.emplace_back(found.second->exportModule->deepCopy());
     }
 
-    auto packageNamespace =
-        ast::MK::ClassOrModule(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
-                               name2Expr(package.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
-                               std::move(importedPackages), ast::ClassDef::Kind::Module);
+    auto packageNamespace = ast::MK::ClassOrModule(
+        core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
+        name2Expr(package.name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
+        std::move(importedPackages), ast::ClassDef::Kind::Module);
 
     auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree.get());
     ENFORCE(rootKlass != nullptr);
@@ -304,12 +348,12 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 auto pkg = getPackageInfo(ctx, file);
-                auto &existing = packageInfoByMangledName[pkg->mangledName];
+                auto &existing = packageInfoByMangledName[pkg->name.mangledName];
                 if (existing != nullptr) {
                     if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::DuplicatePackageName)) {
-                        e.setHeader("Redefinition of package `{}`", pkg->mangledName.data(gs)->show(gs));
-                        e.addErrorLine(existing->loc, "Package `{}` originally defined here",
-                                       existing->mangledName.data(gs)->show(gs));
+                        auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
+                        e.setHeader("Redefinition of package `{}`", pkgName);
+                        e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
                     }
                 } else {
                     existing = pkg;
@@ -366,7 +410,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                         core::Context ctx(gs, core::Symbols::root(), job.file);
                         for (const auto &pkg : packages) {
                             if (absl::StartsWith(path, pkg->packagePathPrefix)) {
-                                job = rewritePackagedFile(ctx, move(job), pkg->mangledName);
+                                job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
                                 packaged = true;
                                 break;
                             }
