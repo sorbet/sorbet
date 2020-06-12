@@ -834,7 +834,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
-                if (lspQueryMatch) {
+                if (lspQueryMatch && !bind.value->isSynthetic) {
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what, tp, ctx.owner));
                 }
