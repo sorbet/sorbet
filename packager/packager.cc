@@ -33,7 +33,7 @@ struct PackageInfo {
     vector<PackageName> importedPackageNames;
     // An AST expression that contains a module definition containing the exported items from this package.
     // Is copied into every package that imports this package.
-    unique_ptr<ast::Expression> exportModule = ast::MK::EmptyTree();
+    ast::TreePtr exportModule = ast::MK::EmptyTree();
 };
 
 class NameFormatter {
@@ -48,14 +48,14 @@ public:
 };
 
 // Gets the package name in `name` if applicable.
-PackageName getPackageName(core::MutableContext ctx, std::unique_ptr<ast::Expression> &name) {
+PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &name) {
     PackageName pName;
     pName.loc = name->loc;
 
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(name.get());
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(name);
     while (constLit != nullptr) {
         pName.fullName.emplace_back(constLit->cnst);
-        constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope.get());
+        constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
     reverse(pName.fullName.begin(), pName.fullName.end());
     if (!pName.fullName.empty()) {
@@ -69,27 +69,26 @@ PackageName getPackageName(core::MutableContext ctx, std::unique_ptr<ast::Expres
     return pName;
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, std::unique_ptr<ast::Expression> &expr) {
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr.get());
+bool isReferenceToPackageSpec(core::Context ctx, ast::TreePtr &expr) {
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
 unique_ptr<ast::UnresolvedConstantLit> copyConstantLit(ast::UnresolvedConstantLit *lit) {
     auto copy = lit->deepCopy();
     // Cast from Expression to UnresolvedConstantLit.
-    auto copyUcl = ast::cast_tree<ast::UnresolvedConstantLit>(copy.get());
+    auto copyUcl = ast::cast_tree<ast::UnresolvedConstantLit>(copy);
     ENFORCE(copyUcl != nullptr);
     unique_ptr<ast::UnresolvedConstantLit> rv(copyUcl);
     copy.release();
     return rv;
 }
 
-unique_ptr<ast::UnresolvedConstantLit> name2Expr(core::NameRef name,
-                                                 unique_ptr<ast::Expression> scope = ast::MK::EmptyTree()) {
+ast::TreePtr name2Expr(core::NameRef name, ast::TreePtr scope = ast::MK::EmptyTree()) {
     return ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(scope), name);
 }
 
-ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::Expression *expr) {
+ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::TreePtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(expr->loc, core::errors::Packager::InvalidImportOrExport)) {
@@ -101,19 +100,20 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
 
 struct PackageInfoFinder {
     shared_ptr<PackageInfo> info = nullptr;
-    unique_ptr<ast::Expression> packageModuleName;
+    ast::TreePtr packageModuleName;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exported;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exportedMethods;
     core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
-    unique_ptr<ast::Send> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *send = ast::cast_tree<ast::Send>(tree);
         if (info == nullptr) {
             // We haven't yet entered the package class.
-            return send;
+            return tree;
         }
 
         if (send->fun == core::Names::export_() && send->args.size() == 1) {
-            auto target = verifyConstant(ctx, core::Names::export_(), send->args[0].get());
+            auto target = verifyConstant(ctx, core::Names::export_(), send->args[0]);
             // null indicates an invalid export.
             if (target != nullptr) {
                 exported.emplace_back(copyConstantLit(target));
@@ -123,7 +123,7 @@ struct PackageInfoFinder {
         }
 
         if (send->fun == core::Names::import_() && send->args.size() == 1) {
-            auto target = verifyConstant(ctx, core::Names::import_(), send->args[0].get());
+            auto target = verifyConstant(ctx, core::Names::import_(), send->args[0]);
             // null indicates an invalid import.
             if (target != nullptr) {
                 auto name = getPackageName(ctx, send->args[0]);
@@ -150,7 +150,7 @@ struct PackageInfoFinder {
                 exportMethodsLoc = send->loc;
             }
             for (auto &arg : send->args) {
-                auto target = verifyConstant(ctx, core::Names::exportMethods(), arg.get());
+                auto target = verifyConstant(ctx, core::Names::exportMethods(), arg);
                 if (target != nullptr) {
                     exportedMethods.emplace_back(copyConstantLit(target));
                     // Transform the constant lit to refer to the target within the mangled package namespace.
@@ -159,13 +159,14 @@ struct PackageInfoFinder {
             }
         }
 
-        return send;
+        return tree;
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         if (classDef->symbol == core::Symbols::root()) {
             // Ignore top-level <root>
-            return classDef;
+            return tree;
         }
 
         if (classDef->ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef->ancestors[0])) {
@@ -185,12 +186,13 @@ struct PackageInfoFinder {
             }
         }
 
-        return classDef;
+        return tree;
     }
 
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         if (classDef->symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
-            return classDef;
+            return tree;
         }
 
         // Inject <PackageRegistry>::Name_Package::<PackageMethods> within the <root> class
@@ -208,22 +210,22 @@ struct PackageInfoFinder {
                       name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
             {}, std::move(extendStatements), ast::ClassDef::Kind::Module));
 
-        return classDef;
+        return tree;
     }
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
-    unique_ptr<ast::Expression> prependInternalPackageNameToScope(unique_ptr<ast::Expression> scope) {
+    ast::TreePtr prependInternalPackageNameToScope(ast::TreePtr scope) {
         ENFORCE(info != nullptr);
         // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-        ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope.get());
+        ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
         if (lastConstLit != nullptr) {
-            while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope.get())) {
+            while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
                 lastConstLit = constLit;
             }
         }
 
         // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-        ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope.get()) != nullptr);
+        ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
 
         auto scopeToPrepend =
             name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()));
@@ -325,14 +327,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         name2Expr(package.name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
         std::move(importedPackages), ast::ClassDef::Kind::Module);
 
-    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree.get());
+    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
     ENFORCE(rootKlass != nullptr);
     rootKlass->rhs.emplace_back(move(packageNamespace));
     return file;
 }
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
-    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree.get());
+    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
     ENFORCE(rootKlass != nullptr);
     auto moduleWrapper =
         ast::MK::ClassOrModule(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
