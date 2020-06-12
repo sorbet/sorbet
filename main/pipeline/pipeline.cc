@@ -1046,6 +1046,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 opts.print.SymbolTableJson.print(buf.str());
             }
         }
+        if (opts.print.SymbolTableProto.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+            if (opts.print.SymbolTableProto.outputPath.empty()) {
+                root.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                root.SerializeToString(&buf);
+                opts.print.SymbolTableProto.print(buf);
+            }
+        }
         if (opts.print.SymbolTableFullJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
@@ -1054,6 +1064,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 stringstream buf;
                 core::Proto::toJSON(root, buf);
                 opts.print.SymbolTableJson.print(buf.str());
+            }
+        }
+        if (opts.print.SymbolTableFullProto.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+            if (opts.print.SymbolTableFullProto.outputPath.empty()) {
+                root.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                root.SerializeToString(&buf);
+                opts.print.SymbolTableFullProto.print(buf);
             }
         }
 #endif
@@ -1065,6 +1085,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
 #ifndef SORBET_REALMAIN_MIN
+        if (opts.print.FileTableProto.enabled) {
+            auto files = core::Proto::filesToProto(*gs);
+            if (opts.print.FileTableProto.outputPath.empty()) {
+                files.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                files.SerializeToString(&buf);
+                opts.print.FileTableProto.print(buf);
+            }
+        }
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
             if (opts.print.FileTableJson.outputPath.empty()) {
