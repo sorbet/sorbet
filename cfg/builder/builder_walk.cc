@@ -218,11 +218,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
             [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
             [&](ast::ConstantLit *a) {
+                auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
                 if (a->symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
+                    current->exprs.emplace_back(aliasName, a->loc, make_unique<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                    current->exprs.emplace_back(aliasName, a->loc, make_unique<Alias>(a->symbol));
                 }
+
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(aliasName));
 
                 if (a->original) {
                     auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a->original);
