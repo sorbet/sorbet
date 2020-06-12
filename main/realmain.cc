@@ -512,7 +512,12 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
+        {
+            indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
+        }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
@@ -540,7 +545,13 @@ int realmain(int argc, char *argv[]) {
 #endif
         } else {
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
             indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
         }
 
         if (opts.suggestTyped) {

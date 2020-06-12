@@ -239,7 +239,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates updates, Worker
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     pipeline::typecheck(gs, move(resolved), config->opts, workers);
-    gs->errorQueue->drainWithQueryResponses();
     gs->lspTypecheckCount++;
     commitFileUpdates(updates, /* cancelable */ false);
     return subset;
@@ -416,7 +415,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the
     // aborted typechecking run.
     // Note 2: `gs` now holds the value of `finalGS`.
-    auto out = gs->errorQueue->drainWithQueryResponses();
+    gs->errorQueue->drainWithQueryResponses();
     gs->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {

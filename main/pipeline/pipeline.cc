@@ -520,10 +520,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
-            // Flush all errors if the error queue had a critical error
-            if (ret.gs->hadCriticalError()) {
-                ret.gs->errorQueue->flushAllErrors(*ret.gs);
-            }
         }
     }
     return ret;
@@ -750,10 +746,7 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         auto result = namer::Namer::run(gs, move(what), workers);
-        // Flush all errors if the error queue had a critical error
-        if (gs.hadCriticalError()) {
-            gs.errorQueue->flushAllErrors(gs);
-        }
+
         return result;
     }
 }
@@ -898,11 +891,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
-    }
-
-    // Flush all errors if the error queue had a critical error
-    if (gs->hadCriticalError()) {
-        gs->errorQueue->flushAllErrors(*gs);
     }
 
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {

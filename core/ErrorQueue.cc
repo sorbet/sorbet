@@ -116,8 +116,6 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
         errors.emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
     }
     collected[file].clear();
-    // Clears errors that aren't attributed to any file
-    collected[core::FileRef()].clear();
 
     errorFlusher->flushErrors(logger, move(errors), gs, file);
 }
