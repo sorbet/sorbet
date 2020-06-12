@@ -134,7 +134,15 @@ struct PackageInfoFinder {
         }
 
         if (send->fun == core::Names::exportMethods()) {
-            exportMethodsLoc = send->loc;
+            const bool alreadyCalled = exportMethodsLoc.exists();
+            if (alreadyCalled) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Packager::MultipleExportMethodsCalls)) {
+                    e.setHeader("export_methods can only be called once in a package");
+                    e.addErrorLine(core::Loc(ctx.file, exportMethodsLoc), "Previous call to export_methods found here");
+                }
+            } else {
+                exportMethodsLoc = send->loc;
+            }
             for (auto &arg : send->args) {
                 auto target = verifyConstant(ctx, core::Names::exportMethods(), arg.get());
                 if (target != nullptr) {
