@@ -369,9 +369,33 @@ module Opus::Types::Test
           t.describe_obj(10...20))
       end
 
-      it 'works if the type is right' do
+      it 'works if the range has a start and end' do
         type = T::Range[Integer]
         value = (3...10)
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
+      # Ruby 2.6 does not support ranges with boundless starts
+      if RUBY_VERSION >= '2.7'
+        it 'works if the range has no beginning' do
+          type = T::Range[Integer]
+          value = (nil...10)
+          msg = type.error_message_for_obj(value)
+          assert_nil(msg)
+        end
+      end
+
+      it 'works if the range has no end' do
+        type = T::Range[Integer]
+        value = (1...nil)
+        msg = type.error_message_for_obj(value)
+        assert_nil(msg)
+      end
+
+      it 'works if the range has no start or end' do
+        type = T::Range[T.untyped]
+        value = (nil...nil)
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
       end
