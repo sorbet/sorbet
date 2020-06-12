@@ -526,6 +526,9 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
+            if (opts.stripePackages) {
+                indexed = pipeline::package(*gs, move(indexed), opts, *workers);
+            }
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
             autogen::AutoloaderConfig autoloaderCfg;
             {
