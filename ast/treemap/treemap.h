@@ -237,7 +237,7 @@ GENERATE_POSTPONE_POSTCLASS(Cast);
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
     SorbetException reported;
-    core::Loc onLoc;
+    core::LocOffsets onLoc;
 };
 
 /**
@@ -643,7 +643,7 @@ private:
                 return mapSend(std::move(what), ctx);
             } else if (isa_tree<Literal>(what)) {
                 return mapLiteral(std::move(what), ctx);
-            } else if (UnresolvedIdent *u = cast_tree<UnresolvedIdent>(what)) {
+            } else if (isa_tree<UnresolvedIdent>(what)) {
                 return mapUnresolvedIdent(std::move(what), ctx);
             } else if (isa_tree<Local>(what)) {
                 return mapLocal(std::move(what), ctx);
@@ -681,7 +681,7 @@ private:
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
 
-            throw ReportedRubyException{e, core::Loc(ctx.file, loc)};
+            throw ReportedRubyException{e, loc};
         }
     }
 };
@@ -694,7 +694,7 @@ public:
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
-            if (auto e = ctx.state.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Failed to process tree (backtrace is above)");
             }
             throw exception.reported;
@@ -1140,7 +1140,7 @@ private:
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
 
-            throw ReportedRubyException{e, core::Loc(ctx.file, loc)};
+            throw ReportedRubyException{e, loc};
         }
     }
 };
@@ -1153,7 +1153,7 @@ public:
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
-            if (auto e = ctx.state.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Failed to process tree (backtrace is above)");
             }
             throw exception.reported;
