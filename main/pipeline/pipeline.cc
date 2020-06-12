@@ -2,6 +2,7 @@
 // minimal build to speedup compilation. Remove extra features
 #else
 // has to go first, as it violates poisons
+#include "common/json2msgpack/json2msgpack.h"
 #include "core/proto/proto.h"
 #include "namer/configatron/configatron.h"
 #include "plugin/Plugins.h"
@@ -1056,6 +1057,24 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 opts.print.SymbolTableProto.print(buf);
             }
         }
+        if (opts.print.SymbolTableMessagePack.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
+            }
+        }
         if (opts.print.SymbolTableFullJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
@@ -1074,6 +1093,24 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 string buf;
                 root.SerializeToString(&buf);
                 opts.print.SymbolTableFullProto.print(buf);
+            }
+        }
+        if (opts.print.SymbolTableFullMessagePack.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
             }
         }
 #endif
@@ -1103,6 +1140,24 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 stringstream buf;
                 core::Proto::toJSON(files, buf);
                 opts.print.FileTableJson.print(buf.str());
+            }
+        }
+        if (opts.print.FileTableMessagePack.enabled) {
+            auto files = core::Proto::filesToProto(*gs);
+            stringstream buf;
+            core::Proto::toJSON(files, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.FileTableMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
             }
         }
         if (opts.print.PluginGeneratedCode.enabled) {

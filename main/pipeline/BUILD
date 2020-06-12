@@ -20,6 +20,7 @@ cc_library(
         "//class_flatten",
         "//common/concurrency",
         "//common/crypto_hashing",
+        "//common/json2msgpack",
         "//common/kvstore",
         "//core",
         "//core/proto",
