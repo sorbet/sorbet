@@ -423,55 +423,6 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
                                                      ast::MK::RaiseUnimplemented(loc)));
     }
 
-    // Compute the Mutator
-    {
-        // Compute a setter
-        auto setType = ASTUtil::dupType(ret.type);
-        ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType)),
-            ASTUtil::dupType(setType)));
-        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-
-        // Maybe make a getter
-        ast::TreePtr mutator;
-        if (ASTUtil::isProbablySymbol(ctx, ret.type, core::Symbols::Hash())) {
-            mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::HashMutator());
-            auto *send = ast::cast_tree_const<ast::Send>(ret.type);
-            if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 2) {
-                mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(),
-                                         ASTUtil::dupType(send->args[0]), ASTUtil::dupType(send->args[1]));
-            } else {
-                mutator = ast::MK::Send2(loc, std::move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc),
-                                         ast::MK::Untyped(loc));
-            }
-        } else if (ASTUtil::isProbablySymbol(ctx, ret.type, core::Symbols::Array())) {
-            mutator = ASTUtil::mkMutator(ctx, loc, core::Names::Constants::ArrayMutator());
-            auto *send = ast::cast_tree_const<ast::Send>(ret.type);
-            if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 1) {
-                mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(),
-                                         ASTUtil::dupType(send->args[0]));
-            } else {
-                mutator = ast::MK::Send1(loc, std::move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc));
-            }
-        } else if (ast::isa_tree<ast::UnresolvedConstantLit>(ret.type)) {
-            // In a perfect world we could know if there was a Mutator we could reference instead, like this:
-            // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()),
-            // core::Names::Constants::Mutator()); For now we're just going to leave these in method_missing.rbi
-        }
-
-        if (mutator.get()) {
-            rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator)));
-            rhs.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
-
-            ast::ClassDef::ANCESTORS_store ancestors;
-            auto name = core::Names::Constants::Mutator();
-            nodes.emplace_back(ast::MK::Class(loc, core::Loc(ctx.file, loc),
-                                              ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
-                                              std::move(ancestors), std::move(rhs)));
-        }
-    }
-
     return nodes;
 }
 
