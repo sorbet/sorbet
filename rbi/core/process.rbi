@@ -20,6 +20,9 @@ module Process
   CLOCK_MONOTONIC_RAW = T.let(T.unsafe(nil), Integer)
   # see
   # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  CLOCK_MONOTONIC_RAW_APPROX = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_PROCESS_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
   # see
   # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
@@ -33,6 +36,12 @@ module Process
   # see
   # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
   CLOCK_THREAD_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  CLOCK_UPTIME_RAW = T.let(T.unsafe(nil), Integer)
+  # see
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  CLOCK_UPTIME_RAW_APPROX = T.let(T.unsafe(nil), Integer)
   # see
   # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
   PRIO_PGRP = T.let(T.unsafe(nil), Integer)
@@ -464,6 +473,86 @@ module Process
   end
   def self.euid=(arg0); end
 
+  # Replaces the current process by running the given external *command*, which
+  # can take one of the following forms:
+  #
+  # `exec(commandline)`
+  # :   command line string which is passed to the standard shell
+  # `exec(cmdname, arg1, ...)`
+  # :   command name and one or more arguments (no shell)
+  # `exec([cmdname, argv0], arg1, ...)`
+  # :   command name, [argv](0) and zero or more arguments (no shell)
+  #
+  #
+  # In the first form, the string is taken as a command line that is subject to
+  # shell expansion before being executed.
+  #
+  # The standard shell always means `"/bin/sh"` on Unix-like systems, same as
+  # `ENV["RUBYSHELL"]` (or `ENV["COMSPEC"]` on Windows NT series), and similar.
+  #
+  # If the string from the first form (`exec("command")`) follows these simple
+  # rules:
+  #
+  # *   no meta characters
+  # *   no shell reserved word and no special built-in
+  # *   Ruby invokes the command directly without shell
+  #
+  #
+  # You can force shell invocation by adding ";" to the string (because ";" is a
+  # meta character).
+  #
+  # Note that this behavior is observable by pid obtained (return value of
+  # spawn() and
+  # [`IO#pid`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-pid) for
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-popen)) is
+  # the pid of the invoked command, not shell.
+  #
+  # In the second form (`exec("command1", "arg1", ...)`), the first is taken as
+  # a command name and the rest are passed as parameters to command with no
+  # shell expansion.
+  #
+  # In the third form (`exec(["command", "argv0"], "arg1", ...)`), starting a
+  # two-element array at the beginning of the command, the first element is the
+  # command to be executed, and the second argument is used as the `argv[0]`
+  # value, which may show up in process listings.
+  #
+  # In order to execute the command, one of the `exec(2)` system calls are used,
+  # so the running command may inherit some of the environment of the original
+  # program (including open file descriptors).
+  #
+  # This behavior is modified by the given `env` and `options` parameters. See
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # for details.
+  #
+  # If the command fails to execute (typically `Errno::ENOENT` when it was not
+  # found) a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # exception is raised.
+  #
+  # This method modifies process attributes according to given `options` before
+  # `exec(2)` system call. See
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # for more details about the given `options`.
+  #
+  # The modified attributes may be retained when `exec(2)` system call fails.
+  #
+  # For example, hard resource limits are not restorable.
+  #
+  # Consider to create a child process using
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # or
+  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-system)
+  # if this is not acceptable.
+  #
+  # ```ruby
+  # exec "echo *"       # echoes list of files in current directory
+  # # never get here
+  #
+  # exec "echo", "*"    # echoes an asterisk
+  # # never get here
+  # ```
+  def self.exec(*_); end
+
   # Returns the process group ID for the given process id. Not available on all
   # platforms.
   #
@@ -662,6 +751,21 @@ module Process
   end
   def self.kill(signal, *pids); end
 
+  # Returns the status of the last executed child process in the current thread.
+  #
+  # ```ruby
+  # Process.wait Process.spawn("ruby", "-e", "exit 13")
+  # Process.last_status   #=> #<Process::Status: pid 4825 exit 13>
+  # ```
+  #
+  # If no child process has ever been executed in the current thread, this
+  # returns `nil`.
+  #
+  # ```ruby
+  # Process.last_status   #=> nil
+  # ```
+  def self.last_status; end
+
   # Returns the maximum number of gids allowed in the supplemental group access
   # list.
   #
@@ -716,6 +820,9 @@ module Process
     .returns(Integer)
   end
   def self.setpgid(pid, arg0); end
+
+  # Equivalent to `setpgid(0,0)`. Not available on all platforms.
+  def self.setpgrp; end
 
   # See `Process#getpriority`.
   #
@@ -941,7 +1048,7 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns([Integer, Process::Status])
+    .returns(T.nilable([Integer, Process::Status]))
   end
   def self.wait2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
@@ -1311,6 +1418,14 @@ end
 # versions of the same functionality found in the `Process`, `Process::UID`, and
 # `Process::GID` modules.
 module Process::Sys
+  # Returns the effective group ID for this process. Not available on all
+  # platforms.
+  #
+  # ```ruby
+  # Process.egid   #=> 500
+  # ```
+  def self.getegid; end
+
   # Returns the effective user ID for this process.
   #
   # ```ruby
@@ -1566,6 +1681,30 @@ end
 class Process::Tms < Struct
   extend T::Generic
   Elem = type_member(:out, fixed: T.untyped)
+
+  def cstime; end
+
+  def cstime=(_); end
+
+  def cutime; end
+
+  def cutime=(_); end
+
+  def stime; end
+
+  def stime=(_); end
+
+  def utime; end
+
+  def utime=(_); end
+
+  def self.[](*_); end
+
+  def self.inspect; end
+
+  def self.members; end
+
+  def self.new(*_); end
 end
 
 class Process::Waiter < Thread

@@ -117,6 +117,8 @@ class Sorbet::Private::RequireEverything
       "--stop-after=parser",
       "--silence-dev-message",
       "--no-error-count",
+      "-e",
+      "''",
     ]) {|io| io.read}
     # This returns a hash with structure:
     # { files:
@@ -130,7 +132,8 @@ class Sorbet::Private::RequireEverything
     #   ]
     # }
     parsed = JSON.parse(output)
-    parsed['files']
+    parsed
+      .fetch('files', [])
       .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
       .map{|file| file["path"]}
       .select{|path| File.file?(path)} # Some files have https:// paths. We ignore those here.

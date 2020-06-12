@@ -77,9 +77,9 @@ public:
         core::TypePtr type;
         core::SymbolRef rebind;
     };
-    static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
+    static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::TreePtr &expr, const ParsedSig &,
                                            TypeSyntaxArgs args);
-    static core::TypePtr getResultType(core::MutableContext ctx, ast::Expression &expr, const ParsedSig &,
+    static core::TypePtr getResultType(core::MutableContext ctx, ast::TreePtr &expr, const ParsedSig &,
                                        TypeSyntaxArgs args);
 
     TypeSyntax() = delete;

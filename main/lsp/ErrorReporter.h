@@ -5,17 +5,26 @@
 
 namespace sorbet::realmain::lsp {
 class LSPConfiguration;
+
+struct EpochTimers {
+    std::vector<Timer> firstDiagnosticLatencyTimers;
+    std::vector<std::unique_ptr<Timer>> lastDiagnosticLatencyTimers;
+    bool hasFirstDiagnosticEndTimes = false;
+};
+
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
     u4 lastReportedEpoch = 0;
     // If true, the client believes this file has errors.
     bool hasErrors = false;
 };
+
 class ErrorReporter {
     const std::shared_ptr<const LSPConfiguration> config;
     // Maps from file ref ID to its error status.
     std::vector<ErrorStatus> fileErrorStatuses;
     ErrorStatus &getFileErrorStatus(core::FileRef file);
+    UnorderedMap<u4, EpochTimers> epochTimers;
 
 public:
     ErrorReporter(std::shared_ptr<const LSPConfiguration> config);
@@ -27,6 +36,21 @@ public:
      */
     void pushDiagnostics(u4 epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
+
+    void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    void endEpoch(u4 epoch, bool committed = true);
+};
+
+class ErrorEpoch final {
+    ErrorReporter &errorReporter;
+    u4 epoch;
+
+public:
+    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+
+    ~ErrorEpoch();
+
+    bool committed = false;
 };
 }; // namespace sorbet::realmain::lsp
 

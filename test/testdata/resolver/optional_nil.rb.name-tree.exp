@@ -2,7 +2,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       class ::Test<<C Test>> < (::<todo sym>)
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -10,7 +10,7 @@ begin
           x
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -18,7 +18,7 @@ begin
           y
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -26,7 +26,7 @@ begin
           z
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -34,7 +34,7 @@ begin
           w
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -42,7 +42,7 @@ begin
           nil
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -50,7 +50,7 @@ begin
           nil
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 
@@ -58,7 +58,7 @@ begin
           ""
         end
 
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
 

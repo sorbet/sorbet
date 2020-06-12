@@ -57,22 +57,22 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.void()
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::Integer)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"v1" => ::Integer}).returns(::Integer)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"v2" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)

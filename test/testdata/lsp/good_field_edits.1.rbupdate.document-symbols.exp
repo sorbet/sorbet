@@ -56,7 +56,7 @@
                 },
                 {
                     "name": "bar",
-                    "detail": "sig {returns(T.untyped)}\ndef bar; end",
+                    "detail": "",
                     "kind": 6,
                     "range": {
                         "start": {

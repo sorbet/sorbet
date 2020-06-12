@@ -6,6 +6,7 @@
 namespace sorbet {
 class KeyValueStore;
 class OwnedKeyValueStore;
+class WorkerPool;
 namespace ast {
 struct ParsedFile;
 }
@@ -27,7 +28,7 @@ std::unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, 
 // If kvstore is not null, caches global state and the given files to disk if they have changed. Can silently fail to
 // cache
 void maybeCacheGlobalStateAndFiles(std::unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
-                                   core::GlobalState &gs, std::vector<ast::ParsedFile> &indexed);
+                                   core::GlobalState &gs, WorkerPool &workers, std::vector<ast::ParsedFile> &indexed);
 } // namespace sorbet::realmain::cache
 
 #endif

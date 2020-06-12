@@ -1,28 +1,8 @@
-class <C <U <root>>> < <C <U Object>> () @ (... removed core rbi locs ..., Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=145:4})
+class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=145:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U AdvancedODM>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=38:18}
-    class <C <U AdvancedODM>><C <U Mutator>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/prop.rb start=45:5 end=45:43}
-      method <C <U AdvancedODM>><C <U Mutator>><U array> (<blk>) -> AppliedType {         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>         targs = [           <C <U Elem>> = T.untyped         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-      method <C <U AdvancedODM>><C <U Mutator>><U array=> (array, <blk>) -> AppliedType {         klass = <C <U Array>>         targs = [           <C <U Elem>> = T.untyped         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
-        argument array<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/prop.rb start=43:11 end=43:16}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-      method <C <U AdvancedODM>><C <U Mutator>><U hash_of> (<blk>) -> AppliedType {         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U HashMutator>>         targs = [           <C <U K>> = Symbol           <C <U V>> = String         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=45:5 end=45:43}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-      method <C <U AdvancedODM>><C <U Mutator>><U hash_of=> (hash_of, <blk>) -> AppliedType {         klass = <C <U Hash>>         targs = [           <C <U K>> = Symbol           <C <U V>> = String           <C <U Elem>> = TupleType {               0 = Symbol               1 = String             }         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=45:5 end=45:43}
-        argument hash_of<> -> T::Hash[Symbol, String] @ Loc {file=test/testdata/rewriter/prop.rb start=45:11 end=45:18}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-      method <C <U AdvancedODM>><C <U Mutator>><U t_array> (<blk>) -> AppliedType {         klass = <C <U Chalk>><C <U ODM>><C <U Mutator>><C <U Private>><C <U ArrayMutator>>         targs = [           <C <U Elem>> = String         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=44:5 end=44:36}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-      method <C <U AdvancedODM>><C <U Mutator>><U t_array=> (t_array, <blk>) -> AppliedType {         klass = <C <U Array>>         targs = [           <C <U Elem>> = String         ]       } @ Loc {file=test/testdata/rewriter/prop.rb start=44:5 end=44:36}
-        argument t_array<> -> T::Array[String] @ Loc {file=test/testdata/rewriter/prop.rb start=44:11 end=44:18}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    class <C <U AdvancedODM>><S <C <U Mutator>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
-      type-member(+) <C <U AdvancedODM>><S <C <U Mutator>> $1><C <U <AttachedClass>>> -> LambdaParam(<C <U AdvancedODM>><S <C <U Mutator>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AdvancedODM::Mutator) @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
-      method <C <U AdvancedODM>><S <C <U Mutator>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
-        argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array> (<blk>) -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U array=> (array, <blk>) -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}

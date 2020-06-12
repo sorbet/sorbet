@@ -9,7 +9,9 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
+namespace {
+
+ast::TreePtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
     auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
     auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
     auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
@@ -19,12 +21,14 @@ unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, co
     return ASTUtil::mkNilable(loc, move(ev));
 }
 
-unique_ptr<ast::Expression> mkNilableString(core::LocOffsets loc) {
+ast::TreePtr mkNilableString(core::LocOffsets loc) {
     return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
-vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
-    vector<unique_ptr<ast::Expression>> empty;
+} // namespace
+
+vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::TreePtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -42,7 +46,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
     }
 
     auto loc = send->loc;
-    auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
+    auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
     if (!sym || !sym->isSymbol(ctx)) {
         return empty;
     }
@@ -54,7 +58,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
 
     ast::Hash *rules = nullptr;
     if (!send->args.empty()) {
-        rules = ast::cast_tree<ast::Hash>(send->args.back().get());
+        rules = ast::cast_tree<ast::Hash>(send->args.back());
     }
 
     if (rules) {
@@ -63,7 +67,7 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
         }
     }
 
-    vector<unique_ptr<ast::Expression>> stats;
+    vector<ast::TreePtr> stats;
 
     // Compute the getters
 
@@ -86,21 +90,6 @@ vector<unique_ptr<ast::Expression>> MixinEncryptedProp::run(core::MutableContext
             loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
             mkNilableEncryptedValue(ctx, loc)));
         stats.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-    }
-
-    // Compute the Mutator
-    {
-        // Compute a setter
-        ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(
-            ast::MK::Sig(loc, ast::MK::Hash1(nameLoc, ast::MK::Symbol(loc, core::Names::arg0()), mkNilableString(loc)),
-                         mkNilableString(loc)));
-        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-
-        rhs.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
-            mkNilableEncryptedValue(ctx, loc)));
-        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
     return stats;

@@ -14,24 +14,24 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
-    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front().get());
+    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
     if (cnst == nullptr) {
         return false;
     }
     if (cnst->cnst != core::Names::Constants::Command()) {
         return false;
     }
-    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
     if (scope == nullptr) {
         return false;
     }
     if (scope->cnst != core::Names::Constants::Opus()) {
         return false;
     }
-    if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {
+    if (ast::isa_tree<ast::EmptyTree>(scope->scope)) {
         return true;
     }
-    auto *id = ast::cast_tree<ast::ConstantLit>(scope->scope.get());
+    auto *id = ast::cast_tree<ast::ConstantLit>(scope->scope);
     if (id == nullptr) {
         return false;
     }
@@ -51,7 +51,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     ast::MethodDef *call;
 
     for (auto &stat : klass->rhs) {
-        auto *mdef = ast::cast_tree<ast::MethodDef>(stat.get());
+        auto *mdef = ast::cast_tree<ast::MethodDef>(stat);
         if (mdef == nullptr) {
             continue;
         }
@@ -75,7 +75,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     // This could in principle be `resolver::TypeSyntax::isSig`, but we don't
     // want to depend on the internals of the resolver, or accidentally rely on
     // passes that happen between here and the resolver.
-    auto *sig = ast::cast_tree<ast::Send>(klass->rhs[i - 1].get());
+    auto *sig = ast::cast_tree<ast::Send>(klass->rhs[i - 1]);
     if (sig == nullptr || sig->fun != core::Names::sig()) {
         return;
     }
@@ -88,7 +88,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     auto selfCall = ast::MK::SyntheticMethod(call->loc, core::Loc(ctx.file, call->loc), call->name, std::move(newArgs),
                                              ast::MK::Untyped(call->loc));
-    selfCall->flags.isSelfMethod = true;
+    ast::cast_tree<ast::MethodDef>(selfCall)->flags.isSelfMethod = true;
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));

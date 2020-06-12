@@ -1380,3 +1380,24 @@ class Pathname < Object
   sig {returns(String)}
   def to_s(); end
 end
+
+module Kernel
+  # Creates a new
+  # [`Pathname`](https://docs.ruby-lang.org/en/2.6.0/Pathname.html) object from
+  # the given string, `path`, and returns pathname object.
+  #
+  # In order to use this constructor, you must first require the
+  # [`Pathname`](https://docs.ruby-lang.org/en/2.6.0/Pathname.html) standard
+  # library extension.
+  #
+  # ```ruby
+  # require 'pathname'
+  # Pathname("/home/zzak")
+  # #=> #<Pathname:/home/zzak>
+  # ```
+  #
+  # See also
+  # [`Pathname::new`](https://docs.ruby-lang.org/en/2.6.0/Pathname.html#method-c-new)
+  # for more information.
+  def Pathname(_); end
+end

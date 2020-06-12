@@ -23,7 +23,7 @@ namespace sorbet::rewriter {
  */
 class DefaultArgs final {
 public:
-    static void run(core::MutableContext ctx, ast::ClassDef *klass);
+    static ast::TreePtr run(core::MutableContext ctx, ast::TreePtr klass);
 
     DefaultArgs() = delete;
 };

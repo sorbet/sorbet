@@ -3,6 +3,8 @@
 # TODO enable on the fast path
 
 class OverrideBad < T::Struct
+  extend T::Sig
+
   # This error about declaring instance variables inside `initialize` is because
   # technically the DSL pass for prop defines this instance variable inside the
   # mangled initialize$1 method.

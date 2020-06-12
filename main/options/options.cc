@@ -51,10 +51,16 @@ const vector<PrintOptions> print_options({
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
+    {"symbol-table-proto", &Printers::SymbolTableProto, true},
+    {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
     {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
+    {"symbol-table-full-proto", &Printers::SymbolTableFullProto, true},
+    {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
     {"file-table-json", &Printers::FileTableJson, true},
+    {"file-table-proto", &Printers::FileTableProto, true},
+    {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
     {"missing-constants", &Printers::MissingConstants, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
@@ -107,10 +113,17 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         CFGRaw,
         SymbolTable,
         SymbolTableRaw,
+        SymbolTableProto,
+        SymbolTableMessagePack,
         SymbolTableJson,
         SymbolTableFull,
+        SymbolTableFullProto,
+        SymbolTableFullMessagePack,
+        SymbolTableFullJson,
         SymbolTableFullRaw,
         FileTableJson,
+        FileTableProto,
+        FileTableMessagePack,
         MissingConstants,
         PluginGeneratedCode,
         Autogen,
@@ -314,9 +327,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
-    options.add_options("advanced")("reserve-mem-kb",
-                                    "Preallocate the specified amount of memory for symbol+name tables",
-                                    cxxopts::value<u8>()->default_value(fmt::format("{}", empty.reserveMemKiB)));
+    options.add_options("advanced")(
+        "reserve-symbol-table-capacity", "Preallocate the specified number of entries in the symbol table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveSymbolTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-name-table-capacity", "Preallocate the specified number of entries in the name table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveNameTableCapacity)));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("remove-path-prefix",
                                     "Remove the provided path prefix from all printed paths. Defaults to the input "
@@ -809,7 +825,8 @@ void readOptions(Options &opts,
                 }
             }
         }
-        opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        opts.reserveNameTableCapacity = raw["reserve-name-table-capacity"].as<u4>();
+        opts.reserveSymbolTableCapacity = raw["reserve-symbol-table-capacity"].as<u4>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");

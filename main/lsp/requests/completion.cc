@@ -533,6 +533,12 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
                                          size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
+    // Completion with T::Sig::WithoutRuntime.sig / Sorbet::Private::Static.sig won't work because
+    // this code path relies on the DispatchResult's receiver type being the `self` of the module
+    // where the completion is happening, which isn't true for those two.  Luckily, this won't
+    // happen in practice, because SigSuggestion.cc short circuits if the method already has a sig.
+    ENFORCE(what == core::Symbols::sig());
+
     const auto &gs = typechecker.state();
     const auto markupKind = clientConfig.clientCompletionItemMarkupKind;
     const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
@@ -558,10 +564,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
     auto methodOwner = targetMethod.data(gs)->owner;
 
-    // TODO: Completion with `T::Sig::WithoutRuntime.sig` introduces a bug where we can complete signatures across
-    // class/module boundaries.
-    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs) ||
-          receiverSym == core::Symbols::T_Sig_WithoutRuntimeSingleton())) {
+    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
         // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
         return nullptr;
     }
@@ -672,7 +675,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     // If it needs to know the types / arity: what. Default to `what` if you don't know.
     auto what = maybeAlias.data(gs)->dealias(gs);
 
-    if (what == core::Symbols::sig() || what == core::Symbols::sigWithoutRuntime()) {
+    if (what == core::Symbols::sig()) {
         if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
             return item;
         }

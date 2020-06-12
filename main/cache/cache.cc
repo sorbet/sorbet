@@ -31,7 +31,7 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
 }
 
 void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
-                                   core::GlobalState &gs, vector<ast::ParsedFile> &indexed) {
+                                   core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     if (kvstore == nullptr) {
         return;
     }
@@ -40,7 +40,7 @@ void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const opti
     auto wroteGlobalState = payload::retainGlobalState(gs, opts, ownedKvstore);
     if (wroteGlobalState) {
         // Only write changes to disk if GlobalState changed since the last time.
-        pipeline::cacheTreesAndFiles(gs, indexed, ownedKvstore);
+        pipeline::cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
         prodCounterInc("cache.committed");
     } else {

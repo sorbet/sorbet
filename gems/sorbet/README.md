@@ -71,6 +71,12 @@ behavior:
   Pin the sorbet-typed cache to a specific revision. (The default is to fetch
   and use the latest `master` commit.)
 
+- `SRB_SKIP_GEM_RBIS`
+
+  Disables the loading of
+  [RBI files exported from gems](https://sorbet.org/docs/rbi#rbis-within-gems).
+  This allows the LSP mode to work properly even when some gems in the Gemfile
+  are exporting RBI files.
 
 ## Running locally
 

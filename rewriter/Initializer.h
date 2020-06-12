@@ -32,7 +32,7 @@ namespace sorbet::rewriter {
 
 class Initializer final {
 public:
-    static void run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::Expression *prevStat);
+    static void run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::TreePtr *prevStat);
 
     Initializer() = delete;
 };

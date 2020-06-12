@@ -22,7 +22,7 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         return;
     }
     auto *arg = send->args[0].get();
-    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+    auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
     // Insert extra {}'s when a hash literal does not have them.
     // Example: `T.type_alias(a: Integer,  b: String)`
     bool wrapHash = hash != nullptr && core::Loc(ctx.file, hash->loc).source(ctx)[0] != '{';

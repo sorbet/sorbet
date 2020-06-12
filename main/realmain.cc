@@ -443,9 +443,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    if (opts.reserveMemKiB > 0) {
-        gs->reserveMemory(opts.reserveMemKiB);
-    }
+    gs->preallocateTables(opts.reserveSymbolTableCapacity, opts.reserveNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }
@@ -515,7 +513,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, indexed);
+        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
@@ -524,10 +522,11 @@ int realmain(int argc, char *argv[]) {
 #else
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+            gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
-            indexed = pipeline::name(*gs, move(indexed), opts);
+            indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
             autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);

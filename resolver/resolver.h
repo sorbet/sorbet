@@ -16,7 +16,7 @@ public:
     /** Only runs tree passes, used for incremental changes that do not affect global state. Assumes that `run` was
      * called on a tree that contains same definitions before (LSP uses heuristics that should only have false negatives
      * to find this) */
-    static std::vector<ast::ParsedFile> runTreePasses(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
+    static ast::ParsedFilesOrCancelled runTreePasses(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
@@ -26,9 +26,9 @@ private:
     static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeSymbols(core::GlobalState &gs);
     static void computeLinearization(core::GlobalState &gs);
-    static std::vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
-    static std::vector<ast::ParsedFile> resolveMixesInClassMethods(core::GlobalState &gs,
-                                                                   std::vector<ast::ParsedFile> trees);
+    static ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
+    static ast::ParsedFilesOrCancelled resolveMixesInClassMethods(core::GlobalState &gs,
+                                                                  std::vector<ast::ParsedFile> trees);
     static void sanityCheck(core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 };
 

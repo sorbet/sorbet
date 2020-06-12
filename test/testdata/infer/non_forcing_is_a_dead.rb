@@ -1,6 +1,8 @@
 # typed: true
 
 class MyStruct
+  extend T::Sig
+
   sig {returns(Integer)}
   def foo
     # We know this check is false, but we can't say so, because similar checks

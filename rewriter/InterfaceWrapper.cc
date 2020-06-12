@@ -11,7 +11,7 @@
 using namespace std;
 
 namespace sorbet::rewriter {
-unique_ptr<ast::Expression> InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
+ast::TreePtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
         return nullptr;
     }
@@ -20,7 +20,7 @@ unique_ptr<ast::Expression> InterfaceWrapper::run(core::MutableContext ctx, ast:
         return nullptr;
     }
 
-    if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv.get())) {
+    if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv)) {
         if (auto e = ctx.beginError(send->recv->loc, core::errors::Rewriter::BadWrapInstance)) {
             e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
         }

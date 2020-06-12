@@ -74,7 +74,11 @@ class Object < BasicObject
   # # does not meet condition, drop value
   # 2.yield_self.detect(&:odd?)            # => nil
   # ```
-  sig {params(blk: T.proc.params(arg: T.untyped).returns(T.untyped)).returns(T.untyped)}
+  sig do
+    type_parameters(:X)
+      .params(blk: T.proc.params(arg: T.untyped).returns(T.type_parameter(:X)))
+      .returns(T.type_parameter(:X))
+  end
   def yield_self(&blk); end
 
   ### `then` is just an alias of `yield_self`. Separately def'd here for easier IDE integration
@@ -106,6 +110,10 @@ class Object < BasicObject
   # # does not meet condition, drop value
   # 2.yield_self.detect(&:odd?)            # => nil
   # ```
-  sig {params(blk: T.proc.params(arg: T.untyped).returns(T.untyped)).returns(T.untyped)}
+  sig do
+    type_parameters(:X)
+      .params(blk: T.proc.params(arg: T.untyped).returns(T.type_parameter(:X)))
+      .returns(T.type_parameter(:X))
+  end
   def then(&blk); end
 end

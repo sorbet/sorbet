@@ -1,5 +1,5 @@
 // has to go first because it violates our poisons
-#include "msgpack.hpp"
+#include "mpack/mpack.h"
 
 #include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
@@ -35,7 +35,7 @@ class AutogenWalk {
     vector<ast::Send *> ignoring;
     vector<ScopeType> scopeTypes;
 
-    UnorderedMap<ast::Expression *, ReferenceRef> refMap;
+    UnorderedMap<void *, ReferenceRef> refMap;
 
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
@@ -50,8 +50,9 @@ class AutogenWalk {
     vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
         vector<core::NameRef> out;
         while (cnst != nullptr && cnst->original != nullptr) {
-            out.emplace_back(cnst->original->cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
+            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+            out.emplace_back(original.cnst);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         reverse(out.begin(), out.end());
         return out;
@@ -67,9 +68,11 @@ public:
         nesting.emplace_back(def.id);
     }
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
-            return original;
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
         }
         scopeTypes.emplace_back(ScopeType::Class);
 
@@ -77,26 +80,26 @@ public:
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        if (original->kind == ast::ClassDef::Kind::Class) {
+        if (original.kind == ast::ClassDef::Kind::Class) {
             def.type = Definition::Type::Class;
         } else {
             def.type = Definition::Type::Module;
         }
-        def.is_empty = absl::c_all_of(original->rhs,
-                                      [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
-        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
+        def.is_empty =
+            absl::c_all_of(original.rhs, [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
+        def.defines_behavior = sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
-        original->name = ast::TreeMap::apply(ctx, *this, move(original->name));
-        auto it = refMap.find(original->name.get());
+        original.name = ast::TreeMap::apply(ctx, *this, move(original.name));
+        auto it = refMap.find(original.name.get());
         ENFORCE(it != refMap.end());
         def.defining_ref = it->second;
         refs[it->second.id()].is_defining_ref = true;
-        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original->loc);
+        refs[it->second.id()].definitionLoc = core::Loc(ctx.file, original.loc);
 
-        auto ait = original->ancestors.begin();
-        if (original->kind == ast::ClassDef::Kind::Class && !original->ancestors.empty()) {
+        auto ait = original.ancestors.begin();
+        if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;
@@ -104,15 +107,15 @@ public:
         // Then push a scope
         nesting.emplace_back(def.id);
 
-        for (; ait != original->ancestors.end(); ++ait) {
+        for (; ait != original.ancestors.end(); ++ait) {
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
         }
-        for (auto &ancst : original->singletonAncestors) {
+        for (auto &ancst : original.singletonAncestors) {
             ancst = ast::TreeMap::apply(ctx, *this, move(ancst));
         }
 
-        for (auto &ancst : original->ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+        for (auto &ancst : original.ancestors) {
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst);
             if (cnst == nullptr || cnst->original == nullptr) {
                 // Don't include synthetic ancestors
                 continue;
@@ -122,40 +125,43 @@ public:
             if (it == refMap.end()) {
                 continue;
             }
-            if (original->kind == ast::ClassDef::Kind::Class && &ancst == &original->ancestors.front()) {
+            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
                 // superclass
                 def.parent_ref = it->second;
             }
             refs[it->second.id()].parent_of = def.id;
         }
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        if (!ast::isa_tree<ast::ConstantLit>(original->name.get())) {
-            return original;
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
         }
 
         nesting.pop_back();
         scopeTypes.pop_back();
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Block> preTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr block) {
         scopeTypes.emplace_back(ScopeType::Block);
         return block;
     }
 
-    unique_ptr<ast::Expression> postTransformBlock(core::Context ctx, unique_ptr<ast::Block> block) {
+    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr block) {
         scopeTypes.pop_back();
         return block;
     }
 
     bool isCBaseConstant(ast::ConstantLit *cnst) {
         while (cnst != nullptr && cnst->original != nullptr) {
-            cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
+            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         if (cnst && cnst->symbol == core::Symbols::root()) {
             return true;
@@ -163,17 +169,19 @@ public:
         return false;
     }
 
-    unique_ptr<ast::Expression> postTransformConstantLit(core::Context ctx, unique_ptr<ast::ConstantLit> original) {
+    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::ConstantLit>(tree);
+
         if (!ignoring.empty()) {
-            return original;
+            return tree;
         }
         if (original->original == nullptr) {
-            return original;
+            return tree;
         }
 
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
-        if (isCBaseConstant(original.get())) {
+        if (isCBaseConstant(original)) {
             ref.scope = nesting.front();
         } else {
             ref.nesting = nesting;
@@ -186,7 +194,7 @@ public:
         // This will get overridden if this loc is_defining_ref at the point
         // where we set that flag.
         ref.definitionLoc = core::Loc(ctx.file, original->loc);
-        ref.name = constantName(ctx, original.get());
+        ref.name = constantName(ctx, original);
         auto sym = original->symbol;
         if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = symbolName(ctx, sym);
@@ -199,39 +207,43 @@ public:
         if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
             ref.parentKind = ClassKind::Class;
         }
-        refMap[original.get()] = ref.id;
-        return original;
+        refMap[tree.get()] = ref.id;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::Context ctx, unique_ptr<ast::Assign> original) {
-        auto *lhs = ast::cast_tree<ast::ConstantLit>(original->lhs.get());
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::Assign>(tree);
+
+        auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
-            return original;
+            return tree;
         }
 
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
-        auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
+        auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
         if (rhs && rhs->symbol.exists() && !rhs->symbol.data(ctx)->isTypeAlias()) {
             def.type = Definition::Type::Alias;
-            ENFORCE(refMap.count(rhs));
-            def.aliased_ref = refMap[rhs];
+            ENFORCE(refMap.count(original.rhs.get()));
+            def.aliased_ref = refMap[original.rhs.get()];
         } else {
             def.type = Definition::Type::Casgn;
         }
-        ENFORCE(refMap.count(lhs));
-        auto &ref = refs[refMap[lhs].id()];
+        ENFORCE(refMap.count(original.lhs.get()));
+        auto &ref = refs[refMap[original.lhs.get()].id()];
         def.defining_ref = ref.id;
         ref.is_defining_ref = true;
-        ref.definitionLoc = core::Loc(ctx.file, original->loc);
+        ref.definitionLoc = core::Loc(ctx.file, original.loc);
 
         def.defines_behavior = true;
         def.is_empty = false;
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::Send>(tree);
+
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
         // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
         // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
@@ -239,21 +251,22 @@ public:
         if (original->fun == core::Names::keepForIde() ||
             (!inBlock && original->recv->isSelfReference() &&
              (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
-            ignoring.emplace_back(original.get());
+            ignoring.emplace_back(original);
         }
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->args.size() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original->args.front().get());
+            auto *lit = ast::cast_tree<ast::Literal>(original->args.front());
             if (lit && lit->isString(ctx)) {
                 requires.emplace_back(lit->asString(ctx));
             }
         }
-        return original;
+        return tree;
     }
-    unique_ptr<ast::Send> postTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        if (!ignoring.empty() && ignoring.back() == original.get()) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto *original = ast::cast_tree<ast::Send>(tree);
+        if (!ignoring.empty() && ignoring.back() == original) {
             ignoring.pop_back();
         }
-        return original;
+        return tree;
     }
 
     ParsedFile parsedFile() {
@@ -379,63 +392,58 @@ private:
         } else {
             id = it->second;
         }
-        packer.pack_uint32(id);
+        mpack_write_u32(&writer, id);
     }
 
     void packNames(vector<core::NameRef> &names) {
-        packer.pack_array(names.size());
+        mpack_start_array(&writer, names.size());
         for (auto nm : names) {
             packName(nm);
         }
+        mpack_finish_array(&writer);
     }
 
     void packString(string_view str) {
-        packer.pack_str(str.size());
-        packer.pack_str_body(str.data(), str.size());
-    }
-
-    void packString(msgpack::packer<msgpack::sbuffer> &packer, string_view str) {
-        packer.pack_str(str.size());
-        packer.pack_str_body(str.data(), str.size());
+        mpack_write_str(&writer, str.data(), str.size());
     }
 
     void packBool(bool b) {
         if (b) {
-            packer.pack_true();
+            mpack_write_true(&writer);
         } else {
-            packer.pack_false();
+            mpack_write_false(&writer);
         }
     }
 
     void packReferenceRef(ReferenceRef ref) {
         if (!ref.exists()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
-            packer.pack_uint16(ref.id());
+            mpack_write_u16(&writer, ref.id());
         }
     }
 
     void packDefinitionnRef(DefinitionRef ref) {
         if (!ref.exists()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
-            packer.pack_uint16(ref.id());
+            mpack_write_u16(&writer, ref.id());
         }
     }
 
     void packRange(u4 begin, u4 end) {
-        packer.pack_uint64(((u8)begin << 32) | end);
+        mpack_write_u64(&writer, ((u8)begin << 32) | end);
     }
 
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
-        packer.pack_array(def_attrs[version].size());
+        mpack_start_array(&writer, def_attrs[version].size());
 
         // raw_full_name
         auto raw_full_name = pf.showFullName(ctx, def.id);
         packNames(raw_full_name);
 
         // type
-        packer.pack_uint8(static_cast<u8>(def.type));
+        mpack_write_u8(&writer, static_cast<u8>(def.type));
 
         // defines_behavior
         packBool(def.defines_behavior);
@@ -451,10 +459,11 @@ private:
 
         // defining_ref
         packReferenceRef(def.defining_ref);
+        mpack_finish_array(&writer);
     }
 
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref) {
-        packer.pack_array(ref_attrs[version].size());
+        mpack_start_array(&writer, ref_attrs[version].size());
 
         // scope
         packDefinitionnRef(ref.scope.id());
@@ -463,10 +472,11 @@ private:
         packNames(ref.name);
 
         // nesting
-        packer.pack_array(ref.nesting.size());
+        mpack_start_array(&writer, ref.nesting.size());
         for (auto &scope : ref.nesting) {
             packDefinitionnRef(scope.id());
         }
+        mpack_finish_array(&writer);
 
         // expression_range
         auto expression_range = ref.definitionLoc.position(ctx);
@@ -476,7 +486,7 @@ private:
 
         // resolved
         if (ref.resolved.empty()) {
-            packer.pack_nil();
+            mpack_write_nil(&writer);
         } else {
             packNames(ref.resolved);
         }
@@ -486,6 +496,7 @@ private:
 
         // parent_of
         packDefinitionnRef(ref.parent_of);
+        mpack_finish_array(&writer);
     }
 
     static int assert_valid_version(int version) {
@@ -502,37 +513,50 @@ public:
     // symbols[0..3] are reserved for the Type aliases
     MsgpackWriter(int version)
         : version(assert_valid_version(version)), ref_attrs(ref_attr_map.at(version)),
-          def_attrs(def_attr_map.at(version)), packer(payload), symbols(4) {}
+          def_attrs(def_attr_map.at(version)), symbols(4) {}
 
     string pack(core::Context ctx, ParsedFile &pf) {
-        packer.pack_array(6);
+        char *data;
+        size_t size;
+        mpack_writer_init_growable(&writer, &data, &size);
+        mpack_start_array(&writer, 6);
 
-        packer.pack_true(); // did_resolution
+        mpack_write_true(&writer); // did_resolution
         packString(pf.path);
-        packer.pack_uint32(pf.cksum);
+        mpack_write_u32(&writer, pf.cksum);
 
         // requires
-        packer.pack_array(pf.requires.size());
+        mpack_start_array(&writer, pf.requires.size());
         for (auto nm : pf.requires) {
             packString(nm.data(ctx)->show(ctx));
         }
+        mpack_finish_array(&writer);
 
-        packer.pack_array(pf.defs.size());
+        mpack_start_array(&writer, pf.defs.size());
         for (auto &def : pf.defs) {
             packDefinition(ctx, pf, def);
         }
-        packer.pack_array(pf.refs.size());
+
+        mpack_finish_array(&writer);
+        mpack_start_array(&writer, pf.refs.size());
         for (auto &ref : pf.refs) {
             packReference(ctx, pf, ref);
         }
+        mpack_finish_array(&writer);
+        mpack_finish_array(&writer);
 
-        msgpack::sbuffer out;
-        msgpack::packer<msgpack::sbuffer> header(out);
-        header.pack_map(5);
+        mpack_writer_destroy(&writer);
+        auto body = string(data, size);
+        MPACK_FREE(data);
 
-        packString(header, "symbols");
+        // write header
+        mpack_writer_init_growable(&writer, &data, &size);
+
+        mpack_start_map(&writer, 5);
+
+        packString("symbols");
         int i = -1;
-        header.pack_array(symbols.size());
+        mpack_start_array(&writer, symbols.size());
         for (auto sym : symbols) {
             ++i;
             string str;
@@ -552,35 +576,44 @@ public:
                 default:
                     str = sym.data(ctx)->show(ctx);
             }
-            packString(header, str);
+            packString(str);
         }
+        mpack_finish_array(&writer);
 
-        packString(header, "ref_count");
-        header.pack_uint32(pf.refs.size());
-        packString(header, "def_count");
-        header.pack_uint32(pf.defs.size());
+        packString("ref_count");
+        mpack_write_u32(&writer, pf.refs.size());
+        packString("def_count");
+        mpack_write_u32(&writer, pf.defs.size());
 
-        packString(header, "ref_attrs");
-        header.pack_array(ref_attrs.size());
+        packString("ref_attrs");
+        mpack_start_array(&writer, ref_attrs.size());
         for (auto attr : ref_attrs) {
-            packString(header, attr);
+            packString(attr);
         }
+        mpack_finish_array(&writer);
 
-        packString(header, "def_attrs");
-        header.pack_array(def_attrs.size());
+        packString("def_attrs");
+        mpack_start_array(&writer, def_attrs.size());
         for (auto attr : def_attrs) {
-            packString(header, attr);
+            packString(attr);
         }
-        out.write(payload.data(), payload.size());
-        return string(out.data(), out.size());
+        mpack_finish_array(&writer);
+
+        mpack_write_object_bytes(&writer, body.data(), body.size());
+
+        mpack_writer_destroy(&writer);
+
+        auto ret = string(data, size);
+        MPACK_FREE(data);
+
+        return ret;
     }
 
 private:
     int version;
     const vector<string> &ref_attrs;
     const vector<string> &def_attrs;
-    msgpack::sbuffer payload;
-    msgpack::packer<msgpack::sbuffer> packer;
+    mpack_writer_t writer;
 
     vector<core::NameRef> symbols;
     UnorderedMap<core::NameRef, u4> symbolIds;

@@ -219,6 +219,25 @@
 # %i[test many keys].map(&{test: 1})  #=> [1, nil, nil]
 # ```
 class Proc < Object
+  # Creates a new `Proc` object, bound to the current context. `Proc::new` may
+  # be called without a block only within a method with an attached block, in
+  # which case that block is converted to the `Proc` object.
+  #
+  # ```ruby
+  # def proc_from
+  #   Proc.new
+  # end
+  # proc = proc_from { "hello" }
+  # proc.call   #=> "hello"
+  # ```
+  def self.new(*_); end
+
+  # Invokes the block with `obj` as the proc's parameter like
+  # [`Proc#call`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-call).
+  # This allows a proc object to be the target of a `when` clause in a case
+  # statement.
+  def ===(*_); end
+
   # Returns the number of mandatory arguments. If the block is declared to take
   # no arguments, returns 0. If the block is known to take exactly n arguments,
   # returns n. If the block has optional arguments, returns -n-1, where n is the
@@ -561,4 +580,36 @@ class Proc < Object
   # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-to_s)
   sig {returns(String)}
   def inspect(); end
+
+  # Invokes the block, setting the block's parameters to the values in *params*
+  # using something close to method calling semantics. Returns the value of the
+  # last expression evaluated in the block.
+  #
+  # ```ruby
+  # a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
+  # a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
+  # a_proc[9, 1, 2, 3]         #=> [9, 18, 27]
+  # a_proc.(9, 1, 2, 3)        #=> [9, 18, 27]
+  # a_proc.yield(9, 1, 2, 3)   #=> [9, 18, 27]
+  # ```
+  #
+  # Note that `prc.()` invokes `prc.call()` with the parameters given. It's
+  # syntactic sugar to hide "call".
+  #
+  # For procs created using `lambda` or `->()` an error is generated if the
+  # wrong number of parameters are passed to the proc. For procs created using
+  # `Proc.new` or `Kernel.proc`, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
+  #
+  # ```ruby
+  # a_proc = proc {|a,b| [a,b] }
+  # a_proc.call(1)   #=> [1, nil]
+  #
+  # a_proc = lambda {|a,b| [a,b] }
+  # a_proc.call(1)   # ArgumentError: wrong number of arguments (given 1, expected 2)
+  # ```
+  #
+  # See also
+  # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.6.0/Proc.html#method-i-lambda-3F).
+  def yield(*_); end
 end

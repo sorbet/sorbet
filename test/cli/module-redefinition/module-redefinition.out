@@ -1,10 +1,10 @@
 test/cli/module-redefinition/module-redefinition-3.rb:3: `A` was previously defined as a `class` https://srb.help/4012
      3 |module A
         ^^^^^^^^
-    test/cli/module-redefinition/module-redefinition-2.rb:3: Previous definition
+    test/cli/module-redefinition/module-redefinition-1.rb:3: Previous definition
      3 |class A
         ^^^^^^^
-    test/cli/module-redefinition/module-redefinition-1.rb:3: Previous definition
+    test/cli/module-redefinition/module-redefinition-2.rb:3: Previous definition
      3 |class A
         ^^^^^^^
 Errors: 1

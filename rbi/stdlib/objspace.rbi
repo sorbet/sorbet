@@ -46,6 +46,45 @@ module ObjectSpace
   sig {params(object_id: Integer).returns(T.untyped)}
   def self._id2ref(object_id); end
 
+  # Counts all objects grouped by type.
+  #
+  # It returns a hash, such as:
+  #
+  # ```ruby
+  # {
+  #   :TOTAL=>10000,
+  #   :FREE=>3011,
+  #   :T_OBJECT=>6,
+  #   :T_CLASS=>404,
+  #   # ...
+  # }
+  # ```
+  #
+  # The contents of the returned hash are implementation specific. It may be
+  # changed in future.
+  #
+  # The keys starting with `:T_` means live objects. For example, `:T_ARRAY` is
+  # the number of arrays. `:FREE` means object slots which is not used now.
+  # `:TOTAL` means sum of above.
+  #
+  # If the optional argument `result_hash` is given, it is overwritten and
+  # returned. This is intended to avoid probe effect.
+  #
+  # ```ruby
+  # h = {}
+  # ObjectSpace.count_objects(h)
+  # puts h
+  # # => { :TOTAL=>10000, :T_CLASS=>158280, :T_MODULE=>20672, :T_STRING=>527249 }
+  # ```
+  #
+  # This method is only expected to work on C Ruby.
+  def self.count_objects(*_); end
+
+  # Adds *aProc* as a finalizer, to be called after *obj* was destroyed. The
+  # object ID of the *obj* will be passed as an argument to *aProc*. If *aProc*
+  # is a lambda or method, make sure it can be called with a single argument.
+  def self.define_finalizer(*_); end
+
   # Calls the block once for each living, nonimmediate object in this Ruby
   # process. If *module* is specified, calls the block for only those classes or
   # modules that match (or are a subclass of) *module*. Returns the number of
@@ -79,6 +118,41 @@ module ObjectSpace
   sig {params(mod: Module, blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
   def self.each_object(mod=BasicObject, &blk)
   end
+
+  # Initiates garbage collection, unless manually disabled.
+  #
+  # This method is defined with keyword arguments that default to true:
+  #
+  # ```ruby
+  # def GC.start(full_mark: true, immediate_sweep: true); end
+  # ```
+  #
+  # Use full\_mark: false to perform a minor
+  # [`GC`](https://docs.ruby-lang.org/en/2.6.0/GC.html). Use immediate\_sweep:
+  # false to defer sweeping (use lazy sweep).
+  #
+  # Note: These keyword arguments are implementation and version dependent. They
+  # are not guaranteed to be future-compatible, and may be ignored if the
+  # underlying implementation does not support them.
+  def self.garbage_collect(*_); end
+
+  # Removes all finalizers for *obj*.
+  def self.undefine_finalizer(_); end
+
+  # Starts tracing object allocations.
+  def self.trace_object_allocations_start; end
+
+  # Stop tracing object allocations.
+  #
+  # Note that if
+  # [`::trace_object_allocations_start`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-trace_object_allocations_start)
+  # is called n-times, then tracing will stop after calling
+  # [`::trace_object_allocations_stop`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-trace_object_allocations_stop)
+  # n-times.
+  def self.trace_object_allocations_stop; end
+
+  # Clear recorded tracing information.
+  def self.trace_object_allocations_clear; end
 end
 
 # An
@@ -94,4 +168,46 @@ class ObjectSpace::WeakMap < Object
 
   extend T::Generic
   Elem = type_member(:out)
+
+  # Retrieves a weakly referenced object with the given key
+  def [](_); end
+
+  # Creates a weak reference from the given key to the given value
+  def []=(_, _); end
+
+  # Iterates over keys and objects in a weakly referenced object
+  def each; end
+
+  # Iterates over keys and objects in a weakly referenced object
+  def each_key; end
+
+  # Iterates over keys and objects in a weakly referenced object
+  def each_pair; end
+
+  # Iterates over keys and objects in a weakly referenced object
+  def each_value; end
+
+  # Returns `true` if `key` is registered
+  def include?(_); end
+
+  def inspect; end
+
+  # Returns `true` if `key` is registered
+  def key?(_); end
+
+  # Iterates over keys and objects in a weakly referenced object
+  def keys; end
+
+  # Returns the number of referenced objects
+  def length; end
+
+  # Returns `true` if `key` is registered
+  def member?(_); end
+
+  # Returns the number of referenced objects
+  def size; end
+
+  # Iterates over values and objects in a weakly referenced object
+  def values; end
+
 end

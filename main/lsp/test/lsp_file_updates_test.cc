@@ -21,7 +21,7 @@ unique_ptr<core::FileHash> getFileHash() {
 }
 
 ast::ParsedFile getParsedFile(core::FileRef fref) {
-    auto lit = make_unique<ast::Literal>(core::LocOffsets{0, 1}, core::Types::Integer());
+    auto lit = ast::make_tree<ast::Literal>(core::LocOffsets{0, 1}, core::Types::Integer());
     return ast::ParsedFile{move(lit), fref};
 }
 

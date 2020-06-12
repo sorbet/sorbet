@@ -632,6 +632,9 @@ tools/scripts/update_testdata_exp.sh test/testdata/cfg/next.rb
 
 # Only update the `*.out` files in `test/cli`
 bazel test //test/cli:update
+
+# Update the `*.exp` files in `gems/sorbet/test/hidden-method-finder`
+gems/sorbet/test/hidden-method-finder/update_hidden_methods_exp.sh
 ```
 
 

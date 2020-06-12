@@ -74,6 +74,7 @@ NameDef names[] = {
     {"exceptionClassTemp", "<exceptionClassTemp>"},
     {"isaCheckTemp", "<isaCheckTemp>"},
     {"keepForCfgTemp", "<keepForCfgTemp>"},
+    {"retryTemp", "<retryTemp>"},
     {"throwAwayTemp", "<throwAwayTemp>"},
     {"castTemp", "<castTemp>"},
     {"finalReturn", "<finalReturn>"},
@@ -196,12 +197,8 @@ NameDef names[] = {
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Document", "Document", true},
-    {"Mutator", "Mutator", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
-    {"HashMutator", "HashMutator", true},
-    {"ArrayMutator", "ArrayMutator", true},
-    {"DocumentMutator", "DocumentMutator", true},
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
@@ -251,14 +248,6 @@ NameDef names[] = {
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
     {"Enum", "Enum", true},
-
-    {"Google", "Google", true},
-    {"Protobuf", "Protobuf", true},
-    {"DescriptorPool", "DescriptorPool", true},
-    {"generatedPool", "generated_pool"},
-    {"lookup"},
-    {"msgclass"},
-    {"enummodule"},
 
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
@@ -330,6 +319,7 @@ NameDef names[] = {
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
     {"keepForCfg", "<keep-for-cfg>"},
+    {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
 
@@ -363,6 +353,7 @@ NameDef names[] = {
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
+    {"blockBreak", "<block-break>"},
     {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
 

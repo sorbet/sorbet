@@ -52,8 +52,12 @@ Usage:
       --web-trace-file file     Web trace file. For use with chrome
                                 about://tracing (default: "")
       --debug-log-file file     Path to debug log file (default: "")
-      --reserve-mem-kb arg      Preallocate the specified amount of memory
-                                for symbol+name tables (default: 0)
+      --reserve-symbol-table-capacity arg
+                                Preallocate the specified number of entries
+                                in the symbol table (default: 0)
+      --reserve-name-table-capacity arg
+                                Preallocate the specified number of entries
+                                in the name table (default: 0)
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
       --remove-path-prefix prefix
                                 Remove the provided path prefix from all
@@ -145,10 +149,13 @@ Usage:
                                 resolve-tree, resolve-tree-raw, flatten-tree,
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
                                 symbol-table, symbol-table-raw, symbol-table-json,
+                                symbol-table-proto, symbol-table-messagepack,
                                 symbol-table-full, symbol-table-full-raw,
-                                symbol-table-full-json, file-table-json,
-                                missing-constants, plugin-generated-code, autogen,
-                                autogen-msgpack, autogen-classlist,
+                                symbol-table-full-json, symbol-table-full-proto,
+                                symbol-table-full-messagepack, file-table-json,
+                                file-table-proto, file-table-messagepack,
+                                missing-constants, plugin-generated-code,
+                                autogen, autogen-msgpack, autogen-classlist,
                                 autogen-autoloader, autogen-subclasses]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of

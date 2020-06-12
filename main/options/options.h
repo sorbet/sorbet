@@ -65,11 +65,17 @@ struct Printers {
     PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
     PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableProto;
+    PrinterConfig SymbolTableMessagePack;
     PrinterConfig SymbolTableJson;
     PrinterConfig SymbolTableFull;
     PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullProto;
+    PrinterConfig SymbolTableFullMessagePack;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
+    PrinterConfig FileTableProto;
+    PrinterConfig FileTableMessagePack;
     PrinterConfig MissingConstants;
     PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
@@ -157,7 +163,8 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
-    u4 reserveMemKiB = 0;
+    u4 reserveSymbolTableCapacity = 0;
+    u4 reserveNameTableCapacity = 0;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";

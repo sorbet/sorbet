@@ -160,6 +160,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE(id == Symbols::Sorbet_Private_Static());
+    id = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::Sorbet_Private_StaticSingleton());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(id == Symbols::StubModule());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
@@ -341,6 +343,18 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
     ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
 
+    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
+    { enterMethodArgumentSymbol(Loc::none(), id, Names::arg0()); }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg1());
+        arg.flags.isDefault = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -508,6 +522,24 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>#<retry>() => Void
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::retry());
+    method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    // Synthesize <Magic>#<blockBreak>(args: T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::blockBreak());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+        auto &argBlock = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        argBlock.flags.isBlock = true;
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
@@ -663,23 +695,17 @@ u4 nextPowerOfTwo(u4 v) {
     return v;
 }
 
-void GlobalState::reserveMemory(u4 kb) {
-    u8 allocated = (sizeof(Name) + sizeof(decltype(namesByHash)::value_type)) * names.capacity() +
-                   sizeof(Symbol) * symbols.capacity();
-    u8 want = 1024 * kb;
-    if (allocated > want) {
-        return;
-    }
-    u4 scale = nextPowerOfTwo(want / allocated);
-    symbols.reserve(symbols.capacity() * scale);
-    expandNames(scale);
+void GlobalState::preallocateTables(u4 symbolSize, u4 nameSize) {
+    u4 symbolSizeScaled = nextPowerOfTwo(symbolSize);
+    u4 nameSizeScaled = nextPowerOfTwo(nameSize);
+
+    // Note: reserve is a no-op if size is < current capacity.
+    symbols.reserve(symbolSizeScaled);
+    expandNames(nameSizeScaled);
     sanityCheck();
 
-    allocated = (sizeof(Name) + sizeof(decltype(namesByHash)::value_type)) * names.capacity() +
-                sizeof(Symbol) * symbols.capacity();
-
-    trace(absl::StrCat("Reserved ", allocated / 1024, "KiB of memory. symbols=", symbols.capacity(),
-                       " names=", names.capacity()));
+    trace(
+        absl::StrCat("Preallocated symbol and name tables. symbols=", symbols.capacity(), " names=", names.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
@@ -1020,7 +1046,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     ENFORCE(probeCount != hashTableSize, "Full table?");
 
     if (names.size() == names.capacity()) {
-        expandNames();
+        expandNames(names.capacity() * 2);
         hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
         bucketId = hs & mask; // look for place in the new size
@@ -1080,7 +1106,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
-        expandNames();
+        expandNames(names.capacity() * 2);
         hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
 
@@ -1173,13 +1199,14 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     }
 }
 
-void GlobalState::expandNames(int growBy) {
+void GlobalState::expandNames(u4 newSize) {
     sanityCheck();
-
-    names.reserve(names.capacity() * growBy);
-    vector<pair<unsigned int, unsigned int>> new_namesByHash(namesByHash.capacity() * growBy);
-    moveNames(namesByHash.data(), new_namesByHash.data(), namesByHash.size(), new_namesByHash.capacity());
-    namesByHash.swap(new_namesByHash);
+    if (newSize > names.capacity()) {
+        names.reserve(newSize);
+        vector<pair<unsigned int, unsigned int>> new_namesByHash(newSize * 2);
+        moveNames(namesByHash.data(), new_namesByHash.data(), namesByHash.size(), new_namesByHash.capacity());
+        namesByHash.swap(new_namesByHash);
+    }
 }
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
@@ -1237,7 +1264,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
-        expandNames();
+        expandNames(names.capacity() * 2);
         hashTableSize = namesByHash.size();
         mask = hashTableSize - 1;
 
@@ -1469,7 +1496,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->namesByHash.reserve(this->namesByHash.size());
     result->namesByHash = this->namesByHash;
 
-    result->symbols.reserve(this->symbols.size());
+    result->symbols.reserve(this->symbols.capacity());
     for (auto &sym : this->symbols) {
         result->symbols.emplace_back(sym.deepCopy(*result, keepId));
     }

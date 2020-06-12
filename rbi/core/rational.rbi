@@ -674,6 +674,18 @@ class Rational < Numeric
   sig {returns(String)}
   def inspect(); end
 
+  # Returns the absolute value of `rat`.
+  #
+  # ```ruby
+  # (1/2r).abs    #=> (1/2)
+  # (-1/2r).abs   #=> (1/2)
+  # ```
+  #
+  # [`Rational#magnitude`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-magnitude)
+  # is an alias for
+  # [`Rational#abs`](https://docs.ruby-lang.org/en/2.6.0/Rational.html#method-i-abs).
+  def magnitude; end
+
   sig do
     params(
         arg0: Integer,
@@ -700,6 +712,9 @@ class Rational < Numeric
   end
   def modulo(arg0); end
 
+  # Returns `true` if `rat` is less than 0.
+  def negative?; end
+
   # Returns the numerator.
   #
   # ```ruby
@@ -713,6 +728,9 @@ class Rational < Numeric
 
   sig {returns(Numeric)}
   def phase(); end
+
+  # Returns `true` if `rat` is greater than 0.
+  def positive?; end
 
   # Performs division.
   #

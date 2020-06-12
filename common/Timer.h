@@ -58,6 +58,8 @@ public:
 
     static microseconds clock_gettime_coarse();
 
+    void setEndTime();
+
 private:
     spdlog::logger &log;
     ConstExprStr name;
@@ -74,6 +76,7 @@ private:
     // on a bucket.
     std::unique_ptr<std::vector<int>> histogramBuckets;
     bool canceled = false;
+    microseconds endTime;
 };
 } // namespace sorbet
 

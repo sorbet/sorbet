@@ -207,10 +207,20 @@ module Marshal
   # Please see the overview for further details.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, IO),
         arg1: Proc,
     )
     .returns(Object)
   end
   def self.load(arg0, arg1=T.unsafe(nil)); end
+
+  # Returns the result of converting the serialized data in source into a Ruby
+  # object (possibly with associated subordinate objects). source may be either
+  # an instance of [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) or an
+  # object that responds to to\_str. If proc is specified, each object will be
+  # passed to the proc, as the object is being deserialized.
+  #
+  # Never pass untrusted data (including user supplied input) to this method.
+  # Please see the overview for further details.
+  def self.restore(*_); end
 end

@@ -1182,7 +1182,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1213,6 +1213,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -1277,7 +1281,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1315,6 +1319,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -1382,7 +1390,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1413,6 +1421,9 @@ ClassDef{
             }
           }
           args = [
+            Local{
+              localVariable = <U <self>>
+            }
           ]
         }
 
@@ -1463,7 +1474,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1501,6 +1512,9 @@ ClassDef{
             }
           }
           args = [
+            Local{
+              localVariable = <U <self>>
+            }
           ]
         }
 
@@ -1678,7 +1692,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1709,6 +1723,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -1773,7 +1791,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1811,6 +1829,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -1878,7 +1900,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -1919,6 +1941,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -1983,7 +2009,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2041,6 +2067,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2108,7 +2138,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2139,6 +2169,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2203,7 +2237,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2241,6 +2275,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2308,7 +2346,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2352,6 +2390,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2416,7 +2458,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2480,6 +2522,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2547,7 +2593,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2595,6 +2641,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2659,7 +2709,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2731,6 +2781,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2798,7 +2852,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2829,6 +2883,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2893,7 +2951,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -2924,6 +2982,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -2988,7 +3050,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3019,6 +3081,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3083,7 +3149,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3121,6 +3187,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3160,7 +3230,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3191,6 +3261,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3255,7 +3329,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3293,6 +3367,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3360,7 +3438,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3414,6 +3492,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3453,7 +3535,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3497,6 +3579,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3536,7 +3622,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3567,6 +3653,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3631,7 +3721,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3669,6 +3759,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3736,7 +3830,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3790,6 +3884,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3829,7 +3927,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3873,6 +3971,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -3912,7 +4014,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -3943,6 +4045,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4007,7 +4113,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4045,6 +4151,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4112,7 +4222,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4166,6 +4276,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4205,7 +4319,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4249,6 +4363,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4288,7 +4406,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4319,6 +4437,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4383,7 +4505,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4421,6 +4543,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4488,7 +4614,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4538,6 +4664,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4577,7 +4707,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4627,6 +4757,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4666,7 +4800,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4697,6 +4831,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4733,7 +4871,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4771,6 +4909,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4838,7 +4980,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4879,6 +5021,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -4915,7 +5061,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -4973,6 +5119,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -5227,211 +5377,6 @@ ClassDef{
           ]
         }
 
-        ClassDef{
-          kind = class
-          name = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U Mutator>>
-          }<<C <U <todo sym>>>>
-          ancestors = []
-          rhs = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Send{
-                    recv = Local{
-                      localVariable = <U <self>>
-                    }
-                    fun = <U params>
-                    block = nullptr
-                    args = [
-                      Hash{
-                        pairs = [
-                          [
-                            key = Literal{ value = :"arg0" }
-                            value = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <C <U Array>>
-                            }
-                          ]
-                        ]
-                      }
-                    ]
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U Array>>
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U array=><<C <U <todo sym>>>>
-              args = [UnresolvedIdent{
-                  kind = Local
-                  name = <U arg0>
-                }, BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = ConstantLit{
-                                  orig = nullptr
-                                  symbol = ::<root>
-                                }
-                                cnst = <C <U Chalk>>
-                              }
-                              cnst = <C <U ODM>>
-                            }
-                            cnst = <C <U Mutator>>
-                          }
-                          cnst = <C <U Private>>
-                        }
-                        cnst = <C <U ArrayMutator>>
-                      }
-                      fun = <U []>
-                      block = nullptr
-                      args = [
-                        Send{
-                          recv = ConstantLit{
-                            orig = nullptr
-                            symbol = ::T
-                          }
-                          fun = <U untyped>
-                          block = nullptr
-                          args = [
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U array><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"array=" }
-              ]
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"array" }
-              ]
-            }
-          ]
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -5495,231 +5440,6 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"t_array=" }
-          ]
-        }
-
-        ClassDef{
-          kind = class
-          name = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U Mutator>>
-          }<<C <U <todo sym>>>>
-          ancestors = []
-          rhs = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Send{
-                    recv = Local{
-                      localVariable = <U <self>>
-                    }
-                    fun = <U params>
-                    block = nullptr
-                    args = [
-                      Hash{
-                        pairs = [
-                          [
-                            key = Literal{ value = :"arg0" }
-                            value = Send{
-                              recv = UnresolvedConstantLit{
-                                scope = UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U T>>
-                                }
-                                cnst = <C <U Array>>
-                              }
-                              fun = <U []>
-                              block = nullptr
-                              args = [
-                                UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U String>>
-                                }
-                              ]
-                            }
-                          ]
-                        ]
-                      }
-                    ]
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U T>>
-                        }
-                        cnst = <C <U Array>>
-                      }
-                      fun = <U []>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U String>>
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U t_array=><<C <U <todo sym>>>>
-              args = [UnresolvedIdent{
-                  kind = Local
-                  name = <U arg0>
-                }, BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = ConstantLit{
-                                  orig = nullptr
-                                  symbol = ::<root>
-                                }
-                                cnst = <C <U Chalk>>
-                              }
-                              cnst = <C <U ODM>>
-                            }
-                            cnst = <C <U Mutator>>
-                          }
-                          cnst = <C <U Private>>
-                        }
-                        cnst = <C <U ArrayMutator>>
-                      }
-                      fun = <U []>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U String>>
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U t_array><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"t_array=" }
-              ]
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"t_array" }
-              ]
-            }
           ]
         }
 
@@ -5790,243 +5510,6 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :"hash_of=" }
-          ]
-        }
-
-        ClassDef{
-          kind = class
-          name = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U Mutator>>
-          }<<C <U <todo sym>>>>
-          ancestors = []
-          rhs = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Send{
-                    recv = Local{
-                      localVariable = <U <self>>
-                    }
-                    fun = <U params>
-                    block = nullptr
-                    args = [
-                      Hash{
-                        pairs = [
-                          [
-                            key = Literal{ value = :"arg0" }
-                            value = Send{
-                              recv = UnresolvedConstantLit{
-                                scope = UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U T>>
-                                }
-                                cnst = <C <U Hash>>
-                              }
-                              fun = <U []>
-                              block = nullptr
-                              args = [
-                                UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U Symbol>>
-                                }
-                                UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U String>>
-                                }
-                              ]
-                            }
-                          ]
-                        ]
-                      }
-                    ]
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U T>>
-                        }
-                        cnst = <C <U Hash>>
-                      }
-                      fun = <U []>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U Symbol>>
-                        }
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U String>>
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U hash_of=><<C <U <todo sym>>>>
-              args = [UnresolvedIdent{
-                  kind = Local
-                  name = <U arg0>
-                }, BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Sig::WithoutRuntime
-              }
-              fun = <U sig>
-              block = Block {
-                args = [
-                ]
-                body = Send{
-                  recv = Local{
-                    localVariable = <U <self>>
-                  }
-                  fun = <U returns>
-                  block = nullptr
-                  args = [
-                    Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = UnresolvedConstantLit{
-                            scope = UnresolvedConstantLit{
-                              scope = UnresolvedConstantLit{
-                                scope = ConstantLit{
-                                  orig = nullptr
-                                  symbol = ::<root>
-                                }
-                                cnst = <C <U Chalk>>
-                              }
-                              cnst = <C <U ODM>>
-                            }
-                            cnst = <C <U Mutator>>
-                          }
-                          cnst = <C <U Private>>
-                        }
-                        cnst = <C <U HashMutator>>
-                      }
-                      fun = <U []>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U Symbol>>
-                        }
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U String>>
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-              args = [
-              ]
-            }
-
-            MethodDef{
-              flags = {rewriter}
-              name = <U hash_of><<C <U <todo sym>>>>
-              args = [BlockArg{ expr = UnresolvedIdent{
-                  kind = Local
-                  name = <U <blk>>
-                } }]
-              rhs = Send{
-                recv = Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = ::T
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      orig = nullptr
-                      symbol = ::Kernel
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"hash_of=" }
-              ]
-            }
-
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::Sorbet::Private::Static
-              }
-              fun = <U keep_def>
-              block = nullptr
-              args = [
-                Local{
-                  localVariable = <U <self>>
-                }
-                Literal{ value = :"hash_of" }
-              ]
-            }
           ]
         }
 
@@ -6737,7 +6220,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -6768,6 +6251,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -6832,7 +6319,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -6870,6 +6357,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -6937,7 +6428,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -6968,6 +6459,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -7032,7 +6527,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -7070,6 +6565,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -7393,7 +6892,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -7424,6 +6923,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -7488,7 +6991,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -7526,6 +7029,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -7593,7 +7100,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -7624,6 +7131,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -7917,7 +7428,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -7948,6 +7459,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8140,7 +7655,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8181,6 +7696,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8217,7 +7736,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8273,6 +7792,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8309,7 +7832,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8367,6 +7890,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8406,7 +7933,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8494,6 +8021,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8533,7 +8064,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8574,6 +8105,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 
@@ -8610,7 +8145,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::T::Sig::WithoutRuntime
+            symbol = ::Sorbet::Private::Static
           }
           fun = <U sig>
           block = Block {
@@ -8666,6 +8201,10 @@ ClassDef{
             }
           }
           args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = ::T::Sig::WithoutRuntime
+            }
           ]
         }
 

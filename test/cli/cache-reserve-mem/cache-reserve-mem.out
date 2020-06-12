@@ -1,1 +1,1 @@
---reserve-mem-kb OK
+--reserve-symbol-table-capacity --reserve-name-table-capacity OK

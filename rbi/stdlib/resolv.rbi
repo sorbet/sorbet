@@ -41,42 +41,55 @@ class Resolv
 
   # Creates a new [`Resolv`](https://docs.ruby-lang.org/en/2.6.0/Resolv.html)
   # using `resolvers`.
-  def self.new(resolvers = _); end
+  sig { params(resolvers: [Hosts, DNS]).void }
+  def initialize(resolvers=[Hosts.new, DNS.new]); end
 
   # Iterates over all IP addresses for `name`.
-  def each_address(name); end
+  sig { params(name: String, block: T.proc.params(address: String).void).void }
+  def each_address(name, &block); end
 
   # Iterates over all hostnames for `address`.
-  def each_name(address); end
+  sig { params(address: String, block: T.proc.params(name: String).void).void }
+  def each_name(address, &block); end
 
   # Looks up the first IP address for `name`.
+  sig { params(name: String).returns(String) }
   def getaddress(name); end
 
   # Looks up all IP address for `name`.
+  sig { params(name: String).returns(T::Array[String]) }
   def getaddresses(name); end
 
   # Looks up the hostname of `address`.
+  sig { params(address: String).returns(String) }
   def getname(address); end
 
   # Looks up all hostnames for `address`.
+  sig { params(address: String).returns(T::Array[String]) }
   def getnames(address); end
 
   # Iterates over all IP addresses for `name`.
+  sig { params(name: String, block: T.proc.params(address: String).void).void }
   def self.each_address(name, &block); end
 
   # Iterates over all hostnames for `address`.
-  def self.each_name(address, &proc); end
+  sig { params(address: String, block: T.proc.params(name: String).void).void }
+  def self.each_name(address, &block); end
 
   # Looks up the first IP address for `name`.
+  sig { params(name: String).returns(String) }
   def self.getaddress(name); end
 
   # Looks up all IP address for `name`.
+  sig { params(name: String).returns(T::Array[String]) }
   def self.getaddresses(name); end
 
   # Looks up the hostname of `address`.
+  sig { params(address: String).returns(String) }
   def self.getname(address); end
 
   # Looks up all hostnames for `address`.
+  sig { params(address: String).returns(T::Array[String]) }
   def self.getnames(address); end
 end
 
@@ -130,10 +143,21 @@ class Resolv::DNS
   #                 :search => ['ruby-lang.org'],
   #                 :ndots => 1)
   # ```
-  def self.new(config_info = _); end
+  sig do
+    params(
+      config_info: T.any(
+        NilClass,
+        String,
+        { nameserver: T.any(String, T::Array[String]), search: T::Array[String], ndots: Integer },
+        { nameserver_port: T::Array[[String, Integer]], search: T::Array[String], ndots: Integer }
+      )
+    ).void
+  end
+  def initialize(config_info = nil); end
 
   # Closes the [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html)
   # resolver.
+  sig { void }
   def close; end
 
   # Iterates over all IP addresses for `name` retrieved from the
@@ -145,7 +169,8 @@ class Resolv::DNS
   # addresses will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
-  def each_address(name); end
+  sig { params(name: String, block: T.proc.params(address: String).void).void }
+  def each_address(name, &block); end
 
   # Iterates over all hostnames for `address` retrieved from the
   # [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html) resolver.
@@ -157,14 +182,22 @@ class Resolv::DNS
   # will be
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html)
   # instances.
-  def each_name(address); end
+  sig { params(address: String, block: T.proc.params(name: String).void).void }
+  def each_name(address, &block); end
 
   # Iterates over all `typeclass`
   # [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html) resources for
   # `name`. See
   # [`getresource`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html#method-i-getresource)
   # for argument details.
-  def each_resource(name, typeclass, &proc); end
+  sig do
+    params(
+      name: T.any(String, Resolv::DNS::Name),
+      typeclass: T.class_of(Resolv::DNS::Resource),
+      block: T.proc.params(resource: Resolv::DNS::Resource).void
+    ).void
+  end
+  def each_resource(name, typeclass, &block); end
 
   def fetch_resource(name, typeclass); end
 
@@ -177,6 +210,7 @@ class Resolv::DNS
   # address will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
+  sig { params(name: String).returns(String) }
   def getaddress(name); end
 
   # Gets all IP addresses for `name` from the
@@ -188,6 +222,7 @@ class Resolv::DNS
   # addresses will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
+  sig { params(name: String).returns(T::Array[String]) }
   def getaddresses(name); end
 
   # Gets the hostname for `address` from the
@@ -199,7 +234,8 @@ class Resolv::DNS
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Retrieved name
   # will be a
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html).
-  def getname(address); end
+  sig { params(address: String).returns(String) }
+  def gname(address); end
 
   # Gets all hostnames for `address` from the
   # [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html) resolver.
@@ -211,6 +247,7 @@ class Resolv::DNS
   # will be
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html)
   # instances.
+  sig { params(address: String).returns(T::Array[String]) }
   def getnames(address); end
 
   # Look up the `typeclass`
@@ -241,6 +278,12 @@ class Resolv::DNS
   # [`Resolv::DNS::Resource`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource.html)
   # instance, i.e.
   # [`Resolv::DNS::Resource::IN::A`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/A.html).
+  sig do
+    params(
+      name: T.any(String, Resolv::DNS::Name),
+      typeclass: T.class_of(Resolv::DNS::Resource)
+    ).returns(Resolv::DNS::Resource)
+  end
   def getresource(name, typeclass); end
 
   # Looks up all `typeclass`
@@ -248,6 +291,12 @@ class Resolv::DNS
   # `name`. See
   # [`getresource`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html#method-i-getresource)
   # for argument details.
+  sig do
+    params(
+      name: T.any(String, Resolv::DNS::Name),
+      typeclass: T.class_of(Resolv::DNS::Resource)
+    ).returns(T::Array[Resolv::DNS::Resource])
+  end
   def getresources(name, typeclass); end
 
   def lazy_initialize; end
@@ -268,7 +317,20 @@ class Resolv::DNS
   # ```ruby
   # dns.timeouts = 3
   # ```
+  sig { params(values: T.any(NilClass, Integer, T::Array[Integer])).void }
   def timeouts=(values); end
+
+  sig do
+    params(
+      config_info: T.any(
+        NilClass,
+        String,
+        { nameserver: T.any(String, T::Array[String]), search: T::Array[String], ndots: Integer },
+        { nameserver_port: T::Array[[String, Integer]], search: T::Array[String], ndots: Integer }
+      )
+    ).returns(Resolv::DNS)
+  end
+  def self.open(config_info = nil); end
 end
 
 class Resolv::DNS::Config
@@ -452,13 +514,15 @@ end
 # A representation of a
 # [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html) name.
 class Resolv::DNS::Name
-  def self.new(labels, absolute = _); end
+  sig { params(labels: T::Array[String], absolute: T.any(FalseClass, TrueClass)).void }
+  def initialize(labels, absolute=true); end
 
   def ==(other); end
 
   def [](i); end
 
   # True if this name is absolute.
+  sig { returns(T.any(FalseClass, TrueClass)) }
   def absolute?; end
 
   def eql?(other); end
@@ -482,6 +546,7 @@ class Resolv::DNS::Name
   # p Resolv::DNS::Name.create("x.y.z.").subdomain_of?(domain) #=> false
   # p Resolv::DNS::Name.create("w.z").subdomain_of?(domain) #=> false
   # ```
+  sig { params(other: Resolv::DNS::Name).returns(T.any(FalseClass, TrueClass)) }
   def subdomain_of?(other); end
 
   def to_a; end
@@ -507,6 +572,7 @@ class Resolv::DNS::Name
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
   # :   Creates a new
   #     [`Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html).
+  sig { params(arg: T.any(String, Resolv::DNS::Name)).returns(Resolv::DNS::Name) }
   def self.create(arg); end
 end
 
@@ -660,6 +726,7 @@ class Resolv::DNS::Resource < ::Resolv::DNS::Query
   # Remaining [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) To Live
   # for this
   # [`Resource`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource.html).
+  sig { returns(T.nilable(Integer)) }
   def ttl; end
 
   def self.decode_rdata(msg); end
@@ -682,12 +749,14 @@ class Resolv::DNS::Resource::DomainName < ::Resolv::DNS::Resource
   # Creates a new
   # [`DomainName`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/DomainName.html)
   # from `name`.
-  def self.new(name); end
+  sig { params(name: T.any(String, Resolv::DNS::Name)).void }
+  def initialize(name); end
 
   def encode_rdata(msg); end
 
   # The name of this
   # [`DomainName`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/DomainName.html).
+  sig { returns(T.any(String, Resolv::DNS::Name)) }
   def name; end
 
   def self.decode_rdata(msg); end
@@ -696,10 +765,12 @@ end
 # A generic resource abstract class.
 class Resolv::DNS::Resource::Generic < ::Resolv::DNS::Resource
   # Creates a new generic resource.
-  def self.new(data); end
+  sig { params(data: T.untyped).void }
+  def initialize(data); end
 
   # [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) for this generic
   # resource.
+  sig { returns(T.untyped) }
   def data; end
 
   def encode_rdata(msg); end
@@ -716,14 +787,17 @@ class Resolv::DNS::Resource::HINFO < ::Resolv::DNS::Resource
   # Creates a new
   # [`HINFO`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/HINFO.html)
   # running `os` on `cpu`.
-  def self.new(cpu, os); end
+  sig { params(cpu: String, os: String).void }
+  def initialize(cpu, os); end
 
   # CPU architecture for this resource.
+  sig { returns(String) }
   def cpu; end
 
   def encode_rdata(msg); end
 
   # Operating system for this resource.
+  sig { returns(String) }
   def os; end
 
   def self.decode_rdata(msg); end
@@ -744,11 +818,13 @@ class Resolv::DNS::Resource::IN::A < ::Resolv::DNS::Resource
   # Creates a new
   # [`A`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/A.html) for
   # `address`.
-  def self.new(address); end
+  sig { params(address: String).void }
+  def initialize(address); end
 
   # The [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html)
   # address for this
   # [`A`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/A.html).
+  sig { returns(Resolv::IPv4) }
   def address; end
 
   def encode_rdata(msg); end
@@ -765,11 +841,13 @@ class Resolv::DNS::Resource::IN::AAAA < ::Resolv::DNS::Resource
   # Creates a new
   # [`AAAA`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/AAAA.html)
   # for `address`.
-  def self.new(address); end
+  sig { params(address: String).void }
+  def initialize(address); end
 
   # The [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
   # address for this
   # [`AAAA`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/AAAA.html).
+  sig { returns(Resolv::IPv6) }
   def address; end
 
   def encode_rdata(msg); end
@@ -851,13 +929,22 @@ class Resolv::DNS::Resource::IN::SRV < ::Resolv::DNS::Resource
   # and
   # [`target`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/IN/SRV.html#attribute-i-target)
   # for `priority`, `weight`, +port and `target` respectively.
-  def self.new(priority, weight, port, target); end
+  sig do
+    params(
+      priority: T.any(Integer, String),
+      weight: T.any(Integer, String),
+      port: T.any(Integer, String),
+      target: T.any(String, Resolv::DNS::Name)
+    ).void
+  end
+  def initialize(priority, weight, port, target); end
 
   def encode_rdata(msg); end
 
   # The port on this target host of this service.
   #
   # The range is 0-65535.
+  sig { returns(Integer) }
   def port; end
 
   # The priority of this target host.
@@ -866,12 +953,14 @@ class Resolv::DNS::Resource::IN::SRV < ::Resolv::DNS::Resource
   # priority it can reach; target hosts with the same priority SHOULD be tried
   # in an order defined by the weight field. The range is 0-65535. Note that it
   # is not widely implemented and should be set to zero.
+  sig { returns(Integer) }
   def priority; end
 
   # The domain name of the target host.
   #
   # A target of "." means that the service is decidedly not available at this
   # domain.
+  sig { returns(Resolv::DNS::Name) }
   def target; end
 
   # A server selection mechanism.
@@ -882,6 +971,7 @@ class Resolv::DNS::Resource::IN::SRV < ::Resolv::DNS::Resource
   # administrators SHOULD use Weight 0 when there isn't any server selection to
   # do, to make the RR easier to read for humans (less noisy). Note that it is
   # not widely implemented and should be set to zero.
+  sig { returns(Integer) }
   def weight; end
 
   def self.decode_rdata(msg); end
@@ -899,9 +989,11 @@ class Resolv::DNS::Resource::IN::WKS < ::Resolv::DNS::Resource
 
   TypeValue = T.let(T.unsafe(nil), Integer)
 
-  def self.new(address, protocol, bitmap); end
+  sig { params(address: String, protocol: Integer, bitmap: String).void }
+  def initialize(address, protocol, bitmap); end
 
   # The host these services run on.
+  sig { returns(Resolv::IPv4) }
   def address; end
 
   # A bit map of enabled services on this host.
@@ -909,11 +1001,13 @@ class Resolv::DNS::Resource::IN::WKS < ::Resolv::DNS::Resource
   # If protocol is 6 (TCP) then the 26th bit corresponds to the SMTP service
   # (port 25). If this bit is set, then an SMTP server should be listening on
   # TCP port 25; if zero, SMTP service is not supported.
+  sig { returns(String) }
   def bitmap; end
 
   def encode_rdata(msg); end
 
   # IP protocol number for these services.
+  sig { returns(Integer) }
   def protocol; end
 
   def self.decode_rdata(msg); end
@@ -970,14 +1064,17 @@ end
 class Resolv::DNS::Resource::MINFO < ::Resolv::DNS::Resource
   TypeValue = T.let(T.unsafe(nil), Integer)
 
-  def self.new(rmailbx, emailbx); end
+  sig { params(rmailbx: String, emailbx: String).void }
+  def initialize(rmailbx, emailbx); end
 
   # Mailbox to use for error messages related to the mail list or mailbox.
+  sig { returns(String) }
   def emailbx; end
 
   def encode_rdata(msg); end
 
   # Domain name responsible for this mail list or mailbox.
+  sig { returns(String) }
   def rmailbx; end
 
   def self.decode_rdata(msg); end
@@ -990,16 +1087,19 @@ class Resolv::DNS::Resource::MX < ::Resolv::DNS::Resource
   # Creates a new
   # [`MX`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/MX.html)
   # record with `preference`, accepting mail at `exchange`.
-  def self.new(preference, exchange); end
+  sig { params(preference: Integer, exchange: String).void }
+  def initialize(preference, exchange); end
 
   def encode_rdata(msg); end
 
   # The host of this
   # [`MX`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/MX.html).
+  sig { returns(String) }
   def exchange; end
 
   # The preference for this
   # [`MX`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/MX.html).
+  sig { returns(Integer) }
   def preference; end
 
   def self.decode_rdata(msg); end
@@ -1023,33 +1123,51 @@ class Resolv::DNS::Resource::SOA < ::Resolv::DNS::Resource
   # Creates a new
   # [`SOA`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/SOA.html)
   # record. See the attr documentation for the details of each argument.
-  def self.new(mname, rname, serial, refresh, retry_, expire, minimum); end
+  sig do
+    params(
+      mname: String,
+      rname: String,
+      serial: Integer,
+      refresh: Integer,
+      retry_: Integer,
+      expire: Integer,
+      minimum: Integer
+    ).void
+  end
+  def initialize(mname, rname, serial, refresh, retry_, expire, minimum); end
 
   def encode_rdata(msg); end
 
   # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) in seconds that a
   # secondary name server is to use the data before refreshing from the primary
   # name server.
+  sig { returns(Integer) }
   def expire; end
 
   # The minimum number of seconds to be used for TTL values in RRs.
+  sig { returns(Integer) }
   def minimum; end
 
   # Name of the host where the master zone file for this zone resides.
+  sig { returns(String) }
   def mname; end
 
   # How often, in seconds, a secondary name server is to check for updates from
   # the primary name server.
+  sig { returns(Integer) }
   def refresh; end
 
   # How often, in seconds, a secondary name server is to retry after a failure
   # to check for a refresh.
+  sig { returns(Integer) }
   def retry; end
 
   # The person responsible for this domain name.
+  sig { returns(String) }
   def rname; end
 
   # The version number of the zone file.
+  sig { returns(Integer) }
   def serial; end
 
   def self.decode_rdata(msg); end
@@ -1059,9 +1177,11 @@ end
 class Resolv::DNS::Resource::TXT < ::Resolv::DNS::Resource
   TypeValue = T.let(T.unsafe(nil), Integer)
 
-  def self.new(first_string, *rest_strings); end
+  sig { params(first_string: String, rest_strings: String).void }
+  def initialize(first_string, *rest_strings); end
 
   # Returns the concatenated string from `strings`.
+  sig { returns(String) }
   def data; end
 
   def encode_rdata(msg); end
@@ -1070,6 +1190,7 @@ class Resolv::DNS::Resource::TXT < ::Resolv::DNS::Resource
   # Strings for this
   # [`TXT`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Resource/TXT.html)
   # record.
+  sig { returns(T::Array[String]) }
   def strings; end
 
   def self.decode_rdata(msg); end
@@ -1083,24 +1204,31 @@ class Resolv::Hosts
   # Creates a new
   # [`Resolv::Hosts`](https://docs.ruby-lang.org/en/2.6.0/Resolv/Hosts.html),
   # using `filename` for its data source.
-  def self.new(filename = _); end
+  sig { params(filename: String).void }
+  def initialize(filename = DefaultFileName); end
 
   # Iterates over all IP addresses for `name` retrieved from the hosts file.
-  def each_address(name, &proc); end
+  sig { params(name: String, block: T.proc.params(address: String).void).void }
+  def each_address(name, &block); end
 
   # Iterates over all hostnames for `address` retrieved from the hosts file.
-  def each_name(address, &proc); end
+  sig { params(address: String, block: T.proc.params(name: String).void).void }
+  def each_name(address, &block); end
 
   # Gets the IP address of `name` from the hosts file.
+  sig { params(name: String).returns(String) }
   def getaddress(name); end
 
   # Gets all IP addresses for `name` from the hosts file.
+  sig { params(name: String).returns(T::Array[String]) }
   def getaddresses(name); end
 
   # Gets the hostname of `address` from the hosts file.
+  sig { params(address: String).returns(String) }
   def getname(address); end
 
   # Gets all hostnames for `address` from the hosts file.
+  sig { params(address: String).returns(T::Array[String]) }
   def getnames(address); end
 
   def lazy_initialize; end
@@ -1116,12 +1244,14 @@ class Resolv::IPv4
   # must match.
   Regex256 = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(address); end
+  sig { params(address: String).void }
+  def initialize(address); end
 
   def ==(other); end
 
   # The raw [`IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html)
   # address as a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  sig { returns(String) }
   def address; end
 
   def eql?(other); end
@@ -1133,10 +1263,12 @@ class Resolv::IPv4
   # Turns this [`IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html)
   # address into a
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html).
+  sig { returns(Resolv::DNS::Name) }
   def to_name; end
 
   def to_s; end
 
+  sig { params(arg: T.any(String, Resolv::IPv4)).returns(Resolv::IPv4) }
   def self.create(arg); end
 end
 
@@ -1164,12 +1296,14 @@ class Resolv::IPv6
   # format a::b:w.x.y.z
   Regex_CompressedHex4Dec = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(address); end
+  sig { params(address: String).void }
+  def initialize(address); end
 
   def ==(other); end
 
   # The raw [`IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
   # address as a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  sig { returns(String) }
   def address; end
 
   def eql?(other); end
@@ -1181,6 +1315,7 @@ class Resolv::IPv6
   # Turns this [`IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
   # address into a
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html).
+  sig { returns(Resolv::DNS::Name) }
   def to_name; end
 
   def to_s; end
@@ -1192,21 +1327,58 @@ class Resolv::IPv6
   # :   returns `arg`.
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
   # :   `arg` must match one of the IPv6::Regex\* constants
+  sig { params(arg: T.any(String, Resolv::IPv6)).returns(Resolv::IPv6) }
   def self.create(arg); end
 end
 
-module Resolv::LOC; end
+module Resolv::LOC
+  sig do
+    params(
+      version: String,
+      ssize: T.any(String, Resolv::LOC::Size),
+      hprecision: T.any(String, Resolv::LOC::Size),
+      vprecision: T.any(String, Resolv::LOC::Size),
+      latitude: T.any(String, Resolv::LOC::Coord),
+      longitude: T.any(String, Resolv::LOC::Coord),
+      altitude: T.any(String, Resolv::LOC::Alt)
+    ).void
+  end
+  def initialize(version, ssize, hprecision, vprecision, latitude, longitude, altitude); end
+
+  sig { returns(String) }
+  def version; end
+
+  sig { returns(Resolv::LOC::Size) }
+  def ssize; end
+
+  sig { returns(Resolv::LOC::Size) }
+  def hprecision; end
+
+  sig { returns(Resolv::LOC::Size) }
+  def vprecision; end
+
+  sig { returns(Resolv::LOC::Coord) }
+  def latitude; end
+
+  sig { returns(Resolv::LOC::Coord) }
+  def longitude; end
+
+  sig { returns(Resolv::LOC::Alt) }
+  def altitude; end
+end
 
 # A
 # [`Resolv::LOC::Alt`](https://docs.ruby-lang.org/en/2.6.0/Resolv/LOC/Alt.html)
 class Resolv::LOC::Alt
   Regex = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(altitude); end
+  sig { params(altitude: String).void }
+  def initialize(altitude); end
 
   def ==(other); end
 
   # The raw altitude
+  sig { returns(String) }
   def altitude; end
 
   def eql?(other); end
@@ -1225,6 +1397,7 @@ class Resolv::LOC::Alt
   # :   returns `arg`.
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
   # :   `arg` must match the LOC::Alt::Regex constant
+  sig { params(arg: T.any(String, Resolv::LOC::Alt)).returns(Resolv::LOC::Alt) }
   def self.create(arg); end
 end
 
@@ -1233,11 +1406,13 @@ end
 class Resolv::LOC::Coord
   Regex = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(coordinates, orientation); end
+  sig { params(coordinates: String, orientation: T.enum(%w[lat lon])).void }
+  def initialize(coordinates, orientation); end
 
   def ==(other); end
 
   # The raw coordinates
+  sig { returns(String) }
   def coordinates; end
 
   def eql?(other); end
@@ -1247,6 +1422,7 @@ class Resolv::LOC::Coord
   def inspect; end
 
   # The orientation of the hemisphere as 'lat' or 'lon'
+  sig { returns(T.enum(%w[lat lon])) }
   def orientation; end
 
   def to_s; end
@@ -1259,6 +1435,7 @@ class Resolv::LOC::Coord
   # :   returns `arg`.
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
   # :   `arg` must match the LOC::Coord::Regex constant
+  sig { params(arg: T.any(String, Resolv::LOC::Coord)).returns(Resolv::LOC::Coord) }
   def self.create(arg); end
 end
 
@@ -1267,7 +1444,8 @@ end
 class Resolv::LOC::Size
   Regex = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(scalar); end
+  sig { params(scalar: String).void }
+  def initialize(scalar); end
 
   def ==(other); end
 
@@ -1278,6 +1456,7 @@ class Resolv::LOC::Size
   def inspect; end
 
   # The raw size
+  sig { returns(String) }
   def scalar; end
 
   def to_s; end
@@ -1290,6 +1469,7 @@ class Resolv::LOC::Size
   # :   returns `arg`.
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
   # :   `arg` must match the LOC::Size::Regex constant
+  sig { params(arg: T.any(String, Resolv::LOC::Size)).returns(Resolv::LOC::Size) }
   def self.create(arg); end
 end
 
@@ -1308,7 +1488,7 @@ class Resolv::MDNS < ::Resolv::DNS
   AddressV6 = T.let(T.unsafe(nil), String)
 
   # Default mDNS addresses
-  Addresses = T.let(T.unsafe(nil), T::Array[T.untyped])
+  Addresses = T.let(T.unsafe(nil), [[String, Integer], [String, Integer]])
 
   # Default mDNS
   # [`Port`](https://docs.ruby-lang.org/en/2.6.0/Resolv/MDNS.html#Port)
@@ -1324,7 +1504,16 @@ class Resolv::MDNS < ::Resolv::DNS
   # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
   # :   Must contain :nameserver or :nameserver\_port like
   #     Resolv::DNS#initialize.
-  def self.new(config_info = _); end
+  sig do
+    params(
+      config_info: T.any(
+        NilClass,
+        { nameserver: T.any(String, T::Array[String]), search: T::Array[String], ndots: Integer },
+        { nameserver_port: T::Array[[String, Integer]], search: T::Array[String], ndots: Integer }
+      )
+    ).void
+  end
+  def initialize(config_info = nil); end
 
   # Iterates over all IP addresses for `name` retrieved from the mDNS resolver,
   # provided name ends with "local". If the name does not end in "local" no

@@ -21,6 +21,6 @@ cc_library(
         "//core",
         "//main/options",
         "@com_github_d_bahr_crcpp",
-        "@com_github_msgpack_msgpack",
+        "@com_github_ludocode_mpack",
     ],
 )

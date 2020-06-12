@@ -13,11 +13,11 @@ class PreemptionTaskManager;
 
 namespace sorbet::realmain::pipeline {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         std::unique_ptr<ast::Expression> cachedTree = nullptr);
+                         ast::TreePtr cachedTree = nullptr);
 
 std::pair<ast::ParsedFile, std::vector<std::shared_ptr<core::File>>>
 indexOneWithPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                    std::unique_ptr<ast::Expression> cachedTree = nullptr);
+                    ast::TreePtr cachedTree = nullptr);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 
@@ -31,8 +31,8 @@ ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std:
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 const options::Options &opts);
 
-std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                  const options::Options &opts, bool skipConfigatron = false);
+ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+                                 WorkerPool &workers, bool skipConfigatron = false);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 ast::ParsedFilesOrCancelled
@@ -51,7 +51,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
                                     const options::Options &opts);
 
 // Caches any uncached trees and files. Returns true if it modifies kvstore.
-bool cacheTreesAndFiles(const core::GlobalState &gs, std::vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, std::vector<ast::ParsedFile> &parsedFiles,
                         const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 // Exported for tests only.

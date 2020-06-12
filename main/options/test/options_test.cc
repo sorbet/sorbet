@@ -53,7 +53,8 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
     CHECK_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
     CHECK_EQ(empty.pathPrefix, opts.pathPrefix);
-    CHECK_EQ(empty.reserveMemKiB, opts.reserveMemKiB);
+    CHECK_EQ(empty.reserveNameTableCapacity, opts.reserveNameTableCapacity);
+    CHECK_EQ(empty.reserveSymbolTableCapacity, opts.reserveSymbolTableCapacity);
     CHECK_EQ(empty.statsdHost, opts.statsdHost);
     CHECK_EQ(empty.statsdPrefix, opts.statsdPrefix);
     CHECK_EQ(empty.statsdPort, opts.statsdPort);

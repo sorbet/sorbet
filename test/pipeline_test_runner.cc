@@ -54,11 +54,13 @@ string singleTest;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->symbol.data(ctx)->isOverloaded()) {
-            return m;
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+
+        if (m.symbol.data(ctx)->isOverloaded()) {
+            return tree;
         }
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
         auto symbol = cfg->symbol;
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         if (cfg) {
@@ -67,7 +69,7 @@ public:
             }
         }
         cfgs.push_back(move(cfg));
-        return m;
+        return tree;
     }
 };
 
@@ -254,7 +256,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(localNamed));
-            vTmp = namer::Namer::run(*gs, move(vTmp));
+            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
@@ -467,7 +469,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(file));
-            vTmp = namer::Namer::run(*gs, move(vTmp));
+            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
             file = testSerialize(*gs, move(vTmp[0]));
         }
 
@@ -477,7 +479,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = resolver::Resolver::runTreePasses(*gs, move(newTrees));
+    trees = move(resolver::Resolver::runTreePasses(*gs, move(newTrees)).result());
 
     for (auto &resolvedTree : trees) {
         handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });

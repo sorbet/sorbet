@@ -44,28 +44,28 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
-        ::T::Sig::WithoutRuntime.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
         <self>.extend(::T::Sig)
