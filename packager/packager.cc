@@ -335,6 +335,13 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
     auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
+    if (rootKlass == nullptr) {
+        // TODO: Why does this happen?
+        if (auto e = ctx.beginError(file.tree->loc, core::errors::Packager::PackageNotFound)) {
+            e.setHeader("What's going on?");
+        }
+        return file;
+    }
     ENFORCE(rootKlass != nullptr);
     auto moduleWrapper =
         ast::MK::ClassOrModule(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
