@@ -371,18 +371,22 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 auto pkg = getPackageInfo(ctx, file);
-                auto &existing = packageInfoByMangledName[pkg->name.mangledName];
-                if (existing != nullptr) {
-                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                        auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
-                        e.setHeader("Redefinition of package `{}`", pkgName);
-                        e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
+                // TODO: Warn if no package found.
+                if (pkg != nullptr) {
+                    auto &existing = packageInfoByMangledName[pkg->name.mangledName];
+                    if (existing != nullptr) {
+                        if (auto e =
+                                ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                            auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
+                            e.setHeader("Redefinition of package `{}`", pkgName);
+                            e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
+                        }
+                    } else {
+                        existing = pkg;
                     }
-                } else {
-                    existing = pkg;
+                    packageInfoByFile[file.file] = pkg;
+                    packages.emplace_back(move(pkg));
                 }
-                packageInfoByFile[file.file] = pkg;
-                packages.emplace_back(move(pkg));
             }
         }
     }
