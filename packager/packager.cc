@@ -128,6 +128,12 @@ struct PackageInfoFinder {
             if (target != nullptr) {
                 auto name = getPackageName(ctx, send->args[0]);
                 if (name.mangledName.exists()) {
+                    if (name.mangledName == info->name.mangledName) {
+                        if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
+                            e.setHeader("Package `{}` cannot import itself",
+                                        absl::StrJoin(info->name.fullName, "::", NameFormatter(ctx)));
+                        }
+                    }
                     info->importedPackageNames.emplace_back(move(name));
                 }
             }
@@ -358,7 +364,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 auto pkg = getPackageInfo(ctx, file);
                 auto &existing = packageInfoByMangledName[pkg->name.mangledName];
                 if (existing != nullptr) {
-                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::DuplicatePackageName)) {
+                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
                         auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
                         e.setHeader("Redefinition of package `{}`", pkgName);
                         e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
