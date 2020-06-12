@@ -88,7 +88,7 @@ class DefaultArgsWalk {
                     if (!retType) {
                         return ast::MK::EmptyTree();
                     }
-                    send->args[0] = move(retType);
+                    send->args[0] = retType->deepCopy();
                     break;
                 }
 
