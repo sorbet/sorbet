@@ -149,12 +149,14 @@ Usage:
                                 resolve-tree, resolve-tree-raw, flatten-tree,
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
                                 symbol-table, symbol-table-raw, symbol-table-json,
-                                symbol-table-proto, symbol-table-full,
-                                symbol-table-full-raw, symbol-table-full-json,
-                                symbol-table-full-proto, file-table-json,
-                                file-table-proto, missing-constants,
-                                plugin-generated-code, autogen, autogen-msgpack,
-                                autogen-classlist, autogen-autoloader, autogen-subclasses]
+                                symbol-table-proto, symbol-table-messagepack,
+                                symbol-table-full, symbol-table-full-raw,
+                                symbol-table-full-json, symbol-table-full-proto,
+                                symbol-table-full-messagepack, file-table-json,
+                                file-table-proto, file-table-messagepack,
+                                missing-constants, plugin-generated-code,
+                                autogen, autogen-msgpack, autogen-classlist,
+                                autogen-autoloader, autogen-subclasses]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
