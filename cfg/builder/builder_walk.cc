@@ -225,7 +225,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current->exprs.emplace_back(aliasName, a->loc, make_unique<Alias>(a->symbol));
                 }
 
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(aliasName));
+                current->exprs.emplace_back(cctx.target, core::LocOffsets::none(), make_unique<Ident>(aliasName));
 
                 if (a->original) {
                     auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a->original);
