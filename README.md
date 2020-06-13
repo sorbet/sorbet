@@ -43,7 +43,6 @@ docs about Stripe-specific development workflows and historical Stripe context.
     - [Testing incremental typechecking](#testing-incremental-typechecking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
-- [C++ conventions](#c-conventions)
 - [Debugging and profiling](#debugging-and-profiling)
   - [Debugging](#debugging)
   - [Profiling](#profiling)
