@@ -429,7 +429,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     filesProcessed++;
-                    if (job.file.data(gs).sourceType == core::File::Type::Normal && !job.file.data(gs).isRBI()) {
+                    if (job.file.data(gs).sourceType == core::File::Type::Normal) {
                         // Check if file path is part of a package.
                         // TODO(jvilk): Could use a radix tree to make this lookup more efficient.
                         auto path = job.file.data(gs).path();
