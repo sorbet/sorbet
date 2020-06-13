@@ -470,7 +470,7 @@ private:
     friend class GlobalSubstitution;
     friend class serialize::SerializerImpl;
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                         const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode);
     friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
@@ -517,7 +517,7 @@ private:
     friend class TypeConstraint;
 
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                         const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
