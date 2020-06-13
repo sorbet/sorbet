@@ -71,7 +71,7 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
             return left;
         }
         if (left == o->left && right == o->right) {
-                return originalType;
+            return originalType;
         }
         return OrType::make_shared(left, right);
     }
