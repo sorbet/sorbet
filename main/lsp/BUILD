@@ -28,7 +28,6 @@ cc_library(
         "UndoState.h",
         "ErrorReporter.h",
         "ErrorFlusherLSP.h",
-        "AutocorrectFlusher.h",
     ],
     hdrs = [
         "LSPConfiguration.h",

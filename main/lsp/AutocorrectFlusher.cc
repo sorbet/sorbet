@@ -1,4 +1,4 @@
-#include "main/lsp/AutocorrectFlusher.h"
+#include "main/lsp/LSPTypechecker.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {
