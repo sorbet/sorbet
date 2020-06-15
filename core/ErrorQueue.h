@@ -18,7 +18,7 @@ private:
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>> drainAll();
     std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
-    UnorderedMap<core::FileRef, std::vector<core::ErrorQueueMessage>> collected;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
 public:

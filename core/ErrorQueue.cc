@@ -111,13 +111,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
         collected[msg.whatFile].emplace_back(move(msg));
     }
 
-    vector<unique_ptr<core::ErrorQueueMessage>> errors;
-    for (auto &error : collected[file]) {
-        errors.emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
-    }
-    collected[file].clear();
-
-    errorFlusher->flushErrors(logger, move(errors), gs, file);
+    errorFlusher->flushErrors(logger, move(collected[file]), gs, file);
 }
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
