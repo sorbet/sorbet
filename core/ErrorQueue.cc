@@ -11,10 +11,8 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::lsp::QueryResponse>>>
-ErrorQueue::drainWithQueryResponses() {
+vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
     checkOwned();
-    vector<unique_ptr<core::lsp::QueryResponse>> outResponses;
     vector<unique_ptr<core::Error>> out;
 
     auto collected = drainAll();
@@ -22,20 +20,13 @@ ErrorQueue::drainWithQueryResponses() {
     out.reserve(collected.size());
     for (auto &it : collected) {
         for (auto &msg : it.second) {
-            if (msg->kind == ErrorQueueMessage::Kind::QueryResponse) {
-                outResponses.emplace_back(move(msg->queryResponse));
-            }
             if (msg->kind == ErrorQueueMessage::Kind::Error) {
                 out.emplace_back(move(msg->error));
             }
         }
     }
 
-    return make_pair(move(out), move(outResponses));
-}
-
-vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
-    return move(drainWithQueryResponses().first);
+    return out;
 }
 
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
