@@ -92,6 +92,21 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
         stats.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
+    // Compute the Mutator
+    {
+        // Compute a setter
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(
+            ast::MK::Sig(loc, ast::MK::Hash1(nameLoc, ast::MK::Symbol(loc, core::Names::arg0()), mkNilableString(loc)),
+                         mkNilableString(loc)));
+        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+
+        rhs.emplace_back(ast::MK::Sig(
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
+            mkNilableEncryptedValue(ctx, loc)));
+        rhs.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+    }
+
     return stats;
 }
 

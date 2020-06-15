@@ -26,7 +26,11 @@ public:
 
     static ast::TreePtr mkNilable(core::LocOffsets loc, ast::TreePtr type);
 
+    static ast::TreePtr mkMutator(core::MutableContext ctx, core::LocOffsets loc, core::NameRef className);
+
     static ast::TreePtr thunkBody(core::MutableContext ctx, ast::TreePtr &node);
+
+    static bool isProbablySymbol(core::MutableContext ctx, ast::TreePtr &type, core::SymbolRef sym);
 
     ASTUtil() = delete;
 };

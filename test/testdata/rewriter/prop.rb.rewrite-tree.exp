@@ -538,17 +538,83 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array=")
 
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array<<C <todo sym>>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array=")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array")
+    end
+
     <self>.prop(:"t_array", <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"t_array=")
 
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](<emptyTree>::<C String>))
+      end
+
+      def t_array<<C <todo sym>>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"t_array=")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"t_array")
+    end
+
     <self>.prop(:"hash_of", <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), {:"without_accessors" => true})
 
     ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"hash_of=")
+
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"arg0" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C HashMutator>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
+      end
+
+      def hash_of<<C <todo sym>>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"hash_of=")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"hash_of")
+    end
 
     <self>.prop(:"const_explicit", <emptyTree>::<C String>, {:"immutable" => true, :"without_accessors" => true})
 
