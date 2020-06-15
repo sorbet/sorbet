@@ -159,10 +159,10 @@ public:
         {
             int argId = -1;
             for (auto &arg : send->args) {
+                argId += 1;
                 if (argId < 3) {
                     continue;
                 }
-                argId += 1;
                 llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                           llvm::ConstantInt::get(cs, llvm::APInt(64, argId - 3, true))};
                 auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
