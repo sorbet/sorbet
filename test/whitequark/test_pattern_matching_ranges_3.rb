@@ -1,0 +1,3 @@
+# typed: true
+
+case foo; in 1...2 then true; end

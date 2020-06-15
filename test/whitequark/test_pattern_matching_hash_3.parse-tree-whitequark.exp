@@ -1,0 +1,8 @@
+s(:case_match,
+  s(:lvar, :foo),
+  s(:in_pattern,
+    s(:hash_pattern,
+      s(:pair,
+        s(:sym, :a),
+        s(:int, "1"))), nil,
+    s(:true)), nil)

@@ -1,0 +1,6 @@
+s(:case_match,
+  s(:int, "1"),
+  s(:in_pattern,
+    s(:int, "2"), nil,
+    s(:int, "3")),
+  s(:empty_else))
