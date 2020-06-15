@@ -197,12 +197,8 @@ NameDef names[] = {
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Document", "Document", true},
-    {"Mutator", "Mutator", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
-    {"HashMutator", "HashMutator", true},
-    {"ArrayMutator", "ArrayMutator", true},
-    {"DocumentMutator", "DocumentMutator", true},
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
