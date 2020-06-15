@@ -58,8 +58,8 @@ class LSPTypechecker final {
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
 
     /** Runs incremental typechecking on the provided updates. */
-    std::vector<core::FileRef> runFastPath(LSPFileUpdates updates, WorkerPool &workers,
-                                           std::shared_ptr<core::ErrorFlusher> errorFlusher);
+    std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                                           std::shared_ptr<core::ErrorFlusher> errorFlusher) const;
 
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
@@ -97,7 +97,7 @@ public:
     /**
      * Re-typechecks the provided files to re-produce error messages.
      */
-    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers);
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
@@ -159,7 +159,7 @@ public:
     /**
      * Re-typechecks the provided files to re-produce error messages.
      */
-    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs);
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;

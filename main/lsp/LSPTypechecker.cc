@@ -132,7 +132,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
         if (isFastPath) {
             filesTypechecked =
-                runFastPath(move(updates), workers, make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter));
+                runFastPath(updates, workers, make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter));
+            commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             committed = runSlowPath(move(updates), workers, /* cancelable */ true);
@@ -145,8 +146,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     return committed;
 }
 
-vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates updates, WorkerPool &workers,
-                                                  shared_ptr<core::ErrorFlusher> errorFlusher) {
+vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                                                  shared_ptr<core::ErrorFlusher> errorFlusher) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
@@ -239,7 +240,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates updates, Worker
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     pipeline::typecheck(gs, move(resolved), config->opts, workers);
     gs->lspTypecheckCount++;
-    commitFileUpdates(updates, /* cancelable */ false);
+
     return subset;
 }
 
@@ -547,7 +548,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
 }
 
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
-                                                                      WorkerPool &workers) {
+                                                                      WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
     auto autoCorrectFlusher = make_shared<AutocorrectFlusher>();
     runFastPath(move(updates), workers, autoCorrectFlusher);
@@ -601,7 +602,7 @@ void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
     ENFORCE(committed);
 }
 
-std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(std::vector<core::FileRef> frefs) {
+std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(std::vector<core::FileRef> frefs) const {
     return typechecker.retypecheck(frefs, workers);
 }
 
