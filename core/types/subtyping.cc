@@ -44,69 +44,36 @@ const TypePtr underlying(const TypePtr &t1) {
     return t1;
 }
 
-void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &type) {
-    auto *o = cast_type<OrType>(type.get());
-    if (o == nullptr) {
-        orComponents.emplace_back(type);
-    } else {
-        fillInOrComponents(orComponents, o->left);
-        fillInOrComponents(orComponents, o->right);
-    }
-}
-
-TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter) {
-    auto *o = cast_type<OrType>(originalType.get());
-    if (o == nullptr) {
-        if (absl::c_linear_search(typeFilter, originalType.get())) {
-            return nullptr;
-        }
-        return originalType;
-    } else {
-        auto left = filterOrComponents(o->left, typeFilter);
-        auto right = filterOrComponents(o->right, typeFilter);
-        if (left == nullptr) {
-            return right;
-        }
-        if (right == nullptr) {
-            return left;
-        }
-        if (left == o->left && right == o->right) {
-            return originalType;
-        }
-        return OrType::make_shared(left, right);
-    }
-}
-
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    InlinedVector<TypePtr, 4> originalOrComponents;
-    InlinedVector<Type *, 4> typesConsumed;
     auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    fillInOrComponents(originalOrComponents, o1->left);
-    fillInOrComponents(originalOrComponents, o1->right);
-
-    for (auto &component : originalOrComponents) {
-        auto lubbed = Types::any(gs, component, t2);
-        if (lubbed.get() == component.get()) {
-            categoryCounterInc("lubDistributeOr.outcome", "t1");
-            return t1;
-        }
-        if (lubbed.get() == t2.get()) {
-            categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-            typesConsumed.emplace_back(component.get());
-        }
+    TypePtr n1 = Types::any(gs, o1->left, t2);
+    if (n1.get() == o1->left.get()) {
+        categoryCounterInc("lubDistributeOr.outcome", "t1");
+        return t1;
     }
-    if (typesConsumed.empty()) {
-        categoryCounterInc("lubDistributeOr.outcome", "worst");
-        return OrType::make_shared(t1, underlying(t2));
+    TypePtr n2 = Types::any(gs, o1->right, t2);
+    if (n1.get() == t2.get()) {
+        categoryCounterInc("lubDistributeOr.outcome", "n2'");
+        return n2;
     }
-    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-    // lub back everything except typesComsumed
-    auto remainingTypes = filterOrComponents(t1, typesConsumed);
-    if (remainingTypes == nullptr) {
-        return t2;
+    if (n2.get() == o1->right.get()) {
+        categoryCounterInc("lubDistributeOr.outcome", "t1'");
+        return t1;
     }
-    return OrType::make_shared(move(remainingTypes), underlying(t2));
+    if (n2.get() == t2.get()) {
+        categoryCounterInc("lubDistributeOr.outcome", "n1'");
+        return n1;
+    }
+    if (Types::isSubType(gs, n1, n2)) {
+        categoryCounterInc("lubDistributeOr.outcome", "n2''");
+        return n2;
+    } else if (Types::isSubType(gs, n2, n1)) {
+        categoryCounterInc("lubDistributeOr.outcome", "n1'''");
+        return n1;
+    }
+    categoryCounterInc("lubDistributeOr.outcome", "worst");
+    return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
