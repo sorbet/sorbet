@@ -10,12 +10,14 @@ void ErrorFlusherLSP::flushErrors(spdlog::logger &logger, vector<unique_ptr<core
     vector<std::unique_ptr<core::Error>> errorsAccumulated;
 
     for (auto &error : errors) {
-        if (error->error->isSilenced) {
-            continue;
-        }
+        if (error->kind == core::ErrorQueueMessage::Kind::Error) {
+            if (error->error->isSilenced) {
+                continue;
+            }
 
-        prodHistogramAdd("error", error->error->what.code, 1);
-        errorsAccumulated.emplace_back(move(error->error));
+            prodHistogramAdd("error", error->error->what.code, 1);
+            errorsAccumulated.emplace_back(move(error->error));
+        }
     }
 
     errorReporter->pushDiagnostics(epoch, file, errorsAccumulated, gs);
