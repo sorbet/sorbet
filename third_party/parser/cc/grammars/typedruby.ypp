@@ -1598,6 +1598,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.cmdarg.push(false);
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::DEF);
+                      driver.current_arg_stack.push("");
                     }
                     f_arglist bodystmt kEND
                     {
@@ -1607,6 +1608,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
                     }
                 | kDEF singleton dot_or_colon
                     {
@@ -1618,6 +1620,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.cmdarg.push(false);
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::DEFS);
+                      driver.current_arg_stack.push("");
                     }
                     f_arglist bodystmt kEND
                     {
@@ -1628,6 +1631,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
                     }
                 | kBREAK
                     {
@@ -1909,6 +1913,7 @@ opt_block_args_tail:
  block_param_def: tPIPE opt_bv_decl tPIPE
                     {
                       $$ = driver.build.args(self, $1, $2, $3, true);
+                      driver.current_arg_stack.set("");
                       DIAGCHECK();
                     }
                 | tOROP
@@ -1920,6 +1925,7 @@ opt_block_args_tail:
                     {
                       auto &params = $2;
                       params->concat($3);
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, $1, params, $4, true);
                       DIAGCHECK();
                     }
@@ -2751,11 +2757,13 @@ keyword_variable: kNIL
 
       f_arg_asgn: f_norm_arg
                     {
+                      driver.current_arg_stack.set($1[0].string());
                       $$ = $1;
                     }
 
       f_arg_item: f_arg_asgn
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.arg(self, $1);
                     }
                 | tLPAREN f_margs rparen
@@ -2782,15 +2790,18 @@ keyword_variable: kNIL
                         YYERROR;
                       }
                       driver.lex.declare(label->string());
+                      driver.current_arg_stack.set($1[0].string());
                       $$ = label;
                     }
 
             f_kw: f_label arg_value
                     {
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.kwoptarg(self, $1, $2);
                     }
                 | f_label
                     {
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.kwarg(self, $1);
                     }
 
@@ -2846,11 +2857,13 @@ keyword_variable: kNIL
 
            f_opt: f_arg_asgn tEQL arg_value
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
      f_block_opt: f_arg_asgn tEQL primary_value
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 

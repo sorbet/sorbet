@@ -57,6 +57,7 @@ tuple<string, string> MESSAGES[] = {
     {"InvalidRegexp", "{}"},
     {"InvalidReturn", "Invalid return in class/module body"},
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
+    {"CircularArgumentReference", "circular argument reference {}"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
