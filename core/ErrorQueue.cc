@@ -120,14 +120,6 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     errorFlusher->flushErrors(logger, move(errors), gs, file);
 }
 
-void ErrorQueue::flushErrorCount() {
-    errorFlusher->flushErrorCount(logger, nonSilencedErrorCount);
-}
-
-void ErrorQueue::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
-    errorFlusher->flushAutocorrects(gs, fs);
-}
-
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Error;

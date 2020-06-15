@@ -415,8 +415,9 @@ int realmain(int argc, char *argv[]) {
     }
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
+    auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
@@ -586,10 +587,15 @@ int realmain(int argc, char *argv[]) {
         gs->errorQueue->flushAllErrors(*gs);
 
         if (!opts.noErrorCount) {
-            gs->errorQueue->flushErrorCount();
+            if (gs->errorQueue->nonSilencedErrorCount == 0) {
+                gs->errorQueue->logger.log(spdlog::level::err, "No errors! Great job.",
+                                           gs->errorQueue->nonSilencedErrorCount);
+            } else {
+                gs->errorQueue->logger.log(spdlog::level::err, "Errors: {}", gs->errorQueue->nonSilencedErrorCount);
+            }
         }
         if (opts.autocorrect) {
-            gs->errorQueue->flushAutocorrects(*gs, *opts.fs);
+            errorFlusher->flushAutocorrects(*gs, *opts.fs);
         }
         logger->trace("sorbet done");
 
@@ -673,7 +679,7 @@ int realmain(int argc, char *argv[]) {
 #endif
     if (!gs || gs->hadCriticalError()) {
         returnCode = 10;
-    } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
+    } else if (returnCode == 0 && errorFlusher->nonSilencedErrorCount > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
     }
 

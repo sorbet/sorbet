@@ -48,14 +48,6 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, vector<unique_ptr<E
     }
 }
 
-void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
-    if (count == 0) {
-        logger.log(spdlog::level::err, "No errors! Great job.", count);
-    } else {
-        logger.log(spdlog::level::err, "Errors: {}", count);
-    }
-}
-
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {

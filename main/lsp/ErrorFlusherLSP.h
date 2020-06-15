@@ -17,8 +17,6 @@ public:
 
     void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors,
                      const core::GlobalState &gs, core::FileRef file) override;
-    void flushErrorCount(spdlog::logger &logger, int count) override;
-    void flushAutocorrects(const core::GlobalState &gs, FileSystem &fs) override;
 };
 
 } // namespace sorbet::realmain::lsp

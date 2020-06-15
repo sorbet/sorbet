@@ -20,9 +20,4 @@ void ErrorFlusherLSP::flushErrors(spdlog::logger &logger, vector<unique_ptr<core
 
     errorReporter->pushDiagnostics(epoch, file, errorsAccumulated, gs);
 }
-
-void ErrorFlusherLSP::flushErrorCount(spdlog::logger &logger, int count) {}
-
-void ErrorFlusherLSP::flushAutocorrects(const core::GlobalState &gs, FileSystem &fs) {}
-
 } // namespace sorbet::realmain::lsp

@@ -14,9 +14,4 @@ void AutocorrectFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<c
         collectedErrors.emplace_back(move(error->error));
     }
 }
-
-void AutocorrectFlusher::flushErrorCount(spdlog::logger &logger, int count) {}
-
-void AutocorrectFlusher::flushAutocorrects(const core::GlobalState &gs, FileSystem &fs) {}
-
 } // namespace sorbet::realmain::lsp
