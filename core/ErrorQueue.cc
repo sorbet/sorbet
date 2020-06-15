@@ -108,7 +108,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(move(msg));
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
     errorFlusher->flushErrors(logger, move(collected[file]), gs, file);
@@ -150,13 +150,11 @@ UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQu
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(move(msg));
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
     for (auto &part : collected) {
-        for (auto &error : part.second) {
-            out[part.first].emplace_back(make_unique<core::ErrorQueueMessage>(move(error)));
-        }
+        out[part.first] = move(part.second);
     }
 
     collected.clear();

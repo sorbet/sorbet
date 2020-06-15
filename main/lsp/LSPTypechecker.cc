@@ -548,7 +548,7 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
                                                                       WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
     auto autoCorrectFlusher = make_shared<AutocorrectFlusher>();
-    runFastPath(move(updates), workers, autoCorrectFlusher);
+    runFastPath(updates, workers, autoCorrectFlusher);
 
     return move(autoCorrectFlusher->collectedErrors);
 }

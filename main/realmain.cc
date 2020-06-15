@@ -679,7 +679,7 @@ int realmain(int argc, char *argv[]) {
 #endif
     if (!gs || gs->hadCriticalError()) {
         returnCode = 10;
-    } else if (returnCode == 0 && errorFlusher->nonSilencedErrorCount > 0 && !opts.supressNonCriticalErrors) {
+    } else if (returnCode == 0 && gs->errorQueue->nonSilencedErrorCount > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
     }
 

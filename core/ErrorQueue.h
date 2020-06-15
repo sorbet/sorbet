@@ -15,7 +15,7 @@ namespace core {
 class ErrorQueue {
 private:
     void checkOwned();
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>> drainAll();
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
     std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
