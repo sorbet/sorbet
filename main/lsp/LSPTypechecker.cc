@@ -9,7 +9,6 @@
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
-#include "main/lsp/AutocorrectFlusher.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
