@@ -1,0 +1,6 @@
+# typed: true
+
+a #
+  #
+.foo
+

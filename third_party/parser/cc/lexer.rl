@@ -2662,7 +2662,23 @@ void lexer::set_state_expr_value() {
   leading_dot := |*
       # Insane leading dots:
       # a #comment
+      #  # post-2.7 comment
       #  .b: a.b
+
+      (c_space* w_space_comment '\n')+
+      => {
+        if (version < ruby_version::RUBY_27) {
+          // Ruby before 2.7 doesn't support comments before leading dot.
+          // If a line after "a" starts with a comment then "a" is a self-contained statement.
+          // So in that case we emit a special tNL token and start reading the
+          // next line as a separate statement.
+          //
+          // Note: block comments before leading dot are not supported on any version of Ruby.
+          emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+          fhold; fnext line_begin; fbreak;
+        }
+      };
+
       c_space* %{ tm = p; } ('.' | '&.')
       => { p = tm - 1; fgoto expr_end; };
 
