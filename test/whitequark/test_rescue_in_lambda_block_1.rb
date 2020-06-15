@@ -1,3 +1,4 @@
 # typed: true
 
--> { rescue; } # error: unexpected token "rescue"
+-> { rescue; }
+#    ^^^^^^ error: unexpected token "rescue"
