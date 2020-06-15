@@ -69,20 +69,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           b = <assignTemp>$17.[](1)
           <assignTemp>$16
         end
-        begin
-          <assignTemp>$18 = array
-          <assignTemp>$19 = ::<Magic>.<expand-splat>(<assignTemp>$18, 2, 0)
-          begin
-            <assignTemp>$20 = a
-            if <assignTemp>$20.==(nil)
-              nil
-            else
-              <assignTemp>$20.x=(<assignTemp>$19.[](0))
-            end
-          end
-          b = <assignTemp>$19.[](1)
-          <assignTemp>$18
-        end
       end
     end
   end

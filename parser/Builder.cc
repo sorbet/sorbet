@@ -223,10 +223,13 @@ public:
         return make_unique<Hash>(collectionLoc(begin, pairs, end), std::move(pairs));
     }
 
-    unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
+    unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
         core::NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         core::LocOffsets loc = receiver->loc.join(tokLoc(selector));
         if ((dot != nullptr) && dot->string() == "&.") {
+            if (masgn) {
+                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+            }
             return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
         }
         return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
@@ -1252,9 +1255,9 @@ ForeignPtr associate(SelfPtr builder, const token *begin, const node_list *pairs
     return build->toForeign(build->associate(begin, build->convertNodeList(pairs), end));
 }
 
-ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector) {
+ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector));
+    return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector, masgn));
 }
 
 ForeignPtr backRef(SelfPtr builder, const token *tok) {
