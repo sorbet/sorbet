@@ -18,7 +18,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>))\l<exceptionClassTemp>$8: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$9: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<exceptionClassTemp>$8: T.class_of(StandardError))\l<isaCheckTemp>$9: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>))\l<cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$10: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$9: T.class_of(StandardError))\l<isaCheckTemp>$10: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_7" [style="bold"];
@@ -37,7 +37,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$11: T.nilable(TrueClass))\l<throwAwayTemp>$12: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$12: T.nilable(TrueClass))\l<throwAwayTemp>$13: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$12: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
@@ -49,7 +49,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_7" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_6" [style="bold"];
@@ -139,7 +139,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:\"main\") = :\"main\"\l<statTemp>$3: Symbol(:\"main\") = <statTemp>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$6: Symbol(:\"main\"))\l<statTemp>$8: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: Symbol(:\"a\") = :\"a\"\l<statTemp>$7: Symbol(:\"a\") = <statTemp>$8: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$10: Symbol(:\"a\"))\l<statTemp>$12: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$14: Symbol(:\"b\") = :\"b\"\l<statTemp>$11: Symbol(:\"b\") = <statTemp>$12: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$14: Symbol(:\"b\"))\l<statTemp>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$18: Symbol(:\"c\") = :\"c\"\l<statTemp>$15: Symbol(:\"c\") = <statTemp>$16: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$18: Symbol(:\"c\"))\l<statTemp>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: Symbol(:\"d\") = :\"d\"\l<statTemp>$19: Symbol(:\"d\") = <statTemp>$20: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$22: Symbol(:\"d\"))\l<statTemp>$25: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$23: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$25: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:\"main\") = :\"main\"\l<statTemp>$3: Symbol(:\"main\") = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$7: Symbol(:\"main\"))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$12: Symbol(:\"a\") = :\"a\"\l<statTemp>$8: Symbol(:\"a\") = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$12: Symbol(:\"a\"))\l<cfgAlias>$15: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$17: Symbol(:\"b\") = :\"b\"\l<statTemp>$13: Symbol(:\"b\") = <cfgAlias>$15: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$17: Symbol(:\"b\"))\l<cfgAlias>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: Symbol(:\"c\") = :\"c\"\l<statTemp>$18: Symbol(:\"c\") = <cfgAlias>$20: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$22: Symbol(:\"c\"))\l<cfgAlias>$25: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$27: Symbol(:\"d\") = :\"d\"\l<statTemp>$23: Symbol(:\"d\") = <cfgAlias>$25: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$27: Symbol(:\"d\"))\l<statTemp>$30: T.untyped = <self>: T.class_of(<root>).foo()\l<statTemp>$28: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$30: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
