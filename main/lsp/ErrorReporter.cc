@@ -23,7 +23,7 @@ void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLat
     ENFORCE(epochTimers.find(epoch) == epochTimers.end());
     vector<Timer> firstDiagnosticLatencyTimers;
     if (config->getClientConfig().enableTypecheckInfo) {
-        Timer::timedSleep(chrono::milliseconds(50), *config->logger, "delay so timer is reported");
+        Timer::timedSleep(chrono::milliseconds(5), *config->logger, "delay so timer is reported");
     }
     for (auto &timer : diagnosticLatencyTimers) {
         firstDiagnosticLatencyTimers.emplace_back(timer->clone("first_diagnostic_latency"));
