@@ -15,6 +15,12 @@ namespace sorbet::rewriter {
  *   def foo; ...; end
  *   sig {params(arg0: Type).returns(Type)}
  *   def foo=(arg0); ...; end
+ *   class Mutator < Chalk::ODM::Mutator
+ *     sig {returns(Type)}
+ *     def foo; end
+ *     sig {params(arg0: Type).returns(Type)}
+ *     def foo=(arg0); end
+ *   end
  *
  * We try to implement a simple approximation of the functionality that Chalk::ODM::Document.prop has. Any deviation
  * from the expected shape stops the desugaring.

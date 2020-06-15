@@ -38,6 +38,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
 
+    class <emptyTree>::<C Mutator><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"arg0" => <emptyTree>::<C Array>}).returns(<emptyTree>::<C Array>)
+      end
+
+      def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C Chalk>::<C ODM>::<C Mutator>::<C Private>::<C ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array_of_explicit<<C <todo sym>>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit=")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"array_of_explicit")
+    end
+
     <self>.prop(:"no_class_arg", {:"type" => <emptyTree>::<C Array>, :"immutable" => true, :"array" => <emptyTree>::<C String>})
 
     <self>.prop(:"proc_type", {:"type" => <emptyTree>::<C T>.proc().params({:"x" => <emptyTree>::<C Integer>}).void()})
