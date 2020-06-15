@@ -16,6 +16,7 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
+#include "main/lsp/QueryCollector.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
@@ -526,10 +527,8 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
 
     // Replace error queue with one that is owned by this thread.
-    // TODO: Replace with an error flusher for queries
-    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer,
-                                                   make_shared<ErrorFlusherLSP>(0, errorReporter));
-    gs->errorQueue->ignoreFlushes = true;
+    auto queryCollector = make_shared<QueryCollector>();
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
 
     Timer timeit(config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
@@ -540,11 +539,10 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
     pipeline::typecheck(gs, move(resolved), config->opts, workers);
-    auto errorsAndQueryResponses = gs->errorQueue->drainWithQueryResponses();
+    gs->errorQueue->drainAllErrors();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    // Drops any errors discovered during the query on the floor.
-    return LSPQueryResult{move(errorsAndQueryResponses.second)};
+    return LSPQueryResult{move(queryCollector->queryResponses)};
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
