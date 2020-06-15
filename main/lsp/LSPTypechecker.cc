@@ -412,10 +412,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptManager);
     });
 
-    // Note: This is important to do even if the slow path was canceled. It clears out any typechecking errors from the
-    // aborted typechecking run.
-    // Note 2: `gs` now holds the value of `finalGS`.
-    gs->errorQueue->drainWithQueryResponses();
+    // Note: `gs` now holds the value of `finalGS`.
     gs->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {
