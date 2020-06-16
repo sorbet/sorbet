@@ -104,6 +104,13 @@ module T::Props
             if type.types.all? {|t| generate(t, mode, varname).nil?}
               nil
             else
+              # We currently deep_clone_object if the type was T.any(Integer, Float).
+              # When we get better support for union types (maybe this specific
+              # union type, because it would be a replacement for
+              # Chalk::ODM::DeprecatedNumemric), we could opt to special case
+              # this union to have no specific serde transform (the only reason
+              # why Float has a special case is because round tripping through
+              # JSON might normalize Floats to Integers)
               "T::Props::Utils.deep_clone_object(#{varname})"
             end
           end
