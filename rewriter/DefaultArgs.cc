@@ -75,6 +75,7 @@ class DefaultArgsWalk {
                     // A total hack but we allow .void.void or .void.returns and
                     // the one with content wins
                     send->fun = core::Names::void_();
+                    break;
                 }
             }
             auto recv = ast::cast_tree<ast::Send>(send->recv);
