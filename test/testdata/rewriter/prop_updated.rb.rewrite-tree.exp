@@ -1,0 +1,36 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Chalk>::<C ODM><<C <todo sym>>> < ()
+    <emptyTree>::<C DeprecatedNumeric> = <emptyTree>::<C Numeric>
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params({:"opts" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped())}).void()
+    end
+
+    def self.updated_prop<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      begin
+        opts.[]=(:"extra", opts.fetch(:"extra", {}).merge({:"DEPRECATED_dynamic_prop" => true}))
+        <self>.prop(:"updated", <emptyTree>::<C T>.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>), opts)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params({:"opts" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped())}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped()))
+    end
+
+    def self.updated_prop<defaultArg>1<<C <todo sym>>>(opts = <emptyTree>, &<blk>)
+      {}
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"updated_prop")
+
+    <self>.updated_prop()
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"updated_prop<defaultArg>1")
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())
+end
