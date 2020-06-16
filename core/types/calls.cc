@@ -1433,7 +1433,11 @@ private:
 
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        if (args.args.size() != 3) {
+        // args[0] is the receiver
+        // args[1] is true if private calls are ok
+        // args[2] is the method
+        // args[3] are the splat arguments
+        if (args.args.size() != 4) {
             return;
         }
         auto &receiver = args.args[0];
@@ -1446,19 +1450,19 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        auto *lit = cast_type<LiteralType>(args.args[2]->type.get());
         if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);
-        if (args.args[2]->type->isUntyped()) {
-            res.returnType = args.args[2]->type;
+        if (args.args[3]->type->isUntyped()) {
+            res.returnType = args.args[3]->type;
             return;
         }
-        auto *tuple = cast_type<TupleType>(args.args[2]->type.get());
+        auto *tuple = cast_type<TupleType>(args.args[3]->type.get());
         if (tuple == nullptr) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
+                    gs.beginError(core::Loc(args.locs.file, args.locs.args[3]), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
             }
             return;
@@ -1466,8 +1470,8 @@ public:
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
-            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[2]));
-        InlinedVector<LocOffsets, 2> sendArgLocs(tuple->elems.size(), args.locs.args[2]);
+            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[3]));
+        InlinedVector<LocOffsets, 2> sendArgLocs(tuple->elems.size(), args.locs.args[3]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
         DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, args.block};
         auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
@@ -1643,12 +1647,13 @@ private:
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         // args[0] is the receiver
-        // args[1] is the method
-        // args[2] is the block
-        // args[3...] are the remaining arguements
+        // args[1] is true if private calls are ok
+        // args[2] is the method
+        // args[3] is the block
+        // args[4...] are the remaining arguements
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
-        if (args.args.size() < 3) {
+        if (args.args.size() < 4) {
             return;
         }
         auto &receiver = args.args[0];
@@ -1658,87 +1663,6 @@ public:
         }
 
         if (!receiver->type->isFullyDefined()) {
-            return;
-        }
-
-        if (core::cast_type<core::TypeVar>(args.args[2]->type.get())) {
-            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[2]),
-                                       core::errors::Infer::GenericPassedAsBlock)) {
-                e.setHeader("Passing generics as block arguments is not supported");
-            }
-            return;
-        }
-
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
-            return;
-        }
-        NameRef fn(gs, (u4)lit->value);
-
-        InlinedVector<TypeAndOrigins, 2> sendArgStore;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
-        for (int i = 3; i < args.args.size(); i++) {
-            sendArgStore.emplace_back(*args.args[i]);
-            sendArgLocs.emplace_back(args.locs.args[i]);
-        }
-        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        sendArgs.reserve(sendArgStore.size());
-        for (auto &arg : sendArgStore) {
-            sendArgs.emplace_back(&arg);
-        }
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
-
-        TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, args.args[2]->type, args.locs.file, args.locs.call, args.locs.args[2]);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
-        res.main.constr = make_unique<TypeConstraint>();
-
-        DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
-
-        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
-                                          core::Loc(args.locs.file, args.locs.args[2]),
-                                          core::Loc(args.locs.file, args.locs.call), res);
-    }
-} Magic_callWithBlock;
-
-class Magic_callWithSplatAndBlock : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        // args[0] is the receiver
-        // args[1] is the method
-        // args[2] are the splat arguments
-        // args[3] is the block
-
-        if (args.args.size() != 4) {
-            return;
-        }
-        auto &receiver = args.args[0];
-        if (receiver->type->isUntyped()) {
-            res.returnType = receiver->type;
-            return;
-        }
-
-        if (!receiver->type->isFullyDefined()) {
-            return;
-        }
-
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
-            return;
-        }
-        NameRef fn(gs, (u4)lit->value);
-
-        if (args.args[2]->type->isUntyped()) {
-            res.returnType = args.args[2]->type;
-            return;
-        }
-        auto *tuple = cast_type<TupleType>(args.args[2]->type.get());
-        if (tuple == nullptr) {
-            if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
-                e.setHeader("Splats are only supported where the size of the array is known statically");
-            }
             return;
         }
 
@@ -1750,10 +1674,23 @@ public:
             return;
         }
 
+        auto *lit = cast_type<LiteralType>(args.args[2]->type.get());
+        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+        NameRef fn(gs, (u4)lit->value);
+
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
-        InlinedVector<const TypeAndOrigins *, 2> sendArgs =
-            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[2]));
-        InlinedVector<LocOffsets, 2> sendArgLocs(tuple->elems.size(), args.locs.args[2]);
+        InlinedVector<LocOffsets, 2> sendArgLocs;
+        for (int i = 4; i < args.args.size(); i++) {
+            sendArgStore.emplace_back(*args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        sendArgs.reserve(sendArgStore.size());
+        for (auto &arg : sendArgStore) {
+            sendArgs.emplace_back(&arg);
+        }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
         TypePtr finalBlockType =
@@ -1766,6 +1703,75 @@ public:
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
                                           core::Loc(args.locs.file, args.locs.args[3]),
+                                          core::Loc(args.locs.file, args.locs.call), res);
+    }
+} Magic_callWithBlock;
+
+class Magic_callWithSplatAndBlock : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        // args[0] is the receiver
+        // args[1] is true if private calls are ok
+        // args[2] is the method
+        // args[3] are the splat arguments
+        // args[3] is the block
+
+        if (args.args.size() != 5) {
+            return;
+        }
+        auto &receiver = args.args[0];
+        if (receiver->type->isUntyped()) {
+            res.returnType = receiver->type;
+            return;
+        }
+
+        if (!receiver->type->isFullyDefined()) {
+            return;
+        }
+
+        auto *lit = cast_type<LiteralType>(args.args[2]->type.get());
+        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+        NameRef fn(gs, (u4)lit->value);
+
+        if (args.args[3]->type->isUntyped()) {
+            res.returnType = args.args[3]->type;
+            return;
+        }
+        auto *tuple = cast_type<TupleType>(args.args[3]->type.get());
+        if (tuple == nullptr) {
+            if (auto e =
+                    gs.beginError(core::Loc(args.locs.file, args.locs.args[3]), core::errors::Infer::UntypedSplat)) {
+                e.setHeader("Splats are only supported where the size of the array is known statically");
+            }
+            return;
+        }
+
+        if (core::cast_type<core::TypeVar>(args.args[3]->type.get())) {
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[4]),
+                                       core::errors::Infer::GenericPassedAsBlock)) {
+                e.setHeader("Passing generics as block arguments is not supported");
+            }
+            return;
+        }
+
+        InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs =
+            Magic_callWithSplat::generateSendArgs(tuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[3]));
+        InlinedVector<LocOffsets, 2> sendArgLocs(tuple->elems.size(), args.locs.args[3]);
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
+
+        TypePtr finalBlockType =
+            Magic_callWithBlock::typeToProc(gs, args.args[4]->type, args.locs.file, args.locs.call, args.locs.args[4]);
+        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
+        res.main.constr = make_unique<TypeConstraint>();
+
+        DispatchArgs innerArgs{fn, sendLocs, sendArgs, receiver->type, receiver->type, link};
+
+        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
+                                          core::Loc(args.locs.file, args.locs.args[4]),
                                           core::Loc(args.locs.file, args.locs.call), res);
     }
 } Magic_callWithSplatAndBlock;

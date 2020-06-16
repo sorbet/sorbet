@@ -451,6 +451,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
 
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));
+                    sendargs.emplace_back(flags.isPrivateOk ? MK::True(loc) : MK::False(loc));
                     sendargs.emplace_back(std::move(method));
                     sendargs.emplace_back(std::move(args));
                     TreePtr res;
@@ -497,6 +498,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));
+                            sendargs.emplace_back(flags.isPrivateOk ? MK::True(loc) : MK::False(loc));
                             sendargs.emplace_back(std::move(method));
                             sendargs.emplace_back(std::move(convertedBlock));
                             for (auto &arg : args) {
