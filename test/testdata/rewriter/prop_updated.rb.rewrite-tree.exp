@@ -15,6 +15,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({}).returns(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)
+    end
+
+    def updated<<C <todo sym>>>(&<blk>)
+      <self>.instance_variable_get(:"@updated")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params({:"arg0" => <emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>}).returns(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)
+    end
+
+    def updated=<<C <todo sym>>>(arg0, &<blk>)
+      begin
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"updated")
+        else
+          <emptyTree>
+        end
+        <self>.instance_variable_set(:"@updated", arg0)
+      end
+    end
+
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"opts" => <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped())}).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped()))
     end
@@ -27,10 +50,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"updated_prop")
 
-    <self>.updated_prop()
+    <self>.updated_prop({:"without_accessors" => true})
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"updated")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"updated=")
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"updated_prop<defaultArg>1")
   end
 
-  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())
+  updated_at = <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())
 end

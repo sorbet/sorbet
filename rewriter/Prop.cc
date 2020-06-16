@@ -135,17 +135,25 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             break;
         case core::Names::createdProp()._id:
             ret.name = core::Names::created();
-            ret.nameLoc =
-                core::LocOffsets{send->loc.beginPos(),
-                                 send->loc.endPos() - 5}; // 5 is the difference between `created_prop` and `created`
+            // 5 is the difference between `created_prop` and `created`
+            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
+        case core::Names::updatedProp()._id: {
+            ret.name = core::Names::updated();
+            // 5 is the difference between `updated_prop` and `updated`
+            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
+            auto chalk = ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Chalk());
+            auto chalk_odm = ast::MK::UnresolvedConstant(send->loc, std::move(chalk), core::Names::Constants::ODM());
+            ret.type = ast::MK::UnresolvedConstant(send->loc, std::move(chalk_odm),
+                                                   core::Names::Constants::DeprecatedNumeric());
+            break;
+        }
         case core::Names::merchantProp()._id:
             ret.isImmutable = true;
             ret.name = core::Names::merchant();
-            ret.nameLoc =
-                core::LocOffsets{send->loc.beginPos(),
-                                 send->loc.endPos() - 5}; // 5 is the difference between `merchant_prop` and `merchant`
+            // 5 is the difference between `merchant_prop` and `merchant`
+            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
 
