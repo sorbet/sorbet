@@ -83,23 +83,16 @@ class DefaultArgsWalk {
 
         send = ast::cast_tree<ast::Send>(sigBlock.body);
         while (send != nullptr) {
-            switch (send->fun._id) {
-                case core::Names::returns()._id: {
-                    if (!retType) {
-                        return ast::MK::EmptyTree();
-                    }
-                    send->args[0] = move(retType);
-                    break;
-                }
+            if (core::Names::void_()._id == send->fun._id) {
+                send->fun = core::Names::returns();
+                send->args.resize(1);
+            }
 
-                case core::Names::void_()._id: {
-                    if (!retType) {
-                        return ast::MK::EmptyTree();
-                    }
-                    send->fun = core::Names::returns();
-                    send->args.emplace_back(move(retType));
-                    break;
+            if (core::Names::returns()._id == send->fun._id) {
+                if (!retType) {
+                    return ast::MK::EmptyTree();
                 }
+                send->args[0] = retType->deepCopy();
             }
 
             auto recv = ast::cast_tree<ast::Send>(send->recv);
