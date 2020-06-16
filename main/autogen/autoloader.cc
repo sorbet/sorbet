@@ -11,7 +11,9 @@ using namespace std;
 namespace sorbet::autogen {
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
+    return !nd.nameParts.empty() &&
+        (nd.nameParts[0] == core::Names::Constants::PackageRegistry() ||
+        topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end());
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
