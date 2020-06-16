@@ -19,7 +19,7 @@ module T::Props
       end
 
       NO_TRANSFORM_TYPES = T.let(
-        [TrueClass, FalseClass, NilClass, Symbol, String, Numeric].freeze,
+        [TrueClass, FalseClass, NilClass, Symbol, String].freeze,
         T::Array[Module],
       )
       private_constant :NO_TRANSFORM_TYPES
@@ -64,6 +64,14 @@ module T::Props
         when T::Types::Simple
           raw = type.raw_type
           if NO_TRANSFORM_TYPES.any? {|cls| raw <= cls}
+            nil
+          elsif raw <= Float
+            case mode
+            when Deserialize then "#{varname}.to_f"
+            when Serialize then nil
+            else T.absurd(mode)
+            end
+          elsif raw <= Numeric
             nil
           elsif raw < T::Props::Serializable
             handle_serializable_subtype(varname, raw, mode)
