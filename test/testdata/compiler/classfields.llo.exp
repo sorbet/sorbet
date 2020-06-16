@@ -335,11 +335,11 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %62, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_write, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_B#write" to i64 (...)*), i32 -1) #13
   %81 = getelementptr inbounds i64, i64* %79, i64 12
   store i64* %81, i64** %74, align 8, !tbaa !6
-  %rawSym27.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i2) #13
+  %rawSym26.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i2) #13
   tail call void @rb_define_method(i64 %62, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_B#read" to i64 (...)*), i32 -1) #13
   %82 = getelementptr inbounds i64, i64* %79, i64 15
   store i64* %82, i64** %74, align 8, !tbaa !6
-  %rawSym40.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i2) #13
+  %rawSym39.i.i = tail call i64 @rb_id2sym(i64 %rubyId_read.i.i2) #13
   tail call void @rb_define_singleton_method(i64 %62, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_read, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_B.read to i64 (...)*), i32 -1) #13
   %83 = getelementptr inbounds i64, i64* %50, i64 21
   store i64* %83, i64** %45, align 8, !tbaa !6
@@ -354,10 +354,10 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #13
   %85 = getelementptr inbounds i64, i64* %50, i64 24
   store i64* %85, i64** %45, align 8, !tbaa !6
-  %call_via_vm_new54.i = tail call i64 @sorbet_callFunc(i64 %62, i64 %rubyId_new.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new.1) #13
-  %call_via_vm_read59.i = tail call i64 @sorbet_callFunc(i64 %call_via_vm_new54.i, i64 %rubyId_read.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_read.2) #13
-  store i64 %call_via_vm_read59.i, i64* %callArgsAddr.i, align 8
-  %call_via_vm_puts66.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.3) #13
+  %call_via_vm_new53.i = tail call i64 @sorbet_callFunc(i64 %62, i64 %rubyId_new.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_new.1) #13
+  %call_via_vm_read58.i = tail call i64 @sorbet_callFunc(i64 %call_via_vm_new53.i, i64 %rubyId_read.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_read.2) #13
+  store i64 %call_via_vm_read58.i, i64* %callArgsAddr.i, align 8
+  %call_via_vm_puts65.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.3) #13
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %35)
   ret void
 }

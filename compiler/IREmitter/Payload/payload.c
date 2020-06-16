@@ -627,7 +627,15 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
 SORBET_INLINE
 VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
                           VALUE proc) {
-    return rb_funcall_with_block(recv, func, argc, argv, proc);
+    if (!NIL_P(proc)) {
+        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
+        vm_block_handler_verify(proc);
+        GET_EC()->passed_block_handler = proc;
+    }
+
+    // NOTE: rb_funcall_with_block is restricted to only calling public methods. Manually setting up the block handler
+    // and using rb_funcallv allows us to call private/protected methods.
+    return rb_funcallv(recv, func, argc, argv);
 }
 
 SORBET_INLINE

@@ -446,9 +446,9 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %52, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #14
   %53 = getelementptr inbounds i64, i64* %46, i64 8
   store i64* %53, i64** %41, align 8, !tbaa !5
-  %callArgsAddr21.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
-  store i64 %27, i64* %callArgsAddr21.i, align 8
-  %call_via_vm_hello.i = call i64 @sorbet_callFunc(i64 %30, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr21.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_hello) #14
+  %callArgsAddr20.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0
+  store i64 %27, i64* %callArgsAddr20.i, align 8
+  %call_via_vm_hello.i = call i64 @sorbet_callFunc(i64 %30, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgsAddr20.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_hello) #14
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %31)
   ret void
 }

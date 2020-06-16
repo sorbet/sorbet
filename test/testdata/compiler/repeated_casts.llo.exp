@@ -191,7 +191,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %17 = load i64, i64* @rb_cObject, align 8
   %18 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %17) #6
   %19 = icmp eq i64 %18, 20
-  br i1 %19, label %typeTestSuccess, label %codeRepl55, !prof !25
+  br i1 %19, label %typeTestSuccess, label %codeRepl54, !prof !25
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %20 = getelementptr inbounds i64, i64* %15, i64 2
@@ -213,18 +213,18 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   tail call void @llvm.assume(i1 %guardUpdated)
   %28 = tail call i64 @rb_obj_is_kind_of(i64 %rawArg_a, i64 %25) #6
   %29 = icmp eq i64 %28, 20
-  br i1 %29, label %typeTestSuccess31, label %codeRepl, !prof !25
+  br i1 %29, label %typeTestSuccess30, label %codeRepl, !prof !25
 
-codeRepl55:                                       ; preds = %fillRequiredArgs
+codeRepl54:                                       ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#doubleCast.cold.2"(i64 %selfRaw) #14
   unreachable
 
-typeTestSuccess31:                                ; preds = %24
+typeTestSuccess30:                                ; preds = %24
   %call_via_vm_foo = tail call i64 @sorbet_callFunc(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo)
   %30 = getelementptr inbounds i64, i64* %15, i64 3
   store i64* %30, i64** %10, align 8, !tbaa !5
-  %call_via_vm_foo46 = tail call i64 @sorbet_callFunc(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo.1)
-  ret i64 %call_via_vm_foo46
+  %call_via_vm_foo45 = tail call i64 @sorbet_callFunc(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo.1)
+  ret i64 %call_via_vm_foo45
 
 codeRepl:                                         ; preds = %24
   tail call void @sorbet_cast_failure(i64 %rawArg_a, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A, i64 0, i64 0)) #12
