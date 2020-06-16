@@ -141,6 +141,10 @@ public:
     }
 
     TreePtr &operator=(TreePtr &&other) noexcept {
+        if (*this == other) {
+            return *this;
+        }
+
         resetTagged(other.releaseTagged());
         return *this;
     }
