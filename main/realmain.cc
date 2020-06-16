@@ -587,12 +587,7 @@ int realmain(int argc, char *argv[]) {
         gs->errorQueue->flushAllErrors(*gs);
 
         if (!opts.noErrorCount) {
-            if (gs->errorQueue->nonSilencedErrorCount == 0) {
-                gs->errorQueue->logger.log(spdlog::level::err, "No errors! Great job.",
-                                           gs->errorQueue->nonSilencedErrorCount);
-            } else {
-                gs->errorQueue->logger.log(spdlog::level::err, "Errors: {}", gs->errorQueue->nonSilencedErrorCount);
-            }
+            errorFlusher->flushErrorCount(gs->errorQueue->logger, gs->errorQueue->nonSilencedErrorCount);
         }
         if (opts.autocorrect) {
             errorFlusher->flushAutocorrects(*gs, *opts.fs);

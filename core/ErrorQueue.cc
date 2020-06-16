@@ -93,7 +93,7 @@ void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     auto collectedErrors = drainAll();
 
     for (auto &it : collectedErrors) {
-        errorFlusher->flushErrors(logger, move(it.second), gs, it.first);
+        errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
     }
 }
 
@@ -111,7 +111,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
-    errorFlusher->flushErrors(logger, move(collected[file]), gs, file);
+    errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
@@ -146,16 +146,13 @@ bool ErrorQueue::isEmpty() {
 
 UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQueue::drainAll() {
     checkOwned();
-    UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> out;
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
-    for (auto &part : collected) {
-        out[part.first] = move(part.second);
-    }
+    auto out = std::move(collected);
 
     collected.clear();
 

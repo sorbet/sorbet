@@ -23,7 +23,24 @@
 
 namespace sorbet::realmain::lsp {
 using namespace std;
+class ErrorCollector : public core::ErrorFlusher {
+public:
+    std::vector<std::unique_ptr<core::Error>> collectedErrors;
+    ErrorCollector() = default;
+    ~ErrorCollector() = default;
+    void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
+                     std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override {
+        for (auto &error : errors) {
+            if (error->kind == core::ErrorQueueMessage::Kind::Error) {
+                if (error->error->isSilenced) {
+                    continue;
+                }
 
+                collectedErrors.emplace_back(move(error->error));
+            }
+        }
+    }
+};
 namespace {
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
                        bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
@@ -547,10 +564,10 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
-    auto autoCorrectFlusher = make_shared<AutocorrectFlusher>();
-    runFastPath(updates, workers, autoCorrectFlusher);
+    auto errorCollector = make_shared<ErrorCollector>();
+    runFastPath(updates, workers, errorCollector);
 
-    return move(autoCorrectFlusher->collectedErrors);
+    return move(errorCollector->collectedErrors);
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {

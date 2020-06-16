@@ -17,8 +17,9 @@ public:
     ErrorFlusherStdout() = default;
     ~ErrorFlusherStdout() = default;
 
-    void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> errors,
-                     const GlobalState &gs, core::FileRef file) override;
+    void flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                     std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
+    void flushErrorCount(spdlog::logger &logger, int count);
     void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
 };
 

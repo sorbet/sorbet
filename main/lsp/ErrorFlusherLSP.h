@@ -15,8 +15,8 @@ public:
     ErrorFlusherLSP(const u4 epoch, std::shared_ptr<ErrorReporter> errorReporter);
     ~ErrorFlusherLSP() = default;
 
-    void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors,
-                     const core::GlobalState &gs, core::FileRef file) override;
+    void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
+                     std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override;
 };
 
 } // namespace sorbet::realmain::lsp

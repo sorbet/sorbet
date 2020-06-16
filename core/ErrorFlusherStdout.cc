@@ -6,8 +6,8 @@ using namespace std;
 
 namespace sorbet::core {
 
-void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors,
-                                     const GlobalState &gs, core::FileRef file) {
+void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                                     vector<unique_ptr<ErrorQueueMessage>> errors) {
     fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
@@ -64,6 +64,14 @@ void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs
         fs.writeFile(entry.first.data(gs).path(), entry.second);
     }
     autocorrects.clear();
+}
+
+void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
+    if (count == 0) {
+        logger.log(spdlog::level::err, "No errors! Great job.", count);
+    } else {
+        logger.log(spdlog::level::err, "Errors: {}", count);
+    }
 }
 
 } // namespace sorbet::core
