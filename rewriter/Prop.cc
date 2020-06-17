@@ -128,20 +128,15 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         case core::Names::tokenProp()._id:
         case core::Names::timestampedTokenProp()._id:
             ret.name = core::Names::token();
-            ret.nameLoc = core::LocOffsets{send->loc.beginPos() +
-                                               (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
-                                           send->loc.endPos() - 5}; // get the 'token' part of it
+            ret.nameLoc =
+                core::LocOffsets{send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0),
+                                 send->loc.endPos() - 5}; // get the 'token' part of it
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::createdProp()._id:
-            ret.name = core::Names::created();
-            // 5 is the difference between `created_prop` and `created`
-            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
-            break;
         case core::Names::updatedProp()._id: {
-            ret.name = core::Names::updated();
-            // 5 is the difference between `updated_prop` and `updated`
+            ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
+            // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             auto chalk = ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Chalk());
             auto chalk_odm = ast::MK::UnresolvedConstant(send->loc, std::move(chalk), core::Names::Constants::ODM());
@@ -152,7 +147,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         case core::Names::merchantProp()._id:
             ret.isImmutable = true;
             ret.name = core::Names::merchant();
-            // 5 is the difference between `merchant_prop` and `merchant`
+            // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
