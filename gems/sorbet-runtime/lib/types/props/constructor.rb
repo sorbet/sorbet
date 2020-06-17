@@ -17,7 +17,7 @@ module T::Props::Constructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::Constructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_without_defaults(instance, hash)
-    @props_without_defaults&.count do |p, setter_proc|
+    props_without_defaults&.count do |p, setter_proc|
       begin
         val = hash[p]
         instance.instance_exec(val, &setter_proc)
