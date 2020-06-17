@@ -41,7 +41,7 @@ module T::Types
     module Private
       module Pool
         def self.type_for_module(mod)
-          cached = mod.instance_variable_get(:@__as_sorbet_simple_type)
+          cached = mod.instance_variable_get(:@__as_sorbet_simple_type) if mod.instance_variable_defined?(:@__as_sorbet_simple_type)
           return cached if cached
 
           type = Simple.new(mod)

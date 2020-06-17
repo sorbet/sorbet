@@ -83,6 +83,7 @@ module T::Configuration
     raise error
   end
 
+  @inline_type_error_handler = nil
   def self.inline_type_error_handler(error)
     if @inline_type_error_handler
       @inline_type_error_handler.call(error)
@@ -123,6 +124,7 @@ module T::Configuration
     raise ArgumentError.new("#{location.path}:#{location.lineno}: Error interpreting `sig`:\n  #{error.message}\n\n")
   end
 
+  @sig_builder_error_handler = nil
   def self.sig_builder_error_handler(error, location)
     if @sig_builder_error_handler
       @sig_builder_error_handler.call(error, location)
@@ -173,6 +175,7 @@ module T::Configuration
     raise error
   end
 
+  @sig_validation_error_handler = nil
   def self.sig_validation_error_handler(error, opts={})
     if @sig_validation_error_handler
       @sig_validation_error_handler.call(error, opts)
@@ -219,6 +222,7 @@ module T::Configuration
     raise TypeError.new(opts[:pretty_message])
   end
 
+  @call_validation_error_handler = nil
   def self.call_validation_error_handler(signature, opts={})
     if @call_validation_error_handler
       @call_validation_error_handler.call(signature, opts)
@@ -251,6 +255,7 @@ module T::Configuration
     puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
   end
 
+  @log_info_handler = nil
   def self.log_info_handler(str, extra)
     if @log_info_handler
       @log_info_handler.call(str, extra)
@@ -285,6 +290,7 @@ module T::Configuration
     puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
   end
 
+  @soft_assert_handler = nil
   def self.soft_assert_handler(str, extra)
     if @soft_assert_handler
       @soft_assert_handler.call(str, extra)
@@ -319,6 +325,7 @@ module T::Configuration
     raise str
   end
 
+  @hard_assert_handler = nil
   def self.hard_assert_handler(str, extra={})
     if @hard_assert_handler
       @hard_assert_handler.call(str, extra)
@@ -359,6 +366,7 @@ module T::Configuration
     T::Enum
   }).freeze
 
+  @scalar_types = nil
   def self.scalar_types
     @scalar_types || @default_scalar_types
   end
@@ -389,10 +397,12 @@ module T::Configuration
   def self.disable_legacy_t_enum_migration_mode
     @legacy_t_enum_migration_mode = false
   end
+  @legacy_t_enum_migration_mode = false
   def self.legacy_t_enum_migration_mode?
-    @legacy_t_enum_migration_mode || false
+    @legacy_t_enum_migration_mode
   end
 
+  @sealed_violation_whitelist = nil
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate
   #   whether inheriting /including a sealed module outside the defining module
   #   should be allowed. Useful to whitelist benign violations, like shim files

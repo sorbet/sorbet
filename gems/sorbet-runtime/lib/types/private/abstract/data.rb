@@ -12,7 +12,7 @@
 # modules that override the `hash` method with something completely broken.
 module T::Private::Abstract::Data
   def self.get(mod, key)
-    mod.instance_variable_get("@opus_abstract__#{key}") # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
+    mod.instance_variable_get("@opus_abstract__#{key}") if key?(mod, key) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
   end
 
   def self.set(mod, key, value)
