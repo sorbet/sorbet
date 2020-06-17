@@ -76,10 +76,10 @@ void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> 
     this->queue.push(move(msg), 1);
 }
 
-void ErrorQueue::pushQueryResponse(unique_ptr<core::lsp::QueryResponse> queryResponse) {
+void ErrorQueue::pushQueryResponse(core::FileRef fromFile, unique_ptr<core::lsp::QueryResponse> queryResponse) {
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::QueryResponse;
-    msg.whatFile = queryResponse->getLoc().file();
+    msg.whatFile = fromFile;
     msg.queryResponse = move(queryResponse);
     this->queue.push(move(msg), 1);
 }
