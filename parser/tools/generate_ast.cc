@@ -310,6 +310,12 @@ NodeDef nodes[] = {
         "kwarg",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
+    // Keyword nil argument
+    {
+        "Kwnilarg",
+        "kwnilarg",
+        vector<FieldDef>(),
+    },
     // explicit `begin` keyword.
     // `kwbegin` is emitted _only_ for post-while and post-until loops
     // because they act differently
