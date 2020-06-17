@@ -57,7 +57,7 @@ class LSPTypechecker final {
      * canceled. */
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
 
-    /** Runs incremental typechecking on the provided updates. */
+    /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
     std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
                                            std::shared_ptr<core::ErrorFlusher> errorFlusher) const;
 
