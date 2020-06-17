@@ -346,4 +346,15 @@ class T::Enum
 
     raise "Inheriting from children of T::Enum is prohibited" if self != T::Enum
   end
+
+  # Marshal support
+  sig {params(_level: Integer).returns(String)}
+  def _dump(_level)
+    Marshal.dump(serialize)
+  end
+
+  sig {params(args: String).returns(T.attached_class)}
+  def self._load(args)
+    deserialize(Marshal.load(args))
+  end
 end

@@ -186,14 +186,14 @@ module Marshal
         arg1: IO,
         arg2: Integer,
     )
-    .returns(Object)
+    .returns(IO)
   end
   sig do
     params(
         arg0: Object,
         arg1: Integer,
     )
-    .returns(Object)
+    .returns(String)
   end
   def self.dump(arg0, arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 

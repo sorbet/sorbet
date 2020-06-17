@@ -458,6 +458,23 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  it "is compatible with Marshal" do
+    (CardSuit.values + CardSuitCustom.values).each do |value|
+      roundtrip = Marshal.load(Marshal.dump(value))
+
+      assert_equal(roundtrip, value)
+
+      assert(value === roundtrip)
+
+      assert(
+        case roundtrip
+        when value then true
+        else false
+        end
+      )
+    end
+  end
+
   it 'can be used with an assert' do
     assert(CardSuit::SPADE, 'some message')
   end
