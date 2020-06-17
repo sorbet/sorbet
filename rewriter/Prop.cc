@@ -140,8 +140,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             auto chalk = ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Chalk());
             auto chalk_odm = ast::MK::UnresolvedConstant(send->loc, std::move(chalk), core::Names::Constants::ODM());
-            ret.type = ast::MK::UnresolvedConstant(send->loc, std::move(chalk_odm),
-                                                   core::Names::Constants::DeprecatedNumeric());
+            ret.type =
+                ASTUtil::mkNilable(send->loc, ast::MK::UnresolvedConstant(send->loc, std::move(chalk_odm),
+                                                                          core::Names::Constants::DeprecatedNumeric()));
             break;
         }
         case core::Names::merchantProp()._id:
