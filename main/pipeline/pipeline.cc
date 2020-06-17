@@ -983,6 +983,10 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                         igs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                            file.data(igs).path());
                                     }
+                                    // Stream out errors
+                                    threadResult.counters = getAndClearThreadCounters();
+                                    resultq->push(move(threadResult), processedByThread);
+                                    processedByThread = 0;
                                 }
                             }
                         }
