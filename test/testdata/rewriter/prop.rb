@@ -1,4 +1,5 @@
 # typed: true
+
 class NotAODM
     def self.prop(*args); end
     prop
@@ -118,7 +119,7 @@ def main
     PropHelpers.new.token = "tok_token"
     PropHelpers.new.token = nil # error: does not match expected type
 
-    T.reveal_type(PropHelpers.new.created) # error: Revealed type: `Float`
+    T.reveal_type(PropHelpers.new.created) # error: Revealed type: `Numeric`
     PropHelpers.new.created = 0.0
     PropHelpers.new.created = nil # error: does not match expected type
 
@@ -126,7 +127,7 @@ def main
     PropHelpers2.new.token = "tok_token"
     PropHelpers2.new.token = nil # error: does not match expected type
 
-    T.reveal_type(PropHelpers2.new.created) # error: Revealed type: `Float`
+    T.reveal_type(PropHelpers2.new.created) # error: Revealed type: `Numeric`
     PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
 
     T.reveal_type(ShardingProp.new.merchant) # error: Revealed type: `String`
@@ -142,4 +143,8 @@ def main
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`
     AdvancedODM.new.ifunset = nil # error: does not match expected type
     AdvancedODM.new.ifunset_nilable = nil
+end
+
+module Chalk::ODM
+  DeprecatedNumeric = Numeric
 end
