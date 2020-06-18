@@ -71,7 +71,7 @@ class Expression;
 class TreePtr {
 public:
     // We store tagged pointers as 64-bit values.
-    using tagged_storage = long long;
+    using tagged_storage = u64;
 
 private:
     static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
