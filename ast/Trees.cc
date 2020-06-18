@@ -42,6 +42,138 @@ using namespace std;
 
 namespace sorbet::ast {
 
+void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
+    ENFORCE(ptr != nullptr);
+
+    switch (tag) {
+        case Tag::EmptyTree:
+            delete reinterpret_cast<EmptyTree *>(ptr);
+            break;
+
+        case Tag::Send:
+            delete reinterpret_cast<Send *>(ptr);
+            break;
+
+        case Tag::ClassDef:
+            delete reinterpret_cast<ClassDef *>(ptr);
+            break;
+
+        case Tag::MethodDef:
+            delete reinterpret_cast<MethodDef *>(ptr);
+            break;
+
+        case Tag::If:
+            delete reinterpret_cast<If *>(ptr);
+            break;
+
+        case Tag::While:
+            delete reinterpret_cast<While *>(ptr);
+            break;
+
+        case Tag::Break:
+            delete reinterpret_cast<Break *>(ptr);
+            break;
+
+        case Tag::Retry:
+            delete reinterpret_cast<Retry *>(ptr);
+            break;
+
+        case Tag::Next:
+            delete reinterpret_cast<Next *>(ptr);
+            break;
+
+        case Tag::Return:
+            delete reinterpret_cast<Return *>(ptr);
+            break;
+
+        case Tag::RescueCase:
+            delete reinterpret_cast<RescueCase *>(ptr);
+            break;
+
+        case Tag::Rescue:
+            delete reinterpret_cast<Rescue *>(ptr);
+            break;
+
+        case Tag::Local:
+            delete reinterpret_cast<Local *>(ptr);
+            break;
+
+        case Tag::UnresolvedIdent:
+            delete reinterpret_cast<UnresolvedIdent *>(ptr);
+            break;
+
+        case Tag::RestArg:
+            delete reinterpret_cast<RestArg *>(ptr);
+            break;
+
+        case Tag::KeywordArg:
+            delete reinterpret_cast<KeywordArg *>(ptr);
+            break;
+
+        case Tag::OptionalArg:
+            delete reinterpret_cast<OptionalArg *>(ptr);
+            break;
+
+        case Tag::BlockArg:
+            delete reinterpret_cast<BlockArg *>(ptr);
+            break;
+
+        case Tag::ShadowArg:
+            delete reinterpret_cast<ShadowArg *>(ptr);
+            break;
+
+        case Tag::Assign:
+            delete reinterpret_cast<Assign *>(ptr);
+            break;
+
+        case Tag::Cast:
+            delete reinterpret_cast<Cast *>(ptr);
+            break;
+
+        case Tag::Hash:
+            delete reinterpret_cast<Hash *>(ptr);
+            break;
+
+        case Tag::Array:
+            delete reinterpret_cast<Array *>(ptr);
+            break;
+
+        case Tag::Literal:
+            delete reinterpret_cast<Literal *>(ptr);
+            break;
+
+        case Tag::UnresolvedConstantLit:
+            delete reinterpret_cast<UnresolvedConstantLit *>(ptr);
+            break;
+
+        case Tag::ConstantLit:
+            delete reinterpret_cast<ConstantLit *>(ptr);
+            break;
+
+        case Tag::ZSuperArgs:
+            delete reinterpret_cast<ZSuperArgs *>(ptr);
+            break;
+
+        case Tag::Block:
+            delete reinterpret_cast<Block *>(ptr);
+            break;
+
+        case Tag::InsSeq:
+            delete reinterpret_cast<InsSeq *>(ptr);
+            break;
+    }
+}
+
+bool isa_reference(const TreePtr &what) {
+    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
+           isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
+           isa_tree<ShadowArg>(what);
+}
+
+bool isa_declaration(const TreePtr &what) {
+    return isa_tree<MethodDef>(what) || isa_tree<ClassDef>(what);
+}
+
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
  *  [] - prototype only

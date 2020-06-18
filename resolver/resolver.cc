@@ -199,7 +199,7 @@ private:
 
     static bool isFullyResolved(core::Context ctx, const ast::TreePtr &expression) {
         ResolutionChecker checker;
-        ast::TreePtr dummy(expression.get());
+        ast::TreePtr dummy(expression.getTagged());
         dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
         ENFORCE(dummy == expression);
         dummy.release();
