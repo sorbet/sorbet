@@ -188,20 +188,26 @@ llvm::Value *IREmitterHelpers::emitMethodCall(CompilerState &cs, llvm::IRBuilder
 llvm::Value *IREmitterHelpers::fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &build,
                                                 const BasicBlockMap &blockMap,
                                                 const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                int rubyBlockId, const InlinedVector<cfg::VariableUseSite, 2> &args) {
+                                                int rubyBlockId, const InlinedVector<cfg::VariableUseSite, 2> &args,
+                                                const std::size_t offset, const std::size_t length) {
+    ENFORCE(offset + length <= args.size(), "Invalid range given to fillSendArgArray");
+
     auto &builder = builderCast(build);
-    if (args.empty()) {
+    if (length == 0) {
         return llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs));
     }
 
     // fill in args
-    int argId = -1;
-    for (auto &arg : args) {
-        argId += 1;
-        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                  llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
-        auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
-        builder.CreateStore(var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+    {
+        int argId = 0;
+        auto it = args.begin() + offset;
+        for (; argId < length; argId += 1, ++it) {
+            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                                      llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+            auto var = Payload::varGet(cs, it->variable, builder, blockMap, aliases, rubyBlockId);
+            builder.CreateStore(var,
+                                builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+        }
     }
 
     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),

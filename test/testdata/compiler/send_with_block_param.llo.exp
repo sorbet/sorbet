@@ -245,7 +245,7 @@ afterSend31.i:                                    ; preds = %sorbet_readRealpath
   br label %"func_<root>.<static-init>$153.exit"
 
 "func_<root>.<static-init>$153.exit":             ; preds = %afterSend31.i, %54
-  %57 = call i64 @rb_funcallv(i64 %52, i64 %rubyId_map.i, i32 0, i64* nonnull %callArgsAddr.i) #9
+  %57 = call i64 @rb_funcallv(i64 %52, i64 %rubyId_map.i, i32 0, i64* null) #9
   store i64 %57, i64* %callArgsAddr.i, align 16
   %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %27, i64 %24, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %28)

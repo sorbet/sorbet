@@ -150,32 +150,15 @@ public:
         core::NameRef funName(cs, lit->value);
         auto rawId = Payload::idIntern(cs, builder, funName.data(cs)->shortName(cs));
         auto block = Payload::varGet(cs, send->args[2].variable, builder, blockMap, aliases, rubyBlockId);
-        auto blockAsProc =
-            IREmitterHelpers::callViaRubyVMSimple(cs, builder, block,
+        auto blockAsProc = IREmitterHelpers::callViaRubyVMSimple(
+            cs, builder, block, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
 
-                                                  llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+        auto numArgs = send->args.size() - 3;
+        auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, numArgs, true));
+        auto *argv =
+            IREmitterHelpers::fillSendArgArray(cs, builder, blockMap, aliases, rubyBlockId, send->args, 3, numArgs);
 
-                                                  llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
-        {
-            int argId = -1;
-            for (auto &arg : send->args) {
-                argId += 1;
-                if (argId < 3) {
-                    continue;
-                }
-                llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                          llvm::ConstantInt::get(cs, llvm::APInt(64, argId - 3, true))};
-                auto var = Payload::varGet(cs, arg.variable, builder, blockMap, aliases, rubyBlockId);
-                builder.CreateStore(
-                    var, builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
-            }
-        }
-
-        llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
-                                  llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
-
-        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size() - 3, true));
-        auto argv = builder.CreateGEP(blockMap.sendArgArrayByBlock[rubyBlockId], indices);
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncProc"), {recv, rawId, argc, argv, blockAsProc},
                                   "rawSendWithProcResult");
     }

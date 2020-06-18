@@ -305,7 +305,6 @@ codeRepl:                                         ; preds = %sorbet_getMethodBlo
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_Object#bar"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #7 {
 functionEntryInitializers:
-  %callArgs = alloca [3 x i64], align 8
   %"stackFrame_func_Object#bar" = load i8*, i8** @"stackFramePrecomputed_func_Object#bar", align 8
   %rubyId_foo = load i64, i64* @rubyIdPrecomputed_foo, align 8
   %rubyId_to_proc = load i64, i64* @rubyIdPrecomputed_to_proc, align 8
@@ -356,19 +355,18 @@ typeTestSuccess:                                  ; preds = %sorbet_getMethodBlo
   store i64* %24, i64** %14, align 8, !tbaa !5
   %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_foo) #13
   %call_via_vm_to_proc = tail call i64 @sorbet_callFunc(i64 %4, i64 %rubyId_to_proc, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_to_proc)
-  %25 = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs, i64 0, i64 0
-  %26 = icmp eq i64 %call_via_vm_to_proc, 8
-  br i1 %26, label %sorbet_callFuncProc.exit, label %27
+  %25 = icmp eq i64 %call_via_vm_to_proc, 8
+  br i1 %25, label %sorbet_callFuncProc.exit, label %26
 
-27:                                               ; preds = %typeTestSuccess
-  %28 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !5
-  %29 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %28, i64 0, i32 17
-  store i64 %call_via_vm_to_proc, i64* %29, align 8, !tbaa !25
+26:                                               ; preds = %typeTestSuccess
+  %27 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !5
+  %28 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %27, i64 0, i32 17
+  store i64 %call_via_vm_to_proc, i64* %28, align 8, !tbaa !25
   br label %sorbet_callFuncProc.exit
 
-sorbet_callFuncProc.exit:                         ; preds = %typeTestSuccess, %27
-  %30 = call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_foo, i32 0, i64* nonnull %25) #13
-  ret i64 %30
+sorbet_callFuncProc.exit:                         ; preds = %typeTestSuccess, %26
+  %29 = tail call i64 @rb_funcallv(i64 %selfRaw, i64 %rubyId_foo, i32 0, i64* null) #13
+  ret i64 %29
 
 codeRepl:                                         ; preds = %sorbet_getMethodBlockAsProc.exit
   tail call fastcc void @"func_Object#bar.cold.1"(i64 %selfRaw) #14

@@ -68,7 +68,14 @@ public:
 
     static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
                                          const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                         const InlinedVector<cfg::VariableUseSite, 2> &args);
+                                         const InlinedVector<cfg::VariableUseSite, 2> &args, const std::size_t offset,
+                                         const std::size_t length);
+
+    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+                                         const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
+                                         const InlinedVector<cfg::VariableUseSite, 2> &args) {
+        return fillSendArgArray(cs, builder, blockMap, aliases, rubyBlockId, args, 0, args.size());
+    }
 
     static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
                                        const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
