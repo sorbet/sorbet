@@ -23,7 +23,8 @@
 
 namespace sorbet::realmain::lsp {
 using namespace std;
-class ErrorCollector : public core::ErrorFlusher {
+namespace {
+class ErrorCollector final : public core::ErrorFlusher {
 public:
     std::vector<std::unique_ptr<core::Error>> collectedErrors;
     ErrorCollector() = default;
@@ -41,7 +42,7 @@ public:
         }
     }
 };
-namespace {
+
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
                        bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
