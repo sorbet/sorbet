@@ -333,11 +333,40 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
     fnd->second.knownTruthy = false;
 }
 
-bool isSingleton(core::Context ctx, core::SymbolRef sym) {
-    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() ||
-           sym == core::Symbols::TrueClass() ||
-           (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
+namespace {
+
+bool isTEnumName(core::Context ctx, core::NameRef name) {
+    if (name.data(ctx)->kind != core::NameKind::CONSTANT) {
+        return false;
+    }
+    auto original = name.data(ctx)->cnst.original;
+    return original.data(ctx)->kind == core::NameKind::UNIQUE &&
+           original.data(ctx)->unique.uniqueNameKind == core::UniqueNameKind::TEnum;
 }
+
+// A singleton is a class which is inhabited by a single value.
+//
+// If a variable != a value whose type is a singleton, then that variable's type must not be that value's type.
+//
+// This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
+//
+// This powers (among other things) exhaustiveness checking for T::Enum.
+bool isSingleton(core::Context ctx, core::SymbolRef sym) {
+    // Singletons that are built into the Ruby VM
+    if (sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass()) {
+        return true;
+    }
+
+    // T::Enum values are modeled as singletons of their own fake class.
+    if (isTEnumName(ctx, sym.data(ctx)->name)) {
+        return true;
+    }
+
+    // The Ruby stdlib has a Singleton module which lets people invent their own singletons.
+    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
+}
+
+} // namespace
 
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {

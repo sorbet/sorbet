@@ -128,21 +128,29 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name->deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    classRhs.emplace_back(ast::MK::Send1(stat->loc, ast::MK::Self(stat->loc), core::Names::include(),
-                                         ast::MK::Constant(stat->loc, core::Symbols::Singleton())));
-    classRhs.emplace_back(ast::MK::Send0(stat->loc, ast::MK::Self(stat->loc), core::Names::declareFinal()));
     auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst->deepCopy(), std::move(parent),
                                    std::move(classRhs));
 
-    auto singletonAsgn =
-        ast::MK::Assign(stat->loc, std::move(asgn->lhs),
-                        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::let(),
-                                       ast::MK::Send0(stat->loc, classCnst->deepCopy(), core::Names::instance()),
-                                       std::move(classCnst)));
+    ast::Send::ARGS_store args;
+    auto first = true;
+    for (auto &&arg : rhs->args) {
+        if (first) {
+            // This is a call to <Magic>.<self-new>, so we need to skip the first arg.
+            first = false;
+            continue;
+        }
+
+        args.emplace_back(std::move(arg));
+    }
+
+    auto singletonAsgn = ast::MK::Assign(
+        stat->loc, std::move(asgn->lhs),
+        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::let(),
+                       ast::MK::Send(stat->loc, classCnst->deepCopy(), core::Names::new_(), std::move(args)),
+                       std::move(classCnst)));
 
     vector<ast::TreePtr> result;
     result.emplace_back(std::move(classDef));
-    result.emplace_back(std::move(asgn->rhs));
     result.emplace_back(std::move(singletonAsgn));
     return result;
 }
