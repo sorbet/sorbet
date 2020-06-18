@@ -4,8 +4,6 @@
 #include "ast/ast.h"
 #include "core/core.h"
 
-#include <vector>
-
 namespace sorbet::definition_validator {
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree);
