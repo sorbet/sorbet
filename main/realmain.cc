@@ -415,8 +415,9 @@ int realmain(int argc, char *argv[]) {
     }
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
+    auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher)));
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
@@ -512,7 +513,12 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        { indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore); }
+        {
+            indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
+        }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
@@ -540,7 +546,13 @@ int realmain(int argc, char *argv[]) {
 #endif
         } else {
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
             indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            if (gs->hadCriticalError()) {
+                gs->errorQueue->flushAllErrors(*gs);
+            }
         }
 
         if (opts.suggestTyped) {
@@ -572,13 +584,13 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        gs->errorQueue->flushErrors(true);
+        gs->errorQueue->flushAllErrors(*gs);
 
         if (!opts.noErrorCount) {
-            gs->errorQueue->flushErrorCount();
+            errorFlusher->flushErrorCount(gs->errorQueue->logger, gs->errorQueue->nonSilencedErrorCount);
         }
         if (opts.autocorrect) {
-            gs->errorQueue->flushAutocorrects(*gs, *opts.fs);
+            errorFlusher->flushAutocorrects(*gs, *opts.fs);
         }
         logger->trace("sorbet done");
 

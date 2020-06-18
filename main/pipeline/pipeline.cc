@@ -520,10 +520,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
-            // Flush all errors if the error queue had a critical error
-            if (ret.gs->hadCriticalError()) {
-                ret.gs->errorQueue->flushErrors(true);
-            }
         }
     }
     return ret;
@@ -750,10 +746,7 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         auto result = namer::Namer::run(gs, move(what), workers);
-        // Flush all errors if the error queue had a critical error
-        if (gs.hadCriticalError()) {
-            gs.errorQueue->flushErrors(true);
-        }
+
         return result;
     }
 }
@@ -900,11 +893,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
 
-    // Flush all errors if the error queue had a critical error
-    if (gs->hadCriticalError()) {
-        gs->errorQueue->flushErrors(true);
-    }
-
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
@@ -988,7 +976,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                     try {
                                         core::Context ctx(igs, core::Symbols::root(), file);
                                         auto parsedFile = typecheckOne(ctx, move(job), opts);
-                                        igs.errorQueue->markFileForFlushing(file);
                                         threadResult.trees.emplace_back(move(parsedFile));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
@@ -1016,7 +1003,9 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                                 make_move_iterator(threadResult.trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    gs->errorQueue->flushErrors();
+                    for (auto &tree : threadResult.trees) {
+                        gs->errorQueue->flushErrorsForFile(*gs, tree.file);
+                    }
                     if (preemptionManager) {
                         (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }
