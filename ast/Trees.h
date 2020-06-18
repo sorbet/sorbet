@@ -74,22 +74,22 @@ public:
     using tagged_storage = long long;
 
 private:
-    static constexpr long long TAG_MASK = 0xffff000000000007;
+    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
 
-    static constexpr long long PTR_MASK = ~TAG_MASK;
+    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
     tagged_storage ptr;
 
     template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
-        auto val = static_cast<long long>(tag);
+        auto val = static_cast<tagged_storage>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
             val <<= 48;
         }
 
-        auto maskedPtr = reinterpret_cast<long long>(expr) & PTR_MASK;
+        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
 
         return maskedPtr | val;
     }
@@ -99,7 +99,7 @@ private:
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
     // A version of release that doesn't mask the tag bits
-    long long releaseTagged() noexcept {
+    tagged_storage releaseTagged() noexcept {
         auto saved = ptr;
         ptr = 0;
         return saved;
@@ -174,7 +174,7 @@ public:
     Tag tag() const noexcept {
         ENFORCE(ptr != 0);
 
-        auto value = reinterpret_cast<long long>(ptr) & TAG_MASK;
+        auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
         if (value <= 7) {
             return static_cast<Tag>(value);
         } else {
