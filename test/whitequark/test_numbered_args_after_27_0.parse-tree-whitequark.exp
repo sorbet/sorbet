@@ -1,0 +1,6 @@
+s(:numblock,
+  s(:send, nil, :m),
+  s(:numparams, 9),
+  s(:send,
+    s(:lvar, :_1), :+,
+    s(:lvar, :_9)))
