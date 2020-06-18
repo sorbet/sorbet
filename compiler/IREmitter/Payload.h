@@ -16,6 +16,10 @@ class CompilerState;
 // should mostly be forwarders.
 class Payload {
 public:
+    // api for payload debugging utilities
+    static void rubyStopInDebugger(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static void dbg_p(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
+
     // api for actual code emission
     static llvm::Value *idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName);
     static llvm::Value *setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *boolean,

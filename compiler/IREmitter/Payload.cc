@@ -628,4 +628,15 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
     // normal local variable
     Payload::boxRawValue(cs, builder, blockMap.llvmVariables.at(local), var);
 }
+
+void Payload::rubyStopInDebugger(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.module->getFunction("sorbet_stopInDebugger"), {});
+}
+
+void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *val) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.module->getFunction("sorbet_dbg_p"), {val});
+}
+
 }; // namespace sorbet::compiler
