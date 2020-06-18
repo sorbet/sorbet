@@ -139,9 +139,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                 auto hasEnoughArgs = llvm::BasicBlock::Create(cs, "readKWHashArgCountSuccess", func);
                 auto hasPassedHash = llvm::BasicBlock::Create(cs, "readKWHash", func);
                 auto afterHash = llvm::BasicBlock::Create(cs, "afterKWHash", func);
-                // checkForArgSize
-                auto argSizeForHashCheck = builder.CreateICmpUGE(
-                    argCountRaw, llvm::ConstantInt::get(cs, llvm::APInt(32, 1)), "hashAttemptReadGuard");
+
+                // Check that there are enough arguments to fill out minPositionalArgCount
+                // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2547
+                auto argSizeForHashCheck =
+                    builder.CreateICmpULT(llvm::ConstantInt::get(cs, llvm::APInt(32, minPositionalArgCount)),
+                                          argCountRaw, "hashAttemptReadGuard");
                 builder.CreateCondBr(argSizeForHashCheck, hasEnoughArgs, afterHash);
 
                 auto sizeTestFailedEnd = builder.GetInsertBlock();
