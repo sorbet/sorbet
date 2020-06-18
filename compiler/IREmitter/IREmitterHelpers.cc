@@ -209,6 +209,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
             // NOTE: explicitly treating Unused functions like Exception functions, as they'll be collected by llvm
             // anyway.
             case FunctionType::Exception:
+                [[fallthrough]];
             case FunctionType::Unused: {
                 auto *fp =
                     llvm::Function::Create(et, llvm::Function::InternalLinkage,
