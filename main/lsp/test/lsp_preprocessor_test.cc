@@ -5,6 +5,7 @@
 #include "common/sort.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
+#include "core/NullFlusher.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -55,10 +56,10 @@ shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts,
 }
 
 unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
-    auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+    auto gs = make_unique<core::GlobalState>(
+        (make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, make_shared<core::NullFlusher>())));
     unique_ptr<const OwnedKeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, opts, kvstore);
-    gs->errorQueue->ignoreFlushes = true;
     return gs;
 }
 
@@ -115,8 +116,7 @@ public:
         preemptManager->assertTypecheckMutexHeld();
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
         // This should never drain error queue items from the preempted task.
-        gs.errorQueue->drainWithQueryResponses();
-        CHECK(gs.errorQueue->ignoreFlushes);
+        gs.errorQueue->drainAllErrors();
         runCount++;
     }
 };

@@ -29,6 +29,7 @@
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
+#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -1225,9 +1226,9 @@ namespace {
 core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
-    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
+    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>(
+        (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
     lgs->initEmpty();
-    lgs->errorQueue->ignoreFlushes = true;
     lgs->silenceErrors = true;
     core::FileRef fref;
     {
@@ -1238,7 +1239,6 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     vector<ast::ParsedFile> single;
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref));
-    auto errs = lgs->errorQueue->drainAllErrors();
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
     auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
