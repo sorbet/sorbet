@@ -103,7 +103,7 @@ module T
     end
   end
 
-  # References a type paramater which was previously defined with
+  # References a type parameter which was previously defined with
   # `type_parameters`.
   #
   # This is used for generic methods. Example usage:
