@@ -868,6 +868,9 @@ private:
 };
 CheckSize(EmptyTree, 16, 8);
 
+// This specialization of make_tree exists to ensure that we only ever create one empty tree.
+template <> TreePtr make_tree<EmptyTree>();
+
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
  *  [] - prototype only
