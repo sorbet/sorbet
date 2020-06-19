@@ -40,7 +40,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
     - [Testing "Go to Type Definition"](#testing-go-to-type-definition)
     - [Testing hover](#testing-hover)
     - [Testing completion](#testing-completion)
-    - [Testing incremental type checking](#testing-incremental-typechecking)
+    - [Testing incremental type checking](#testing-incremental-type-checking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
 - [Debugging and profiling](#debugging-and-profiling)
