@@ -47,7 +47,7 @@ void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
     switch (tag) {
         case Tag::EmptyTree:
-            delete reinterpret_cast<EmptyTree *>(ptr);
+            // explicitly not deleting the empty tree pointer
             break;
 
         case Tag::Send:
@@ -410,6 +410,18 @@ InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, TreePtr expr)
 EmptyTree::EmptyTree() : Expression(core::LocOffsets::none()) {
     categoryCounterInc("trees", "emptytree");
     _sanityCheck();
+}
+
+namespace {
+
+EmptyTree singletonEmptyTree{};
+
+} // namespace
+
+template <> TreePtr make_tree<EmptyTree>() {
+    TreePtr result = nullptr;
+    result.reset(&singletonEmptyTree);
+    return result;
 }
 
 namespace {
