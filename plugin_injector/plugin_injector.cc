@@ -129,6 +129,12 @@ public:
         if (!shouldCompile(gs, loc.file())) {
             return;
         }
+
+        // Don't emit bodies for abstract methods.
+        if (md.symbol.data(gs)->isAbstract()) {
+            return;
+        }
+
         auto threadState = getTypecheckThreadState();
         if (threadState->aborted) {
             return;

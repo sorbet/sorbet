@@ -116,18 +116,26 @@ public:
         auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
         ENFORCE(funcSym.exists());
         ENFORCE(funcSym.data(cs)->isMethod());
-        auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-        auto universalSignature =
-            llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-        auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-        auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
-        ENFORCE(rubyFunc);
-        builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
-                                      Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
-                                      llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+        // Don't define the method if it's abstract
+        if (!funcSym.data(cs)->isAbstract()) {
+            auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+            auto universalSignature =
+                llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
+            auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+            auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
+            ENFORCE(rubyFunc);
+            builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
+                                          Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
+                                          llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+
+            builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+        }
+
+        // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
+        // meta-progrmaming methods applied to an abstract method definition, see
+        // https://github.com/stripe/sorbet_llvm/issues/115 for more information.
         return Payload::varGet(cs, send->args[1].variable, builder, blockMap, aliases, rubyBlockId);
     }
 
