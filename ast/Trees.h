@@ -323,7 +323,7 @@ CheckSize(Declaration, 32, 8);
     class name;                                                                     \
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
     template <> struct TagToTree<Tag::name> { using value = name; };                \
-    class name final
+    class __attribute__((aligned(8))) name final
 
 TREE(ClassDef) : public Declaration {
 public:

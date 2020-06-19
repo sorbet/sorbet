@@ -414,9 +414,7 @@ EmptyTree::EmptyTree() : Expression(core::LocOffsets::none()) {
 
 namespace {
 
-// NOTE: the EmptyTree singleton is explicitly aligned on a 8-byte boundary, to preserve the assumptions of TreePtr when
-// building with emscripten for sorbet.run.
-__attribute__((aligned(8))) EmptyTree singletonEmptyTree{};
+EmptyTree singletonEmptyTree{};
 
 } // namespace
 
