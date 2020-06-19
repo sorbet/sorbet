@@ -335,15 +335,6 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
 
 namespace {
 
-bool isTEnumName(core::Context ctx, core::NameRef name) {
-    if (name.data(ctx)->kind != core::NameKind::CONSTANT) {
-        return false;
-    }
-    auto original = name.data(ctx)->cnst.original;
-    return original.data(ctx)->kind == core::NameKind::UNIQUE &&
-           original.data(ctx)->unique.uniqueNameKind == core::UniqueNameKind::TEnum;
-}
-
 // A singleton is a class which is inhabited by a single value.
 //
 // If a variable != a value whose type is a singleton, then that variable's type must not be that value's type.
@@ -358,7 +349,7 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     }
 
     // T::Enum values are modeled as singletons of their own fake class.
-    if (isTEnumName(ctx, sym.data(ctx)->name)) {
+    if (sym.data(ctx)->name.data(ctx)->isTEnumName(ctx)) {
         return true;
     }
 

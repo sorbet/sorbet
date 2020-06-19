@@ -619,12 +619,6 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     return item;
 }
 
-bool isTEnumName(const core::GlobalState &gs, core::NameRef name) {
-    auto original = name.data(gs)->cnst.original;
-    return original.data(gs)->kind == core::NameKind::UNIQUE &&
-           original.data(gs)->unique.uniqueNameKind == core::UniqueNameKind::TEnum;
-}
-
 bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::SymbolRef sym) {
     if (!sym.exists()) {
         return false;
@@ -639,7 +633,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
         return false;
     }
 
-    if (isTEnumName(gs, name)) {
+    if (name.data(gs)->isTEnumName(gs)) {
         // Every T::Enum value gets a class with the ~same name (see rewriter/TEnum.cc for details).
         // This manifests as showing two completion results when we should only show one, so skip the bad kind.
         return false;
