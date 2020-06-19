@@ -40,9 +40,6 @@ vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
 
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
-    if (ignoreFlushes) {
-        return;
-    }
 
     Timer timeit(tracer, "ErrorQueue::flushAllErrors");
     auto collectedErrors = drainAll();
@@ -54,9 +51,6 @@ void ErrorQueue::flushAllErrors(const GlobalState &gs) {
 
 void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
-    if (ignoreFlushes) {
-        return;
-    }
 
     filesFlushedCount.fetch_add(1);
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");

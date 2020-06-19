@@ -27,7 +27,6 @@ public:
     std::atomic<bool> hadCritical{false};
     std::atomic<int> nonSilencedErrorCount{0};
     std::atomic<int> filesFlushedCount{0};
-    bool ignoreFlushes{false};
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
                std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
