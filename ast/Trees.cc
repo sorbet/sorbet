@@ -470,6 +470,10 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
                    this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
+    if (this->rhs.empty()) {
+        fmt::format_to(buf, "{}", '\n');
+    }
+
     for (auto &a : this->rhs) {
         fmt::format_to(buf, "{}", '\n');
         printTabs(buf, tabs + 1);

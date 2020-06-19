@@ -130,7 +130,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"foo2=")
   end
 
-  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)  end
+  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
+  end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
