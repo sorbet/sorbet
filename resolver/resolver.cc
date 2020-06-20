@@ -2040,6 +2040,7 @@ public:
     }
 
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+        nestedBlockCounts.pop_back();
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
         return tree;
