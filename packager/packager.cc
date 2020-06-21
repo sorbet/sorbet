@@ -403,10 +403,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         for (auto &file : files) {
             if (file.file.data(gs).sourceType == core::File::Type::Package) {
                 auto &packageInfo = packageInfoByFile[file.file];
-                ENFORCE(packageInfo != nullptr)
-
-                core::Context ctx(gs, core::Symbols::root(), file.file);
-                file = rewritePackage(ctx, move(file), *packageInfo, packageInfoByMangledName);
+                if (packageInfo != nullptr) {
+                    core::Context ctx(gs, core::Symbols::root(), file.file);
+                    file = rewritePackage(ctx, move(file), *packageInfo, packageInfoByMangledName);
+                }
             }
         }
     }
