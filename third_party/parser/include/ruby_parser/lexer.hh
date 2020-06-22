@@ -26,6 +26,7 @@ enum class ruby_version {
     RUBY_23,
     RUBY_24,
     RUBY_25,
+    RUBY_26,
 };
 
 class lexer {
