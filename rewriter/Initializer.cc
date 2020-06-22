@@ -70,7 +70,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         return;
     }
     // make sure that the `sig` block looks like a valid sig block
-    auto *sig = ASTUtil::castSig(*prevStat, core::Names::void_());
+    auto *sig = ASTUtil::castSig(*prevStat);
     if (sig == nullptr) {
         return;
     }
