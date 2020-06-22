@@ -30,6 +30,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
             if (!cursor.exists()) {
                 return cursor;
             }
+            ENFORCE(cursor.kind() == core::SymbolRef::Kind::ClassOrModule);
             for (auto aliasPair : typeAliases[cursor.id()]) {
                 if (aliasPair.first == tparam) {
                     return dealiasAt(gs, aliasPair.second, klass, typeAliases);
@@ -82,6 +83,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         return true;
     }
+    ENFORCE(sym.kind() == core::SymbolRef::Kind::ClassOrModule);
     typeAliases[sym.id()].emplace_back(parentTypeMember, my);
     return true;
 } // namespace

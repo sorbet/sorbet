@@ -105,11 +105,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
         if (from.namesUsed() == optionalCommonParent->namesUsed() &&
             from.allSymbolsUsed() == optionalCommonParent->allSymbolsUsed()) {
             ENFORCE(to.namesUsed() >= from.namesUsed());
-            ENFORCE(to.classAndModulesUsed() >= from.classAndModulesUsed());
-            ENFORCE(to.methodsUsed() >= from.methodsUsed());
-            ENFORCE(to.fieldsUsed() >= from.fieldsUsed());
-            ENFORCE(to.typeArgumentsUsed() >= from.typeArgumentsUsed());
-            ENFORCE(to.typeMembersUsed() >= from.typeMembersUsed());
+            ENFORCE(to.allSymbolsUsed() >= from.allSymbolsUsed());
             fastPath = true;
         }
     }
