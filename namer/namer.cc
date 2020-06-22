@@ -1022,7 +1022,7 @@ class SymbolDefiner {
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
             auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton.id() >= oldSymCount,
+            ENFORCE(newSingleton.classOrModuleIndex() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return symbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {

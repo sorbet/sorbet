@@ -30,8 +30,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
             if (!cursor.exists()) {
                 return cursor;
             }
-            ENFORCE(cursor.kind() == core::SymbolRef::Kind::ClassOrModule);
-            for (auto aliasPair : typeAliases[cursor.id()]) {
+            for (auto aliasPair : typeAliases[cursor.classOrModuleIndex()]) {
                 if (aliasPair.first == tparam) {
                     return dealiasAt(gs, aliasPair.second, klass, typeAliases);
                 }
@@ -83,18 +82,17 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         return true;
     }
-    ENFORCE(sym.kind() == core::SymbolRef::Kind::ClassOrModule);
-    typeAliases[sym.id()].emplace_back(parentTypeMember, my);
+    typeAliases[sym.classOrModuleIndex()].emplace_back(parentTypeMember, my);
     return true;
 } // namespace
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
     ENFORCE(sym.data(gs)->isClassOrModule());
-    if (resolved[sym.id()]) {
+    if (resolved[sym.classOrModuleIndex()]) {
         return;
     }
-    resolved[sym.id()] = true;
+    resolved[sym.classOrModuleIndex()] = true;
 
     if (sym.data(gs)->superClass().exists()) {
         auto parent = sym.data(gs)->superClass();

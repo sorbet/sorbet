@@ -40,6 +40,9 @@ class SymbolRef final {
     friend class Symbol;
 
     u4 _id;
+    u4 unsafeTableIndex() const {
+        return _id >> KIND_BITS;
+    }
 
 public:
     // TODO: Enforce that this is only 3 bits?
@@ -59,12 +62,33 @@ public:
         return static_cast<Kind>(_id & KIND_MASK);
     }
 
-    u4 id() const {
-        return _id >> KIND_BITS;
-    }
-
     u4 raw() const {
         return _id;
+    }
+
+    u4 classOrModuleIndex() const {
+        ENFORCE(kind() == Kind::ClassOrModule);
+        return unsafeTableIndex();
+    }
+
+    u4 methodIndex() const {
+        ENFORCE(kind() == Kind::Method);
+        return unsafeTableIndex();
+    }
+
+    u4 fieldIndex() const {
+        ENFORCE(kind() == Kind::Field);
+        return unsafeTableIndex();
+    }
+
+    u4 typeArgumentIndex() const {
+        ENFORCE(kind() == Kind::TypeArgument);
+        return unsafeTableIndex();
+    }
+
+    u4 typeMemberIndex() const {
+        ENFORCE(kind() == Kind::TypeMember);
+        return unsafeTableIndex();
     }
 
     SymbolRef(GlobalState const *from, Kind type, u4 _id);
@@ -529,7 +553,7 @@ public:
         if (argc > MAX_PROC_ARITY) {
             return noSymbol();
         }
-        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, Proc0().id() + argc * 2);
+        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, Proc0().classOrModuleIndex() + argc * 2);
     }
 
     static SymbolRef last_proc() {
@@ -538,7 +562,7 @@ public:
 
     // Keep as last and update to match the last entry
     static SymbolRef last_synthetic_class_sym() {
-        ENFORCE(last_proc().id() == MAX_SYNTHETIC_CLASS_SYMBOLS - 2);
+        ENFORCE(last_proc().classOrModuleIndex() == MAX_SYNTHETIC_CLASS_SYMBOLS - 2);
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, MAX_SYNTHETIC_CLASS_SYMBOLS - 1);
     }
 

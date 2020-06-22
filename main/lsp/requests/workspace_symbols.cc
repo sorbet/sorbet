@@ -47,15 +47,15 @@ private:
     PartialMatch &getPartialMatch(core::SymbolRef ref) {
         switch (ref.kind()) {
             case core::SymbolRef::Kind::ClassOrModule:
-                return classOrModuleMatches[ref.id()];
+                return classOrModuleMatches[ref.classOrModuleIndex()];
             case core::SymbolRef::Kind::Method:
-                return methodMatches[ref.id()];
+                return methodMatches[ref.methodIndex()];
             case core::SymbolRef::Kind::Field:
-                return fieldMatches[ref.id()];
+                return fieldMatches[ref.fieldIndex()];
             case core::SymbolRef::Kind::TypeArgument:
-                return typeArgumentMatches[ref.id()];
+                return typeArgumentMatches[ref.typeArgumentIndex()];
             case core::SymbolRef::Kind::TypeMember:
-                return typeMemberMatches[ref.id()];
+                return typeMemberMatches[ref.typeMemberIndex()];
         }
     }
 
