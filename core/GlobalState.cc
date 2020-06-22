@@ -58,13 +58,12 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
       lspQuery(lsp::Query::noQuery()), epochManager(move(epochManager)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
-    // TODO(jvilk): Update
-    unsigned int maxNameCount = 8192;
-    unsigned int maxClassAndModuleCount = 16384;
-    unsigned int maxMethodCount = 16384;
-    unsigned int maxFieldCount = 16384;
-    unsigned int maxTypeArgumentCount = 16384;
-    unsigned int maxTypeMemberCount = 16384;
+    unsigned int maxNameCount = 32768;
+    unsigned int maxClassAndModuleCount = 8192;
+    unsigned int maxMethodCount = 32768;
+    unsigned int maxFieldCount = 4096;
+    unsigned int maxTypeArgumentCount = 256;
+    unsigned int maxTypeMemberCount = 4096;
 
     names.reserve(maxNameCount);
     classAndModules.reserve(maxClassAndModuleCount);
