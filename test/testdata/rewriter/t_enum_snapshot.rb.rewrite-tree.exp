@@ -6,20 +6,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.sealed!()
 
-    class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+    <self>.enums() do ||
+      begin
+        class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+        end
+        <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
+        class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+        end
+        <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
+        class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
+        end
+        <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
+        nil
+      end
     end
-
-    <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
-
-    class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
-    end
-
-    <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
-
-    class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
-    end
-
-    <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
   end
 
   class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
@@ -42,20 +42,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.sealed!()
 
-    class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+    <self>.enums() do ||
+      begin
+        class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+        end
+        <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
+        class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+        end
+        <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
+        class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
+        end
+        <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
+        nil
+      end
     end
-
-    <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
-
-    class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
-    end
-
-    <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
-
-    class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
-    end
-
-    <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"something_outside")
   end
@@ -74,12 +74,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C StaticField1> = 1
 
-    class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+    <self>.enums() do ||
+      begin
+        class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
+        end
+        <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.new(), <emptyTree>::<C Inside$1>)
+        <emptyTree>::<C StaticField2> = 2
+        nil
+      end
     end
-
-    <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.new(), <emptyTree>::<C Inside$1>)
-
-    <emptyTree>::<C StaticField2> = 2
 
     class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
     end

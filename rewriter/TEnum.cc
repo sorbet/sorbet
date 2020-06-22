@@ -155,13 +155,14 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     return result;
 }
 
-void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr stat, FromWhere fromWhere) {
+void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr stat, FromWhere fromWhere,
+                     vector<ast::TreePtr> &into) {
     auto newStats = processStat(ctx, klass, stat, fromWhere);
     if (newStats.empty()) {
-        klass->rhs.emplace_back(std::move(stat));
+        into.emplace_back(std::move(stat));
     } else {
         for (auto &newStat : newStats) {
-            klass->rhs.emplace_back(std::move(newStat));
+            into.emplace_back(std::move(newStat));
         }
     }
 }
@@ -189,16 +190,29 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
+            vector<ast::TreePtr> newStats;
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
                 for (auto &stat : insSeq->stats) {
-                    collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside);
+                    collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
                 }
-                collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside);
+                collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside, newStats);
             } else {
-                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside);
+                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside, newStats);
             }
+
+            ast::InsSeq::STATS_store insSeqStats;
+            for (auto &newStat : newStats) {
+                insSeqStats.emplace_back(std::move(newStat));
+            }
+
+            block.body = ast::MK::InsSeq(block.loc, std::move(insSeqStats), ast::MK::Nil(block.loc));
+            klass->rhs.emplace_back(std::move(stat));
         } else {
-            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside);
+            vector<ast::TreePtr> newStats;
+            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside, newStats);
+            for (auto &newStat : newStats) {
+                klass->rhs.emplace_back(std::move(newStat));
+            }
         }
     }
 }
