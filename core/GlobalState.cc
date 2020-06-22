@@ -1945,19 +1945,23 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     vector<const vector<Symbol> *> symbolTypes = {&this->classAndModules, &this->methods, &this->fields,
                                                   &this->typeArguments, &this->typeMembers};
     for (const auto symbolType : symbolTypes) {
-        for (const auto &sym : *symbolType) {
-            if (!sym.ignoreInHashing(*this)) {
-                if (sym.isMethod()) {
-                    auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
-                    target = mix(target, sym.hash(*this));
-                    hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
-                } else {
-                    hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+        if (symbolType == &this->methods) {
+            for (const auto &sym : *symbolType) {
+                auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
+                target = mix(target, sym.hash(*this));
+                hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+                counter++;
+                if (DEBUG_HASHING_TAIL && counter > classAndModulesUsed() - 15) {
+                    errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
                 }
             }
-            counter++;
-            if (DEBUG_HASHING_TAIL && counter > classAndModulesUsed() - 15) {
-                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+        } else {
+            for (const auto &sym : *symbolType) {
+                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+                counter++;
+                if (DEBUG_HASHING_TAIL && counter > classAndModulesUsed() - 15) {
+                    errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+                }
             }
         }
     }
