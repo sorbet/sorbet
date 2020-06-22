@@ -1155,8 +1155,32 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2 =
-            const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
+        SymbolRef current2;
+        switch (current.kind()) {
+            case SymbolRef::Kind::ClassOrModule:
+                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+                break;
+            case SymbolRef::Kind::Method:
+                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
+                break;
+            case SymbolRef::Kind::Field:
+                if (isField()) {
+                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
+                } else {
+                    current2 =
+                        const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+                }
+                break;
+            case SymbolRef::Kind::TypeArgument:
+                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner, this->name,
+                                                                           this->variance());
+                break;
+            case SymbolRef::Kind::TypeMember:
+                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner, this->name,
+                                                                         this->variance());
+                break;
+        }
+
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
             ENFORCE_NO_TIMER(e.first.exists(), name.toString(gs) + " has a member symbol without a name");

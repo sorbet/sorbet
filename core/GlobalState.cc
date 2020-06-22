@@ -901,12 +901,14 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     }
 }
 
-SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
-    ENFORCE_NO_TIMER(owner.exists(), "entering symbol in to non-existing owner");
-    ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
+SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    ENFORCE_NO_TIMER(!owner.exists() || // used when entering entirely syntehtic classes
+                     owner.data(*this)->isClassOrModule());
+    ENFORCE_NO_TIMER(name.data(*this)->isClassName(*this));
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
+    auto flags = Symbol::Flags::CLASS_OR_MODULE;
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE_NO_TIMER((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
@@ -915,62 +917,24 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-
-    SymbolRef ret;
-    if (flags & Symbol::Flags::CLASS_OR_MODULE) {
-        ret = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
-        store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
-        classAndModules.emplace_back();
-    } else if (flags & Symbol::Flags::METHOD) {
-        ret = SymbolRef(this, SymbolRef::Kind::Method, methods.size());
-        store = ret; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
-        methods.emplace_back();
-    } else if (flags & (Symbol::Flags::FIELD | Symbol::Flags::STATIC_FIELD)) {
-        ret = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
-        store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
-        fields.emplace_back();
-    } else if (flags & Symbol::Flags::TYPE_ARGUMENT) {
-        ret = SymbolRef(this, SymbolRef::Kind::TypeArgument, typeArguments.size());
-        store = ret; // DO NOT MOVE this assignment down. emplace_back on typeArguments invalidates `store`
-        typeArguments.emplace_back();
-    } else if (flags & Symbol::Flags::TYPE_MEMBER) {
-        ret = SymbolRef(this, SymbolRef::Kind::TypeMember, typeMembers.size());
-        store = ret; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
-        typeMembers.emplace_back();
-    } else {
-        ENFORCE(false);
-    }
-
+    auto ret = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
+    classAndModules.emplace_back();
     SymbolData data = ret.dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
     data->addLoc(*this, loc);
-    DEBUG_ONLY(
-        if (data->isClassOrModule()) { categoryCounterInc("symbols", "class"); } else if (data->isMethod()) {
-            categoryCounterInc("symbols", "method");
-        } else if (data->isField()) { categoryCounterInc("symbols", "field"); } else if (data->isStaticField()) {
-            categoryCounterInc("symbols", "static_field");
-        } else if (data->isTypeArgument()) {
-            categoryCounterInc("symbols", "type_argument");
-        } else if (data->isTypeMember()) { categoryCounterInc("symbols", "type_member"); } else {
-            Exception::notImplemented();
-        });
-
+    DEBUG_ONLY(categoryCounterInc("symbols", "method"));
     wasModified_ = true;
-    return ret;
-}
 
-SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
-            owner.data(*this)->isClassOrModule());
-    ENFORCE(name.data(*this)->isClassName(*this));
-    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    return ret;
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
     ENFORCE(owner.data(*this)->isClassOrModule());
+    ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
     } else if (variance == Variance::CoVariant) {
@@ -982,7 +946,30 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     }
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
-    SymbolRef result = enterSymbol(loc, owner, name, flags);
+
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
+    }
+
+    ENFORCE(!symbolTableFrozen);
+    auto result = SymbolRef(this, SymbolRef::Kind::TypeMember, typeMembers.size());
+    store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
+    typeMembers.emplace_back();
+
+    SymbolData data = result.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = flags;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+    DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
+    wasModified_ = true;
+
     auto &members = owner.data(*this)->typeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
@@ -991,6 +978,8 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 }
 
 SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+    ENFORCE(owner.exists());
+    ENFORCE(name.exists());
     u4 flags;
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
@@ -1003,7 +992,30 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     }
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
-    SymbolRef result = enterSymbol(loc, owner, name, flags);
+
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
+    }
+
+    ENFORCE(!symbolTableFrozen);
+    auto result = SymbolRef(this, SymbolRef::Kind::TypeArgument, typeArguments.size());
+    store = result; // DO NOT MOVE this assignment down. emplace_back on typeArguments invalidates `store`
+    typeArguments.emplace_back();
+
+    SymbolData data = result.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = flags;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+    DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
+    wasModified_ = true;
+
     owner.data(*this)->typeArguments().emplace_back(result);
     return result;
 }
@@ -1012,7 +1024,34 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     bool isBlock =
         name.data(*this)->kind == NameKind::UNIQUE && name.data(*this)->unique.original == Names::blockTemp();
     ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
-    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
+
+    auto flags = Symbol::Flags::METHOD;
+
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
+    }
+
+    ENFORCE(!symbolTableFrozen);
+
+    auto result = SymbolRef(this, SymbolRef::Kind::Method, methods.size());
+    store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
+    methods.emplace_back();
+
+    SymbolData data = result.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = flags;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+    DEBUG_ONLY(categoryCounterInc("symbols", "method"));
+    wasModified_ = true;
+
+    return result;
 }
 
 SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
@@ -1049,12 +1088,68 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(owner.data(*this)->isClassOrModule(), "entering field symbol into not-a-class");
-    return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
+    ENFORCE(name.exists());
+
+    auto flags = Symbol::Flags::FIELD;
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
+    }
+
+    ENFORCE(!symbolTableFrozen);
+
+    auto result = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
+    fields.emplace_back();
+
+    SymbolData data = result.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = flags;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+
+    DEBUG_ONLY(categoryCounterInc("symbols", "field"));
+    wasModified_ = true;
+
+    return result;
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(owner.data(*this)->isClassOrModule());
-    return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
+    ENFORCE(name.exists());
+
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto flags = Symbol::Flags::STATIC_FIELD;
+    auto &store = ownerScope->members()[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
+    }
+
+    ENFORCE(!symbolTableFrozen);
+
+    auto ret = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
+    fields.emplace_back();
+
+    SymbolData data = ret.dataAllowingNone(*this);
+    data->name = name;
+    data->flags = flags;
+    data->owner = owner;
+    data->addLoc(*this, loc);
+
+    DEBUG_ONLY(categoryCounterInc("symbols", "static_field"));
+    wasModified_ = true;
+
+    return ret;
 }
 
 ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
