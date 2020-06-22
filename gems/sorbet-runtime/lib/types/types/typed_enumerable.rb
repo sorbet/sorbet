@@ -23,50 +23,7 @@ module T::Types
 
     # @override Base
     def valid?(obj)
-      return false unless obj.is_a?(Enumerable)
-      case obj
-      when Array
-        begin
-          it = 0
-          while it < obj.count
-            return false unless @type.valid?(obj[it])
-            it += 1
-          end
-          return true
-        end
-      when Hash
-        return false unless @type.is_a?(FixedArray)
-        types = @type.types
-        return false if types.count != 2
-        key_type = types[0]
-        value_type = types[1]
-        obj.each_pair do |key, val|
-          # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
-          # iterate over a [key, value] array, so we can't juse use the @type.valid?(v)
-          return false if !key_type.valid?(key) || !value_type.valid?(val)
-        end
-        return true
-      when Enumerator
-        # Enumerators can be unbounded: see `[:foo, :bar].cycle`
-        return true
-      when Range
-        # A nil beginning or a nil end does not provide any type information. That is, nil in a range represents
-        # boundlessness, it does not express a type. For example `(nil...nil)` is not a T::Range[NilClass], its a range
-        # of unknown types (T::Range[T.untyped]).
-        # Similarly, `(nil...1)` is not a `T::Range[T.nilable(Integer)]`, it's a boundless range of Integer.
-        (obj.begin.nil? || @type.valid?(obj.begin)) && (obj.end.nil? || @type.valid?(obj.end))
-      when Set
-        obj.each do |item|
-          return false unless @type.valid?(item)
-        end
-
-        return true
-      else
-        # We don't check the enumerable since it isn't guaranteed to be
-        # rewindable (e.g. STDIN) and it may be expensive to enumerate
-        # (e.g. an enumerator that makes an HTTP request)"
-        true
-      end
+      obj.is_a?(Enumerable)
     end
 
     # @override Base
