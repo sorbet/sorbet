@@ -445,7 +445,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateTables(opts.reserveSymbolTableCapacity, opts.reserveNameTableCapacity);
+    gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                          opts.reserveTypeMemberTableCapacity, opts.reserveNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }

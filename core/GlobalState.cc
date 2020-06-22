@@ -780,19 +780,28 @@ u4 nextPowerOfTwo(u4 v) {
     return v;
 }
 
-void GlobalState::preallocateTables(u4 symbolSize, u4 nameSize) {
-    // u4 symbolSizeScaled = nextPowerOfTwo(symbolSize);
+void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
+                                    u4 typeMembersSize, u4 nameSize) {
+    u4 classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
+    u4 methodsSizeScaled = nextPowerOfTwo(methodsSize);
+    u4 fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
+    u4 typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
+    u4 typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
     u4 nameSizeScaled = nextPowerOfTwo(nameSize);
 
     // Note: reserve is a no-op if size is < current capacity.
-    // TODO: FIX
-    // symbols.reserve(symbolSizeScaled);
+    classAndModules.reserve(classAndModulesSizeScaled);
+    methods.reserve(methodsSizeScaled);
+    fields.reserve(fieldsSizeScaled);
+    typeArguments.reserve(typeArgumentsSizeScaled);
+    typeMembers.reserve(typeMembersSizeScaled);
     expandNames(nameSizeScaled);
     sanityCheck();
 
-    // trace(
-    //    absl::StrCat("Preallocated symbol and name tables. symbols=", symbols.capacity(), " names=",
-    //    names.capacity()));
+    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
+                      "typeMembers={} names={}",
+                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
+                      typeMembers.capacity(), names.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;

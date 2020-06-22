@@ -244,8 +244,11 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
         for (auto pair : symbolKinds) {
             const auto kind = pair.first;
             const auto size = pair.second;
-            for (u4 i = 1; i < size; ++i) {
-                updatePartialMatch(core::SymbolRef(gs, kind, i), queryBegin, queryEnd, ceilingScore);
+            for (u4 i = 0; i < size; ++i) {
+                auto sym = core::SymbolRef(gs, kind, i);
+                if (sym.exists()) {
+                    updatePartialMatch(core::SymbolRef(gs, kind, i), queryBegin, queryEnd, ceilingScore);
+                }
             }
         }
     }
@@ -260,8 +263,11 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
         for (auto pair : symbolKinds) {
             const auto kind = pair.first;
             const auto size = pair.second;
-            for (u4 i = 1; i < size; ++i) {
+            for (u4 i = 0; i < size; ++i) {
                 auto symbolRef = core::SymbolRef(gs, kind, i);
+                if (!symbolRef.exists()) {
+                    continue;
+                }
                 auto symbolData = symbolRef.data(gs);
                 auto nameData = symbolData->name.data(gs);
                 if (!isEligibleSymbol(nameData)) {
