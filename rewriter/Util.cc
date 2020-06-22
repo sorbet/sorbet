@@ -137,20 +137,20 @@ pair<ast::TreePtr, ast::TreePtr> ASTUtil::extractHashValue(core::MutableContext 
     return make_pair(nullptr, nullptr);
 }
 
-ast::Send *ASTUtil::castSig(ast::TreePtr &expr, core::NameRef returns) {
+ast::Send *ASTUtil::castSig(ast::TreePtr &expr) {
     auto *send = ast::cast_tree<ast::Send>(expr);
     if (send == nullptr) {
         return nullptr;
     }
 
-    return ASTUtil::castSig(send, returns);
+    return ASTUtil::castSig(send);
 }
 
 // This will return nullptr if the argument is not the right shape as a sig (i.e. a send to a method called `sig` with 0
 // or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
 // against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
 // look for non-void sigs).
-ast::Send *ASTUtil::castSig(ast::Send *send, core::NameRef returns) {
+ast::Send *ASTUtil::castSig(ast::Send *send) {
     if (send->fun != core::Names::sig()) {
         return nullptr;
     }
@@ -165,15 +165,15 @@ ast::Send *ASTUtil::castSig(ast::Send *send, core::NameRef returns) {
     }
     auto *block = ast::cast_tree<ast::Block>(send->block);
     ENFORCE(block);
-    auto body = ast::cast_tree<ast::Send>(block->body);
-    if (!body) {
+    auto *body = ast::cast_tree<ast::Send>(block->body);
+    while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure())) {
+        body = ast::cast_tree<ast::Send>(body->recv);
+    }
+    if (body != nullptr && (body->fun == core::Names::void_() || body->fun == core::Names::returns())) {
+        return send;
+    } else {
         return nullptr;
     }
-    if (body->fun != returns) {
-        return nullptr;
-    }
-
-    return send;
 }
 
 ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs) {

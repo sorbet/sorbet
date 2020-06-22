@@ -16,8 +16,8 @@ public:
     static std::pair<ast::TreePtr, ast::TreePtr> extractHashValue(core::MutableContext ctx, ast::Hash &hash,
                                                                   core::NameRef name);
 
-    static ast::Send *castSig(ast::TreePtr &expr, core::NameRef returns);
-    static ast::Send *castSig(ast::Send *expr, core::NameRef returns);
+    static ast::Send *castSig(ast::TreePtr &expr);
+    static ast::Send *castSig(ast::Send *expr);
 
     static ast::TreePtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs);
 
