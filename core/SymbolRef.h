@@ -53,7 +53,7 @@ public:
 
     // Kind takes up this many bits in _id.
     static constexpr u4 KIND_BITS = 3;
-    static constexpr u4 KIND_MASK = 0x7;
+    static constexpr u4 KIND_MASK = (1 << KIND_BITS) - 1;
 
     Kind kind() const {
         return static_cast<Kind>(_id & KIND_MASK);
