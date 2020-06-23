@@ -139,11 +139,9 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
 
                     if (leftType != remainingType) {
                         remainingType = leftType;
+
                         auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
                         llvm::StringRef clazNameRef(clazName.data(), clazName.size());
-                        auto recv = Payload::varGet(cs, send->recv.variable, builder, irctx, aliases, rubyBlockId);
-
-                        auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
 
                         auto alternative = llvm::BasicBlock::Create(
                             cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
@@ -151,6 +149,15 @@ llvm::Value *trySymbolBasedIntrinsic(CompilerState &cs, llvm::IRBuilderBase &bui
                         auto fastPath = llvm::BasicBlock::Create(
                             cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
                             builder.GetInsertBlock()->getParent());
+
+                        llvm::Value *typeTest;
+                        if (symbolBasedIntrinsic->skipReceiverTypeTest()) {
+                            typeTest = builder.getInt1(true);
+                        } else {
+                            auto recv = Payload::varGet(cs, send->recv.variable, builder, irctx, aliases, rubyBlockId);
+                            typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
+                        }
+
                         builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath,
                                              alternative);
                         builder.SetInsertPoint(fastPath);

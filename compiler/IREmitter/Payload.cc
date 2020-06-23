@@ -331,6 +331,23 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
                     return;
                 }
             }
+
+            if (ct->symbol.data(cs)->name.data(cs)->isTEnumName(cs)) {
+                // T.let(..., MyEnum::X$1) only happens in the constant assignment that happens
+                // inside the T::Enum rewriter pass. The fake T::Enum class doesn't exist at
+                // runtime, which means the type test will always fail, but we don't care.
+                ret = builder.getInt1(true);
+                return;
+            }
+
+            if (ct->symbol.data(cs)->derivesFrom(cs, core::Symbols::T_Enum())) {
+                // T.let(..., MyEnum::X) is special. These are singleton values, so we can do a type
+                // test with an object (reference) equality check.
+                ret = builder.CreateCall(cs.module->getFunction("sorbet_testObjectEqual_p"),
+                                         {Payload::getRubyConstant(cs, ct->symbol, builder), val});
+                return;
+            }
+
             auto attachedClass = ct->symbol.data(cs)->attachedClass(cs);
             // todo: handle attached of attached class
             if (attachedClass.exists()) {
