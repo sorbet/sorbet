@@ -19,6 +19,6 @@ Key data structures:
 TypecheckThreadState
   llvm::Module
 CompilerState
-BasicBlockMap
+IREmitterContext
 Aliases
 

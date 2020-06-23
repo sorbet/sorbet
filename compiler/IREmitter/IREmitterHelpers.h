@@ -9,7 +9,7 @@
 
 namespace sorbet::compiler {
 
-struct BasicBlockMap;
+struct IREmitterContext;
 
 // TODO(jez) This shouldn't be at the top-level (sorbet::compiler). It should probably be nested in something.
 // (Confusing to see bare `Alias` when there is also `cfg::Alias`)
@@ -66,38 +66,38 @@ public:
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
 
-    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                          const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                          const InlinedVector<cfg::VariableUseSite, 2> &args, const std::size_t offset,
                                          const std::size_t length);
 
-    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+    static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                          const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                          const InlinedVector<cfg::VariableUseSite, 2> &args) {
-        return fillSendArgArray(cs, builder, blockMap, aliases, rubyBlockId, args, 0, args.size());
+        return fillSendArgArray(cs, builder, irctx, aliases, rubyBlockId, args, 0, args.size());
     }
 
     static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
-                                       const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                       const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases,
                                        int rubyBlockId);
 
     static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *self,
                                             llvm::Value *argv, llvm::Value *argc, std::string_view name);
 
     static llvm::Value *emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef funSym,
-                                              cfg::Send *send, const BasicBlockMap &blockMap,
+                                              cfg::Send *send, const IREmitterContext &irctx,
                                               UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId);
 
     static llvm::Value *emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
-                                                const BasicBlockMap &blockMap,
+                                                const IREmitterContext &irctx,
                                                 const UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                 int rubyBlockId, llvm::Function *blk);
 
-    static BasicBlockMap getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
-                                                          UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                          llvm::Function *mainFunc);
+    static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
+                                                             UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                             llvm::Function *mainFunc);
 
-    static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+    static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                       UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                       int bodyRubyBlockId, core::LocalVariable exceptionValue);
 };

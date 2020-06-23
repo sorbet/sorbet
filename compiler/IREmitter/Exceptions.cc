@@ -3,7 +3,7 @@
 
 #include "cfg/CFG.h"
 #include "compiler/Core/CompilerState.h"
-#include "compiler/IREmitter/BasicBlockMap.h"
+#include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/IREmitter/Payload.h"
 
@@ -16,7 +16,7 @@ namespace {
 class ExceptionState {
     CompilerState &cs;
     llvm::IRBuilder<> &builder;
-    const BasicBlockMap &blockMap;
+    const IREmitterContext &irctx;
     UnorderedMap<core::LocalVariable, Alias> &aliases;
     const int rubyBlockId;
     const int bodyRubyBlockId;
@@ -30,27 +30,27 @@ class ExceptionState {
     llvm::BasicBlock *exceptionEntry = nullptr;
     llvm::Value *exceptionResultPtr = nullptr;
 
-    ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+    ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                    UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId, int bodyRubyBlockId,
                    core::LocalVariable exceptionValue)
-        : cs(cs), builder(static_cast<llvm::IRBuilder<> &>(builder)), blockMap(blockMap), aliases(aliases),
+        : cs(cs), builder(static_cast<llvm::IRBuilder<> &>(builder)), irctx(irctx), aliases(aliases),
           rubyBlockId(rubyBlockId), bodyRubyBlockId(bodyRubyBlockId),
           handlersRubyBlockId(bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET),
           ensureRubyBlockId(bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET),
           elseRubyBlockId(bodyRubyBlockId + cfg::CFG::ELSE_BLOCK_OFFSET), exceptionValue(exceptionValue),
-          currentFunc(blockMap.rubyBlocks2Functions[rubyBlockId]) {}
+          currentFunc(irctx.rubyBlocks2Functions[rubyBlockId]) {}
 
 public:
     // Setup the context for compiling exception-handling code, and bring some needed constants into scope.
-    static ExceptionState setup(CompilerState &cs, llvm::IRBuilderBase &builder, const BasicBlockMap &blockMap,
+    static ExceptionState setup(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                 UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId, int bodyRubyBlockId,
                                 core::LocalVariable exceptionValue) {
-        ExceptionState state(cs, builder, blockMap, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
+        ExceptionState state(cs, builder, irctx, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
         // Allocate a place to store the exception result from sorbet_try. This must go in the function init block,
         // otherwise the allocation might happen inside of a loop, causing a stack overflow.
         auto ip = state.builder.saveIP();
-        state.builder.SetInsertPoint(blockMap.functionInitializersByFunction[rubyBlockId]);
+        state.builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
         state.exceptionResultPtr = state.builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "exceptionValue");
         state.builder.restoreIP(ip);
 
@@ -64,7 +64,7 @@ public:
         state.builder.SetInsertPoint(state.exceptionEntry);
 
         // Clear out the variable that we store the current exception in
-        Payload::varSet(cs, exceptionValue, Payload::rubyNil(state.cs, state.builder), builder, blockMap, aliases,
+        Payload::varSet(cs, exceptionValue, Payload::rubyNil(state.cs, state.builder), builder, irctx, aliases,
                         rubyBlockId);
 
         return state;
@@ -75,24 +75,24 @@ public:
     }
 
     llvm::Function *getEnsure() const {
-        auto ensurePresent = blockMap.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused;
-        return ensurePresent ? blockMap.rubyBlocks2Functions[ensureRubyBlockId] : getDoNothing();
+        auto ensurePresent = irctx.rubyBlockType[ensureRubyBlockId] != FunctionType::Unused;
+        return ensurePresent ? irctx.rubyBlocks2Functions[ensureRubyBlockId] : getDoNothing();
     }
 
     llvm::Function *getElse() const {
-        auto elsePresent = blockMap.rubyBlockType[elseRubyBlockId] != FunctionType::Unused;
-        return elsePresent ? blockMap.rubyBlocks2Functions[elseRubyBlockId] : getDoNothing();
+        auto elsePresent = irctx.rubyBlockType[elseRubyBlockId] != FunctionType::Unused;
+        return elsePresent ? irctx.rubyBlocks2Functions[elseRubyBlockId] : getDoNothing();
     }
 
     llvm::Function *getHandlers() const {
-        return blockMap.rubyBlocks2Functions[handlersRubyBlockId];
+        return irctx.rubyBlocks2Functions[handlersRubyBlockId];
     }
 
     // Fetch the pc, iseq_encoded, and closure values that are used when calling an exception function.
     tuple<llvm::Value *, llvm::Value *, llvm::Value *> getExceptionArgs() {
-        auto *pc = builder.CreateLoad(blockMap.lineNumberPtrsByFunction[rubyBlockId]);
-        auto *iseq_encoded = builder.CreateLoad(blockMap.iseqEncodedPtrsByFunction[rubyBlockId]);
-        auto *closure = blockMap.escapedClosure[rubyBlockId];
+        auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
+        auto *iseq_encoded = builder.CreateLoad(irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
+        auto *closure = irctx.escapedClosure[rubyBlockId];
         return {pc, iseq_encoded, closure};
     }
 
@@ -122,7 +122,7 @@ public:
     llvm::Value *runBody() {
         // Call the body, using sorbet_try to catch any exceptions raised and communicate them out via
         // exceptionResultPtr.
-        auto *bodyFunction = blockMap.rubyBlocks2Functions[bodyRubyBlockId];
+        auto *bodyFunction = irctx.rubyBlocks2Functions[bodyRubyBlockId];
         auto [bodyResult, exceptionResultPtr] = sorbetTry(bodyFunction, previousException);
 
         // Check for an early return from the body.
@@ -140,7 +140,7 @@ public:
         // Update the exceptionValue closure variable to hold the exception raised.
         builder.SetInsertPoint(continueBlock);
         auto *exceptionResult = builder.CreateLoad(exceptionResultPtr);
-        Payload::varSet(cs, exceptionValue, exceptionResult, builder, blockMap, aliases, rubyBlockId);
+        Payload::varSet(cs, exceptionValue, exceptionResult, builder, irctx, aliases, rubyBlockId);
 
         return exceptionResult;
     }
@@ -164,7 +164,7 @@ public:
         auto *ensureBlock = llvm::BasicBlock::Create(cs, "exception-ensure", currentFunc);
         auto *shouldRetry = builder.CreateAnd(
             exceptionRaised,
-            builder.CreateICmpEQ(handlerResult, Payload::retrySingleton(cs, builder, blockMap), "shouldRetry"));
+            builder.CreateICmpEQ(handlerResult, Payload::retrySingleton(cs, builder, irctx), "shouldRetry"));
         builder.CreateCondBr(shouldRetry, exceptionEntry, ensureBlock);
 
         // the handler didn't retry, run ensure and return its value.
@@ -187,7 +187,7 @@ public:
     // If no rescue clause handled the exception, the exceptionValue will contain a non-nil value. Test for that at
     // the end of exception handling, conditionally re-raising it to the outer context.
     void raiseUnhandledException() {
-        auto *exn = Payload::varGet(cs, exceptionValue, builder, blockMap, aliases, rubyBlockId);
+        auto *exn = Payload::varGet(cs, exceptionValue, builder, irctx, aliases, rubyBlockId);
         raiseIfNotNil(exn);
     }
 };
@@ -195,10 +195,10 @@ public:
 } // namespace
 
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
-                                             const BasicBlockMap &blockMap,
+                                             const IREmitterContext &irctx,
                                              UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                              int bodyRubyBlockId, core::LocalVariable exceptionValue) {
-    auto state = ExceptionState::setup(cs, build, blockMap, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
+    auto state = ExceptionState::setup(cs, build, irctx, aliases, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
     auto exceptionResult = state.runBody();
     state.runRescueElseEnsure(exceptionResult);

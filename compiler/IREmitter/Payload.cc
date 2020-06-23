@@ -7,7 +7,7 @@
 #include "ast/Trees.h"
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
-#include "compiler/IREmitter/BasicBlockMap.h"
+#include "compiler/IREmitter/IREmitterContext.h"
 #include <string>
 
 using namespace std;
@@ -476,7 +476,7 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
 }
 
 // Ensure that the retry singleton is present during module initialization, and store it in a module-local global.
-llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &build, const BasicBlockMap &blockMap) {
+llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
     auto tp = llvm::Type::getInt64Ty(cs);
     string rawName = "<retry-singleton>";
     auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
@@ -540,8 +540,8 @@ llvm::Value *Payload::readRestArgs(CompilerState &cs, llvm::IRBuilderBase &build
 }
 
 namespace {
-llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const BasicBlockMap &blockMap) {
-    auto sym = blockMap.forMethod.data(cs)->owner;
+llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx) {
+    auto sym = irctx.forMethod.data(cs)->owner;
     ENFORCE(sym.data(cs)->isClassOrModule());
 
     return Payload::getRubyConstant(cs, sym.data(cs)->topAttachedClass(cs), builder);
@@ -550,7 +550,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 } // namespace
 
 llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
-                             const BasicBlockMap &blockMap, const UnorderedMap<core::LocalVariable, Alias> &aliases,
+                             const IREmitterContext &irctx, const UnorderedMap<core::LocalVariable, Alias> &aliases,
                              int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
@@ -565,29 +565,29 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
                 {Payload::idIntern(cs, builder, alias.globalField.data(cs)->name.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
-                                      {getClassVariableStoreClass(cs, builder, blockMap),
+                                      {getClassVariableStoreClass(cs, builder, irctx),
                                        Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             return builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableGet"),
-                {varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
+                {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId),
                  Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
-    if (blockMap.escapedVariableIndices.contains(local)) {
-        auto id = blockMap.escapedVariableIndices.at(local);
+    if (irctx.escapedVariableIndices.contains(local)) {
+        auto id = irctx.escapedVariableIndices.at(local);
         auto store =
             builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
-                               {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
+                               {irctx.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
         return builder.CreateLoad(store);
     }
 
     // normal local variable
-    return Payload::unboxRawValue(cs, builder, blockMap.llvmVariables.at(local));
+    return Payload::unboxRawValue(cs, builder, irctx.llvmVariables.at(local));
 }
 
 void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &build,
-                     const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases,
+                     const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases,
                      int rubyBlockId) {
     auto &builder = builderCast(build);
     if (aliases.contains(local)) {
@@ -606,27 +606,27 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
                 {Payload::idIntern(cs, builder, alias.globalField.data(cs)->name.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.module->getFunction("sorbet_classVariableSet"),
-                               {getClassVariableStoreClass(cs, builder, blockMap),
+                               {getClassVariableStoreClass(cs, builder, irctx),
                                 Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(
                 cs.module->getFunction("sorbet_instanceVariableSet"),
-                {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, blockMap, aliases, rubyBlockId),
+                {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId),
                  Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;
     }
-    if (blockMap.escapedVariableIndices.contains(local)) {
-        auto id = blockMap.escapedVariableIndices.at(local);
+    if (irctx.escapedVariableIndices.contains(local)) {
+        auto id = irctx.escapedVariableIndices.at(local);
         auto store =
             builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
-                               {blockMap.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
+                               {irctx.escapedClosure[rubyBlockId], llvm::ConstantInt::get(cs, llvm::APInt(32, id))});
         builder.CreateStore(var, store);
         return;
     }
 
     // normal local variable
-    Payload::boxRawValue(cs, builder, blockMap.llvmVariables.at(local), var);
+    Payload::boxRawValue(cs, builder, irctx.llvmVariables.at(local), var);
 }
 
 void Payload::rubyStopInDebugger(CompilerState &cs, llvm::IRBuilderBase &build) {

@@ -7,13 +7,13 @@
 
 namespace sorbet::compiler {
 
-struct BasicBlockMap;
+struct IREmitterContext;
 
 class NameBasedIntrinsicMethod {
 public:
     const Intrinsics::HandleBlock blockHandled;
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &builder,
-                                  const BasicBlockMap &blockMap,
+                                  const IREmitterContext &irctx,
                                   const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
                                   llvm::Function *blk) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;

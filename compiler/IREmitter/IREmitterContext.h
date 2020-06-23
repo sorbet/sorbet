@@ -19,14 +19,12 @@ enum class FunctionType {
     Unused,
 };
 
-// We probably want to rename this something more like IREmitterContext, because that's what it's grown into being.
-//
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
 //
 // Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyBlockId (i.e., an ID
 // for each Ruby block like `do ...  end` inside a Ruby method, with 0 meaning "outside a Ruby block").
 // It might make sense to newtype this someday.
-struct BasicBlockMap {
+struct IREmitterContext {
     core::SymbolRef forMethod;
 
     // Contains llvm::BasicBlocks (insertion points) to hold code for a Ruby method or block that runs first,

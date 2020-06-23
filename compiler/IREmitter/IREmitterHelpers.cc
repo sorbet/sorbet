@@ -8,8 +8,8 @@
 #include "cfg/CFG.h"
 #include "common/sort.h"
 #include "compiler/Core/CompilerState.h"
-#include "compiler/IREmitter/BasicBlockMap.h"
 #include "compiler/IREmitter/CFGHelpers.h"
+#include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
 #include "compiler/Names/Names.h"
 
@@ -19,7 +19,7 @@ namespace sorbet::compiler {
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const BasicBlockMap &blockMap, UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                    const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
@@ -38,7 +38,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                 continue;
             }
             auto svName = var._name.data(cs)->shortName(cs);
-            builder.SetInsertPoint(blockMap.functionInitializersByFunction[entry.second.value()]);
+            builder.SetInsertPoint(irctx.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
             auto nilValueRaw = Payload::rubyNil(cs, builder);
@@ -49,12 +49,12 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
     {
         // nill out closure variables
 
-        builder.SetInsertPoint(blockMap.functionInitializersByFunction[0]);
-        auto escapedVariablesCount = blockMap.escapedVariableIndices.size();
+        builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
+        auto escapedVariablesCount = irctx.escapedVariableIndices.size();
         for (auto i = 0; i < escapedVariablesCount; i++) {
-            auto store = builder.CreateCall(
-                cs.module->getFunction("sorbet_getClosureElem"),
-                {blockMap.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))}, "nillingOutClosureVars");
+            auto store = builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
+                                            {irctx.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))},
+                                            "nillingOutClosureVars");
             builder.CreateStore(Payload::rubyNil(cs, builder), store);
         }
     }
@@ -294,10 +294,10 @@ void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector
     return;
 }
 
-BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
-                                                                 const ast::MethodDef &md,
-                                                                 UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                                 llvm::Function *mainFunc) {
+IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
+                                                                    const ast::MethodDef &md,
+                                                                    UnorderedMap<core::LocalVariable, Alias> &aliases,
+                                                                    llvm::Function *mainFunc) {
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
     vector<int> basicBlockRubyBlockId(cfg.maxBasicBlockId, 0);
     llvm::IRBuilder<> builder(cs);
@@ -467,29 +467,31 @@ BasicBlockMap IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &
 
     llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess", mainFunc);
 
-    BasicBlockMap approximation{cfg.symbol,
-                                functionInitializersByFunction,
-                                argumentSetupBlocksByFunction,
-                                userEntryBlockByFunction,
-                                llvmBlocks,
-                                move(basicBlockJumpOverrides),
-                                move(basicBlockRubyBlockId),
-                                move(sendArgArrays),
-                                escapedClosure,
-                                std::move(escapedVariableIndices),
-                                {},
-                                sigVerificationBlock,
-                                postProcessBlock,
-                                move(blockLinks),
-                                move(rubyBlockArgs),
-                                move(rubyBlock2Function),
-                                move(blockTypes),
-                                move(lineNumberPtrsByFunction),
-                                move(iseqEncodedPtrsByFunction),
-                                usesBlockArgs,
-                                move(exceptionHandlingBlockHeaders),
-                                move(deadBlocks),
-                                move(blockExits)};
+    IREmitterContext approximation{
+        cfg.symbol,
+        functionInitializersByFunction,
+        argumentSetupBlocksByFunction,
+        userEntryBlockByFunction,
+        llvmBlocks,
+        move(basicBlockJumpOverrides),
+        move(basicBlockRubyBlockId),
+        move(sendArgArrays),
+        escapedClosure,
+        std::move(escapedVariableIndices),
+        {},
+        sigVerificationBlock,
+        postProcessBlock,
+        move(blockLinks),
+        move(rubyBlockArgs),
+        move(rubyBlock2Function),
+        move(blockTypes),
+        move(lineNumberPtrsByFunction),
+        move(iseqEncodedPtrsByFunction),
+        usesBlockArgs,
+        move(exceptionHandlingBlockHeaders),
+        move(deadBlocks),
+        move(blockExits),
+    };
     approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
 
     return approximation;
