@@ -42,7 +42,7 @@ void maybeAddLet(core::MutableContext ctx, ast::TreePtr &expr,
     auto typeExpr = argTypeMap.find(rhs->name);
     if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
         auto loc = rhs->loc;
-        auto newLet = ast::MK::Let(loc, move(assn->rhs), (*typeExpr->second)->deepCopy());
+        auto newLet = ast::MK::Let(loc, move(assn->rhs), (*typeExpr->second).deepCopy());
         assn->rhs = move(newLet);
     }
 }

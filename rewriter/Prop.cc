@@ -317,7 +317,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
             auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
                                           ast::MK::Symbol(nameLoc, ivarName));
-            auto assign = ast::MK::Assign(loc, arg2->deepCopy(), std::move(ivarGet));
+            auto assign = ast::MK::Assign(loc, arg2.deepCopy(), std::move(ivarGet));
 
             auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_());
             auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator());
@@ -466,7 +466,7 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
         auto loc = prop.loc;
         args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
         sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-        sigVals.emplace_back(prop.type->deepCopy());
+        sigVals.emplace_back(prop.type.deepCopy());
     }
 
     // then, add all the optional props.
@@ -476,9 +476,9 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
         }
         auto loc = prop.loc;
         args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                               prop.default_->deepCopy()));
+                                               prop.default_.deepCopy()));
         sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
-        sigVals.emplace_back(prop.type->deepCopy());
+        sigVals.emplace_back(prop.type.deepCopy());
     }
 
     // then initialize all the instance variables in the body

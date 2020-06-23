@@ -38,7 +38,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
                 }
 
                 for (auto &key : hash->keys) {
-                    keys.emplace_back(key->deepCopy());
+                    keys.emplace_back(key.deepCopy());
                 }
 
                 auto arg = ast::MK::Hash(hash->loc, std::move(keys), std::move(values));
