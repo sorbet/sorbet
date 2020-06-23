@@ -541,7 +541,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     pipeline::typecheck(gs, move(resolved), config->opts, workers);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{move(queryCollector->queryResponses)};
+    return LSPQueryResult{queryCollector->drainQueryResponses()};
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {

@@ -33,7 +33,9 @@ void QueryCollector::flushErrors(spdlog::logger &logger, const core::GlobalState
             queryResponses.emplace_back(move(error->queryResponse));
         }
     }
+}
 
+vector<unique_ptr<core::lsp::QueryResponse>> QueryCollector::drainQueryResponses() {
     stable_sort(queryResponses.begin(), queryResponses.end(), [](auto &left, auto &right) -> bool {
         /* we want the most precise information to go first. Normally, they are computed in this order by
         construction, but threading artifact might reorder them, thus we'd like to sort them */
@@ -53,5 +55,7 @@ void QueryCollector::flushErrors(spdlog::logger &logger, const core::GlobalState
         // Locations tie! Tiebreak with the expected specificity of the response.
         return getQueryResponseTypeSpecificity(*left) > getQueryResponseTypeSpecificity(*right);
     });
-}
+
+    return move(queryResponses);
+};
 } // namespace sorbet::realmain::lsp
