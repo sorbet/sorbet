@@ -262,63 +262,6 @@ public:
     };
 } Regexp_new;
 
-class TEnum_new : public SymbolBasedIntrinsicMethod {
-public:
-    TEnum_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
-        // Instead of `MyEnum::X$1.new(...)`, we want to do `<self>.new(...)` to get back to what
-        // would have happened at runtime. This is effecctively "undo-ing" the earlier DSL pass.
-        auto appliedType = core::cast_type<core::AppliedType>(send->recv.type.get());
-        if (appliedType == nullptr) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
-        }
-
-        auto attachedClass = appliedType->klass.data(cs)->attachedClass(cs);
-        ENFORCE(attachedClass.exists());
-        if (!attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
-        }
-
-        auto &builder = builderCast(build);
-        auto self = Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId);
-        auto args = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, aliases, rubyBlockId, send->args);
-        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
-        return IREmitterHelpers::callViaRubyVMSimple(cs, build, self, args, argc, "new");
-    };
-
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
-        return {core::Symbols::T_Enum().data(cs)->lookupSingletonClass(cs)};
-    };
-    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::new_()};
-    };
-    virtual bool skipReceiverTypeTest() const override {
-        return true;
-    };
-} TEnum_new;
-
-class TEnum_abstract : public SymbolBasedIntrinsicMethod {
-public:
-    TEnum_abstract() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
-        return Payload::rubyNil(cs, builder);
-    };
-
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
-        return {core::Symbols::T_Enum().data(cs)->lookupSingletonClass(cs)};
-    };
-    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::declareAbstract()};
-    };
-} TEnum_abstract;
-
 class CallCMethodSingleton : public CallCMethod {
 public:
     CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod,
@@ -365,8 +308,10 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
     vector<const SymbolBasedIntrinsicMethod *> res{
-        &DefineMethodIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
-        &TEnum_abstract,
+        &DefineMethodIntrinsic,
+        &SorbetPrivateStaticSigIntrinsic,
+        &Module_tripleEq,
+        &Regexp_new,
     };
     for (auto &method : knownCMethodsInstance) {
         res.emplace_back(&method);

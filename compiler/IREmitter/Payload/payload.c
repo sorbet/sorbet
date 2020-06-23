@@ -403,12 +403,6 @@ _Bool sorbet_testIsString(VALUE value) {
     return TYPE(value) == RUBY_T_STRING;
 }
 
-// https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F
-SORBET_INLINE
-_Bool sorbet_testObjectEqual_p(VALUE obj1, VALUE obj2) {
-    return obj1 == obj2;
-}
-
 // ****
 // ****                       Variables
 // ****

@@ -81,19 +81,10 @@ public:
                                   llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         auto sym = typeToSym(cs, send->args[0].type);
-        auto attachedClass = sym.data(cs)->attachedClass(cs);
-
-        if (attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
-            // T::Enum classes like `class X$1 < MyEnum; end` are fake and for the type system only
-            // (We don't define them at runtime, because classes are expensive compared to how many
-            // individual enum values there are.)
-            return Payload::rubyNil(cs, builder);
-        }
-
         // this is wrong and will not work for `class <<self`
         auto classNameCStr = Payload::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
-        auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
+        auto funcSym = cs.gs.lookupStaticInitForClass(sym.data(cs)->attachedClass(cs));
 
         if (sym.data(cs)->owner != core::Symbols::root()) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
