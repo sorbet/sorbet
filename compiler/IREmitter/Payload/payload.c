@@ -403,12 +403,6 @@ _Bool sorbet_testIsString(VALUE value) {
     return TYPE(value) == RUBY_T_STRING;
 }
 
-// https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F
-SORBET_INLINE
-_Bool sorbet_testObjectEqual_p(VALUE obj1, VALUE obj2) {
-    return obj1 == obj2;
-}
-
 // ****
 // ****                       Variables
 // ****
@@ -672,7 +666,7 @@ __attribute__((__cold__, __noreturn__)) void sorbet_cast_failure(VALUE value, ch
     // https://github.com/sorbet/sorbet/blob/b045fb1ba12756c3760fe516dc315580d93f3621/gems/sorbet-runtime/lib/types/types/base.rb#L105
     //
     // e.g. we need to teach the `got` part to do `T.class_of`
-    rb_raise(rb_eTypeError, "%s: Expected type %s, got type %s with value %" PRIsVALUE, castMethod, type,
+    rb_raise(rb_eTypeError, "%s: Expected type %s, got %s with value %" PRIsVALUE, castMethod, type,
              rb_obj_classname(value), value);
 }
 
