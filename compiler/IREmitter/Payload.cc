@@ -331,6 +331,15 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
                     return;
                 }
             }
+
+            if (ct->symbol.data(cs)->name.data(cs)->isTEnumName(cs)) {
+                // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
+                // test with an object (reference) equality check.
+                ret = builder.CreateCall(cs.module->getFunction("sorbet_testObjectEqual_p"),
+                                         {Payload::getRubyConstant(cs, ct->symbol, builder), val});
+                return;
+            }
+
             auto attachedClass = ct->symbol.data(cs)->attachedClass(cs);
             // todo: handle attached of attached class
             if (attachedClass.exists()) {
