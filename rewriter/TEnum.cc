@@ -145,7 +145,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
 
     auto singletonAsgn = ast::MK::Assign(
         stat->loc, std::move(asgn->lhs),
-        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::let(),
+        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
                        ast::MK::Send(stat->loc, classCnst->deepCopy(), core::Names::new_(), std::move(args)),
                        std::move(classCnst)));
 

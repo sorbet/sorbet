@@ -1773,7 +1773,7 @@ private:
         typecase(
             expr.get(), [&](ast::Literal *a) { result = a->value; },
             [&](ast::Cast *cast) {
-                if (cast->cast != core::Names::let()) {
+                if (cast->cast != core::Names::let() && cast->cast != core::Names::uncheckedLet()) {
                     if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
@@ -2080,6 +2080,7 @@ public:
             }
             switch (send.fun._id) {
                 case core::Names::let()._id:
+                case core::Names::uncheckedLet()._id:
                 case core::Names::assertType()._id:
                 case core::Names::cast()._id: {
                     if (send.args.size() < 2) {

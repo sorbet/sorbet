@@ -10,13 +10,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
         end
-        <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
+        <emptyTree>::<C X> = ::T.<unchecked_let>(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
         class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
         end
-        <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
+        <emptyTree>::<C Y> = ::T.<unchecked_let>(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
         class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C MyEnum>)
         end
-        <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
+        <emptyTree>::<C Z> = ::T.<unchecked_let>(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
         nil
       end
     end
@@ -46,13 +46,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         class <emptyTree>::<C X$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
         end
-        <emptyTree>::<C X> = ::T.let(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
+        <emptyTree>::<C X> = ::T.<unchecked_let>(<emptyTree>::<C X$1>.new(), <emptyTree>::<C X$1>)
         class <emptyTree>::<C Y$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
         end
-        <emptyTree>::<C Y> = ::T.let(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
+        <emptyTree>::<C Y> = ::T.<unchecked_let>(<emptyTree>::<C Y$1>.new("y"), <emptyTree>::<C Y$1>)
         class <emptyTree>::<C Z$1><<C <todo sym>>> < (<emptyTree>::<C EnumsDoEnum>)
         end
-        <emptyTree>::<C Z> = ::T.let(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
+        <emptyTree>::<C Z> = ::T.<unchecked_let>(<emptyTree>::<C Z$1>.new(<self>), <emptyTree>::<C Z$1>)
         nil
       end
     end
@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C Before$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
     end
 
-    <emptyTree>::<C Before> = ::T.let(<emptyTree>::<C Before$1>.new(), <emptyTree>::<C Before$1>)
+    <emptyTree>::<C Before> = ::T.<unchecked_let>(<emptyTree>::<C Before$1>.new(), <emptyTree>::<C Before$1>)
 
     <emptyTree>::<C StaticField1> = 1
 
@@ -78,7 +78,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         class <emptyTree>::<C Inside$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
         end
-        <emptyTree>::<C Inside> = ::T.let(<emptyTree>::<C Inside$1>.new(), <emptyTree>::<C Inside$1>)
+        <emptyTree>::<C Inside> = ::T.<unchecked_let>(<emptyTree>::<C Inside$1>.new(), <emptyTree>::<C Inside$1>)
         <emptyTree>::<C StaticField2> = 2
         nil
       end
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C After$1><<C <todo sym>>> < (<emptyTree>::<C BadConsts>)
     end
 
-    <emptyTree>::<C After> = ::T.let(<emptyTree>::<C After$1>.new(), <emptyTree>::<C After$1>)
+    <emptyTree>::<C After> = ::T.<unchecked_let>(<emptyTree>::<C After$1>.new(), <emptyTree>::<C After$1>)
 
     <emptyTree>::<C StaticField3> = 3
 
