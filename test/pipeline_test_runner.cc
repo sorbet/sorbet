@@ -19,6 +19,7 @@
 #include "common/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
@@ -97,22 +98,24 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
 class ExpectationHandler {
     Expectations &test;
     shared_ptr<core::ErrorQueue> &errorQueue;
+    shared_ptr<core::ErrorCollector> &errorCollector;
 
 public:
     vector<unique_ptr<core::Error>> errors;
     UnorderedMap<string_view, string> got;
 
-    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue)
-        : test(test), errorQueue(errorQueue){};
+    ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue,
+                       shared_ptr<core::ErrorCollector> &errorCollector)
+        : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
 
-    void addObserved(string_view expectationType, std::function<string()> mkExp, bool addNewline = true) {
+    void addObserved(const core::GlobalState &gs, string_view expectationType, std::function<string()> mkExp,
+                     bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
                 got[expectationType].append("\n");
             }
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            drainErrors(gs);
         }
     }
 
@@ -134,14 +137,15 @@ public:
         }
     }
 
-    void drainErrors() {
-        auto newErrors = errorQueue->drainAllErrors();
+    void drainErrors(const core::GlobalState &gs) {
+        errorQueue->flushAllErrors(gs);
+        auto newErrors = errorCollector->drainErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
-    void clear() {
+    void clear(const core::GlobalState &gs) {
         got.clear();
-        errorQueue->drainAllErrors();
+        errorQueue->flushAllErrors(gs);
     }
 };
 
@@ -158,7 +162,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
@@ -189,7 +194,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
     vector<ast::ParsedFile> trees;
-    ExpectationHandler handler(test, errorQueue);
+    ExpectationHandler handler(test, errorQueue, errorCollector);
 
     for (auto file : files) {
         if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
@@ -203,10 +208,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             nodes = parser::Parser::run(*gs, file);
         }
 
-        handler.drainErrors();
-        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved("parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
-        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.drainErrors(*gs);
+        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
         // Desugarer
         ast::ParsedFile desugared;
@@ -217,8 +222,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved("desugar-tree", [&]() { return desugared.tree->toString(*gs); });
-        handler.addObserved("desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree->toString(*gs); });
+        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
 
         ast::ParsedFile rewriten;
         ast::ParsedFile localNamed;
@@ -233,14 +238,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.addObserved("rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
-            handler.addObserved("rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
+            handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
 
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
 
-            handler.addObserved("index-tree", [&]() { return localNamed.tree->toString(*gs); });
-            handler.addObserved("index-tree-raw", [&]() { return localNamed.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree->toString(*gs); });
+            handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree->showRaw(*gs); });
         } else {
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
@@ -260,8 +265,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
-        handler.addObserved("name-tree", [&]() { return namedTree.tree->toString(*gs); });
-        handler.addObserved("name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree->toString(*gs); });
+        handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
 
         trees.emplace_back(move(namedTree));
     }
@@ -274,7 +279,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             trees = resolver::Resolver::runConstantResolution(*gs, move(trees), *workers);
         }
         handler.addObserved(
-            "autogen",
+            *gs, "autogen",
             [&]() {
                 stringstream payload;
                 for (auto &tree : trees) {
@@ -293,15 +298,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
-        handler.drainErrors();
+        handler.drainErrors(*gs);
     }
 
-    handler.addObserved("symbol-table", [&]() { return gs->toString(); });
-    handler.addObserved("symbol-table-raw", [&]() { return gs->showRaw(); });
+    handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
 
     for (auto &resolvedTree : trees) {
-        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
 
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
@@ -315,12 +320,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         core::Context ctx(*gs, core::Symbols::root(), file);
         resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
-        handler.drainErrors();
+        handler.drainErrors(*gs);
 
         resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
-        handler.addObserved("flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
@@ -349,7 +354,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
             resolvedTree.tree.reset();
 
-            handler.addObserved("cfg", [&]() {
+            handler.addObserved(*gs, "cfg", [&]() {
                 stringstream dot;
                 dot << "digraph \"" << rbName << "\" {" << '\n';
                 for (auto &cfg : collector.cfgs) {
@@ -359,7 +364,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 return dot.str();
             });
 
-            handler.addObserved("cfg-raw", [&]() {
+            handler.addObserved(*gs, "cfg-raw", [&]() {
                 stringstream dot;
                 dot << "digraph \"" << rbName << "\" {" << '\n';
                 dot << "  graph [fontname = \"Courier\"];\n";
@@ -383,7 +388,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 extension->finishTypecheckFile(ctx, file);
             }
             resolvedTree.tree.reset();
-            handler.drainErrors();
+            handler.drainErrors(*gs);
         }
     }
 
@@ -421,9 +426,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 
-    // Allow later phases to have errors that we didn't test for
-    errorQueue->drainAllErrors();
-
     // now we test the incremental resolver
 
     auto disableStressIncremental =
@@ -433,7 +435,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         return;
     }
 
-    handler.clear();
+    handler.clear(*gs);
     auto symbolsBefore = gs->symbolsUsed();
 
     vector<ast::ParsedFile> newTrees;
@@ -446,23 +448,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         auto nodes = parser::Parser::run(*gs, f.file);
-        handler.addObserved("parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved("parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-        handler.addObserved("desguar-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
-        handler.addObserved("rewrite-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
-        handler.addObserved("index-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("index-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "index-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree->showRaw(*gs); });
 
         // namer
         {
@@ -473,8 +475,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             file = testSerialize(*gs, move(vTmp[0]));
         }
 
-        handler.addObserved("name-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved("name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "name-tree", [&]() { return file.tree->toString(*gs); });
+        handler.addObserved(*gs, "name-tree-raw", [&]() { return file.tree->showRaw(*gs); });
         newTrees.emplace_back(move(file));
     }
 
@@ -482,14 +484,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(resolver::Resolver::runTreePasses(*gs, move(newTrees)).result());
 
     for (auto &resolvedTree : trees) {
-        handler.addObserved("resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved("resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
+        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
     }
 
     handler.checkExpectations("[stress-incremental] ");
 
     // and drain all the remaining errors
-    errorQueue->drainAllErrors();
+    // errorQueue->flushAllErrors();
 
     {
         INFO("the incremental resolver should not add new symbols");

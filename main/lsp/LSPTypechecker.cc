@@ -5,6 +5,7 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort.h"
 #include "common/typecase.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -25,25 +26,6 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 namespace {
-class ErrorCollector final : public core::ErrorFlusher {
-public:
-    std::vector<std::unique_ptr<core::Error>> collectedErrors;
-    ErrorCollector() = default;
-    ~ErrorCollector() = default;
-    void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
-                     std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override {
-        for (auto &error : errors) {
-            if (error->kind == core::ErrorQueueMessage::Kind::Error) {
-                if (error->error->isSilenced) {
-                    continue;
-                }
-
-                collectedErrors.emplace_back(move(error->error));
-            }
-        }
-    }
-};
-
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
                        bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
@@ -562,10 +544,10 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
-    auto errorCollector = make_shared<ErrorCollector>();
+    auto errorCollector = make_shared<core::ErrorCollector>();
     runFastPath(updates, workers, errorCollector);
 
-    return move(errorCollector->collectedErrors);
+    return errorCollector->drainErrors();
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {

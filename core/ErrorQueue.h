@@ -19,6 +19,7 @@ private:
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
 
 public:
     spdlog::logger &logger;
@@ -26,7 +27,6 @@ public:
     std::atomic<bool> hadCritical{false};
     std::atomic<int> nonSilencedErrorCount{0};
     std::atomic<int> filesFlushedCount{0};
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
                std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
@@ -36,7 +36,6 @@ public:
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
     /** Extract all errors. This discards all query responses currently present in error Queue */
-    std::vector<std::unique_ptr<core::Error>> drainAllErrors();
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);

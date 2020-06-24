@@ -4,6 +4,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
 #include "core/Error.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -55,9 +56,10 @@ shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts,
     return config;
 }
 
-unique_ptr<core::GlobalState> makeGS(const options::Options &opts = nullOpts) {
-    auto gs = make_unique<core::GlobalState>(
-        (make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, make_shared<core::NullFlusher>())));
+unique_ptr<core::GlobalState> makeGS(shared_ptr<core::ErrorFlusher> errorFlusher = make_shared<core::NullFlusher>(),
+                                     const options::Options &opts = nullOpts) {
+    auto gs =
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher)));
     unique_ptr<const OwnedKeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, opts, kvstore);
     return gs;
@@ -307,7 +309,8 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
 }
 
 TEST_CASE("PreemptionTasksWorkAsExpected") {
-    auto gs = makeGS();
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto gs = makeGS(errorCollector);
     // Note: needs to be > 0 otherwise an enforce triggers.
     gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
@@ -338,7 +341,8 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
     CHECK_EQ(1, task->runCount);
 
     // Our error should still be there.
-    auto errors = gs->errorQueue->drainAllErrors();
+    gs->errorQueue->flushAllErrors(*gs);
+    auto errors = errorCollector->drainErrors();
     REQUIRE_EQ(1, errors.size());
     CHECK_EQ("MyError", errors[0]->header);
 

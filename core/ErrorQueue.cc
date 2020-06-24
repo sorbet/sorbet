@@ -11,24 +11,6 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
-    checkOwned();
-    vector<unique_ptr<core::Error>> out;
-
-    auto collected = drainAll();
-
-    out.reserve(collected.size());
-    for (auto &it : collected) {
-        for (auto &msg : it.second) {
-            if (msg->kind == ErrorQueueMessage::Kind::Error) {
-                out.emplace_back(move(msg->error));
-            }
-        }
-    }
-
-    return out;
-}
-
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
 
