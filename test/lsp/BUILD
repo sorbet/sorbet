@@ -50,6 +50,8 @@ cc_test(
         "@doctest",
         "@doctest//:doctest_main",
     ],
+    # TODO(vilhena) This test had to be disabled because it frequently flaked on Buildkite.
+    tags = ["manual"],
 )
 
 cc_test(
