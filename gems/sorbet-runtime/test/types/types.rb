@@ -212,46 +212,10 @@ module Opus::Types::Test
         assert_equal(Integer, type.type.raw_type)
       end
 
-      it 'fails if an element of the array is the wrong type' do
-        type = T::Array[Integer]
-        value = [true]
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Array[Integer], " \
-                         "got T::Array[T::Boolean]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'succeeds if all values have the correct type' do
         type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
         assert_nil(type.error_message_for_obj(value))
-      end
-
-      it 'fails if any of the values is the wrong type' do
-        type = T::Array[T.any(Integer, T::Boolean)]
-        value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Array[T.any(Integer, T::Boolean)], " \
-          "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
-      end
-
-      it 'proposes a simple type if only one type exists' do
-        type = T::Array[String]
-        value = [1, 2, 3]
-        expected_error = "Expected type T::Array[String], " \
-                         "got T::Array[Integer]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
-      end
-
-      it 'proposes a union type if multiple types exist' do
-        type = T::Array[String]
-        value = [true, false, 1]
-        expected_error = "Expected type T::Array[String], " \
-          "got T::Array[T.any(Integer, T::Boolean)]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
       end
 
       it 'is covariant for the type_member for valid?' do
@@ -262,15 +226,6 @@ module Opus::Types::Test
         # but with type erasure, we have to leave all runtime checks as
         # covariant.
         assert_nil(type.error_message_for_obj(value))
-      end
-
-      it 'is not contravariant for the type_member' do
-        type = T::Array[Integer]
-        value = [Object.new]
-        expected_error = "Expected type T::Array[Integer], " \
-          "got T::Array[Object]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
       end
 
       it 'gives the right error when passed a Hash' do
@@ -314,26 +269,6 @@ module Opus::Types::Test
 
       it 'is coerced from plain hash' do
         assert_equal(T::Hash[T.untyped, T.untyped], T::Utils.coerce(::Hash))
-      end
-
-      it 'fails if a key in the Hash is the wrong type' do
-        type = T::Hash[Symbol, Integer]
-        value = {
-          'oops_string' => 1,
-        }
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[String, Integer]"
-        assert_equal(expected_error, msg)
-      end
-
-      it 'fails if a value in the Hash is the wrong type' do
-        type = T::Hash[Symbol, Integer]
-        value = {
-          sym: 1.0,
-        }
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[Symbol, Float]"
-        assert_equal(expected_error, msg)
       end
     end
 
@@ -400,15 +335,6 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
-      it 'fails if the type is wrong' do
-        type = T::Range[Float]
-        value = (3...10)
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Range[Float], " \
-                         "got T::Range[Integer]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'can have its metatype instantiated' do
         assert_equal((3..4), T::Range[Integer].new(3, 4))
       end
@@ -427,15 +353,6 @@ module Opus::Types::Test
         value = Set.new([1, 2, 3])
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
-      end
-
-      it 'fails if the type is wrong' do
-        type = T::Set[Float]
-        value = Set.new([1, 2, 3])
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Set[Float], " \
-                         "got T::Set[Integer]"
-        assert_equal(expected_error, msg)
       end
 
       it 'can have its metatype instantiated' do
@@ -464,46 +381,10 @@ module Opus::Types::Test
         assert_equal(Integer, type.type.raw_type)
       end
 
-      it 'fails if an element of the array is the wrong type' do
-        type = T::Enumerable[Integer]
-        value = [true]
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerable[Integer], " \
-                         "got T::Array[T::Boolean]"
-        assert_equal(expected_error, msg)
-      end
-
       it 'succeeds if all values have the correct type' do
         type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
         assert_nil(type.error_message_for_obj(value))
-      end
-
-      it 'fails if any of the values is the wrong type' do
-        type = T::Enumerable[T.any(Integer, T::Boolean)]
-        value = [true, 3.0, false, 4, "5", false]
-        expected_error = "Expected type T::Enumerable[T.any(Integer, T::Boolean)], " \
-          "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
-      end
-
-      it 'proposes a simple type if only one type exists' do
-        type = T::Enumerable[String]
-        value = [1, 2, 3]
-        expected_error = "Expected type T::Enumerable[String], " \
-                         "got T::Array[Integer]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
-      end
-
-      it 'proposes a union type if multiple types exist' do
-        type = T::Enumerable[String]
-        value = [true, false, 1]
-        expected_error = "Expected type T::Enumerable[String], " \
-          "got T::Array[T.any(Integer, T::Boolean)]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
       end
 
       it 'wont check unrewindable enumerables' do
@@ -518,15 +399,6 @@ module Opus::Types::Test
         assert_nil(type.error_message_for_obj(value))
       end
 
-      it 'is not contravariant for the type_member' do
-        type = T::Enumerable[Integer]
-        value = [Object.new]
-        expected_error = "Expected type T::Enumerable[Integer], " \
-          "got T::Array[Object]"
-        msg = type.error_message_for_obj(value)
-        assert_equal(expected_error, msg)
-      end
-
       it 'does not check lazy enumerables (for now)' do
         type = T::Enumerable[Integer]
         value = ["bad"].lazy
@@ -539,18 +411,6 @@ module Opus::Types::Test
         value = ["bad"].cycle
         msg = type.error_message_for_obj(value)
         assert_nil(msg)
-      end
-
-      it 'can serialize enumerables whose each throws' do
-        type = T::Enumerable[Integer]
-        value = Class.new(Array) do
-          def each
-            raise "bad"
-          end
-        end.new(['str'])
-        msg = type.error_message_for_obj(value)
-        expected_error = "Expected type T::Enumerable[Integer], got T::Array[T.untyped]"
-        assert_equal(expected_error, msg)
       end
     end
 

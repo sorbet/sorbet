@@ -172,18 +172,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     prop :the_hash, T::Hash[String, InnerStruct]
   end
 
-  describe 'validating prop values' do
-    it 'validates subdoc hashes have the correct values' do
-
-      assert_raises(TypeError) do
-        StructHash.new(the_hash: {'foo' => {}})
-      end
-
-      # no raise:
-      StructHash.new(the_hash: {'foo' => StructHash::InnerStruct.new})
-    end
-  end
-
   class OptionalArrayClass
     include T::Props::Serializable
     prop :foo, T.nilable(T::Array[Integer])
