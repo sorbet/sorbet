@@ -1085,6 +1085,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind,
                 }
 
                 const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value);
+                ENFORCE(c->cast != core::Names::uncheckedLet());
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type->isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
