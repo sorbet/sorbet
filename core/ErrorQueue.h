@@ -15,11 +15,11 @@ namespace core {
 class ErrorQueue {
 private:
     void checkOwned();
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
     std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
 
 public:
     spdlog::logger &logger;
@@ -35,7 +35,6 @@ public:
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
-    /** Extract all errors. This discards all query responses currently present in error Queue */
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);

@@ -146,6 +146,7 @@ public:
     void clear(const core::GlobalState &gs) {
         got.clear();
         errorQueue->flushAllErrors(gs);
+        errorCollector->drainErrors();
     }
 };
 
@@ -426,6 +427,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 
+    // Allow later phases to have errors that we didn't test for
+    errorQueue->flushAllErrors(*gs);
+    errorCollector->drainErrors();
+
     // now we test the incremental resolver
 
     auto disableStressIncremental =
@@ -491,7 +496,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     handler.checkExpectations("[stress-incremental] ");
 
     // and drain all the remaining errors
-    // errorQueue->flushAllErrors();
+    errorQueue->flushAllErrors(*gs);
+    errorCollector->drainErrors();
 
     {
         INFO("the incremental resolver should not add new symbols");
