@@ -300,7 +300,7 @@ def _emscripten_urls(path):
     """
     return [
         "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/{}".format(path),
-        "https://artifactory.corp.stripe.com/artifactory/googleapis-storage-cache/webassembly/emscripten-releases-builds/old/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/googleapis-storage-cache/webassembly/emscripten-releases-builds/old/{}".format(path),
     ]
 
 def _rubygems_urls(gem):
@@ -309,7 +309,7 @@ def _rubygems_urls(gem):
     """
     return [
         "https://rubygems.org/downloads/{}".format(gem),
-        "https://intgems.local.corp.stripe.com:446/gems/{}".format(gem),
+        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
     ]
 
 def _ruby_urls(path):
@@ -318,5 +318,5 @@ def _ruby_urls(path):
     """
     return [
         "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
-        "https://artifactory.corp.stripe.com/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
     ]
