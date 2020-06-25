@@ -1186,7 +1186,6 @@ public:
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name.data(ctx));
-        original.name->showRaw(ctx);
 
         handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original.name));
 
