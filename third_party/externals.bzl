@@ -10,19 +10,19 @@ def _github_public_urls(path):
 def _rubygems_urls(gem):
     return [
         "https://rubygems.org/downloads/{}".format(gem),
-        "https://intgems.local.corp.stripe.com:446/gems/{}".format(gem),
+        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
     ]
 
 def _zlib_urls(path):
     return [
         "https://zlib.net/{}".format(path),
-        "https://https://artifactory.corp.stripe.com/artifactory/zlib-cache/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/zlib-cache/{}".format(path),
     ]
 
 def _ruby_urls(path):
     return [
         "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
-        "https://artifactory.corp.stripe.com/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
     ]
 
 # We define our externals here instead of directly in WORKSPACE
