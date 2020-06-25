@@ -309,7 +309,7 @@ def _rubygems_urls(gem):
     """
     return [
         "https://rubygems.org/downloads/{}".format(gem),
-        "https://intgems.local.corp.stripe.com:446/gems/{}".format(gem),
+        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
     ]
 
 def _ruby_urls(path):
