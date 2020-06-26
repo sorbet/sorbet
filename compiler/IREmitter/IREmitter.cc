@@ -73,6 +73,20 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
     }
 }
 
+void setupStackFrames(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx) {
+    llvm::IRBuilder<> builder(cs);
+    for (auto rubyBlockId = 0; rubyBlockId < irctx.rubyBlocks2Functions.size(); rubyBlockId++) {
+        cs.functionEntryInitializers = irctx.functionInitializersByFunction[rubyBlockId];
+
+        builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
+        setupStackFrame(cs, md, irctx, builder, rubyBlockId);
+        auto lastLoc = core::Loc::none();
+        Payload::setLineNumber(cs, builder, core::Loc(cs.file, md.loc), md.symbol, lastLoc,
+                               irctx.iseqEncodedPtrsByFunction[rubyBlockId],
+                               irctx.lineNumberPtrsByFunction[rubyBlockId]);
+    }
+}
+
 void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx,
                     UnorderedMap<core::LocalVariable, Alias> &aliases) {
     // this function effectively generate an optimized build of
@@ -435,8 +449,6 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                 }
             }
         }
-
-        setupStackFrame(cs, md, irctx, builder, rubyBlockId);
 
         switch (blockType) {
             case FunctionType::TopLevel:
@@ -843,6 +855,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
+    setupStackFrames(cs, md, irctx);
     setupArguments(cs, cfg, md, irctx, aliases);
     emitSigVerification(cs, cfg, md, irctx, aliases);
 

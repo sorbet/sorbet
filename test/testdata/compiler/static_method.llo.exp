@@ -219,8 +219,6 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %28 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %28)
   %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %rubyId_bar.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
-  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %29 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !6
   %30 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %29, i64 0, i32 2
   %31 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %30, align 8, !tbaa !18
@@ -251,6 +249,8 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   unreachable
 
 "func_<root>.<static-init>$153.exit":             ; preds = %sorbet_readRealpath.exit
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
+  %rubyId_bar.i = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %49 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0)) #13
   %50 = load i64, i64* @guard_epoch_Foo, align 8
   %51 = tail call i64 @sorbet_getConstantEpoch()
@@ -268,7 +268,6 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %guardUpdated = icmp eq i64 %55, %56
   tail call void @llvm.assume(i1 %guardUpdated)
   %"stackFrame_func_Foo.<static-init>.i.i" = load i8*, i8** @"stackFramePrecomputed_func_Foo.<static-init>", align 8
-  %rubyId_bar.i.i1 = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %57 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !6
   %58 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %57, i64 0, i32 2
   %59 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %58, align 8, !tbaa !18
@@ -286,6 +285,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %69 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %68, align 8, !tbaa !24
   %70 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %69, i64 0, i32 2
   %71 = load i64*, i64** %70, align 8, !tbaa !26
+  %rubyId_bar.i.i1 = load i64, i64* @rubyIdPrecomputed_bar, align 8
   %72 = getelementptr inbounds i64, i64* %71, i64 2
   store i64* %72, i64** %66, align 8, !tbaa !6
   %rawSym.i.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i.i1) #13
@@ -304,15 +304,6 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
 define i64 @func_Foo.bar(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #9 {
 functionEntryInitializers:
   %stackFrame_func_Foo.bar = load i8*, i8** @stackFramePrecomputed_func_Foo.bar, align 8
-  %rubyStr_bar = load i64, i64* @rubyStrFrozen_bar, align 8
-  %tooManyArgs = icmp eq i32 %argc, 0
-  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock, !prof !35
-
-argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call void @sorbet_raiseArity(i32 %argc, i32 0, i32 0)
-  unreachable
-
-fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !6
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !18
@@ -332,6 +323,15 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %14 = load i64*, i64** %13, align 8, !tbaa !26
   %15 = getelementptr inbounds i64, i64* %14, i64 1
   store i64* %15, i64** %9, align 8, !tbaa !6
+  %rubyStr_bar = load i64, i64* @rubyStrFrozen_bar, align 8
+  %tooManyArgs = icmp eq i32 %argc, 0
+  br i1 %tooManyArgs, label %fillRequiredArgs, label %argCountFailBlock, !prof !35
+
+argCountFailBlock:                                ; preds = %functionEntryInitializers
+  tail call void @sorbet_raiseArity(i32 %argc, i32 0, i32 0)
+  unreachable
+
+fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %16 = load i64, i64* @guard_epoch_Foo, align 8
   %17 = tail call i64 @sorbet_getConstantEpoch()
   %needTakeSlowPath = icmp eq i64 %16, %17

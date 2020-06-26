@@ -184,8 +184,6 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %25 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %25)
   %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
-  %rubyStr_str.i = load i64, i64* @rubyStrFrozen_str, align 8
   %26 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !6
   %27 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %26, i64 0, i32 2
   %28 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %27, align 8, !tbaa !18
@@ -205,6 +203,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %40 = load i64*, i64** %39, align 8, !tbaa !26
   %41 = getelementptr inbounds i64, i64* %40, i64 1
   store i64* %41, i64** %35, align 8, !tbaa !6
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8
   %42 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !6
   %43 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %42, i64 0, i32 17
   %44 = load i64, i64* %43, align 8, !tbaa !8
@@ -216,6 +215,7 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   unreachable
 
 "func_<root>.<static-init>$153.exit":             ; preds = %sorbet_readRealpath.exit
+  %rubyStr_str.i = load i64, i64* @rubyStrFrozen_str, align 8
   %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0
   store i64 85, i64* %callArgsAddr.i, align 8
   %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %24, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9

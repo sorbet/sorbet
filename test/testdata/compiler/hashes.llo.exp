@@ -183,8 +183,6 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %26 = bitcast [4 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %26)
   %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8
-  %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8
   %27 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !6
   %28 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %27, i64 0, i32 2
   %29 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %28, align 8, !tbaa !18
@@ -215,6 +213,8 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   unreachable
 
 "func_<root>.<static-init>$153.exit":             ; preds = %sorbet_readRealpath.exit
+  %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8
+  %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9
   %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9
   %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0
