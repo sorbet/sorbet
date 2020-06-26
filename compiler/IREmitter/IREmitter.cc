@@ -679,7 +679,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                         }
                     },
                     [&](cfg::TAbsurd *i) {
-                        cs.failCompilation(core::Loc(cs.file, bind.loc), "Unimplemented T.absurd");
+                        auto val = Payload::varGet(cs, i->what.variable, builder, irctx, aliases, bb->rubyBlockId);
+                        builder.CreateCall(cs.module->getFunction("sorbet_t_absurd"), {val});
                     });
                 if (isTerminated) {
                     break;

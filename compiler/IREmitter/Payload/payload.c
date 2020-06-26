@@ -685,6 +685,11 @@ __attribute__((__noreturn__)) void sorbet_raiseExtraKeywords(VALUE hash) {
     rb_exc_raise(rb_exc_new3(rb_eArgError, err_mess));
 }
 
+__attribute__((__cold__)) VALUE sorbet_t_absurd(VALUE val) {
+    VALUE t = rb_const_get(rb_cObject, rb_intern("T"));
+    return rb_funcall(t, rb_intern("absurd"), 1, val);
+}
+
 void sorbet_checkStack() {
     // This is actually pretty slow. We should probably use guard pages instead.
     ruby_stack_check();

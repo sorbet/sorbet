@@ -77,8 +77,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.2 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.13 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.14 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.16 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.17 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -134,6 +134,12 @@ declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
 ; Function Attrs: cold noreturn nounwind optsize ssp uwtable
 declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #3
 
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #4
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #4
+
 ; Function Attrs: nounwind ssp uwtable
 declare i8* @sorbet_allocateRubyStackFrames(i64, i64, i64, i64, i32, i32) local_unnamed_addr #1
 
@@ -145,13 +151,7 @@ declare i64 @rb_ary_new() local_unnamed_addr #0
 
 declare i64 @rb_ary_dup(i64) local_unnamed_addr #0
 
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #4
-
 declare i64 @rb_ary_entry(i64, i64) local_unnamed_addr #0
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #4
 
 ; Function Attrs: noinline nounwind ssp uwtable
 declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #5
@@ -160,7 +160,7 @@ declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.Func
 define void @Init_splat() local_unnamed_addr #6 {
 entry:
   %callArgs.i = alloca [7 x i64], align 16
-  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0)) #9
+  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0)) #9
   %1 = and i64 %0, 7
   %2 = icmp ne i64 %1, 0
   %3 = and i64 %0, -9
@@ -178,11 +178,11 @@ entry:
 
 12:                                               ; preds = %6, %entry
   %13 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !0
-  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.14, i64 0, i64 0)) #8
+  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.17, i64 0, i64 0)) #8
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %6
-  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0), i64 8) #9
+  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0), i64 8) #9
   %15 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #9
   store i64 %15, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %16 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #9
@@ -293,7 +293,7 @@ sorbet_splatIntrinsic.exit.i:                     ; preds = %69, %rb_array_len.e
 
 sorbet_isa_Array.exit.thread.i:                   ; preds = %sorbet_splatIntrinsic.exit.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"alternativeCallIntrinsic_Array_[]156.i"
+  br label %"alternativeCallIntrinsic_Array_[]155.i"
 
 sorbet_isa_Array.exit.i:                          ; preds = %sorbet_splatIntrinsic.exit.i
   %80 = inttoptr i64 %74 to %struct.RBasic*
@@ -302,16 +302,16 @@ sorbet_isa_Array.exit.i:                          ; preds = %sorbet_splatIntrins
   %83 = and i64 %82, 31
   %84 = icmp eq i64 %83, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %84, label %sorbet_rb_array_square_br.exit13.i, label %"alternativeCallIntrinsic_Array_[]156.i", !prof !35
+  br i1 %84, label %sorbet_rb_array_square_br.exit13.i, label %"alternativeCallIntrinsic_Array_[]155.i", !prof !35
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
   tail call fastcc void @Init_splat.cold.1(i64 %25) #10
   unreachable
 
-afterSend153.i:                                   ; preds = %sorbet_rb_array_square_br.exit13.i, %"alternativeCallIntrinsic_Array_[]156.i"
-  %"symIntrinsicRawPhi_[]13847.i" = phi i64 [ %125, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[]151.i", %"alternativeCallIntrinsic_Array_[]156.i" ]
-  %"symIntrinsicRawPhi_[]4145.i" = phi i64 [ %124, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[].i", %"alternativeCallIntrinsic_Array_[]156.i" ]
-  %"symIntrinsicRawPhi_[]154.i" = phi i64 [ %126, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[]167.i", %"alternativeCallIntrinsic_Array_[]156.i" ]
+afterSend153.i:                                   ; preds = %sorbet_rb_array_square_br.exit13.i, %"alternativeCallIntrinsic_Array_[]155.i"
+  %"symIntrinsicRawPhi_[]13847.i" = phi i64 [ %125, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[]151.i", %"alternativeCallIntrinsic_Array_[]155.i" ]
+  %"symIntrinsicRawPhi_[]4145.i" = phi i64 [ %124, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[].i", %"alternativeCallIntrinsic_Array_[]155.i" ]
+  %"symIntrinsicRawPhi_[]154.i" = phi i64 [ %126, %sorbet_rb_array_square_br.exit13.i ], [ %"call_via_vm_[]167.i", %"alternativeCallIntrinsic_Array_[]155.i" ]
   %85 = getelementptr inbounds i64, i64* %41, i64 2
   store i64* %85, i64** %36, align 8, !tbaa !6
   store i64 %"symIntrinsicRawPhi_[]4145.i", i64* %callArgsAddr.i, align 16
@@ -374,7 +374,7 @@ sorbet_splatIntrinsic.exit11.i:                   ; preds = %108, %rb_array_len.
 
 sorbet_isa_Array.exit12.thread.i:                 ; preds = %sorbet_splatIntrinsic.exit11.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"alternativeCallIntrinsic_Array_[]243.i"
+  br label %"alternativeCallIntrinsic_Array_[]242.i"
 
 sorbet_isa_Array.exit12.i:                        ; preds = %sorbet_splatIntrinsic.exit11.i
   %119 = inttoptr i64 %113 to %struct.RBasic*
@@ -383,9 +383,9 @@ sorbet_isa_Array.exit12.i:                        ; preds = %sorbet_splatIntrins
   %122 = and i64 %121, 31
   %123 = icmp eq i64 %122, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %123, label %sorbet_rb_array_square_br.exit28.i, label %"alternativeCallIntrinsic_Array_[]243.i", !prof !35
+  br i1 %123, label %sorbet_rb_array_square_br.exit28.i, label %"alternativeCallIntrinsic_Array_[]242.i", !prof !35
 
-"alternativeCallIntrinsic_Array_[]156.i":         ; preds = %sorbet_isa_Array.exit.i, %sorbet_isa_Array.exit.thread.i
+"alternativeCallIntrinsic_Array_[]155.i":         ; preds = %sorbet_isa_Array.exit.i, %sorbet_isa_Array.exit.thread.i
   %"call_via_vm_[].i" = call i64 @sorbet_callFunc(i64 %74, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[]") #9
   store i64 -3, i64* %callArgsAddr.i, align 16
   %"call_via_vm_[]151.i" = call i64 @sorbet_callFunc(i64 %74, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[].1") #9
@@ -401,10 +401,10 @@ sorbet_rb_array_square_br.exit13.i:               ; preds = %sorbet_isa_Array.ex
   %126 = call i64 @rb_ary_entry(i64 %74, i64 -1) #9, !noalias !50
   br label %afterSend153.i
 
-afterSend240.i:                                   ; preds = %sorbet_rb_array_square_br.exit28.i, %"alternativeCallIntrinsic_Array_[]243.i"
-  %"symIntrinsicRawPhi_[]22556.i" = phi i64 [ %166, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]238.i", %"alternativeCallIntrinsic_Array_[]243.i" ]
-  %"symIntrinsicRawPhi_[]2095054.i" = phi i64 [ %165, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]222.i", %"alternativeCallIntrinsic_Array_[]243.i" ]
-  %"symIntrinsicRawPhi_[]241.i" = phi i64 [ %167, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]254.i", %"alternativeCallIntrinsic_Array_[]243.i" ]
+afterSend240.i:                                   ; preds = %sorbet_rb_array_square_br.exit28.i, %"alternativeCallIntrinsic_Array_[]242.i"
+  %"symIntrinsicRawPhi_[]22556.i" = phi i64 [ %166, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]238.i", %"alternativeCallIntrinsic_Array_[]242.i" ]
+  %"symIntrinsicRawPhi_[]2095054.i" = phi i64 [ %165, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]222.i", %"alternativeCallIntrinsic_Array_[]242.i" ]
+  %"symIntrinsicRawPhi_[]241.i" = phi i64 [ %167, %sorbet_rb_array_square_br.exit28.i ], [ %"call_via_vm_[]254.i", %"alternativeCallIntrinsic_Array_[]242.i" ]
   %127 = getelementptr inbounds i64, i64* %41, i64 5
   store i64* %127, i64** %36, align 8, !tbaa !6
   store i64 %"symIntrinsicRawPhi_[]2095054.i", i64* %callArgsAddr.i, align 16
@@ -465,7 +465,7 @@ sorbet_splatIntrinsic.exit26.i:                   ; preds = %149, %rb_array_len.
 
 sorbet_isa_Array.exit27.thread.i:                 ; preds = %sorbet_splatIntrinsic.exit26.i
   store i64 1, i64* %callArgsAddr.i, align 16
-  br label %"alternativeCallIntrinsic_Array_[]327.i"
+  br label %"alternativeCallIntrinsic_Array_[]326.i"
 
 sorbet_isa_Array.exit27.i:                        ; preds = %sorbet_splatIntrinsic.exit26.i
   %160 = inttoptr i64 %154 to %struct.RBasic*
@@ -474,9 +474,9 @@ sorbet_isa_Array.exit27.i:                        ; preds = %sorbet_splatIntrins
   %163 = and i64 %162, 31
   %164 = icmp eq i64 %163, 7
   store i64 1, i64* %callArgsAddr.i, align 16
-  br i1 %164, label %sorbet_rb_array_square_br.exit.i, label %"alternativeCallIntrinsic_Array_[]327.i", !prof !35
+  br i1 %164, label %sorbet_rb_array_square_br.exit.i, label %"alternativeCallIntrinsic_Array_[]326.i", !prof !35
 
-"alternativeCallIntrinsic_Array_[]243.i":         ; preds = %sorbet_isa_Array.exit12.i, %sorbet_isa_Array.exit12.thread.i
+"alternativeCallIntrinsic_Array_[]242.i":         ; preds = %sorbet_isa_Array.exit12.i, %sorbet_isa_Array.exit12.thread.i
   %"call_via_vm_[]222.i" = call i64 @sorbet_callFunc(i64 %113, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[].3") #9
   store i64 -3, i64* %callArgsAddr.i, align 16
   %"call_via_vm_[]238.i" = call i64 @sorbet_callFunc(i64 %113, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[].4") #9
@@ -492,7 +492,7 @@ sorbet_rb_array_square_br.exit28.i:               ; preds = %sorbet_isa_Array.ex
   %167 = call i64 @rb_ary_entry(i64 %113, i64 -1) #9, !noalias !62
   br label %afterSend240.i
 
-"alternativeCallIntrinsic_Array_[]327.i":         ; preds = %sorbet_isa_Array.exit27.i, %sorbet_isa_Array.exit27.thread.i
+"alternativeCallIntrinsic_Array_[]326.i":         ; preds = %sorbet_isa_Array.exit27.i, %sorbet_isa_Array.exit27.thread.i
   %"call_via_vm_[]306.i" = call i64 @sorbet_callFunc(i64 %154, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[].7") #9
   store i64 -3, i64* %callArgsAddr.i, align 16
   %"call_via_vm_[]322.i" = call i64 @sorbet_callFunc(i64 %154, i64 %"rubyId_[].i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_[].8") #9
@@ -508,10 +508,10 @@ sorbet_rb_array_square_br.exit.i:                 ; preds = %sorbet_isa_Array.ex
   %170 = call i64 @rb_ary_entry(i64 %154, i64 -1) #9, !noalias !71
   br label %"func_<root>.<static-init>$153.exit"
 
-"func_<root>.<static-init>$153.exit":             ; preds = %"alternativeCallIntrinsic_Array_[]327.i", %sorbet_rb_array_square_br.exit.i
-  %"symIntrinsicRawPhi_[]30965.i" = phi i64 [ %169, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]322.i", %"alternativeCallIntrinsic_Array_[]327.i" ]
-  %"symIntrinsicRawPhi_[]2935963.i" = phi i64 [ %168, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]306.i", %"alternativeCallIntrinsic_Array_[]327.i" ]
-  %"symIntrinsicRawPhi_[]325.i" = phi i64 [ %170, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]338.i", %"alternativeCallIntrinsic_Array_[]327.i" ]
+"func_<root>.<static-init>$153.exit":             ; preds = %"alternativeCallIntrinsic_Array_[]326.i", %sorbet_rb_array_square_br.exit.i
+  %"symIntrinsicRawPhi_[]30965.i" = phi i64 [ %169, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]322.i", %"alternativeCallIntrinsic_Array_[]326.i" ]
+  %"symIntrinsicRawPhi_[]2935963.i" = phi i64 [ %168, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]306.i", %"alternativeCallIntrinsic_Array_[]326.i" ]
+  %"symIntrinsicRawPhi_[]325.i" = phi i64 [ %170, %sorbet_rb_array_square_br.exit.i ], [ %"call_via_vm_[]338.i", %"alternativeCallIntrinsic_Array_[]326.i" ]
   %171 = getelementptr inbounds i64, i64* %41, i64 8
   store i64* %171, i64** %36, align 8, !tbaa !6
   store i64 %"symIntrinsicRawPhi_[]2935963.i", i64* %callArgsAddr.i, align 16

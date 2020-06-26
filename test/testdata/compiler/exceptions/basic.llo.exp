@@ -81,10 +81,10 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @rb_eException = external local_unnamed_addr global i64, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @rb_cData = external local_unnamed_addr constant i64, align 8
-@.str.13 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.14 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.16 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.17 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @rb_cModule = external local_unnamed_addr constant i64, align 8
-@.str.18 = private unnamed_addr constant [25 x i8] c"T::Private::Retry::RETRY\00", align 1
+@.str.21 = private unnamed_addr constant [25 x i8] c"T::Private::Retry::RETRY\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -176,6 +176,12 @@ declare void @sorbet_raiseArity(i32, i32, i32) local_unnamed_addr #5
 ; Function Attrs: noreturn
 declare void @rb_exc_raise(i64) local_unnamed_addr #1
 
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #6
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #6
+
 declare i8* @ruby_xmalloc(i64) local_unnamed_addr #2
 
 declare %struct.rb_data_type_struct* @sorbet_getClosureInfo(...) local_unnamed_addr #2
@@ -190,16 +196,10 @@ declare i64 @rb_gv_get(i8*) local_unnamed_addr #2
 declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #2
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #6
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #6
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #7
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #7
+declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #7
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly ssp uwtable
 declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #8
@@ -250,7 +250,7 @@ declare i64 @rb_errinfo() local_unnamed_addr #2
 define void @Init_basic() local_unnamed_addr #9 {
 entry:
   %callArgs.i = alloca [1 x i64], align 8
-  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0)) #14
+  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0)) #14
   %1 = and i64 %0, 7
   %2 = icmp ne i64 %1, 0
   %3 = and i64 %0, -9
@@ -268,11 +268,11 @@ entry:
 
 12:                                               ; preds = %6, %entry
   %13 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !0
-  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.14, i64 0, i64 0)) #15
+  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.17, i64 0, i64 0)) #15
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %6
-  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0), i64 8) #14
+  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0), i64 8) #14
   %15 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #14
   store i64 %15, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %16 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #14
@@ -301,7 +301,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %"rubyStr_test/testdata/compiler/exceptions/basic.rb.i1.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/exceptions/basic.rb", align 8
   %24 = tail call i8* @sorbet_allocateRubyStackFrames(i64 %23, i64 %rubyId_test.i.i, i64 %"rubyStr_test/testdata/compiler/exceptions/basic.rb.i1.i", i64 %0, i32 6, i32 20) #14
   store i8* %24, i8** @stackFramePrecomputed_func_A.test, align 8
-  %25 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @.str.18, i64 0, i64 0), i64 24) #14
+  %25 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @.str.21, i64 0, i64 0), i64 24) #14
   store i64 %25, i64* @"<retry-singleton>", align 8
   %26 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_begin, i64 0, i64 0), i64 5) #14
   tail call void @rb_gc_register_mark_object(i64 %26) #14
@@ -520,12 +520,12 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 
 56:                                               ; preds = %51
   %57 = load i64, i64* @rb_cModule, align 8, !tbaa !0
-  %58 = tail call i64 @rb_obj_is_kind_of(i64 %47, i64 %57) #6
+  %58 = tail call i64 @rb_obj_is_kind_of(i64 %47, i64 %57) #7
   %59 = icmp eq i64 %58, 0
   br i1 %59, label %codeRepl, label %sorbet_isa_class_of.exit, !prof !47
 
 sorbet_isa_class_of.exit:                         ; preds = %56
-  %60 = tail call i64 @rb_class_inherited_p(i64 %47, i64 %52) #6
+  %60 = tail call i64 @rb_class_inherited_p(i64 %47, i64 %52) #7
   %61 = icmp eq i64 %60, 0
   br i1 %61, label %codeRepl, label %typeTestSuccess, !prof !48
 
@@ -893,8 +893,8 @@ attributes #2 = { "addedToSilenceEmptyAttrsError" }
 attributes #3 = { noinline nounwind ssp uwtable }
 attributes #4 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #5 = { noreturn nounwind ssp uwtable }
-attributes #6 = { nounwind readnone }
-attributes #7 = { argmemonly nounwind }
+attributes #6 = { argmemonly nounwind }
+attributes #7 = { nounwind readnone }
 attributes #8 = { alwaysinline norecurse nounwind readonly ssp uwtable }
 attributes #9 = { nounwind sspreq }
 attributes #10 = { nounwind sspreq uwtable }

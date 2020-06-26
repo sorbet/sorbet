@@ -74,8 +74,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.2 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.13 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.14 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.16 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.17 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -144,7 +144,7 @@ declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.Func
 define void @Init_app_strconcat() local_unnamed_addr #6 {
 entry:
   %callArgs.i = alloca [5 x i64], align 8
-  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0)) #10
+  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0)) #10
   %1 = and i64 %0, 7
   %2 = icmp ne i64 %1, 0
   %3 = and i64 %0, -9
@@ -162,11 +162,11 @@ entry:
 
 12:                                               ; preds = %6, %entry
   %13 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !0
-  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.14, i64 0, i64 0)) #9
+  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.17, i64 0, i64 0)) #9
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %6
-  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.13, i64 0, i64 0), i64 8) #10
+  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0), i64 8) #10
   %15 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #10
   store i64 %15, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %16 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #10
@@ -277,24 +277,24 @@ afterSend.i:                                      ; preds = %"fastSymCallIntrins
   %65 = or i1 %62, %64
   br i1 %65, label %79, label %73
 
-"alternativeCallIntrinsic_Integer_+112.i":        ; preds = %sorbet_stringInterpolate.exit.i
+"alternativeCallIntrinsic_Integer_+111.i":        ; preds = %sorbet_stringInterpolate.exit.i
   %"call_via_vm_+123.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_+.i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+.3") #10
   br label %BB2.i.backedge
 
-"fastSymCallIntrinsic_Integer_+113.i":            ; preds = %sorbet_stringInterpolate.exit.i
+"fastSymCallIntrinsic_Integer_+112.i":            ; preds = %sorbet_stringInterpolate.exit.i
   %66 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 2) #10
   %67 = extractvalue { i64, i1 } %66, 1
   %68 = extractvalue { i64, i1 } %66, 0
   br i1 %67, label %69, label %BB2.i.backedge
 
-69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+113.i"
+69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+112.i"
   %70 = ashr i64 %68, 1
   %71 = xor i64 %70, -9223372036854775808
   %72 = call i64 @rb_int2big(i64 %71) #10
   br label %BB2.i.backedge
 
-BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+113.i", %"alternativeCallIntrinsic_Integer_+112.i"
-  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+123.i", %"alternativeCallIntrinsic_Integer_+112.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+113.i" ]
+BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+112.i", %"alternativeCallIntrinsic_Integer_+111.i"
+  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+123.i", %"alternativeCallIntrinsic_Integer_+111.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+112.i" ]
   br label %BB2.i
 
 73:                                               ; preds = %56
@@ -388,7 +388,7 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %130, %124
   %134 = call i64 @rb_str_concat_literals(i32 5, i64* nonnull %callArgsAddr.i) #10
   store i64* %49, i64** %36, align 8, !tbaa !6
   store i64 3, i64* %callArgsAddr.i, align 8
-  br i1 %51, label %"fastSymCallIntrinsic_Integer_+113.i", label %"alternativeCallIntrinsic_Integer_+112.i"
+  br i1 %51, label %"fastSymCallIntrinsic_Integer_+112.i", label %"alternativeCallIntrinsic_Integer_+111.i"
 
 "func_<root>.<static-init>$153.exit":             ; preds = %afterSend.i
   store i64* %42, i64** %36, align 8, !tbaa !6
