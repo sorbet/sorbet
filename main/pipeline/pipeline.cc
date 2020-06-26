@@ -999,12 +999,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                 });
 
-            if (workers.size() > 0) {
-                auto counterQueue = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
-                workers.multiplexJob("collectCounters",
-                                     [counterQueue]() { counterQueue->push(getAndClearThreadCounters(), 1); });
-            }
-
             typecheck_thread_result threadResult;
             {
                 for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
@@ -1024,6 +1018,21 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return ast::ParsedFilesOrCancelled();
+                }
+            }
+
+            if (workers.size() > 0) {
+                auto counterQueue = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
+                workers.multiplexJob("collectCounters",
+                                     [counterQueue]() { counterQueue->push(getAndClearThreadCounters(), 1); });
+                {
+                    sorbet::CounterState counters;
+                    for (auto result = counterQueue->try_pop(counters); !result.done();
+                         result = counterQueue->try_pop(counters)) {
+                        if (result.gotItem()) {
+                            counterConsume(move(counters));
+                        }
+                    }
                 }
             }
         }
