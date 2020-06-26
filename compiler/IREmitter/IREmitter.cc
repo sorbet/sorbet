@@ -632,7 +632,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                                 break;
                             }
                             default:
-                                cs.trace("UnsupportedLiteral");
+                                cs.failCompilation(core::Loc(cs.file, bind.loc), "UnsupportedLiteral");
                         }
                     },
                     [&](cfg::GetCurrentException *i) {
@@ -678,7 +678,9 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                                             aliases, bb->rubyBlockId);
                         }
                     },
-                    [&](cfg::TAbsurd *i) { cs.trace("TAbsurd\n"); });
+                    [&](cfg::TAbsurd *i) {
+                        cs.failCompilation(core::Loc(cs.file, bind.loc), "Unimplemented T.absurd");
+                    });
                 if (isTerminated) {
                     break;
                 }
