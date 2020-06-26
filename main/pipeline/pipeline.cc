@@ -727,11 +727,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     return result;
 }
 
-struct typecheck_thread_result {
-    vector<ast::ParsedFile> trees;
-    CounterState counters;
-};
-
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers, bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
@@ -913,7 +908,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
-                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager,
+                                      bool presorted) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
@@ -931,19 +927,22 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
-        shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
+        shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> treesq;
 
         {
             fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
-            resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+            treesq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(what.size());
         }
 
         const core::GlobalState &igs = *gs;
+        if (!presorted) {
+            // If files are not already sorted, we want to start typeckecking big files first because it helps with
+            // better work distribution
+            fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
+                return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+            });
+        }
 
-        // We want to start typeckecking big files first because it helps with better work distribution
-        fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
-        });
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
@@ -951,8 +950,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob(
-                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
-                    typecheck_thread_result threadResult;
+                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, treesq, cancelable]() {
+                    vector<ast::ParsedFile> trees;
                     ast::ParsedFile job;
                     int processedByThread = 0;
 
@@ -977,34 +976,35 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                     try {
                                         core::Context ctx(igs, core::Symbols::root(), file);
                                         auto parsedFile = typecheckOne(ctx, move(job), opts);
-                                        threadResult.trees.emplace_back(move(parsedFile));
+                                        trees.emplace_back(move(parsedFile));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
                                         igs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                            file.data(igs).path());
                                     }
+                                    // Stream out errors
+                                    treesq->push(move(trees), processedByThread);
+                                    processedByThread = 0;
                                 }
                             }
                         }
                     }
                     if (processedByThread > 0) {
-                        threadResult.counters = getAndClearThreadCounters();
-                        resultq->push(move(threadResult), processedByThread);
+                        treesq->push(move(trees), processedByThread);
                     }
                 });
 
-            typecheck_thread_result threadResult;
+            vector<ast::ParsedFile> trees;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
+                for (auto result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
-                     result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                     result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
-                        counterConsume(move(threadResult.counters));
-                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
-                                                make_move_iterator(threadResult.trees.end()));
+                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(trees.begin()),
+                                                make_move_iterator(trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    for (auto &tree : threadResult.trees) {
+                    for (auto &tree : trees) {
                         gs->errorQueue->flushErrorsForFile(*gs, tree.file);
                     }
                     if (preemptionManager) {
@@ -1013,6 +1013,21 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return ast::ParsedFilesOrCancelled();
+                }
+            }
+
+            if (workers.size() > 0) {
+                auto counterq = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
+                workers.multiplexJob("collectCounters",
+                                     [counterq]() { counterq->push(getAndClearThreadCounters(), 1); });
+                {
+                    sorbet::CounterState counters;
+                    for (auto result = counterq->try_pop(counters); !result.done();
+                         result = counterq->try_pop(counters)) {
+                        if (result.gotItem()) {
+                            counterConsume(move(counters));
+                        }
+                    }
                 }
             }
         }
