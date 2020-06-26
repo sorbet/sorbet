@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::core::lsp {
 
 void QueryResponse::pushQueryResponse(core::Context ctx, QueryResponseVariant response) {
-    ctx.state.errorQueue->pushQueryResponse(make_unique<QueryResponse>(std::move(response)));
+    ctx.state.errorQueue->pushQueryResponse(ctx.file, make_unique<QueryResponse>(std::move(response)));
 }
 
 QueryResponse::QueryResponse(QueryResponseVariant response) : response(std::move(response)) {}

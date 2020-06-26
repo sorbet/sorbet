@@ -1,3 +1,4 @@
+#include "core/NullFlusher.h"
 #include "main/lsp/wrapper.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/stdout_sinks.h"
@@ -29,9 +30,8 @@ std::shared_ptr<sorbet::realmain::options::Options> mkOpts(std::string_view cont
 std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
                                                          std::unique_ptr<sorbet::KeyValueStore> &kvStore) {
     auto gs = std::make_unique<sorbet::core::GlobalState>(
-        (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console)));
+        (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
     sorbet::payload::createInitialGlobalState(gs, opts, kvStore);
-    gs->errorQueue->ignoreFlushes = true;
     return gs;
 }
 

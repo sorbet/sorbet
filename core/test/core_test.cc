@@ -1,6 +1,7 @@
 #include "doctest.h"
 // has to go first as it violates our requirements
 #include "core/Error.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/Unfreeze.h"
@@ -14,7 +15,8 @@ using namespace std;
 
 namespace sorbet::core {
 auto logger = spd::stderr_color_mt("parse");
-auto errorQueue = make_shared<ErrorQueue>(*logger, *logger);
+auto errorCollector = make_shared<core::ErrorCollector>();
+auto errorQueue = make_shared<ErrorQueue>(*logger, *logger, errorCollector);
 
 struct Offset2PosTest {
     string src;
@@ -58,9 +60,9 @@ TEST_CASE("Errors") {
     if (auto e = gs.beginError(Loc{f, 0, 3}, errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
     }
+    gs.errorQueue->flushAllErrors(gs);
     REQUIRE(gs.hadCriticalError());
-    auto errors = errorQueue->drainAllErrors();
-    REQUIRE_EQ(1, errors.size());
+    REQUIRE_EQ(1, errorCollector->drainErrors().size());
 }
 
 TEST_CASE("SymbolRef") {

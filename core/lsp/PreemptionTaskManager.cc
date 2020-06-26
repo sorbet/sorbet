@@ -1,5 +1,6 @@
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/ErrorQueue.h"
+#include "core/NullFlusher.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
@@ -48,8 +49,8 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs)
         // preempted task will see all of the errors that have accumulated thus far on the slow path. Thus, we save the
         // old error queue and replace so new operation starts fresh
         auto previousErrorQueue = move(gs.errorQueue);
-        gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer);
-        gs.errorQueue->ignoreFlushes = true;
+        gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer,
+                                                      make_shared<core::NullFlusher>());
         gs.tracer().debug("[Typechecker] Beginning preemption task.");
         preemptTask->run();
         gs.tracer().debug("[Typechecker] Preemption task complete.");

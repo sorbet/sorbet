@@ -19,6 +19,7 @@
 #include "common/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
@@ -80,7 +81,8 @@ TEST_CASE("WhitequarkParserTest") {
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     core::GlobalState gs(errorQueue);
 
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
@@ -128,14 +130,16 @@ TEST_CASE("WhitequarkParserTest") {
             nodes = parser::Parser::run(gs, file, initialLocals);
         }
         {
-            auto newErrors = errorQueue->drainAllErrors();
+            errorQueue->flushAllErrors(gs);
+            auto newErrors = errorCollector->drainErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         auto expectation = test.expectations.find("parse-tree-whitequark");
         if (expectation != test.expectations.end()) {
             got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
+            errorQueue->flushAllErrors(gs);
+            auto newErrors = errorCollector->drainErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
@@ -173,9 +177,6 @@ TEST_CASE("WhitequarkParserTest") {
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
-
-    // Allow later phases to have errors that we didn't test for
-    errorQueue->drainAllErrors();
 
     MESSAGE("errors OK");
 } // namespace sorbet::test
