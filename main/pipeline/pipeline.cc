@@ -984,7 +984,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                                            file.data(igs).path());
                                     }
                                     // Stream out errors
-                                    threadResult.counters = getAndClearThreadCounters();
                                     resultq->push(move(threadResult), processedByThread);
                                     processedByThread = 0;
                                 }
@@ -992,10 +991,15 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                         }
                     }
                     if (processedByThread > 0) {
-                        threadResult.counters = getAndClearThreadCounters();
                         resultq->push(move(threadResult), processedByThread);
                     }
                 });
+
+            if (workers.size() > 0) {
+                auto counterQueue = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
+                workers.multiplexJob("collectCounters",
+                                     [counterQueue]() { counterQueue->push(getAndClearThreadCounters(), 1); });
+            }
 
             typecheck_thread_result threadResult;
             {
@@ -1003,7 +1007,6 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                      !result.done();
                      result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
-                        counterConsume(move(threadResult.counters));
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
                                                 make_move_iterator(threadResult.trees.end()));
                     }
