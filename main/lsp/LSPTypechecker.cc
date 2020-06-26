@@ -64,6 +64,17 @@ bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameH
     return true;
 }
 
+vector<ast::ParsedFile> sortParsedFiles(const core::GlobalState &gs, ErrorReporter &errorReporter,
+                                        vector<ast::ParsedFile> parsedFiles) {
+    fast_sort(parsedFiles, [&](const auto &lhs, const auto &rhs) -> bool {
+        auto lhsEpoch = max(errorReporter.lastDiagnosticEpochForFile(lhs.file), lhs.file.data(gs).epoch);
+        auto rhsEpoch = max(errorReporter.lastDiagnosticEpochForFile(rhs.file), rhs.file.data(gs).epoch);
+
+        return lhsEpoch > rhsEpoch;
+    });
+
+    return parsedFiles;
+}
 } // namespace
 
 LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
@@ -239,14 +250,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-    fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
-        auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
-        auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
-
-        return lhsEpoch > rhsEpoch;
-    });
-
-    pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
+    auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+    pipeline::typecheck(gs, move(sorted), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
 
     return subset;
@@ -417,14 +422,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
-        fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
-            auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
-            auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
-
-            return lhsEpoch > rhsEpoch;
-        });
-
-        pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+        auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+        pipeline::typecheck(gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -534,13 +533,6 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-
-    fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
-        auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
-        auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
-
-        return lhsEpoch > rhsEpoch;
-    });
 
     pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
