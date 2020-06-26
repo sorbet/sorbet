@@ -913,7 +913,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
-                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager,
+                                      bool presorted) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
@@ -939,11 +940,14 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
         const core::GlobalState &igs = *gs;
+        if (!presorted) {
+            // If files are not already sorted, we want to start typeckecking big files first because it helps with
+            // better work distribution
+            fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
+                return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+            });
+        }
 
-        // We want to start typeckecking big files first because it helps with better work distribution
-        fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
-        });
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }

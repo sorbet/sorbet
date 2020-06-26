@@ -239,7 +239,14 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
-    pipeline::typecheck(gs, move(resolved), config->opts, workers);
+    fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
+        auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
+        auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
+
+        return lhsEpoch > rhsEpoch;
+    });
+
+    pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
 
     return subset;
@@ -410,7 +417,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
-        pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptManager);
+        fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
+            auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
+            auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
+
+            return lhsEpoch > rhsEpoch;
+        });
+
+        pipeline::typecheck(gs, move(resolved), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -520,7 +534,15 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     auto resolved = getResolved(filesForQuery);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
-    pipeline::typecheck(gs, move(resolved), config->opts, workers);
+
+    fast_sort(resolved, [&](const auto &lhs, const auto &rhs) -> bool {
+        auto lhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(lhs.file), lhs.file.data(*gs).epoch);
+        auto rhsEpoch = max(errorReporter->lastDiagnosticEpochForFile(rhs.file), rhs.file.data(*gs).epoch);
+
+        return lhsEpoch > rhsEpoch;
+    });
+
+    pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses()};
