@@ -674,6 +674,8 @@ end
 # summary about the de facto spec.
 # http://tools.ietf.org/html/draft-hoffman-ftp-uri-04
 class URI::FTP < URI::Generic
+  include ::OpenURI::OpenRead
+
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)
@@ -1695,6 +1697,8 @@ end
 # used to be supported in Internet Explorer 5 and 6, before the MS04-004
 # security update. See <URL:http://support.microsoft.com/kb/834489>.
 class URI::HTTP < URI::Generic
+  include ::OpenURI::OpenRead
+
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)
