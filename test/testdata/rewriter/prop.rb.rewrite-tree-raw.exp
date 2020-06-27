@@ -6633,44 +6633,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U token_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -6814,34 +6776,42 @@ ClassDef{
           ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"token_prop<defaultArg>1" }
-          ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"created_prop<defaultArg>1" }
-          ]
         }
       ]
     }
@@ -7196,44 +7166,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U timestamped_token_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -7366,34 +7298,42 @@ ClassDef{
           ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U timestamped_token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"timestamped_token_prop<defaultArg>1" }
-          ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"created_prop<defaultArg>1" }
-          ]
         }
       ]
     }
@@ -7524,25 +7464,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U merchant_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -7608,19 +7529,23 @@ ClassDef{
           ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U merchant_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"merchant_prop<defaultArg>1" }
-          ]
         }
       ]
     }
@@ -8238,25 +8163,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U encrypted_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -8379,19 +8285,23 @@ ClassDef{
           ]
         }
 
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = ::Sorbet::Private::Static
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U encrypted_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
           }
-          fun = <U keep_self_def>
-          block = nullptr
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :"encrypted_prop<defaultArg>1" }
-          ]
         }
       ]
     }

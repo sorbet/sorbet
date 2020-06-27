@@ -56,6 +56,11 @@ begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
+        <self>.extend(::T::Sig)
+        ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+        ::Sorbet::Private::Static.keep_def(<self>, :"bar")
+        ::Sorbet::Private::Static.keep_def(<self>, :"qux")
+        ::Sorbet::Private::Static.keep_def(<self>, :"baz")
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
@@ -68,15 +73,6 @@ begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
-        <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :"foo")
-        ::Sorbet::Private::Static.keep_def(<self>, :"bar")
-        ::Sorbet::Private::Static.keep_def(<self>, :"qux")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz")
-        ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"bar<defaultArg>1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"qux<defaultArg>1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz<defaultArg>1")
         <emptyTree>
       end
     end
