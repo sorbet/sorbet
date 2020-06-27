@@ -559,12 +559,11 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 } // namespace
 
 llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
-                             const IREmitterContext &irctx, const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                             int rubyBlockId) {
+                             const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
-    if (aliases.contains(local)) {
+    if (irctx.aliases.contains(local)) {
         // alias to a field or constant
-        auto alias = aliases.at(local);
+        auto alias = irctx.aliases.at(local);
 
         if (alias.kind == Alias::AliasKind::Constant) {
             return Payload::getRubyConstant(cs, alias.constantSym, builder);
@@ -577,10 +576,9 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
                                       {getClassVariableStoreClass(cs, builder, irctx),
                                        Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
-            return builder.CreateCall(
-                cs.module->getFunction("sorbet_instanceVariableGet"),
-                {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId),
-                 Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
+            return builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableGet"),
+                                      {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
+                                       Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
@@ -596,14 +594,13 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
 }
 
 void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &build,
-                     const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases,
-                     int rubyBlockId) {
+                     const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
-    if (aliases.contains(local)) {
+    if (irctx.aliases.contains(local)) {
         // alias to a field or constant
-        auto alias = aliases.at(local);
+        auto alias = irctx.aliases.at(local);
         if (alias.kind == Alias::AliasKind::Constant) {
-            auto sym = aliases.at(local).constantSym;
+            auto sym = irctx.aliases.at(local).constantSym;
             auto name = sym.data(cs.gs)->name.show(cs.gs);
             auto owner = sym.data(cs.gs)->owner;
             builder.CreateCall(cs.module->getFunction("sorbet_setConstant"),
@@ -618,10 +615,9 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
                                {getClassVariableStoreClass(cs, builder, irctx),
                                 Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
-            builder.CreateCall(
-                cs.module->getFunction("sorbet_instanceVariableSet"),
-                {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId),
-                 Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
+            builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableSet"),
+                               {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
+                                Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;
     }

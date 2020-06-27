@@ -67,39 +67,31 @@ public:
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                         const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                         const InlinedVector<cfg::VariableUseSite, 2> &args, const std::size_t offset,
-                                         const std::size_t length);
+                                         int rubyBlockId, const InlinedVector<cfg::VariableUseSite, 2> &args,
+                                         const std::size_t offset, const std::size_t length);
 
     static llvm::Value *fillSendArgArray(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                         const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                         const InlinedVector<cfg::VariableUseSite, 2> &args) {
-        return fillSendArgArray(cs, builder, irctx, aliases, rubyBlockId, args, 0, args.size());
+                                         int rubyBlockId, const InlinedVector<cfg::VariableUseSite, 2> &args) {
+        return fillSendArgArray(cs, builder, irctx, rubyBlockId, args, 0, args.size());
     }
 
     static llvm::Value *emitMethodCall(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
-                                       const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                       int rubyBlockId);
+                                       const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *self,
                                             llvm::Value *argv, llvm::Value *argc, std::string_view name);
 
     static llvm::Value *emitMethodCallDirrect(CompilerState &cs, llvm::IRBuilderBase &builder, core::SymbolRef funSym,
-                                              cfg::Send *send, const IREmitterContext &irctx,
-                                              UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId);
+                                              cfg::Send *send, const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *emitMethodCallViaRubyVM(CompilerState &cs, llvm::IRBuilderBase &builder, cfg::Send *send,
-                                                const IREmitterContext &irctx,
-                                                const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                                                int rubyBlockId, llvm::Function *blk);
+                                                const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk);
 
     static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
-                                                             UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                              llvm::Function *mainFunc);
 
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                      UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                      int bodyRubyBlockId, core::LocalVariable exceptionValue);
+                                      int rubyBlockId, int bodyRubyBlockId, core::LocalVariable exceptionValue);
 };
 } // namespace sorbet::compiler
 #endif

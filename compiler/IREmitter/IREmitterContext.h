@@ -19,6 +19,8 @@ enum class FunctionType {
     Unused,
 };
 
+struct Alias;
+
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.
 //
 // Nearly every vector here behaves as a lookup map keyed on cfg::BasicBlock::rubyBlockId (i.e., an ID
@@ -26,6 +28,12 @@ enum class FunctionType {
 // It might make sense to newtype this someday.
 struct IREmitterContext {
     core::SymbolRef forMethod;
+
+    // Sorbet uses cfg::Alias to link a local variable to a global construct, like an instance variable or a constant.
+    //
+    // This mapping is essentially, "if you were about to access a local variable corresponding to an alias,
+    // this is the thing you should access instead"
+    UnorderedMap<core::LocalVariable, Alias> aliases;
 
     // Contains llvm::BasicBlocks (insertion points) to hold code for a Ruby method or block that runs first,
     // before starting to execute the user-written body.

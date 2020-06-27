@@ -87,8 +87,7 @@ void setupStackFrames(CompilerState &cs, const ast::MethodDef &md, const IREmitt
     }
 }
 
-void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx,
-                    UnorderedMap<core::LocalVariable, Alias> &aliases) {
+void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
     llvm::IRBuilder<> builder(cs);
@@ -293,8 +292,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                 // box `self`
                 if (!isBlock) {
                     auto selfArgRaw = func->arg_begin() + 2;
-                    Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, irctx, aliases,
-                                    rubyBlockId);
+                    Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
                 }
 
                 for (auto i = 0; i < maxPositionalArgCount; i++) {
@@ -314,7 +312,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                     auto name = a._name.data(cs)->shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
                     auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
-                    Payload::varSet(cs, a, rawValue, builder, irctx, aliases, rubyBlockId);
+                    Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
                     if (i >= minPositionalArgCount) {
                         // check if we need to fill in the next variable from the arg
                         builder.CreateBr(checkBlocks[i - minPositionalArgCount + 1]);
@@ -328,7 +326,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                     // TODO: I don't think this correctly handles blocks with block args
                     Payload::varSet(cs, blkArgName,
                                     builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
-                                    irctx, aliases, 0);
+                                    irctx, 0);
                 }
                 builder.CreateBr(checkBlocks[0]);
             }
@@ -375,7 +373,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                         auto argIndex = i + minPositionalArgCount;
                         auto a = irctx.rubyBlockArgs[rubyBlockId][argIndex];
 
-                        Payload::varSet(cs, a, rawValue, builder, irctx, aliases, rubyBlockId);
+                        Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
                     }
                     builder.CreateBr(fillFromDefaultBlocks[i + 1]);
                 }
@@ -388,7 +386,7 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                 if (hasRestArgs) {
                     Payload::varSet(cs, restArgName,
                                     Payload::readRestArgs(cs, builder, maxPositionalArgCount, argCountRaw, argArrayRaw),
-                                    builder, irctx, aliases, rubyBlockId);
+                                    builder, irctx, rubyBlockId);
                 }
                 if (hasKWArgs) {
                     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
@@ -437,12 +435,12 @@ void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, 
                             kwArgValue->addIncoming(passedValue, isUndefEnd);
                             kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
 
-                            Payload::varSet(cs, name, kwArgValue, builder, irctx, aliases, rubyBlockId);
+                            Payload::varSet(cs, name, kwArgValue, builder, irctx, rubyBlockId);
                         }
                     }
                     if (hasKWRestArgs) {
                         Payload::varSet(cs, kwRestArgName, Payload::readKWRestArg(cs, builder, hashArgs), builder,
-                                        irctx, aliases, rubyBlockId);
+                                        irctx, rubyBlockId);
                     } else {
                         Payload::assertNoExtraKWArg(cs, builder, hashArgs);
                     }
@@ -488,8 +486,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
     }
 }
 
-void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx,
-                  UnorderedMap<core::LocalVariable, Alias> &aliases) {
+void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(cs);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -507,45 +504,18 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
-                        auto var = Payload::varGet(cs, i->what, builder, irctx, aliases, bb->rubyBlockId);
-                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->what, builder, irctx, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::Alias *i) {
-                        if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
-                            auto name = bind.bind.variable._name.data(cs)->shortName(cs);
-                            if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
-                                aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
-                            } else if (name.size() > 1 && name[0] == '@') {
-                                aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
-                            } else if (name.size() > 1 && name[0] == '$') {
-                                aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
-                            } else {
-                                ENFORCE(stoi((string)name) > 0, "'" + ((string)name) + "' is not a valid global name");
-                                aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
-                            }
-                        } else {
-                            // It's currently impossible in Sorbet to declare a global field with a T.let
-                            // (they will all be Magic_undeclaredFieldStub)
-                            auto name = i->what.data(cs)->name;
-                            auto shortName = name.data(cs)->shortName(cs);
-                            ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
-
-                            if (i->what.data(cs)->isField()) {
-                                aliases[bind.bind.variable] = Alias::forInstanceField(name);
-                            } else if (i->what.data(cs)->isStaticField()) {
-                                if (shortName.size() > 2 && shortName[0] == '@' && shortName[1] == '@') {
-                                    aliases[bind.bind.variable] = Alias::forClassField(name);
-                                } else {
-                                    aliases[bind.bind.variable] = Alias::forConstant(i->what);
-                                }
-                            } else {
-                                aliases[bind.bind.variable] = Alias::forConstant(i->what);
-                            }
-                        }
+                        // We compute the alias map when IREmitterContext is first created, so if an entry is missing,
+                        // there's a problem.
+                        ENFORCE(irctx.aliases.find(bind.bind.variable) != irctx.aliases.end(),
+                                "Alias is missing from the alias map");
                     },
                     [&](cfg::SolveConstraint *i) {
-                        auto var = Payload::varGet(cs, i->send, builder, irctx, aliases, bb->rubyBlockId);
-                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->send, builder, irctx, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::Send *i) {
                         if (i->recv.variable._name == core::Names::blkArg() &&
@@ -555,16 +525,15 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                             return;
                         }
 
-                        auto rawCall =
-                            IREmitterHelpers::emitMethodCall(cs, builder, i, irctx, aliases, bb->rubyBlockId);
-                        Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, aliases, bb->rubyBlockId);
+                        auto rawCall = IREmitterHelpers::emitMethodCall(cs, builder, i, irctx, bb->rubyBlockId);
+                        Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, aliases, bb->rubyBlockId);
+                        auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                         switch (irctx.rubyBlockType[bb->rubyBlockId]) {
                             case FunctionType::TopLevel: {
-                                Payload::varSet(cs, returnValue(cs), var, builder, irctx, aliases, bb->rubyBlockId);
+                                Payload::varSet(cs, returnValue(cs), var, builder, irctx, bb->rubyBlockId);
                                 builder.CreateBr(irctx.postProcessBlock);
                                 break;
                             }
@@ -588,7 +557,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
-                        auto var = Payload::varGet(cs, i->what.variable, builder, irctx, aliases, bb->rubyBlockId);
+                        auto var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                         builder.CreateRet(var);
                     },
                     [&](cfg::LoadSelf *i) {
@@ -597,17 +566,17 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                     [&](cfg::Literal *i) {
                         if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
-                                            aliases, bb->rubyBlockId);
+                                            bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyTrue(cs, builder), builder, irctx,
-                                            aliases, bb->rubyBlockId);
+                                            bb->rubyBlockId);
                             return;
                         }
                         if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyNil(cs, builder), builder, irctx,
-                                            aliases, bb->rubyBlockId);
+                                            bb->rubyBlockId);
                             return;
                         }
 
@@ -616,15 +585,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
                                 auto rawInt = Payload::longToRubyValue(cs, builder, litType->value);
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, aliases,
-                                                bb->rubyBlockId);
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Float: {
                                 auto rawInt =
                                     Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, aliases,
-                                                bb->rubyBlockId);
+                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::Symbol: {
@@ -632,15 +599,13 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                                 auto rawId = Payload::idIntern(cs, builder, str);
                                 auto rawRubySym =
                                     builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
-                                Payload::varSet(cs, bind.bind.variable, rawRubySym, builder, irctx, aliases,
-                                                bb->rubyBlockId);
+                                Payload::varSet(cs, bind.bind.variable, rawRubySym, builder, irctx, bb->rubyBlockId);
                                 break;
                             }
                             case core::LiteralType::LiteralTypeKind::String: {
                                 auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
                                 auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str, true);
-                                Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, irctx, aliases,
-                                                bb->rubyBlockId);
+                                Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, irctx, bb->rubyBlockId);
                                 break;
                             }
                             default:
@@ -654,8 +619,8 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                             return;
                         }
 
-                        IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, aliases, bb->rubyBlockId,
-                                                                bodyRubyBlockId, bind.bind.variable);
+                        IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
+                                                                bind.bind.variable);
                     },
                     [&](cfg::LoadArg *i) {
                         /* intentionally omitted, it's part of method preambula */
@@ -665,7 +630,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                         /* intentionally omitted, it's part of method preambula */
                     },
                     [&](cfg::Cast *i) {
-                        auto val = Payload::varGet(cs, i->value.variable, builder, irctx, aliases, bb->rubyBlockId);
+                        auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
                         auto passedTypeTest = Payload::typeTest(cs, builder, val, bind.bind.type);
                         auto successBlock =
                             llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
@@ -684,14 +649,14 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                         builder.SetInsertPoint(successBlock);
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
-                            Payload::varSet(cs, bind.bind.variable, val, builder, irctx, aliases, bb->rubyBlockId);
+                            Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
                         } else if (i->cast == core::Names::assertType()) {
                             Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
-                                            aliases, bb->rubyBlockId);
+                                            bb->rubyBlockId);
                         }
                     },
                     [&](cfg::TAbsurd *i) {
-                        auto val = Payload::varGet(cs, i->what.variable, builder, irctx, aliases, bb->rubyBlockId);
+                        auto val = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                         builder.CreateCall(cs.module->getFunction("sorbet_t_absurd"), {val});
                     });
                 if (isTerminated) {
@@ -703,7 +668,7 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
                 auto *elseb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.elseb);
 
                 if (thenb != elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
-                    auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, aliases, bb->rubyBlockId);
+                    auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, bb->rubyBlockId);
                     auto condValue = Payload::testIsTruthy(cs, builder, var);
 
                     builder.CreateCondBr(condValue, thenb, elseb);
@@ -748,11 +713,10 @@ void emitBlockExits(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
     }
 }
 
-void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx,
-                     UnorderedMap<core::LocalVariable, Alias> &aliases) {
+void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(irctx.postProcessBlock);
-    auto var = Payload::varGet(cs, returnValue(cs), builder, irctx, aliases, 0);
+    auto var = Payload::varGet(cs, returnValue(cs), builder, irctx, 0);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
         builder.CreateRet(var);
@@ -782,8 +746,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     builder.CreateRet(var);
 }
 
-void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx,
-                         const UnorderedMap<core::LocalVariable, Alias> &aliases) {
+void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
     cs.functionEntryInitializers = irctx.functionInitializersByFunction[0];
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(irctx.sigVerificationBlock);
@@ -794,7 +757,7 @@ void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef 
         for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
             argId += 1;
             auto local = irctx.rubyBlockArgs[0][argId];
-            auto var = Payload::varGet(cs, local, builder, irctx, aliases, 0);
+            auto var = Payload::varGet(cs, local, builder, irctx, 0);
             auto &expectedType = argInfo.type;
             if (!expectedType) {
                 continue;
@@ -843,26 +806,18 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
 
-    // Sorbet uses cfg::Alias to link a local variable to a global construct, like an instance variable or a constant.
-    //
-    // This mapping is essentially, "if you were about to access a local variable corresponding to an alias,
-    // this is the thing you should access instead"
-    //
-    // TODO(jez) Move this into IREmitterContext
-    UnorderedMap<core::LocalVariable, Alias> aliases;
-
-    const IREmitterContext irctx = IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, aliases, func);
+    const IREmitterContext irctx = IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, func);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 
     setupStackFrames(cs, md, irctx);
-    setupArguments(cs, cfg, md, irctx, aliases);
-    emitSigVerification(cs, cfg, md, irctx, aliases);
+    setupArguments(cs, cfg, md, irctx);
+    emitSigVerification(cs, cfg, md, irctx);
 
-    emitUserBody(cs, cfg, irctx, aliases);
+    emitUserBody(cs, cfg, irctx);
     emitDeadBlocks(cs, cfg, irctx);
     emitBlockExits(cs, cfg, irctx);
-    emitPostProcess(cs, cfg, irctx, aliases);
+    emitPostProcess(cs, cfg, irctx);
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
         builder.CreateBr(irctx.argumentSetupBlocksByFunction[funId]);

@@ -62,14 +62,12 @@ public:
         : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         auto &builder = builderCast(build);
 
-        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, aliases, rubyBlockId, send->args);
+        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
 
-        auto recv = Payload::varGet(cs, send->recv.variable, builder, irctx, aliases, rubyBlockId);
+        auto recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
         llvm::Value *blkPtr;
         if (blk != nullptr) {
             blkPtr = blk;
@@ -95,9 +93,7 @@ class DefineMethodIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     DefineMethodIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         bool isSelf = send->fun == core::Names::keepSelfDef();
         ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
@@ -135,7 +131,7 @@ public:
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
         // meta-progrmaming methods applied to an abstract method definition, see
         // https://github.com/stripe/sorbet_llvm/issues/115 for more information.
-        return Payload::varGet(cs, send->args[1].variable, builder, irctx, aliases, rubyBlockId);
+        return Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyBlockId);
     }
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -150,9 +146,7 @@ class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         return Payload::rubyNil(cs, builder);
     }
@@ -170,19 +164,17 @@ class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
     Module_tripleEq() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         auto representedClass = core::Types::getRepresentedClass(cs, send->recv.type.get());
         if (!representedClass.exists()) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         }
         auto recvType = representedClass.data(cs)->externalType(cs);
         auto &arg0 = send->args[0];
 
         auto &builder = builderCast(build);
 
-        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, irctx, aliases, rubyBlockId);
+        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
         auto representedClassValue = Payload::getRubyConstant(cs, representedClass, builder);
         auto classEq = builder.CreateICmpEQ(recvValue, representedClassValue, "Module_tripleEq_shortCircuit");
 
@@ -194,14 +186,14 @@ public:
         builder.CreateCondBr(expected, fastStart, slowStart);
 
         builder.SetInsertPoint(fastStart);
-        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, irctx, aliases, rubyBlockId);
+        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, irctx, rubyBlockId);
         auto typeTest = Payload::typeTest(cs, builder, arg0Value, recvType);
         auto fastPath = Payload::boolToRuby(cs, builder, typeTest);
         auto fastEnd = builder.GetInsertBlock();
         builder.CreateBr(cont);
 
         builder.SetInsertPoint(slowStart);
-        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         auto slowEnd = builder.GetInsertBlock();
         builder.CreateBr(cont);
 
@@ -226,12 +218,10 @@ class Regexp_new : public SymbolBasedIntrinsicMethod {
 public:
     Regexp_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         if (send->args.size() < 1 || send->args.size() > 2) {
             // todo: make this work with options.
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         }
         auto options = 0;
         if (send->args.size() == 2) {
@@ -239,7 +229,7 @@ public:
             auto literalOptions = core::cast_type<core::LiteralType>(arg1.type.get());
             if (literalOptions == nullptr ||
                 literalOptions->literalKind != core::LiteralType::LiteralTypeKind::Integer) {
-                return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+                return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
             }
             options = literalOptions->value;
         }
@@ -247,7 +237,7 @@ public:
         auto &arg0 = send->args[0];
         auto literal = core::cast_type<core::LiteralType>(arg0.type.get());
         if (literal == nullptr || literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         }
         auto &builder = builderCast(build);
         auto str = core::NameRef(cs, literal->value).data(cs)->shortName(cs);
@@ -266,25 +256,23 @@ class TEnum_new : public SymbolBasedIntrinsicMethod {
 public:
     TEnum_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         // Instead of `MyEnum::X$1.new(...)`, we want to do `<self>.new(...)` to get back to what
         // would have happened at runtime. This is effecctively "undo-ing" the earlier DSL pass.
         auto appliedType = core::cast_type<core::AppliedType>(send->recv.type.get());
         if (appliedType == nullptr) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         }
 
         auto attachedClass = appliedType->klass.data(cs)->attachedClass(cs);
         ENFORCE(attachedClass.exists());
         if (!attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, aliases, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
         }
 
         auto &builder = builderCast(build);
-        auto self = Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, aliases, rubyBlockId);
-        auto args = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, aliases, rubyBlockId, send->args);
+        auto self = Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId);
+        auto args = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         return IREmitterHelpers::callViaRubyVMSimple(cs, build, self, args, argc, "new");
     };
@@ -304,9 +292,7 @@ class TEnum_abstract : public SymbolBasedIntrinsicMethod {
 public:
     TEnum_abstract() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
     virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx,
-                                  const UnorderedMap<core::LocalVariable, Alias> &aliases, int rubyBlockId,
-                                  llvm::Function *blk) const override {
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
         auto &builder = builderCast(build);
         return Payload::rubyNil(cs, builder);
     };

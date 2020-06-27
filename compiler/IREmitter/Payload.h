@@ -62,11 +62,9 @@ public:
                                    core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr,
                                    llvm::AllocaInst *lineNumberPtr);
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
-                               const IREmitterContext &irctx, const UnorderedMap<core::LocalVariable, Alias> &aliases,
-                               int rubyBlockId);
+                               const IREmitterContext &irctx, int rubyBlockId);
     static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
-                       const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases,
-                       int rubyBlockId);
+                       const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 };

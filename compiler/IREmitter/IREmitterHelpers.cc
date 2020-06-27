@@ -16,10 +16,57 @@
 using namespace std;
 namespace sorbet::compiler {
 
+// Iterate over all instructions in the CFG, populating the alias map.
+UnorderedMap<core::LocalVariable, Alias> setupAliases(CompilerState &cs, const cfg::CFG &cfg) {
+    UnorderedMap<core::LocalVariable, Alias> aliases{};
+
+    for (auto &bb : cfg.basicBlocks) {
+        for (auto &bind : bb->exprs) {
+            if (auto *i = cfg::cast_instruction<cfg::Alias>(bind.value.get())) {
+                ENFORCE(aliases.find(bind.bind.variable) == aliases.end(), "Overwriting an entry in the aliases map");
+
+                if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
+                    auto name = bind.bind.variable._name.data(cs)->shortName(cs);
+                    if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
+                        aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
+                    } else if (name.size() > 1 && name[0] == '@') {
+                        aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
+                    } else if (name.size() > 1 && name[0] == '$') {
+                        aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
+                    } else {
+                        ENFORCE(stoi((string)name) > 0, "'" + ((string)name) + "' is not a valid global name");
+                        aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
+                    }
+                } else {
+                    // It's currently impossible in Sorbet to declare a global field with a T.let
+                    // (they will all be Magic_undeclaredFieldStub)
+                    auto name = i->what.data(cs)->name;
+                    auto shortName = name.data(cs)->shortName(cs);
+                    ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
+
+                    if (i->what.data(cs)->isField()) {
+                        aliases[bind.bind.variable] = Alias::forInstanceField(name);
+                    } else if (i->what.data(cs)->isStaticField()) {
+                        if (shortName.size() > 2 && shortName[0] == '@' && shortName[1] == '@') {
+                            aliases[bind.bind.variable] = Alias::forClassField(name);
+                        } else {
+                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                        }
+                    } else {
+                        aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                    }
+                }
+            }
+        }
+    }
+
+    return aliases;
+}
+
 UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                     const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
-                    const IREmitterContext &irctx, UnorderedMap<core::LocalVariable, Alias> &aliases) {
+                    const IREmitterContext &irctx) {
     UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
@@ -296,7 +343,6 @@ void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector
 
 IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                     const ast::MethodDef &md,
-                                                                    UnorderedMap<core::LocalVariable, Alias> &aliases,
                                                                     llvm::Function *mainFunc) {
     vector<int> basicBlockJumpOverrides(cfg.maxBasicBlockId);
     vector<int> basicBlockRubyBlockId(cfg.maxBasicBlockId, 0);
@@ -469,6 +515,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     IREmitterContext approximation{
         cfg.symbol,
+        setupAliases(cs, cfg),
         functionInitializersByFunction,
         argumentSetupBlocksByFunction,
         userEntryBlockByFunction,
@@ -492,7 +539,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(deadBlocks),
         move(blockExits),
     };
-    approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation, aliases);
+
+    approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
 
     return approximation;
 }
