@@ -271,6 +271,18 @@ NodeDef nodes[] = {
         "for",
         vector<FieldDef>({{"vars", FieldType::Node}, {"expr", FieldType::Node}, {"body", FieldType::Node}}),
     },
+    // "..." argument forwarding in definition site
+    {
+        "ForwardArgs",
+        "forward_args",
+        vector<FieldDef>(),
+    },
+    // "..." argument forwarding in call site
+    {
+        "ForwardedArgs",
+        "forwarded_args",
+        vector<FieldDef>(),
+    },
     // float literal like "1.2"
     {
         "Float",
