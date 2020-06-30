@@ -22,6 +22,7 @@ struct AutoloaderConfig {
 
     std::string rootDir;
     std::string preamble;
+    std::string registryModule;
     UnorderedSet<core::NameRef> topLevelNamespaceRefs;
     UnorderedSet<core::NameRef> excludedRequireRefs;
     UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
