@@ -1437,6 +1437,12 @@ class Array < Object
     )
     .void
   end
+  sig do
+    params(
+      arg0: T::Array[Elem],
+    )
+    .void
+  end
   def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   # Inserts the given values before the element with the given `index`.
