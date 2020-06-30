@@ -14,13 +14,17 @@ namespace sorbet::compiler {
 class CompilerState {
 public:
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
-    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, core::FileRef,
-                  llvm::BasicBlock *globalConstructorsEntry);
+    CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, llvm::DIBuilder *,
+                  llvm::DICompileUnit *, core::FileRef, llvm::BasicBlock *globalConstructorsEntry);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
     llvm::Module *module;
     llvm::BasicBlock *globalConstructorsEntry;
+
+    // Debug info
+    llvm::DIBuilder *debug;
+    llvm::DICompileUnit *compileUnit;
 
     // Our own state
 

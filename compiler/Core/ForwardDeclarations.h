@@ -4,6 +4,8 @@
 namespace llvm {
 class AllocaInst;
 class BasicBlock;
+class DIBuilder;
+class DICompileUnit;
 class Function;
 class FunctionType;
 class IRBuilderBase;

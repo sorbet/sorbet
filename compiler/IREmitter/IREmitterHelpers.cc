@@ -1,4 +1,5 @@
 // These violate our poisons so have to happen first
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType
 #include "llvm/IR/IRBuilder.h"
 
@@ -227,16 +228,48 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
     return maxSendArgCount;
 }
 
-vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
-                                                        const vector<FunctionType> &blockTypes) {
-    vector<llvm::Function *> res;
-    res.emplace_back(func);
+// TODO
+llvm::DISubroutineType *getDebugFunctionType(CompilerState &cs, llvm::Function *func) {
+    vector<llvm::Metadata *> eltTys;
+
+    auto *valueTy = cs.debug->createBasicType("VALUE", 64, llvm::dwarf::DW_ATE_signed);
+    eltTys.push_back(valueTy);
+
+    // NOTE: the return type is always the first element in the array
+    return cs.debug->createSubroutineType(cs.debug->getOrCreateTypeArray(eltTys));
+}
+
+llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScope *parent, llvm::Function *func,
+                                  int rubyBlockId) {
+    auto debugFile = cs.debug->createFile(cs.compileUnit->getFilename(), cs.compileUnit->getDirectory());
+    auto loc = cfg.symbol.data(cs)->loc();
+
+    auto owner = cfg.symbol.data(cs)->owner;
+    std::string diName(owner.data(cs)->name.data(cs)->shortName(cs));
+
+    if (owner.data(cs)->isSingletonClass(cs)) {
+        diName += ".";
+    } else {
+        diName += "#";
+    }
+
+    diName += cfg.symbol.data(cs)->name.data(cs)->shortName(cs);
+
+    auto lineNo = loc.position(cs).first.line;
+
+    return cs.debug->createFunction(parent, diName, func->getName(), debugFile, lineNo, getDebugFunctionType(cs, func),
+                                    lineNo, llvm::DINode::FlagPrototyped, llvm::DISubprogram::SPFlagDefinition);
+}
+
+void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Function *func,
+                                    const vector<FunctionType> &blockTypes, vector<llvm::Function *> &funcs,
+                                    vector<llvm::DISubprogram *> &scopes) {
     auto *bt = cs.getRubyBlockFFIType();
     auto *et = cs.getRubyExceptionFFIType();
-    for (int i = 1; i <= cfg.maxRubyBlockId; i++) {
+    for (int i = 0; i <= cfg.maxRubyBlockId; i++) {
         switch (blockTypes[i]) {
             case FunctionType::TopLevel:
-                res.emplace_back(func);
+                funcs[i] = func;
                 break;
 
             case FunctionType::Block: {
@@ -249,7 +282,7 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
                 (fp->arg_begin() + 2)->setName("argc");
                 (fp->arg_begin() + 3)->setName("argArray");
                 (fp->arg_begin() + 4)->setName("blockArg");
-                res.emplace_back(fp);
+                funcs[i] = fp;
                 break;
             }
 
@@ -267,12 +300,18 @@ vector<llvm::Function *> getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::
                 (fp->arg_begin() + 1)->setName("iseq_encoded");
                 (fp->arg_begin() + 2)->setName("captures");
 
-                res.emplace_back(fp);
+                funcs[i] = fp;
                 break;
             }
         }
+
+        auto *parent = i == 0 ? static_cast<llvm::DIScope *>(cs.compileUnit) : scopes[0];
+        auto *scope = getDebugScope(cs, cfg, parent, funcs[i], i);
+        scopes[i] = scope;
+        funcs[i]->setSubprogram(scope);
+
+        ENFORCE(scope->describes(funcs[i]));
     }
-    return res;
 };
 
 // Returns the mapping of ruby block id to function type, as well as the mapping from basic block to exception handling
@@ -361,7 +400,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId + 1, 0);
     determineBlockTypes(cfg, blockTypes, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
 
-    vector<llvm::Function *> rubyBlock2Function = getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes);
+    vector<llvm::Function *> rubyBlock2Function(cfg.maxRubyBlockId + 1, nullptr);
+    vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
+    getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg);
@@ -538,6 +579,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(exceptionHandlingBlockHeaders),
         move(deadBlocks),
         move(blockExits),
+        move(blockScopes),
     };
 
     approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
@@ -661,6 +703,19 @@ llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Fun
         func->begin()->eraseFromParent();
     }
     return func;
+}
+
+void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                    int rubyBlockId, core::Loc loc) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    if (!loc.exists()) {
+        builder.SetCurrentDebugLocation(llvm::DebugLoc());
+    } else {
+        auto *scope = irctx.blockScopes[rubyBlockId];
+        auto start = loc.position(cs).first;
+        builder.SetCurrentDebugLocation(llvm::DebugLoc::get(start.line, start.column, scope));
+    }
 }
 
 } // namespace sorbet::compiler

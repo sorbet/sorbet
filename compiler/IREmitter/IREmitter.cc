@@ -1,5 +1,6 @@
 // These violate our poisons so have to happen first
 #include "llvm/IR/Attributes.h"
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/DerivedTypes.h" // FunctionType, StructType
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
@@ -494,13 +495,24 @@ void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irct
         auto block = irctx.llvmBlocksBySorbetBlocks[bb->id];
         cs.functionEntryInitializers = irctx.functionInitializersByFunction[bb->rubyBlockId];
         bool isTerminated = false;
+
         builder.SetInsertPoint(block);
+
+        // NOTE: explicitly clearing debug location information here so that we don't accidentally inherit the location
+        // information from blocks in different target functions.
+        builder.SetCurrentDebugLocation(llvm::DebugLoc());
+
         core::Loc lastLoc;
         if (bb != cfg.deadBlock()) {
             for (cfg::Binding &bind : bb->exprs) {
-                lastLoc = Payload::setLineNumber(cs, builder, core::Loc(cs.file, bind.loc), cfg.symbol, lastLoc,
+                auto loc = core::Loc(cs.file, bind.loc);
+
+                lastLoc = Payload::setLineNumber(cs, builder, loc, cfg.symbol, lastLoc,
                                                  irctx.iseqEncodedPtrsByFunction[bb->rubyBlockId],
                                                  irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
+
+                IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
+
                 typecase(
                     bind.value.get(),
                     [&](cfg::Ident *i) {
@@ -822,6 +834,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         builder.SetInsertPoint(irctx.functionInitializersByFunction[funId]);
         builder.CreateBr(irctx.argumentSetupBlocksByFunction[funId]);
     }
+
+    cs.debug->finalize();
 
     /* run verifier */
     if (debug_mode && llvm::verifyFunction(*func, &llvm::errs())) {

@@ -153,6 +153,9 @@ struct IREmitterContext {
     // between a basic block in a ruby block exists, and transitions to a node in a different ruby block (that isn't the
     // dead block).
     std::vector<llvm::BasicBlock *> blockExitMapping;
+
+    // Mappinf from ruby block id to debug info scope.
+    std::vector<llvm::DISubprogram *> blockScopes;
 };
 
 } // namespace sorbet::compiler

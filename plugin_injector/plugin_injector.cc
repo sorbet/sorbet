@@ -1,4 +1,5 @@
 // These violate our poisons so have to happen first
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -67,6 +68,9 @@ public:
     // "Combined" because all the methods in this file get compiled and accumulated into this Module,
     // but each method is typechecked (and thus compiled) individually.
     unique_ptr<llvm::Module> combinedModule;
+
+    unique_ptr<llvm::DIBuilder> debugInfo;
+    llvm::DICompileUnit *compileUnit = nullptr;
 
     // The function that holds calls to global constructors
     //
@@ -148,13 +152,36 @@ public:
         }
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
+        unique_ptr<llvm::DIBuilder> &debug = threadState->debugInfo;
+        llvm::DICompileUnit *&compUnit = threadState->compileUnit;
         // TODO: Figure out why this isn't true
         // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(),
         // loc.toString(gs));
         ENFORCE(loc.file().exists());
         if (!module) {
             ENFORCE(threadState->globalConstructorsEntry == nullptr);
+            ENFORCE(debug == nullptr);
+            ENFORCE(compUnit == nullptr);
             module = compiler::PayloadLoader::readDefaultModule(lctx);
+
+            module->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+
+            if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
+                // osx only supports dwarf2
+                module->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 2);
+            }
+
+            debug = llvm::make_unique<llvm::DIBuilder>(*module);
+
+            // NOTE: we use C here because our generated functions follow its abi
+            auto language = llvm::dwarf::DW_LANG_C;
+            auto filename = loc.file().data(gs).path();
+            auto isOptimized = false;
+            auto runtimeVersion = 0;
+            compUnit = debug->createCompileUnit(
+                language, debug->createFile(llvm::StringRef(filename.data(), filename.size()), "."), "Sorbet LLVM",
+                isOptimized, "", runtimeVersion);
+
             threadState->file = loc.file();
 
             auto linkageType = llvm::Function::InternalLinkage;
@@ -168,7 +195,8 @@ public:
             ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
-        compiler::CompilerState state(gs, lctx, module.get(), threadState->file, threadState->globalConstructorsEntry);
+        compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
+                                      threadState->globalConstructorsEntry);
         try {
             compiler::IREmitter::run(state, cfg, md);
             string fileName = objectFileName(gs, loc.file());
@@ -195,6 +223,8 @@ public:
         builder.CreateRetVoid();
 
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
+        unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
+        auto *compileUnit = threadState->compileUnit;
         threadState->globalConstructorsEntry = nullptr;
 
         if (!module) {
@@ -213,7 +243,9 @@ public:
         ENFORCE(threadState->globalConstructorsEntry == nullptr);
         threadState->file = core::FileRef();
 
-        compiler::CompilerState cs(gs, lctx, module.get(), f, nullptr);
+        debug->finalize();
+
+        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr);
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
             if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");

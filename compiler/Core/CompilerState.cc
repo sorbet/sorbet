@@ -17,9 +17,10 @@ using namespace std;
 namespace sorbet::compiler {
 
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
-                             core::FileRef file, llvm::BasicBlock *globalConstructorsEntry)
-    : gs(gs), lctx(lctx), module(module), globalConstructorsEntry(globalConstructorsEntry),
-      functionEntryInitializers(nullptr), file(file) {}
+                             llvm::DIBuilder *debug, llvm::DICompileUnit *compileUnit, core::FileRef file,
+                             llvm::BasicBlock *globalConstructorsEntry)
+    : gs(gs), lctx(lctx), module(module), globalConstructorsEntry(globalConstructorsEntry), debug(debug),
+      compileUnit(compileUnit), functionEntryInitializers(nullptr), file(file) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
