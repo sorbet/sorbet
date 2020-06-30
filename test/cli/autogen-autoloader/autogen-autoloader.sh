@@ -52,6 +52,7 @@ main/sorbet --silence-dev-message --stop-after=namer \
   --autogen-autoloader-modules=Foo \
   --autogen-autoloader-root my-autoloader/ \
   --autogen-autoloader-strip-prefix test/cli/ \
+  --autogen-registry-module "Primus::Require" \
   test/cli/autogen-autoloader/inplace.rb
 
 cat strip-output/root.rb
