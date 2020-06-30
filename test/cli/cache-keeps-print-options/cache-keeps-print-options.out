@@ -29,14 +29,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
+  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
+  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
+  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)  end
+  class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
+  end
 end

@@ -22,7 +22,9 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
 void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(epochTimers.find(epoch) == epochTimers.end());
     vector<Timer> firstDiagnosticLatencyTimers;
-
+    if (config->getClientConfig().enableTypecheckInfo) {
+        Timer::timedSleep(chrono::milliseconds(5), *config->logger, "delay so timer is reported");
+    }
     for (auto &timer : diagnosticLatencyTimers) {
         firstDiagnosticLatencyTimers.emplace_back(timer->clone("first_diagnostic_latency"));
     }
@@ -132,6 +134,10 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     }
     return fileErrorStatuses[file.id()];
 };
+
+u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
+    return getFileErrorStatus(file).lastReportedEpoch;
+}
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
                        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)

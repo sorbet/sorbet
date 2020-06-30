@@ -5,6 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Error.h"
+#include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
@@ -16,7 +17,8 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("error-check-test");
-auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+auto errorCollector = make_shared<sorbet::core::ErrorCollector>();
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger, errorCollector);
 
 namespace sorbet {
 
@@ -43,8 +45,8 @@ TEST_CASE("ParserCheck") {
         auto desugared = sorbet::ast::desugar::node2Tree(ctx, move(ast));
     } catch (SorbetException &) {
     }
-
-    CHECK_EQ(0, errorQueue->drainAllErrors().size());
+    errorQueue->flushAllErrors(gs);
+    CHECK_EQ(0, errorCollector->drainErrors().size());
 }
 
 } // namespace sorbet

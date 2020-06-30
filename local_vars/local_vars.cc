@@ -90,8 +90,7 @@ class LocalNameInserter {
         vector<NamedArg> namedArgs;
         UnorderedSet<core::NameRef> nameSet;
         for (auto &arg : methodArgs) {
-            auto *refExp = ast::cast_tree<ast::Reference>(arg);
-            if (!refExp) {
+            if (!ast::isa_reference(arg)) {
                 Exception::raise("Must be a reference!");
             }
             auto named = nameArg(move(arg));

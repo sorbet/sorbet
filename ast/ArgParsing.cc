@@ -42,13 +42,9 @@ ParsedArg parseArg(const ast::TreePtr &arg) {
 }
 
 TreePtr getDefaultValue(TreePtr arg) {
-    auto *refExp = ast::cast_tree<ast::Reference>(arg);
-    if (!refExp) {
-        Exception::raise("Must be a reference!");
-    }
     TreePtr default_;
     typecase(
-        refExp, [&](ast::RestArg *rest) { default_ = getDefaultValue(move(rest->expr)); },
+        arg.get(), [&](ast::RestArg *rest) { default_ = getDefaultValue(move(rest->expr)); },
         [&](ast::KeywordArg *kw) { default_ = getDefaultValue(move(kw->expr)); },
         [&](ast::OptionalArg *opt) { default_ = move(opt->default_); },
         [&](ast::BlockArg *blk) { default_ = getDefaultValue(move(blk->expr)); },
@@ -65,7 +61,7 @@ TreePtr getDefaultValue(TreePtr arg) {
 vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
     vector<ParsedArg> parsedArgs;
     for (auto &arg : args) {
-        if (!ast::isa_tree<ast::Reference>(arg)) {
+        if (!ast::isa_reference(arg)) {
             Exception::raise("Must be a reference!");
         }
         parsedArgs.emplace_back(parseArg(arg));

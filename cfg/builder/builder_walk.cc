@@ -218,11 +218,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
             [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
             [&](ast::ConstantLit *a) {
+                auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
                 if (a->symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(core::Symbols::untyped()));
+                    current->exprs.emplace_back(aliasName, a->loc, make_unique<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
+                    current->exprs.emplace_back(aliasName, a->loc, make_unique<Alias>(a->symbol));
                 }
+
+                synthesizeExpr(current, cctx.target, a->loc, make_unique<Ident>(aliasName));
 
                 if (a->original) {
                     auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a->original);
@@ -672,7 +675,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Cast *c) {
                 core::LocalVariable tmp = cctx.newTemporary(core::Names::castTemp());
                 current = walk(cctx.withTarget(tmp), c->arg.get(), current);
-                current->exprs.emplace_back(cctx.target, c->loc, make_unique<Cast>(tmp, c->type, c->cast));
+                if (c->cast == core::Names::uncheckedLet()) {
+                    current->exprs.emplace_back(cctx.target, c->loc, make_unique<Ident>(tmp));
+                } else {
+                    current->exprs.emplace_back(cctx.target, c->loc, make_unique<Cast>(tmp, c->type, c->cast));
+                }
                 if (c->cast == core::Names::let()) {
                     cctx.inWhat.minLoops[cctx.target] = CFG::MIN_LOOP_LET;
                 }

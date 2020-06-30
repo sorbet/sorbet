@@ -1739,7 +1739,7 @@ class IO < Object
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: Object,
     )
     .returns(Integer)
   end
@@ -2283,7 +2283,7 @@ class IO < Object
   sig do
     params(
         name: T.any(String, Tempfile, File, Pathname),
-        string: String,
+        string: Object,
         offset: Integer,
         external_encoding: String,
         internal_encoding: String,
@@ -2497,7 +2497,7 @@ class IO < Object
   # should not raise an
   # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
   # exception, but return the symbol `:wait_writable` instead.
-  sig { params(string: String, exception: T::Boolean).returns(Integer) }
+  sig { params(string: Object, exception: T::Boolean).returns(Integer) }
   def write_nonblock(string, exception: true); end
 end
 

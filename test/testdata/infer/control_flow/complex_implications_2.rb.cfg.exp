@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2, rubyBlockId=0](foo: T.untyped)\l<statTemp>$7: T.class_of(StandardError) = alias <C StandardError>\lbar: T.untyped = foo: T.untyped.is_a?(<statTemp>$7: T.class_of(StandardError))\lbar: T.untyped\l"
+        label = "block[id=2, rubyBlockId=0](foo: T.untyped)\l<cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>\lbar: T.untyped = foo: T.untyped.is_a?(<cfgAlias>$8: T.class_of(StandardError))\lbar: T.untyped\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
@@ -55,7 +55,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$3: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$5: Symbol(:\"foo\") = :\"foo\"\l<returnMethodTemp>$2: Symbol(:\"foo\") = <statTemp>$3: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$5: Symbol(:\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"foo\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:\"foo\") = :\"foo\"\l<returnMethodTemp>$2: Symbol(:\"foo\") = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$6: Symbol(:\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"foo\")\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];

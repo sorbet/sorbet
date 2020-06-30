@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\ltry: Integer(0) = 0\l<magic>$39: T.class_of(<Magic>) = alias <C <Magic>>\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\ltry: Integer(0) = 0\l<magic>$42: T.class_of(<Magic>) = alias <C <Magic>>\l<unconditional>\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
@@ -16,93 +16,93 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
+        label = "block[id=2, rubyBlockId=0](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <self>: Object, <exceptionValue>$4: T.untyped, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionClassTemp>$41: T.class_of(B) = alias <C B>\l<isaCheckTemp>$42: T.untyped = <exceptionValue>$4: T.untyped.is_a?(<exceptionClassTemp>$41: T.class_of(B))\l<isaCheckTemp>$42: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <self>: Object, <exceptionValue>$4: T.untyped, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<cfgAlias>$45: T.class_of(B) = alias <C B>\l<isaCheckTemp>$46: T.untyped = <exceptionValue>$4: T.untyped.is_a?(<cfgAlias>$45: T.class_of(B))\l<isaCheckTemp>$46: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_21" [style="bold"];
     "bb::Object#main_3" -> "bb::Object#main_22" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$7: String(\"top\") = \"top\"\l<statTemp>$5: NilClass = <self>: Object.puts(<statTemp>$7: String(\"top\"))\l<magic>$27: T.class_of(<Magic>) = alias <C <Magic>>\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$7: String(\"top\") = \"top\"\l<statTemp>$5: NilClass = <self>: Object.puts(<statTemp>$7: String(\"top\"))\l<magic>$29: T.class_of(<Magic>) = alias <C <Magic>>\l<unconditional>\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_5" [
-        label = "block[id=5, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: T.untyped = <get-current-exception>\l<exceptionValue>$8: T.untyped\l"
+        label = "block[id=5, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: T.untyped = <get-current-exception>\l<exceptionValue>$8: T.untyped\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_5" -> "bb::Object#main_7" [style="tapered"];
 
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <exceptionValue>$8: T.untyped, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionClassTemp>$29: T.class_of(A) = alias <C A>\l<isaCheckTemp>$30: T.untyped = <exceptionValue>$8: T.untyped.is_a?(<exceptionClassTemp>$29: T.class_of(A))\l<isaCheckTemp>$30: T.untyped\l"
+        label = "block[id=6, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <exceptionValue>$8: T.untyped, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<cfgAlias>$32: T.class_of(A) = alias <C A>\l<isaCheckTemp>$33: T.untyped = <exceptionValue>$8: T.untyped.is_a?(<cfgAlias>$32: T.class_of(A))\l<isaCheckTemp>$33: T.untyped\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_16" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_17" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$11: Integer(3) = 3\l<ifTemp>$9: T::Boolean = try: Integer(0).<(<statTemp>$11: Integer(3))\l<ifTemp>$9: T::Boolean\l"
+        label = "block[id=7, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$11: Integer(3) = 3\l<ifTemp>$9: T::Boolean = try: Integer(0).<(<statTemp>$11: Integer(3))\l<ifTemp>$9: T::Boolean\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_8" [style="bold"];
     "bb::Object#main_7" -> "bb::Object#main_9" [style="tapered"];
 
     "bb::Object#main_8" [
-        label = "block[id=8, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$13: Integer(0) = try\l<statTemp>$14: Integer(1) = 1\ltry: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))\l<statTemp>$17: T.class_of(A) = alias <C A>\l<statTemp>$16: A = <statTemp>$17: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$16: A)\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$13: Integer(0) = try\l<statTemp>$14: Integer(1) = 1\ltry: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))\l<cfgAlias>$18: T.class_of(A) = alias <C A>\l<statTemp>$16: A = <cfgAlias>$18: T.class_of(A).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$16: A)\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_13" [style="bold"];
     "bb::Object#main_9" [
-        label = "block[id=9, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$20: Integer(6) = 6\l<ifTemp>$18: T::Boolean = try: Integer(0).<(<statTemp>$20: Integer(6))\l<ifTemp>$18: T::Boolean\l"
+        label = "block[id=9, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$21: Integer(6) = 6\l<ifTemp>$19: T::Boolean = try: Integer(0).<(<statTemp>$21: Integer(6))\l<ifTemp>$19: T::Boolean\l"
     ];
 
     "bb::Object#main_9" -> "bb::Object#main_10" [style="bold"];
     "bb::Object#main_9" -> "bb::Object#main_13" [style="tapered"];
 
     "bb::Object#main_10" [
-        label = "block[id=10, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$22: Integer(0) = try\l<statTemp>$23: Integer(1) = 1\ltry: Integer = <statTemp>$22: Integer(0).+(<statTemp>$23: Integer(1))\l<statTemp>$26: T.class_of(B) = alias <C B>\l<statTemp>$25: B = <statTemp>$26: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$25: B)\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=5](<self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<statTemp>$23: Integer(0) = try\l<statTemp>$24: Integer(1) = 1\ltry: Integer = <statTemp>$23: Integer(0).+(<statTemp>$24: Integer(1))\l<cfgAlias>$28: T.class_of(B) = alias <C B>\l<statTemp>$26: B = <cfgAlias>$28: T.class_of(B).new()\l<returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$26: B)\l<unconditional>\l"
     ];
 
     "bb::Object#main_10" -> "bb::Object#main_13" [style="bold"];
     "bb::Object#main_13" [
-        label = "block[id=13, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: T.untyped = <get-current-exception>\l<exceptionValue>$8: T.untyped\l"
+        label = "block[id=13, rubyBlockId=5](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: T.untyped = <get-current-exception>\l<exceptionValue>$8: T.untyped\l"
     ];
 
     "bb::Object#main_13" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_13" -> "bb::Object#main_14" [style="tapered"];
 
     "bb::Object#main_14" [
-        label = "block[id=14, rubyBlockId=8](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<unconditional>\l"
+        label = "block[id=14, rubyBlockId=8](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<unconditional>\l"
     ];
 
     "bb::Object#main_14" -> "bb::Object#main_15" [style="bold"];
     "bb::Object#main_15" [
-        label = "block[id=15, rubyBlockId=7](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: T.nilable(TrueClass), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<gotoDeadTemp>$37: T.nilable(TrueClass)\l"
+        label = "block[id=15, rubyBlockId=7](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: T.nilable(TrueClass), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<gotoDeadTemp>$40: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_15" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_15" -> "bb::Object#main_18" [style="tapered"];
 
     "bb::Object#main_16" [
-        label = "block[id=16, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$27: T.class_of(<Magic>), <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: NilClass = nil\l<keepForCfgTemp>$28: Sorbet::Private::Static::Void = <magic>$27: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$8: NilClass)\l<statTemp>$33: String(\"rescue A\") = \"rescue A\"\l<statTemp>$31: NilClass = <self>: Object.puts(<statTemp>$33: String(\"rescue A\"))\l<magic>$35: T.class_of(<Magic>) = alias <C <Magic>>\l<retryTemp>$36: Sorbet::Private::Static::Void = <magic>$35: T.class_of(<Magic>).<retry>()\l<unconditional>\l"
+        label = "block[id=16, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$29: T.class_of(<Magic>), <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$8: NilClass = nil\l<keepForCfgTemp>$30: Sorbet::Private::Static::Void = <magic>$29: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$8: NilClass)\l<statTemp>$36: String(\"rescue A\") = \"rescue A\"\l<statTemp>$34: NilClass = <self>: Object.puts(<statTemp>$36: String(\"rescue A\"))\l<magic>$38: T.class_of(<Magic>) = alias <C <Magic>>\l<retryTemp>$39: Sorbet::Private::Static::Void = <magic>$38: T.class_of(<Magic>).<retry>()\l<unconditional>\l"
     ];
 
     "bb::Object#main_16" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_17" [
-        label = "block[id=17, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<gotoDeadTemp>$37: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=17, rubyBlockId=6](<returnMethodTemp>$2: NilClass, <self>: Object, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<gotoDeadTemp>$40: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_17" -> "bb::Object#main_15" [style="bold"];
     "bb::Object#main_18" [
-        label = "block[id=18, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
+        label = "block[id=18, rubyBlockId=1](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: T.untyped = <get-current-exception>\l<exceptionValue>$4: T.untyped\l"
     ];
 
     "bb::Object#main_18" -> "bb::Object#main_3" [style="bold"];
@@ -114,19 +114,19 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_19" -> "bb::Object#main_20" [style="bold"];
     "bb::Object#main_20" [
-        label = "block[id=20, rubyBlockId=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$49: T.nilable(TrueClass))\l<gotoDeadTemp>$49: T.nilable(TrueClass)\l"
+        label = "block[id=20, rubyBlockId=3](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$53: T.nilable(TrueClass))\l<gotoDeadTemp>$53: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_20" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_20" -> "bb::Object#main_23" [style="tapered"];
 
     "bb::Object#main_21" [
-        label = "block[id=21, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$37: NilClass, <magic>$39: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: NilClass = nil\l<keepForCfgTemp>$40: Sorbet::Private::Static::Void = <magic>$39: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)\l<statTemp>$45: String(\"rescue B \") = \"rescue B \"\l<statTemp>$43: NilClass = <self>: Object.puts(<statTemp>$45: String(\"rescue B \"))\l<magic>$47: T.class_of(<Magic>) = alias <C <Magic>>\l<retryTemp>$48: Sorbet::Private::Static::Void = <magic>$47: T.class_of(<Magic>).<retry>()\l<unconditional>\l"
+        label = "block[id=21, rubyBlockId=2](<returnMethodTemp>$2: NilClass, <self>: Object, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>), try: Integer(0))\l<exceptionValue>$4: NilClass = nil\l<keepForCfgTemp>$43: Sorbet::Private::Static::Void = <magic>$42: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)\l<statTemp>$49: String(\"rescue B \") = \"rescue B \"\l<statTemp>$47: NilClass = <self>: Object.puts(<statTemp>$49: String(\"rescue B \"))\l<magic>$51: T.class_of(<Magic>) = alias <C <Magic>>\l<retryTemp>$52: Sorbet::Private::Static::Void = <magic>$51: T.class_of(<Magic>).<retry>()\l<unconditional>\l"
     ];
 
     "bb::Object#main_21" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_22" [
-        label = "block[id=22, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$49: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=22, rubyBlockId=2](<returnMethodTemp>$2: NilClass)\l<gotoDeadTemp>$53: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_22" -> "bb::Object#main_20" [style="bold"];
@@ -144,7 +144,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$6: T.class_of(A) = alias <C A>\l<statTemp>$4: Sorbet::Private::Static::Void = <statTemp>$5: T.class_of(<Magic>).<define-top-class-or-module>(<statTemp>$6: T.class_of(A))\l<statTemp>$8: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$9: T.class_of(A) = alias <C A>\l<statTemp>$7: Sorbet::Private::Static::Void = <statTemp>$8: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$9: T.class_of(A))\l<statTemp>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$12: T.class_of(Exception) = alias <C Exception>\l<statTemp>$10: Sorbet::Private::Static::Void = <statTemp>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$12: T.class_of(Exception))\l<statTemp>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$16: T.class_of(B) = alias <C B>\l<statTemp>$14: Sorbet::Private::Static::Void = <statTemp>$15: T.class_of(<Magic>).<define-top-class-or-module>(<statTemp>$16: T.class_of(B))\l<statTemp>$18: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$19: T.class_of(B) = alias <C B>\l<statTemp>$17: Sorbet::Private::Static::Void = <statTemp>$18: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$19: T.class_of(B))\l<statTemp>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: T.class_of(Exception) = alias <C Exception>\l<statTemp>$20: Sorbet::Private::Static::Void = <statTemp>$21: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$22: T.class_of(Exception))\l<statTemp>$24: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$26: Symbol(:\"main\") = :\"main\"\l<statTemp>$23: Symbol(:\"main\") = <statTemp>$24: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$26: Symbol(:\"main\"))\l<statTemp>$27: T.untyped = <self>: T.class_of(<root>).main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(A) = alias <C A>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(A))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(A) = alias <C A>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(A))\l<cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$18: T.class_of(Exception) = alias <C Exception>\l<statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$18: T.class_of(Exception))\l<cfgAlias>$22: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$24: T.class_of(B) = alias <C B>\l<statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$24: T.class_of(B))\l<cfgAlias>$27: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$29: T.class_of(B) = alias <C B>\l<statTemp>$25: Sorbet::Private::Static::Void = <cfgAlias>$27: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$29: T.class_of(B))\l<cfgAlias>$32: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$34: T.class_of(Exception) = alias <C Exception>\l<statTemp>$30: Sorbet::Private::Static::Void = <cfgAlias>$32: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$34: T.class_of(Exception))\l<cfgAlias>$37: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$39: Symbol(:\"main\") = :\"main\"\l<statTemp>$35: Symbol(:\"main\") = <cfgAlias>$37: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$39: Symbol(:\"main\"))\l<statTemp>$40: T.untyped = <self>: T.class_of(<root>).main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
