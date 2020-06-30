@@ -224,7 +224,8 @@ public:
 
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
         unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
-        auto *compileUnit = threadState->compileUnit;
+        llvm::DICompileUnit *compileUnit = threadState->compileUnit;
+        threadState->compileUnit = nullptr;
         threadState->globalConstructorsEntry = nullptr;
 
         if (!module) {
