@@ -159,7 +159,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         raise "#{msg} #{extra.inspect}"
       end
 
-      e = assert_raises(TypeError) do
+      e = assert_raises(RuntimeError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
@@ -171,7 +171,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'includes relevant generated code on serialize' do
       m = a_serializable
       m.instance_variable_set(:@foo, "Won't respond like hash")
-      e = assert_raises(TypeError) do
+      e = assert_raises(NoMethodError) do
         m.serialize
       end
 
@@ -797,5 +797,35 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         T::Props::HasLazilySpecializedMethods.remove_instance_variable(:@lazy_evaluation_disabled)
       end
     end
+  end
+
+  class StructWithFloat < T::Struct
+    const :my_float, Float
+  end
+
+  it "coerces raw values to Float if the prop's type is Float" do
+    swf1 = StructWithFloat.new(my_float: 1.0)
+
+    serialized_hash = swf1.serialize
+    # Ruby happens to serialize Float's with a `.0`, but JSON doesn't
+    # distinguish number types, so it's equally fine to omit it, and the
+    # process of serializing and deserializing is free to drop that
+    # information.
+    #
+    # To get Ruby to omit it, we change it to an Integer before calling `.to_json`
+    serialized_hash['my_float'] = 1
+    json = serialized_hash.to_json
+
+    assert_equal('{"my_float":1}', json)
+
+    deserialized_hash = JSON.load(json)
+
+    assert_instance_of(Integer, deserialized_hash['my_float'])
+    assert_equal(1, deserialized_hash['my_float'])
+
+    swf2 = StructWithFloat.from_hash(deserialized_hash)
+
+    assert_instance_of(Float, swf2.my_float)
+    assert_in_delta(1.0, swf2.my_float, 0.0001)
   end
 end

@@ -306,6 +306,49 @@ module Opus::Types::Test
         assert_empty(lines[3..-1])
       end
 
+      describe 'ranges' do
+        describe 'return type is non-nilable integer' do
+          it 'permits a range that has integers on start and end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (1...10)
+            end
+
+            assert_equal((1...10), @mod.foo )
+          end
+
+          it 'permits a range that has an integer start and no end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (1...nil)
+            end
+
+            assert_equal((1...nil), @mod.foo )
+          end
+
+          # Ruby 2.6 does not support ranges with boundless starts
+          if RUBY_VERSION >= '2.7'
+            it 'permits a range that has an integer start and no end' do
+              @mod.sig { returns(T::Range[Integer] )}
+              def @mod.foo
+                (nil...10)
+              end
+
+              assert_equal((nil...10), @mod.foo )
+            end
+          end
+
+          it 'permits a range with no beginning or end' do
+            @mod.sig { returns(T::Range[Integer] )}
+            def @mod.foo
+              (nil...nil)
+            end
+
+            assert_equal((nil...nil), @mod.foo )
+          end
+        end
+      end
+
       describe "instance methods" do
         it "raises an error when the return value is the wrong type " do
           klass = Class.new do

@@ -12,6 +12,10 @@ x, y, z = s.rpartition('')
 T.assert_type!(x, String)
 T.assert_type!(y, String)
 T.assert_type!(z, String)
+T.assert_type!(x.freeze, String)
 
 u = "abcdefg\0\0abc".unpack('CdAD')
 T.assert_type!(u, T::Array[T.nilable(T.any(Integer, Float, String))])
+
+w = "aãeéèbc".chars
+T.assert_type!(w, T::Array[String])

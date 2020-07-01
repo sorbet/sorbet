@@ -185,11 +185,11 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
-        name = "com_github_msgpack_msgpack",
-        urls = _github_public_urls("msgpack/msgpack-c/archive/7893d4d8c9ba8a8699c5c33152deaabf409250b3.zip"),
-        sha256 = "72dadac3def5180a701a3b251e9f1105c2b126907dc384d933370b7df5b73951",
-        build_file = "@com_stripe_ruby_typer//third_party:msgpack.BUILD",
-        strip_prefix = "msgpack-c-7893d4d8c9ba8a8699c5c33152deaabf409250b3",
+        name = "com_github_ludocode_mpack",
+        urls = _github_public_urls("ludocode/mpack/archive/6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c.zip"),
+        sha256 = "fb184dc169722cecf9b47bece308f70861787f4615ebdbee7383b6434cfdbc0d",
+        build_file = "@com_stripe_ruby_typer//third_party:mpack.BUILD",
+        strip_prefix = "mpack-6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c",
     )
 
     http_archive(
@@ -210,7 +210,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "emscripten_clang_linux",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/linux/emscripten-llvm-e1.38.25.tar.gz",
+        urls = _emscripten_urls("linux/emscripten-llvm-e1.38.25.tar.gz"),
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
         strip_prefix = "emscripten-llvm-e1.38.25",
@@ -218,7 +218,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "emscripten_clang_darwin",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/mac/emscripten-llvm-e1.38.25.tar.gz",
+        urls = _emscripten_urls("mac/emscripten-llvm-e1.38.25.tar.gz"),
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
         strip_prefix = "emscripten-llvm-e1.38.25",
@@ -253,13 +253,13 @@ package(default_visibility = ["//visibility:public"])
 
     http_file(
         name = "bundler_2_1_4",
-        urls = ["https://rubygems.org/downloads/bundler-2.1.4.gem"],
+        urls = _rubygems_urls("bundler-2.1.4.gem"),
         sha256 = "50014d21d6712079da4d6464de12bb93c278f87c9200d0b60ba99f32c25af489",
     )
 
     http_archive(
         name = "ruby_2_5",
-        url = "https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.8.tar.gz",
+        urls = _ruby_urls("2.5/ruby-2.5.8.tar.gz"),
         sha256 = "6c0bdf07876c69811a9e7dc237c43d40b1cb6369f68e0e17953d7279b524ad9a",
         strip_prefix = "ruby-2.5.8",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
@@ -267,7 +267,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "ruby_2_6",
-        url = "https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.5.tar.gz",
+        urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
         strip_prefix = "ruby-2.6.5",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
@@ -292,4 +292,31 @@ def _github_public_urls(path):
     return [
         "https://github.com/{}".format(path),
         "https://artifactory-content.stripe.build/artifactory/github-archives/{}".format(path),
+    ]
+
+def _emscripten_urls(path):
+    """
+    Produce a url list that works both with emscripten, and stripe's internal artifact cache.
+    """
+    return [
+        "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/googleapis-storage-cache/webassembly/emscripten-releases-builds/old/{}".format(path),
+    ]
+
+def _rubygems_urls(gem):
+    """
+    Produce a url list that works both with rubygems, and stripe's internal gem cache.
+    """
+    return [
+        "https://rubygems.org/downloads/{}".format(gem),
+        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
+    ]
+
+def _ruby_urls(path):
+    """
+    Produce a url list that works both with ruby-lang.org, and stripe's internal artifact cache.
+    """
+    return [
+        "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
+        "https://artifactory-content.stripe.build/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
     ]

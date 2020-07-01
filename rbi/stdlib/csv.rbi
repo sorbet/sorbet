@@ -1168,7 +1168,7 @@ class CSV::Table < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out)
+  Elem = type_member(fixed: CSV::Row)
 
   # Construct a new
   # [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html) from

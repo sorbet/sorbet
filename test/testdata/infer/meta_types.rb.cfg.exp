@@ -6,7 +6,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: T.class_of(TestMetaType) = alias <C TestMetaType>\l<statTemp>$3: Sorbet::Private::Static::Void = <statTemp>$4: T.class_of(<Magic>).<define-top-class-or-module>(<statTemp>$5: T.class_of(TestMetaType))\l<statTemp>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$8: T.class_of(TestMetaType) = alias <C TestMetaType>\l<statTemp>$6: Sorbet::Private::Static::Void = <statTemp>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<statTemp>$8: T.class_of(TestMetaType))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(TestMetaType) = alias <C TestMetaType>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestMetaType))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(TestMetaType) = alias <C TestMetaType>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestMetaType))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_1" [shape = parallelogram];
 
     "bb::TestMetaType#testit_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<statTemp>$6: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$7: T.class_of(T) = alias <C T>\l<statTemp>$8: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <statTemp>$6: T.class_of(T::Array).[](<statTemp>$8: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$12: T.untyped = <self>: TestMetaType._()\l<ifTemp>$12: T.untyped\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestMetaType = cast(<self>: NilClass, TestMetaType);\l<cfgAlias>$7: T.class_of(T::Array) = alias <C Array>\l<cfgAlias>$9: T.class_of(T) = alias <C T>\l<cfgAlias>$11: T.class_of(String) = alias <C String>\l<statTemp>$5: <Type: T::Array[String]> = <cfgAlias>$7: T.class_of(T::Array).[](<cfgAlias>$11: T.class_of(String))\l<statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: <Type: T::Array[String]>)\l<ifTemp>$15: T.untyped = <self>: TestMetaType._()\l<ifTemp>$15: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_2" [style="bold"];
@@ -54,34 +54,34 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
     "bb::TestMetaType#testit_2" [
-        label = "block[id=2, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$14: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$15: T.class_of(T) = alias <C T>\l<statTemp>$16: T.class_of(String) = alias <C String>\l<statTemp>$11: <Type: T::Array[String]> = <statTemp>$14: T.class_of(T::Array).[](<statTemp>$16: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=2, rubyBlockId=0](<self>: TestMetaType)\l<cfgAlias>$18: T.class_of(T::Array) = alias <C Array>\l<cfgAlias>$20: T.class_of(T) = alias <C T>\l<cfgAlias>$22: T.class_of(String) = alias <C String>\l<statTemp>$14: <Type: T::Array[String]> = <cfgAlias>$18: T.class_of(T::Array).[](<cfgAlias>$22: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_2" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_3" [
-        label = "block[id=3, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$11: FalseClass = false\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$14: FalseClass = false\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_3" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_4" [
-        label = "block[id=4, rubyBlockId=0](<statTemp>$11: Object, <self>: TestMetaType)\l<statTemp>$9: NilClass = <self>: TestMetaType.puts(<statTemp>$11: Object)\l<ifTemp>$19: T.untyped = <self>: TestMetaType._()\l<ifTemp>$19: T.untyped\l"
+        label = "block[id=4, rubyBlockId=0](<statTemp>$14: Object, <self>: TestMetaType)\l<statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)\l<ifTemp>$25: T.untyped = <self>: TestMetaType._()\l<ifTemp>$25: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_5" [style="bold"];
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_6" [style="tapered"];
 
     "bb::TestMetaType#testit_5" [
-        label = "block[id=5, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$21: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$22: T.class_of(T) = alias <C T>\l<statTemp>$23: T.class_of(String) = alias <C String>\l<statTemp>$18: <Type: T::Array[String]> = <statTemp>$21: T.class_of(T::Array).[](<statTemp>$23: T.class_of(String))\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0](<self>: TestMetaType)\l<cfgAlias>$28: T.class_of(T::Array) = alias <C Array>\l<cfgAlias>$30: T.class_of(T) = alias <C T>\l<cfgAlias>$32: T.class_of(String) = alias <C String>\l<statTemp>$24: <Type: T::Array[String]> = <cfgAlias>$28: T.class_of(T::Array).[](<cfgAlias>$32: T.class_of(String))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_5" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_6" [
-        label = "block[id=6, rubyBlockId=0](<self>: TestMetaType)\l<statTemp>$24: T.class_of(T::Array) = alias <C Array>\lkeep_for_ide$25: T.class_of(T) = alias <C T>\l<statTemp>$26: T.class_of(Float) = alias <C Float>\l<statTemp>$18: <Type: T::Array[Float]> = <statTemp>$24: T.class_of(T::Array).[](<statTemp>$26: T.class_of(Float))\l<unconditional>\l"
+        label = "block[id=6, rubyBlockId=0](<self>: TestMetaType)\l<cfgAlias>$34: T.class_of(T::Array) = alias <C Array>\l<cfgAlias>$36: T.class_of(T) = alias <C T>\l<cfgAlias>$38: T.class_of(Float) = alias <C Float>\l<statTemp>$24: <Type: T::Array[Float]> = <cfgAlias>$34: T.class_of(T::Array).[](<cfgAlias>$38: T.class_of(Float))\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_7" [
-        label = "block[id=7, rubyBlockId=0](<statTemp>$18: Object, <self>: TestMetaType)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$18: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<statTemp>$24: Object, <self>: TestMetaType)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];
@@ -94,7 +94,7 @@ subgraph "cluster_::<Class:TestMetaType>#<static-init>" {
     "bb::<Class:TestMetaType>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestMetaType>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestMetaType) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestMetaType>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestMetaType>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<statTemp>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:\"_\") = :\"_\"\l<statTemp>$3: Symbol(:\"_\") = <statTemp>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$6: Symbol(:\"_\"))\l<statTemp>$8: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$10: Symbol(:\"testit\") = :\"testit\"\l<statTemp>$7: Symbol(:\"testit\") = <statTemp>$8: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$10: Symbol(:\"testit\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestMetaType) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestMetaType>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestMetaType>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:\"_\") = :\"_\"\l<statTemp>$3: Symbol(:\"_\") = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$7: Symbol(:\"_\"))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$12: Symbol(:\"testit\") = :\"testit\"\l<statTemp>$8: Symbol(:\"testit\") = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$12: Symbol(:\"testit\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestMetaType>#<static-init>_0" -> "bb::<Class:TestMetaType>#<static-init>_1" [style="bold"];

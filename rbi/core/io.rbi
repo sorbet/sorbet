@@ -1739,7 +1739,7 @@ class IO < Object
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: Object,
     )
     .returns(Integer)
   end
@@ -2283,7 +2283,7 @@ class IO < Object
   sig do
     params(
         name: T.any(String, Tempfile, File, Pathname),
-        string: String,
+        string: Object,
         offset: Integer,
         external_encoding: String,
         internal_encoding: String,
@@ -2431,6 +2431,74 @@ class IO < Object
   # [`fileno`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-fileno)
   sig {returns(Integer)}
   def to_i(); end
+
+  # Writes the given string to *ios* using the write(2) system call after
+  # O\_NONBLOCK is set for the underlying file descriptor.
+  #
+  # It returns the number of bytes written.
+  #
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # just calls the write(2) system call. It causes all errors the write(2)
+  # system call causes: Errno::EWOULDBLOCK, Errno::EINTR, etc. The result may
+  # also be smaller than string.length (partial write). The caller should care
+  # such errors and partial write.
+  #
+  # If the exception is Errno::EWOULDBLOCK or Errno::EAGAIN, it is extended by
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html).
+  # So
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # can be used to rescue the exceptions for retrying write\_nonblock.
+  #
+  # ```ruby
+  # # Creates a pipe.
+  # r, w = IO.pipe
+  #
+  # # write_nonblock writes only 65536 bytes and return 65536.
+  # # (The pipe size is 65536 bytes on this environment.)
+  # s = "a" * 100000
+  # p w.write_nonblock(s)     #=> 65536
+  #
+  # # write_nonblock cannot write a byte and raise EWOULDBLOCK (EAGAIN).
+  # p w.write_nonblock("b")   # Resource temporarily unavailable (Errno::EAGAIN)
+  # ```
+  #
+  # If the write buffer is not empty, it is flushed at first.
+  #
+  # When
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # raises an exception kind of
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html),
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # should not be called until io is writable for avoiding busy loop. This can
+  # be done as follows.
+  #
+  # ```ruby
+  # begin
+  #   result = io.write_nonblock(string)
+  # rescue IO::WaitWritable, Errno::EINTR
+  #   IO.select(nil, [io])
+  #   retry
+  # end
+  # ```
+  #
+  # Note that this doesn't guarantee to write all data in string. The length
+  # written is reported as result and it should be checked later.
+  #
+  # On some platforms such as Windows,
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # is not supported according to the kind of the
+  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object. In such cases,
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # raises `Errno::EBADF`.
+  #
+  # By specifying a keyword argument *exception* to `false`, you can indicate
+  # that
+  # [`write_nonblock`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write_nonblock)
+  # should not raise an
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # exception, but return the symbol `:wait_writable` instead.
+  sig { params(string: Object, exception: T::Boolean).returns(Integer) }
+  def write_nonblock(string, exception: true); end
 end
 
 # exception to wait for reading by EAGAIN. see

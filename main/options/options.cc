@@ -51,10 +51,16 @@ const vector<PrintOptions> print_options({
     {"symbol-table", &Printers::SymbolTable, true},
     {"symbol-table-raw", &Printers::SymbolTableRaw, true},
     {"symbol-table-json", &Printers::SymbolTableJson, true},
+    {"symbol-table-proto", &Printers::SymbolTableProto, true},
+    {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false},
     {"symbol-table-full", &Printers::SymbolTableFull, true},
     {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
     {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
+    {"symbol-table-full-proto", &Printers::SymbolTableFullProto, true},
+    {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
     {"file-table-json", &Printers::FileTableJson, true},
+    {"file-table-proto", &Printers::FileTableProto, true},
+    {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
     {"missing-constants", &Printers::MissingConstants, true},
     {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
@@ -107,10 +113,17 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         CFGRaw,
         SymbolTable,
         SymbolTableRaw,
+        SymbolTableProto,
+        SymbolTableMessagePack,
         SymbolTableJson,
         SymbolTableFull,
+        SymbolTableFullProto,
+        SymbolTableFullMessagePack,
+        SymbolTableFullJson,
         SymbolTableFullRaw,
         FileTableJson,
+        FileTableProto,
+        FileTableMessagePack,
         MissingConstants,
         PluginGeneratedCode,
         Autogen,
@@ -381,6 +394,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("advanced")("autogen-autoloader-root", "Root directory for autoloader output",
                                     cxxopts::value<string>()->default_value("autoloader"));
+    options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
+                                    cxxopts::value<string>()->default_value("Opus::Require"));
     options.add_options("advanced")("autogen-autoloader-samefile",
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
@@ -591,6 +606,7 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
         }
     }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
+    cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     return true;
 }

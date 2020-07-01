@@ -128,6 +128,9 @@ Usage:
       --autogen-autoloader-root arg
                                 Root directory for autoloader output
                                 (default: autoloader)
+      --autogen-registry-module arg
+                                Name of Ruby module used for autoloader
+                                registry (default: Opus::Require)
       --autogen-autoloader-samefile arg
                                 Modules that should never be collapsed into
                                 their parent. This helps break cycles in
@@ -149,10 +152,13 @@ Usage:
                                 resolve-tree, resolve-tree-raw, flatten-tree,
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
                                 symbol-table, symbol-table-raw, symbol-table-json,
+                                symbol-table-proto, symbol-table-messagepack,
                                 symbol-table-full, symbol-table-full-raw,
-                                symbol-table-full-json, file-table-json,
-                                missing-constants, plugin-generated-code, autogen,
-                                autogen-msgpack, autogen-classlist,
+                                symbol-table-full-json, symbol-table-full-proto,
+                                symbol-table-full-messagepack, file-table-json,
+                                file-table-proto, file-table-messagepack,
+                                missing-constants, plugin-generated-code,
+                                autogen, autogen-msgpack, autogen-classlist,
                                 autogen-autoloader, autogen-subclasses]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of

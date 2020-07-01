@@ -3662,15 +3662,17 @@ class Gem::S3URISigner
   def uri=(uri); end
 end
 
-class Gem::S3URISigner::ConfigurationError
+class Gem::S3URISigner::ConfigurationError < Gem::Exception
   def initialize(message); end
 end
 
-class Gem::S3URISigner::InstanceProfileError
+class Gem::S3URISigner::InstanceProfileError < Gem::Exception
   def initialize(message); end
 end
 
-class Gem::S3URISigner::S3Config
+class Gem::S3URISigner::S3Config < Struct
+  Elem = type_member(:out, fixed: T.untyped)
+
   def access_key_id(); end
 
   def access_key_id=(_); end
@@ -3914,4 +3916,56 @@ module Gem::Util
   def self.silent_system(*command); end
 
   def self.traverse_parents(directory, &block); end
+end
+
+# RubyGems adds the
+# [`gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem) method
+# to allow activation of specific gem versions and overrides the
+# [`require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+# method on [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) to make
+# gems appear as if they live on the `$LOAD_PATH`. See the documentation of
+# these methods for further detail.
+module Kernel
+  # Use
+  # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem)
+  # to activate a specific version of `gem_name`.
+  #
+  # `requirements` is a list of version requirements that the specified gem must
+  # match, most commonly "= example.version.number". See
+  # [`Gem::Requirement`](https://docs.ruby-lang.org/en/2.6.0/Gem/Requirement.html)
+  # for how to specify a version requirement.
+  #
+  # If you will be activating the latest version of a gem, there is no need to
+  # call
+  # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem),
+  # [`Kernel#require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+  # will do the right thing for you.
+  #
+  # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem)
+  # returns true if the gem was activated, otherwise false. If the gem could not
+  # be found, didn't match the version requirements, or a different version was
+  # already activated, an exception will be raised.
+  #
+  # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem)
+  # should be called **before** any require statements (otherwise RubyGems may
+  # load a conflicting library version).
+  #
+  # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem)
+  # only loads prerelease versions when prerelease `requirements` are given:
+  #
+  # ```ruby
+  # gem 'rake', '>= 1.1.a', '< 2'
+  # ```
+  #
+  # In older RubyGems versions, the environment variable GEM\_SKIP could be used
+  # to skip activation of specified gems, for example to test out changes that
+  # haven't been installed yet. Now RubyGems defers to -I and the RUBYLIB
+  # environment variable to skip activation of a gem.
+  #
+  # Example:
+  #
+  # ```
+  # GEM_SKIP=libA:libB ruby -I../libA -I../libB ./mycode.rb
+  # ```
+  def gem(dep, *reqs); end
 end

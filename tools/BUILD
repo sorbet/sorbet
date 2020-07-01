@@ -86,6 +86,7 @@ compilation_database(
         "//common/statsd:statsd",
         "//common/kvstore:kvstore_test",
         "//common/kvstore:kvstore",
+        "//common/json2msgpack:json2msgpack",
         "//common/crypto_hashing:crypto_hashing",
         "//common:common_test",
         "//class_flatten:class_flatten",

@@ -4,7 +4,7 @@
 
 # Sorbet
 
-This repository contains Sorbet, a fast, powerful typechecker designed for Ruby.
+This repository contains Sorbet, a fast, powerful type checker designed for Ruby.
 It aims to be easy to add to existing codebases with gradual types, and fast to
 respond with errors and suggestions.
 
@@ -40,10 +40,9 @@ docs about Stripe-specific development workflows and historical Stripe context.
     - [Testing "Go to Type Definition"](#testing-go-to-type-definition)
     - [Testing hover](#testing-hover)
     - [Testing completion](#testing-completion)
-    - [Testing incremental typechecking](#testing-incremental-typechecking)
+    - [Testing incremental type checking](#testing-incremental-type-checking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
-- [C++ conventions](#c-conventions)
 - [Debugging and profiling](#debugging-and-profiling)
   - [Debugging](#debugging)
   - [Profiling](#profiling)
@@ -59,7 +58,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 
 ## Sorbet user-facing design principles
 
-Early in our project we've defined some guidelines for how working with sorbet should feel like.
+Early in our project, we've defined some guidelines for how working with sorbet should feel like.
 
 1. **Explicit**
 
@@ -85,7 +84,7 @@ Early in our project we've defined some guidelines for how working with sorbet s
 
 4. **Compatible with Ruby**
 
-    In particular, we don't want new syntax. Existing Ruby syntax means
+    In particular, we don't want a new syntax. Existing Ruby syntax means
     we can leverage most of our existing tooling (editors, etc). Also,
     the point of Sorbet is to gradually improve an existing Ruby codebase. No
     new syntax makes it easier to be compatible with existing tools.
@@ -93,7 +92,7 @@ Early in our project we've defined some guidelines for how working with sorbet s
 5. **Scales**
 
     On all axes: execution speed, number of collaborators, lines of code,
-    codebase age. We work in large Ruby code bases, and they will only get
+    codebase age. We work in large Ruby codebases, and they will only get
     larger.
 
 6. **Can be adopted gradually**
@@ -309,7 +308,7 @@ We aspire to have our tests be fully reproducible.
 
 There are many ways to test Sorbet, some "better" than others. We've ordered
 them below in order from most preferable to least preferable. And we always
-prefer some test to no tests!
+prefer some tests to no tests!
 
 ### test_corpus tests
 
@@ -323,7 +322,7 @@ tests, based on the name of the test harness or the folder containing these test
 To create a test_corpus test, add any file `<name>.rb` to `test/testdata`, in
 any folder depth. The file must either:
 
-- typecheck entirely, or
+- type check entirely, or
 - throw errors **only** on lines marked with a comment (see below).
 
 To mark that a line should have errors, append `# error: <message>` (the
@@ -377,7 +376,7 @@ Our bazel setup will produce two targets:
   the `.out` file.
 
 The scripts are run inside Bazel, so they will be executed from the top of the
-workspace and have access to sources files and built targets using their path
+workspace and have access to source files and built targets using their path
 from the root. In particular, the compiled sorbet binary is available under
 `main/sorbet`.
 
@@ -572,11 +571,11 @@ nearly all the code paths are shared with hover, so you can alternatively write
 a hover test.
 
 
-#### Testing incremental typechecking
+#### Testing incremental type checking
 
 In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the
 file before and after the update to determine if the change is covered under the fast path. If it is,
-it performs further processing to determine the set of files that need to be typechecked.
+it performs further processing to determine the set of files that need to be type checked.
 
 LSP tests can define file updates in `<name>.<version>.rbupdate` files which contain the contents of `<name>.rb`
 after the update occurs. For example, the file `foo.1.rbupdate` contains the updated contents of `foo.rb`.

@@ -65,11 +65,17 @@ struct Printers {
     PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
     PrinterConfig SymbolTableRaw;
+    PrinterConfig SymbolTableProto;
+    PrinterConfig SymbolTableMessagePack;
     PrinterConfig SymbolTableJson;
     PrinterConfig SymbolTableFull;
     PrinterConfig SymbolTableFullRaw;
+    PrinterConfig SymbolTableFullProto;
+    PrinterConfig SymbolTableFullMessagePack;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
+    PrinterConfig FileTableProto;
+    PrinterConfig FileTableMessagePack;
     PrinterConfig MissingConstants;
     PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
@@ -100,6 +106,7 @@ struct AutoloaderConfig {
     std::vector<std::string> modules;
     std::string rootDir;
     std::string preamble;
+    std::string registryModule;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
     std::vector<std::string> stripPrefixes;

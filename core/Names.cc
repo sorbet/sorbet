@@ -196,6 +196,15 @@ bool Name::isClassName(const GlobalState &gs) const {
     }
 }
 
+bool Name::isTEnumName(const GlobalState &gs) const {
+    if (this->kind != NameKind::CONSTANT) {
+        return false;
+    }
+    auto original = this->cnst.original;
+    return original.data(gs)->kind == NameKind::UNIQUE &&
+           original.data(gs)->unique.uniqueNameKind == UniqueNameKind::TEnum;
+}
+
 NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, int _id) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
@@ -246,7 +255,7 @@ NameData NameRef::data(GlobalState &gs) const {
 }
 
 const NameData NameRef::data(const GlobalState &gs) const {
-    ENFORCE(_id < gs.names.size(), "name id out of bounds");
+    ENFORCE(_id < gs.names.size(), "name {} id out of bounds {}", _id, gs.names.size());
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
     return NameData(const_cast<Name &>(gs.names[_id]), gs);

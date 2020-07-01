@@ -233,13 +233,13 @@ inplace-output/root.rb
 --- strip-prefixes and root rename
 
 
-Opus::Require.autoload_map(Object, {
+Primus::Require.autoload_map(Object, {
   Foo: "my-autoloader/Foo.rb",
 })
 
-Opus::Require.on_autoload('Foo')
+Primus::Require.on_autoload('Foo')
 
 module Foo
 end
 
-Opus::Require.for_autoload(Foo, "autogen-autoloader/inplace.rb")
+Primus::Require.for_autoload(Foo, "autogen-autoloader/inplace.rb")

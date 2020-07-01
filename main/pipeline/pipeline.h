@@ -13,11 +13,11 @@ class PreemptionTaskManager;
 
 namespace sorbet::realmain::pipeline {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         std::unique_ptr<ast::Expression> cachedTree = nullptr);
+                         ast::TreePtr cachedTree = nullptr);
 
 std::pair<ast::ParsedFile, std::vector<std::shared_ptr<core::File>>>
 indexOneWithPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                    std::unique_ptr<ast::Expression> cachedTree = nullptr);
+                    ast::TreePtr cachedTree = nullptr);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 
@@ -38,7 +38,8 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedF
 ast::ParsedFilesOrCancelled
 typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
           WorkerPool &workers, bool cancelable = false,
-          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt);
+          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
+          bool presorted = false);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 

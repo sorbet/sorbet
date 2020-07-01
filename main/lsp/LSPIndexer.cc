@@ -2,6 +2,7 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
 #include "core/NameHash.h"
+#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/cache/cache.h"
@@ -147,8 +148,8 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
     // going to use it on typechecker thread for this one operation.
     auto savedErrorQueue = initialGS->errorQueue;
-    initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer);
-    initialGS->errorQueue->ignoreFlushes = true;
+    initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
+                                                          make_shared<core::NullFlusher>());
 
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
@@ -165,9 +166,6 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
             }
             indexed[id] = move(t);
         }
-        // Clear error queue.
-        // (Note: Flushing is disabled in LSP mode, so we have to drain.)
-        initialGS->errorQueue->drainWithQueryResponses();
     }
 
     pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
@@ -243,11 +241,9 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         unique_ptr<const OwnedKeyValueStore> kvstore;
         // Create a throwaway error queue. commitEdit may be called on two different threads, and we can't anticipate
         // which one it will be.
-        initialGS->errorQueue =
-            make_shared<core::ErrorQueue>(initialGS->errorQueue->logger, initialGS->errorQueue->tracer);
-        initialGS->errorQueue->ignoreFlushes = true;
+        initialGS->errorQueue = make_shared<core::ErrorQueue>(
+            initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
         auto trees = pipeline::index(initialGS, frefs, config->opts, *emptyWorkers, kvstore);
-        initialGS->errorQueue->drainWithQueryResponses(); // Clear error queue; we don't care about errors here.
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file.id()];

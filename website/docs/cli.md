@@ -118,7 +118,7 @@ overrides on a file-by-file basis. For example, with this YAML file:
 ```yaml
 # -- foo.yaml --
 true:
-  - foo.rb
+  - ./foo.rb
 ```
 
 and this Ruby file:

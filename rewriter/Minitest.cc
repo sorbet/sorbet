@@ -15,13 +15,13 @@ namespace sorbet::rewriter {
 namespace {
 class ConstantMover {
     u4 classDepth = 0;
-    vector<unique_ptr<ast::Expression>> movedConstants;
+    vector<ast::TreePtr> movedConstants = {};
 
 public:
-    unique_ptr<ast::Expression> createConstAssign(ast::Assign &asgn) {
+    ast::TreePtr createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
-        if (auto send = ast::cast_tree<ast::Send>(asgn.rhs.get())) {
+        if (auto send = ast::cast_tree<ast::Send>(asgn.rhs)) {
             if (send->fun == core::Names::let() && send->args.size() == 2) {
                 auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1]->deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
@@ -31,10 +31,11 @@ public:
         return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(raiseUnimplemented));
     }
 
-    unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get())) {
-            if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs.get())) {
-                movedConstants.emplace_back(move(asgn));
+    ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *asgn = ast::cast_tree<ast::Assign>(tree);
+        if (auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
+            if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs)) {
+                movedConstants.emplace_back(move(tree));
                 return ast::MK::EmptyTree();
             }
             auto name = ast::MK::Symbol(cnst->loc, cnst->cnst);
@@ -46,17 +47,17 @@ public:
             return ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), move(name), move(asgn->rhs));
         }
 
-        return asgn;
+        return tree;
     }
 
     // classdefs define new constants, so we always move those if they're the "top-level" classdef (i.e. if we have
     // nested classdefs, we should only move the outermost one)
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr classDef) {
         classDepth++;
         return classDef;
     }
 
-    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr classDef) {
         classDepth--;
         if (classDepth == 0) {
             movedConstants.emplace_back(move(classDef));
@@ -67,29 +68,31 @@ public:
 
     // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
     // we treat those the same way we treat classes
-    unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+    ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *send = ast::cast_tree<ast::Send>(tree);
         if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
-        return send;
+        return tree;
     }
 
-    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto *send = ast::cast_tree<ast::Send>(tree);
         if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
-                movedConstants.emplace_back(move(send));
+                movedConstants.emplace_back(move(tree));
                 return ast::MK::EmptyTree();
             }
         }
-        return send;
+        return tree;
     }
 
-    vector<unique_ptr<ast::Expression>> getMovedConstants() {
+    vector<ast::TreePtr> getMovedConstants() {
         return move(movedConstants);
     }
 
-    unique_ptr<ast::Expression> addConstantsToExpression(core::LocOffsets loc, unique_ptr<ast::Expression> expr) {
+    ast::TreePtr addConstantsToExpression(core::LocOffsets loc, ast::TreePtr expr) {
         auto consts = getMovedConstants();
 
         if (consts.empty()) {
@@ -106,17 +109,17 @@ public:
     }
 };
 
-unique_ptr<ast::Expression> addSigVoid(unique_ptr<ast::Expression> expr) {
+ast::TreePtr addSigVoid(ast::TreePtr expr) {
     return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)), std::move(expr));
 }
 } // namespace
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
+ast::TreePtr recurse(core::MutableContext ctx, ast::TreePtr body);
 
-unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+ast::TreePtr prepareBody(core::MutableContext ctx, ast::TreePtr body) {
     body = recurse(ctx, std::move(body));
 
-    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get())) {
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         for (auto &exp : bodySeq->stats) {
             exp = recurse(ctx, std::move(exp));
         }
@@ -126,8 +129,8 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
     return body;
 }
 
-string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
-    auto argLit = ast::cast_tree<ast::Literal>(arg.get());
+string to_s(core::Context ctx, ast::TreePtr &arg) {
+    auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
     if (argLit != nullptr) {
         if (argLit->isString(ctx)) {
@@ -136,7 +139,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
             return argLit->asSymbol(ctx).show(ctx);
         }
     }
-    auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
+    auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
         return argConstant->cnst.show(ctx);
     }
@@ -146,18 +149,18 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
 // This returns `true` for expressions which can be moved from class to method scope without changing their meaning, and
 // `false` otherwise. This mostly encompasses literals (arrays, hashes, basic literals), constants, and sends that only
 // involve the other things described.
-bool canMoveIntoMethodDef(const unique_ptr<ast::Expression> &exp) {
-    if (ast::isa_tree<ast::Literal>(exp.get())) {
+bool canMoveIntoMethodDef(const ast::TreePtr &exp) {
+    if (ast::isa_tree<ast::Literal>(exp)) {
         return true;
-    } else if (auto list = ast::cast_tree<ast::Array>(exp.get())) {
+    } else if (auto *list = ast::cast_tree_const<ast::Array>(exp)) {
         return absl::c_all_of(list->elems, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto hash = ast::cast_tree<ast::Hash>(exp.get())) {
+    } else if (auto *hash = ast::cast_tree_const<ast::Hash>(exp)) {
         return absl::c_all_of(hash->keys, [](auto &elem) { return canMoveIntoMethodDef(elem); }) &&
                absl::c_all_of(hash->values, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto send = ast::cast_tree<ast::Send>(exp.get())) {
+    } else if (auto *send = ast::cast_tree_const<ast::Send>(exp)) {
         return canMoveIntoMethodDef(send->recv) &&
                absl::c_all_of(send->args, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (ast::isa_tree<ast::UnresolvedConstantLit>(exp.get())) {
+    } else if (ast::isa_tree<ast::UnresolvedConstantLit>(exp)) {
         return true;
     }
     return false;
@@ -165,7 +168,7 @@ bool canMoveIntoMethodDef(const unique_ptr<ast::Expression> &exp) {
 
 // if the thing can be moved into a method def, then the thing we iterate over can be copied into the body of the
 // method, and otherwise we replace it with a synthesized 'nil'
-unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
+ast::TreePtr getIteratee(ast::TreePtr &exp) {
     if (canMoveIntoMethodDef(exp)) {
         return exp->deepCopy();
     } else {
@@ -175,21 +178,20 @@ unique_ptr<ast::Expression> getIteratee(unique_ptr<ast::Expression> &exp) {
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
-unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef eachName,
-                                         unique_ptr<ast::Expression> stmt, ast::MethodDef::ARGS_store &args,
-                                         unique_ptr<ast::Expression> &iteratee) {
+ast::TreePtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast::TreePtr stmt,
+                          ast::MethodDef::ARGS_store &args, ast::TreePtr &iteratee) {
     // this statement must be a send
-    if (auto send = ast::cast_tree<ast::Send>(stmt.get())) {
+    if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
         if (send->fun == core::Names::it() && send->args.size() == 1 && send->block != nullptr &&
-            send->block->args.size() == 0) {
+            ast::cast_tree<ast::Block>(send->block)->args.size() == 0) {
             // we use this for the name of our test
             auto argString = to_s(ctx, send->args.front());
             auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
 
             // pull constants out of the block
             ConstantMover constantMover;
-            unique_ptr<ast::Expression> body = move(send->block->body);
+            ast::TreePtr body = move(ast::cast_tree<ast::Block>(send->block)->body);
             body = ast::TreeMap::apply(ctx, constantMover, move(body));
 
             // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
@@ -215,10 +217,9 @@ unique_ptr<ast::Expression> runUnderEach(core::MutableContext ctx, core::NameRef
 }
 
 // this just walks the body of a `test_each` and tries to transform every statement
-unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName,
-                                                unique_ptr<ast::Expression> body, ast::MethodDef::ARGS_store &args,
-                                                unique_ptr<ast::Expression> &iteratee) {
-    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
+ast::TreePtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::TreePtr body,
+                                 ast::MethodDef::ARGS_store &args, ast::TreePtr &iteratee) {
+    auto *bodySeq = ast::cast_tree<ast::InsSeq>(body);
     if (bodySeq) {
         for (auto &exp : bodySeq->stats) {
             exp = runUnderEach(ctx, eachName, std::move(exp), args, iteratee);
@@ -232,22 +233,23 @@ unique_ptr<ast::Expression> prepareTestEachBody(core::MutableContext ctx, core::
     return body;
 }
 
-unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send) {
+ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
     if (send->block == nullptr) {
         return nullptr;
     }
+
+    auto *block = ast::cast_tree<ast::Block>(send->block);
 
     if (!send->recv->isSelfReference()) {
         return nullptr;
     }
 
-    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->args.size() == 1 &&
-        send->block != nullptr) {
-        if ((send->fun == core::Names::testEach() && send->block->args.size() != 1) ||
-            (send->fun == core::Names::testEachHash() && send->block->args.size() != 2)) {
+    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->args.size() == 1) {
+        if ((send->fun == core::Names::testEach() && block->args.size() != 1) ||
+            (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
             if (auto e = ctx.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
                 e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
-                            1, send->block->args.size());
+                            1, block->args.size());
             }
             return nullptr;
         }
@@ -257,19 +259,19 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         // and then reconstruct the send but with a modified body
         ast::Send::ARGS_store args;
         args.emplace_back(move(send->args.front()));
-        return ast::MK::Send(send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
-                             ast::MK::Block(send->block->loc,
-                                            prepareTestEachBody(ctx, send->fun, std::move(send->block->body),
-                                                                send->block->args, iteratee),
-                                            std::move(send->block->args)));
+        return ast::MK::Send(
+            send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
+            ast::MK::Block(send->block->loc,
+                           prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
+                           std::move(block->args)));
     }
 
     if (send->args.empty() && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
-        send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
+        block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), name,
-                                                           prepareBody(ctx, std::move(send->block->body))));
+                                                           prepareBody(ctx, std::move(block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -283,17 +285,17 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
         ast::ClassDef::ANCESTORS_store ancestors;
         ancestors.emplace_back(ast::MK::Self(arg->loc));
         ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(prepareBody(ctx, std::move(send->block->body)));
+        rhs.emplace_back(prepareBody(ctx, std::move(block->body)));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, core::Loc(ctx.file, send->loc), std::move(name), std::move(ancestors),
                               std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
-        send->block->body = ast::TreeMap::apply(ctx, constantMover, move(send->block->body));
+        block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), std::move(name),
-                                                           prepareBody(ctx, std::move(send->block->body))));
+                                                           prepareBody(ctx, std::move(block->body))));
         method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
@@ -301,8 +303,8 @@ unique_ptr<ast::Expression> runSingle(core::MutableContext ctx, ast::Send *send)
     return nullptr;
 }
 
-unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
-    auto bodySend = ast::cast_tree<ast::Send>(body.get());
+ast::TreePtr recurse(core::MutableContext ctx, ast::TreePtr body) {
+    auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
         auto change = runSingle(ctx, bodySend);
         if (change) {
@@ -312,8 +314,8 @@ unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Ex
     return body;
 }
 
-vector<unique_ptr<ast::Expression>> Minitest::run(core::MutableContext ctx, ast::Send *send) {
-    vector<unique_ptr<ast::Expression>> stats;
+vector<ast::TreePtr> Minitest::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::TreePtr> stats;
     if (ctx.state.runningUnderAutogen) {
         return stats;
     }

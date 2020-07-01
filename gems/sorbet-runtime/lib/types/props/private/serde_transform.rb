@@ -19,7 +19,7 @@ module T::Props
       end
 
       NO_TRANSFORM_TYPES = T.let(
-        [TrueClass, FalseClass, NilClass, Symbol, String, Numeric].freeze,
+        [TrueClass, FalseClass, NilClass, Symbol, String].freeze,
         T::Array[Module],
       )
       private_constant :NO_TRANSFORM_TYPES
@@ -65,6 +65,14 @@ module T::Props
           raw = type.raw_type
           if NO_TRANSFORM_TYPES.any? {|cls| raw <= cls}
             nil
+          elsif raw <= Float
+            case mode
+            when Deserialize then "#{varname}.to_f"
+            when Serialize then nil
+            else T.absurd(mode)
+            end
+          elsif raw <= Numeric
+            nil
           elsif raw < T::Props::Serializable
             handle_serializable_subtype(varname, raw, mode)
           elsif raw.singleton_class < T::Props::CustomType
@@ -96,6 +104,13 @@ module T::Props
             if type.types.all? {|t| generate(t, mode, varname).nil?}
               nil
             else
+              # We currently deep_clone_object if the type was T.any(Integer, Float).
+              # When we get better support for union types (maybe this specific
+              # union type, because it would be a replacement for
+              # Chalk::ODM::DeprecatedNumemric), we could opt to special case
+              # this union to have no specific serde transform (the only reason
+              # why Float has a special case is because round tripping through
+              # JSON might normalize Floats to Integers)
               "T::Props::Utils.deep_clone_object(#{varname})"
             end
           end

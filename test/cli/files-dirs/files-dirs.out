@@ -1,0 +1,48 @@
+------------------------------------------------------------------------
+{}
+------------------------------------------------------------------------
+{
+ "files": [
+  {
+   "path": "foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
+------------------------------------------------------------------------
+You must pass either `-e` or at least one folder or ruby file.
+
+Typechecker for Ruby
+Usage:
+  sorbet [OPTION...] <path 1> <path 2> ...
+
+  -e, string     Parse an inline ruby string (default: "")
+  -q, --quiet    Silence all non-critical errors
+  -v, --verbose  Verbosity level [0-3]
+  -h,            Show short help
+      --help     Show long help
+      --version  Show version
+
+------------------------------------------------------------------------
+{
+ "files": [
+  {
+   "path": "./foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
+------------------------------------------------------------------------
+Note: --dir and -e are meant to be additive
+{
+ "files": [
+  {
+   "path": "./foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
+------------------------------------------------------------------------

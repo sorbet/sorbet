@@ -2,7 +2,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.require_relative("../../t")
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 
   class <emptyTree>::<C NotStruct><<C <todo sym>>> < (::<todo sym>)
@@ -33,8 +34,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+      def initialize<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
+        nil
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>2<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"foo")
@@ -48,6 +65,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>2")
     end
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -71,8 +92,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(foo: = nil, bar: = nil, &<blk>)
+      def initialize<<C <todo sym>>>(foo: = <emptyTree>, bar: = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(foo: = <emptyTree>, bar: = <emptyTree>, &<blk>)
+        nil
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>2<<C <todo sym>>>(foo: = <emptyTree>, bar: = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"foo")
@@ -86,6 +123,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>2")
     end
   end
 
@@ -163,8 +204,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+      def initialize<<C <todo sym>>>(foo = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(foo = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"foo")
@@ -174,6 +223,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
     end
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -189,8 +240,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"foo" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, &<blk>)
+      def initialize<<C <todo sym>>>(foo = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(foo = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"foo")
@@ -200,11 +259,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
     end
   end
 
   class <emptyTree>::<C AccidentallyStruct><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
+    end
 
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)
@@ -227,8 +289,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(foo = nil, bar = nil, &<blk>)
+      def initialize<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
+        nil
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>2<<C <todo sym>>>(foo = <emptyTree>, bar = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"foo")
@@ -242,6 +320,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Elem> = <self>.type_member({:"fixed" => ::T.untyped()})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>2")
     end
   end
 
@@ -267,8 +349,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"x" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(x = nil, &<blk>)
+      def initialize<<C <todo sym>>>(x = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"x" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"x")
@@ -284,6 +374,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::<Magic>.<self-new>(<self>).foo()
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
     end
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -299,8 +391,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"x" => ::BasicObject}).void()
       end
 
-      def initialize<<C <todo sym>>>(x: = nil, &<blk>)
+      def initialize<<C <todo sym>>>(x: = <emptyTree>, &<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params({:"x" => ::BasicObject}).returns(::BasicObject)
+      end
+
+      def initialize<defaultArg>1<<C <todo sym>>>(x: = <emptyTree>, &<blk>)
+        nil
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :"x")
@@ -320,6 +420,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::<Magic>.<self-new>(<self>, {:"giberish" => 1})
 
       ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
     end
 
     <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)

@@ -1492,6 +1492,25 @@ class Module < Object
   end
   def remove_method(arg0); end
 
+  # For the given method names, marks the method as passing keywords through a
+  # normal argument splat. This should only be called on methods that accept an
+  # argument splat (`*args`) but not explicit keywords or a keyword splat. It
+  # marks the method such that if the method is called with keyword arguments,
+  # the final hash argument is marked with a special flag such that if it is the
+  # final element of a normal argument splat to another method call, and that
+  # method calls does not include explicit keywords or a keyword splat, the
+  # final element is interpreted as keywords. In other words, keywords will be
+  # passed through the method to other methods.
+  #
+  # This should only be used for methods that delegate keywords to another
+  # method, and only for backwards compatibility with Ruby versions before 2.7.
+  #
+  # This method will probably be removed at some point, as it exists only for
+  # backwards compatibility, so always check that the module responds to this
+  # method before calling it.
+  sig { params(method_name: Symbol).returns(T.self_type) }
+  def ruby2_keywords(*method_name); end
+
   # Returns `true` if *mod* is a singleton class or `false` if it is an ordinary
   # class or module.
   #

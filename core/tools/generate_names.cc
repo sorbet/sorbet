@@ -127,6 +127,7 @@ NameDef names[] = {
     {"assertType", "assert_type!"},
     {"cast"},
     {"let"},
+    {"uncheckedLet", "<unchecked_let>"},
     {"unsafe"},
     {"must"},
     {"declareInterface", "interface!"},
@@ -197,12 +198,8 @@ NameDef names[] = {
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Document", "Document", true},
-    {"Mutator", "Mutator", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
-    {"HashMutator", "HashMutator", true},
-    {"ArrayMutator", "ArrayMutator", true},
-    {"DocumentMutator", "DocumentMutator", true},
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
@@ -357,6 +354,7 @@ NameDef names[] = {
     {"callWithBlock", "<call-with-block>"},
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
+    {"blockBreak", "<block-break>"},
     {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
 

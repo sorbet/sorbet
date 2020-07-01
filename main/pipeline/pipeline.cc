@@ -3,6 +3,8 @@
 #else
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
+// ^^ has to go first
+#include "common/json2msgpack/json2msgpack.h"
 #include "namer/configatron/configatron.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
@@ -27,6 +29,7 @@
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
+#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -52,15 +55,16 @@ class CFGCollectorAndTyper {
 public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m->symbol.data(ctx)->isOverloaded()) {
-            return m;
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m.symbol.data(ctx)->isOverloaded()) {
+            return tree;
         }
         auto &print = opts.print;
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
 
         if (opts.stopAfterPhase == options::Phase::CFG) {
-            return m;
+            return tree;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (cfg) {
@@ -74,7 +78,7 @@ public:
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
-        return m;
+        return tree;
     }
 };
 
@@ -104,8 +108,8 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
     return nullptr;
 }
 
-unique_ptr<ast::Expression> fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::TreePtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
     if (cachedFile) {
         return move(cachedFile->tree);
@@ -132,10 +136,10 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                                       const options::Printers &print) {
+ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+                        const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
-    unique_ptr<ast::Expression> ast;
+    ast::TreePtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
@@ -150,7 +154,7 @@ unique_ptr<ast::Expression> runDesugar(core::GlobalState &gs, core::FileRef file
     return ast;
 }
 
-unique_ptr<ast::Expression> runRewriter(core::GlobalState &gs, core::FileRef file, unique_ptr<ast::Expression> ast) {
+ast::TreePtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::TreePtr ast) {
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
@@ -167,8 +171,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         unique_ptr<ast::Expression> tree) {
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file, ast::TreePtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
@@ -221,9 +224,8 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::File
     return {emptyParsedFile(file), vector<shared_ptr<core::File>>()};
 }
 
-pair<ast::ParsedFile, vector<shared_ptr<core::File>>> indexOneWithPlugins(const options::Options &opts,
-                                                                          core::GlobalState &gs, core::FileRef file,
-                                                                          unique_ptr<ast::Expression> tree) {
+pair<ast::ParsedFile, vector<shared_ptr<core::File>>>
+indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file, ast::TreePtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
@@ -417,10 +419,10 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 }
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
-unique_ptr<ast::Expression> readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
-                                                            const options::Options &opts,
-                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    unique_ptr<ast::Expression> ast;
+ast::TreePtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+                                             const options::Options &opts,
+                                             const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    ast::TreePtr ast;
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
@@ -443,8 +445,7 @@ unique_ptr<ast::Expression> readFileWithStrictnessOverrides(unique_ptr<core::Glo
         core::UnfreezeFileTable unfreezeFiles(*gs);
         auto fileObj =
             make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
-        auto maybeCached = fetchFileFromCache(*gs, file, *fileObj, kvstore);
-        if (maybeCached) {
+        if (auto maybeCached = fetchFileFromCache(*gs, file, *fileObj, kvstore)) {
             fileObj = move(maybeCached->file);
             ast = move(maybeCached->tree);
         }
@@ -520,10 +521,6 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
             }
             progress.reportProgress(input->doneEstimate());
-            // Flush all errors if the error queue had a critical error
-            if (ret.gs->hadCriticalError()) {
-                ret.gs->errorQueue->flushErrors(true);
-            }
         }
     }
     return ret;
@@ -730,11 +727,6 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     return result;
 }
 
-struct typecheck_thread_result {
-    vector<ast::ParsedFile> trees;
-    CounterState counters;
-};
-
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers, bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
@@ -750,19 +742,15 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
         core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
         auto result = namer::Namer::run(gs, move(what), workers);
-        // Flush all errors if the error queue had a critical error
-        if (gs.hadCriticalError()) {
-            gs.errorQueue->flushErrors(true);
-        }
+
         return result;
     }
 }
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
-    unique_ptr<ast::Expression> postTransformConstantLit(core::MutableContext ctx,
-                                                         unique_ptr<ast::ConstantLit> original) {
-        auto unresolvedPath = original->fullUnresolvedPath(ctx);
+    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+        auto unresolvedPath = ast::cast_tree_nonnull<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}",
@@ -770,7 +758,7 @@ public:
                 fmt::map_join(unresolvedPath->second,
                               "::", [&](const auto &el) -> string { return el.data(ctx)->show(ctx); })));
         }
-        return original;
+        return tree;
     }
 };
 
@@ -823,13 +811,13 @@ public:
         ENFORCE(file.exists());
     };
 
-    unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        checkSym(ctx, original->symbol);
-        return original;
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
+        return tree;
     }
-    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        checkSym(ctx, original->symbol);
-        return original;
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
+        return tree;
     }
 };
 
@@ -901,11 +889,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
 
-    // Flush all errors if the error queue had a critical error
-    if (gs->hadCriticalError()) {
-        gs->errorQueue->flushErrors(true);
-    }
-
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
@@ -925,7 +908,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                       const options::Options &opts, WorkerPool &workers, bool cancelable,
-                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager) {
+                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager,
+                                      bool presorted) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
@@ -943,19 +927,22 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
-        shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
+        shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> treesq;
 
         {
             fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
-            resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+            treesq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(what.size());
         }
 
         const core::GlobalState &igs = *gs;
+        if (!presorted) {
+            // If files are not already sorted, we want to start typeckecking big files first because it helps with
+            // better work distribution
+            fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
+                return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+            });
+        }
 
-        // We want to start typeckecking big files first because it helps with better work distribution
-        fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
-        });
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
@@ -963,8 +950,8 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob(
-                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, resultq, cancelable]() {
-                    typecheck_thread_result threadResult;
+                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, treesq, cancelable]() {
+                    vector<ast::ParsedFile> trees;
                     ast::ParsedFile job;
                     int processedByThread = 0;
 
@@ -989,41 +976,58 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                                     try {
                                         core::Context ctx(igs, core::Symbols::root(), file);
                                         auto parsedFile = typecheckOne(ctx, move(job), opts);
-                                        igs.errorQueue->markFileForFlushing(file);
-                                        threadResult.trees.emplace_back(move(parsedFile));
+                                        trees.emplace_back(move(parsedFile));
                                     } catch (SorbetException &) {
                                         Exception::failInFuzzer();
                                         igs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                            file.data(igs).path());
                                     }
+                                    // Stream out errors
+                                    treesq->push(move(trees), processedByThread);
+                                    processedByThread = 0;
                                 }
                             }
                         }
                     }
                     if (processedByThread > 0) {
-                        threadResult.counters = getAndClearThreadCounters();
-                        resultq->push(move(threadResult), processedByThread);
+                        treesq->push(move(trees), processedByThread);
                     }
                 });
 
-            typecheck_thread_result threadResult;
+            vector<ast::ParsedFile> trees;
             {
-                for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
+                for (auto result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
-                     result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                     result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
-                        counterConsume(move(threadResult.counters));
-                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
-                                                make_move_iterator(threadResult.trees.end()));
+                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(trees.begin()),
+                                                make_move_iterator(trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    gs->errorQueue->flushErrors();
+                    for (auto &tree : trees) {
+                        gs->errorQueue->flushErrorsForFile(*gs, tree.file);
+                    }
                     if (preemptionManager) {
                         (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return ast::ParsedFilesOrCancelled();
+                }
+            }
+
+            if (workers.size() > 0) {
+                auto counterq = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
+                workers.multiplexJob("collectCounters",
+                                     [counterq]() { counterq->push(getAndClearThreadCounters(), 1); });
+                {
+                    sorbet::CounterState counters;
+                    for (auto result = counterq->try_pop(counters); !result.done();
+                         result = counterq->try_pop(counters)) {
+                        if (result.gotItem()) {
+                            counterConsume(move(counters));
+                        }
+                    }
                 }
             }
         }
@@ -1049,6 +1053,34 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 opts.print.SymbolTableJson.print(buf.str());
             }
         }
+        if (opts.print.SymbolTableProto.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+            if (opts.print.SymbolTableProto.outputPath.empty()) {
+                root.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                root.SerializeToString(&buf);
+                opts.print.SymbolTableProto.print(buf);
+            }
+        }
+        if (opts.print.SymbolTableMessagePack.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
+            }
+        }
         if (opts.print.SymbolTableFullJson.enabled) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
             if (opts.print.SymbolTableJson.outputPath.empty()) {
@@ -1057,6 +1089,34 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 stringstream buf;
                 core::Proto::toJSON(root, buf);
                 opts.print.SymbolTableJson.print(buf.str());
+            }
+        }
+        if (opts.print.SymbolTableFullProto.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+            if (opts.print.SymbolTableFullProto.outputPath.empty()) {
+                root.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                root.SerializeToString(&buf);
+                opts.print.SymbolTableFullProto.print(buf);
+            }
+        }
+        if (opts.print.SymbolTableFullMessagePack.enabled) {
+            auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
             }
         }
 #endif
@@ -1068,6 +1128,16 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         }
 
 #ifndef SORBET_REALMAIN_MIN
+        if (opts.print.FileTableProto.enabled) {
+            auto files = core::Proto::filesToProto(*gs);
+            if (opts.print.FileTableProto.outputPath.empty()) {
+                files.SerializeToOstream(&cout);
+            } else {
+                string buf;
+                files.SerializeToString(&buf);
+                opts.print.FileTableProto.print(buf);
+            }
+        }
         if (opts.print.FileTableJson.enabled) {
             auto files = core::Proto::filesToProto(*gs);
             if (opts.print.FileTableJson.outputPath.empty()) {
@@ -1076,6 +1146,24 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                 stringstream buf;
                 core::Proto::toJSON(files, buf);
                 opts.print.FileTableJson.print(buf.str());
+            }
+        }
+        if (opts.print.FileTableMessagePack.enabled) {
+            auto files = core::Proto::filesToProto(*gs);
+            stringstream buf;
+            core::Proto::toJSON(files, buf);
+            auto str = buf.str();
+            rapidjson::Document document;
+            document.Parse(str);
+            mpack_writer_t writer;
+            if (opts.print.FileTableMessagePack.outputPath.empty()) {
+                mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+            } else {
+                mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
+            }
+            json2msgpack::json2msgpack(document, &writer);
+            if (mpack_writer_destroy(&writer)) {
+                Exception::raise("failed to write msgpack");
             }
         }
         if (opts.print.PluginGeneratedCode.enabled) {
@@ -1092,54 +1180,55 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 class AllNamesCollector {
 public:
     core::UsageHash acc;
-    unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
-        acc.sends.emplace_back(ctx, original->fun.data(ctx));
-        return original;
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun.data(ctx));
+        return tree;
     }
 
-    unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> original) {
-        acc.constants.emplace_back(ctx, original->name.data(ctx));
-        return original;
+    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        acc.constants.emplace_back(ctx, original.name.data(ctx));
+        return tree;
     }
 
     void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
         while (expr) {
             acc.constants.emplace_back(ctx, expr->cnst.data(ctx));
             // Handle references to 'Foo' in 'Foo::Bar'.
-            expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope.get());
+            expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope);
         }
     }
 
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
-        acc.constants.emplace_back(ctx, original->symbol.data(ctx)->name.data(ctx));
-        original->name->showRaw(ctx);
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name.data(ctx));
 
-        handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original->name.get()));
+        handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original.name));
 
         // Grab names of superclasses. (N.B. `include` and `extend` are captured as ConstantLits.)
-        for (auto &ancst : original->ancestors) {
-            handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(ancst.get()));
+        for (auto &ancst : original.ancestors) {
+            handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(ancst));
         }
 
-        return original;
+        return tree;
     }
 
-    unique_ptr<ast::UnresolvedConstantLit>
-    postTransformUnresolvedConstantLit(core::Context ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
-        handleUnresolvedConstantLit(ctx, original.get());
-        return original;
+    ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
+        handleUnresolvedConstantLit(ctx, &original);
+        return tree;
     }
 
-    unique_ptr<ast::UnresolvedIdent> postTransformUnresolvedIdent(core::Context ctx,
-                                                                  unique_ptr<ast::UnresolvedIdent> id) {
-        if (id->kind != ast::UnresolvedIdent::Kind::Local) {
-            acc.constants.emplace_back(ctx, id->name.data(ctx));
+    ast::TreePtr postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
+        auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
+        if (id.kind != ast::UnresolvedIdent::Kind::Local) {
+            acc.constants.emplace_back(ctx, id.name.data(ctx));
         }
-        return id;
+        return tree;
     }
 };
 
-core::UsageHash getAllNames(core::Context ctx, unique_ptr<ast::Expression> &tree) {
+core::UsageHash getAllNames(core::Context ctx, ast::TreePtr &tree) {
     AllNamesCollector collector;
     tree = ast::TreeMap::apply(ctx, collector, move(tree));
     core::NameHash::sortAndDedupe(collector.acc.sends);
@@ -1151,9 +1240,9 @@ namespace {
 core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     const static options::Options emptyOpts{};
-    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(logger, logger)));
+    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>(
+        (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
     lgs->initEmpty();
-    lgs->errorQueue->ignoreFlushes = true;
     lgs->silenceErrors = true;
     core::FileRef fref;
     {
@@ -1164,7 +1253,6 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     vector<ast::ParsedFile> single;
 
     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref));
-    auto errs = lgs->errorQueue->drainAllErrors();
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
     auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());

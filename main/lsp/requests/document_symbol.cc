@@ -51,12 +51,12 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
         prefix = "self.";
     }
     auto result = make_unique<DocumentSymbol>(prefix + sym->name.show(gs), kind, move(range), move(selectionRange));
-    if (sym->isMethod()) {
-        result->detail = prettyTypeForMethod(gs, symRef, nullptr, nullptr, nullptr);
-    } else {
-        // Currently released version of VSCode has a bug that requires this non-optional field to be present
-        result->detail = "";
-    }
+
+    // Previous versions of VSCode have a bug that requires this non-optional field to be present.
+    // This previously tried to include the method signature but due to issues where large signatures were not readable
+    // when put on one line and given that currently details are only visible in the outline view but not seen in the
+    // symbol search. Additionally, no other language server implementations we could find used this field.
+    result->detail = "";
 
     vector<unique_ptr<DocumentSymbol>> children;
     symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, children);

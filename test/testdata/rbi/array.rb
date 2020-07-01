@@ -1,5 +1,12 @@
 # typed: strict
 
+# initializing with array
+T.assert_type!(T::Array[String].new(['a', 'b', 'c']), T::Array[String])
+#  initializing with size
+T.assert_type!(T::Array[T.nilable(String)].new(3), T::Array[T.nilable(String)])
+#  initializing with size and initial  element
+T.assert_type!(T::Array[String].new(3, 'a'), T::Array[String])
+
 # no arg, no block
 T.assert_type!(T::Array[Float].new.sum, T.any(Float, Integer))
 T.assert_type!([Rational(1, 2)].sum, T.any(Rational, Integer))

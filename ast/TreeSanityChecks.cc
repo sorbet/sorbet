@@ -25,7 +25,7 @@ void Block::_sanityCheck() {
 
 void BlockArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Break::_sanityCheck() {
@@ -35,7 +35,8 @@ void Break::_sanityCheck() {
 void Cast::_sanityCheck() {
     ENFORCE(arg);
     ENFORCE(type);
-    ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let());
+    ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let() ||
+            cast == core::Names::uncheckedLet());
 }
 
 void ClassDef::_sanityCheck() {
@@ -87,7 +88,7 @@ void InsSeq::_sanityCheck() {
 
 void KeywordArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Local::_sanityCheck() {
@@ -97,7 +98,7 @@ void Local::_sanityCheck() {
 void MethodDef::_sanityCheck() {
     ENFORCE(name.exists());
     ENFORCE(!args.empty(), "Every method should have at least one arg (the block arg).\n");
-    ENFORCE(isa_tree<BlockArg>(args.back().get()) || isa_tree<Local>(args.back().get()),
+    ENFORCE(isa_tree<BlockArg>(args.back()) || isa_tree<Local>(args.back()),
             "Last arg must be a block arg (or a local, if block args have already been removed).");
     for (auto &node : args) {
         ENFORCE(node);
@@ -112,7 +113,7 @@ void Next::_sanityCheck() {
 void OptionalArg::_sanityCheck() {
     ENFORCE(expr);
     ENFORCE(default_);
-    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Return::_sanityCheck() {
@@ -138,7 +139,7 @@ void RescueCase::_sanityCheck() {
 
 void RestArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Retry::_sanityCheck() {}
@@ -153,7 +154,7 @@ void Send::_sanityCheck() {
 
 void ShadowArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void UnresolvedIdent::_sanityCheck() {
