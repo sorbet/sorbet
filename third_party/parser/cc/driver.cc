@@ -16,7 +16,7 @@ base_driver::base_driver(ruby_version version, const std::string& source, const 
 }
 
 typedruby25::typedruby25(const std::string& source, const struct builder& builder)
-	: base_driver(ruby_version::RUBY_25, source, builder)
+	: base_driver(ruby_version::RUBY_26, source, builder)
 {}
 
 ForeignPtr typedruby25::parse(SelfPtr self) {

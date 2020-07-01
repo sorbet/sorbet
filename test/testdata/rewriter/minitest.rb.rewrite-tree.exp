@@ -218,7 +218,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)        end
+        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
+        end
         begin
           "contains nested describes"
           ::Sorbet::Private::Static.keep_def(<self>, :"<it \'contains nested describes\'>")
@@ -230,6 +231,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   ::Sorbet::Private::Static.keep_def(<self>, :"junk")
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
-    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 end

@@ -47,10 +47,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
-    auto run = typechecker.retypecheck({file});
+    auto errors = typechecker.retypecheck({file});
     auto loc = params->range->toLoc(gs, file);
     vector<core::AutocorrectSuggestion::Edit> allEdits;
-    for (auto &error : run.errors) {
+    for (auto &error : errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.

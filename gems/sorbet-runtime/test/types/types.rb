@@ -676,6 +676,7 @@ module Opus::Types::Test
         a = T::Utils.coerce(::MyEnum::A)
         assert_instance_of(T::Types::TEnum, a)
         assert_equal(a.val, ::MyEnum::A)
+        assert_equal(a.name, 'MyEnum::A')
       end
 
       it 'allows T::Enum values in a sig params' do
@@ -723,6 +724,9 @@ module Opus::Types::Test
         assert_raises(TypeError) do
           c.foo(MyEnum::C)
         end
+
+        runtime_type = T.any(MyEnum::A, MyEnum::B)
+        assert_equal("T.any(MyEnum::A, MyEnum::B)", runtime_type.to_s)
       end
     end
 

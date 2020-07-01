@@ -560,7 +560,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(dctx, std::move(and_->left));
                 auto rhs = node2TreeImpl(dctx, std::move(and_->right));
-                if (isa_tree<Reference>(lhs)) {
+                if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
@@ -576,7 +576,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             [&](parser::Or *or_) {
                 auto lhs = node2TreeImpl(dctx, std::move(or_->left));
                 auto rhs = node2TreeImpl(dctx, std::move(or_->right));
-                if (isa_tree<Reference>(lhs)) {
+                if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
                     auto iff = MK::If(loc, std::move(cond), std::move(lhs), std::move(rhs));
                     result = std::move(iff);
@@ -608,7 +608,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result = std::move(wrapped);
-                } else if (isa_tree<Reference>(recv)) {
+                } else if (isa_reference(recv)) {
                     auto cond = MK::cpRef(recv);
                     auto elsep = MK::cpRef(recv);
                     auto body = MK::Assign(loc, std::move(recv), std::move(arg));
@@ -670,7 +670,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result = std::move(wrapped);
-                } else if (isa_tree<Reference>(recv)) {
+                } else if (isa_reference(recv)) {
                     auto cond = MK::cpRef(recv);
                     auto elsep = MK::cpRef(recv);
                     auto body = MK::Assign(loc, std::move(recv), std::move(arg));
@@ -730,7 +730,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                                         std::move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(res));
                     result = std::move(wrapped);
-                } else if (isa_tree<Reference>(recv)) {
+                } else if (isa_reference(recv)) {
                     auto lhs = MK::cpRef(recv);
                     auto send = MK::Send1(loc, std::move(recv), opAsgn->op, std::move(rhs));
                     auto res = MK::Assign(loc, std::move(lhs), std::move(send));
@@ -1467,11 +1467,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 Rescue::RESCUE_CASE_store cases;
                 cases.reserve(rescue->rescue.size());
                 for (auto &node : rescue->rescue) {
-                    TreePtr rescueCaseExpr = node2TreeImpl(dctx, std::move(node));
-                    auto rescueCase = cast_tree<RescueCase>(rescueCaseExpr);
-                    ENFORCE(rescueCase != nullptr, "rescue case cast failed");
-                    cases.emplace_back(rescueCase);
-                    rescueCaseExpr.release();
+                    cases.emplace_back(node2TreeImpl(dctx, std::move(node)));
+                    ENFORCE(isa_tree<RescueCase>(cases.back()), "node2TreeImpl failed to produce a rescue case");
                 }
                 TreePtr res = make_tree<Rescue>(loc, node2TreeImpl(dctx, std::move(rescue->body)), std::move(cases),
                                                 node2TreeImpl(dctx, std::move(rescue->else_)), MK::EmptyTree());

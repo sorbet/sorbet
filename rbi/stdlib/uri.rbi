@@ -674,6 +674,8 @@ end
 # summary about the de facto spec.
 # http://tools.ietf.org/html/draft-hoffman-ftp-uri-04
 class URI::FTP < URI::Generic
+  include ::OpenURI::OpenRead
+
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)
@@ -933,7 +935,7 @@ class URI::Generic < Object
   # uri.coerce("http://foo.com")
   # #=> [#<URI::HTTP http://foo.com>, #<URI::HTTP http://my.example.com>]
   # ```
-  sig {params(oth: T.any(URI, String)).returns(T.untyped)}
+  sig {params(oth: T.any(URI::Generic, String)).returns(T.untyped)}
   def coerce(oth); end
 
   # Components of the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) in
@@ -1192,7 +1194,7 @@ class URI::Generic < Object
   #
   # Also aliased as:
   # [`+`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#method-i-2B)
-  sig {params(oth: String).returns(URI)}
+  sig {params(oth: T.any(String, URI::Generic)).returns(URI::Generic)}
   def merge(oth); end
 
   # ## Args
@@ -1232,7 +1234,7 @@ class URI::Generic < Object
   #
   # *   scheme and host are converted to lowercase,
   # *   an empty path component is set to "/".
-  sig {returns(URI)}
+  sig {returns(URI::Generic)}
   def normalize; end
 
   # Destructive version of
@@ -1695,6 +1697,8 @@ end
 # used to be supported in Internet Explorer 5 and 6, before the MS04-004
 # security update. See <URL:http://support.microsoft.com/kb/834489>.
 class URI::HTTP < URI::Generic
+  include ::OpenURI::OpenRead
+
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
   ABS_URI_REF = T.let(T.unsafe(nil), Regexp)

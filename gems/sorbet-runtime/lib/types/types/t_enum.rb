@@ -12,7 +12,12 @@ module T::Types
 
     # @override Base
     def name
-      @val.inspect
+      # Strips the #<...> off, just leaving the ...
+      # Reasoning: the user will have written something like
+      #   T.any(MyEnum::A, MyEnum::B)
+      # in the type, so we should print what they wrote in errors, not:
+      #   T.any(#<MyEnum::A>, #<MyEnum::B>)
+      @val.inspect[2..-2]
     end
 
     # @override Base
