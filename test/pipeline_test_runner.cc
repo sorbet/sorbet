@@ -263,7 +263,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         // Packager runs over all trees.
         trees = packager::Packager::run(*gs, *workers, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "packager", [&]() { return tree.tree->toString(*gs); });
         }
     }
 
@@ -491,7 +491,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (enablePackager) {
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved("packager", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "packager", [&]() { return tree.tree->toString(*gs); });
         }
     }
 
@@ -504,8 +504,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
             tree = testSerialize(*gs, move(vTmp[0]));
 
-            handler.addObserved("name-tree", [&]() { return tree.tree->toString(*gs); });
-            handler.addObserved("name-tree-raw", [&]() { return tree.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "name-tree", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree->showRaw(*gs); });
         }
     }
 

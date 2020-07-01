@@ -355,7 +355,7 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    id = enterClassSymbol(Loc::none(), core::Symbols::todo(), core::Names::Constants::PackageRegistry());
+    id = enterClassSymbol(Loc::none(), core::Symbols::root(), core::Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
 
     // PackageSpec is a class that can be subclassed.
