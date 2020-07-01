@@ -46,7 +46,8 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  def all?(&blk); end
+  sig { params(pattern: T.any).returns(T::Boolean) }
+  def all?(pattern = nil, &blk); end
 
   # Passes each element of the collection to the given block. The method returns
   # `true` if the block ever returns a value other than `false` or `nil`. If the
@@ -74,7 +75,8 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  def any?(&blk); end
+  sig { params(pattern: T.any).returns(T::Boolean) }
+  def any?(pattern = nil, &blk); end
 
   # Enumerates over the items, chunking them together based on the return value
   # of the block.
@@ -1024,7 +1026,8 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  def none?(&blk); end
+  sig { params(pattern: T.any).returns(T::Boolean) }
+  def none?(pattern = nil, &blk); end
 
   # Passes each element of the collection to the given block. The method returns
   # `true` if the block returns `true` exactly once. If the block is not given,
