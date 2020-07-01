@@ -1,4 +1,9 @@
-unpackaged-error.rb:1: File `test/cli/unpackaged-error/unpackaged-error.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/8006
+unpackaged-error.rb:1: File `test/cli/unpackaged-error/unpackaged-error.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/8005
      1 |# typed: true
         ^
-Errors: 1
+
+gem.rbi:5: File `test/cli/unpackaged-error/gem.rbi` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/8005
+     5 |module Minitest
+     6 |
+     7 |end
+Errors: 2

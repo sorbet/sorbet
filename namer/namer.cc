@@ -1501,8 +1501,7 @@ public:
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
                 if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
-                    e.setHeader("`{}` has behavior defined in multiple files {}", klass.symbol.data(ctx)->show(ctx),
-                                klass.symbol.data(ctx)->owner.show(ctx));
+                    e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.data(ctx)->show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
             }
