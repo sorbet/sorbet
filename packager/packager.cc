@@ -203,6 +203,7 @@ struct PackageInfoFinder {
                 ast::MK::Send1(klass->loc, ast::MK::Self(klass->loc), core::Names::include(),
                                name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
         }
+
         // Use the loc of the `export_methods` call so `include` errors goes to the right place.
         classDef->rhs.emplace_back(ast::MK::ClassOrModule(
             exportMethodsLoc, core::Loc(ctx.file, exportMethodsLoc),
@@ -321,6 +322,10 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         const auto &found = *it;
         importedPackages.emplace_back(found.second->exportModule->deepCopy());
     }
+
+    // Include Kernel in the package.
+    importedPackages.emplace_back(ast::MK::Send1(core::LocOffsets::none(), ast::MK::Self(core::LocOffsets::none()),
+                                                 core::Names::include(), name2Expr(core::Names::Constants::Kernel())));
 
     auto packageNamespace = ast::MK::ClassOrModule(
         core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
