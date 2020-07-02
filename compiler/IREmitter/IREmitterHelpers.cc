@@ -629,7 +629,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + suffix;
 }
 
-bool IREmitterHelpers::isStaticInit(CompilerState &cs, core::SymbolRef sym) {
+bool IREmitterHelpers::isStaticInit(const core::GlobalState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
     return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
            core::Names::staticInit();
