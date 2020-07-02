@@ -127,6 +127,7 @@ NameDef names[] = {
     {"assertType", "assert_type!"},
     {"cast"},
     {"let"},
+    {"uncheckedLet", "<unchecked_let>"},
     {"unsafe"},
     {"must"},
     {"declareInterface", "interface!"},

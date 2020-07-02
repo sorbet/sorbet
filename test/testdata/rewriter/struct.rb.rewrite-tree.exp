@@ -2,7 +2,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.require_relative("../../t")
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 
   class <emptyTree>::<C NotStruct><<C <todo sym>>> < (::<todo sym>)
@@ -264,7 +265,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C AccidentallyStruct><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
+    end
 
     class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<C <todo sym>>>(&<blk>)

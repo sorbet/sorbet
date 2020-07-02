@@ -416,21 +416,10 @@ private:
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
 
-        int i = 0;
-        while (i < cast_tree<Rescue>(v)->rescueCases.size()) {
-            auto &el = cast_tree<Rescue>(v)->rescueCases[i];
-            auto *oldRef = el.get();
-            auto narg = mapRescueCase(std::move(el), ctx);
-            if (el.get() != narg.get()) {
-                auto *nargCase = cast_tree<RescueCase>(narg);
-                ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
-                el.reset(nargCase);
-                narg.release();
-            } else {
-                narg.release();
-                el.reset(oldRef);
-            }
-            i++;
+        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
+            ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
+            el = mapRescueCase(std::move(el), ctx);
+            ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
         cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
@@ -631,52 +620,100 @@ private:
                     ctx, std::move(what), func);
             }
 
-            if (isa_tree<EmptyTree>(what) || isa_tree<ZSuperArgs>(what)) {
-                return what;
-            }
+            switch (what.tag()) {
+                case Tag::EmptyTree:
+                    return what;
 
-            if (isa_tree<UnresolvedConstantLit>(what)) {
-                return mapUnresolvedConstantLit(std::move(what), ctx);
-            } else if (isa_tree<ConstantLit>(what)) {
-                return mapConstantLit(std::move(what), ctx);
-            } else if (isa_tree<Send>(what)) {
-                return mapSend(std::move(what), ctx);
-            } else if (isa_tree<Literal>(what)) {
-                return mapLiteral(std::move(what), ctx);
-            } else if (isa_tree<UnresolvedIdent>(what)) {
-                return mapUnresolvedIdent(std::move(what), ctx);
-            } else if (isa_tree<Local>(what)) {
-                return mapLocal(std::move(what), ctx);
-            } else if (isa_tree<MethodDef>(what)) {
-                return mapMethodDef(std::move(what), ctx);
-            } else if (isa_tree<InsSeq>(what)) {
-                return mapInsSeq(std::move(what), ctx);
-            } else if (isa_tree<Hash>(what)) {
-                return mapHash(std::move(what), ctx);
-            } else if (isa_tree<ClassDef>(what)) {
-                return mapClassDef(std::move(what), ctx);
-            } else if (isa_tree<If>(what)) {
-                return mapIf(std::move(what), ctx);
-            } else if (isa_tree<While>(what)) {
-                return mapWhile(std::move(what), ctx);
-            } else if (isa_tree<Break>(what)) {
-                return mapBreak(std::move(what), ctx);
-            } else if (isa_tree<Retry>(what)) {
-                return mapRetry(std::move(what), ctx);
-            } else if (isa_tree<Next>(what)) {
-                return mapNext(std::move(what), ctx);
-            } else if (isa_tree<Return>(what)) {
-                return mapReturn(std::move(what), ctx);
-            } else if (isa_tree<Rescue>(what)) {
-                return mapRescue(std::move(what), ctx);
-            } else if (isa_tree<Assign>(what)) {
-                return mapAssign(std::move(what), ctx);
-            } else if (isa_tree<Array>(what)) {
-                return mapArray(std::move(what), ctx);
-            } else if (isa_tree<Cast>(what)) {
-                return mapCast(std::move(what), ctx);
-            } else {
-                Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                case Tag::Send:
+                    return mapSend(std::move(what), ctx);
+
+                case Tag::ClassDef:
+                    return mapClassDef(std::move(what), ctx);
+
+                case Tag::MethodDef:
+                    return mapMethodDef(std::move(what), ctx);
+
+                case Tag::If:
+                    return mapIf(std::move(what), ctx);
+
+                case Tag::While:
+                    return mapWhile(std::move(what), ctx);
+
+                case Tag::Break:
+                    return mapBreak(std::move(what), ctx);
+
+                case Tag::Retry:
+                    return mapRetry(std::move(what), ctx);
+
+                case Tag::Next:
+                    return mapNext(std::move(what), ctx);
+
+                case Tag::Return:
+                    return mapReturn(std::move(what), ctx);
+
+                case Tag::RescueCase:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::Rescue:
+                    return mapRescue(std::move(what), ctx);
+
+                case Tag::Local:
+                    return mapLocal(std::move(what), ctx);
+
+                case Tag::UnresolvedIdent:
+                    return mapUnresolvedIdent(std::move(what), ctx);
+
+                case Tag::RestArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::KeywordArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::OptionalArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::BlockArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::ShadowArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::Assign:
+                    return mapAssign(std::move(what), ctx);
+
+                case Tag::Cast:
+                    return mapCast(std::move(what), ctx);
+
+                case Tag::Hash:
+                    return mapHash(std::move(what), ctx);
+
+                case Tag::Array:
+                    return mapArray(std::move(what), ctx);
+
+                case Tag::Literal:
+                    return mapLiteral(std::move(what), ctx);
+
+                case Tag::UnresolvedConstantLit:
+                    return mapUnresolvedConstantLit(std::move(what), ctx);
+
+                case Tag::ConstantLit:
+                    return mapConstantLit(std::move(what), ctx);
+
+                case Tag::ZSuperArgs:
+                    return what;
+
+                case Tag::Block:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::InsSeq:
+                    return mapInsSeq(std::move(what), ctx);
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
@@ -684,7 +721,7 @@ private:
             throw ReportedRubyException{e, loc};
         }
     }
-};
+}; // namespace sorbet::ast
 
 class TreeMap {
 public:
@@ -875,21 +912,10 @@ private:
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
 
-        int i = 0;
-        while (i < cast_tree<Rescue>(v)->rescueCases.size()) {
-            auto &el = cast_tree<Rescue>(v)->rescueCases[i];
-            auto *oldRef = el.get();
-            auto narg = mapRescueCase(std::move(el), ctx);
-            if (el.get() != narg.get()) {
-                auto *nargCase = cast_tree<RescueCase>(narg);
-                ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
-                el.reset(nargCase);
-                narg.release();
-            } else {
-                narg.release();
-                el.reset(oldRef);
-            }
-            i++;
+        for (auto &el : cast_tree<Rescue>(v)->rescueCases) {
+            ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
+            el = mapRescueCase(std::move(el), ctx);
+            ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
         cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
@@ -1090,52 +1116,100 @@ private:
                     ctx, std::move(what), func);
             }
 
-            if (isa_tree<EmptyTree>(what) || isa_tree<ZSuperArgs>(what)) {
-                return what;
-            }
+            switch (what.tag()) {
+                case Tag::EmptyTree:
+                    return what;
 
-            if (isa_tree<UnresolvedConstantLit>(what)) {
-                return mapUnresolvedConstantLit(std::move(what), ctx);
-            } else if (isa_tree<ConstantLit>(what)) {
-                return mapConstantLit(std::move(what), ctx);
-            } else if (isa_tree<Send>(what)) {
-                return mapSend(std::move(what), ctx);
-            } else if (isa_tree<Literal>(what)) {
-                return mapLiteral(std::move(what), ctx);
-            } else if (UnresolvedIdent *u = cast_tree<UnresolvedIdent>(what)) {
-                return mapUnresolvedIdent(std::move(what), ctx);
-            } else if (isa_tree<Local>(what)) {
-                return mapLocal(std::move(what), ctx);
-            } else if (isa_tree<MethodDef>(what)) {
-                return mapMethodDef(std::move(what), ctx);
-            } else if (isa_tree<InsSeq>(what)) {
-                return mapInsSeq(std::move(what), ctx);
-            } else if (isa_tree<Hash>(what)) {
-                return mapHash(std::move(what), ctx);
-            } else if (isa_tree<ClassDef>(what)) {
-                return mapClassDef(std::move(what), ctx);
-            } else if (isa_tree<If>(what)) {
-                return mapIf(std::move(what), ctx);
-            } else if (isa_tree<While>(what)) {
-                return mapWhile(std::move(what), ctx);
-            } else if (isa_tree<Break>(what)) {
-                return mapBreak(std::move(what), ctx);
-            } else if (isa_tree<Retry>(what)) {
-                return mapRetry(std::move(what), ctx);
-            } else if (isa_tree<Next>(what)) {
-                return mapNext(std::move(what), ctx);
-            } else if (isa_tree<Return>(what)) {
-                return mapReturn(std::move(what), ctx);
-            } else if (isa_tree<Rescue>(what)) {
-                return mapRescue(std::move(what), ctx);
-            } else if (isa_tree<Assign>(what)) {
-                return mapAssign(std::move(what), ctx);
-            } else if (isa_tree<Array>(what)) {
-                return mapArray(std::move(what), ctx);
-            } else if (isa_tree<Cast>(what)) {
-                return mapCast(std::move(what), ctx);
-            } else {
-                Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                case Tag::Send:
+                    return mapSend(std::move(what), ctx);
+
+                case Tag::ClassDef:
+                    return mapClassDef(std::move(what), ctx);
+
+                case Tag::MethodDef:
+                    return mapMethodDef(std::move(what), ctx);
+
+                case Tag::If:
+                    return mapIf(std::move(what), ctx);
+
+                case Tag::While:
+                    return mapWhile(std::move(what), ctx);
+
+                case Tag::Break:
+                    return mapBreak(std::move(what), ctx);
+
+                case Tag::Retry:
+                    return mapRetry(std::move(what), ctx);
+
+                case Tag::Next:
+                    return mapNext(std::move(what), ctx);
+
+                case Tag::Return:
+                    return mapReturn(std::move(what), ctx);
+
+                case Tag::RescueCase:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::Rescue:
+                    return mapRescue(std::move(what), ctx);
+
+                case Tag::Local:
+                    return mapLocal(std::move(what), ctx);
+
+                case Tag::UnresolvedIdent:
+                    return mapUnresolvedIdent(std::move(what), ctx);
+
+                case Tag::RestArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::KeywordArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::OptionalArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::BlockArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::ShadowArg:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::Assign:
+                    return mapAssign(std::move(what), ctx);
+
+                case Tag::Cast:
+                    return mapCast(std::move(what), ctx);
+
+                case Tag::Hash:
+                    return mapHash(std::move(what), ctx);
+
+                case Tag::Array:
+                    return mapArray(std::move(what), ctx);
+
+                case Tag::Literal:
+                    return mapLiteral(std::move(what), ctx);
+
+                case Tag::UnresolvedConstantLit:
+                    return mapUnresolvedConstantLit(std::move(what), ctx);
+
+                case Tag::ConstantLit:
+                    return mapConstantLit(std::move(what), ctx);
+
+                case Tag::ZSuperArgs:
+                    return what;
+
+                case Tag::Block:
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    break;
+
+                case Tag::InsSeq:
+                    return mapInsSeq(std::move(what), ctx);
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();

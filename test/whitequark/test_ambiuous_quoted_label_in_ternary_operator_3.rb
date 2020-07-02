@@ -1,3 +1,4 @@
 # typed: true
 
-a ? b ! '': nil # error: unexpected token "!"
+a ? b ! '': nil
+#     ^ error: unexpected token "!"

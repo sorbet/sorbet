@@ -1,5 +1,6 @@
 #include "main/lsp/wrapper.h"
 #include "core/ErrorQueue.h"
+#include "core/NullFlusher.h"
 #include "core/errors/namer.h"
 #include "main/cache/cache.h"
 #include "main/lsp/LSPInput.h"
@@ -21,9 +22,6 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         // in Stripe code.
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
-
-    // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
-    gs.errorQueue->ignoreFlushes = true;
 
     // Ensure LSP is enabled.
     options.runLSP = true;

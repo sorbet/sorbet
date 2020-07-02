@@ -28,47 +28,183 @@
 
 namespace sorbet::ast {
 
+enum class Tag {
+    EmptyTree = 1,
+    Send,
+    ClassDef,
+    MethodDef,
+    If,
+    While,
+    Break,
+    Retry,
+    Next,
+    Return,
+    RescueCase,
+    Rescue,
+    Local,
+    UnresolvedIdent,
+    RestArg,
+    KeywordArg,
+    OptionalArg,
+    BlockArg,
+    ShadowArg,
+    Assign,
+    Cast,
+    Hash,
+    Array,
+    Literal,
+    UnresolvedConstantLit,
+    ConstantLit,
+    ZSuperArgs,
+    Block,
+    InsSeq,
+};
+
+// A mapping from tree type to its corresponding tag.
+template <typename T> struct TreeToTag;
+
+// A mapping from tag value to the tree it represents.
+template <Tag T> struct TagToTree;
+
 class Expression;
 
 class TreePtr {
+public:
+    // We store tagged pointers as 64-bit values.
+    using tagged_storage = u8;
+
 private:
-    std::unique_ptr<Expression> ptr;
+    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
+
+    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+
+    tagged_storage ptr;
+
+    template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
+
+    static tagged_storage tagPtr(Tag tag, void *expr) {
+        auto val = static_cast<tagged_storage>(tag);
+        if (val >= 8) {
+            // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
+            val <<= 48;
+        }
+
+        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
+
+        return maskedPtr | val;
+    }
+
+    explicit TreePtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
+
+    static void deleteTagged(Tag tag, void *ptr) noexcept;
+
+    // A version of release that doesn't mask the tag bits
+    tagged_storage releaseTagged() noexcept {
+        auto saved = ptr;
+        ptr = 0;
+        return saved;
+    }
+
+    // A version of reset that expects the tagged bits to be set.
+    void resetTagged(tagged_storage expr) noexcept {
+        Tag tagVal;
+        void *saved = nullptr;
+
+        if (ptr != 0) {
+            tagVal = tag();
+            saved = get();
+        }
+
+        ptr = expr;
+
+        if (saved != nullptr) {
+            deleteTagged(tagVal, saved);
+        }
+    }
 
 public:
-    constexpr TreePtr() noexcept : ptr(nullptr) {}
-
-    explicit TreePtr(Expression *ptr) noexcept : ptr(ptr) {}
+    constexpr TreePtr() noexcept : ptr(0) {}
 
     TreePtr(std::nullptr_t) noexcept : TreePtr() {}
+
+    // Construction from a tagged pointer. This is needed for:
+    // * ResolveConstantsWalk::isFullyResolved
+    explicit TreePtr(tagged_storage ptr) : ptr(ptr) {}
+
+    ~TreePtr() {
+        if (ptr != 0) {
+            deleteTagged(tag(), get());
+        }
+    }
 
     TreePtr(const TreePtr &) = delete;
     TreePtr &operator=(const TreePtr &) = delete;
 
-    TreePtr(TreePtr &&other) noexcept : ptr(std::move(other.ptr)) {}
+    TreePtr(TreePtr &&other) noexcept {
+        ptr = other.releaseTagged();
+    }
 
     TreePtr &operator=(TreePtr &&other) noexcept {
-        this->ptr = std::move(other.ptr);
+        if (*this == other) {
+            return *this;
+        }
+
+        resetTagged(other.releaseTagged());
         return *this;
     }
 
-    Expression *release() noexcept {
-        return ptr.release();
+    void *release() noexcept {
+        auto *saved = get();
+        ptr = 0;
+        return saved;
     }
 
-    void reset(Expression *expr = nullptr) noexcept {
-        ptr.reset(expr);
+    void reset() noexcept {
+        resetTagged(0);
+    }
+
+    void reset(std::nullptr_t) noexcept {
+        resetTagged(0);
+    }
+
+    template <typename T> void reset(T *expr = nullptr) noexcept {
+        resetTagged(tagPtr(TreeToTag<T>::value, expr));
+    }
+
+    Tag tag() const noexcept {
+        ENFORCE(ptr != 0);
+
+        auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
+        if (value <= 7) {
+            return static_cast<Tag>(value);
+        } else {
+            return static_cast<Tag>(value >> 48);
+        }
     }
 
     Expression *get() const noexcept {
-        return ptr.get();
+        auto val = ptr & PTR_MASK;
+
+        if constexpr (sizeof(void *) == 4) {
+            return reinterpret_cast<Expression *>(val);
+        } else {
+            // sign extension for the upper 16 bits
+            return reinterpret_cast<Expression *>((val << 16) >> 16);
+        }
+    }
+
+    // Fetch the tagged pointer. This is needed for:
+    // * ResolveConstantsWalk::isFullyResolved
+    tagged_storage getTagged() const noexcept {
+        return ptr;
     }
 
     Expression *operator->() const noexcept {
-        return ptr.get();
+        return get();
     }
 
     Expression *operator*() const noexcept {
-        return ptr.get();
+        return get();
     }
 
     explicit operator bool() const noexcept {
@@ -85,7 +221,7 @@ public:
 };
 
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
-    return TreePtr(new E(std::forward<Args>(args)...));
+    return TreePtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
 }
 
 class Expression {
@@ -133,21 +269,32 @@ public:
     std::vector<ParsedFile> &result();
 };
 
+template <class To> bool isa_tree(const TreePtr &what) {
+    return what != nullptr && what.tag() == TreeToTag<To>::value;
+}
+
+bool isa_reference(const TreePtr &what);
+
+bool isa_declaration(const TreePtr &what);
+
 template <class To> To *cast_tree(TreePtr &what) {
-    return fast_cast<Expression, To>(what.get());
+    if (isa_tree<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
 // A variant of cast_tree that preserves the const-ness (if const in, then const out)
 template <class To> To const *cast_tree_const(const TreePtr &what) {
-    return fast_cast<Expression, To>(const_cast<Expression *>(what.get()));
-}
-
-template <class To> bool isa_tree(const TreePtr &what) {
-    return cast_tree_const<To>(what) != nullptr;
+    if (isa_tree<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
 template <class To> To &cast_tree_nonnull(TreePtr &what) {
-    ENFORCE(what != nullptr);
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
@@ -172,7 +319,13 @@ public:
 };
 CheckSize(Declaration, 32, 8);
 
-class ClassDef final : public Declaration {
+#define TREE(name)                                                                  \
+    class name;                                                                     \
+    template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
+    template <> struct TagToTree<Tag::name> { using value = name; };                \
+    class __attribute__((aligned(8))) name final
+
+TREE(ClassDef) : public Declaration {
 public:
     enum class Kind : u1 {
         Module,
@@ -205,7 +358,7 @@ private:
 };
 CheckSize(ClassDef, 136, 8);
 
-class MethodDef final : public Declaration {
+TREE(MethodDef) : public Declaration {
 public:
     TreePtr rhs;
 
@@ -237,7 +390,7 @@ private:
 };
 CheckSize(MethodDef, 72, 8);
 
-class If final : public Expression {
+TREE(If) : public Expression {
 public:
     TreePtr cond;
     TreePtr thenp;
@@ -254,7 +407,7 @@ private:
 };
 CheckSize(If, 40, 8);
 
-class While final : public Expression {
+TREE(While) : public Expression {
 public:
     TreePtr cond;
     TreePtr body;
@@ -270,7 +423,7 @@ private:
 };
 CheckSize(While, 32, 8);
 
-class Break final : public Expression {
+TREE(Break) : public Expression {
 public:
     TreePtr expr;
 
@@ -285,7 +438,7 @@ private:
 };
 CheckSize(Break, 24, 8);
 
-class Retry final : public Expression {
+TREE(Retry) : public Expression {
 public:
     Retry(core::LocOffsets loc);
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
@@ -298,7 +451,7 @@ private:
 };
 CheckSize(Retry, 16, 8);
 
-class Next final : public Expression {
+TREE(Next) : public Expression {
 public:
     TreePtr expr;
 
@@ -313,7 +466,7 @@ private:
 };
 CheckSize(Next, 24, 8);
 
-class Return final : public Expression {
+TREE(Return) : public Expression {
 public:
     TreePtr expr;
 
@@ -328,7 +481,7 @@ private:
 };
 CheckSize(Return, 24, 8);
 
-class RescueCase final : public Expression {
+TREE(RescueCase) : public Expression {
 public:
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
     using EXCEPTION_store = InlinedVector<TreePtr, EXPECTED_EXCEPTION_COUNT>;
@@ -351,7 +504,7 @@ private:
 };
 CheckSize(RescueCase, 56, 8);
 
-class Rescue final : public Expression {
+TREE(Rescue) : public Expression {
 public:
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
     using RESCUE_CASE_store = InlinedVector<TreePtr, EXPECTED_RESCUE_CASE_COUNT>;
@@ -372,7 +525,7 @@ private:
 };
 CheckSize(Rescue, 64, 8);
 
-class Local final : public Reference {
+TREE(Local) : public Reference {
 public:
     core::LocalVariable localVariable;
 
@@ -387,7 +540,7 @@ private:
 };
 CheckSize(Local, 24, 8);
 
-class UnresolvedIdent final : public Reference {
+TREE(UnresolvedIdent) : public Reference {
 public:
     enum class Kind : u1 {
         Local,
@@ -409,7 +562,7 @@ private:
 };
 CheckSize(UnresolvedIdent, 24, 8);
 
-class RestArg final : public Reference {
+TREE(RestArg) : public Reference {
 public:
     TreePtr expr;
 
@@ -424,7 +577,7 @@ private:
 };
 CheckSize(RestArg, 24, 8);
 
-class KeywordArg final : public Reference {
+TREE(KeywordArg) : public Reference {
 public:
     TreePtr expr;
 
@@ -439,7 +592,7 @@ private:
 };
 CheckSize(KeywordArg, 24, 8);
 
-class OptionalArg final : public Reference {
+TREE(OptionalArg) : public Reference {
 public:
     TreePtr expr;
     TreePtr default_;
@@ -455,7 +608,7 @@ private:
 };
 CheckSize(OptionalArg, 32, 8);
 
-class BlockArg final : public Reference {
+TREE(BlockArg) : public Reference {
 public:
     TreePtr expr;
 
@@ -470,7 +623,7 @@ private:
 };
 CheckSize(BlockArg, 24, 8);
 
-class ShadowArg final : public Reference {
+TREE(ShadowArg) : public Reference {
 public:
     TreePtr expr;
 
@@ -485,7 +638,7 @@ private:
 };
 CheckSize(ShadowArg, 24, 8);
 
-class Assign final : public Expression {
+TREE(Assign) : public Expression {
 public:
     TreePtr lhs;
     TreePtr rhs;
@@ -501,9 +654,7 @@ private:
 };
 CheckSize(Assign, 32, 8);
 
-class Block;
-
-class Send final : public Expression {
+TREE(Send) : public Expression {
 public:
     core::NameRef fun;
 
@@ -537,7 +688,7 @@ private:
 };
 CheckSize(Send, 64, 8);
 
-class Cast final : public Expression {
+TREE(Cast) : public Expression {
 public:
     // The name of the cast operator.
     core::NameRef cast;
@@ -556,7 +707,7 @@ private:
 };
 CheckSize(Cast, 48, 8);
 
-class Hash final : public Expression {
+TREE(Hash) : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
     using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
@@ -576,7 +727,7 @@ private:
 };
 CheckSize(Hash, 64, 8);
 
-class Array final : public Expression {
+TREE(Array) : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
     using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
@@ -595,7 +746,7 @@ private:
 };
 CheckSize(Array, 56, 8);
 
-class Literal final : public Expression {
+TREE(Literal) : public Expression {
 public:
     core::TypePtr value;
 
@@ -617,7 +768,7 @@ private:
 };
 CheckSize(Literal, 32, 8);
 
-class UnresolvedConstantLit final : public Expression {
+TREE(UnresolvedConstantLit) : public Expression {
 public:
     core::NameRef cnst;
     TreePtr scope;
@@ -633,7 +784,7 @@ private:
 };
 CheckSize(UnresolvedConstantLit, 32, 8);
 
-class ConstantLit final : public Expression {
+TREE(ConstantLit) : public Expression {
 public:
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
     // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
@@ -647,15 +798,15 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual TreePtr _deepCopy(const Expression *avoid, bool root = false) const;
-    std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>>
-    fullUnresolvedPath(const core::GlobalState &gs) const;
+    std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
+        const core::GlobalState &gs) const;
 
 private:
     virtual void _sanityCheck();
 };
 CheckSize(ConstantLit, 56, 8);
 
-class ZSuperArgs final : public Expression {
+TREE(ZSuperArgs) : public Expression {
 public:
     // null if no block passed
     ZSuperArgs(core::LocOffsets loc);
@@ -669,7 +820,7 @@ private:
 };
 CheckSize(ZSuperArgs, 16, 8);
 
-class Block final : public Expression {
+TREE(Block) : public Expression {
 public:
     MethodDef::ARGS_store args;
     TreePtr body;
@@ -683,7 +834,7 @@ public:
 };
 CheckSize(Block, 48, 8);
 
-class InsSeq final : public Expression {
+TREE(InsSeq) : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
     using STATS_store = InlinedVector<TreePtr, EXPECTED_STATS_COUNT>;
@@ -704,7 +855,7 @@ private:
 };
 CheckSize(InsSeq, 64, 8);
 
-class EmptyTree final : public Expression {
+TREE(EmptyTree) : public Expression {
 public:
     EmptyTree();
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
@@ -716,6 +867,9 @@ private:
     virtual void _sanityCheck();
 };
 CheckSize(EmptyTree, 16, 8);
+
+// This specialization of make_tree exists to ensure that we only ever create one empty tree.
+template <> TreePtr make_tree<EmptyTree>();
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

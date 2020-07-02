@@ -6,6 +6,7 @@
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Loc.h"
+#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -43,10 +44,10 @@ shared_ptr<LSPConfiguration> makeConfig() {
 }
 
 unique_ptr<core::GlobalState> makeGS() {
-    auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
+    auto gs = make_unique<core::GlobalState>(
+        (make_shared<core::ErrorQueue>(*logger, *logger, make_shared<core::NullFlusher>())));
     unique_ptr<const OwnedKeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, nullOpts, kvstore);
-    gs->errorQueue->ignoreFlushes = true;
     return gs;
 }
 
