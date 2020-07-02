@@ -60,8 +60,7 @@ llvm::Value *tryFinalCall(CompilerState &cs, llvm::IRBuilderBase &build, cfg::Se
                     auto selfVar = llvmFunc->arg_begin() + 2;
                     auto argsCount = llvmFunc->arg_begin();
                     auto argsArray = llvmFunc->arg_begin() + 1;
-                    auto cs2 = cs;
-                    cs2.functionEntryInitializers = bb1;
+                    auto cs2 = cs.withFunctionEntry(bb1);
                     auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, selfVar, argsArray, argsCount,
                                                                     send->fun.data(cs)->shortName(cs));
                     funcBuilder.CreateRet(rt);

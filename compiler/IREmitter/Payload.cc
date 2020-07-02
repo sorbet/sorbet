@@ -415,8 +415,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const ast::Method
     builder.SetInsertPoint(bb);
 
     // We are building a new function. We should redefine where do function initializers go
-    auto cs1 = cs;
-    cs1.functionEntryInitializers = bei;
+    auto cs1 = cs.withFunctionEntry(bei);
 
     auto loc = core::Loc(md.declLoc.file(), md.loc);
     auto sym = md.symbol;

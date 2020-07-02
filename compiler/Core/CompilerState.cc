@@ -80,6 +80,12 @@ llvm::FunctionType *CompilerState::getSorbetIntrinsicFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+CompilerState CompilerState::withFunctionEntry(llvm::BasicBlock *entry) {
+    auto res = CompilerState(*this);
+    res.functionEntryInitializers = entry;
+    return res;
+}
+
 void CompilerState::runCheapOptimizations(llvm::Function *func) {
     llvm::legacy::FunctionPassManager pm(module);
     llvm::PassManagerBuilder pmbuilder;

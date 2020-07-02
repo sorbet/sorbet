@@ -74,10 +74,10 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
     }
 }
 
-void setupStackFrames(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx) {
-    llvm::IRBuilder<> builder(cs);
+void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmitterContext &irctx) {
+    llvm::IRBuilder<> builder(base);
     for (auto rubyBlockId = 0; rubyBlockId < irctx.rubyBlocks2Functions.size(); rubyBlockId++) {
-        cs.functionEntryInitializers = irctx.functionInitializersByFunction[rubyBlockId];
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
 
         builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
         setupStackFrame(cs, md, irctx, builder, rubyBlockId);
@@ -88,17 +88,22 @@ void setupStackFrames(CompilerState &cs, const ast::MethodDef &md, const IREmitt
     }
 }
 
-void setupArguments(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
+void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
     // this function effectively generate an optimized build of
     // https://github.com/ruby/ruby/blob/59c3b1c9c843fcd2d30393791fe224e5789d1677/include/ruby/ruby.h#L2522-L2675
-    llvm::IRBuilder<> builder(cs);
+    llvm::IRBuilder<> builder(base);
     for (auto rubyBlockId = 0; rubyBlockId < irctx.rubyBlocks2Functions.size(); rubyBlockId++) {
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
+
         builder.SetInsertPoint(irctx.argumentSetupBlocksByFunction[rubyBlockId]);
+
+        // emit a location that corresponds to the function entry
+        auto loc = md.symbol.data(cs)->loc();
+        IREmitterHelpers::emitDebugLoc(cs, builder, irctx, rubyBlockId, loc);
 
         auto blockType = irctx.rubyBlockType[rubyBlockId];
         if (blockType == FunctionType::TopLevel || blockType == FunctionType::Block) {
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
-            cs.functionEntryInitializers = irctx.functionInitializersByFunction[rubyBlockId];
             auto maxPositionalArgCount = 0;
             auto minPositionalArgCount = 0;
             auto isBlock = blockType == FunctionType::Block;
@@ -487,13 +492,14 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
     }
 }
 
-void emitUserBody(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
-    llvm::IRBuilder<> builder(cs);
+void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
+    llvm::IRBuilder<> builder(base);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyBlockId]);
+
         auto block = irctx.llvmBlocksBySorbetBlocks[bb->id];
-        cs.functionEntryInitializers = irctx.functionInitializersByFunction[bb->rubyBlockId];
         bool isTerminated = false;
 
         builder.SetInsertPoint(block);
@@ -704,10 +710,12 @@ void emitDeadBlocks(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &ir
     }
 }
 
-void emitBlockExits(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
-    llvm::IRBuilder<> builder(cs);
+void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
+    llvm::IRBuilder<> builder(base);
 
     for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
+        auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
+
         builder.SetInsertPoint(irctx.blockExitMapping[rubyBlockId]);
 
         switch (irctx.rubyBlockType[rubyBlockId]) {
@@ -758,8 +766,8 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     builder.CreateRet(var);
 }
 
-void emitSigVerification(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
-    cs.functionEntryInitializers = irctx.functionInitializersByFunction[0];
+void emitSigVerification(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
+    auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[0]);
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(irctx.sigVerificationBlock);
 

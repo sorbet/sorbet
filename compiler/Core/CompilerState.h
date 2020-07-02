@@ -61,6 +61,8 @@ public:
     // Use only when compilation CANNOT continue.
     // (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)
     void failCompilation(const core::Loc &loc, ConstExprStr msg) const;
+
+    CompilerState withFunctionEntry(llvm::BasicBlock *functionEntry);
 };
 
 } // namespace sorbet::compiler
