@@ -1381,12 +1381,7 @@ class Array < Object
   # a.include?("b")   #=> true
   # a.include?("z")   #=> false
   # ```
-  sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-    )
-    .returns(T::Boolean)
-  end
+  sig {params(arg0: Elem).returns(T::Boolean)}
   def include?(arg0); end
 
   # Returns the *index* of the first object in `ary` such that the object is
@@ -1408,12 +1403,7 @@ class Array < Object
   # a.index("z")              #=> nil
   # a.index {|x| x == "b"}    #=> 1
   # ```
-  sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-    )
-    .returns(T.nilable(Integer))
-  end
+  sig {params(arg0: Elem).returns(T.nilable(Integer))}
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
