@@ -216,10 +216,10 @@ class Range < Object
   # either true/false, or always return a number. It is undefined which value is
   # actually picked up at each iteration.
   sig do
-    type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T::Boolean),
+    params(
+      blk: T.proc.params(arg0: Elem).returns(T::Boolean),
     )
-    .returns(T.nilable(T.type_parameter(:U)))
+    .returns(T.nilable(Elem))
   end
   def bsearch(&blk); end
 

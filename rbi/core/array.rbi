@@ -741,7 +741,13 @@ class Array < Object
   # You must not mix the two modes at a time; the block must always return
   # either true/false, or always return a number. It is undefined which value is
   # actually picked up at each iteration.
-  def bsearch; end
+  sig do
+    params(
+      blk: T.proc.params(arg0: Elem).returns(T::Boolean),
+    )
+    .returns(T.nilable(Elem))
+  end
+  def bsearch(&blk); end
 
   # By using binary search, finds an index of a value from this array which
   # meets the given condition in O(log n) where n is the size of the array.
@@ -753,7 +759,13 @@ class Array < Object
   # the element instead of the element itself. For more details consult the
   # documentation for
   # [`bsearch`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-bsearch).
-  def bsearch_index; end
+  sig do
+    params(
+      blk: T.proc.params(arg0: Elem).returns(T::Boolean),
+    )
+    .returns(T.nilable(Integer))
+  end
+  def bsearch_index(&blk); end
 
   # Removes all elements from `self`.
   #
