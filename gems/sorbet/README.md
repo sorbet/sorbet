@@ -100,19 +100,19 @@ To make this easier, you can either
 To run all the tests:
 
 ```
-bazel test test/snapshot --config=dbg
+bazel test //gems/sorbet/test/snapshot
 ```
 
 You'll see the name of each test in the output of the above command. To run that individual test:
 
 ```
-bazel test test/snapshot:test_<testname> --config=dbg
+bazel test //gems/sorbet/test/snapshot:test_<testname>
 ```
 
 For example:
 
 ```
-bazel test test/snapshot:test_ruby_2_6/partial/local_rvm_gemset_gem --config=dbg
+bazel test //gems/sorbet/test/snapshot:test_ruby_2_6/partial/local_rvm_gemset_gem
 ```
 
 ## Writing tests
@@ -184,13 +184,13 @@ of a test using the `gems/` folder.
 When it **is** necessary to update a snapshot test:
 
 ```
-bazel test test/snapshot:update_<testname> --config=dbg
+bazel test //gems/sorbet/test/snapshot:update_<testname>
 ```
 
 For example:
 
 ```
-bazel test test/snapshot:update_ruby_2_6/partial/local_rvm_gemset_gem --config=dbg
+bazel test //gems/sorbet/test/snapshot:update_ruby_2_6/partial/local_rvm_gemset_gem
 ```
 
 ### Creating new partial tests
