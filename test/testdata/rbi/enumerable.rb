@@ -31,3 +31,6 @@ a.any? { |i| i }
 a.none?
 a.none?(1)
 a.none? { |i| i }
+a.one?
+a.one?(1)
+a.one? { |i| i }

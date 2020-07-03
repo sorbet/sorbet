@@ -46,7 +46,7 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  sig { params(pattern: T.any).returns(T::Boolean) }
+  sig { params(pattern: T.untyped).returns(T::Boolean) }
   def all?(pattern = nil, &blk); end
 
   # Passes each element of the collection to the given block. The method returns
@@ -75,7 +75,7 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  sig { params(pattern: T.any).returns(T::Boolean) }
+  sig { params(pattern: T.untyped).returns(T::Boolean) }
   def any?(pattern = nil, &blk); end
 
   # Enumerates over the items, chunking them together based on the return value
@@ -1026,7 +1026,7 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  sig { params(pattern: T.any).returns(T::Boolean) }
+  sig { params(pattern: T.untyped).returns(T::Boolean) }
   def none?(pattern = nil, &blk); end
 
   # Passes each element of the collection to the given block. The method returns
@@ -1054,7 +1054,8 @@ module Enumerable
     )
     .returns(T::Boolean)
   end
-  def one?(&blk); end
+  sig { params(pattern: T.untyped).returns(T::Boolean) }
+  def one?(pattern = nil, &blk); end
 
   # Returns two arrays, the first containing the elements of *enum* for which
   # the block evaluates to true, the second containing the rest.
