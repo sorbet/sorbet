@@ -100,25 +100,20 @@ To make this easier, you can either
 To run all the tests:
 
 ```
-test/snapshot/driver.sh
+bazel test test/snapshot --config=dbg
 ```
 
-The driver.sh output should show you how to re-run a single failing test, but an
-example is like this:
+You'll see the name of each test in the output of the above command. To run that individual test:
 
 ```
-test/snapshot/test_one.sh test/snapshot/total/empty
+bazel test test/snapshot:test_<testname> --config=dbg
 ```
 
-There are more options to `driver.sh` and `test_one.sh`. For the full list of
-available options, use `--help`:
+For example:
 
 ```
-test/snapshot/driver.sh --help
-
-test/snapshot/test_one.sh --help
+bazel test test/snapshot:test_ruby_2_6/partial/local_rvm_gemset_gem --config=dbg
 ```
-
 
 ## Writing tests
 
@@ -186,34 +181,24 @@ of a test using the `gems/` folder.
 
 ### Updating tests
 
-When it **is** necessary to update a snapshot test, run one of:
+When it **is** necessary to update a snapshot test:
 
 ```
-test/snapshot/driver.sh --update
+bazel test test/snapshot:update_<testname> --config=dbg
+```
 
-test/snapshot/test_one.sh <testname> --update
+For example:
+
+```
+bazel test test/snapshot:update_ruby_2_6/partial/local_rvm_gemset_gem --config=dbg
 ```
 
 ### Creating new partial tests
 
 A total test can never be empty, so to record a new total test, just use
-`--update`, like above.
+`update`, like above.
 
 Since a partial test is allowed to have an empty `expected/` folder, there's no
 difference between "a new partial test" and "an existing partial test that just
-asserts no errors". As such, to populate the `expected/` folder of a new partial
-test, use the `--record` flag:
-
-```
-test/snapshot/test_one.sh <testname> --update --record
-```
-
-### Debugging tests
-
-To use `binding.pry` to debug a test, edit your test case and/or the `srb` gem
-to require and call `pry`, and then pass the `--debug` flag when running the
-test:
-
-```
-test/snapshot/test_one.sh <testname> --debug
-```
+asserts no errors". As such, you'll have to manually populate the `expected/`
+with the files you want checked.
