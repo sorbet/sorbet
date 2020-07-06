@@ -623,7 +623,7 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
     if (!me) {
         // TODO do something here
         // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
-        rb_raise(rb_eRuntimeError, "unimplmented super with a missing method");
+        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
         return Qnil;
     } else {
         return rb_vm_call(ec, recv, id, argc, argv, me);
