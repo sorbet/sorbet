@@ -204,6 +204,13 @@ public:
                 auto keepName = mdef->flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
                 klass.rhs.emplace_back(move(stat));
+
+                // We have to create this keep_def call to maintain the invariant that
+                // rewriter/Flatten has created a keep_def call for every method.
+                //
+                // The DefaultArgs pass has to do it itself, because it runs after rewriter/Flatten.
+                // (This is nice because it means that DefaultArgs doesn't have to know about things
+                // like private def foo; end)
                 klass.rhs.emplace_back(ast::MK::Send2(loc,
                                                       ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()),
                                                       keepName, ast::MK::Self(loc), ast::MK::Symbol(loc, name)));
