@@ -169,8 +169,8 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
             local = ast::cast_tree_const<ast::Local>(arg);
         }
         ENFORCE(local);
-        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                        blkArg);
+        trackBlockUsage(cs, cfg, local->localVariable, cfg.entry(), aliases, ret, escapedVariableIndexes, idx,
+                        usesBlockArg, blkArg);
         if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
             blkArg = local->localVariable;
         }
@@ -178,31 +178,32 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
 
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
-            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                            blkArg);
+            trackBlockUsage(cs, cfg, bind.bind.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                            usesBlockArg, blkArg);
             typecase(
                 bind.value.get(),
                 [&](cfg::Ident *i) {
-                    trackBlockUsage(cs, cfg, i->what, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg, blkArg);
+                    trackBlockUsage(cs, cfg, i->what, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
+                                    blkArg);
                 },
                 [&](cfg::Alias *i) { /* nothing */
                 },
                 [&](cfg::SolveConstraint *i) { /* nothing*/ },
                 [&](cfg::Send *i) {
                     for (auto &arg : i->args) {
-                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                                        blkArg);
+                        trackBlockUsage(cs, cfg, arg.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                                        usesBlockArg, blkArg);
                     }
-                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                                    blkArg);
+                    trackBlockUsage(cs, cfg, i->recv.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                                    usesBlockArg, blkArg);
                 },
                 [&](cfg::Return *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                                    blkArg);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                                    usesBlockArg, blkArg);
                 },
                 [&](cfg::BlockReturn *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                                    blkArg);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                                    usesBlockArg, blkArg);
                 },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::GetCurrentException *i) { /*nothing*/ },
@@ -212,15 +213,15 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                                     usesBlockArg, blkArg);
                 },
                 [&](cfg::TAbsurd *i) {
-                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                                    blkArg);
+                    trackBlockUsage(cs, cfg, i->what.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                                    usesBlockArg, blkArg);
                 });
         }
 
         // no need to track the condition variable if the jump is unconditional
         if (bb->bexit.thenb != bb->bexit.elseb) {
-            trackBlockUsage(cs, cfg, bb->bexit.cond.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx, usesBlockArg,
-                            blkArg);
+            trackBlockUsage(cs, cfg, bb->bexit.cond.variable, bb.get(), aliases, ret, escapedVariableIndexes, idx,
+                            usesBlockArg, blkArg);
         }
     }
     return {std::move(ret), std::move(escapedVariableIndexes), usesBlockArg};
