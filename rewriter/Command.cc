@@ -83,7 +83,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     ast::MethodDef::ARGS_store newArgs;
     newArgs.reserve(call->args.size());
     for (auto &arg : call->args) {
-        newArgs.emplace_back(arg->deepCopy());
+        newArgs.emplace_back(arg.deepCopy());
     }
 
     auto selfCall = ast::MK::SyntheticMethod(call->loc, core::Loc(ctx.file, call->loc), call->name, std::move(newArgs),

@@ -79,7 +79,7 @@ TEST_CASE("namer tests") {
         auto baseNames = gs.namesUsed();
 
         auto tree = hello_world(gs);
-        ast::ParsedFile treeCopy{tree.tree->deepCopy(), tree.file};
+        ast::ParsedFile treeCopy{tree.tree.deepCopy(), tree.file};
         vector<ast::ParsedFile> trees;
         {
             auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));

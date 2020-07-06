@@ -244,7 +244,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     for (auto &f : subset) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         auto t = pipeline::indexOne(config->opts, *gs, f);
-        updatedIndexed.emplace_back(ast::ParsedFile{t.tree->deepCopy(), t.file});
+        updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
     }
 
@@ -298,7 +298,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                         const auto &tree = indexed[job];
                         // Note: indexed entries for payload files don't have any contents.
                         if (tree.tree && !ignore.contains(tree.file.id())) {
-                            threadResult.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
+                            threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
                         }
                     }
                 }
@@ -358,7 +358,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 finalGS = move(pair.first);
                 auto &ast = pair.second;
                 if (ast.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+                    indexedCopies.emplace_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
                     updatedFiles.insert(ast.file.id());
                 }
                 updates.updatedFinalGSFileIndexes.push_back(move(ast));
@@ -549,7 +549,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
-        noop.updatedFileIndexes.push_back({index.tree->deepCopy(), index.file});
+        noop.updatedFileIndexes.push_back({index.tree.deepCopy(), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
     return noop;
@@ -580,7 +580,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     for (auto fref : frefs) {
         auto &indexed = getIndexed(fref);
         if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree->deepCopy(), indexed.file});
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
     return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
