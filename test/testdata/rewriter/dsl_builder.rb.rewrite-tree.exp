@@ -219,6 +219,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.implied_string<defaultArg>1<<C <todo sym>>>(implied_string = <emptyTree>, &<blk>)
       ::T.untyped()
     end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"implied_string<defaultArg>1")
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)

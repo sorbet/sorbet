@@ -20,6 +20,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       1
     end
 
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
+
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"a" => <emptyTree>::<C String>, :"b" => <emptyTree>::<C Integer>, :"c" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
     end
@@ -27,6 +29,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<defaultArg>2<<C <todo sym>>>(a, b = <emptyTree>, c = <emptyTree>, &<blk>)
       2
     end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>2")
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
@@ -75,6 +79,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ""
     end
 
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
+
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
     end
@@ -82,5 +88,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def test<defaultArg>1<<C <todo sym>>>(x = <emptyTree>, &<blk>)
       297
     end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"test<defaultArg>1")
   end
 end

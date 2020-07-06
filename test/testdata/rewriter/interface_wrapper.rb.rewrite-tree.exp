@@ -40,6 +40,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.wrap_instance<defaultArg>1<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
       nil
     end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"wrap_instance<defaultArg>1")
   end
 
   ::Sorbet::Private::Static.keep_def(<self>, :"testit")

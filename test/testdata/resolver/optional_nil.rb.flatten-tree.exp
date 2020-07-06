@@ -64,15 +64,19 @@ begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"x" => ::String}).returns(::String)
         end
+        ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => ::String}).returns(::String)
         end
+        ::Sorbet::Private::Static.keep_def(<self>, :"bar<defaultArg>1")
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => ::String}).returns(::String)
         end
+        ::Sorbet::Private::Static.keep_def(<self>, :"qux<defaultArg>1")
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => ::String}).returns(::String)
         end
+        ::Sorbet::Private::Static.keep_def(<self>, :"baz<defaultArg>1")
         <emptyTree>
       end
     end

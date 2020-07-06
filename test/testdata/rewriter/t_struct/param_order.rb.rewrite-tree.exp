@@ -65,5 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def initialize<defaultArg>1<<C <todo sym>>>(bar:, foo: = <emptyTree>, &<blk>)
       3
     end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
   end
 end

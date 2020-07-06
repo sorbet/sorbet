@@ -6795,6 +6795,21 @@ ClassDef{
           }
         }
 
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"token_prop<defaultArg>1" }
+          ]
+        }
+
         MethodDef{
           flags = {self, rewriter}
           name = <DA <U created_prop> $1><<C <U <todo sym>>>>
@@ -6812,6 +6827,21 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop<defaultArg>1" }
+          ]
         }
       ]
     }
@@ -7317,6 +7347,21 @@ ClassDef{
           }
         }
 
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"timestamped_token_prop<defaultArg>1" }
+          ]
+        }
+
         MethodDef{
           flags = {self, rewriter}
           name = <DA <U created_prop> $1><<C <U <todo sym>>>>
@@ -7334,6 +7379,21 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"created_prop<defaultArg>1" }
+          ]
         }
       ]
     }
@@ -7546,6 +7606,21 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"merchant_prop<defaultArg>1" }
+          ]
         }
       ]
     }
@@ -8302,6 +8377,21 @@ ClassDef{
             pairs = [
             ]
           }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet::Private::Static
+          }
+          fun = <U keep_self_def>
+          block = nullptr
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Literal{ value = :"encrypted_prop<defaultArg>1" }
+          ]
         }
       ]
     }

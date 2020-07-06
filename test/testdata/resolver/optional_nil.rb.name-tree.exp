@@ -52,6 +52,8 @@ begin
           nil
         end
 
+        ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
+
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"y" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
@@ -59,6 +61,8 @@ begin
         def bar<defaultArg>1(y, <blk>)
           nil
         end
+
+        ::Sorbet::Private::Static.keep_def(<self>, :"bar<defaultArg>1")
 
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"z" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
@@ -68,6 +72,8 @@ begin
           ""
         end
 
+        ::Sorbet::Private::Static.keep_def(<self>, :"qux<defaultArg>1")
+
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params({:"w" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
         end
@@ -75,6 +81,8 @@ begin
         def baz<defaultArg>1(w, <blk>)
           ""
         end
+
+        ::Sorbet::Private::Static.keep_def(<self>, :"baz<defaultArg>1")
       end
       ::Sorbet::Private::Static.keep_for_ide(::Test)
       <emptyTree>
