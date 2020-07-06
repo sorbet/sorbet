@@ -1,5 +1,5 @@
-#ifndef SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
-#define SORBET_COMPILER_LLVM_IR_EMITTER_IMPL_H
+#ifndef SORBET_COMPILER_IREMITTER_IREMITTERHELPERS_H
+#define SORBET_COMPILER_IREMITTER_IREMITTERHELPERS_H
 #include "IREmitter.h"
 #include "cfg/CFG.h"
 #include "compiler/Core/ForwardDeclarations.h"
