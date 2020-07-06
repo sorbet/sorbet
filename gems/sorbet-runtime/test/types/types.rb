@@ -227,19 +227,19 @@ module Opus::Types::Test
       it 'does not fail if any of the values is the wrong type' do
         type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3.0, false, 4, "5", false]
-        assert_nil(type.error_message_for_obj)
+        assert_nil(type.error_message_for_obj(value))
       end
 
       it 'does not propose a simple type if only one type exists' do
         type = T::Array[String]
         value = [1, 2, 3]
-        assert_nil(type.error_message_for_obj)
+        assert_nil(type.error_message_for_obj(value))
       end
 
       it 'does not propose a union type if multiple types exist' do
         type = T::Array[String]
         value = [true, false, 1]
-        assert_nil(type.error_message_for_obj)
+        assert_nil(type.error_message_for_obj(value))
       end
 
       it 'is covariant for the type_member for valid?' do
