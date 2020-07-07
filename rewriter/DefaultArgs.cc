@@ -93,7 +93,7 @@ class DefaultArgsWalk {
                 if (!retType) {
                     return ast::MK::EmptyTree();
                 }
-                send->args[0] = retType->deepCopy();
+                send->args[0] = retType.deepCopy();
             }
 
             auto recv = ast::cast_tree<ast::Send>(send->recv);
