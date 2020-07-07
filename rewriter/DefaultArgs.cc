@@ -126,7 +126,7 @@ public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
-        vector<ast::TreePtr> newMethods;
+        vector<ast::TreePtr> newMethodsAndSigs;
         ast::Send *lastSig = nullptr;
         bool isOverload = false;
 
@@ -181,7 +181,7 @@ public:
                             if (sig == nullptr) {
                                 continue;
                             }
-                            newMethods.emplace_back(move(sig));
+                            newMethodsAndSigs.emplace_back(move(sig));
                         }
                         auto defaultArgDef = ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name,
                                                                       std::move(args), std::move(rhs));
@@ -189,7 +189,7 @@ public:
                             auto &defaultDef = ast::cast_tree_nonnull<ast::MethodDef>(defaultArgDef);
                             defaultDef.flags.isSelfMethod = mdef->flags.isSelfMethod;
                         }
-                        newMethods.emplace_back(move(defaultArgDef));
+                        newMethodsAndSigs.emplace_back(move(defaultArgDef));
                     }
                     lastSig = nullptr;
                 },
@@ -197,8 +197,26 @@ public:
                 [&](ast::Expression *expr) {});
         }
 
-        for (auto &stat : newMethods) {
-            klass.rhs.emplace_back(move(stat));
+        for (auto &stat : newMethodsAndSigs) {
+            if (auto mdef = ast::cast_tree<ast::MethodDef>(stat)) {
+                auto loc = mdef->loc;
+                auto name = mdef->name;
+                auto keepName = mdef->flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
+
+                klass.rhs.emplace_back(move(stat));
+
+                // We have to create this keep_def call to maintain the invariant that
+                // rewriter/Flatten has created a keep_def call for every method.
+                //
+                // The DefaultArgs pass has to do it itself, because it runs after rewriter/Flatten.
+                // (This is nice because it means that DefaultArgs doesn't have to know about things
+                // like private def foo; end)
+                klass.rhs.emplace_back(ast::MK::Send2(loc,
+                                                      ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()),
+                                                      keepName, ast::MK::Self(loc), ast::MK::Symbol(loc, name)));
+            } else {
+                klass.rhs.emplace_back(move(stat));
+            }
         }
 
         return tree;
