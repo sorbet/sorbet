@@ -39,7 +39,7 @@ void handleFieldDefinition(core::MutableContext ctx, ast::TreePtr &stat, vector<
     if (auto send = ast::cast_tree<ast::Send>(stat)) {
         if ((send->fun != core::Names::from() && send->fun != core::Names::field() &&
              send->fun != core::Names::pattern()) ||
-            !send->recv->isSelfReference() || send->args.size() < 1) {
+            !send->recv.isSelfReference() || send->args.size() < 1) {
             return;
         }
         auto name = getFieldName(ctx, *send);

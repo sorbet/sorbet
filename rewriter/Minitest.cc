@@ -70,7 +70,7 @@ public:
     // we treat those the same way we treat classes
     ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
         return tree;
@@ -78,7 +78,7 @@ public:
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(tree));
@@ -240,7 +240,7 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
 
     auto *block = ast::cast_tree<ast::Block>(send->block);
 
-    if (!send->recv->isSelfReference()) {
+    if (!send->recv.isSelfReference()) {
         return nullptr;
     }
 

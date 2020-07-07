@@ -342,7 +342,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::implementation()._id:
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
-                        if (send->recv->isSelfReference()) {
+                        if (send->recv.isSelfReference()) {
                             e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "override");
                         } else {
                             e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "{}.override",
@@ -420,7 +420,7 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
 
             // we only report this error if we haven't reported another unknown method error
             if (!recv && !reportedInvalidMethod) {
-                if (!send->recv->isSelfReference()) {
+                if (!send->recv.isSelfReference()) {
                     if (!sig.seen.proc) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed signature: `{}` being invoked on an invalid receiver",
@@ -969,7 +969,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             result.type = core::Types::untypedUntracked();
         },
         [&](ast::Local *slf) {
-            if (slf->isSelfReference()) {
+            if (expr.isSelfReference()) {
                 result.type = ctxOwnerData->selfType(ctx);
             } else {
                 if (auto e = ctx.beginError(slf->loc, core::errors::Resolver::InvalidTypeDeclaration)) {

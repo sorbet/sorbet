@@ -20,7 +20,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         }
 
         auto rhs = ast::cast_tree<ast::Send>(assn->rhs);
-        if (!rhs || !rhs->recv->isSelfReference() || rhs->fun != core::Names::typeMember()) {
+        if (!rhs || !rhs->recv.isSelfReference() || rhs->fun != core::Names::typeMember()) {
             continue;
         }
 

@@ -557,7 +557,7 @@ private:
                 return;
             }
             job.ancestor = cnst;
-        } else if (ancestor->isSelfReference()) {
+        } else if (ancestor.isSelfReference()) {
             auto loc = ancestor->loc;
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
@@ -1275,7 +1275,7 @@ public:
         auto sym = id->symbol;
         auto data = sym.data(ctx);
         if (data->isTypeAlias() || data->isTypeMember()) {
-            ENFORCE(!data->isTypeMember() || send->recv->isSelfReference());
+            ENFORCE(!data->isTypeMember() || send->recv.isSelfReference());
 
             // This is for a special case that happens with the generation of
             // reflection.rbi: it re-creates the type aliases of the payload,
@@ -2183,7 +2183,7 @@ public:
                 default:
                     return tree;
             }
-        } else if (send.recv.get()->isSelfReference()) {
+        } else if (send.recv.isSelfReference()) {
             if (send.fun != core::Names::aliasMethod()) {
                 return tree;
             }
@@ -2305,7 +2305,7 @@ class ResolveMixesInClassMethodsWalk {
 public:
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
+        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, send);
         }
         return tree;

@@ -610,7 +610,7 @@ public:
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
-        } else if (!send->recv->isSelfReference()) {
+        } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun._id) {
@@ -1335,7 +1335,7 @@ class TreeSymbolizer {
                 // emitted via `class << self` blocks
             } else if (ast::isa_tree<ast::EmptyTree>(node)) {
                 // ::Foo
-            } else if (node->isSelfReference()) {
+            } else if (node.isSelfReference()) {
                 // self::Foo
             } else {
                 if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
@@ -1391,7 +1391,7 @@ class TreeSymbolizer {
         } else {
             return;
         }
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             // ignore `something.include`
             return;
         }
@@ -1416,7 +1416,7 @@ class TreeSymbolizer {
             if (ast::isa_tree<ast::EmptyTree>(arg)) {
                 continue;
             }
-            if (arg->isSelfReference()) {
+            if (arg.isSelfReference()) {
                 dest->emplace_back(arg.deepCopy());
                 continue;
             }
@@ -1432,7 +1432,7 @@ class TreeSymbolizer {
     }
 
     bool isValidAncestor(ast::TreePtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp->isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
@@ -1472,7 +1472,7 @@ public:
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
     bool shouldLeaveAncestorForIDE(const ast::TreePtr &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc) || anc->isSelfReference()) {
+        if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
@@ -1701,7 +1701,7 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             return handleAssignment(ctx, std::move(tree));
         }
 
