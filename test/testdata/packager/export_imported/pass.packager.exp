@@ -9,6 +9,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C B><<C <todo sym>>> < ()
       <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>
     end
+
+    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -16,10 +18,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()  end
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C Kernel>)
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()
-    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 end

@@ -740,7 +740,12 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
     if (opts.stripePackages) {
         // TODO: Disable unless in stripe mode?
         Timer timeit(gs.tracer(), "package");
-        return packager::Packager::run(gs, workers, move(what));
+        what = packager::Packager::run(gs, workers, move(what));
+        if (opts.print.Packager.enabled) {
+            for (auto &f : what) {
+                opts.print.Packager.fmt("{}\n", f.tree->toStringWithTabs(gs, 0));
+            }
+        }
     }
 #endif
     return what;

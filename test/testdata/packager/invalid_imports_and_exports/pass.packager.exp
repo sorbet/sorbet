@@ -37,13 +37,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C <PackageMethods>>)
     end
+
+    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C A_Package><<C <todo sym>>> < ()
     <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
 
-    class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)
+    end
 
     class <emptyTree>::<C AClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
@@ -95,6 +98,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C <PackageMethods>>)
     end
+
+    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
