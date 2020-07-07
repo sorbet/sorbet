@@ -10,7 +10,7 @@ public:
     static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
 
 private:
-    static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
+    static BasicBlock *walk(CFGContext cctx, const ast::TreePtr &what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
