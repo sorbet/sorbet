@@ -219,6 +219,8 @@ public:
     TreePtr deepCopy() const;
 
     std::string nodeName() const;
+
+    bool isSelfReference() const;
 };
 
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
@@ -236,8 +238,6 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual void _sanityCheck() = 0;
     const core::LocOffsets loc;
-
-    bool isSelfReference() const;
 };
 CheckSize(Expression, 16, 8);
 

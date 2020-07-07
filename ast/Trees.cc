@@ -206,6 +206,13 @@ string TreePtr::nodeName() const {
 #undef NODE_NAME
 }
 
+bool TreePtr::isSelfReference() const {
+    if (auto *local = cast_tree_const<Local>(*this)) {
+        return local->localVariable == core::LocalVariable::selfVariable();
+    }
+    return false;
+}
+
 bool isa_reference(const TreePtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
@@ -806,11 +813,6 @@ string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 
 string Local::nodeName() {
     return "Local";
-}
-
-bool Expression::isSelfReference() const {
-    auto asLocal = fast_cast<const Expression, const Local>(this);
-    return asLocal && asLocal->localVariable == core::LocalVariable::selfVariable();
 }
 
 string Local::showRaw(const core::GlobalState &gs, int tabs) {
