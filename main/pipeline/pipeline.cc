@@ -1000,13 +1000,14 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                      !result.done();
                      result = treesq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
                     if (result.gotItem()) {
+                        for (auto &tree : trees) {
+                            gs->errorQueue->flushErrorsForFile(*gs, tree.file);
+                        }
                         typecheck_result.insert(typecheck_result.end(), make_move_iterator(trees.begin()),
                                                 make_move_iterator(trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    for (auto &tree : trees) {
-                        gs->errorQueue->flushErrorsForFile(*gs, tree.file);
-                    }
+
                     if (preemptionManager) {
                         (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
                     }
