@@ -41,8 +41,6 @@ cc_test(
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
-    # TODO(vilhena) This test had to be disabled because it frequently flaked on Buildkite.
-    tags = ["manual"],
     visibility = ["//tools:__pkg__"],
     deps = [
         "//core",
