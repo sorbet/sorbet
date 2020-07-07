@@ -532,7 +532,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         INFO("the incremental resolver should not add new symbols");
         CHECK_EQ(symbolsBefore, gs->symbolsUsed());
     }
-} // namespace sorbet::test
+}
 } // namespace sorbet::test
 
 int main(int argc, char *argv[]) {

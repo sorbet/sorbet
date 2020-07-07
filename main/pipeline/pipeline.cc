@@ -738,7 +738,6 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                                 WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
-        // TODO: Disable unless in stripe mode?
         Timer timeit(gs.tracer(), "package");
         what = packager::Packager::run(gs, workers, move(what));
         if (opts.print.Packager.enabled) {
