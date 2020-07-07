@@ -13,7 +13,7 @@ public:
             ENFORCE(original->loc.exists(), "location is unset");
         }
 
-        original->_sanityCheck();
+        original._sanityCheck();
 
         return original;
     }
@@ -37,7 +37,7 @@ public:
     }
 
     TreePtr preTransformBlock(core::Context ctx, TreePtr original) {
-        original->_sanityCheck();
+        original._sanityCheck();
         return original;
     }
 };

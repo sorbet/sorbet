@@ -5,6 +5,48 @@ using namespace std;
 
 namespace sorbet::ast {
 
+void TreePtr::_sanityCheck() const {
+    auto *ptr = get();
+    ENFORCE(ptr != nullptr);
+
+#define SANITY_CHECK(name)                             \
+    case Tag::name:                                    \
+        reinterpret_cast<name *>(ptr)->_sanityCheck(); \
+        break;
+    switch (tag()) {
+        SANITY_CHECK(EmptyTree)
+        SANITY_CHECK(Send)
+        SANITY_CHECK(ClassDef)
+        SANITY_CHECK(MethodDef)
+        SANITY_CHECK(If)
+        SANITY_CHECK(While)
+        SANITY_CHECK(Break)
+        SANITY_CHECK(Retry)
+        SANITY_CHECK(Next)
+        SANITY_CHECK(Return)
+        SANITY_CHECK(RescueCase)
+        SANITY_CHECK(Rescue)
+        SANITY_CHECK(Local)
+        SANITY_CHECK(UnresolvedIdent)
+        SANITY_CHECK(RestArg)
+        SANITY_CHECK(KeywordArg)
+        SANITY_CHECK(OptionalArg)
+        SANITY_CHECK(BlockArg)
+        SANITY_CHECK(ShadowArg)
+        SANITY_CHECK(Assign)
+        SANITY_CHECK(Cast)
+        SANITY_CHECK(Hash)
+        SANITY_CHECK(Array)
+        SANITY_CHECK(Literal)
+        SANITY_CHECK(UnresolvedConstantLit)
+        SANITY_CHECK(ConstantLit)
+        SANITY_CHECK(ZSuperArgs)
+        SANITY_CHECK(Block)
+        SANITY_CHECK(InsSeq)
+    }
+#undef SANITY_CHECK
+}
+
 void Array::_sanityCheck() {
     for (auto &node : elems) {
         ENFORCE(node);

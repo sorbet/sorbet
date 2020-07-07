@@ -221,6 +221,8 @@ public:
     std::string nodeName() const;
 
     bool isSelfReference() const;
+
+    void _sanityCheck() const;
 };
 
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
@@ -236,7 +238,6 @@ public:
         return toStringWithTabs(gs);
     }
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual void _sanityCheck() = 0;
     const core::LocOffsets loc;
 };
 CheckSize(Expression, 16, 8);
@@ -346,8 +347,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ClassDef, 136, 8);
 
@@ -380,8 +380,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(MethodDef, 72, 8);
 
@@ -399,8 +398,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(If, 40, 8);
 
@@ -417,8 +415,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(While, 32, 8);
 
@@ -434,8 +431,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Break, 24, 8);
 
@@ -449,8 +445,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Retry, 16, 8);
 
@@ -466,8 +461,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Next, 24, 8);
 
@@ -483,8 +477,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Return, 24, 8);
 
@@ -508,8 +501,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(RescueCase, 56, 8);
 
@@ -531,8 +523,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Rescue, 64, 8);
 
@@ -548,8 +539,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Local, 24, 8);
 
@@ -572,8 +562,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(UnresolvedIdent, 24, 8);
 
@@ -589,8 +578,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(RestArg, 24, 8);
 
@@ -606,8 +594,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(KeywordArg, 24, 8);
 
@@ -624,8 +611,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(OptionalArg, 32, 8);
 
@@ -641,8 +627,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(BlockArg, 24, 8);
 
@@ -658,8 +643,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ShadowArg, 24, 8);
 
@@ -676,8 +660,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Assign, 32, 8);
 
@@ -752,8 +735,7 @@ public:
         return (args.size() - numPosArgs) & 0x1;
     }
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Send, 64, 8);
 
@@ -773,8 +755,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Cast, 48, 8);
 
@@ -794,8 +775,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Hash, 64, 8);
 
@@ -814,8 +794,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Array, 56, 8);
 
@@ -838,8 +817,7 @@ public:
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Literal, 32, 8);
 
@@ -856,8 +834,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(UnresolvedConstantLit, 32, 8);
 
@@ -880,8 +857,7 @@ public:
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
         const core::GlobalState &gs) const;
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ConstantLit, 56, 8);
 
@@ -896,8 +872,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ZSuperArgs, 16, 8);
 
@@ -913,7 +888,7 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Block, 48, 8);
 
@@ -935,8 +910,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(InsSeq, 64, 8);
 
@@ -950,8 +924,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(EmptyTree, 16, 8);
 
