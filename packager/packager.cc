@@ -107,6 +107,32 @@ struct PackageInfoFinder {
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
+
+        // Ignore methods
+        if (send->fun == core::Names::keepDef() || send->fun == core::Names::keepSelfDef()) {
+            return tree;
+        }
+
+        // Blacklisted methods
+        if (send->fun == core::Names::extend() || send->fun == core::Names::include()) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Packager::InvalidPackageExpression)) {
+                e.setHeader("Invalid expression in package: `{}` is not allowed", send->fun.data(ctx)->shortName(ctx));
+            }
+            return tree;
+        }
+
+        // Sanity check arguments for unrecognized methods
+        if (send->fun != core::Names::export_() && send->fun != core::Names::import_() &&
+            send->fun != core::Names::exportMethods()) {
+            for (const auto &arg : send->args) {
+                if (!ast::isa_tree<ast::Literal>(arg)) {
+                    if (auto e = ctx.beginError(arg->loc, core::errors::Packager::InvalidPackageExpression)) {
+                        e.setHeader("Invalid expression in package: Arguments to functions must be literals");
+                    }
+                }
+            }
+        }
+
         if (info == nullptr) {
             // We haven't yet entered the package class.
             return tree;
@@ -276,6 +302,74 @@ struct PackageInfoFinder {
         this->info->exportModule = ast::MK::ClassOrModule(
             core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()), move(this->packageModuleName), {},
             std::move(exportedItems), ast::ClassDef::Kind::Module);
+    }
+
+    /* Forbidden control flow in packages */
+
+    void illegalControlFlow(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
+        if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
+            e.setHeader("Invalid expression in package: {} not allowed", type);
+        }
+    }
+
+    ast::TreePtr preTransformIf(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`if`");
+        return original;
+    }
+
+    ast::TreePtr preTransformWhile(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`while`");
+        return original;
+    }
+
+    ast::TreePtr postTransformBreak(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`break`");
+        return original;
+    }
+
+    ast::TreePtr postTransformRetry(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`retry`");
+        return original;
+    }
+
+    ast::TreePtr postTransformNext(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`next`");
+        return original;
+    }
+
+    ast::TreePtr preTransformReturn(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`return`");
+        return original;
+    }
+
+    ast::TreePtr preTransformRescueCase(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`rescue case`");
+        return original;
+    }
+
+    ast::TreePtr preTransformRescue(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`rescue`");
+        return original;
+    }
+
+    ast::TreePtr preTransformAssign(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "`=`");
+        return original;
+    }
+
+    ast::TreePtr preTransformHash(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "hash literals");
+        return original;
+    }
+
+    ast::TreePtr preTransformArray(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "array literals");
+        return original;
+    }
+
+    ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr original) {
+        illegalControlFlow(ctx, original->loc, "method definitions");
+        return original;
     }
 };
 
