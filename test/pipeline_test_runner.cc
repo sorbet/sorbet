@@ -341,6 +341,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
         handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
 
+        // Don't run typecheck on RBI files.
+        if (resolvedTree.file.data(ctx).isRBI()) {
+            continue;
+        }
+
         auto checkTree = [&]() {
             if (resolvedTree.tree == nullptr) {
                 auto path = file.data(*gs).path();
