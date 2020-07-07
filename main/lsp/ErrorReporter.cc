@@ -135,6 +135,10 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     return fileErrorStatuses[file.id()];
 };
 
+u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
+    return getFileErrorStatus(file).lastReportedEpoch;
+}
+
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
                        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
     : errorReporter(errorReporter), epoch(epoch) {

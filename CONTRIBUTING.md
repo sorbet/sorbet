@@ -11,7 +11,7 @@ We welcome contributions from the community. This doc describes the process to c
 * Some good tasks to get started with are [available in the issue tracker](https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
 # Release cadence
-* Currently we are targeting approximately quaterly official releases. We may change this based
+* Currently we are targeting approximately quarterly official releases. We may change this based
   on customer demand.
 * In general, master is assumed to be release candidate quality at all times for documented
   features. For undocumented or clearly under development features, use caution or ask about

@@ -58,7 +58,7 @@ class DefaultArgsWalk {
                         if (lit && lit->isSymbol(ctx)) {
                             auto symName = lit->asSymbol(ctx);
                             if (name == symName) {
-                                retType = value->deepCopy();
+                                retType = value.deepCopy();
                             }
                         }
                     }

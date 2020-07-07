@@ -154,11 +154,11 @@ public:
     }
 };
 
-class typedruby25 : public base_driver {
+class typedruby27 : public base_driver {
 public:
-    typedruby25(const std::string &source, const struct builder &builder);
+    typedruby27(const std::string &source, const struct builder &builder);
     virtual ForeignPtr parse(SelfPtr self);
-    ~typedruby25() {}
+    ~typedruby27() {}
 };
 
 } // namespace ruby_parser

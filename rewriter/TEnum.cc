@@ -126,9 +126,9 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
     auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
-    parent.emplace_back(klass->name->deepCopy());
+    parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst->deepCopy(), std::move(parent),
+    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst.deepCopy(), std::move(parent),
                                    std::move(classRhs));
 
     ast::Send::ARGS_store args;
@@ -146,7 +146,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     auto singletonAsgn = ast::MK::Assign(
         stat->loc, std::move(asgn->lhs),
         ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
-                       ast::MK::Send(stat->loc, classCnst->deepCopy(), core::Names::new_(), std::move(args)),
+                       ast::MK::Send(stat->loc, classCnst.deepCopy(), core::Names::new_(), std::move(args)),
                        std::move(classCnst)));
 
     vector<ast::TreePtr> result;

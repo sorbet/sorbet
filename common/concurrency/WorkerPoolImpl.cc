@@ -12,15 +12,15 @@ WorkerPool::~WorkerPool() {
     // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
 }
 
-WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : size(size), logger(logger) {
-    logger.debug("Creating {} worker threads", size);
+WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : _size(size), logger(logger) {
+    logger.debug("Creating {} worker threads", _size);
     if (sorbet::emscripten_build) {
         ENFORCE(size == 0);
-        this->size = 0;
+        this->_size = 0;
     } else {
-        bool pinThreads = (size > 0) && (size == thread::hardware_concurrency());
-        threadQueues.reserve(size);
-        for (int i = 0; i < size; i++) {
+        bool pinThreads = (_size > 0) && (_size == thread::hardware_concurrency());
+        threadQueues.reserve(_size);
+        for (int i = 0; i < _size; i++) {
             auto &last = threadQueues.emplace_back(make_unique<Queue>());
             auto *ptr = last.get();
             auto threadIdleName = absl::StrCat("idle", i + 1);
@@ -56,7 +56,7 @@ WorkerPoolImpl::~WorkerPoolImpl() {
 }
 
 void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
-    if (size > 0) {
+    if (_size > 0) {
         multiplexJob_([t{move(t)}, taskName] {
             setCurrentThreadName(taskName);
             t();
@@ -70,10 +70,14 @@ void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
 
 void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     logger.debug("Multiplexing job");
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < _size; i++) {
         const bool enqueued = threadQueues[i]->enqueue(t);
         ENFORCE(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");
     }
+}
+
+int WorkerPoolImpl::size() {
+    return _size;
 }
 
 }; // namespace sorbet

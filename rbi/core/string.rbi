@@ -467,7 +467,7 @@ class String < Object
   #
   # If a block is given, which is a deprecated form, works the same as
   # `each_char`.
-  sig {returns(T::Array[T.untyped])}
+  sig {returns(T::Array[String])}
   def chars(); end
 
   # Returns a new `String` with the given record separator removed from the end

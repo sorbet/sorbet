@@ -629,6 +629,13 @@ class Array < Object
     )
     .returns(Elem)
   end
+  sig do
+    params(
+        arg0: T::Range[Integer],
+        arg1: T::Array[Elem],
+    )
+    .returns(T::Array[Elem])
+  end
   def []=(arg0, arg1, arg2=T.unsafe(nil)); end
 
   # Alias for:
@@ -1434,6 +1441,12 @@ class Array < Object
     params(
         arg0: Integer,
         arg1: Elem,
+    )
+    .void
+  end
+  sig do
+    params(
+      arg0: T::Array[Elem],
     )
     .void
   end

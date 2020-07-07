@@ -394,6 +394,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("advanced")("autogen-autoloader-root", "Root directory for autoloader output",
                                     cxxopts::value<string>()->default_value("autoloader"));
+    options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
+                                    cxxopts::value<string>()->default_value("Opus::Require"));
     options.add_options("advanced")("autogen-autoloader-samefile",
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
@@ -604,6 +606,7 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
         }
     }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
+    cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     return true;
 }

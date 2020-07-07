@@ -1,15 +1,15 @@
 #include <ruby_parser/capi.hh>
 #include <cstdio>
 
-ruby_parser::typedruby25*
-rbdriver_typedruby25_new(const char* source_ptr, size_t source_length, const ruby_parser::builder* builder)
+ruby_parser::typedruby27*
+rbdriver_typedruby27_new(const char* source_ptr, size_t source_length, const ruby_parser::builder* builder)
 {
 	std::string source { source_ptr, source_length };
-	return new ruby_parser::typedruby25(source, *builder);
+	return new ruby_parser::typedruby27(source, *builder);
 }
 
 void
-rbdriver_typedruby25_free(ruby_parser::typedruby25* driver)
+rbdriver_typedruby27_free(ruby_parser::typedruby27* driver)
 {
 	delete driver;
 }
