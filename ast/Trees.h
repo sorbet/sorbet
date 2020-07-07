@@ -69,25 +69,29 @@ template <Tag T> struct TagToTree;
 class Expression;
 
 class TreePtr {
+public:
+    // We store tagged pointers as 64-bit values.
+    using tagged_storage = u8;
+
 private:
-    static constexpr long long TAG_MASK = 0xffff000000000007;
+    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
 
-    static constexpr long long PTR_MASK = ~TAG_MASK;
+    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
-    void *ptr;
+    tagged_storage ptr;
 
     template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
 
-    static void *tagPtr(Tag tag, void *expr) {
-        auto val = static_cast<long long>(tag);
+    static tagged_storage tagPtr(Tag tag, void *expr) {
+        auto val = static_cast<tagged_storage>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
             val <<= 48;
         }
 
-        auto maskedPtr = reinterpret_cast<long long>(expr) & PTR_MASK;
+        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
 
-        return reinterpret_cast<void *>(maskedPtr | val);
+        return maskedPtr | val;
     }
 
     explicit TreePtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
@@ -95,18 +99,18 @@ private:
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
     // A version of release that doesn't mask the tag bits
-    void *releaseTagged() noexcept {
-        auto *saved = ptr;
-        ptr = nullptr;
+    tagged_storage releaseTagged() noexcept {
+        auto saved = ptr;
+        ptr = 0;
         return saved;
     }
 
     // A version of reset that expects the tagged bits to be set.
-    void resetTagged(void *expr) noexcept {
+    void resetTagged(tagged_storage expr) noexcept {
         Tag tagVal;
         void *saved = nullptr;
 
-        if (ptr != nullptr) {
+        if (ptr != 0) {
             tagVal = tag();
             saved = get();
         }
@@ -119,16 +123,16 @@ private:
     }
 
 public:
-    constexpr TreePtr() noexcept : ptr(nullptr) {}
+    constexpr TreePtr() noexcept : ptr(0) {}
 
     TreePtr(std::nullptr_t) noexcept : TreePtr() {}
 
     // Construction from a tagged pointer. This is needed for:
     // * ResolveConstantsWalk::isFullyResolved
-    explicit TreePtr(void *ptr) : ptr(ptr) {}
+    explicit TreePtr(tagged_storage ptr) : ptr(ptr) {}
 
     ~TreePtr() {
-        if (ptr != nullptr) {
+        if (ptr != 0) {
             deleteTagged(tag(), get());
         }
     }
@@ -136,7 +140,7 @@ public:
     TreePtr(const TreePtr &) = delete;
     TreePtr &operator=(const TreePtr &) = delete;
 
-    TreePtr(TreePtr &&other) noexcept : ptr(nullptr) {
+    TreePtr(TreePtr &&other) noexcept {
         ptr = other.releaseTagged();
     }
 
@@ -151,16 +155,16 @@ public:
 
     void *release() noexcept {
         auto *saved = get();
-        ptr = nullptr;
+        ptr = 0;
         return saved;
     }
 
     void reset() noexcept {
-        resetTagged(nullptr);
+        resetTagged(0);
     }
 
     void reset(std::nullptr_t) noexcept {
-        resetTagged(nullptr);
+        resetTagged(0);
     }
 
     template <typename T> void reset(T *expr = nullptr) noexcept {
@@ -168,9 +172,9 @@ public:
     }
 
     Tag tag() const noexcept {
-        ENFORCE(ptr != nullptr);
+        ENFORCE(ptr != 0);
 
-        auto value = reinterpret_cast<long long>(ptr) & TAG_MASK;
+        auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
         if (value <= 7) {
             return static_cast<Tag>(value);
         } else {
@@ -179,15 +183,19 @@ public:
     }
 
     Expression *get() const noexcept {
-        auto val = reinterpret_cast<long long>(ptr) & PTR_MASK;
+        auto val = ptr & PTR_MASK;
 
-        // sign extension for the upper 16 bits
-        return reinterpret_cast<Expression *>((val << 16) >> 16);
+        if constexpr (sizeof(void *) == 4) {
+            return reinterpret_cast<Expression *>(val);
+        } else {
+            // sign extension for the upper 16 bits
+            return reinterpret_cast<Expression *>((val << 16) >> 16);
+        }
     }
 
     // Fetch the tagged pointer. This is needed for:
     // * ResolveConstantsWalk::isFullyResolved
-    void *getTagged() const noexcept {
+    tagged_storage getTagged() const noexcept {
         return ptr;
     }
 
@@ -315,7 +323,7 @@ CheckSize(Declaration, 32, 8);
     class name;                                                                     \
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
     template <> struct TagToTree<Tag::name> { using value = name; };                \
-    class name final
+    class __attribute__((aligned(8))) name final
 
 TREE(ClassDef) : public Declaration {
 public:
@@ -859,6 +867,9 @@ private:
     virtual void _sanityCheck();
 };
 CheckSize(EmptyTree, 16, 8);
+
+// This specialization of make_tree exists to ensure that we only ever create one empty tree.
+template <> TreePtr make_tree<EmptyTree>();
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

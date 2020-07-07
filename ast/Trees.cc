@@ -47,7 +47,7 @@ void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
     switch (tag) {
         case Tag::EmptyTree:
-            delete reinterpret_cast<EmptyTree *>(ptr);
+            // explicitly not deleting the empty tree pointer
             break;
 
         case Tag::Send:
@@ -414,6 +414,18 @@ EmptyTree::EmptyTree() : Expression(core::LocOffsets::none()) {
 
 namespace {
 
+EmptyTree singletonEmptyTree{};
+
+} // namespace
+
+template <> TreePtr make_tree<EmptyTree>() {
+    TreePtr result = nullptr;
+    result.reset(&singletonEmptyTree);
+    return result;
+}
+
+namespace {
+
 void printTabs(fmt::memory_buffer &to, int count) {
     int i = 0;
     while (i < count) {
@@ -457,6 +469,10 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(buf, "{}<{}> < ", name->toStringWithTabs(gs, tabs),
                    this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
+
+    if (this->rhs.empty()) {
+        fmt::format_to(buf, "{}", '\n');
+    }
 
     for (auto &a : this->rhs) {
         fmt::format_to(buf, "{}", '\n');

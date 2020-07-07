@@ -131,6 +131,8 @@ Suit::Diamonds.serialize # => 'DIAMONDS'
 Each serialized value must be unique compared to all other serialized values for
 this enum.
 
+## Converting from other types to enums
+
 Another common conversion is to take the serialized value and deserialize it
 back to the original enum value. This is also built into `T::Enum`:
 

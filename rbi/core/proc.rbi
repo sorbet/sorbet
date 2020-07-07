@@ -558,6 +558,36 @@ class Proc < Object
   sig {returns(T::Array[[Symbol, Symbol]])}
   def parameters(); end
 
+  # Marks the proc as passing keywords through a normal argument splat.
+  # This should only be called on procs that accept an argument splat (`*args`)
+  # but not explicit keywords or a keyword splat. It marks the proc such that if
+  # the proc is called with keyword arguments, the final hash argument is marked
+  # with a special flag such that if it is the final element of a normal argument
+  # splat to another method call, and that method call does not include explicit
+  # keywords or a keyword splat, the final element is interpreted as keywords.
+  # In other words, keywords will be passed through the proc to other methods.
+  #
+  # This should only be used for procs that delegate keywords to another method,
+  # and only for backwards compatibility with Ruby versions before 2.7.
+  #
+  # This method will probably be removed at some point, as it exists only for
+  # backwards compatibility. As it does not exist in Ruby versions before 2.7,
+  # check that the proc responds to this method before calling it. Also, be
+  # aware that if this method is removed, the behavior of the proc will change
+  # so that it does not pass through keywords.
+  #
+  # ```ruby
+  #
+  # module Mod
+  #   foo = ->(meth, *args, &block) do
+  #     send(:"do_#{meth}", *args, &block)
+  #   end
+  #   foo.ruby2_keywords if foo.respond_to?(:ruby2_keywords)
+  # end
+  # ```
+  sig { returns(T.self_type) }
+  def ruby2_keywords; end
+
   # Returns the Ruby source filename and line number containing this proc or
   # `nil` if this proc was not defined in Ruby (i.e. native).
   sig {returns([String, Integer])}

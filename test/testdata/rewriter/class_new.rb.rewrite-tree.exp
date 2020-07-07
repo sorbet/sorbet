@@ -27,7 +27,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C B>.new().bar())
 
-  module <emptyTree>::<C M><<C <todo sym>>> < ()  end
+  module <emptyTree>::<C M><<C <todo sym>>> < ()
+  end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
     <self>.include(<emptyTree>::<C M>)
@@ -50,10 +51,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C D>.qux()
 
   module <emptyTree>::<C Top><<C <todo sym>>> < ()
-    class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)    end
+    class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 
-  class <emptyTree>::<C E><<C <todo sym>>> < (<emptyTree>::<C Top>::<C Parent>)  end
+  class <emptyTree>::<C E><<C <todo sym>>> < (<emptyTree>::<C Top>::<C Parent>)
+  end
 
   <emptyTree>::<C T>.let(<emptyTree>::<C E>.new(), <emptyTree>::<C Top>::<C Parent>)
 end
