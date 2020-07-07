@@ -69,7 +69,7 @@ string rbFile2BaseTestName(string rbFileName) {
 }
 
 bool addToExpectations(Expectations &exp, string_view parentDir, string_view filePath) {
-    if (!absl::StartsWith(filePath, exp.basename)) {
+    if (rbFile2BaseTestName(string(filePath)) != exp.basename) {
         return false;
     }
 
