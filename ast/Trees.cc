@@ -164,6 +164,48 @@ void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     }
 }
 
+string TreePtr::nodeName() const {
+    auto *ptr = get();
+
+    ENFORCE(ptr != nullptr);
+
+#define NODE_NAME(name) \
+    case Tag::name:     \
+        return reinterpret_cast<name *>(ptr)->nodeName();
+    switch (tag()) {
+        NODE_NAME(EmptyTree)
+        NODE_NAME(Send)
+        NODE_NAME(ClassDef)
+        NODE_NAME(MethodDef)
+        NODE_NAME(If)
+        NODE_NAME(While)
+        NODE_NAME(Break)
+        NODE_NAME(Retry)
+        NODE_NAME(Next)
+        NODE_NAME(Return)
+        NODE_NAME(RescueCase)
+        NODE_NAME(Rescue)
+        NODE_NAME(Local)
+        NODE_NAME(UnresolvedIdent)
+        NODE_NAME(RestArg)
+        NODE_NAME(KeywordArg)
+        NODE_NAME(OptionalArg)
+        NODE_NAME(BlockArg)
+        NODE_NAME(ShadowArg)
+        NODE_NAME(Assign)
+        NODE_NAME(Cast)
+        NODE_NAME(Hash)
+        NODE_NAME(Array)
+        NODE_NAME(Literal)
+        NODE_NAME(UnresolvedConstantLit)
+        NODE_NAME(ConstantLit)
+        NODE_NAME(ZSuperArgs)
+        NODE_NAME(Block)
+        NODE_NAME(InsSeq)
+    }
+#undef NODE_NAME
+}
+
 bool isa_reference(const TreePtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
