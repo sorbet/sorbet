@@ -65,8 +65,7 @@ public:
     core::SymbolRef what;
     core::NameRef name;
 
-    Alias(core::SymbolRef what);
-    Alias(core::SymbolRef what, core::NameRef name);
+    Alias(core::SymbolRef what, core::NameRef name = core::NameRef());
 
     virtual std::string toString(const core::GlobalState &gs) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
