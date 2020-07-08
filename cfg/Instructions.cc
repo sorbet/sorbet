@@ -117,9 +117,12 @@ Ident::Ident(core::LocalVariable what) : what(what) {
 }
 
 Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) {
-    ENFORCE(what == core::Symbols::Magic_undeclaredFieldStub() && name.exists(),
+    // what == undeclaredFieldStub -> name.exists()
+    ENFORCE(what != core::Symbols::Magic_undeclaredFieldStub() || name.exists(),
             "Missing name for undeclared field alias!");
-    ENFORCE(what != core::Symbols::Magic_undeclaredFieldStub() && !name.exists(), "Name provided for known alias!");
+
+    // name.exists() -> what == undeclaredFieldStub()
+    ENFORCE(!name.exists() || what == core::Symbols::Magic_undeclaredFieldStub(), "Name provided for known alias!");
     categoryCounterInc("cfg", "alias");
 }
 
