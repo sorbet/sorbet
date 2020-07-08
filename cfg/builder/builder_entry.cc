@@ -60,7 +60,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     }
     for (auto kv : discoveredUndeclaredFields) {
         aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
-                                   make_unique<Alias>(core::Symbols::Magic_undeclaredFieldStub()));
+                                   make_unique<Alias>(core::Symbols::Magic_undeclaredFieldStub(), kv.first));
         res->minLoops[kv.second] = CFG::MIN_LOOP_FIELD;
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
