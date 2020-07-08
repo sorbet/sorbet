@@ -27,16 +27,17 @@ UnorderedMap<core::LocalVariable, Alias> setupAliases(CompilerState &cs, const c
                 ENFORCE(aliases.find(bind.bind.variable) == aliases.end(), "Overwriting an entry in the aliases map");
 
                 if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
-                    auto name = bind.bind.variable._name.data(cs)->shortName(cs);
+                    // When `i->what` is undeclaredFieldStub, `i->name` is populated
+                    auto name = i->name.data(cs)->shortName(cs);
                     if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
-                        aliases[bind.bind.variable] = Alias::forClassField(bind.bind.variable._name);
+                        aliases[bind.bind.variable] = Alias::forClassField(i->name);
                     } else if (name.size() > 1 && name[0] == '@') {
-                        aliases[bind.bind.variable] = Alias::forInstanceField(bind.bind.variable._name);
+                        aliases[bind.bind.variable] = Alias::forInstanceField(i->name);
                     } else if (name.size() > 1 && name[0] == '$') {
-                        aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
+                        aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     } else {
                         ENFORCE(stoi((string)name) > 0, "'" + ((string)name) + "' is not a valid global name");
-                        aliases[bind.bind.variable] = Alias::forGlobalField(i->what);
+                        aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     }
                 } else {
                     // It's currently impossible in Sorbet to declare a global field with a T.let

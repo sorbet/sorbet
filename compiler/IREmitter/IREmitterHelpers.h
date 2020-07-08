@@ -19,7 +19,7 @@ struct Alias {
     core::SymbolRef constantSym;
     core::NameRef instanceField;
     core::NameRef classField;
-    core::SymbolRef globalField;
+    core::NameRef globalField;
     static Alias forConstant(core::SymbolRef sym) {
         Alias ret;
         ret.kind = AliasKind::Constant;
@@ -38,10 +38,10 @@ struct Alias {
         ret.instanceField = name;
         return ret;
     }
-    static Alias forGlobalField(core::SymbolRef sym) {
+    static Alias forGlobalField(core::NameRef name) {
         Alias ret;
         ret.kind = AliasKind::GlobalField;
-        ret.globalField = sym;
+        ret.globalField = name;
         return ret;
     }
 };
