@@ -116,7 +116,11 @@ Ident::Ident(core::LocalVariable what) : what(what) {
     categoryCounterInc("cfg", "ident");
 }
 
-Alias::Alias(core::SymbolRef what) : what(what) {
+Alias::Alias(core::SymbolRef what) : what(what), name{} {
+    categoryCounterInc("cfg", "alias");
+}
+
+Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) {
     categoryCounterInc("cfg", "alias");
 }
 
@@ -129,7 +133,11 @@ string Ident::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string Alias::toString(const core::GlobalState &gs) const {
-    return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+    if (name.exists()) {
+        return fmt::format("alias {} ({})", this->what.data(gs)->name.data(gs)->toString(gs), name.toString(gs));
+    } else {
+        return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+    }
 }
 
 string Alias::showRaw(const core::GlobalState &gs, int tabs) const {

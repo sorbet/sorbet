@@ -63,8 +63,10 @@ CheckSize(Ident, 24, 8);
 class Alias final : public Instruction {
 public:
     core::SymbolRef what;
+    core::NameRef name;
 
     Alias(core::SymbolRef what);
+    Alias(core::SymbolRef what, core::NameRef name);
 
     virtual std::string toString(const core::GlobalState &gs) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
