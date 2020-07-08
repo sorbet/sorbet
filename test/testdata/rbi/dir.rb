@@ -6,4 +6,7 @@ sig {returns(T::Array[String])}
 def test_dir_brackets
   Dir['a', 'b']
   Dir['a', base: '.']
+  Dir['/*'] do |match|
+  end
+  Dir[Pathname.new('.')]
 end
