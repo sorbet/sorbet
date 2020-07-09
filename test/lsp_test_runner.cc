@@ -327,8 +327,11 @@ TEST_CASE("LSPTest") {
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
             auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
                                                                  "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
-            INFO("Should not receive any response to opening an empty file.");
-            CHECK_EQ(0, countNonTestMessages(responses));
+            // Sorbet will complain about missing packages in packaging mode. Ignore them.
+            if (!lspWrapper->opts->stripePackages) {
+                INFO("Should not receive any response to opening an empty file.");
+                CHECK_EQ(0, countNonTestMessages(responses));
+            }
         }
     }
 
