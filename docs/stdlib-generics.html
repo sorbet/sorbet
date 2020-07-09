@@ -79,7 +79,9 @@ namespace to represent them:</p>
 <li><code>T::Range[Type]</code></li>
 </ul>
 <p>Inside a sig, just writing <code>Array</code> or <code>Hash</code> will be treated as
-<code>T::Array[T.untyped]</code> and <code>T::Hash[T.untyped, T.untyped]</code> respectively.</p>
+<code>T::Array[T.untyped]</code> and <code>T::Hash[T.untyped, T.untyped]</code> respectively. However,
+using bare <code>Array</code> or <code>Hash</code> is not allowed at <code>typed: strict</code> or above: in
+those cases, you should use the generic form with an explicit argument instead.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
@@ -97,6 +99,18 @@ sig {returns(T::Array[T.any(Integer, String)])}
 
 T.reveal_type(bar.first) <span class="hljs-comment"># Revealed type: T.nilable(T.any(Integer, String))</span>
 </code></pre>
+<p>The type parameters for the generic types provided by the standard library are
+only used as hints for the static type system, and are ignored entirely by the
+runtime type system.</p>
+<blockquote>
+<p><strong>Note</strong>: Sorbet used to take these type parameters into account during
+runtime type-checking, but this turned out to be an common and
+difficult-to-debug source of performance problems: In order to verify that an
+array contained the values it claimed it did, the Sorbet runtime used to
+recursively check the type of every member of a collection, which would take a
+long time for arrays or hashes of a sufficiently large size. Consequently,
+this behavior was eventually removed.</p>
+</blockquote>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/class-of"><span class="arrow-prev">← </span><span>T.class_of</span></a><a class="docs-next button" href="/docs/self-type"><span>T.self_type</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
