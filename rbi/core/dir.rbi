@@ -567,18 +567,11 @@ class Dir < Object
   # Equivalent to calling `Dir.glob([string,...], 0)`.
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
-        flags: Integer,
+        pattern: T.any(String, Pathname),
+        base: T.nilable(T.any(String, Pathname)),
+        blk: T.nilable(T.proc.params(arg0: String).returns(BasicObject))
     )
     .returns(T::Array[String])
   end
-  sig do
-    params(
-        pattern: T.any(String, T::Array[String]),
-        flags: Integer,
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(NilClass)
-  end
-  def self.[](pattern, flags=T.unsafe(nil), &blk); end
+  def self.[](*pattern, base: nil, &blk); end
 end
