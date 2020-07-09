@@ -4,7 +4,7 @@ require 'csv'
 T.assert_type!(CSV.foreach('source.csv', headers: true), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
 T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
 CSV.foreach('source.csv') do |row|
-  T.assert_type!(row, T.any(T::Array[T.nilable(BasicObject)], CSV::Row))
+  T.assert_type!(row, T.any(T::Array[T.untyped], CSV::Row))
 end
 
 csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'], [2, 3])])
@@ -14,7 +14,7 @@ csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'],
 T.assert_type!(csv, CSV::Table[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])])
 
 CSV.parse("1,2,3\n3,,abc\n5,6,1") do |line|
-  T.assert_type!(line, T.any(CSV::Row, T::Array[T.nilable(BasicObject)]))
+  T.assert_type!(line, T.any(CSV::Row, T::Array[T.untyped]))
 end
 
 csv = CSV.parse("1,2,3\n3,,abc\n5,6,1", { headers: true, converters: %i[numeric] })
@@ -64,7 +64,7 @@ if csv.is_a?(CSV::Table)
   T.assert_type!(csv.dig(0), T.any(CSV::Row, T::Array[T.nilable(BasicObject)]))
   T.assert_type!(csv.by_row.dig(0), CSV::Row)
   T.assert_type!(csv.by_col.dig(0), T::Array[T.nilable(BasicObject)])
-  T.assert_type!(csv.dig(0, 1), T.nilable(BasicObject))
+  T.let(csv.dig(0, 1), T.untyped)
 
   T.assert_type!(csv.headers, T::Array[BasicObject])
 
@@ -94,7 +94,7 @@ if csv.is_a?(CSV::Table)
   end
 
   # errors
-  csv.table # error: Method `table` does not exist on `CSV::Table[T.any(CSV::Row, T::Array[BasicObject])]`
+  csv.table # error: Method `table` does not exist on `CSV::Table[T.any(CSV::Row, T::Array[T.untyped])]`
 else
   T.assert_type!(csv, T::Array[T::Array[T.nilable(BasicObject)]])
 end
