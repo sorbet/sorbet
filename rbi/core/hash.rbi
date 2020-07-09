@@ -1212,7 +1212,16 @@ class Hash < Object
   # ```
   #
   # If no block is given, an enumerator is returned instead.
-  def transform_keys; end
+  sig do
+    type_parameters(:A).params(
+      blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
+    )
+                       .returns(T::Hash[T.type_parameter(:A), V])
+  end
+  sig do
+    returns(T::Enumerator[K])
+  end
+  def transform_keys(&blk); end
 
   # Invokes the given block once for each key in *hsh*, replacing it with the
   # new key returned by the block, and then returns *hsh*. This method does not
@@ -1227,7 +1236,16 @@ class Hash < Object
   # ```
   #
   # If no block is given, an enumerator is returned instead.
-  def transform_keys!; end
+  sig do
+    type_parameters(:A).params(
+      blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
+    )
+                       .returns(T::Hash[T.type_parameter(:A), V])
+  end
+  sig do
+    returns(T::Enumerator[K])
+  end
+  def transform_keys!(&blk); end
 
   # Return a new with the results of running block once for every value. This
   # method does not change the keys.
@@ -1265,7 +1283,16 @@ class Hash < Object
   # ```
   #
   # If no block is given, an enumerator is returned instead.
-  def transform_values!; end
+  sig do
+    type_parameters(:A).params(
+      blk: T.proc.params(arg0: V).returns(T.type_parameter(:A))
+    )
+                       .returns(T::Hash[K, T.type_parameter(:A)])
+  end
+  sig do
+    returns(T::Enumerator[V])
+  end
+  def transform_values!(&blk); end
 
   # Adds the contents of the given hashes to the receiver.
   #

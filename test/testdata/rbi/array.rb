@@ -39,6 +39,12 @@ T.assert_type!([1,2].repeated_permutation(1) {}, T::Array[Integer])
 T.assert_type!([1,2].combination(1) {}, T::Array[Integer])
 T.assert_type!([1,2].repeated_combination(1) {}, T::Array[Integer])
 
+# assignments
+arr = [1, 2, 3]
+T.assert_type!(arr[0] = 1, Integer)
+T.assert_type!(arr[1..2] = 3, Integer)
+T.assert_type!(arr[1..2] = [100, 200], T::Array[Integer])
+
 # errors
 
 T::Array[Float].new.sum.nan? # error: Method `nan?` does not exist on `Integer` component of `T.any(Integer, Float)`

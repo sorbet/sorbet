@@ -6633,44 +6633,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U token_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -6814,6 +6776,25 @@ ClassDef{
           ]
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -6827,6 +6808,25 @@ ClassDef{
             }
             Literal{ value = :"token_prop<defaultArg>1" }
           ]
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
         }
 
         Send{
@@ -7196,44 +7196,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U timestamped_token_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -7366,6 +7328,25 @@ ClassDef{
           ]
         }
 
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U timestamped_token_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
+        }
+
         Send{
           recv = ConstantLit{
             orig = nullptr
@@ -7379,6 +7360,25 @@ ClassDef{
             }
             Literal{ value = :"timestamped_token_prop<defaultArg>1" }
           ]
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U created_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
         }
 
         Send{
@@ -7524,25 +7524,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U merchant_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -7606,6 +7587,25 @@ ClassDef{
             }
             Literal{ value = :"merchant" }
           ]
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U merchant_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
         }
 
         Send{
@@ -8238,25 +8238,6 @@ ClassDef{
           }
         }
 
-        MethodDef{
-          flags = {self, rewriter}
-          name = <DA <U encrypted_prop> $1><<C <U <todo sym>>>>
-          args = [OptionalArg{
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <U opts>
-              }
-              default_ = EmptyTree
-            }, BlockArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U <blk>>
-            } }]
-          rhs = Hash{
-            pairs = [
-            ]
-          }
-        }
-
         Send{
           recv = Local{
             localVariable = <U <self>>
@@ -8377,6 +8358,25 @@ ClassDef{
             }
             Literal{ value = :"encrypted_bar" }
           ]
+        }
+
+        MethodDef{
+          flags = {self, rewriter}
+          name = <DA <U encrypted_prop> $1><<C <U <todo sym>>>>
+          args = [OptionalArg{
+              expr = UnresolvedIdent{
+                kind = Local
+                name = <U opts>
+              }
+              default_ = EmptyTree
+            }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Hash{
+            pairs = [
+            ]
+          }
         }
 
         Send{

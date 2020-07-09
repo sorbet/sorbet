@@ -116,7 +116,13 @@ Ident::Ident(core::LocalVariable what) : what(what) {
     categoryCounterInc("cfg", "ident");
 }
 
-Alias::Alias(core::SymbolRef what) : what(what) {
+Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) {
+    // what == undeclaredFieldStub -> name.exists()
+    ENFORCE(what != core::Symbols::Magic_undeclaredFieldStub() || name.exists(),
+            "Missing name for undeclared field alias!");
+
+    // name.exists() -> what == undeclaredFieldStub()
+    ENFORCE(!name.exists() || what == core::Symbols::Magic_undeclaredFieldStub(), "Name provided for known alias!");
     categoryCounterInc("cfg", "alias");
 }
 
@@ -129,7 +135,11 @@ string Ident::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string Alias::toString(const core::GlobalState &gs) const {
-    return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+    if (name.exists()) {
+        return fmt::format("alias {} ({})", this->what.data(gs)->name.data(gs)->toString(gs), name.toString(gs));
+    } else {
+        return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+    }
 }
 
 string Alias::showRaw(const core::GlobalState &gs, int tabs) const {

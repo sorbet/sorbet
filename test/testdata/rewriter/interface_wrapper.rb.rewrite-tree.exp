@@ -35,11 +35,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"wrap_instance")
+
     def self.wrap_instance<defaultArg>1<<C <todo sym>>>(x, y = <emptyTree>, &<blk>)
       nil
     end
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"wrap_instance")
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"wrap_instance<defaultArg>1")
   end

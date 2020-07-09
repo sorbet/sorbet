@@ -1394,11 +1394,11 @@ class TreeSymbolizer {
                 continue;
             }
             if (arg->isSelfReference()) {
-                dest->emplace_back(arg->deepCopy());
+                dest->emplace_back(arg.deepCopy());
                 continue;
             }
             if (isValidAncestor(arg)) {
-                dest->emplace_back(arg->deepCopy());
+                dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
@@ -1482,11 +1482,11 @@ public:
         }
         ast::InsSeq::STATS_store ideSeqs;
         if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.name->deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.name.deepCopy()));
         }
         if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass.ancestors.front())) {
-            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front()->deepCopy()));
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front().deepCopy()));
         }
 
         if (klass.symbol != core::Symbols::root() && !klass.declLoc.file().data(ctx).isRBI() &&

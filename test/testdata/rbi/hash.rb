@@ -53,10 +53,32 @@ h3[nil] = "foo" # error: Expected `Integer` but found `NilClass` for argument `a
 h3[3] = nil # error: Expected `String` but found `NilClass` for argument `arg1`
 
 initial_hash = T.let({ a: 1.0, b: 3.0 }, T::Hash[Symbol, Float])
-transformed_hash = initial_hash.transform_values(&:to_s)
-T.assert_type!(transformed_hash, T::Hash[Symbol, String])
+
+transformed_keys_hash = initial_hash.transform_keys(&:to_s)
+T.assert_type!(transformed_keys_hash, T::Hash[String, Float])
+initial_hash.transform_keys.with_index do |k, i|
+  T.assert_type!(k, Symbol)
+  T.assert_type!(i, Integer)
+end
+
+transformed_keys_bang_hash = initial_hash.dup.transform_keys!(&:to_s)
+T.assert_type!(transformed_keys_bang_hash, T::Hash[String, Float])
+initial_hash.transform_keys!.with_index do |k, i|
+  T.assert_type!(k, Symbol)
+  T.assert_type!(i, Integer)
+end
+
+transformed_values_hash = initial_hash.transform_values(&:to_s)
+T.assert_type!(transformed_values_hash, T::Hash[Symbol, String])
 initial_hash.transform_values(&:size) # error: Method `size` does not exist on `Float`
 initial_hash.transform_values.with_index do |v, i|
+  T.assert_type!(v, Float)
+  T.assert_type!(i, Integer)
+end
+
+transformed_values_bang_hash = initial_hash.dup.transform_values!(&:to_s)
+T.assert_type!(transformed_values_bang_hash, T::Hash[Symbol, String])
+initial_hash.transform_values!.with_index do |v, i|
   T.assert_type!(v, Float)
   T.assert_type!(i, Integer)
 end

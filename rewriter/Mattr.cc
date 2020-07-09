@@ -21,8 +21,8 @@ static bool isLiteralFalse(const core::GlobalState &gs, const ast::TreePtr &node
 }
 
 static void addInstanceCounterPart(vector<ast::TreePtr> &sink, const ast::TreePtr &sig, const ast::TreePtr &def) {
-    sink.emplace_back(sig->deepCopy());
-    auto instanceDef = def->deepCopy();
+    sink.emplace_back(sig.deepCopy());
+    auto instanceDef = def.deepCopy();
     ENFORCE(ast::isa_tree<ast::MethodDef>(def));
     ast::cast_tree<ast::MethodDef>(instanceDef)->flags.isSelfMethod = false;
     ast::cast_tree<ast::MethodDef>(instanceDef)->flags.isRewriterSynthesized = true;

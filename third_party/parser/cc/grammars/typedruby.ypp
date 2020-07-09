@@ -21,10 +21,10 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::typedruby25& driver }
+%param { ruby_parser::typedruby27& driver }
 %parse-param { ruby_parser::SelfPtr self }
-%define api.namespace {ruby_parser::bison::typedruby25}
-%define api.prefix {typedruby25}
+%define api.namespace {ruby_parser::bison::typedruby27}
+%define api.prefix {typedruby27}
 %define api.value.type { union parser_value }
 %define api.token.constructor false
 %define parse.assert
@@ -212,7 +212,6 @@ using namespace std::string_literals;
   f_opt
   fitem
   for_var
-  fsym
   keyword_variable
   lhs
   literal
@@ -230,6 +229,7 @@ using namespace std::string_literals;
   qsymbols
   qwords
   regexp
+  ssym
   simple_numeric
   singleton
   stmt
@@ -392,7 +392,7 @@ union parser_value {
 %code {
 namespace ruby_parser {
 namespace bison {
-namespace typedruby25 {
+namespace typedruby27 {
 
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
@@ -417,7 +417,7 @@ void parser::error(const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
@@ -976,14 +976,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | op
                 | reswords
 
-            fsym: fname
+            fitem: fname
                     {
                       $$ = driver.build.symbol(self, $1);
                     }
                 | symbol
-
-           fitem: fsym
-                | dsym
 
       undef_list: fitem
                     {
@@ -2235,7 +2232,6 @@ opt_block_args_tail:
 
          literal: numeric
                 | symbol
-                | dsym
 
          strings: string
                     {
@@ -2424,13 +2420,16 @@ regexp_contents: // nothing
                 | backref
 
 
-          symbol: tSYMBOL
+          symbol: ssym
+                | dsym
+
+            ssym: tSYMBOL
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol(self, $1);
                     }
 
-            dsym: tSYMBEG xstring_contents tSTRING_END
+            dsym: tSYMBEG string_contents tSTRING_END
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol_compose(self, $1, $2, $3);

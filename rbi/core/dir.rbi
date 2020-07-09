@@ -127,7 +127,7 @@ class Dir < Object
   # ```
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Encoding,
     )
     .returns(T::Array[String])
@@ -137,7 +137,7 @@ class Dir < Object
   # Returns `true` if the named file is a directory, `false` otherwise.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -162,7 +162,7 @@ class Dir < Object
   # ```
   sig do
     params(
-        dir: String,
+        dir: T.any(String, Pathname),
         arg0: Encoding,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
@@ -170,7 +170,7 @@ class Dir < Object
   end
   sig do
     params(
-        dir: String,
+        dir: T.any(String, Pathname),
         arg0: Encoding,
     )
     .returns(T::Enumerator[String])
@@ -349,14 +349,14 @@ class Dir < Object
   # block, and `Dir::open` returns the value of the block.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Encoding,
     )
     .returns(Dir)
   end
   sig do
     type_parameters(:U).params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
         arg1: Encoding,
         blk: T.proc.params(arg0: Dir).returns(T.type_parameter(:U)),
     )
@@ -379,7 +379,7 @@ class Dir < Object
   # directory isn't empty.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -392,7 +392,7 @@ class Dir < Object
   # directory isn't empty.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -567,18 +567,11 @@ class Dir < Object
   # Equivalent to calling `Dir.glob([string,...], 0)`.
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
-        flags: Integer,
+        pattern: T.any(String, Pathname),
+        base: T.nilable(T.any(String, Pathname)),
+        blk: T.nilable(T.proc.params(arg0: String).returns(BasicObject))
     )
     .returns(T::Array[String])
   end
-  sig do
-    params(
-        pattern: T.any(String, T::Array[String]),
-        flags: Integer,
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(NilClass)
-  end
-  def self.[](pattern, flags=T.unsafe(nil), &blk); end
+  def self.[](*pattern, base: nil, &blk); end
 end
