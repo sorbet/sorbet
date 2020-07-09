@@ -1,5 +1,3 @@
 # typed: strict
 
-class A < PackageSpec # error: Redefinition of package `A`
-
-end
+class A < PackageSpec; end # error: Redefinition of package `A`

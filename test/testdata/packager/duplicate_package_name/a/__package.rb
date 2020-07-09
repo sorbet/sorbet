@@ -1,6 +1,4 @@
 # typed: strict
 # enable-packager: true
 
-class A < PackageSpec
-
-end
+class A < PackageSpec; end
