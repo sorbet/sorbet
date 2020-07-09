@@ -4,13 +4,13 @@
 class A < PackageSpec
   import 123
        # ^^^ error: Argument to `import` must be a constant
-       # ^^^ error: Expected `T.class_of(Object::PackageSpec)`
+       # ^^^ error: Expected `T.class_of(PackageSpec)`
   import "hello"
        # ^^^^^^^ error: Argument to `import` must be a constant
-       # ^^^^^^^ error: Expected `T.class_of(Object::PackageSpec)`
+       # ^^^^^^^ error: Expected `T.class_of(PackageSpec)`
   import method
        # ^^^^^^ error: Argument to `import` must be a constant
-       # ^^^^^^ error: Expected `T.class_of(Object::PackageSpec)`
+       # ^^^^^^ error: Expected `T.class_of(PackageSpec)`
        # ^^^^^^ error: Not enough arguments
   import REFERENCE # error: Cannot find package `REFERENCE`
        # ^^^^^^^^^ error: Unable to resolve constant `REFERENCE`

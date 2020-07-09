@@ -202,7 +202,6 @@ load(":pipeline_test.bzl", "pipeline_tests")
 pipeline_tests(
     "test_corpus",
     glob([
-        "testdata/**/folder_test",
         "testdata/**/*.rb",
         "testdata/**/*.exp",
         "testdata/**/*.exp.svg",

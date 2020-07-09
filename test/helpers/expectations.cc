@@ -68,8 +68,8 @@ string rbFile2BaseTestName(string rbFileName) {
     return testName;
 }
 
-bool addToExpectations(Expectations &exp, string_view parentDir, string_view filePath) {
-    if (rbFile2BaseTestName(string(filePath)) != exp.basename) {
+bool addToExpectations(Expectations &exp, string_view parentDir, string_view filePath, bool isDirectory) {
+    if (!isDirectory && rbFile2BaseTestName(string(filePath)) != exp.basename) {
         return false;
     }
 
@@ -128,7 +128,7 @@ Expectations getExpectationsForFolderTest(string_view dir) {
     exp.testName = string(dir.substr(0, dir.length() - 1));
 
     for (auto &s : names) {
-        addToExpectations(exp, dir, s);
+        addToExpectations(exp, dir, s, true);
     }
 
     populateSourceFileContents(exp);
@@ -141,7 +141,7 @@ vector<Expectations> listDir(string_view name) {
 
     Expectations current;
     for (auto &s : names) {
-        if (current.basename.empty() || !addToExpectations(current, name, s)) {
+        if (current.basename.empty() || !addToExpectations(current, name, s, false)) {
             // `s` doesn't belong to current Expectations, _or_ Expectations is new.
             if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
                 auto basename = rbFile2BaseTestName(s);

@@ -355,11 +355,11 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    id = enterClassSymbol(Loc::none(), core::Symbols::root(), core::Names::Constants::PackageRegistry());
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
 
     // PackageSpec is a class that can be subclassed.
-    id = enterClassSymbol(Loc::none(), core::Symbols::Object(), core::Names::Constants::PackageSpec());
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::PackageSpec());
 
@@ -698,7 +698,7 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
-} // namespace sorbet::core
+}
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
