@@ -71,7 +71,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
+void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const vector<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
                              int &nextId) {
     UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
@@ -261,7 +261,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
-    UnorderedSet<std::string> filenames;
+    vector<std::string> filenames;
     std::unique_ptr<LSPWrapper> lspWrapper;
 
     /** Test expectations. */
@@ -274,7 +274,7 @@ TEST_CASE("LSPTest") {
     int nextId = 0;
 
     for (auto &sourceFile : test.sourceFiles) {
-        filenames.insert(test.folder + sourceFile);
+        filenames.push_back(test.folder + sourceFile);
     }
 
     // Initialize lspWrapper.
