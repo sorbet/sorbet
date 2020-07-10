@@ -203,7 +203,7 @@ struct PackageInfoFinder {
             info = make_shared<PackageInfo>();
             // TODO(jvilk): Can getPackageName fail? e.g. empty name?
             info->name = getPackageName(ctx, classDef->name);
-            packageModuleName = classDef->name->deepCopy();
+            packageModuleName = classDef->name.deepCopy();
             info->loc = core::Loc(ctx.file, classDef->loc);
         } else {
             if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::MultiplePackagesInOneFile)) {
@@ -227,7 +227,7 @@ struct PackageInfoFinder {
             // include <PackageRegistry>::MangledPackageName::Path::To::Item
             extendStatements.emplace_back(
                 ast::MK::Send1(klass->loc, ast::MK::Self(klass->loc), core::Names::include(),
-                               name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
+                               name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope.deepCopy()))));
         }
 
         // Use the loc of the `export_methods` call so `include` errors goes to the right place.
@@ -287,7 +287,7 @@ struct PackageInfoFinder {
             // Item = <PackageRegistry>::MangledPackageName::Path::To::Item
             exportedItems.emplace_back(
                 ast::MK::Assign(core::LocOffsets::none(), name2Expr(klass->cnst),
-                                name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope->deepCopy()))));
+                                name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope.deepCopy()))));
         }
 
         if (!exportedMethods.empty()) {
@@ -414,7 +414,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         }
 
         const auto &found = *it;
-        importedPackages.emplace_back(found.second->exportModule->deepCopy());
+        importedPackages.emplace_back(found.second->exportModule.deepCopy());
     }
 
     // Include Kernel in the package.
