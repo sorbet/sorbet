@@ -78,6 +78,13 @@ run_cmd() {{
 run_cmd sed -i.bak -e 's@^COMMONOBJS\( *\)=@COMMONOBJS\\1= {extra_srcs_object_files}@' common.mk
 run_cmd rm -f common.mk.bak
 
+# This is a hack to get C level backtraces working. (The default autoconf test
+# for backtraces uses a sigaltstack size that is too small, so the SIGSEGV
+# signal handler itself causes a SIGSEGV). This value was plucked from signal.c:
+# https://github.com/ruby/ruby/blob/v2_6_5/signal.c#L568
+run_cmd sed -i.bak -e 's@SIGSTKSZ@16*1024@' configure
+run_cmd rm -f configure.bak
+
 # This is a hack. The configure script builds up a command for compiling C
 # files that includes `-fvisibility=hidden`. To override it, our flag needs to
 # come after, so we inject a flag right before the `-o` option that comes near
