@@ -4,6 +4,8 @@ class T::Enum
   extend T::Props::CustomType
 
   ## Enum class methods ##
+
+  # All the values defined in the Enum class
   sig {returns(T::Array[T.attached_class])}
   def self.values; end
 
