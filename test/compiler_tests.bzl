@@ -304,7 +304,7 @@ def _validate_exp_test_impl(ctx):
     validate_exp = ctx.attr._validate_exp[DefaultInfo]
 
     runfiles = ctx.runfiles(
-        ctx.files.srcs + ctx.files.exp_files + [output.build, output.log],
+        ctx.files.srcs + ctx.files.exp_files + [output.stdout, output.build, output.log],
     )
 
     runfiles = runfiles.merge(ctx.attr._validate_exp[DefaultInfo].default_runfiles)
