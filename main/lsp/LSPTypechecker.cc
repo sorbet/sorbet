@@ -556,7 +556,8 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
-        noop.updatedFileIndexes.push_back({index.tree.deepCopy(), index.file});
+        // Note: `index.tree` can be null if the file is a stdlib file.
+        noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
     return noop;
@@ -584,12 +585,31 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
 vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
+
     for (auto fref : frefs) {
+        if (fref.data(*gs).sourceType == core::File::Type::Package) {
+            // Will be added in second loop.
+            ENFORCE(config->opts.stripePackages);
+            continue;
+        }
+
         auto &indexed = getIndexed(fref);
         if (indexed.tree) {
             updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
+
+    if (config->opts.stripePackages) {
+        // We must include every package file to resolve these files properly.
+        for (u4 i = 1; i < gs->filesUsed(); i++) {
+            core::FileRef fref(i);
+            if (fref.data(*gs).sourceType == core::File::Type::Package) {
+                auto &indexed = getIndexed(fref);
+                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            }
+        }
+    }
+
     return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
 }
 

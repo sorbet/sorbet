@@ -671,7 +671,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
                           "str\n'hi'\nend\nsig{returns(Integer)}\ndef int\n1\nend\nend",
                           4, false, 0));
 
-    // // Send a no-op to clear out the pipeline.
+    // Send a no-op to clear out the pipeline.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 

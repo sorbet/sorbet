@@ -460,7 +460,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     ENFORCE(rootKlass != nullptr);
     rootKlass->rhs.emplace_back(move(packageNamespace));
     return file;
-} // namespace
+}
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
     auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
@@ -472,6 +472,24 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
     rootKlass->rhs.clear();
     rootKlass->rhs.emplace_back(move(moduleWrapper));
     return file;
+}
+
+// We can't run packages without having all package ASTs. Assert that they are all present.
+bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+    UnorderedSet<core::FileRef> allPackages;
+    for (u4 i = 1; i < gs.filesUsed(); i++) {
+        core::FileRef fref(i);
+        if (fref.data(gs).sourceType == core::File::Type::Package) {
+            allPackages.insert(fref);
+        }
+    }
+
+    for (const auto &f : files) {
+        if (f.file.data(gs).sourceType == core::File::Type::Package) {
+            allPackages.erase(f.file);
+        }
+    }
+    return allPackages.empty();
 }
 
 } // namespace
@@ -602,6 +620,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
+    ENFORCE(checkContainsAllPackages(gs, files));
     auto namesUsed = gs.namesUsed();
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
     files = Packager::run(gs, *emptyWorkers, move(files));
