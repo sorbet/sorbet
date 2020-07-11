@@ -1974,7 +1974,7 @@ module Kernel
   # If a file is loaded `true` is returned and false otherwise.
   sig do
     params(
-        feature: String,
+        feature: T.any(String, Pathname)
     )
     .returns(T::Boolean)
   end
