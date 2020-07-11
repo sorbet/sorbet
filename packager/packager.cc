@@ -98,6 +98,18 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
     return target;
 }
 
+core::LocOffsets firstLineOfFile(core::Context ctx) {
+    auto file = ctx.file;
+    core::LocOffsets firstLine{0, 0};
+    // Line 0 is reserved.
+    if (file.data(ctx).lineCount() > 1) {
+        firstLine.endLoc = static_cast<u4>(file.data(ctx).lineBreaks()[1]);
+    } else {
+        firstLine.endLoc = static_cast<u4>(file.data(ctx).source().length());
+    }
+    return firstLine;
+}
+
 struct PackageInfoFinder {
     shared_ptr<PackageInfo> info = nullptr;
     ast::TreePtr packageModuleName;
@@ -201,7 +213,6 @@ struct PackageInfoFinder {
             }
         } else if (info == nullptr) {
             info = make_shared<PackageInfo>();
-            // TODO(jvilk): Can getPackageName fail? e.g. empty name?
             info->name = getPackageName(ctx, classDef->name);
             packageModuleName = classDef->name.deepCopy();
             info->loc = core::Loc(ctx.file, classDef->loc);
@@ -272,9 +283,8 @@ struct PackageInfoFinder {
     //   end
     void finalize(core::MutableContext ctx) {
         if (info == nullptr) {
-            if (auto e = ctx.beginError(core::LocOffsets{0, static_cast<u4>(ctx.file.data(ctx).source().length())},
-                                        core::errors::Packager::PackageSpecMissingFromPackage)) {
-                e.setHeader("Package file must contain a PackageSpec");
+            if (auto e = ctx.beginError(firstLineOfFile(ctx), core::errors::Packager::InvalidPackageDefinition)) {
+                e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
             }
             return;
         }
@@ -406,6 +416,13 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                                const UnorderedMap<core::NameRef, shared_ptr<PackageInfo>> &packageInfoByMangledName) {
     ast::ClassDef::RHS_store importedPackages;
 
+    // Sanity check: Packages _must_ be typed: strict
+    if (file.file.data(ctx).strictLevel != core::StrictLevel::Strict) {
+        if (auto e = ctx.beginError(firstLineOfFile(ctx), core::errors::Packager::PackageFileMustBeStrict)) {
+            e.setHeader("Package files must be typed: strict");
+        }
+    }
+
     UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
     for (auto imported : package.importedPackageNames) {
         auto it = packageInfoByMangledName.find(imported.mangledName);
@@ -443,7 +460,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     ENFORCE(rootKlass != nullptr);
     rootKlass->rhs.emplace_back(move(packageNamespace));
     return file;
-}
+} // namespace
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
     auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
@@ -483,7 +500,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 auto pkg = getPackageInfo(ctx, file);
-                // TODO: Warn if no package found.
+                // getPackageInfo emits an error if the package is malformed.
                 if (pkg != nullptr) {
                     auto &existing = packageInfoByMangledName[pkg->name.mangledName];
                     if (existing != nullptr) {
