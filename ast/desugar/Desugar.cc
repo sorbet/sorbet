@@ -786,13 +786,11 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 auto zeroLengthLoc = loc.copyWithZeroLength();
                 auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
 
-                // NOTE(dug): We actually desugar into a call to `== nil`. If an
-                // object has overridden `==`, this technically will not match
-                // Ruby's behavior.
-
                 auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
-                auto cond = MK::Send1(zeroLengthLoc, MK::Local(zeroLengthRecvLoc, tempRecv), core::Names::eqeq(),
-                                      MK::Nil(zeroLengthLoc));
+
+                // Just compare with `NilClass` to avoid potentially calling into a class-defined `==`
+                auto cond = MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
+                                      core::Names::tripleEq(), MK::Local(zeroLengthRecvLoc, tempRecv));
 
                 unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));

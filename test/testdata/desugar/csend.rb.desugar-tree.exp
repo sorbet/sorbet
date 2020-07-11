@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       begin
         <assignTemp>$2 = <self>.foo()
-        if <assignTemp>$2.==(nil)
+        if ::NilClass.===(<assignTemp>$2)
           nil
         else
           <assignTemp>$2.bar()
@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$3 = <self>.foo()
-        if <assignTemp>$3.==(nil)
+        if ::NilClass.===(<assignTemp>$3)
           nil
         else
           <assignTemp>$3.bar() do |x|
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$4 = <self>.foo()
-        if <assignTemp>$4.==(nil)
+        if ::NilClass.===(<assignTemp>$4)
           nil
         else
           <assignTemp>$4.bar=(5)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$5 = <self>.foo()
-        if <assignTemp>$5.==(nil)
+        if ::NilClass.===(<assignTemp>$5)
           nil
         else
           begin
@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$7 = <self>.foo()
-        if <assignTemp>$7.==(nil)
+        if ::NilClass.===(<assignTemp>$7)
           nil
         else
           begin
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$10 = <self>.foo()
-        if <assignTemp>$10.==(nil)
+        if ::NilClass.===(<assignTemp>$10)
           nil
         else
           begin
@@ -75,7 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     <assignTemp>$2 = <emptyTree>::<C BasicObject>.new()
-    if <assignTemp>$2.==(nil)
+    if ::NilClass.===(<assignTemp>$2)
       nil
     else
       <assignTemp>$2.__id__()
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<<C <todo sym>>>(x, &<blk>)
       begin
         <assignTemp>$2 = x
-        if <assignTemp>$2.==(nil)
+        if ::NilClass.===(<assignTemp>$2)
           nil
         else
           <assignTemp>$2.|(true)
