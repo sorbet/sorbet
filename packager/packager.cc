@@ -271,8 +271,11 @@ struct PackageInfoFinder {
     //     extend <PackageRegistry>::Foo_Bar_Package::<PackageMethods>
     //   end
     void finalize(core::MutableContext ctx) {
-        // TODO: Error if no package spec.
         if (info == nullptr) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, static_cast<u4>(ctx.file.data(ctx).source().length())},
+                                        core::errors::Packager::PackageSpecMissingFromPackage)) {
+                e.setHeader("Package file must contain a PackageSpec");
+            }
             return;
         }
         ENFORCE(this->packageModuleName != nullptr);

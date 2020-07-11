@@ -1,0 +1,5 @@
+__package.rb:1: Package file must contain a PackageSpec https://srb.help/8011
+     1 |# typed: strict
+     2 |# This package doesn't have a packagespec defined. It will error.
+     3 |
+Errors: 1
