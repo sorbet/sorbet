@@ -18,6 +18,12 @@ def main
                     # ^ hover: sig {returns(String)}
 
   # Safenav
+  dog = Dog.new
+  breed = dog&.breed # error: This code is unreachable
+# ^ hover: String
+        # ^ hover: Dog
+            # ^ hover: sig {returns(String)}
+
   maybeDog = T.let(nil, T.nilable(Dog))
   maybeBreed = maybeDog&.breed
 # ^ hover: T.nilable(String)
