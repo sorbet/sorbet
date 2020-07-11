@@ -27,7 +27,7 @@ rescue TypeError => exn
   # runtime sig wrapping code). So the logic below basically says that "this
   # code doesn't crash both when interpretted and when compiled," rather than
   # "the interpretted and compiled behavior are identical"
-  first_line = exn&.backtrace&.fetch(0)
+  first_line = exn.backtrace&.fetch(0)
   if first_line =~ /call_validation_error_handler_default/
     puts 'ok'
   elsif first_line =~ /:14:in `takes_string'/
