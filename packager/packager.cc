@@ -403,7 +403,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                                const UnorderedMap<core::NameRef, shared_ptr<PackageInfo>> &packageInfoByMangledName) {
     ast::ClassDef::RHS_store importedPackages;
 
-    // TODO: Don't allow duplicate imports.
+    UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
     for (auto imported : package.importedPackageNames) {
         auto it = packageInfoByMangledName.find(imported.mangledName);
         if (it == packageInfoByMangledName.end()) {
@@ -413,8 +413,18 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             continue;
         }
 
-        const auto &found = *it;
-        importedPackages.emplace_back(found.second->exportModule.deepCopy());
+        if (importedNames.contains(imported.mangledName)) {
+            if (auto e = ctx.beginError(imported.loc, core::errors::Packager::InvalidImportOrExport)) {
+                e.setHeader("Duplicate package import `{}`",
+                            absl::StrJoin(imported.fullName, "::", NameFormatter(ctx)));
+                e.addErrorLine(core::Loc(ctx.file, importedNames[imported.mangledName]),
+                               "Previous package import found here");
+            }
+        } else {
+            importedNames[imported.mangledName] = imported.loc;
+            const auto &found = *it;
+            importedPackages.emplace_back(found.second->exportModule.deepCopy());
+        }
     }
 
     // Include Kernel in the package.
