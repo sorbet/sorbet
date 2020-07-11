@@ -464,13 +464,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
     auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
-    if (rootKlass == nullptr) {
-        // TODO: Why does this happen?
-        if (auto e = ctx.beginError(file.tree->loc, core::errors::Packager::PackageNotFound)) {
-            e.setHeader("What's going on?");
-        }
-        return file;
-    }
     ENFORCE(rootKlass != nullptr);
     auto moduleWrapper =
         ast::MK::ClassOrModule(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
@@ -560,7 +553,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     filesProcessed++;
                     if (job.file.data(gs).sourceType == core::File::Type::Normal) {
                         // Check if file path is part of a package.
-                        // TODO(jvilk): Could use a radix tree to make this lookup more efficient.
+                        // TODO(jvilk): Could use a prefix array to make this lookup more efficient.
                         auto path = job.file.data(gs).path();
                         bool packaged = false;
                         core::Context ctx(gs, core::Symbols::root(), job.file);

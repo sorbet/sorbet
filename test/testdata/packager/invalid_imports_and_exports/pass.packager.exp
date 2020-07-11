@@ -10,6 +10,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.import(<emptyTree>::<C B>)
 
+    <self>.import(<emptyTree>::<C B>)
+
     <self>.export(123)
 
     <self>.export("hello")
