@@ -1,6 +1,7 @@
 #include "packager/packager.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
@@ -49,12 +50,27 @@ public:
 };
 
 // Gets the package name in `name` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &name) {
+PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &name, bool errorOnInvalidName = false) {
     PackageName pName;
     pName.loc = name->loc;
 
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(name);
     while (constLit != nullptr) {
+        if (errorOnInvalidName && absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
+            // By forbidding package names to have an underscore, we can trivially convert between mangled names and
+            // unmangled names by replacing `_` with `::`.
+            if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
+                e.setHeader("Package names cannot contain an underscore");
+                auto replacement = absl::StrReplaceAll(constLit->cnst.data(ctx)->shortName(ctx), {{"_", ""}});
+                auto nameLoc = constLit->loc;
+                // cnst is the last characters in the constant literal
+                nameLoc.beginLoc = nameLoc.endLoc - constLit->cnst.data(ctx)->shortName(ctx).size();
+
+                e.addAutocorrect(core::AutocorrectSuggestion{
+                    fmt::format("Replace `{}` with `{}`", constLit->cnst.data(ctx)->shortName(ctx), replacement),
+                    {core::AutocorrectSuggestion::Edit{core::Loc(ctx.file, nameLoc), replacement}}});
+            }
+        }
         pName.fullName.emplace_back(constLit->cnst);
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
@@ -225,7 +241,7 @@ struct PackageInfoFinder {
             }
         } else if (info == nullptr) {
             info = make_shared<PackageInfo>();
-            info->name = getPackageName(ctx, classDef->name);
+            info->name = getPackageName(ctx, classDef->name, true);
             info->loc = core::Loc(ctx.file, classDef->loc);
         } else {
             if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::MultiplePackagesInOneFile)) {

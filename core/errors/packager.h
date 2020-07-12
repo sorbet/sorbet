@@ -14,5 +14,6 @@ constexpr ErrorClass MultipleExportMethodsCalls{8008, StrictLevel::False};
 constexpr ErrorClass NoSelfImport{8009, StrictLevel::False};
 constexpr ErrorClass InvalidPackageExpression{8010, StrictLevel::False};
 constexpr ErrorClass PackageFileMustBeStrict{8011, StrictLevel::False};
+constexpr ErrorClass InvalidPackageName{8012, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
