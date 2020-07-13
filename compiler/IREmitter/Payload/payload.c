@@ -1495,7 +1495,11 @@ VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE m
 
     *exceptionValue = RUBY_Qnil;
 
-    // Restore the exception context. When running the body of an excep
+    // Restore the exception context. When running the body of a begin/end the
+    // value of exceptionContext is nil, indicating that no exception is being
+    // handled by this function. However, when the rescue function is being run,
+    // the exception value will be non-nil, ensuring that the exception state
+    // is restored in the context of the rescue function.
     if (exceptionContext != RUBY_Qnil) {
         rb_set_errinfo(exceptionContext);
     }
