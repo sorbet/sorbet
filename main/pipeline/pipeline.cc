@@ -150,7 +150,7 @@ ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<pa
         print.DesugarTree.fmt("{}\n", ast->toStringWithTabs(gs, 0));
     }
     if (print.DesugarTreeRaw.enabled) {
-        print.DesugarTreeRaw.fmt("{}\n", ast->showRaw(gs));
+        print.DesugarTreeRaw.fmt("{}\n", ast.showRaw(gs));
     }
     return ast;
 }
@@ -204,7 +204,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(lgs, 0));
         }
         if (print.RewriterTreeRaw.enabled) {
-            print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(lgs));
+            print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
@@ -264,7 +264,7 @@ indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::F
                 print.RewriterTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
             }
             if (print.RewriterTreeRaw.enabled) {
-                print.RewriterTreeRaw.fmt("{}\n", tree->showRaw(gs));
+                print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(gs));
             }
 
             tree = runLocalVars(gs, ast::ParsedFile{move(tree), file}).tree;
@@ -276,7 +276,7 @@ indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::F
             print.IndexTree.fmt("{}\n", tree->toStringWithTabs(gs, 0));
         }
         if (print.IndexTreeRaw.enabled) {
-            print.IndexTreeRaw.fmt("{}\n", tree->showRaw(gs));
+            print.IndexTreeRaw.fmt("{}\n", tree.showRaw(gs));
         }
         if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyPluginFile(file);
@@ -691,7 +691,7 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
         opts.print.FlattenTree.fmt("{}\n", resolved.tree->toString(ctx));
     }
     if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
-        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree->showRaw(ctx));
+        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree.showRaw(ctx));
     }
 
     if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -868,7 +868,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 opts.print.NameTree.fmt("{}\n", named.tree->toStringWithTabs(*gs, 0));
             }
             if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree->showRaw(*gs));
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
             }
         }
 
@@ -921,7 +921,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 opts.print.ResolveTree.fmt("{}\n", resolved.tree->toString(*gs));
             }
             if (opts.print.ResolveTreeRaw.enabled) {
-                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree->showRaw(*gs));
+                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree.showRaw(*gs));
             }
         }
     }

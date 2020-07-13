@@ -220,6 +220,8 @@ public:
 
     std::string nodeName() const;
 
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+
     bool isSelfReference() const;
 
     void _sanityCheck() const;
@@ -237,7 +239,6 @@ public:
     std::string toString(const core::GlobalState &gs) const {
         return toStringWithTabs(gs);
     }
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
     const core::LocOffsets loc;
 };
 CheckSize(Expression, 16, 8);
