@@ -107,8 +107,8 @@ ast::TreePtr name2Expr(core::NameRef name, ast::TreePtr scope = ast::MK::EmptyTr
 
 ast::TreePtr PackageName::getFullNameLiteral(core::LocOffsets loc) const {
     ast::TreePtr name = ast::MK::EmptyTree();
-    for (auto it = fullName.rbegin(); it != fullName.rend(); ++it) {
-        name = name2Expr(*it, move(name));
+    for (auto namePart : fullName) {
+        name = name2Expr(namePart, move(name));
     }
     // Outer name should have the provided loc.
     if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(name)) {
