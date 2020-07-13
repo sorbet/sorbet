@@ -225,16 +225,16 @@ sorbet_rb_int_minus.exit119:                      ; preds = %sorbet_rb_int_lt.ex
   %17 = getelementptr inbounds i64, i64* %14, i64 5
   store i64* %17, i64** %9, align 8, !tbaa !12
   %18 = add nsw i64 %rawArg_n, -2, !dbg !35
-  store i64 %18, i64* %callArgsAddr, align 8, !dbg !32
+  store i64 %18, i64* %callArgs0Addr, align 8, !dbg !32
   %19 = tail call i32 @ruby_stack_check() #15, !dbg !32
-  %directSendResult = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw), !dbg !32
+  %directSendResult = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgs0Addr, i64 %selfRaw), !dbg !32
   %20 = add nsw i64 %rawArg_n, -4, !dbg !36
-  store i64 %20, i64* %callArgsAddr, align 8, !dbg !37
+  store i64 %20, i64* %callArgs0Addr, align 8, !dbg !37
   %21 = tail call i32 @ruby_stack_check() #15, !dbg !37
-  %directSendResult78 = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr, i64 %selfRaw), !dbg !37
+  %directSendResult78 = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgs0Addr, i64 %selfRaw), !dbg !37
   %22 = and i64 %directSendResult, 1, !dbg !32
   %23 = icmp eq i64 %22, 0, !dbg !32
-  store i64 %directSendResult78, i64* %callArgsAddr, align 8, !dbg !32
+  store i64 %directSendResult78, i64* %callArgs0Addr, align 8, !dbg !32
   br i1 %23, label %"alternativeCallIntrinsic_Integer_+", label %"fastSymCallIntrinsic_Integer_+", !dbg !32, !prof !38
 
 BB4:                                              ; preds = %51, %46, %55, %"alternativeCallIntrinsic_Integer_+"
@@ -291,8 +291,8 @@ sorbet_isa_class_of.exit:                         ; preds = %36
 sorbet_rb_int_lt.exit:                            ; preds = %sorbet_isa_class_of.exit, %31
   %42 = getelementptr inbounds i64, i64* %14, i64 2, !dbg !42
   store i64* %42, i64** %9, align 8, !dbg !42, !tbaa !12
-  %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !43
-  store i64 7, i64* %callArgsAddr, align 8, !dbg !43
+  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !43
+  store i64 7, i64* %callArgs0Addr, align 8, !dbg !43
   %43 = icmp sgt i64 %rawArg_n, 5, !dbg !43
   br i1 %43, label %sorbet_rb_int_minus.exit119, label %BB4.thread, !dbg !43
 
@@ -301,7 +301,7 @@ codeRepl126:                                      ; preds = %36, %sorbet_isa_cla
   unreachable
 
 "alternativeCallIntrinsic_Integer_+":             ; preds = %sorbet_rb_int_minus.exit119
-  %"call_via_vm_+" = call i64 @sorbet_callFunc(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+"), !dbg !32
+  %"call_via_vm_+" = call i64 @sorbet_callFunc(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+"), !dbg !32
   br label %BB4, !dbg !32
 
 "fastSymCallIntrinsic_Integer_+":                 ; preds = %sorbet_rb_int_minus.exit119
@@ -524,14 +524,14 @@ codeRepl4:                                        ; preds = %sorbet_readRealpath
   store i64 %107, i64* %109, align 8, !dbg !70
   %110 = getelementptr inbounds i64, i64* %90, i64 3, !dbg !70
   store i64* %110, i64** %85, align 8, !dbg !70, !tbaa !12
-  %rawSym27.i.i = tail call i64 @rb_id2sym(i64 %rubyId_fib.i.i1) #15, !dbg !68
+  %rawSym26.i.i = tail call i64 @rb_id2sym(i64 %rubyId_fib.i.i1) #15, !dbg !68
   tail call void @rb_define_singleton_method(i64 %63, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_HasFib.fib to i64 (...)*), i32 -1) #15, !dbg !68
   %111 = getelementptr inbounds i64, i64* %51, i64 12
   store i64* %111, i64** %46, align 8, !tbaa !12
-  %callArgsAddr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !71
-  store i64 69, i64* %callArgsAddr.i, align 8, !dbg !71
+  %callArgs0Addr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !71
+  store i64 69, i64* %callArgs0Addr.i, align 8, !dbg !71
   %112 = tail call i32 @ruby_stack_check() #15, !dbg !71
-  %directSendResult.i = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgsAddr.i, i64 %63) #15, !dbg !71
+  %directSendResult.i = call i64 @func_HasFib.fib(i32 1, i64* nonnull %callArgs0Addr.i, i64 %63) #15, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %36)
   ret void
 }

@@ -250,10 +250,10 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %41 = tail call i64 @sorbet_getConstantEpoch(), !dbg !36
   %guardUpdated = icmp eq i64 %40, %41, !dbg !36
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !36
-  %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !36
-  store i64 %39, i64* %callArgsAddr, align 8, !dbg !36
+  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !36
+  store i64 %39, i64* %callArgs0Addr, align 8, !dbg !36
   %42 = load i64, i64* @rb_mKernel, align 8, !dbg !36
-  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %42, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts), !dbg !36
+  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %42, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts), !dbg !36
   %43 = getelementptr inbounds i64, i64* %24, i64 3, !dbg !36
   store i64* %43, i64** %19, align 8, !dbg !36, !tbaa !18
   %44 = tail call i64 @rb_block_call(i64 21, i64 %rubyId_times, i32 0, i64* null, i64 (...)* bitcast (i64 (i64, i64, i32, i64*, i64)* @"func_Object#foo$block_1" to i64 (...)*), i64 %4) #13, !dbg !37
@@ -333,10 +333,10 @@ fillRequiredArgs:                                 ; preds = %sorbet_isa_Array.ex
   %35 = tail call i64 @sorbet_getConstantEpoch(), !dbg !42
   %guardUpdated = icmp eq i64 %34, %35, !dbg !42
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !42
-  %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !42
-  store i64 %33, i64* %callArgsAddr, align 8, !dbg !42
+  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !42
+  store i64 %33, i64* %callArgs0Addr, align 8, !dbg !42
   %36 = load i64, i64* @rb_mKernel, align 8, !dbg !42
-  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %36, i64 %rubyId_puts, i32 1, i64* nonnull %callArgsAddr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.1), !dbg !42
+  %call_via_vm_puts = call i64 @sorbet_callFunc(i64 %36, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.1), !dbg !42
   store i64* %27, i64** %9, align 8, !dbg !42, !tbaa !18
   ret i64 %call_via_vm_puts, !dbg !45
 }

@@ -204,8 +204,8 @@ llvm::Value *IREmitterHelpers::fillSendArgArray(CompilerState &cs, llvm::IRBuild
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
             auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
-            builder.CreateStore(var,
-                                builder.CreateGEP(irctx.sendArgArrayByBlock[rubyBlockId], indices, "callArgsAddr"));
+            builder.CreateStore(var, builder.CreateGEP(irctx.sendArgArrayByBlock[rubyBlockId], indices,
+                                                       fmt::format("callArgs{}Addr", argId)));
         }
     }
 

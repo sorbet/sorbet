@@ -200,9 +200,9 @@ sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArray
 
 afterSend:                                        ; preds = %sorbet_isa_Array.exit, %functionEntryInitializers, %26, %argArrayExpandArrayTest
   store i64* %15, i64** %9, align 8, !tbaa !13
-  %callArgsAddr16 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0, !dbg !33
-  store i64 %rubyStr_THX1138., i64* %callArgsAddr16, align 8, !dbg !33
-  %call_via_vm_match = call i64 @sorbet_callFunc(i64 %"rubyRegexp_(.)(.)(\5Cd+)(\5Cd)", i64 %rubyId_match, i32 1, i64* nonnull %callArgsAddr16, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_match), !dbg !33
+  %callArgs0Addr15 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0, !dbg !33
+  store i64 %rubyStr_THX1138., i64* %callArgs0Addr15, align 8, !dbg !33
+  %call_via_vm_match = call i64 @sorbet_callFunc(i64 %"rubyRegexp_(.)(.)(\5Cd+)(\5Cd)", i64 %rubyId_match, i32 1, i64* nonnull %callArgs0Addr15, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_match), !dbg !33
   ret i64 %call_via_vm_match, !dbg !35
 }
 

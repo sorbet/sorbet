@@ -401,11 +401,11 @@ sorbet_readRealpath.exit:                         ; preds = %7
   br i1 %61, label %typeTestSuccess.i, label %codeRepl, !dbg !58, !prof !59
 
 typeTestSuccess.i:                                ; preds = %sorbet_readRealpath.exit
-  %callArgsAddr.i = getelementptr inbounds <2 x i64>, <2 x i64>* %callArgs.i, i64 0, i64 0, !dbg !60
+  %callArgs0Addr.i = getelementptr inbounds <2 x i64>, <2 x i64>* %callArgs.i, i64 0, i64 0, !dbg !60
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %callArgs.i, align 16, !dbg !60
-  %62 = call i64 @rb_ary_new_from_values(i64 2, i64* nonnull %callArgsAddr.i) #11, !dbg !60
-  store i64 %62, i64* %callArgsAddr.i, align 16, !dbg !58
-  %63 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgsAddr.i) #11, !dbg !58
+  %62 = call i64 @rb_ary_new_from_values(i64 2, i64* nonnull %callArgs0Addr.i) #11, !dbg !60
+  store i64 %62, i64* %callArgs0Addr.i, align 16, !dbg !58
+  %63 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgs0Addr.i) #11, !dbg !58
   %64 = and i64 %63, 7, !dbg !58
   %65 = icmp ne i64 %64, 0, !dbg !58
   %66 = and i64 %63, -9, !dbg !58

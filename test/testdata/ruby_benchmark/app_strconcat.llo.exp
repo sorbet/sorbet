@@ -222,12 +222,12 @@ sorbet_readRealpath.exit:                         ; preds = %6
 
 BB2.preheader.i:                                  ; preds = %sorbet_readRealpath.exit
   %47 = getelementptr inbounds i64, i64* %41, i64 2
-  %callArgsAddr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 0, !dbg !48
+  %callArgs0Addr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 0, !dbg !48
   %48 = getelementptr inbounds i64, i64* %41, i64 3
-  %callArgsAddr98.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 1, !dbg !48
-  %callArgsAddr100.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 2, !dbg !48
-  %callArgsAddr102.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 3, !dbg !48
-  %callArgsAddr104.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 4, !dbg !48
+  %callArgs1Addr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 1, !dbg !48
+  %callArgs2Addr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 2, !dbg !48
+  %callArgs3Addr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 3, !dbg !48
+  %callArgs4Addr.i = getelementptr inbounds [5 x i64], [5 x i64]* %callArgs.i, i64 0, i64 4, !dbg !48
   %49 = getelementptr inbounds i64, i64* %41, i64 4, !dbg !48
   br label %BB2.i, !dbg !39
 
@@ -236,7 +236,7 @@ BB2.i:                                            ; preds = %BB2.i.backedge, %BB
   store i64* %47, i64** %36, align 8, !tbaa !10
   %50 = and i64 %i.sroa.0.0.i, 1, !dbg !39
   %51 = icmp ne i64 %50, 0, !dbg !39
-  store i64 4000001, i64* %callArgsAddr.i, align 8, !dbg !39
+  store i64 4000001, i64* %callArgs0Addr.i, align 8, !dbg !39
   br i1 %51, label %"fastSymCallIntrinsic_Integer_<.i", label %"alternativeCallIntrinsic_Integer_<.i", !dbg !39, !prof !47
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
@@ -250,7 +250,7 @@ afterSend.i:                                      ; preds = %"fastSymCallIntrins
   br i1 %53, label %"func_<root>.<static-init>$153.exit", label %56, !dbg !39
 
 "alternativeCallIntrinsic_Integer_<.i":           ; preds = %BB2.i
-  %"call_via_vm_<.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_<.i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_<") #10, !dbg !39
+  %"call_via_vm_<.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_<.i", i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_<") #10, !dbg !39
   br label %afterSend.i, !dbg !39
 
 "fastSymCallIntrinsic_Integer_<.i":               ; preds = %BB2.i
@@ -260,16 +260,16 @@ afterSend.i:                                      ; preds = %"fastSymCallIntrins
 
 56:                                               ; preds = %afterSend.i
   store i64* %48, i64** %36, align 8, !tbaa !10
-  store i64 5, i64* %callArgsAddr.i, align 8, !dbg !49
-  store i64 %"rubyStr_ .i", i64* %callArgsAddr98.i, align 8, !dbg !49
-  store i64 5, i64* %callArgsAddr100.i, align 8, !dbg !49
-  store i64 %"rubyStr_ .i", i64* %callArgsAddr102.i, align 8, !dbg !49
-  store i64 5, i64* %callArgsAddr104.i, align 8, !dbg !49
+  store i64 5, i64* %callArgs0Addr.i, align 8, !dbg !49
+  store i64 %"rubyStr_ .i", i64* %callArgs1Addr.i, align 8, !dbg !49
+  store i64 5, i64* %callArgs2Addr.i, align 8, !dbg !49
+  store i64 %"rubyStr_ .i", i64* %callArgs3Addr.i, align 8, !dbg !49
+  store i64 5, i64* %callArgs4Addr.i, align 8, !dbg !49
   %57 = call i64 @rb_funcallv(i64 5, i64 3217, i32 0, i64* null) #10, !dbg !49
-  %58 = load i64, i64* %callArgsAddr.i, align 8, !dbg !49, !tbaa !4
+  %58 = load i64, i64* %callArgs0Addr.i, align 8, !dbg !49, !tbaa !4
   %59 = call i64 @rb_obj_as_string_result(i64 %57, i64 %58) #10, !dbg !49
-  store i64 %59, i64* %callArgsAddr.i, align 8, !dbg !49, !tbaa !4
-  %60 = load i64, i64* %callArgsAddr98.i, align 8, !dbg !49, !tbaa !4
+  store i64 %59, i64* %callArgs0Addr.i, align 8, !dbg !49, !tbaa !4
+  %60 = load i64, i64* %callArgs1Addr.i, align 8, !dbg !49, !tbaa !4
   %61 = and i64 %60, 7, !dbg !49
   %62 = icmp ne i64 %61, 0, !dbg !49
   %63 = and i64 %60, -9, !dbg !49
@@ -277,24 +277,24 @@ afterSend.i:                                      ; preds = %"fastSymCallIntrins
   %65 = or i1 %62, %64, !dbg !49
   br i1 %65, label %79, label %73, !dbg !49
 
-"alternativeCallIntrinsic_Integer_+111.i":        ; preds = %sorbet_stringInterpolate.exit.i
-  %"call_via_vm_+123.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_+.i", i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+.3") #10, !dbg !50
+"alternativeCallIntrinsic_Integer_+107.i":        ; preds = %sorbet_stringInterpolate.exit.i
+  %"call_via_vm_+119.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_+.i", i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+.3") #10, !dbg !50
   br label %BB2.i.backedge, !dbg !50
 
-"fastSymCallIntrinsic_Integer_+112.i":            ; preds = %sorbet_stringInterpolate.exit.i
+"fastSymCallIntrinsic_Integer_+108.i":            ; preds = %sorbet_stringInterpolate.exit.i
   %66 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 2) #10, !dbg !50
   %67 = extractvalue { i64, i1 } %66, 1, !dbg !50
   %68 = extractvalue { i64, i1 } %66, 0, !dbg !50
   br i1 %67, label %69, label %BB2.i.backedge, !dbg !50
 
-69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+112.i"
+69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+108.i"
   %70 = ashr i64 %68, 1, !dbg !50
   %71 = xor i64 %70, -9223372036854775808, !dbg !50
   %72 = call i64 @rb_int2big(i64 %71) #10, !dbg !50
   br label %BB2.i.backedge, !dbg !50
 
-BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+112.i", %"alternativeCallIntrinsic_Integer_+111.i"
-  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+123.i", %"alternativeCallIntrinsic_Integer_+111.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+112.i" ]
+BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+108.i", %"alternativeCallIntrinsic_Integer_+107.i"
+  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+119.i", %"alternativeCallIntrinsic_Integer_+107.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+108.i" ]
   br label %BB2.i
 
 73:                                               ; preds = %56
@@ -307,13 +307,13 @@ BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIn
 
 79:                                               ; preds = %73, %56
   %80 = call i64 @rb_funcallv(i64 %60, i64 3217, i32 0, i64* null) #10, !dbg !49
-  %81 = load i64, i64* %callArgsAddr98.i, align 8, !dbg !49, !tbaa !4
+  %81 = load i64, i64* %callArgs1Addr.i, align 8, !dbg !49, !tbaa !4
   %82 = call i64 @rb_obj_as_string_result(i64 %80, i64 %81) #10, !dbg !49
-  store i64 %82, i64* %callArgsAddr98.i, align 8, !dbg !49, !tbaa !4
+  store i64 %82, i64* %callArgs1Addr.i, align 8, !dbg !49, !tbaa !4
   br label %83, !dbg !49
 
 83:                                               ; preds = %79, %73
-  %84 = load i64, i64* %callArgsAddr100.i, align 8, !dbg !49, !tbaa !4
+  %84 = load i64, i64* %callArgs2Addr.i, align 8, !dbg !49, !tbaa !4
   %85 = and i64 %84, 7, !dbg !49
   %86 = icmp ne i64 %85, 0, !dbg !49
   %87 = and i64 %84, -9, !dbg !49
@@ -331,13 +331,13 @@ BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIn
 
 96:                                               ; preds = %90, %83
   %97 = call i64 @rb_funcallv(i64 %84, i64 3217, i32 0, i64* null) #10, !dbg !49
-  %98 = load i64, i64* %callArgsAddr100.i, align 8, !dbg !49, !tbaa !4
+  %98 = load i64, i64* %callArgs2Addr.i, align 8, !dbg !49, !tbaa !4
   %99 = call i64 @rb_obj_as_string_result(i64 %97, i64 %98) #10, !dbg !49
-  store i64 %99, i64* %callArgsAddr100.i, align 8, !dbg !49, !tbaa !4
+  store i64 %99, i64* %callArgs2Addr.i, align 8, !dbg !49, !tbaa !4
   br label %100, !dbg !49
 
 100:                                              ; preds = %96, %90
-  %101 = load i64, i64* %callArgsAddr102.i, align 8, !dbg !49, !tbaa !4
+  %101 = load i64, i64* %callArgs3Addr.i, align 8, !dbg !49, !tbaa !4
   %102 = and i64 %101, 7, !dbg !49
   %103 = icmp ne i64 %102, 0, !dbg !49
   %104 = and i64 %101, -9, !dbg !49
@@ -355,13 +355,13 @@ BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIn
 
 113:                                              ; preds = %107, %100
   %114 = call i64 @rb_funcallv(i64 %101, i64 3217, i32 0, i64* null) #10, !dbg !49
-  %115 = load i64, i64* %callArgsAddr102.i, align 8, !dbg !49, !tbaa !4
+  %115 = load i64, i64* %callArgs3Addr.i, align 8, !dbg !49, !tbaa !4
   %116 = call i64 @rb_obj_as_string_result(i64 %114, i64 %115) #10, !dbg !49
-  store i64 %116, i64* %callArgsAddr102.i, align 8, !dbg !49, !tbaa !4
+  store i64 %116, i64* %callArgs3Addr.i, align 8, !dbg !49, !tbaa !4
   br label %117, !dbg !49
 
 117:                                              ; preds = %113, %107
-  %118 = load i64, i64* %callArgsAddr104.i, align 8, !dbg !49, !tbaa !4
+  %118 = load i64, i64* %callArgs4Addr.i, align 8, !dbg !49, !tbaa !4
   %119 = and i64 %118, 7, !dbg !49
   %120 = icmp ne i64 %119, 0, !dbg !49
   %121 = and i64 %118, -9, !dbg !49
@@ -379,16 +379,16 @@ BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIn
 
 130:                                              ; preds = %124, %117
   %131 = call i64 @rb_funcallv(i64 %118, i64 3217, i32 0, i64* null) #10, !dbg !49
-  %132 = load i64, i64* %callArgsAddr104.i, align 8, !dbg !49, !tbaa !4
+  %132 = load i64, i64* %callArgs4Addr.i, align 8, !dbg !49, !tbaa !4
   %133 = call i64 @rb_obj_as_string_result(i64 %131, i64 %132) #10, !dbg !49
-  store i64 %133, i64* %callArgsAddr104.i, align 8, !dbg !49, !tbaa !4
+  store i64 %133, i64* %callArgs4Addr.i, align 8, !dbg !49, !tbaa !4
   br label %sorbet_stringInterpolate.exit.i, !dbg !49
 
 sorbet_stringInterpolate.exit.i:                  ; preds = %130, %124
-  %134 = call i64 @rb_str_concat_literals(i32 5, i64* nonnull %callArgsAddr.i) #10, !dbg !49
+  %134 = call i64 @rb_str_concat_literals(i32 5, i64* nonnull %callArgs0Addr.i) #10, !dbg !49
   store i64* %49, i64** %36, align 8, !dbg !49, !tbaa !10
-  store i64 3, i64* %callArgsAddr.i, align 8, !dbg !50
-  br i1 %51, label %"fastSymCallIntrinsic_Integer_+112.i", label %"alternativeCallIntrinsic_Integer_+111.i", !dbg !50
+  store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !50
+  br i1 %51, label %"fastSymCallIntrinsic_Integer_+108.i", label %"alternativeCallIntrinsic_Integer_+107.i", !dbg !50
 
 "func_<root>.<static-init>$153.exit":             ; preds = %afterSend.i
   store i64* %42, i64** %36, align 8, !tbaa !10

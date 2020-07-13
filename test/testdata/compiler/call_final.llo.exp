@@ -377,7 +377,7 @@ codeRepl5:                                        ; preds = %sorbet_readRealpath
   store i64 %108, i64* %110, align 8, !dbg !56
   %111 = getelementptr inbounds i64, i64* %91, i64 3, !dbg !56
   store i64* %111, i64** %86, align 8, !dbg !56, !tbaa !10
-  %rawSym27.i.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i.i1) #13, !dbg !52
+  %rawSym26.i.i = tail call i64 @rb_id2sym(i64 %rubyId_foo.i.i1) #13, !dbg !52
   tail call void @rb_define_singleton_method(i64 %64, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @func_A.foo to i64 (...)*), i32 -1) #13, !dbg !52
   %112 = getelementptr inbounds i64, i64* %52, i64 7
   store i64* %112, i64** %47, align 8, !tbaa !10
@@ -577,10 +577,10 @@ afterCallFinal_foo:                               ; preds = %20
   %33 = tail call i64 @sorbet_getConstantEpoch(), !dbg !69
   %guardUpdated20 = icmp eq i64 %32, %33, !dbg !69
   tail call void @llvm.assume(i1 %guardUpdated20), !dbg !69
-  %callArgsAddr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !69
-  store i64 %rawArg_a, i64* %callArgsAddr, align 8, !dbg !69
+  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !69
+  store i64 %rawArg_a, i64* %callArgs0Addr, align 8, !dbg !69
   %34 = tail call i32 @ruby_stack_check() #13, !dbg !69
-  %directSendResult = call i64 @func_A.foo(i32 1, i64* nonnull %callArgsAddr, i64 %31), !dbg !69
+  %directSendResult = call i64 @func_A.foo(i32 1, i64* nonnull %callArgs0Addr, i64 %31), !dbg !69
   ret i64 %directSendResult
 }
 

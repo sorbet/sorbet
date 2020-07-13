@@ -217,18 +217,18 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8, !dbg !46
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9, !dbg !46
   %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9, !dbg !45
-  %callArgsAddr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0, !dbg !47
-  store i64 %rawSym.i, i64* %callArgsAddr.i, align 8, !dbg !47
-  %callArgsAddr19.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 1, !dbg !47
-  store i64 3, i64* %callArgsAddr19.i, align 8, !dbg !47
-  %callArgsAddr21.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 2, !dbg !47
-  store i64 %rawSym15.i, i64* %callArgsAddr21.i, align 8, !dbg !47
-  %callArgsAddr23.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3, !dbg !47
-  store i64 5, i64* %callArgsAddr23.i, align 8, !dbg !47
+  %callArgs0Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0, !dbg !47
+  store i64 %rawSym.i, i64* %callArgs0Addr.i, align 8, !dbg !47
+  %callArgs1Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 1, !dbg !47
+  store i64 3, i64* %callArgs1Addr.i, align 8, !dbg !47
+  %callArgs2Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 2, !dbg !47
+  store i64 %rawSym15.i, i64* %callArgs2Addr.i, align 8, !dbg !47
+  %callArgs3Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3, !dbg !47
+  store i64 5, i64* %callArgs3Addr.i, align 8, !dbg !47
   %47 = tail call i64 @rb_hash_new_with_size(i64 2) #9, !dbg !47, !noalias !48
-  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgsAddr.i, i64 %47) #9, !dbg !47
-  store i64 %47, i64* %callArgsAddr.i, align 8, !dbg !39
-  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %25, i64 %22, i32 1, i64* nonnull %callArgsAddr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9, !dbg !39
+  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgs0Addr.i, i64 %47) #9, !dbg !47
+  store i64 %47, i64* %callArgs0Addr.i, align 8, !dbg !39
+  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %25, i64 %22, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9, !dbg !39
   call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %26)
   ret void
 }
