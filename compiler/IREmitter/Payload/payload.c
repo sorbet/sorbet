@@ -1457,13 +1457,13 @@ struct ExceptionClosure {
     ExceptionFFIType body;
     VALUE **pc;
     VALUE *iseq_encoded;
-    VALUE env;
+    VALUE methodClosure;
     VALUE *returnValue;
 };
 
 static VALUE sorbet_applyExceptionClosure(VALUE arg) {
     struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->iseq_encoded, closure->env);
+    VALUE res = closure->body(closure->pc, closure->iseq_encoded, closure->methodClosure);
     if (res != sorbet_rubyUndef()) {
         *closure->returnValue = res;
     }
@@ -1482,7 +1482,7 @@ static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
 extern void rb_set_errinfo(VALUE);
 
 // Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE env, VALUE exceptionContext,
+VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE methodClosure, VALUE exceptionContext,
                  VALUE *exceptionValue) {
     VALUE returnValue = sorbet_rubyUndef();
 
@@ -1490,7 +1490,7 @@ VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE e
     closure.body = body;
     closure.pc = pc;
     closure.iseq_encoded = iseq_encoded;
-    closure.env = env;
+    closure.methodClosure = methodClosure;
     closure.returnValue = &returnValue;
 
     *exceptionValue = RUBY_Qnil;
