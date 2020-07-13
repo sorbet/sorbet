@@ -25,4 +25,10 @@ def foo
     j = Range.new(1, nil)
     T.reveal_type(i) # error: Revealed type: `T::Range[Integer(1)]`
     T.reveal_type(j) # error: Revealed type: `T::Range[Integer(1)]`
+
+    # testing nil..nil edge case
+    k = (nil..)
+    l = Range.new(nil, nil)
+    T.reveal_type(k) # error: Revealed type: `T::Range[T.noreturn]`
+    T.reveal_type(l) # error: Revealed type: `T::Range[T.noreturn]`
 end
