@@ -472,9 +472,9 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 // Create a module for the imported package that sets up constant references to exported items.
                 // Use proper loc information on the module name so that `import Foo` displays in the results of LSP
                 // Find All References on `Foo`.
-                importedPackages.emplace_back(ast::MK::Class(imported.loc, core::Loc(ctx.file, imported.loc),
-                                                             imported.getFullNameLiteral(imported.loc), {},
-                                                             std::move(exportedItemsCopy)));
+                importedPackages.emplace_back(ast::MK::Module(imported.loc, core::Loc(ctx.file, imported.loc),
+                                                              imported.getFullNameLiteral(imported.loc), {},
+                                                              std::move(exportedItemsCopy)));
             }
         }
     }
