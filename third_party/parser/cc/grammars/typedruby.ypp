@@ -884,15 +884,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
@@ -926,15 +926,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {

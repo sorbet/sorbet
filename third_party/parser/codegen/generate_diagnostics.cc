@@ -56,6 +56,7 @@ tuple<string, string> MESSAGES[] = {
     {"BlockGivenToYield", "block given to yield"},
     {"InvalidRegexp", "{}"},
     {"InvalidReturn", "Invalid return in class/module body"},
+    {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
