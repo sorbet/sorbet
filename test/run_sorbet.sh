@@ -12,8 +12,10 @@ if [ "$1" == "-d" ]; then
   shift 1
 fi
 
+rb_files=( "$@" )
+
 if [ -z "$*" ]; then
-  echo "Usage: test/run_sorbet.sh [-d] <test_file>"
+  echo "Usage: test/run_sorbet.sh [-d] <test_file_1> [<test_file_n> ...]"
   exit 1
 fi
 
@@ -39,11 +41,8 @@ else
   command=( "lldb" "--" "./bazel-bin/main/sorbet" )
 fi
 
-command=( "${command[@]}" \
-  --silence-dev-message \
-  "--llvm-ir-folder=$llvmir" \
-  "$@"  \
-)
+command=( "${command[@]}" --silence-dev-message "--llvm-ir-folder=$llvmir" \
+  "${rb_files[@]}" )
 
 echo
 info "Running SorbetLLVM to generate LLVM + shared object..."

@@ -12,16 +12,16 @@ if [ "$1" == "-d" ]; then
   shift 1
 fi
 
-rb_file=$1
-shift
-
-if [ -z "$rb_file" ]; then
-  echo "Usage: test/run_compiled.sh [-d] <test_file>"
+if [ 1 -gt "$#" ]; then
+  echo "Usage: test/run_compiled.sh [-d] <main.rb> [<additional_n.rb> ...]"
   echo
-  echo "  NOTE: if the 'llvmir' environmenet variable is set, that will be used"
+  echo "  NOTE: if the 'llvmir' environment variable is set, that will be used"
   echo "        for compiler output instead."
   exit 1
 fi
+
+rb_file=$1
+rb_files=( "$@" )
 
 if [ -z "${llvmir:-}" ]; then
   llvmir=$(mktemp -d)
@@ -36,7 +36,7 @@ if [ -z "${llvmir:-}" ]; then
 fi
 
 # ensure that the extension is built
-"test/run_sorbet.sh" "$rb_file"
+"test/run_sorbet.sh" "${rb_files[@]}"
 
 ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
 sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb"
