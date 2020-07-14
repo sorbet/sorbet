@@ -222,8 +222,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             continue;
         }
 
-        // TODO(jvilk): We're currently retypechecking every __package file every fast path. We should have an efficient
-        // way to determine if any changed file belongs to a package and, if so, only include those packages.
         if (oldFile->sourceType == core::File::Type::Package) {
             subset.emplace_back(core::FileRef(i));
             continue;

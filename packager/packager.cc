@@ -260,10 +260,10 @@ struct PackageInfoFinder {
         }
 
         // Inject <PackageRegistry>::Name_Package::<PackageMethods> within the <root> class
-        ast::ClassDef::RHS_store extendStatements;
+        ast::ClassDef::RHS_store includeStatements;
         for (auto &klass : exportedMethods) {
             // include <PackageRegistry>::MangledPackageName::Path::To::Item
-            extendStatements.emplace_back(
+            includeStatements.emplace_back(
                 ast::MK::Send1(klass->loc, ast::MK::Self(klass->loc), core::Names::include(),
                                name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope.deepCopy()))));
         }
@@ -273,7 +273,7 @@ struct PackageInfoFinder {
             exportMethodsLoc, core::Loc(ctx.file, exportMethodsLoc),
             name2Expr(core::Names::Constants::PackageMethods(),
                       name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
-            {}, std::move(extendStatements)));
+            {}, std::move(includeStatements)));
 
         return tree;
     }
@@ -652,6 +652,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
+    // TODO(jvilk): This incremental pass retypechecks every package file in the project. It should instead only process
+    // the packages needed to understand file changes.
     ENFORCE(checkContainsAllPackages(gs, files));
     auto namesUsed = gs.namesUsed();
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
