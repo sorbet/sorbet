@@ -1,7 +1,8 @@
 # typed: true
 
-# rbi files should be exempt from packaging rules.
+# rbi files should not be exempt from packaging rules -- this will also error with an unpackaged error.
 
-module Minitest
+module ::Minitest
 
 end
+
