@@ -53,7 +53,7 @@ string rbFile2BaseTestName(string rbFileName) {
     if (lastDirSeparator != string::npos) {
         basename = basename.substr(lastDirSeparator + 1);
     }
-    auto split = basename.rfind(".");
+    auto split = basename.find(".");
     if (split != string::npos) {
         basename = basename.substr(0, split);
     }
@@ -68,7 +68,7 @@ string rbFile2BaseTestName(string rbFileName) {
     return testName;
 }
 
-bool addToExpectations(Expectations &exp, string_view parentDir, string_view filePath, bool isDirectory) {
+bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory) {
     if (!isDirectory && rbFile2BaseTestName(string(filePath)) != exp.basename) {
         return false;
     }
@@ -79,7 +79,7 @@ bool addToExpectations(Expectations &exp, string_view parentDir, string_view fil
     } else if (absl::EndsWith(filePath, ".exp")) {
         auto kind_start = filePath.rfind(".", filePath.size() - strlen(".exp") - 1);
         auto kind = filePath.substr(kind_start + 1, filePath.size() - kind_start - strlen(".exp") - 1);
-        string source_file_path = absl::StrCat(parentDir, "/", filePath.substr(0, kind_start));
+        string source_file_path = absl::StrCat(exp.folder, filePath.substr(0, kind_start));
         exp.expectations[kind][source_file_path] = filePath;
         return true;
     } else if (absl::EndsWith(filePath, ".rbupdate")) {
@@ -128,43 +128,34 @@ Expectations getExpectationsForFolderTest(string_view dir) {
     exp.testName = string(dir.substr(0, dir.length() - 1));
 
     for (auto &s : names) {
-        addToExpectations(exp, dir, s, true);
+        addToExpectations(exp, s, true);
     }
 
     populateSourceFileContents(exp);
     return exp;
 }
 
-vector<Expectations> listDir(string_view name) {
-    vector<Expectations> result;
-    vector<string> names = listTrimmedTestFilesInDir(name, false);
-
-    Expectations current;
+Expectations getExpectationsForTest(string_view parentDir, string_view testName) {
+    vector<string> names = listTrimmedTestFilesInDir(parentDir, false);
+    bool found = false;
+    Expectations exp;
+    exp.basename = testName.substr(parentDir.size() + 1);
+    exp.folder = parentDir;
+    exp.folder += "/";
+    exp.testName = testName;
     for (auto &s : names) {
-        if (current.basename.empty() || !addToExpectations(current, name, s, false)) {
-            // `s` doesn't belong to current Expectations, _or_ Expectations is new.
-            if (absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi")) {
-                auto basename = rbFile2BaseTestName(s);
-                if (!current.basename.empty()) {
-                    // End of previously found test.
-                    result.emplace_back(current);
-                    current = Expectations();
-                }
-                // Start of new test.
-                current.basename = basename;
-                current.sourceFiles.emplace_back(s);
-                current.folder = name;
-                current.folder += "/";
-                current.testName = current.folder + current.basename;
-            }
+        if (addToExpectations(exp, s, false)) {
+            // We found `basename` when we find a ruby file for the test.
+            found = found || absl::EndsWith(s, ".rb") || absl::EndsWith(s, ".rbi");
         }
     }
-    if (!current.basename.empty()) {
-        result.emplace_back(current);
-        current = Expectations();
+    if (!found) {
+        Exception::raise("Unable to find test `{}`", testName);
     }
 
-    return result;
+    populateSourceFileContents(exp);
+
+    return exp;
 }
 
 } // namespace
@@ -191,20 +182,7 @@ Expectations Expectations::getExpectations(std::string singleTest) {
             parentDir = singleTest.substr(0, lastDirSeparator);
         }
     }
-    auto scan = listDir(parentDir);
-    auto lookingFor = rbFile2BaseTestName(singleTest);
-    for (Expectations &f : scan) {
-        if (f.testName == lookingFor) {
-            populateSourceFileContents(f);
-            result.emplace_back(f);
-        }
-    }
-
-    if (result.size() != 1) {
-        Exception::raise("Expected exactly one test, found {}", result.size());
-    }
-
-    return result.front();
+    return getExpectationsForTest(parentDir, rbFile2BaseTestName(singleTest));
 }
 
 // A variant of CHECK_EQ that prints a diff on failure.
