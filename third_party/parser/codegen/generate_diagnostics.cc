@@ -55,7 +55,7 @@ tuple<string, string> MESSAGES[] = {
     {"MasgnAsCondition", "multiple assignment in conditional context"},
     {"BlockGivenToYield", "block given to yield"},
     {"InvalidRegexp", "{}"},
-    {"InvalidReturn", "Invalid return in class/module body"},
+    {"InvalidReturn", "invalid return in class/module body"},
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
 
     // Parser warnings
@@ -69,7 +69,7 @@ tuple<string, string> MESSAGES[] = {
     {"Clobbered", "clobbered by: {}"},
 
     // TypedRuby diagnostics
-    {"NotStaticCpathInGeninst", "Type name in generic instance must be a static constant path"},
+    {"NotStaticCpathInGeninst", "type name in generic instance must be a static constant path"},
 };
 
 void generateDclass() {
