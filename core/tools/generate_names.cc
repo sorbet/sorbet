@@ -359,7 +359,7 @@ NameDef names[] = {
     {"stringInterpolate", "<string-interpolate>"},
 
     // Packager
-    {"import_", "import"},
+    {"import"},
     {"export_", "export"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},

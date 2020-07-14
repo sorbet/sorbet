@@ -162,7 +162,7 @@ struct PackageInfoFinder {
         }
 
         // Sanity check arguments for unrecognized methods
-        if (send->fun != core::Names::export_() && send->fun != core::Names::import_() &&
+        if (send->fun != core::Names::export_() && send->fun != core::Names::import() &&
             send->fun != core::Names::exportMethods()) {
             for (const auto &arg : send->args) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
@@ -188,8 +188,8 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send->fun == core::Names::import_() && send->args.size() == 1) {
-            auto target = verifyConstant(ctx, core::Names::import_(), send->args[0]);
+        if (send->fun == core::Names::import() && send->args.size() == 1) {
+            auto target = verifyConstant(ctx, core::Names::import(), send->args[0]);
             // null indicates an invalid import.
             if (target != nullptr) {
                 auto name = getPackageName(ctx, send->args[0]);

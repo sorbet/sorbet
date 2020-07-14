@@ -366,7 +366,7 @@ void GlobalState::initEmpty() {
     id = id.data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::PackageSpecSingleton());
 
-    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import_());
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import());
     ENFORCE(id == Symbols::PackageSpec_import());
     {
         auto &importArg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
