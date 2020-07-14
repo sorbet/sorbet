@@ -27,23 +27,24 @@ namespace sorbet::packager {
  *
  * to:
  *
- *   module <PACKAGE_REGISTRY>::Project_Foo_Package
+ *   module <PackageRegistry>::Project_Foo_Package
  *     module Project::Bar
  *       # Import methods exported on Bar
- *       extend <PACKAGE_REGISTRY>::Bar_Package::SomeClassWithMethods
- *       extend <PACKAGE_REGISTRY>::Bar_Package::SomeOtherClassWithMethods
+ *       extend <PackageRegistry>::Bar_Package::<PackageMethods>
  *       # Import each class exported by Bar
- *       SomeClassInBar = <PACKAGE_REGISTRY>::Bar_Package::SomeClassInBar
- *       SomeOtherClassInBar = <PACKAGE_REGISTRY>::Bar_Package::SomeOtherClassInBar
+ *       SomeClassInBar = <PackageRegistry>::Bar_Package::SomeClassInBar
+ *       SomeOtherClassInBar = <PackageRegistry>::Bar_Package::SomeOtherClassInBar
+ *     end
+ *     module <PackageMethods>
+ *       include <PackageRegistry>::Project_Foo_Package::FooClassWithMethods
  *     end
  *   end
  *
- *   class Opus::Foo < PackageSpec
- *    import Bar
- *    import OtherPkg::X
+ *   class Project::Foo < PackageSpec
+ *    import Project::Bar
  *
- *    export <PACKAGE_REGISTRY>::Project_Foo_Package::Baz
- *    export_methods <PACKAGE_REGISTRY>::Project_Foo_Package::FooClassWithMethods
+ *    export <PackageRegistry>::Project_Foo_Package::Baz
+ *    export_methods <PackageRegistry>::Project_Foo_Package::FooClassWithMethods
  *   end
  *
  * It also rewrites files in the package, like `foo/baz.rb`, from:
@@ -58,7 +59,7 @@ namespace sorbet::packager {
  *
  * to:
  *
- * module <PACKAGE_REGISTRY_INTERNAL>::Opus_Foo_Package
+ * module <PackageRegistry>::Project_Foo_Package
  *   class SomeOtherClassInTheFile
  *     ...
  *   end

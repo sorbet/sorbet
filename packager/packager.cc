@@ -316,8 +316,8 @@ struct PackageInfoFinder {
             return;
         }
 
-        // NOTE: Don't assign locs to the code generated below. They encode offsets to __package.rb, but will be
-        // transplanted into other __package.rbs and may no longer be valid.
+        // NOTE: Don't assign locs to the nodes generated below. They will be copied into other __package.rbs that
+        // import this package with __package.rb-specific locs.
         for (auto &klass : exported) {
             // Item = <PackageRegistry>::MangledPackageName::Path::To::Item
             info->exportedItems.emplace_back(
@@ -326,7 +326,7 @@ struct PackageInfoFinder {
         }
 
         if (!exportedMethods.empty()) {
-            // Extend <PackageRegistry>::Name_of_package::<PackageMethods>
+            // extend <PackageRegistry>::Name_of_package::<PackageMethods>
             info->exportedItems.emplace_back(
                 ast::MK::Send1(core::LocOffsets::none(), ast::MK::Self(core::LocOffsets::none()), core::Names::extend(),
                                name2Expr(core::Names::Constants::PackageMethods(),
