@@ -146,25 +146,25 @@ struct PackageInfoFinder {
     core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto *send = ast::cast_tree<ast::Send>(tree);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
-        if (send->fun == core::Names::keepDef() || send->fun == core::Names::keepSelfDef()) {
+        if (send.fun == core::Names::keepDef() || send.fun == core::Names::keepSelfDef()) {
             return tree;
         }
 
         // Blacklisted methods
-        if (send->fun == core::Names::extend() || send->fun == core::Names::include()) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Packager::InvalidPackageExpression)) {
-                e.setHeader("Invalid expression in package: `{}` is not allowed", send->fun.data(ctx)->shortName(ctx));
+        if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
+                e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.data(ctx)->shortName(ctx));
             }
             return tree;
         }
 
         // Sanity check arguments for unrecognized methods
-        if (send->fun != core::Names::export_() && send->fun != core::Names::import() &&
-            send->fun != core::Names::exportMethods()) {
-            for (const auto &arg : send->args) {
+        if (send.fun != core::Names::export_() && send.fun != core::Names::import() &&
+            send.fun != core::Names::exportMethods()) {
+            for (const auto &arg : send.args) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg->loc, core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
@@ -178,19 +178,19 @@ struct PackageInfoFinder {
             return tree;
         }
 
-        if (send->fun == core::Names::export_() && send->args.size() == 1) {
+        if (send.fun == core::Names::export_() && send.args.size() == 1) {
             // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_(), send->args[0])) {
+            if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
                 exported.emplace_back(copyConstantLit(target));
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send->args[0] = prependInternalPackageNameToScope(move(send->args[0]));
+                send.args[0] = prependInternalPackageNameToScope(move(send.args[0]));
             }
         }
 
-        if (send->fun == core::Names::import() && send->args.size() == 1) {
+        if (send.fun == core::Names::import() && send.args.size() == 1) {
             // null indicates an invalid import.
-            if (auto target = verifyConstant(ctx, core::Names::import(), send->args[0])) {
-                auto name = getPackageName(ctx, send->args[0]);
+            if (auto target = verifyConstant(ctx, core::Names::import(), send.args[0])) {
+                auto name = getPackageName(ctx, send.args[0]);
                 if (name.mangledName.exists()) {
                     if (name.mangledName == info->name.mangledName) {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
@@ -203,17 +203,17 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send->fun == core::Names::exportMethods()) {
+        if (send.fun == core::Names::exportMethods()) {
             const bool alreadyCalled = exportMethodsLoc.exists();
             if (alreadyCalled) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Packager::MultipleExportMethodsCalls)) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::MultipleExportMethodsCalls)) {
                     e.setHeader("export_methods can only be called once in a package");
                     e.addErrorLine(core::Loc(ctx.file, exportMethodsLoc), "Previous call to export_methods found here");
                 }
             } else {
-                exportMethodsLoc = send->loc;
+                exportMethodsLoc = send.loc;
             }
-            for (auto &arg : send->args) {
+            for (auto &arg : send.args) {
                 if (auto target = verifyConstant(ctx, core::Names::exportMethods(), arg)) {
                     exportedMethods.emplace_back(copyConstantLit(target));
                     // Transform the constant lit to refer to the target within the mangled package namespace.
@@ -226,22 +226,22 @@ struct PackageInfoFinder {
     }
 
     ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
-        if (classDef->symbol == core::Symbols::root()) {
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
             return tree;
         }
 
-        if (classDef->ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef->ancestors[0])) {
-            if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::InvalidPackageDefinition)) {
+        if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0])) {
+            if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
         } else if (info == nullptr) {
             info = make_unique<PackageInfo>();
-            info->name = getPackageName(ctx, classDef->name, true);
-            info->loc = core::Loc(ctx.file, classDef->loc);
+            info->name = getPackageName(ctx, classDef.name, true);
+            info->loc = core::Loc(ctx.file, classDef.loc);
         } else {
-            if (auto e = ctx.beginError(classDef->loc, core::errors::Packager::MultiplePackagesInOneFile)) {
+            if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
                 e.addErrorLine(info->loc, "Previous package declaration found here");
             }
@@ -251,8 +251,8 @@ struct PackageInfoFinder {
     }
 
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
-        if (classDef->symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (classDef.symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
             return tree;
         }
 
@@ -266,7 +266,7 @@ struct PackageInfoFinder {
         }
 
         // Use the loc of the `export_methods` call so `include` errors goes to the right place.
-        classDef->rhs.emplace_back(ast::MK::Module(
+        classDef.rhs.emplace_back(ast::MK::Module(
             exportMethodsLoc, core::Loc(ctx.file, exportMethodsLoc),
             name2Expr(core::Names::Constants::PackageMethods(),
                       name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
@@ -485,20 +485,19 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                         name2Expr(package.name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
                         std::move(importedPackages));
 
-    auto rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
     return file;
 }
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
-    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
-    ENFORCE(rootKlass != nullptr);
+    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     auto moduleWrapper =
         ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
                         name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
-                        std::move(rootKlass->rhs));
-    rootKlass->rhs.clear();
-    rootKlass->rhs.emplace_back(move(moduleWrapper));
+                        std::move(rootKlass.rhs));
+    rootKlass.rhs.clear();
+    rootKlass.rhs.emplace_back(move(moduleWrapper));
     return file;
 }
 
