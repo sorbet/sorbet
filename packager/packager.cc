@@ -407,8 +407,8 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
-    ENFORCE(static_cast<ast::ClassDef *>(package.tree.get()) != nullptr);
-    ENFORCE(static_cast<ast::ClassDef *>(package.tree.get())->symbol == core::Symbols::root());
+    ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
+    ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
     auto packageFilePath = package.file.data(ctx).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     PackageInfoFinder finder;
