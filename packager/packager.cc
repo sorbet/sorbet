@@ -140,12 +140,12 @@ public:
     }
 };
 
-// Gets the package name in `name` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &name, bool errorOnInvalidName = false) {
+// Gets the package name in `tree` if applicable.
+PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &tree, bool errorOnInvalidName = false) {
     PackageName pName;
-    pName.loc = name->loc;
+    pName.loc = tree->loc;
 
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(name);
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(tree);
     while (constLit != nullptr) {
         if (errorOnInvalidName && absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between mangled names and
