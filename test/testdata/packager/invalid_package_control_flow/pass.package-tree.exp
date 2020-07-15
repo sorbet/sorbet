@@ -46,7 +46,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
-    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)

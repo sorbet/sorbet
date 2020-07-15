@@ -17,8 +17,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C <PackageMethods>>)
     end
-
-    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
@@ -84,8 +82,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C <PackageMethods>>)
     end
-
-    <self>.include(<emptyTree>::<C Kernel>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
