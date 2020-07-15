@@ -599,20 +599,21 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
 
 // We can't run packages without having all package ASTs. Assert that they are all present.
 bool checkContainsAllPackages(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
-    UnorderedSet<core::FileRef> allPackages;
-    for (u4 i = 1; i < gs.filesUsed(); i++) {
-        core::FileRef fref(i);
-        if (fref.data(gs).sourceType == core::File::Type::Package) {
-            allPackages.insert(fref);
+    UnorderedSet<core::FileRef> filePackages;
+    for (const auto &f : files) {
+        if (f.file.data(gs).sourceType == core::File::Type::Package) {
+            filePackages.insert(f.file);
         }
     }
 
-    for (const auto &f : files) {
-        if (f.file.data(gs).sourceType == core::File::Type::Package) {
-            allPackages.erase(f.file);
+    for (u4 i = 1; i < gs.filesUsed(); i++) {
+        core::FileRef fref(i);
+        if (fref.data(gs).sourceType == core::File::Type::Package && !filePackages.contains(fref)) {
+            return false;
         }
     }
-    return allPackages.empty();
+
+    return true;
 }
 
 } // namespace
