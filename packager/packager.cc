@@ -433,69 +433,79 @@ struct PackageInfoFinder {
 
     /* Forbid arbitrary computation in packages */
 
-    void illegalControlFlow(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
+    void illegalNode(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
             e.setHeader("Invalid expression in package: {} not allowed", type);
         }
     }
 
     ast::TreePtr preTransformIf(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`if`");
+        illegalNode(ctx, original->loc, "`if`");
         return original;
     }
 
     ast::TreePtr preTransformWhile(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`while`");
+        illegalNode(ctx, original->loc, "`while`");
         return original;
     }
 
     ast::TreePtr postTransformBreak(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`break`");
+        illegalNode(ctx, original->loc, "`break`");
         return original;
     }
 
     ast::TreePtr postTransformRetry(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`retry`");
+        illegalNode(ctx, original->loc, "`retry`");
         return original;
     }
 
     ast::TreePtr postTransformNext(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`next`");
+        illegalNode(ctx, original->loc, "`next`");
         return original;
     }
 
     ast::TreePtr preTransformReturn(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`return`");
+        illegalNode(ctx, original->loc, "`return`");
         return original;
     }
 
     ast::TreePtr preTransformRescueCase(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`rescue case`");
+        illegalNode(ctx, original->loc, "`rescue case`");
         return original;
     }
 
     ast::TreePtr preTransformRescue(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`rescue`");
+        illegalNode(ctx, original->loc, "`rescue`");
         return original;
     }
 
     ast::TreePtr preTransformAssign(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "`=`");
+        illegalNode(ctx, original->loc, "`=`");
         return original;
     }
 
     ast::TreePtr preTransformHash(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "hash literals");
+        illegalNode(ctx, original->loc, "hash literals");
         return original;
     }
 
     ast::TreePtr preTransformArray(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "array literals");
+        illegalNode(ctx, original->loc, "array literals");
         return original;
     }
 
     ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr original) {
-        illegalControlFlow(ctx, original->loc, "method definitions");
+        illegalNode(ctx, original->loc, "method definitions");
+        return original;
+    }
+
+    ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr original) {
+        illegalNode(ctx, original->loc, "blocks");
+        return original;
+    }
+
+    ast::TreePtr preTransformInsSeq(core::MutableContext ctx, ast::TreePtr original) {
+        illegalNode(ctx, original->loc, "`begin` and `end`");
         return original;
     }
 };
