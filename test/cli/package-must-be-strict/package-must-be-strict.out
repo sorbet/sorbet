@@ -1,4 +1,0 @@
-__package.rb:1: Package files must be typed: strict https://srb.help/3711
-     1 |# typed: true
-        ^
-Errors: 1
