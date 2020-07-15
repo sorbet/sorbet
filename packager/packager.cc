@@ -69,21 +69,24 @@ public:
         if (finalized) {
             Exception::raise("Cannot add additional packages after finalizing PackageDB");
         }
-        if (pkg != nullptr) {
-            auto &existing = packageInfoByMangledName[pkg->name.mangledName];
-            if (existing != nullptr) {
-                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
-                    e.setHeader("Redefinition of package `{}`", pkgName);
-                    e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
-                }
-            } else {
-                existing = pkg;
-            }
-
-            packageInfoByFile[ctx.file] = pkg;
-            packages.emplace_back(pkg);
+        if (pkg == nullptr) {
+            // There was an error creating a PackageInfo for this file, and getPackageInfo has already surfaced that
+            // error to the user. Nothing to do here.
+            return;
         }
+        auto it = packageInfoByMangledName.find(pkg->name.mangledName);
+        if (it != packageInfoByMangledName.end()) {
+            if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
+                e.setHeader("Redefinition of package `{}`", pkgName);
+                e.addErrorLine(it->second->loc, "Package `{}` originally defined here", pkgName);
+            }
+        } else {
+            packageInfoByMangledName[pkg->name.mangledName] = pkg;
+        }
+
+        packageInfoByFile[ctx.file] = pkg;
+        packages.emplace_back(pkg);
     }
 
     void finalizePackages() {
