@@ -289,15 +289,13 @@ struct PackageInfoFinder {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, core::Names::import(), send.args[0])) {
                 auto name = getPackageName(ctx, *target);
-                if (name.mangledName.exists()) {
-                    if (name.mangledName == info->name.mangledName) {
-                        if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                            e.setHeader("Package `{}` cannot import itself",
-                                        absl::StrJoin(info->name.fullName, "::", NameFormatter(ctx)));
-                        }
+                if (name.mangledName == info->name.mangledName) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
+                        e.setHeader("Package `{}` cannot import itself",
+                                    absl::StrJoin(info->name.fullName, "::", NameFormatter(ctx)));
                     }
-                    info->importedPackageNames.emplace_back(move(name));
                 }
+                info->importedPackageNames.emplace_back(move(name));
             }
         }
 
