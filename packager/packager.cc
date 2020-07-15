@@ -140,14 +140,10 @@ public:
     }
 };
 
-// Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &tree, bool errorOnInvalidName = false) {
-    PackageName pName;
-    pName.loc = tree->loc;
-
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(tree);
+void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit &tree) {
+    auto constLit = &tree;
     while (constLit != nullptr) {
-        if (errorOnInvalidName && absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
+        if (absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between mangled names and
             // unmangled names by replacing `_` with `::`.
             if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
@@ -162,18 +158,29 @@ PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &tree, bool er
                     {core::AutocorrectSuggestion::Edit{core::Loc(ctx.file, nameLoc), replacement}}});
             }
         }
-        pName.fullName.emplace_back(constLit->cnst);
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
-    reverse(pName.fullName.begin(), pName.fullName.end());
-    if (!pName.fullName.empty()) {
-        // Foo::Bar => Foo_Bar_Package
-        auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName, "_", NameFormatter(ctx)), "_Package");
-        pName.mangledName = ctx.state.enterNameConstant(mangledName);
-    } else {
-        // Not a valid name.
-        pName.mangledName = core::NameRef::noName();
+}
+
+// Gets the package name in `tree` if applicable.
+PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit &constantLit) {
+    PackageName pName;
+    pName.loc = constantLit.loc;
+
+    {
+        auto current = &constantLit;
+        while (current != nullptr) {
+            pName.fullName.emplace_back(current->cnst);
+            current = ast::cast_tree<ast::UnresolvedConstantLit>(current->scope);
+        }
     }
+    reverse(pName.fullName.begin(), pName.fullName.end());
+    ENFORCE(!pName.fullName.empty());
+
+    // Foo::Bar => Foo_Bar_Package
+    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName, "_", NameFormatter(ctx)), "_Package");
+    pName.mangledName = ctx.state.enterNameConstant(mangledName);
+
     return pName;
 }
 
@@ -281,7 +288,7 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::import() && send.args.size() == 1) {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, core::Names::import(), send.args[0])) {
-                auto name = getPackageName(ctx, send.args[0]);
+                auto name = getPackageName(ctx, *target);
                 if (name.mangledName.exists()) {
                     if (name.mangledName == info->name.mangledName) {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
@@ -323,13 +330,16 @@ struct PackageInfoFinder {
             return tree;
         }
 
-        if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0])) {
+        if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0]) ||
+            !ast::isa_tree<ast::UnresolvedConstantLit>(classDef.name)) {
             if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
         } else if (info == nullptr) {
+            auto &nameTree = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
             info = make_unique<PackageInfo>();
-            info->name = getPackageName(ctx, classDef.name, true);
+            checkPackageName(ctx, nameTree);
+            info->name = getPackageName(ctx, nameTree);
             info->loc = core::Loc(ctx.file, classDef.loc);
         } else {
             if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
