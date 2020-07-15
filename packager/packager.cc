@@ -299,7 +299,11 @@ struct PackageInfoFinder {
             }
             for (auto &arg : send.args) {
                 if (auto target = verifyConstant(ctx, core::Names::exportMethods(), arg)) {
-                    exportedMethods.emplace_back(copyConstantLit(target));
+                    // Don't export the methods if export_methods was already called. Let dependents error until it is
+                    // fixed.
+                    if (!alreadyCalled) {
+                        exportedMethods.emplace_back(copyConstantLit(target));
+                    }
                     // Transform the constant lit to refer to the target within the mangled package namespace.
                     arg = prependInternalPackageNameToScope(move(arg));
                 }
