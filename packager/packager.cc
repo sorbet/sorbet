@@ -485,9 +485,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                         name2Expr(package.name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
                         std::move(importedPackages));
 
-    auto rootKlass = ast::cast_tree<ast::ClassDef>(file.tree);
-    ENFORCE(rootKlass != nullptr);
-    rootKlass->rhs.emplace_back(move(packageNamespace));
+    auto rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
+    rootKlass.rhs.emplace_back(move(packageNamespace));
     return file;
 }
 
