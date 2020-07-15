@@ -582,10 +582,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         }
     }
 
-    // Include Kernel in the package.
-    importedPackages.emplace_back(ast::MK::Send1(core::LocOffsets::none(), ast::MK::Self(core::LocOffsets::none()),
-                                                 core::Names::include(), name2Expr(core::Names::Constants::Kernel())));
-
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
                         name2Expr(package->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
