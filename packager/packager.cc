@@ -64,7 +64,7 @@ private:
 public:
     PackageDB() : owner(this_thread::get_id()) {}
 
-    void addPackage(core::Context ctx, unique_ptr<PackageInfo> pkg) {
+    void addPackage(core::Context ctx, shared_ptr<PackageInfo> pkg) {
         ENFORCE(owner == this_thread::get_id());
         if (finalized) {
             Exception::raise("Cannot add additional packages after finalizing PackageDB");
@@ -78,10 +78,11 @@ public:
                     e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
                 }
             } else {
-                existing = move(pkg);
+                existing = pkg;
             }
-            packageInfoByFile[ctx.file] = move(pkg);
-            packages.emplace_back(move(pkg));
+
+            packageInfoByFile[ctx.file] = pkg;
+            packages.emplace_back(pkg);
         }
     }
 
@@ -92,6 +93,7 @@ public:
         fast_sort(packages, [](const auto &a, const auto &b) -> bool {
             return a->packagePathPrefix.size() > b->packagePathPrefix.size();
         });
+        finalized = true;
     }
 
     /**
