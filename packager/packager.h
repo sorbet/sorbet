@@ -11,10 +11,10 @@ namespace sorbet::packager {
  * This pass transforms package files (`foo/__package.rb`) from
  *
  *   class Project::Foo < PackageSpec
- *    import Project::Bar
+ *     import Project::Bar
  *
- *    export Baz
- *    export_methods FooClassWithMethods
+ *     export Baz
+ *     export_methods FooClassWithMethods
  *   end
  *
  * given
