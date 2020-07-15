@@ -429,7 +429,7 @@ class Logger
 
   sig do
     params(
-      logdev: T.any(String, IO, StringIO),
+      logdev: T.any(String, IO, StringIO, NilClass),
       shift_age: Integer,
       shift_size: Integer,
       level: Integer,
