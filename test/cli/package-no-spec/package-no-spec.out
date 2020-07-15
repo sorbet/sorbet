@@ -1,4 +1,4 @@
-__package.rb:1: Package file must contain a package definition of form `Foo::Bar < PackageSpec` https://srb.help/8002
+__package.rb:1: Package file must contain a package definition of form `Foo::Bar < PackageSpec` https://srb.help/3702
      1 |# typed: strict
-        ^^^^^^^^^^^^^^^
+        ^
 Errors: 1

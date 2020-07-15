@@ -225,18 +225,6 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
     return target;
 }
 
-core::LocOffsets firstLineOfFile(core::Context ctx) {
-    auto file = ctx.file;
-    core::LocOffsets firstLine{0, 0};
-    // Line 0 is reserved.
-    if (file.data(ctx).lineCount() > 1) {
-        firstLine.endLoc = static_cast<u4>(file.data(ctx).lineBreaks()[1]);
-    } else {
-        firstLine.endLoc = static_cast<u4>(file.data(ctx).source().length());
-    }
-    return firstLine;
-}
-
 struct PackageInfoFinder {
     unique_ptr<PackageInfo> info = nullptr;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exported;
@@ -406,7 +394,7 @@ struct PackageInfoFinder {
     //   end
     void finalize(core::MutableContext ctx) {
         if (info == nullptr) {
-            if (auto e = ctx.beginError(firstLineOfFile(ctx), core::errors::Packager::InvalidPackageDefinition)) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
             }
             return;
@@ -548,7 +536,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).strictLevel != core::StrictLevel::Strict) {
-        if (auto e = ctx.beginError(firstLineOfFile(ctx), core::errors::Packager::PackageFileMustBeStrict)) {
+        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be typed: strict");
         }
     }
