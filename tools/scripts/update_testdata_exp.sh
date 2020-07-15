@@ -35,7 +35,7 @@ passes=(
   cfg-raw
   autogen
   document-symbols
-  packager
+  package-tree
 )
 
 bazel build //main:sorbet //test:print_document_symbols -c opt
@@ -75,7 +75,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer --skip-rewriter-passes")
       fi
-      if [ "$pass" = "packager" ]; then
+      if [ "$pass" = "package-tree" ]; then
         args=("--stripe-packages")
       fi
       if ! [ -e "$candidate" ]; then

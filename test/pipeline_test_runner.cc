@@ -79,7 +79,7 @@ UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
     "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
     "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols",      "packager"};
+    "cfg-raw",          "autogen",         "document-symbols",      "package-tree"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -263,7 +263,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         // Packager runs over all trees.
         trees = packager::Packager::run(*gs, *workers, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved(*gs, "packager", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree->toString(*gs); });
         }
     }
 
@@ -496,7 +496,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (enablePackager) {
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved(*gs, "packager", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree->toString(*gs); });
         }
     }
 

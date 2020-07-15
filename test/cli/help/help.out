@@ -161,7 +161,7 @@ Usage:
                                 file-table-proto, file-table-messagepack,
                                 missing-constants, plugin-generated-code,
                                 autogen, autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses, packager]
+                                autogen-autoloader, autogen-subclasses, package-tree]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
