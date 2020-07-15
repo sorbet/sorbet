@@ -3,17 +3,19 @@
 #include "core/Error.h"
 
 namespace sorbet::core::errors::Packager {
-constexpr ErrorClass MustBeTypedStrict{8001, StrictLevel::False};
-constexpr ErrorClass InvalidPackageDefinition{8002, StrictLevel::False};
-constexpr ErrorClass RedefinitionOfPackage{8003, StrictLevel::False};
-constexpr ErrorClass PackageNotFound{8004, StrictLevel::False};
-constexpr ErrorClass UnpackagedFile{8005, StrictLevel::False};
-constexpr ErrorClass InvalidImportOrExport{8006, StrictLevel::False};
-constexpr ErrorClass MultiplePackagesInOneFile{8007, StrictLevel::False};
-constexpr ErrorClass MultipleExportMethodsCalls{8008, StrictLevel::False};
-constexpr ErrorClass NoSelfImport{8009, StrictLevel::False};
-constexpr ErrorClass InvalidPackageExpression{8010, StrictLevel::False};
-constexpr ErrorClass PackageFileMustBeStrict{8011, StrictLevel::False};
-constexpr ErrorClass InvalidPackageName{8012, StrictLevel::False};
+// Packaging errors are fatal (they prevent packaging from working at runtime!), and should not be silenceable.
+// Thus, all of these errors fire on typed: false and above.
+constexpr ErrorClass MustBeTypedStrict{3701, StrictLevel::False};
+constexpr ErrorClass InvalidPackageDefinition{3702, StrictLevel::False};
+constexpr ErrorClass RedefinitionOfPackage{3703, StrictLevel::False};
+constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};
+constexpr ErrorClass UnpackagedFile{3705, StrictLevel::False};
+constexpr ErrorClass InvalidImportOrExport{3706, StrictLevel::False};
+constexpr ErrorClass MultiplePackagesInOneFile{3707, StrictLevel::False};
+constexpr ErrorClass MultipleExportMethodsCalls{3708, StrictLevel::False};
+constexpr ErrorClass NoSelfImport{3709, StrictLevel::False};
+constexpr ErrorClass InvalidPackageExpression{3710, StrictLevel::False};
+constexpr ErrorClass PackageFileMustBeStrict{3711, StrictLevel::False};
+constexpr ErrorClass InvalidPackageName{3712, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
