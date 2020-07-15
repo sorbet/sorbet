@@ -69,6 +69,8 @@ namespace sorbet::packager {
  *   end
  * end
  *
+ * Note that packages cannot have `_` in their names, so the above name mangling is 1:1.
+ *
  * This pass intentionally runs outside of rewriter so that its output does not get cached.
  */
 class Packager final {
