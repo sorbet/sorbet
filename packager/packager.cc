@@ -49,6 +49,92 @@ public:
     }
 };
 
+/**
+ * Container class that facilitates thread-safe read-only access to packages.
+ */
+class PackageDB final {
+private:
+    // The only thread that is allowed write access to this class.
+    const std::thread::id owner;
+    vector<shared_ptr<const PackageInfo>> packages;
+    bool finalized = false;
+    UnorderedMap<core::FileRef, shared_ptr<const PackageInfo>> packageInfoByFile;
+    UnorderedMap<core::NameRef, shared_ptr<const PackageInfo>> packageInfoByMangledName;
+
+public:
+    PackageDB() : owner(this_thread::get_id()) {}
+
+    void addPackage(core::Context ctx, unique_ptr<PackageInfo> pkg) {
+        ENFORCE(owner == this_thread::get_id());
+        if (finalized) {
+            Exception::raise("Cannot add additional packages after finalizing PackageDB");
+        }
+        if (pkg != nullptr) {
+            auto &existing = packageInfoByMangledName[pkg->name.mangledName];
+            if (existing != nullptr) {
+                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
+                    e.setHeader("Redefinition of package `{}`", pkgName);
+                    e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
+                }
+            } else {
+                existing = move(pkg);
+            }
+            packageInfoByFile[ctx.file] = move(pkg);
+            packages.emplace_back(move(pkg));
+        }
+    }
+
+    void finalizePackages() {
+        ENFORCE(owner == this_thread::get_id());
+        // Sort packages so that packages with the longest/most specific paths are first.
+        // That way, the first package to match a file's path is the most specific package match.
+        fast_sort(packages, [](const auto &a, const auto &b) -> bool {
+            return a->packagePathPrefix.size() > b->packagePathPrefix.size();
+        });
+    }
+
+    /**
+     * Given a file of type PACKAGE, return its PackageInfo or nullptr if one does not exist.
+     */
+    const PackageInfo *getPackageByFile(core::FileRef packageFile) const {
+        const auto &it = packageInfoByFile.find(packageFile);
+        if (it == packageInfoByFile.end()) {
+            return nullptr;
+        }
+        return it->second.get();
+    }
+
+    /**
+     * Given the mangled name for a package (e.g., Foo::Bar's mangled name is Foo_Bar_Package), return that package's
+     * info or nullptr if it does not exist.
+     */
+    const PackageInfo *getPackageByMangledName(core::NameRef name) const {
+        const auto &it = packageInfoByMangledName.find(name);
+        if (it == packageInfoByMangledName.end()) {
+            return nullptr;
+        }
+        return it->second.get();
+    }
+
+    /**
+     * Given a context, return the active package or nullptr if one does not exist.
+     */
+    const PackageInfo *getPackageForContext(core::Context ctx) const {
+        if (!finalized) {
+            Exception::raise("Cannot map files to packages until all packages are added and PackageDB is finalized");
+        }
+        // TODO(jvilk): Could use a prefix array to make this lookup more efficient.
+        auto path = ctx.file.data(ctx).path();
+        for (const auto &pkg : packages) {
+            if (absl::StartsWith(path, pkg->packagePathPrefix)) {
+                return pkg.get();
+            }
+        }
+        return nullptr;
+    }
+};
+
 // Gets the package name in `name` if applicable.
 PackageName getPackageName(core::MutableContext ctx, ast::TreePtr &name, bool errorOnInvalidName = false) {
     PackageName pName;
@@ -427,9 +513,15 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 //      end
 //    end
 // ...to __package.rb files to set up the package namespace.
-ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageInfo &package,
-                               const UnorderedMap<core::NameRef, shared_ptr<PackageInfo>> &packageInfoByMangledName) {
+ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageDB &packageDB) {
     ast::ClassDef::RHS_store importedPackages;
+
+    auto package = packageDB.getPackageByFile(file.file);
+    if (package == nullptr) {
+        // We already produced an error on this package when producing its package info.
+        // The correct course of action is to abort the transform.
+        return file;
+    }
 
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).strictLevel != core::StrictLevel::Strict) {
@@ -440,9 +532,9 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     {
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
-        for (auto imported : package.importedPackageNames) {
-            auto it = packageInfoByMangledName.find(imported.mangledName);
-            if (it == packageInfoByMangledName.end()) {
+        for (auto imported : package->importedPackageNames) {
+            auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
+            if (importedPackage == nullptr) {
                 if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
                     e.setHeader("Cannot find package `{}`", absl::StrJoin(imported.fullName, "::", NameFormatter(ctx)));
                 }
@@ -458,10 +550,9 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
-                const auto &found = *it->second;
 
                 ast::ClassDef::RHS_store exportedItemsCopy;
-                for (const auto &exported : found.exportedItems) {
+                for (const auto &exported : importedPackage->exportedItems) {
                     exportedItemsCopy.emplace_back(exported.deepCopy());
                 }
 
@@ -482,7 +573,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
-                        name2Expr(package.name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
+                        name2Expr(package->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
                         std::move(importedPackages));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
@@ -527,9 +618,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
     // Step 1: Find packages and determine their imports/exports.
-    UnorderedMap<core::FileRef, shared_ptr<PackageInfo>> packageInfoByFile;
-    UnorderedMap<core::NameRef, shared_ptr<PackageInfo>> packageInfoByMangledName;
-    vector<shared_ptr<PackageInfo>> packages;
+    PackageDB packageDB;
     {
         Timer timeit(gs.tracer(), "packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
@@ -537,41 +626,20 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                // getPackageInfo emits an error if the package is malformed.
-                if (auto pkg = getPackageInfo(ctx, file)) {
-                    auto &existing = packageInfoByMangledName[pkg->name.mangledName];
-                    if (existing != nullptr) {
-                        if (auto e =
-                                ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                            auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
-                            e.setHeader("Redefinition of package `{}`", pkgName);
-                            e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
-                        }
-                    } else {
-                        existing = move(pkg);
-                    }
-                    packageInfoByFile[file.file] = move(pkg);
-                    packages.emplace_back(move(pkg));
-                }
+                packageDB.addPackage(ctx, getPackageInfo(ctx, file));
             }
         }
+        // We're done adding packages.
+        packageDB.finalizePackages();
     }
-
-    // Sort packages so that packages with the longest/most specific paths are first.
-    // That way, the first package to match a file's path is the most specific package match.
-    fast_sort(packages, [](const auto &a, const auto &b) -> bool {
-        return a->packagePathPrefix.size() > b->packagePathPrefix.size();
-    });
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackages");
         // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
         for (auto &file : files) {
             if (file.file.data(gs).sourceType == core::File::Type::Package) {
-                if (auto &packageInfo = packageInfoByFile[file.file]) {
-                    core::Context ctx(gs, core::Symbols::root(), file.file);
-                    file = rewritePackage(ctx, move(file), *packageInfo, packageInfoByMangledName);
-                }
+                core::Context ctx(gs, core::Symbols::root(), file.file);
+                file = rewritePackage(ctx, move(file), packageDB);
             }
         }
     }
@@ -586,7 +654,9 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             fileq->push(move(file), 1);
         }
 
-        workers.multiplexJob("rewritePackagedFiles", [&gs, &packages, fileq, resultq]() {
+        const PackageDB &constPkgDB = packageDB;
+
+        workers.multiplexJob("rewritePackagedFiles", [&gs, constPkgDB, fileq, resultq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagedFilesWorker");
             vector<ast::ParsedFile> results;
             u4 filesProcessed = 0;
@@ -595,19 +665,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 if (result.gotItem()) {
                     filesProcessed++;
                     if (job.file.data(gs).sourceType == core::File::Type::Normal) {
-                        // Check if file path is part of a package.
-                        // TODO(jvilk): Could use a prefix array to make this lookup more efficient.
-                        auto path = job.file.data(gs).path();
-                        bool packaged = false;
                         core::Context ctx(gs, core::Symbols::root(), job.file);
-                        for (const auto &pkg : packages) {
-                            if (absl::StartsWith(path, pkg->packagePathPrefix)) {
-                                job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
-                                packaged = true;
-                                break;
-                            }
-                        }
-                        if (!packaged) {
+                        if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
+                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
+                        } else {
                             // Don't transform, but raise an error.
                             if (auto e = ctx.beginError(job.tree->loc, core::errors::Packager::UnpackagedFile)) {
                                 e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
