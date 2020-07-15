@@ -179,9 +179,8 @@ struct PackageInfoFinder {
         }
 
         if (send->fun == core::Names::export_() && send->args.size() == 1) {
-            auto target = verifyConstant(ctx, core::Names::export_(), send->args[0]);
             // null indicates an invalid export.
-            if (target != nullptr) {
+            if (auto target = verifyConstant(ctx, core::Names::export_(), send->args[0])) {
                 exported.emplace_back(copyConstantLit(target));
                 // Transform the constant lit to refer to the target within the mangled package namespace.
                 send->args[0] = prependInternalPackageNameToScope(move(send->args[0]));
@@ -189,9 +188,8 @@ struct PackageInfoFinder {
         }
 
         if (send->fun == core::Names::import() && send->args.size() == 1) {
-            auto target = verifyConstant(ctx, core::Names::import(), send->args[0]);
             // null indicates an invalid import.
-            if (target != nullptr) {
+            if (auto target = verifyConstant(ctx, core::Names::import(), send->args[0])) {
                 auto name = getPackageName(ctx, send->args[0]);
                 if (name.mangledName.exists()) {
                     if (name.mangledName == info->name.mangledName) {
@@ -216,8 +214,7 @@ struct PackageInfoFinder {
                 exportMethodsLoc = send->loc;
             }
             for (auto &arg : send->args) {
-                auto target = verifyConstant(ctx, core::Names::exportMethods(), arg);
-                if (target != nullptr) {
+                if (auto target = verifyConstant(ctx, core::Names::exportMethods(), arg)) {
                     exportedMethods.emplace_back(copyConstantLit(target));
                     // Transform the constant lit to refer to the target within the mangled package namespace.
                     arg = prependInternalPackageNameToScope(move(arg));
@@ -542,9 +539,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
                 file.file.data(gs).sourceType = core::File::Type::Package;
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                auto pkg = getPackageInfo(ctx, file);
                 // getPackageInfo emits an error if the package is malformed.
-                if (pkg != nullptr) {
+                if (auto pkg = getPackageInfo(ctx, file)) {
                     auto &existing = packageInfoByMangledName[pkg->name.mangledName];
                     if (existing != nullptr) {
                         if (auto e =
@@ -574,8 +570,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         // Step 2: Rewrite packages. Can be done in parallel (and w/ step 3) if this becomes a bottleneck.
         for (auto &file : files) {
             if (file.file.data(gs).sourceType == core::File::Type::Package) {
-                auto &packageInfo = packageInfoByFile[file.file];
-                if (packageInfo != nullptr) {
+                if (auto &packageInfo = packageInfoByFile[file.file]) {
                     core::Context ctx(gs, core::Symbols::root(), file.file);
                     file = rewritePackage(ctx, move(file), *packageInfo, packageInfoByMangledName);
                 }
