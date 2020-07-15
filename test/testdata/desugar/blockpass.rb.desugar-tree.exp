@@ -62,7 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
       begin
         <assignTemp>$4 = <emptyTree>::<C CallsWithObject>
-        if <assignTemp>$4.==(nil)
+        if ::NilClass.===(<assignTemp>$4)
           nil
         else
           <assignTemp>$4.calls_with_object() do |<block-pass>$5|
