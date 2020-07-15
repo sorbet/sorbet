@@ -431,7 +431,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                                const UnorderedMap<core::NameRef, shared_ptr<PackageInfo>> &packageInfoByMangledName) {
     ast::ClassDef::RHS_store importedPackages;
 
-    // Sanity check: Packages _must_ be typed: strict
+    // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).strictLevel != core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(firstLineOfFile(ctx), core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be typed: strict");
