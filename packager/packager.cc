@@ -420,7 +420,7 @@ struct PackageInfoFinder {
         }
     }
 
-    /* Forbidden control flow in packages */
+    /* Forbid arbitrary computation in packages */
 
     void illegalControlFlow(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
