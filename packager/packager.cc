@@ -140,7 +140,7 @@ core::LocOffsets firstLineOfFile(core::Context ctx) {
 }
 
 struct PackageInfoFinder {
-    shared_ptr<PackageInfo> info = nullptr;
+    unique_ptr<PackageInfo> info = nullptr;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exported;
     vector<unique_ptr<ast::UnresolvedConstantLit>> exportedMethods;
     core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
@@ -237,7 +237,7 @@ struct PackageInfoFinder {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
         } else if (info == nullptr) {
-            info = make_shared<PackageInfo>();
+            info = make_unique<PackageInfo>();
             info->name = getPackageName(ctx, classDef->name, true);
             info->loc = core::Loc(ctx.file, classDef->loc);
         } else {
@@ -403,7 +403,7 @@ struct PackageInfoFinder {
 
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
-shared_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
     // Assumption: Root of AST is <root> class.
@@ -550,9 +550,9 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                             e.addErrorLine(existing->loc, "Package `{}` originally defined here", pkgName);
                         }
                     } else {
-                        existing = pkg;
+                        existing = move(pkg);
                     }
-                    packageInfoByFile[file.file] = pkg;
+                    packageInfoByFile[file.file] = move(pkg);
                     packages.emplace_back(move(pkg));
                 }
             }
