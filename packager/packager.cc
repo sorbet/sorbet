@@ -645,7 +645,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Just run all packages w/ the changed files through Packager again. It should not define any new names.
-    // TODO(jvilk): This incremental pass retypechecks every package file in the project. It should instead only process
+    // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.
     ENFORCE(checkContainsAllPackages(gs, files));
     auto namesUsed = gs.namesUsed();
