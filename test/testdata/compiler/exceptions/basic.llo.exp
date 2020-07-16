@@ -755,20 +755,26 @@ sorbet_try.exit.us:                               ; preds = %124, %exception-bod
   %127 = load i64, i64* %2, align 8, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 40, i8* nonnull %107) #14, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %106) #14, !dbg !71
-  call void @rb_set_errinfo(i64 8) #14, !dbg !71
+  %128 = load i64, i64* %exceptionValue, align 8, !dbg !71
+  %129 = icmp eq i64 %128, 8, !dbg !71
+  %130 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
+  %131 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %130, i64 0, i32 1, i64 0, !dbg !71
+  %132 = load i64, i64* %131, align 8, !dbg !71
+  %133 = select i1 %129, i64 %132, i64 %128, !dbg !71
+  call void @rb_set_errinfo(i64 %133) #14, !dbg !71
   %"<retry-singleton>.us" = load i64, i64* @"<retry-singleton>", align 8, !dbg !71
   %shouldRetry.us = icmp eq i64 %127, %"<retry-singleton>.us", !dbg !71
-  %128 = and i1 %122, %shouldRetry.us, !dbg !71
-  br i1 %128, label %exception-entry.us, label %exception-ensure, !dbg !71
+  %134 = and i1 %122, %shouldRetry.us, !dbg !71
+  br i1 %134, label %exception-entry.us, label %exception-ensure, !dbg !71
 
 codeRepl:                                         ; preds = %89, %sorbet_isa_class_of.exit
   tail call fastcc void @func_A.test.cold.1(i64 %80) #16, !dbg !72
   unreachable
 
 exception-entry:                                  ; preds = %typeTestSuccess, %sorbet_try.exit
-  %129 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
-  %130 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %129, i64 0, i32 1, i64 0, !dbg !71
-  store i64 8, i64* %130, align 8, !dbg !71
+  %135 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
+  %136 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %135, i64 0, i32 1, i64 0, !dbg !71
+  store i64 8, i64* %136, align 8, !dbg !71
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %96) #14, !dbg !71
   store i64 52, i64* %0, align 8, !dbg !71, !tbaa !4
   call void @llvm.lifetime.start.p0i8(i64 40, i8* nonnull %97) #14, !dbg !71
@@ -779,99 +785,100 @@ exception-entry:                                  ; preds = %typeTestSuccess, %s
   store i64* %0, i64** %102, align 8, !dbg !71, !tbaa !14
   store i64 8, i64* %exceptionValue, align 8, !dbg !71, !tbaa !4
   call void @rb_set_errinfo(i64 %previousException) #14, !dbg !71
-  %131 = load i64, i64* @rb_eException, align 8, !dbg !71, !tbaa !4
-  %132 = call i64 (i64 (...)*, i64, i64 (...)*, i64, ...) @rb_rescue2(i64 (...)* bitcast (i64 (i64)* @sorbet_applyExceptionClosure to i64 (...)*), i64 %104, i64 (...)* bitcast (i64 (i64)* @sorbet_rescueStoreException to i64 (...)*), i64 %105, i64 %131, i32 0) #14, !dbg !71
-  %133 = load i64, i64* %0, align 8, !dbg !71
+  %137 = load i64, i64* @rb_eException, align 8, !dbg !71, !tbaa !4
+  %138 = call i64 (i64 (...)*, i64, i64 (...)*, i64, ...) @rb_rescue2(i64 (...)* bitcast (i64 (i64)* @sorbet_applyExceptionClosure to i64 (...)*), i64 %104, i64 (...)* bitcast (i64 (i64)* @sorbet_rescueStoreException to i64 (...)*), i64 %105, i64 %137, i32 0) #14, !dbg !71
+  %139 = load i64, i64* %0, align 8, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 40, i8* nonnull %97) #14, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %96) #14, !dbg !71
-  %isReturnValue = icmp eq i64 %133, 52, !dbg !71
+  %isReturnValue = icmp eq i64 %139, 52, !dbg !71
   br i1 %isReturnValue, label %exception-body-continue, label %exception-body-return, !dbg !71
 
 exception-body-return:                            ; preds = %exception-entry, %exception-entry.us
-  %.lcssa = phi i64 [ %118, %exception-entry.us ], [ %133, %exception-entry ], !dbg !71
-  %134 = bitcast [1 x i64]* %callArgs.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %134)
-  %"stackFrame_func_A.test$block_3.i41" = load i8*, i8** @"stackFramePrecomputed_func_A.test$block_3", align 8
-  %135 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  %136 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %135, i64 0, i32 2
-  %137 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %136, align 8, !tbaa !28
-  %138 = getelementptr inbounds i8, i8* %"stackFrame_func_A.test$block_3.i41", i64 16
-  %139 = bitcast i8* %138 to %struct.rb_iseq_constant_body**
-  %140 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %139, align 8, !tbaa !31
-  %141 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %140, i64 0, i32 0
-  %142 = load i32, i32* %141, align 8, !tbaa !33
-  %143 = and i32 %142, -2
-  %144 = icmp eq i32 %143, 4
-  br i1 %144, label %145, label %171
+  %.lcssa = phi i64 [ %118, %exception-entry.us ], [ %139, %exception-entry ], !dbg !71
+  call void @rb_set_errinfo(i64 %previousException) #14, !dbg !71
+  %140 = bitcast [1 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %140)
+  %"stackFrame_func_A.test$block_3.i43" = load i8*, i8** @"stackFramePrecomputed_func_A.test$block_3", align 8
+  %141 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  %142 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %141, i64 0, i32 2
+  %143 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %142, align 8, !tbaa !28
+  %144 = getelementptr inbounds i8, i8* %"stackFrame_func_A.test$block_3.i43", i64 16
+  %145 = bitcast i8* %144 to %struct.rb_iseq_constant_body**
+  %146 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %145, align 8, !tbaa !31
+  %147 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %146, i64 0, i32 0
+  %148 = load i32, i32* %147, align 8, !tbaa !33
+  %149 = and i32 %148, -2
+  %150 = icmp eq i32 %149, 4
+  br i1 %150, label %151, label %177
 
-145:                                              ; preds = %exception-body-return
-  %146 = bitcast i8* %"stackFrame_func_A.test$block_3.i41" to %struct.rb_iseq_struct*
-  %147 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 3
-  %148 = load i64, i64* %147, align 8, !tbaa !42
-  %149 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 1
-  %150 = load i64*, i64** %149, align 8, !tbaa !44
-  %151 = getelementptr inbounds i64, i64* %150, i64 1
-  %152 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %140, i64 0, i32 14
-  %153 = load i32, i32* %152, align 8, !tbaa !45
-  %154 = add i32 %153, -1
-  %155 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 4
-  %156 = bitcast i64** %155 to i64*
-  %157 = load i64, i64* %156, align 8, !tbaa !46
-  %158 = or i64 %157, 1
-  %159 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %140, i64 0, i32 2
-  %160 = load i64*, i64** %159, align 8, !tbaa !47
-  %161 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %140, i64 0, i32 18
-  %162 = load i32, i32* %161, align 8, !tbaa !48
-  %163 = call %struct.rb_control_frame_struct* @rb_vm_push_frame(%struct.rb_execution_context_struct* %135, %struct.rb_iseq_struct* %146, i64 2022178817, i64 %148, i64 %158, i64 0, i64* %160, i64* nonnull %151, i32 %154, i32 %162) #14
-  %164 = call i64 @rb_errinfo() #14
-  %165 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  %166 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %165, i64 0, i32 2
-  %167 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %166, align 8, !tbaa !28
-  %168 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %167, i64 0, i32 4
-  %169 = load i64*, i64** %168, align 8, !tbaa !46
-  %170 = getelementptr inbounds i64, i64* %169, i64 -3
-  store i64 %164, i64* %170, align 8, !tbaa !4
-  br label %sorbet_setRubyStackFrame.exit47
-
-171:                                              ; preds = %exception-body-return
-  %172 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 2
-  %173 = bitcast %struct.rb_iseq_struct** %172 to i8**
-  store i8* %"stackFrame_func_A.test$block_3.i41", i8** %173, align 8, !tbaa !49
-  %174 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 4
+151:                                              ; preds = %exception-body-return
+  %152 = bitcast i8* %"stackFrame_func_A.test$block_3.i43" to %struct.rb_iseq_struct*
+  %153 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %143, i64 0, i32 3
+  %154 = load i64, i64* %153, align 8, !tbaa !42
+  %155 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %143, i64 0, i32 1
+  %156 = load i64*, i64** %155, align 8, !tbaa !44
+  %157 = getelementptr inbounds i64, i64* %156, i64 1
+  %158 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %146, i64 0, i32 14
+  %159 = load i32, i32* %158, align 8, !tbaa !45
+  %160 = add i32 %159, -1
+  %161 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %143, i64 0, i32 4
+  %162 = bitcast i64** %161 to i64*
+  %163 = load i64, i64* %162, align 8, !tbaa !46
+  %164 = or i64 %163, 1
+  %165 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %146, i64 0, i32 2
+  %166 = load i64*, i64** %165, align 8, !tbaa !47
+  %167 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %146, i64 0, i32 18
+  %168 = load i32, i32* %167, align 8, !tbaa !48
+  %169 = call %struct.rb_control_frame_struct* @rb_vm_push_frame(%struct.rb_execution_context_struct* %141, %struct.rb_iseq_struct* %152, i64 2022178817, i64 %154, i64 %164, i64 0, i64* %166, i64* nonnull %157, i32 %160, i32 %168) #14
+  %170 = call i64 @rb_errinfo() #14
+  %171 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  %172 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %171, i64 0, i32 2
+  %173 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %172, align 8, !tbaa !28
+  %174 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %173, i64 0, i32 4
   %175 = load i64*, i64** %174, align 8, !tbaa !46
-  %176 = load i64, i64* %175, align 8, !tbaa !4
-  %177 = and i64 %176, -129
-  store i64 %177, i64* %175, align 8, !tbaa !4
-  br label %sorbet_setRubyStackFrame.exit47
+  %176 = getelementptr inbounds i64, i64* %175, i64 -3
+  store i64 %170, i64* %176, align 8, !tbaa !4
+  br label %sorbet_setRubyStackFrame.exit49
 
-sorbet_setRubyStackFrame.exit47:                  ; preds = %145, %171
-  %178 = phi %struct.rb_control_frame_struct* [ %163, %145 ], [ %137, %171 ]
-  %179 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %178, i64 0, i32 0
-  %180 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %139, align 8, !tbaa !31
-  %181 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %180, i64 0, i32 2
-  %182 = load i64*, i64** %181, align 8, !tbaa !47
-  %rubyStr_ensure.i42 = load i64, i64* @rubyStrFrozen_ensure, align 8, !dbg !77
-  %rubyId_puts.i43 = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !80
-  %183 = getelementptr inbounds i64, i64* %182, i64 13
-  store i64* %183, i64** %179, align 8, !tbaa !17
-  %callArgs0Addr.i44 = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !80
-  store i64 %rubyStr_ensure.i42, i64* %callArgs0Addr.i44, align 8, !dbg !80
-  %184 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !80, !tbaa !69
-  %185 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %184, i64 0, i32 1, i64 1, !dbg !80
-  %186 = load i64, i64* %185, align 8, !dbg !80
-  %call_via_vm_puts.i45 = call i64 @sorbet_callFunc(i64 %186, i64 %rubyId_puts.i43, i32 1, i64* nonnull %callArgs0Addr.i44, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.7) #14, !dbg !80
-  %187 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  call void @rb_vm_pop_frame(%struct.rb_execution_context_struct* %187) #14
-  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %134)
+177:                                              ; preds = %exception-body-return
+  %178 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %143, i64 0, i32 2
+  %179 = bitcast %struct.rb_iseq_struct** %178 to i8**
+  store i8* %"stackFrame_func_A.test$block_3.i43", i8** %179, align 8, !tbaa !49
+  %180 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %143, i64 0, i32 4
+  %181 = load i64*, i64** %180, align 8, !tbaa !46
+  %182 = load i64, i64* %181, align 8, !tbaa !4
+  %183 = and i64 %182, -129
+  store i64 %183, i64* %181, align 8, !tbaa !4
+  br label %sorbet_setRubyStackFrame.exit49
+
+sorbet_setRubyStackFrame.exit49:                  ; preds = %151, %177
+  %184 = phi %struct.rb_control_frame_struct* [ %169, %151 ], [ %143, %177 ]
+  %185 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %184, i64 0, i32 0
+  %186 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %145, align 8, !tbaa !31
+  %187 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %186, i64 0, i32 2
+  %188 = load i64*, i64** %187, align 8, !tbaa !47
+  %rubyStr_ensure.i44 = load i64, i64* @rubyStrFrozen_ensure, align 8, !dbg !77
+  %rubyId_puts.i45 = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !80
+  %189 = getelementptr inbounds i64, i64* %188, i64 13
+  store i64* %189, i64** %185, align 8, !tbaa !17
+  %callArgs0Addr.i46 = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !80
+  store i64 %rubyStr_ensure.i44, i64* %callArgs0Addr.i46, align 8, !dbg !80
+  %190 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !80, !tbaa !69
+  %191 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %190, i64 0, i32 1, i64 1, !dbg !80
+  %192 = load i64, i64* %191, align 8, !dbg !80
+  %call_via_vm_puts.i47 = call i64 @sorbet_callFunc(i64 %192, i64 %rubyId_puts.i45, i32 1, i64* nonnull %callArgs0Addr.i46, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.7) #14, !dbg !80
+  %193 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  call void @rb_vm_pop_frame(%struct.rb_execution_context_struct* %193) #14
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %140)
   ret i64 %.lcssa, !dbg !71
 
 exception-body-continue:                          ; preds = %exception-entry
-  %188 = load i64, i64* %exceptionValue, align 8, !dbg !71
-  %189 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
-  %190 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %189, i64 0, i32 1, i64 0, !dbg !71
-  store i64 %188, i64* %190, align 8, !dbg !71
-  %191 = icmp ne i64 %188, 8, !dbg !71
-  %handler = select i1 %191, i64 (i64**, i64*, i64)* @"func_A.test$block_2", i64 (i64**, i64*, i64)* @"func_A.test$block_4", !dbg !71
+  %194 = load i64, i64* %exceptionValue, align 8, !dbg !71
+  %195 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
+  %196 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %195, i64 0, i32 1, i64 0, !dbg !71
+  store i64 %194, i64* %196, align 8, !dbg !71
+  %197 = icmp ne i64 %194, 8, !dbg !71
+  %handler = select i1 %197, i64 (i64**, i64*, i64)* @"func_A.test$block_2", i64 (i64**, i64*, i64)* @"func_A.test$block_4", !dbg !71
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %106) #14, !dbg !71
   store i64 52, i64* %2, align 8, !dbg !71, !tbaa !4
   call void @llvm.lifetime.start.p0i8(i64 40, i8* nonnull %107) #14, !dbg !71
@@ -881,133 +888,141 @@ exception-body-continue:                          ; preds = %exception-entry
   store i64 %8, i64* %111, align 8, !dbg !71, !tbaa !13
   store i64* %2, i64** %112, align 8, !dbg !71, !tbaa !14
   store i64 8, i64* %exceptionValue, align 8, !dbg !71, !tbaa !4
-  %192 = icmp eq i64 %188, 8, !dbg !71
-  br i1 %192, label %sorbet_try.exit, label %193, !dbg !71
+  %198 = icmp eq i64 %194, 8, !dbg !71
+  br i1 %198, label %sorbet_try.exit, label %199, !dbg !71
 
-193:                                              ; preds = %exception-body-continue
-  call void @rb_set_errinfo(i64 %188) #14, !dbg !71
+199:                                              ; preds = %exception-body-continue
+  call void @rb_set_errinfo(i64 %194) #14, !dbg !71
   br label %sorbet_try.exit, !dbg !71
 
-sorbet_try.exit:                                  ; preds = %exception-body-continue, %193
-  %194 = load i64, i64* @rb_eException, align 8, !dbg !71, !tbaa !4
-  %195 = call i64 (i64 (...)*, i64, i64 (...)*, i64, ...) @rb_rescue2(i64 (...)* bitcast (i64 (i64)* @sorbet_applyExceptionClosure to i64 (...)*), i64 %113, i64 (...)* bitcast (i64 (i64)* @sorbet_rescueStoreException to i64 (...)*), i64 %105, i64 %194, i32 0) #14, !dbg !71
-  %196 = load i64, i64* %2, align 8, !dbg !71
+sorbet_try.exit:                                  ; preds = %exception-body-continue, %199
+  %200 = load i64, i64* @rb_eException, align 8, !dbg !71, !tbaa !4
+  %201 = call i64 (i64 (...)*, i64, i64 (...)*, i64, ...) @rb_rescue2(i64 (...)* bitcast (i64 (i64)* @sorbet_applyExceptionClosure to i64 (...)*), i64 %113, i64 (...)* bitcast (i64 (i64)* @sorbet_rescueStoreException to i64 (...)*), i64 %105, i64 %200, i32 0) #14, !dbg !71
+  %202 = load i64, i64* %2, align 8, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 40, i8* nonnull %107) #14, !dbg !71
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %106) #14, !dbg !71
-  call void @rb_set_errinfo(i64 %previousException) #14, !dbg !71
+  %203 = load i64, i64* %exceptionValue, align 8, !dbg !71
+  %204 = icmp eq i64 %203, 8, !dbg !71
+  %205 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
+  %206 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %205, i64 0, i32 1, i64 0, !dbg !71
+  %207 = load i64, i64* %206, align 8, !dbg !71
+  %208 = icmp eq i64 %207, 8, !dbg !71
+  %209 = select i1 %208, i64 %previousException, i64 %207, !dbg !71
+  %210 = select i1 %204, i64 %209, i64 %203, !dbg !71
+  call void @rb_set_errinfo(i64 %210) #14, !dbg !71
   %"<retry-singleton>" = load i64, i64* @"<retry-singleton>", align 8, !dbg !71
-  %shouldRetry = icmp eq i64 %196, %"<retry-singleton>", !dbg !71
-  %197 = and i1 %191, %shouldRetry, !dbg !71
-  br i1 %197, label %exception-entry, label %exception-ensure, !dbg !71
+  %shouldRetry = icmp eq i64 %202, %"<retry-singleton>", !dbg !71
+  %211 = and i1 %197, %shouldRetry, !dbg !71
+  br i1 %211, label %exception-entry, label %exception-ensure, !dbg !71
 
 exception-ensure:                                 ; preds = %sorbet_try.exit, %sorbet_try.exit.us
-  %.lcssa50 = phi i64 [ %127, %sorbet_try.exit.us ], [ %196, %sorbet_try.exit ], !dbg !71
-  %198 = bitcast [1 x i64]* %callArgs.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %198)
+  %.lcssa53 = phi i64 [ %127, %sorbet_try.exit.us ], [ %202, %sorbet_try.exit ], !dbg !71
+  %.lcssa52 = phi i64 [ %133, %sorbet_try.exit.us ], [ %210, %sorbet_try.exit ], !dbg !71
+  %212 = bitcast [1 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %212)
   %"stackFrame_func_A.test$block_3.i" = load i8*, i8** @"stackFramePrecomputed_func_A.test$block_3", align 8
-  %199 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  %200 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %199, i64 0, i32 2
-  %201 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %200, align 8, !tbaa !28
-  %202 = getelementptr inbounds i8, i8* %"stackFrame_func_A.test$block_3.i", i64 16
-  %203 = bitcast i8* %202 to %struct.rb_iseq_constant_body**
-  %204 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %203, align 8, !tbaa !31
-  %205 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %204, i64 0, i32 0
-  %206 = load i32, i32* %205, align 8, !tbaa !33
-  %207 = and i32 %206, -2
-  %208 = icmp eq i32 %207, 4
-  br i1 %208, label %209, label %235
+  %213 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  %214 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %213, i64 0, i32 2
+  %215 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %214, align 8, !tbaa !28
+  %216 = getelementptr inbounds i8, i8* %"stackFrame_func_A.test$block_3.i", i64 16
+  %217 = bitcast i8* %216 to %struct.rb_iseq_constant_body**
+  %218 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %217, align 8, !tbaa !31
+  %219 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %218, i64 0, i32 0
+  %220 = load i32, i32* %219, align 8, !tbaa !33
+  %221 = and i32 %220, -2
+  %222 = icmp eq i32 %221, 4
+  br i1 %222, label %223, label %249
 
-209:                                              ; preds = %exception-ensure
-  %210 = bitcast i8* %"stackFrame_func_A.test$block_3.i" to %struct.rb_iseq_struct*
-  %211 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %201, i64 0, i32 3
-  %212 = load i64, i64* %211, align 8, !tbaa !42
-  %213 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %201, i64 0, i32 1
-  %214 = load i64*, i64** %213, align 8, !tbaa !44
-  %215 = getelementptr inbounds i64, i64* %214, i64 1
-  %216 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %204, i64 0, i32 14
-  %217 = load i32, i32* %216, align 8, !tbaa !45
-  %218 = add i32 %217, -1
-  %219 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %201, i64 0, i32 4
-  %220 = bitcast i64** %219 to i64*
-  %221 = load i64, i64* %220, align 8, !tbaa !46
-  %222 = or i64 %221, 1
-  %223 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %204, i64 0, i32 2
-  %224 = load i64*, i64** %223, align 8, !tbaa !47
-  %225 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %204, i64 0, i32 18
-  %226 = load i32, i32* %225, align 8, !tbaa !48
-  %227 = call %struct.rb_control_frame_struct* @rb_vm_push_frame(%struct.rb_execution_context_struct* %199, %struct.rb_iseq_struct* %210, i64 2022178817, i64 %212, i64 %222, i64 0, i64* %224, i64* nonnull %215, i32 %218, i32 %226) #14
-  %228 = call i64 @rb_errinfo() #14
-  %229 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  %230 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %229, i64 0, i32 2
-  %231 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %230, align 8, !tbaa !28
-  %232 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %231, i64 0, i32 4
-  %233 = load i64*, i64** %232, align 8, !tbaa !46
-  %234 = getelementptr inbounds i64, i64* %233, i64 -3
-  store i64 %228, i64* %234, align 8, !tbaa !4
-  br label %sorbet_setRubyStackFrame.exit39
+223:                                              ; preds = %exception-ensure
+  %224 = bitcast i8* %"stackFrame_func_A.test$block_3.i" to %struct.rb_iseq_struct*
+  %225 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %215, i64 0, i32 3
+  %226 = load i64, i64* %225, align 8, !tbaa !42
+  %227 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %215, i64 0, i32 1
+  %228 = load i64*, i64** %227, align 8, !tbaa !44
+  %229 = getelementptr inbounds i64, i64* %228, i64 1
+  %230 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %218, i64 0, i32 14
+  %231 = load i32, i32* %230, align 8, !tbaa !45
+  %232 = add i32 %231, -1
+  %233 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %215, i64 0, i32 4
+  %234 = bitcast i64** %233 to i64*
+  %235 = load i64, i64* %234, align 8, !tbaa !46
+  %236 = or i64 %235, 1
+  %237 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %218, i64 0, i32 2
+  %238 = load i64*, i64** %237, align 8, !tbaa !47
+  %239 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %218, i64 0, i32 18
+  %240 = load i32, i32* %239, align 8, !tbaa !48
+  %241 = call %struct.rb_control_frame_struct* @rb_vm_push_frame(%struct.rb_execution_context_struct* %213, %struct.rb_iseq_struct* %224, i64 2022178817, i64 %226, i64 %236, i64 0, i64* %238, i64* nonnull %229, i32 %232, i32 %240) #14
+  %242 = call i64 @rb_errinfo() #14
+  %243 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  %244 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %243, i64 0, i32 2
+  %245 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %244, align 8, !tbaa !28
+  %246 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %245, i64 0, i32 4
+  %247 = load i64*, i64** %246, align 8, !tbaa !46
+  %248 = getelementptr inbounds i64, i64* %247, i64 -3
+  store i64 %242, i64* %248, align 8, !tbaa !4
+  br label %sorbet_setRubyStackFrame.exit41
 
-235:                                              ; preds = %exception-ensure
-  %236 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %201, i64 0, i32 2
-  %237 = bitcast %struct.rb_iseq_struct** %236 to i8**
-  store i8* %"stackFrame_func_A.test$block_3.i", i8** %237, align 8, !tbaa !49
-  %238 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %201, i64 0, i32 4
-  %239 = load i64*, i64** %238, align 8, !tbaa !46
-  %240 = load i64, i64* %239, align 8, !tbaa !4
-  %241 = and i64 %240, -129
-  store i64 %241, i64* %239, align 8, !tbaa !4
-  br label %sorbet_setRubyStackFrame.exit39
+249:                                              ; preds = %exception-ensure
+  %250 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %215, i64 0, i32 2
+  %251 = bitcast %struct.rb_iseq_struct** %250 to i8**
+  store i8* %"stackFrame_func_A.test$block_3.i", i8** %251, align 8, !tbaa !49
+  %252 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %215, i64 0, i32 4
+  %253 = load i64*, i64** %252, align 8, !tbaa !46
+  %254 = load i64, i64* %253, align 8, !tbaa !4
+  %255 = and i64 %254, -129
+  store i64 %255, i64* %253, align 8, !tbaa !4
+  br label %sorbet_setRubyStackFrame.exit41
 
-sorbet_setRubyStackFrame.exit39:                  ; preds = %209, %235
-  %242 = phi %struct.rb_control_frame_struct* [ %227, %209 ], [ %201, %235 ]
-  %243 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %242, i64 0, i32 0
-  %244 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %203, align 8, !tbaa !31
-  %245 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %244, i64 0, i32 2
-  %246 = load i64*, i64** %245, align 8, !tbaa !47
+sorbet_setRubyStackFrame.exit41:                  ; preds = %223, %249
+  %256 = phi %struct.rb_control_frame_struct* [ %241, %223 ], [ %215, %249 ]
+  %257 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %256, i64 0, i32 0
+  %258 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %217, align 8, !tbaa !31
+  %259 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %258, i64 0, i32 2
+  %260 = load i64*, i64** %259, align 8, !tbaa !47
   %rubyStr_ensure.i = load i64, i64* @rubyStrFrozen_ensure, align 8, !dbg !81
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !83
-  %247 = getelementptr inbounds i64, i64* %246, i64 13
-  store i64* %247, i64** %243, align 8, !tbaa !17
+  %261 = getelementptr inbounds i64, i64* %260, i64 13
+  store i64* %261, i64** %257, align 8, !tbaa !17
   %callArgs0Addr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !83
   store i64 %rubyStr_ensure.i, i64* %callArgs0Addr.i, align 8, !dbg !83
-  %248 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !83, !tbaa !69
-  %249 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %248, i64 0, i32 1, i64 1, !dbg !83
-  %250 = load i64, i64* %249, align 8, !dbg !83
-  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %250, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.7) #14, !dbg !83
-  %251 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
-  call void @rb_vm_pop_frame(%struct.rb_execution_context_struct* %251) #14
-  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %198)
-  %isReturnValue22 = icmp eq i64 %.lcssa50, 52, !dbg !71
-  br i1 %isReturnValue22, label %exception-continue, label %exception-return, !dbg !71
+  %262 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !83, !tbaa !69
+  %263 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %262, i64 0, i32 1, i64 1, !dbg !83
+  %264 = load i64, i64* %263, align 8, !dbg !83
+  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %264, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts.7) #14, !dbg !83
+  %265 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !17
+  call void @rb_vm_pop_frame(%struct.rb_execution_context_struct* %265) #14
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %212)
+  %isReturnValue24 = icmp eq i64 %.lcssa53, 52, !dbg !71
+  br i1 %isReturnValue24, label %exception-continue, label %exception-return, !dbg !71
 
-exception-continue:                               ; preds = %sorbet_setRubyStackFrame.exit39
-  %252 = load i64, i64* %exceptionValue, align 8, !dbg !71
-  %253 = icmp eq i64 %252, 8, !dbg !71
-  br i1 %253, label %sorbet_raiseIfNotNil.exit38, label %254, !dbg !71
+exception-continue:                               ; preds = %sorbet_setRubyStackFrame.exit41
+  %266 = icmp eq i64 %.lcssa52, 8, !dbg !71
+  br i1 %266, label %sorbet_raiseIfNotNil.exit40, label %267, !dbg !71
 
-254:                                              ; preds = %exception-continue
-  call void @rb_exc_raise(i64 %252) #15, !dbg !71
+267:                                              ; preds = %exception-continue
+  call void @rb_exc_raise(i64 %.lcssa52) #15, !dbg !71
   unreachable, !dbg !71
 
-sorbet_raiseIfNotNil.exit38:                      ; preds = %exception-continue
-  %255 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
-  %256 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %255, i64 0, i32 1, i64 0, !dbg !71
-  %257 = load i64, i64* %256, align 8, !dbg !71
-  %258 = icmp eq i64 %257, 8, !dbg !71
-  br i1 %258, label %sorbet_raiseIfNotNil.exit, label %259, !dbg !71
+sorbet_raiseIfNotNil.exit40:                      ; preds = %exception-continue
+  %268 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !71, !tbaa !69
+  %269 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %268, i64 0, i32 1, i64 0, !dbg !71
+  %270 = load i64, i64* %269, align 8, !dbg !71
+  %271 = icmp eq i64 %270, 8, !dbg !71
+  br i1 %271, label %sorbet_raiseIfNotNil.exit, label %272, !dbg !71
 
-259:                                              ; preds = %sorbet_raiseIfNotNil.exit38
-  call void @rb_exc_raise(i64 %257) #15, !dbg !71
+272:                                              ; preds = %sorbet_raiseIfNotNil.exit40
+  call void @rb_exc_raise(i64 %270) #15, !dbg !71
   unreachable, !dbg !71
 
-sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNil.exit38
+sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNil.exit40
   store i64* %72, i64** %68, align 8, !tbaa !17
-  %260 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !72, !tbaa !69
-  %261 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %260, i64 0, i32 1, i64 3, !dbg !72
-  %262 = load i64, i64* %261, align 8, !dbg !72
-  ret i64 %262
+  %273 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %11, align 8, !dbg !72, !tbaa !69
+  %274 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %273, i64 0, i32 1, i64 3, !dbg !72
+  %275 = load i64, i64* %274, align 8, !dbg !72
+  ret i64 %275
 
-exception-return:                                 ; preds = %sorbet_setRubyStackFrame.exit39
-  ret i64 %.lcssa50, !dbg !71
+exception-return:                                 ; preds = %sorbet_setRubyStackFrame.exit41
+  ret i64 %.lcssa53, !dbg !71
 }
 
 ; Function Attrs: nounwind ssp

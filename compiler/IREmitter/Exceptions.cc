@@ -129,6 +129,7 @@ public:
         // If a non-undef value was returned from the body, there's no possibility that an exception was raised. Run
         // ensure and return the body result.
         builder.SetInsertPoint(earlyReturnBlock);
+        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {previousException});
         auto ensureResult = sorbetEnsure(bodyResult);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
 
@@ -140,6 +141,22 @@ public:
         return exceptionResult;
     }
 
+    llvm::Value *determinePostRescueExceptionContext(llvm::Value *handlerException) {
+        auto *handlerRaised = builder.CreateICmpNE(handlerException, Payload::rubyNil(cs, builder));
+
+        auto *exn = Payload::varGet(cs, exceptionValue, builder, irctx, rubyBlockId);
+        auto *exceptionNotHandled = builder.CreateICmpNE(exn, Payload::rubyNil(cs, builder));
+
+        // There are three exceptions that need to be considered when determining the state after a rescue handler has
+        // been applied. They're listed in order of preference when being restored for the ensure handler:
+        //
+        // 1. An exception raised by the rescue block
+        // 2. The original exception raised by the body, that wasn't handled by the rescue block
+        // 3. The ambient previous exception that was present before exception handling began
+        auto *unhandledOrPrevious = builder.CreateSelect(exceptionNotHandled, exn, previousException);
+        return builder.CreateSelect(handlerRaised, handlerException, unhandledOrPrevious);
+    }
+
     void runRescueElseEnsure(llvm::Value *exceptionResult) {
         auto *handlersFunction = getHandlers();
         auto *elseFunction = getElse();
@@ -149,13 +166,15 @@ public:
         auto *handler = builder.CreateSelect(exceptionRaised, handlersFunction, elseFunction, "handler");
         auto [handlerResult, handlerExceptionPtr] = sorbetTry(static_cast<llvm::Function *>(handler), exceptionResult);
 
-        // Restore the previous exception
-        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {previousException});
+        // Setup the exception state for the ensure handler
+        auto *handlerException = builder.CreateLoad(handlerExceptionPtr);
+        auto *exceptionContext = determinePostRescueExceptionContext(handlerException);
+        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {exceptionContext});
 
         // Check the handlerResult for a retry, and branch back to the beginning of exception handling if it's present
         // and we ran the rescue block.
-        // NOTE: if retry was returned from the handler, we know that no new exceptions were raised (handlerException
-        // will be nil)
+        // NOTE: if retry was returned from the handler, we know that no new exceptions were raised (exceptionContext
+        // will be nil), and that the previous exception will have been restored.
         auto *ensureBlock = llvm::BasicBlock::Create(cs, "exception-ensure", currentFunc);
         auto *shouldRetry = builder.CreateAnd(
             exceptionRaised,
@@ -176,7 +195,7 @@ public:
 
         // Re-raise if an exception was raised by the handler
         builder.SetInsertPoint(continueBlock);
-        raiseIfNotNil(builder.CreateLoad(handlerExceptionPtr));
+        raiseIfNotNil(exceptionContext);
     }
 
     // If no rescue clause handled the exception, the exceptionValue will contain a non-nil value. Test for that at
