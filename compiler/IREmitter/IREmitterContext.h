@@ -12,12 +12,35 @@ enum class FunctionType {
     // Blocks used within a method
     Block,
 
-    // Functions extracted for part of exception
-    Exception,
+    // Functions extracted for rescue handlers
+    Rescue,
+
+    // Functions extracted for ensure handlers
+    Ensure,
+
+    // Functions extracted for the body of an exception
+    ExceptionBegin,
 
     // The type of blocks that aren't reference, and should be skipped during code generation
     Unused,
 };
+
+constexpr bool functionTypePushesFrame(FunctionType ty) {
+    switch (ty) {
+        case FunctionType::TopLevel:
+            return false;
+        case FunctionType::Block:
+            return false;
+        case FunctionType::Rescue:
+            return true;
+        case FunctionType::Ensure:
+            return true;
+        case FunctionType::ExceptionBegin:
+            return false;
+        case FunctionType::Unused:
+            return false;
+    }
+}
 
 struct Alias;
 
@@ -131,6 +154,13 @@ struct IREmitterContext {
     //
     // idx: cfg::BasicBlock::rubyBlockId
     std::vector<FunctionType> rubyBlockType;
+
+    // The parent block id of each function being generated. Used for constructing the parent relationship when
+    // allocating iseq values for block/exception functions.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: cfg::BasicBlock::rubyBlockId
+    std::vector<int> rubyBlockParent;
 
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;

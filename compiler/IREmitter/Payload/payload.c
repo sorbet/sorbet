@@ -799,14 +799,39 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
-void *sorbet_allocateRubyStackFrames(VALUE funcName, ID func, VALUE filename, VALUE realpath, int startline,
-                                     int endline) {
+SORBET_INLINE
+int sorbet_rubyIseqTypeMethod() {
+    return ISEQ_TYPE_METHOD;
+}
+
+SORBET_INLINE
+int sorbet_rubyIseqTypeBlock() {
+    return ISEQ_TYPE_BLOCK;
+}
+
+SORBET_INLINE
+int sorbet_rubyIseqTypeRescue() {
+    return ISEQ_TYPE_RESCUE;
+}
+
+SORBET_INLINE
+int sorbet_rubyIseqTypeEnsure() {
+    return ISEQ_TYPE_ENSURE;
+}
+
+// NOTE: parent is the immediate parent frame, so for the rescue clause of a
+// top-level method the parent would be the method iseq, but for a rescue clause
+// nested within a rescue clause, it would be the outer rescue iseq.
+//
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
+void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
+                                    int iseqType, int startline, int endline) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
     // ... but actually this line allocates and will not be retained by anyone else,
     // so we pin this object right here. TODO: This leaks memory
-    rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, 0, ISEQ_TYPE_METHOD);
+    rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, (rb_iseq_t *)parent, iseqType);
     rb_gc_register_mark_object((VALUE)iseq);
 
     // This is the table that tells us the hash entry for instruction types
@@ -837,6 +862,20 @@ void *sorbet_allocateRubyStackFrames(VALUE funcName, ID func, VALUE filename, VA
     // One NOP per line, to match insns_info
     iseq->body->iseq_encoded = iseq_encoded;
 
+    // if this is a rescue frame, we need to set up some local storage for
+    // exception values ($!).
+    if (iseqType == ISEQ_TYPE_RESCUE || iseqType == ISEQ_TYPE_ENSURE) {
+        // this is an inlined version of `iseq_set_exception_local_table` from
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1390-L1404
+        ID id_dollar_bang;
+        ID *ids = (ID *)ALLOC_N(ID, 1);
+
+        CONST_ID(id_dollar_bang, "#$!");
+        iseq->body->local_table_size = 1;
+        ids[0] = id_dollar_bang;
+        iseq->body->local_table = ids;
+    }
+
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
     return (void *)iseq;
 }
@@ -851,12 +890,51 @@ const VALUE sorbet_readRealpath() {
     return realpath;
 }
 
+/* Defined in vm_insnhelper.c, but not exported via any header */
+extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const rb_iseq_t *iseq, VALUE type, VALUE self,
+                                            VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp, int local_size,
+                                            int stack_max);
+
+// TODO(perf): We could pass the iseq type in here, given that we know what it
+// is at the point that we call this function. That would mean that we could
+// have llvm fold away the conditional in the body, when this function gets
+// inlined.
 const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_control_frame_t *cfp = GET_EC()->cfp;
-    cfp->iseq = iseq;
-    VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+
+    // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
+    if (iseq->body->type == ISEQ_TYPE_RESCUE || iseq->body->type == ISEQ_TYPE_ENSURE) {
+        // Self is the same in exception-handlers
+        rb_execution_context_t *ec = GET_EC();
+        VALUE self = ec->cfp->self;
+
+        // there is only ever one local for rescue/ensure frames, this mirrors the implementation in
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2085-L2101
+        VALUE *sp = ec->cfp->sp + 1;
+        int num_locals = iseq->body->local_table_size - 1;
+
+        VALUE blockHandler = VM_GUARDED_PREV_EP(cfp->ep);
+        VALUE me = 0;
+
+        cfp = rb_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
+                               num_locals, iseq->body->stack_max);
+
+        // We need to make sure to preserve the value of $! on the frame stack.
+        VALUE currentException = rb_errinfo();
+        VM_STACK_ENV_WRITE(GET_EC()->cfp->ep, VM_ENV_INDEX_LAST_LVAR, currentException);
+    } else {
+        cfp->iseq = iseq;
+        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+    }
+
     return &cfp->pc;
+}
+
+extern void rb_vm_pop_frame(rb_execution_context_t *ec);
+
+void sorbet_popRubyStack() {
+    rb_vm_pop_frame(GET_EC());
 }
 
 const VALUE *sorbet_getIseqEncoded(unsigned char *iseqchar) {

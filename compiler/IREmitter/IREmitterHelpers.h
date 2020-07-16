@@ -95,6 +95,9 @@ public:
 
     static void emitDebugLoc(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                              int rubyBlockId, core::Loc loc);
+
+    static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                           int rubyBlockId, llvm::Value *retVal);
 };
 } // namespace sorbet::compiler
 #endif

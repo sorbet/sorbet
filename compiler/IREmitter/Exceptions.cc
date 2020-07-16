@@ -130,7 +130,7 @@ public:
         // ensure and return the body result.
         builder.SetInsertPoint(earlyReturnBlock);
         auto ensureResult = sorbetEnsure(bodyResult);
-        builder.CreateRet(ensureResult);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
 
         // Update the exceptionValue closure variable to hold the exception raised.
         builder.SetInsertPoint(continueBlock);
@@ -172,7 +172,7 @@ public:
 
         // return the result of the ensure
         builder.SetInsertPoint(returnBlock);
-        builder.CreateRet(ensureResult);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
 
         // Re-raise if an exception was raised by the handler
         builder.SetInsertPoint(continueBlock);

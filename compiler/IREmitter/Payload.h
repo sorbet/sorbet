@@ -50,7 +50,8 @@ public:
                                  const core::TypePtr &type);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
     static std::pair<llvm::Value *, llvm::Value *> setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                                                     const ast::MethodDef &md);
+                                                                     const IREmitterContext &irctx,
+                                                                     const ast::MethodDef &md, int rubyBlockId);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);

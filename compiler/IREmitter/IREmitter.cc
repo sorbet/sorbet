@@ -51,15 +51,17 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::TopLevel:
-        case FunctionType::Block: {
+        case FunctionType::Block:
+        case FunctionType::Rescue:
+        case FunctionType::Ensure: {
             // Switch the current control frame from a C frame to a Ruby-esque one
-            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, md);
+            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, irctx, md, rubyBlockId);
             builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyBlockId]);
             builder.CreateStore(iseq_encoded, irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
             break;
         }
 
-        case FunctionType::Exception: {
+        case FunctionType::ExceptionBegin: {
             // Exception functions get their pc and iseq_encoded values as arguments
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
             auto *pc = func->arg_begin();
@@ -73,6 +75,8 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
             break;
     }
 }
+
+} // namespace
 
 void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
@@ -461,7 +465,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 break;
 
             case FunctionType::Block:
-            case FunctionType::Exception:
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
                 // jump dirrectly to user body
                 builder.CreateBr(irctx.userEntryBlockByFunction[rubyBlockId]);
                 break;
@@ -563,12 +569,11 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                                                    "returns through multiple stacks not implemented");
                                 break;
 
-                            case FunctionType::Exception:
-                                builder.CreateRet(var);
-                                break;
-
+                            case FunctionType::ExceptionBegin:
+                            case FunctionType::Rescue:
+                            case FunctionType::Ensure:
                             case FunctionType::Unused:
-                                builder.CreateRet(var);
+                                IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                                 break;
                         }
                     },
@@ -576,7 +581,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
                         isTerminated = true;
                         auto var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        builder.CreateRet(var);
+                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     },
                     [&](cfg::LoadSelf *i) {
                         // it's done in function setup, no need to do anything here
@@ -724,10 +729,12 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
                 break;
 
             case FunctionType::Block:
-            case FunctionType::Exception:
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
             case FunctionType::Unused:
                 // for non-top-level functions, we return `Qundef` to indicate that this value isn't used for anything.
-                builder.CreateRet(Payload::rubyUndef(cs, builder));
+                IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, Payload::rubyUndef(cs, builder));
                 break;
         }
     }
@@ -736,16 +743,20 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
 void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(cs);
     builder.SetInsertPoint(irctx.postProcessBlock);
-    auto var = Payload::varGet(cs, returnValue(cs), builder, irctx, 0);
+
+    // we're only using the top-level ruby block at this point
+    auto rubyBlockId = 0;
+
+    auto var = Payload::varGet(cs, returnValue(cs), builder, irctx, rubyBlockId);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
-        builder.CreateRet(var);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
         return;
     }
     auto ct = core::cast_type<core::ClassType>(expectedType.get());
     if (ct != nullptr && ct->symbol == core::Symbols::void_()) {
         auto void_ = Payload::getRubyConstant(cs, core::Symbols::T_Private_Types_Void_VOIDSingleton(), builder);
-        builder.CreateRet(void_);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);
         return;
     }
     auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
@@ -763,7 +774,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     builder.CreateUnreachable();
     builder.SetInsertPoint(successBlock);
 
-    builder.CreateRet(var);
+    IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
 }
 
 void emitSigVerification(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
@@ -801,8 +812,6 @@ void emitSigVerification(CompilerState &base, cfg::CFG &cfg, const ast::MethodDe
 
     builder.CreateBr(irctx.userEntryBlockByFunction[0]);
 }
-
-} // namespace
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");

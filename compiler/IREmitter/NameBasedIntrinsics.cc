@@ -176,7 +176,7 @@ public:
         llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
 
         auto *retrySingleton = Payload::retrySingleton(cs, builder, irctx);
-        builder.CreateRet(retrySingleton);
+        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, retrySingleton);
 
         auto *dead = llvm::BasicBlock::Create(cs, "dead-retry", irctx.rubyBlocks2Functions[rubyBlockId]);
         builder.SetInsertPoint(dead);

@@ -297,8 +297,9 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
 
             // NOTE: explicitly treating Unused functions like Exception functions, as they'll be collected by llvm
             // anyway.
-            case FunctionType::Exception:
-                [[fallthrough]];
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
             case FunctionType::Unused: {
                 auto *fp =
                     llvm::Function::Create(et, llvm::Function::InternalLinkage,
@@ -323,16 +324,32 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
     }
 };
 
+// Resolve a ruby block id to one that will have a frame allocated.
+int resolveParent(const vector<FunctionType> &blockTypes, const vector<int> &blockParents, int candidate) {
+    while (candidate > 0) {
+        if (blockTypes[candidate] != FunctionType::ExceptionBegin) {
+            break;
+        }
+        candidate = blockParents[candidate];
+    }
+
+    return candidate;
+}
+
 // Returns the mapping of ruby block id to function type, as well as the mapping from basic block to exception handling
 // body block id.
-void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &exceptionHandlingBlockHeaders,
-                         vector<int> &basicBlockJumpOverrides) {
+void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &blockParents,
+                         vector<int> &exceptionHandlingBlockHeaders, vector<int> &basicBlockJumpOverrides) {
     // ruby block 0 is always the top-level of the method being compiled
     blockTypes[0] = FunctionType::TopLevel;
 
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
             blockTypes[b->rubyBlockId] = FunctionType::Block;
+
+            // the else branch always points back to the original owning rubyBlockId of the block call
+            blockParents[b->rubyBlockId] = resolveParent(blockTypes, blockParents, b->bexit.elseb->rubyBlockId);
+
         } else if (b->bexit.cond.variable._name == core::Names::exceptionValue()) {
             auto *bodyBlock = b->bexit.elseb;
             auto *handlersBlock = b->bexit.thenb;
@@ -373,16 +390,23 @@ void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector
 
             exceptionHandlingBlockHeaders[b->id] = bodyBlockId;
 
-            blockTypes[bodyBlockId] = FunctionType::Exception;
-            blockTypes[handlersBlockId] = FunctionType::Exception;
+            blockTypes[bodyBlockId] = FunctionType::ExceptionBegin;
+            blockTypes[handlersBlockId] = FunctionType::Rescue;
 
             if (elseBlock) {
-                blockTypes[elseBlockId] = FunctionType::Exception;
+                blockTypes[elseBlockId] = FunctionType::ExceptionBegin;
             }
 
             if (ensureBlock) {
-                blockTypes[ensureBlockId] = FunctionType::Exception;
+                blockTypes[ensureBlockId] = FunctionType::Ensure;
             }
+
+            // All exception handling blocks are children of `b`, as far as ruby iseq allocation is concerned.
+            auto parent = resolveParent(blockTypes, blockParents, b->rubyBlockId);
+            blockParents[bodyBlockId] = parent;
+            blockParents[handlersBlockId] = parent;
+            blockParents[elseBlockId] = parent;
+            blockParents[ensureBlockId] = parent;
         }
     }
 
@@ -406,8 +430,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     }
 
     vector<FunctionType> blockTypes(cfg.maxRubyBlockId + 1, FunctionType::Unused);
+    vector<int> blockParents(cfg.maxRubyBlockId + 1, 0);
     vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId + 1, 0);
-    determineBlockTypes(cfg, blockTypes, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
+    determineBlockTypes(cfg, blockTypes, blockParents, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
 
     vector<llvm::Function *> rubyBlock2Function(cfg.maxRubyBlockId + 1, nullptr);
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
@@ -450,7 +475,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 localClosure = fun->arg_begin() + 1;
                 break;
 
-            case FunctionType::Exception:
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
             case FunctionType::Unused:
                 localClosure = fun->arg_begin() + 2;
                 break;
@@ -583,6 +610,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(rubyBlockArgs),
         move(rubyBlock2Function),
         move(blockTypes),
+        move(blockParents),
         move(lineNumberPtrsByFunction),
         move(iseqEncodedPtrsByFunction),
         usesBlockArgs,
@@ -726,6 +754,17 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
         auto start = loc.position(cs).first;
         builder.SetCurrentDebugLocation(llvm::DebugLoc::get(start.line, start.column, scope));
     }
+}
+
+void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                  int rubyBlockId, llvm::Value *retVal) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
+        builder.CreateCall(cs.module->getFunction("sorbet_popRubyStack"), {});
+    }
+
+    builder.CreateRet(retVal);
 }
 
 } // namespace sorbet::compiler
