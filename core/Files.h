@@ -64,6 +64,7 @@ public:
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
+        Package,           // Stripe Ruby package
         Normal,
         TombStone,
     };

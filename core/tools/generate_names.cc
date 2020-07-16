@@ -358,6 +358,14 @@ NameDef names[] = {
     {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
 
+    // Packager
+    {"import"},
+    {"export_", "export"},
+    {"PackageSpec", "PackageSpec", true},
+    {"PackageRegistry", "<PackageRegistry>", true},
+    {"exportMethods", "export_methods"},
+    {"PackageMethods", "<PackageMethods>", true},
+
     // GlobalState initEmpty()
     {"Top", "<any>", true},
     {"Bottom", "T.noreturn", true},

@@ -112,6 +112,8 @@ Usage:
       --no-error-count          Do not print the error count summary line
       --autogen-version arg     Autogen version to output
       --stripe-mode             Enable Stripe specific error enforcement
+      --stripe-packages         Enable support for Stripe's internal Ruby
+                                package system
       --autogen-autoloader-exclude-require arg
                                 Names that should be excluded from top-level
                                 require statements in autoloader output. (e.g.
@@ -159,7 +161,7 @@ Usage:
                                 file-table-proto, file-table-messagepack,
                                 missing-constants, plugin-generated-code,
                                 autogen, autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses]
+                                autogen-autoloader, autogen-subclasses, package-tree]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in

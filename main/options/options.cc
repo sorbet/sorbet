@@ -68,6 +68,7 @@ const vector<PrintOptions> print_options({
     {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses, true},
+    {"package-tree", &Printers::Packager},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -131,6 +132,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenClasslist,
         AutogenAutoloader,
         AutogenSubclasses,
+        Packager,
     });
 }
 
@@ -380,6 +382,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
+    options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
+                                    cxxopts::value<bool>());
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -838,6 +842,7 @@ void readOptions(Options &opts,
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
+        opts.stripePackages = raw["stripe-packages"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {

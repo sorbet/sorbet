@@ -1,0 +1,71 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C SomeConstant> = <emptyTree>::<C PackageSpec>
+
+  class <emptyTree>::<C MyPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def package_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.static_method<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.include(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.some_method(<self>.method_call_arg())
+
+    <self>.some_method(<emptyTree>::<C ConstantArg>)
+
+    <self>.some_method("add".+("ition"))
+
+    <self>.some_method(1.+(2))
+
+    <self>.some_method([0, 1, 2])
+
+    <self>.some_method({:"prop" => 10})
+
+    <self>.some_method("Literal")
+
+    <self>.some_method(1)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :"package_method")
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :"static_method")
+
+    @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
+    class ::<root>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
+      def self.some_method<<C <todo sym>>>(x, &<blk>)
+        <emptyTree>
+      end
+
+      def self.method_call_arg<<C <todo sym>>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"some_method")
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :"method_call_arg")
+
+      <emptyTree>::<C ConstantArg> = 10
+    end
+  end
+end

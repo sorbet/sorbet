@@ -457,6 +457,32 @@ public:
         return SymbolRef(nullptr, 98);
     }
 
+    static SymbolRef PackageRegistry() {
+        return SymbolRef(nullptr, 99);
+    }
+
+    static SymbolRef PackageSpec() {
+        return SymbolRef(nullptr, 100);
+    }
+
+    static SymbolRef PackageSpecSingleton() {
+        return SymbolRef(nullptr, 101);
+    }
+
+    // 102 is the attached class of PackageSpecSingleton
+
+    static SymbolRef PackageSpec_import() {
+        return SymbolRef(nullptr, 103);
+    }
+
+    static SymbolRef PackageSpec_export() {
+        return SymbolRef(nullptr, 104);
+    }
+
+    static SymbolRef PackageSpec_export_methods() {
+        return SymbolRef(nullptr, 105);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 3 - 3);

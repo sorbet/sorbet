@@ -1,0 +1,133 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(123)
+
+    <self>.import("hello")
+
+    <self>.import(<self>.method())
+
+    <self>.import(<emptyTree>::<C REFERENCE>)
+
+    <self>.import(<emptyTree>::<C B>)
+
+    <self>.import(<emptyTree>::<C B>)
+
+    <self>.export(123)
+
+    <self>.export("hello")
+
+    <self>.export(<self>.method())
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C REFERENCE>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AClass>)
+
+    <self>.export_methods(123, "hello", <self>.method(), <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C REFERENCE>, <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AModule>, <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AClass>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C <PackageMethods>><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C REFERENCE>)
+
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AModule>)
+
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AClass>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>
+
+      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C <PackageMethods>>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package><<C <todo sym>>> < ()
+    <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
+
+    class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)
+    end
+
+    class <emptyTree>::<C AClass><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C AClass>)
+      end
+
+      def get_a<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C B>.get_a()
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"get_a")
+    end
+
+    module <emptyTree>::<C AModule><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Integer>)
+      end
+
+      def one<<C <todo sym>>>(&<blk>)
+        1
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"one")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C A>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BClass>)
+
+    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BModule>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C <PackageMethods>><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C B_Package>::<C BModule>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C REFERENCE>
+
+      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C AClass>
+
+      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C A_Package>::<C <PackageMethods>>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C B_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Integer>)
+      end
+
+      def get_one<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C A>.one()
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"get_one")
+    end
+
+    module <emptyTree>::<C BModule><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C A>::<C AClass>)
+      end
+
+      def get_a<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C A>::<C AClass>.new()
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"get_a")
+    end
+  end
+end
