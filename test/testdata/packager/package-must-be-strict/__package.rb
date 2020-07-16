@@ -1,4 +1,4 @@
-# error: Package files must be typed: strict
+# error: Package files must be at least `# typed: strict`
 # typed: true
 # enable-packager: true
 
