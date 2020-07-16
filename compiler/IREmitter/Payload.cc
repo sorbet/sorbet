@@ -404,13 +404,40 @@ namespace {
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                      const ast::MethodDef &md, int rubyBlockId);
 
-std::tuple<string_view, llvm::Value *, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                                  const IREmitterContext &irctx,
-                                                                  const ast::MethodDef &md, int rubyBlockId) {
+llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                         int rubyBlockId) {
     auto &builder = builderCast(build);
+    switch (irctx.rubyBlockType[rubyBlockId]) {
+        case FunctionType::TopLevel:
+            return builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
+
+        case FunctionType::Block:
+            return builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeBlock"), {}, "ISEQ_TYPE_BLOCK");
+
+        case FunctionType::Rescue:
+            return builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeRescue"), {}, "ISEQ_TYPE_RESCUE");
+
+        case FunctionType::Ensure:
+            return builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeEnsure"), {}, "ISEQ_TYPE_ENSURE");
+
+        case FunctionType::ExceptionBegin:
+            // Exception body functions inherit the iseq entry for their containing context, so we should never be
+            // generating an iseq entry for them.
+            Exception::raise("Allocating an iseq for a FunctionType::ExceptionBegin function");
+            break;
+
+        case FunctionType::Unused:
+            // This should never happen, as we should be skipping iseq initialization for unused functions.
+            Exception::raise("Picking an ISEQ_TYPE for an unused function!");
+            break;
+    }
+}
+
+std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                   const IREmitterContext &irctx, const ast::MethodDef &md,
+                                                   int rubyBlockId) {
     string_view funcName;
     llvm::Value *parent = nullptr;
-    llvm::Value *iseqType = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::TopLevel: {
             if (IREmitterHelpers::isStaticInit(cs, md.symbol)) {
@@ -419,26 +446,22 @@ std::tuple<string_view, llvm::Value *, llvm::Value *> getIseqInfo(CompilerState 
                 funcName = md.symbol.data(cs)->name.data(cs)->shortName(cs);
             }
 
-            iseqType = builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
             parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
             break;
         }
 
         case FunctionType::Block:
             funcName = "block for"sv;
-            iseqType = builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeBlock"), {}, "ISEQ_TYPE_BLOCK");
             parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
             break;
 
         case FunctionType::Rescue:
             funcName = "rescue for"sv;
-            iseqType = builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeRescue"), {}, "ISEQ_TYPE_RESCUE");
             parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
             break;
 
         case FunctionType::Ensure:
             funcName = "ensure for"sv;
-            iseqType = builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeEnsure"), {}, "ISEQ_TYPE_ENSURE");
             parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
             break;
 
@@ -454,7 +477,7 @@ std::tuple<string_view, llvm::Value *, llvm::Value *> getIseqInfo(CompilerState 
             break;
     }
 
-    return {funcName, parent, iseqType};
+    return {funcName, parent};
 }
 
 llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
@@ -477,7 +500,8 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     auto cs1 = cs.withFunctionEntry(bei);
 
     auto loc = core::Loc(md.declLoc.file(), md.loc);
-    auto [funcName, parent, iseqType] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
+    auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
+    auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
     auto filename = loc.file().data(cs).path();
@@ -551,7 +575,8 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
                                                                    const ast::MethodDef &md, int rubyBlockId) {
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
-    auto pc = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {stackFrame});
+    auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
+    auto pc = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {iseqType, stackFrame});
     auto iseq_encoded = builder.CreateCall(cs.module->getFunction("sorbet_getIseqEncoded"), {stackFrame});
     return {pc, iseq_encoded};
 }

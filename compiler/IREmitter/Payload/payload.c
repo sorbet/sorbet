@@ -895,16 +895,12 @@ extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const r
                                             VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp, int local_size,
                                             int stack_max);
 
-// TODO(perf): We could pass the iseq type in here, given that we know what it
-// is at the point that we call this function. That would mean that we could
-// have llvm fold away the conditional in the body, when this function gets
-// inlined.
-const VALUE **sorbet_setRubyStackFrame(unsigned char *iseqchar) {
+const VALUE **sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_control_frame_t *cfp = GET_EC()->cfp;
 
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
-    if (iseq->body->type == ISEQ_TYPE_RESCUE || iseq->body->type == ISEQ_TYPE_ENSURE) {
+    if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
         // Self is the same in exception-handlers
         rb_execution_context_t *ec = GET_EC();
         VALUE self = ec->cfp->self;
