@@ -18,27 +18,13 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-struct PackageName {
-    core::LocOffsets loc;
-    core::NameRef mangledName = core::NameRef::noName();
-    vector<core::NameRef> fullName;
-    ast::TreePtr getFullNameLiteral(core::LocOffsets loc) const;
-};
-
-struct PackageInfo {
-    // The path prefix before every file in the package, including path separator at end.
-    std::string packagePathPrefix;
-    PackageName name;
-    // loc for the package definition. Used for error messages.
+struct FullyQualifiedName {
+    vector<core::NameRef> parts;
     core::Loc loc;
-    // The mangled names of each package imported by this package.
-    vector<PackageName> importedPackageNames;
-    // List of exported items that form the body of this package's public API.
-    // These are copied into every package that imports this package.
-    ast::ClassDef::RHS_store exportedItems;
+    ast::TreePtr toLiteral(core::LocOffsets loc) const;
 };
 
-class NameFormatter {
+class NameFormatter final {
     const core::GlobalState &gs;
 
 public:
@@ -47,6 +33,30 @@ public:
     void operator()(std::string *out, core::NameRef name) const {
         out->append(name.data(gs)->shortName(gs));
     }
+};
+
+struct PackageName {
+    core::LocOffsets loc;
+    core::NameRef mangledName = core::NameRef::noName();
+    FullyQualifiedName fullName;
+
+    // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
+    string toString(const core::GlobalState &gs) const {
+        return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
+    }
+};
+
+struct PackageInfo {
+    // The path prefix before every file in the package, including path separator at end.
+    std::string packagePathPrefix;
+    PackageName name;
+    // loc for the package definition. Used for error messages.
+    core::Loc loc;
+    // The names of each package imported by this package.
+    vector<PackageName> importedPackageNames;
+    // List of exported items that form the body of this package's public API.
+    // These are copied into every package that imports this package.
+    ast::ClassDef::RHS_store exportedItems;
 };
 
 /**
@@ -77,7 +87,7 @@ public:
         auto it = packageInfoByMangledName.find(pkg->name.mangledName);
         if (it != packageInfoByMangledName.end()) {
             if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                auto pkgName = absl::StrJoin(pkg->name.fullName, "::", NameFormatter(ctx));
+                auto pkgName = pkg->name.toString(ctx);
                 e.setHeader("Redefinition of package `{}`", pkgName);
                 e.addErrorLine(it->second->loc, "Package `{}` originally defined here", pkgName);
             }
@@ -140,8 +150,7 @@ public:
     }
 };
 
-void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit &tree) {
-    auto constLit = &tree;
+void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
     while (constLit != nullptr) {
         if (absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between mangled names and
@@ -162,23 +171,28 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit &tree) {
     }
 }
 
-// Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit &constantLit) {
-    PackageName pName;
-    pName.loc = constantLit.loc;
-
-    {
-        auto current = &constantLit;
-        while (current != nullptr) {
-            pName.fullName.emplace_back(current->cnst);
-            current = ast::cast_tree<ast::UnresolvedConstantLit>(current->scope);
-        }
+FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConstantLit *constantLit) {
+    FullyQualifiedName fqn;
+    fqn.loc = core::Loc(ctx.file, constantLit->loc);
+    while (constantLit != nullptr) {
+        fqn.parts.emplace_back(constantLit->cnst);
+        constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
     }
-    reverse(pName.fullName.begin(), pName.fullName.end());
-    ENFORCE(!pName.fullName.empty());
+    reverse(fqn.parts.begin(), fqn.parts.end());
+    ENFORCE(!fqn.parts.empty());
+    return fqn;
+}
+
+// Gets the package name in `tree` if applicable.
+PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit) {
+    ENFORCE(constantLit != nullptr);
+
+    PackageName pName;
+    pName.loc = constantLit->loc;
+    pName.fullName = getFullyQualifiedName(ctx, constantLit);
 
     // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName, "_", NameFormatter(ctx)), "_Package");
+    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), "_Package");
     pName.mangledName = ctx.state.enterNameConstant(mangledName);
 
     return pName;
@@ -189,24 +203,14 @@ bool isReferenceToPackageSpec(core::Context ctx, ast::TreePtr &expr) {
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
-unique_ptr<ast::UnresolvedConstantLit> copyConstantLit(ast::UnresolvedConstantLit *lit) {
-    auto copy = lit->deepCopy();
-    // Cast from Expression to UnresolvedConstantLit.
-    auto copyUcl = ast::cast_tree<ast::UnresolvedConstantLit>(copy);
-    ENFORCE(copyUcl != nullptr);
-    unique_ptr<ast::UnresolvedConstantLit> rv(copyUcl);
-    copy.release();
-    return rv;
-}
-
 ast::TreePtr name2Expr(core::NameRef name, ast::TreePtr scope = ast::MK::EmptyTree()) {
     return ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(scope), name);
 }
 
-ast::TreePtr PackageName::getFullNameLiteral(core::LocOffsets loc) const {
+ast::TreePtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
     ast::TreePtr name = ast::MK::EmptyTree();
-    for (auto namePart : fullName) {
-        name = name2Expr(namePart, move(name));
+    for (auto part : parts) {
+        name = name2Expr(part, move(name));
     }
     // Outer name should have the provided loc.
     if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(name)) {
@@ -227,8 +231,8 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
 
 struct PackageInfoFinder {
     unique_ptr<PackageInfo> info = nullptr;
-    vector<unique_ptr<ast::UnresolvedConstantLit>> exported;
-    vector<unique_ptr<ast::UnresolvedConstantLit>> exportedMethods;
+    vector<FullyQualifiedName> exported;
+    vector<FullyQualifiedName> exportedMethods;
     core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
@@ -267,20 +271,19 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::export_() && send.args.size() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.args[0])) {
-                exported.emplace_back(copyConstantLit(target));
+                exported.push_back(getFullyQualifiedName(ctx, target));
                 // Transform the constant lit to refer to the target within the mangled package namespace.
-                send.args[0] = prependInternalPackageNameToScope(move(send.args[0]));
+                send.args[0] = prependInternalPackageName(move(send.args[0]));
             }
         }
 
         if (send.fun == core::Names::import() && send.args.size() == 1) {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, core::Names::import(), send.args[0])) {
-                auto name = getPackageName(ctx, *target);
+                auto name = getPackageName(ctx, target);
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                        e.setHeader("Package `{}` cannot import itself",
-                                    absl::StrJoin(info->name.fullName, "::", NameFormatter(ctx)));
+                        e.setHeader("Package `{}` cannot import itself", info->name.toString(ctx));
                     }
                 }
                 info->importedPackageNames.emplace_back(move(name));
@@ -302,10 +305,10 @@ struct PackageInfoFinder {
                     // Don't export the methods if export_methods was already called. Let dependents error until it is
                     // fixed.
                     if (!alreadyCalled) {
-                        exportedMethods.emplace_back(copyConstantLit(target));
+                        exportedMethods.push_back(getFullyQualifiedName(ctx, target));
                     }
                     // Transform the constant lit to refer to the target within the mangled package namespace.
-                    arg = prependInternalPackageNameToScope(move(arg));
+                    arg = prependInternalPackageName(move(arg));
                 }
             }
         }
@@ -326,7 +329,7 @@ struct PackageInfoFinder {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
         } else if (info == nullptr) {
-            auto &nameTree = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
+            auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
             info = make_unique<PackageInfo>();
             checkPackageName(ctx, nameTree);
             info->name = getPackageName(ctx, nameTree);
@@ -349,11 +352,13 @@ struct PackageInfoFinder {
 
         // Inject <PackageRegistry>::Name_Package::<PackageMethods> within the <root> class
         ast::ClassDef::RHS_store includeStatements;
-        for (auto &klass : exportedMethods) {
+        for (auto &exportedMethod : exportedMethods) {
             // include <PackageRegistry>::MangledPackageName::Path::To::Item
-            includeStatements.emplace_back(
-                ast::MK::Send1(klass->loc, ast::MK::Self(klass->loc), core::Names::include(),
-                               name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope.deepCopy()))));
+            // Use the loc of the name so the error goes to the right place.
+            ENFORCE(exportedMethod.loc.file() == ctx.file);
+            includeStatements.emplace_back(ast::MK::Send1(
+                exportedMethod.loc.offsets(), ast::MK::Self(exportedMethod.loc.offsets()), core::Names::include(),
+                prependInternalPackageName(exportedMethod.toLiteral(exportedMethod.loc.offsets()))));
         }
 
         // Use the loc of the `export_methods` call so `include` errors goes to the right place.
@@ -367,7 +372,7 @@ struct PackageInfoFinder {
     }
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
-    ast::TreePtr prependInternalPackageNameToScope(ast::TreePtr scope) {
+    ast::TreePtr prependInternalPackageName(ast::TreePtr scope) {
         ENFORCE(info != nullptr);
         // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
         ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
@@ -408,9 +413,10 @@ struct PackageInfoFinder {
         // import this package with __package.rb-specific locs.
         for (auto &klass : exported) {
             // Item = <PackageRegistry>::MangledPackageName::Path::To::Item
+            ENFORCE(!klass.parts.empty());
             info->exportedItems.emplace_back(
-                ast::MK::Assign(core::LocOffsets::none(), name2Expr(klass->cnst),
-                                name2Expr(klass->cnst, prependInternalPackageNameToScope(klass->scope.deepCopy()))));
+                ast::MK::Assign(core::LocOffsets::none(), name2Expr(klass.parts.back()),
+                                prependInternalPackageName(klass.toLiteral(core::LocOffsets::none()))));
         }
 
         if (!exportedMethods.empty()) {
@@ -551,15 +557,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
             if (importedPackage == nullptr) {
                 if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
-                    e.setHeader("Cannot find package `{}`", absl::StrJoin(imported.fullName, "::", NameFormatter(ctx)));
+                    e.setHeader("Cannot find package `{}`", imported.toString(ctx));
                 }
                 continue;
             }
 
             if (importedNames.contains(imported.mangledName)) {
                 if (auto e = ctx.beginError(imported.loc, core::errors::Packager::InvalidImportOrExport)) {
-                    e.setHeader("Duplicate package import `{}`",
-                                absl::StrJoin(imported.fullName, "::", NameFormatter(ctx)));
+                    e.setHeader("Duplicate package import `{}`", imported.toString(ctx));
                     e.addErrorLine(core::Loc(ctx.file, importedNames[imported.mangledName]),
                                    "Previous package import found here");
                 }
@@ -571,12 +576,12 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                     exportedItemsCopy.emplace_back(exported.deepCopy());
                 }
 
-                ENFORCE(!imported.fullName.empty());
+                ENFORCE(!imported.fullName.parts.empty());
                 // Create a module for the imported package that sets up constant references to exported items.
                 // Use proper loc information on the module name so that `import Foo` displays in the results of LSP
                 // Find All References on `Foo`.
                 importedPackages.emplace_back(ast::MK::Module(imported.loc, core::Loc(ctx.file, imported.loc),
-                                                              imported.getFullNameLiteral(imported.loc), {},
+                                                              imported.fullName.toLiteral(imported.loc), {},
                                                               std::move(exportedItemsCopy)));
             }
         }
