@@ -109,6 +109,7 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
             build = extension,
             oracle = oracle,
             tags = tags + extra_tags,
+            size = "small",
         )
 
         exp_tests = []
@@ -119,6 +120,7 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
                 exp_files = exps_name,
                 extension = extension,
                 tags = tags + extra_tags,
+                size = "small",
             )
 
             exp_tests = [validate_exp]
