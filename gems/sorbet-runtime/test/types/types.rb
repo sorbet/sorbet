@@ -9,6 +9,12 @@ module Opus::Types::Test
     class Sub < Base; end
     class WithMixin; include Mixin1; end
 
+    private def counting_allocations
+      before = GC.stat[:total_allocated_objects]
+      yield
+      GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
+    end
+
     describe "Base" do
       it "raises an error if you override `subtype_of?`" do
         err = assert_raises do
@@ -44,6 +50,14 @@ module Opus::Types::Test
 
       it 'can hand back its raw type' do
         assert_equal(Integer, @type.raw_type)
+      end
+
+      it 'valid? does not allocate' do
+        allocs_when_valid = counting_allocations {@type.valid?(0)}
+        assert_equal(0, allocs_when_valid)
+
+        allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+        assert_equal(0, allocs_when_invalid)
       end
     end
 
@@ -86,6 +100,14 @@ module Opus::Types::Test
       it "unwraps aliased types" do
         type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
         assert_equal("T.any(Integer, String)", type.name)
+      end
+
+      it 'valid? does not allocate' do
+        allocs_when_valid = counting_allocations {@type.valid?(0)}
+        assert_equal(0, allocs_when_valid)
+
+        allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+        assert_equal(0, allocs_when_invalid)
       end
     end
 
@@ -132,6 +154,17 @@ module Opus::Types::Test
         type_alias = T::Private::Types::TypeAlias.new(-> {Mixin1})
         type = T.all(@type, type_alias)
         assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", type.name)
+      end
+
+      it 'valid? does not allocate' do
+        @klass.include(Mixin1)
+        @klass.include(Mixin2)
+
+        allocs_when_valid = counting_allocations {@type.valid?(@klass)}
+        assert_equal(0, allocs_when_valid)
+
+        allocs_when_invalid = counting_allocations {@type.valid?(Mixin1)}
+        assert_equal(0, allocs_when_invalid)
       end
     end
 
@@ -289,6 +322,18 @@ module Opus::Types::Test
       it 'is coerced from plain array' do
         assert_equal(T::Array[T.untyped], T::Utils.coerce(::Array))
       end
+
+      it 'valid? does not allocate' do
+        type = T::Array[Integer]
+        valid = [1]
+        invalid = {}
+
+        allocs_when_valid = counting_allocations {type.valid?(valid)}
+        assert_equal(0, allocs_when_valid)
+
+        allocs_when_invalid = counting_allocations {type.valid?(invalid)}
+        assert_equal(0, allocs_when_invalid)
+      end
     end
 
     describe "TypedHash" do
@@ -334,6 +379,18 @@ module Opus::Types::Test
         msg = type.error_message_for_obj(value)
         expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[Symbol, Float]"
         assert_equal(expected_error, msg)
+      end
+
+      it 'valid? does not allocate' do
+        type = T::Hash[String, Integer]
+        valid = {'one' => 1}
+        invalid = []
+
+        allocs_when_valid = counting_allocations {type.valid?(valid)}
+        assert_equal(0, allocs_when_valid)
+
+        allocs_when_invalid = counting_allocations {type.valid?(invalid)}
+        assert_equal(0, allocs_when_invalid)
       end
     end
 
