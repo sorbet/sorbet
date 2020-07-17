@@ -28,7 +28,7 @@ module T::Types
         super(T.untyped)
       end
 
-      def valid?(obj)
+      def valid?(obj, deep=false)
         obj.is_a?(Set)
       end
     end
