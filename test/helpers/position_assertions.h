@@ -97,9 +97,10 @@ public:
 
     const std::string symbol;
     const int version;
+    const bool isDefOfSelf;
 
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
-                 int version);
+                 int version, bool isDefOfSelf);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                int &nextId, const Location &queryLoc);

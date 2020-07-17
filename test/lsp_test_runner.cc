@@ -425,10 +425,15 @@ TEST_CASE("LSPTest") {
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                     version = defAssertion->version;
                     symbol = defAssertion->symbol;
+                    // Some definition locations are not the definition of themselves.
+                    if (!defAssertion->isDefOfSelf) {
+                        continue;
+                    }
                 } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                     version = usageAssertion->version;
                     symbol = usageAssertion->symbol;
                 }
+
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
                     auto &def = entry->second;

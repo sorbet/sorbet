@@ -406,32 +406,41 @@ unique_ptr<DocumentHighlight> RangeAssertion::getDocumentHighlight() {
     return make_unique<DocumentHighlight>(range->copy());
 }
 
-pair<string_view, int> getSymbolAndVersion(string_view assertionContents) {
+tuple<string_view, int, string_view> getSymbolVersionAndOption(string_view assertionContents) {
     int version = 1;
     vector<string_view> split = absl::StrSplit(assertionContents, ' ');
     CHECK_GE(split.size(), 0);
     {
         INFO(fmt::format(
             "Invalid usage and def assertion; multiple words found:\n{}\nUsage and def assertions should be "
-            "of the form:\n# [^*] [usage | def | type | type-def]: symbolname [version?]",
+            "of the form:\n# [^*] [usage | def | type | type-def]: symbolname [version?] [option?]",
             assertionContents));
-        CHECK_LT(split.size(), 3);
+        CHECK_LT(split.size(), 4);
     }
-    if (split.size() == 2) {
+    if (split.size() >= 2) {
         string_view versionString = split[1];
         version = stoi(string(versionString));
     }
-    return pair<string_view, int>(split[0], version);
+    string_view option;
+    if (split.size() == 3) {
+        option = split[2];
+    }
+    return make_tuple(split[0], version, option);
 }
 
 DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
-                           int version)
-    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version) {}
+                           int version, bool isDefOfSelf)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version), isDefOfSelf(isDefOfSelf) {}
 
 shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                             string_view assertionContents, string_view assertionType) {
-    auto symbolAndVersion = getSymbolAndVersion(assertionContents);
-    return make_shared<DefAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
+    auto [symbol, version, option] = getSymbolVersionAndOption(assertionContents);
+    auto notDefOfSelf = option == "not-def-of-self";
+    if (!notDefOfSelf && !option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected def assertion option: `{}`", option));
+    }
+    return make_shared<DefAssertion>(filename, range, assertionLine, symbol, version, !notDefOfSelf);
 }
 
 vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
@@ -649,8 +658,12 @@ UsageAssertion::UsageAssertion(string_view filename, unique_ptr<Range> &range, i
 
 shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                 string_view assertionContents, string_view assertionType) {
-    auto symbolAndVersion = getSymbolAndVersion(assertionContents);
-    return make_shared<UsageAssertion>(filename, range, assertionLine, symbolAndVersion.first, symbolAndVersion.second);
+    auto [symbol, version, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected usage assertion option: `{}`", option));
+    }
+    return make_shared<UsageAssertion>(filename, range, assertionLine, symbol, version);
 }
 
 string UsageAssertion::toString() const {
@@ -663,7 +676,11 @@ TypeDefAssertion::TypeDefAssertion(string_view filename, unique_ptr<Range> &rang
 
 shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                     string_view assertionContents, string_view assertionType) {
-    auto [symbol, _version] = getSymbolAndVersion(assertionContents);
+    auto [symbol, _version, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected type-def assertion option: `{}`", option));
+    }
     return make_shared<TypeDefAssertion>(filename, range, assertionLine, symbol);
 }
 
@@ -732,7 +749,11 @@ TypeAssertion::TypeAssertion(string_view filename, unique_ptr<Range> &range, int
 
 shared_ptr<TypeAssertion> TypeAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                               string_view assertionContents, string_view assertionType) {
-    auto [symbol, _version] = getSymbolAndVersion(assertionContents);
+    auto [symbol, _version, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected type assertion option: `{}`", option));
+    }
     return make_shared<TypeAssertion>(filename, range, assertionLine, symbol);
 }
 
