@@ -13,7 +13,7 @@ class T::Types::Base
   def subtype_of?(t2); end
   def to_s; end
   def describe_obj(obj); end
-  def error_message_for_obj(obj); end
+  def error_message_for_obj(obj, deep=false); end
   def validate!(obj); end
   def hash; end
   def ==(other); end
