@@ -147,7 +147,9 @@ public:
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
             ENFORCE(name->kind == core::NameKind::UTF8);
-            if (driver_->lex.is_declared(name->show(gs_))) {
+            auto name_str = name->show(gs_);
+            if (driver_->lex.is_declared(name_str)) {
+                checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
@@ -1151,6 +1153,12 @@ public:
         auto firstPart = parts.front().get();
 
         return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
+    }
+
+    void checkCircularArgumentReferences(const Node *node, std::string name) {
+        if (name == driver_->current_arg_stack.top()) {
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, name);
+        }
     }
 
     void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::LocOffsets> &map) {

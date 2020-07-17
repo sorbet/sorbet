@@ -117,12 +117,50 @@ public:
     }
 };
 
+/*
+ * Stack that holds names of current arguments,
+ * i.e. while parsing
+ *   def m1(a = (def m2(b = def m3(c = 1); end); end)); end
+ *                                   ^
+ * stack is [:a, :b, :c]
+ *
+ * Emulates `p->cur_arg` in MRI's parse.y
+ */
+class current_arg_stack {
+    std::vector<std::string> stack;
+
+public:
+    void push(std::string value) {
+        stack.push_back(value);
+    }
+
+    void set(std::string value) {
+        pop();
+        push(value);
+    }
+
+    void pop() {
+        if (!stack.empty()) {
+            stack.pop_back();
+        }
+    }
+
+    void reset() {
+        stack.clear();
+    }
+
+    std::string top() {
+        return stack.empty() ? "" : stack.back();
+    }
+};
+
 class base_driver {
 public:
     diagnostics_t diagnostics;
     const builder &build;
     lexer lex;
     mempool alloc;
+    current_arg_stack current_arg_stack;
 
     bool pending_error;
     size_t def_level;
