@@ -686,8 +686,9 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                         if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
                             job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
                         } else {
-                            // Don't transform, but raise an error.
-                            if (auto e = ctx.beginError(job.tree->loc, core::errors::Packager::UnpackagedFile)) {
+                            // Don't transform, but raise an error on the first line.
+                            if (auto e =
+                                    ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
                                 e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
                                             "of its parent directories",
                                             ctx.file.data(gs).path());
