@@ -7,7 +7,7 @@ class Test
     .returns(T.nilable(String))
   end
   def message(failures)
-    failure = failures&.first
+    failure = failures.first
     T.assert_type!(failure && failure['message'], T.nilable(String))
   end
 end

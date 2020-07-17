@@ -1485,6 +1485,31 @@ class Array < Object
   sig {returns(String)}
   def inspect(); end
 
+
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) Intersection ---
+  # Returns a new array containing unique elements common to the two arrays. The
+  # order is preserved from the original array.
+  #
+  # It compares elements using their
+  # [`hash`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-hash) and
+  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-eql-3F)
+  # methods for efficiency.
+  #
+  # ```ruby
+  # [ 1, 1, 3, 5 ] & [ 3, 2, 1 ]                 #=> [ 1, 3 ]
+  # [ 'a', 'b', 'b', 'z' ] & [ 'a', 'b', 'c' ]   #=> [ 'a', 'b' ]
+  # ```
+  #
+  # See also
+  # [`Array#&`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-26).
+  sig do
+    params(
+      arrays: T::Array[T.untyped]
+    )
+    .returns(T::Array[Elem])
+  end
+  def intersection(*arrays); end
+
   # Returns a string created by converting each element of the array to a
   # string, separated by the given `separator`. If the `separator` is `nil`, it
   # uses current `$,`. If both the `separator` and `$,` are `nil`, it uses an

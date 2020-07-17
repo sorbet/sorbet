@@ -6,6 +6,7 @@
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
 #include "namer/configatron/configatron.h"
+#include "packager/packager.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
 #include <sstream>
@@ -295,11 +296,17 @@ indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::F
 vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts) {
     try {
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            Timer timeit(gs.tracer(), "incremental_packager");
+            what = packager::Packager::runIncremental(gs, move(what));
+        }
+#endif
         {
             Timer timeit(gs.tracer(), "incremental_naming");
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
 
             auto result = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers);
             // Cancellation cannot occur during incremental namer.
@@ -727,6 +734,22 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
     return result;
 }
 
+vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+                                WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.stripePackages) {
+        Timer timeit(gs.tracer(), "package");
+        what = packager::Packager::run(gs, workers, move(what));
+        if (opts.print.Packager.enabled) {
+            for (auto &f : what) {
+                opts.print.Packager.fmt("{}\n", f.tree->toStringWithTabs(gs, 0));
+            }
+        }
+    }
+#endif
+    return what;
+}
+
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers, bool skipConfigatron) {
     Timer timeit(gs.tracer(), "name");
@@ -831,6 +854,9 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
     try {
+        // packager intentionally runs outside of rewriter so that its output does not get cached.
+        what = package(*gs, move(what), opts, workers);
+
         auto result = name(*gs, move(what), opts, workers, skipConfigatron);
         if (!result.hasResult()) {
             return result;

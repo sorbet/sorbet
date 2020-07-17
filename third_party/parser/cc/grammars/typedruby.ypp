@@ -589,6 +589,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.build.assign(self, $1, $2, driver.build.array(self, nullptr, $3, nullptr));
                     }
+                | mlhs tEQL mrhs_arg kRESCUE_MOD stmt
+                    {
+                    ruby_parser::node_list rescue_body(
+						driver.build.rescue_body(self, $4, nullptr, nullptr, nullptr, nullptr, $5));
+                      auto begin_body = driver.build.beginBody(self, $3, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.multi_assign(self, $1, begin_body);
+                    }
                 | mlhs tEQL mrhs_arg
                     {
                       $$ = driver.build.multi_assign(self, $1, $3);

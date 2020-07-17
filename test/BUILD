@@ -23,6 +23,7 @@ cc_binary(
         "//main/lsp",
         "//main/pipeline/semantic_extension:none",
         "//namer",
+        "//packager",
         "//payload",
         "//resolver",
         "//rewriter",

@@ -1,0 +1,21 @@
+#ifndef SORBET_CORE_ERRORS_PACKAGER_H
+#define SORBET_CORE_ERRORS_PACKAGER_H
+#include "core/Error.h"
+
+namespace sorbet::core::errors::Packager {
+// Packaging errors are fatal (they prevent packaging from working at runtime!), and should not be silenceable.
+// Thus, all of these errors fire on typed: false and above.
+constexpr ErrorClass MustBeTypedStrict{3701, StrictLevel::False};
+constexpr ErrorClass InvalidPackageDefinition{3702, StrictLevel::False};
+constexpr ErrorClass RedefinitionOfPackage{3703, StrictLevel::False};
+constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};
+constexpr ErrorClass UnpackagedFile{3705, StrictLevel::False};
+constexpr ErrorClass InvalidImportOrExport{3706, StrictLevel::False};
+constexpr ErrorClass MultiplePackagesInOneFile{3707, StrictLevel::False};
+constexpr ErrorClass MultipleExportMethodsCalls{3708, StrictLevel::False};
+constexpr ErrorClass NoSelfImport{3709, StrictLevel::False};
+constexpr ErrorClass InvalidPackageExpression{3710, StrictLevel::False};
+constexpr ErrorClass PackageFileMustBeStrict{3711, StrictLevel::False};
+constexpr ErrorClass InvalidPackageName{3712, StrictLevel::False};
+} // namespace sorbet::core::errors::Packager
+#endif
