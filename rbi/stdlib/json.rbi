@@ -130,11 +130,12 @@ module JSON
   sig do
     params(
       obj: ::T.untyped,
-      args: ::T.untyped,
+      anIO: ::T.untyped,
+      limit: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.dump(obj, *args); end
+  def self.dump(obj, anIO=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   # The global default options for the
   # [`JSON.dump`](https://docs.ruby-lang.org/en/2.6.0/JSON.html#method-i-dump)
@@ -186,11 +187,11 @@ module JSON
   sig do
     params(
       obj: ::T.untyped,
-      args: ::T.untyped,
+      opts: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.generate(obj, *args); end
+  def self.generate(obj, opts=T.unsafe(nil)); end
 
   # Returns the [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html)
   # generator module that is used by
@@ -305,11 +306,11 @@ module JSON
   sig do
     params(
       obj: ::T.untyped,
-      args: ::T.untyped,
+      opts: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.pretty_generate(obj, *args); end
+  def self.pretty_generate(obj, opts=T.unsafe(nil)); end
 
   sig do
     params(
