@@ -26,11 +26,12 @@ module T::Props
     sig(:final) do
       params(
         value: BasicObject,
+        deep: T::Boolean,
       )
       .returns(T::Boolean)
       .checked(:never)
     end
-    def valid?(value)
+    def valid?(value, deep=false)
       instance?(value)
     end
 
