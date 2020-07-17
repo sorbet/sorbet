@@ -44,5 +44,27 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe "T.assert_type with collections" do
+      it "does not do recursive type-checking of arrays without `deep: true`" do
+        assert_equal([1], T.assert_type!([1], T::Array[String]))
+      end
+
+      it "does do recursive type-checking of arrays with `deep: true`" do
+        assert_raises(TypeError) do
+          T.assert_type!([1], T::Array[String], deep: true)
+        end
+      end
+
+      it "does not do recursive type-checking of hashes without `deep: true`" do
+        assert_equal({x: "y"}, T.assert_type!({x: "y"}, T::Hash[Symbol, Integer]))
+      end
+
+      it "does do recursive type-checking of arrays with `deep: true`" do
+        assert_raises(TypeError) do
+          T.assert_type!({x: "y"}, T::Hash[Symbol, Integer], deep: true)
+        end
+      end
+    end
   end
 end

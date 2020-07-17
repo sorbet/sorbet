@@ -152,10 +152,10 @@ module T
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
   # statically known and being checked appropriately. If `checked` is true, raises an exception at
   # runtime if the value doesn't match the type.
-  def self.assert_type!(value, type, checked: true)
+  def self.assert_type!(value, type, checked: true, deep: false)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.assert_type!")
+    Private::Casts.cast(value, type, cast_method: "T.assert_type!", deep: deep)
   end
 
   # For the static type checker, strips all type information from a value
