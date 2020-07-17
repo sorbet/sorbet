@@ -44,11 +44,7 @@ module T::Types
 
     # @override Base
     def valid?(obj)
-      @types.each do |type|
-        return true if type.valid?(obj)
-      end
-
-      false
+      @types.any? {|type| type.valid?(obj)}
     end
 
     # @override Base
