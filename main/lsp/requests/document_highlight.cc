@@ -7,14 +7,20 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(vector<unique_ptr<Location>> const locations) {
+namespace {
+vector<unique_ptr<DocumentHighlight>> locationsToDocumentHighlights(string_view uri,
+                                                                    vector<unique_ptr<Location>> const locations) {
     vector<unique_ptr<DocumentHighlight>> highlights;
     for (auto const &location : locations) {
-        auto highlight = make_unique<DocumentHighlight>(move(location->range));
-        highlights.push_back(move(highlight));
+        // The query may pick up secondary files required for accurate querying (e.g., package files)
+        if (location->uri == uri) {
+            auto highlight = make_unique<DocumentHighlight>(move(location->range));
+            highlights.push_back(move(highlight));
+        }
     }
     return highlights;
 }
+} // namespace
 
 DocumentHighlightTask::DocumentHighlightTask(const LSPConfiguration &config, MessageId id,
                                              unique_ptr<TextDocumentPositionParams> params)
@@ -65,7 +71,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
                         core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
                         {loc.file()});
                     auto locations = extractLocations(gs, run2.responses);
-                    response->result = locationsToDocumentHighlights(move(locations));
+                    response->result = locationsToDocumentHighlights(uri, move(locations));
                 }
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();

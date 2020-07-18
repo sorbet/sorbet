@@ -235,8 +235,12 @@ LSPTask::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string
             auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
             auto locations = extractLocations(typechecker.state(), run2.responses);
             for (auto const &location : locations) {
-                auto highlight = make_unique<DocumentHighlight>(move(location->range));
-                highlights.push_back(move(highlight));
+                // 'queryBySymbolInFiles' may pick up secondary files required for accurate querying (e.g., package
+                // files)
+                if (location->uri == uri) {
+                    auto highlight = make_unique<DocumentHighlight>(move(location->range));
+                    highlights.push_back(move(highlight));
+                }
             }
         }
     }
