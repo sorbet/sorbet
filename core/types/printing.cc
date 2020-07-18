@@ -154,8 +154,114 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
+/**
+ * Metadata collected while traversing AndType for pretty-printing.
+ */
+struct AndInfo {
+    /// True when the leaves of the AndType contains a NilClass.
+    bool containsNil{false};
+
+    /// True when the leaves of the AndType contains a FalseClass.
+    bool containsFalse{false};
+
+    /// True when the leaves of the AndType contains a TrueClass.
+    bool containsTrue{false};
+
+    /// True when the leaves of the AndType contains a type that is none of the
+    /// obove cases is present (Integer, for example).
+    bool containsOther{false};
+
+    /// True when there are more than one non-NilClass types present in the
+    /// leaves of the AndType.
+    bool containsMultiple{false};
+
+    bool isBoolean() const {
+        return containsTrue && containsFalse && !containsOther;
+    }
+
+    void markContainsMultiple() {
+        this->containsMultiple = true;
+    }
+
+    AndInfo() {}
+
+    static AndInfo nilInfo() {
+        AndInfo res;
+        res.containsNil = true;
+        return res;
+    }
+
+    static AndInfo trueInfo() {
+        AndInfo res;
+        res.containsTrue = true;
+        return res;
+    }
+
+    static AndInfo falseInfo() {
+        AndInfo res;
+        res.containsFalse = true;
+        return res;
+    }
+
+    static AndInfo otherInfo() {
+        AndInfo res;
+        res.containsOther = true;
+        return res;
+    }
+
+    static AndInfo merge(const AndInfo &left, const AndInfo &right) {
+        AndInfo res;
+        res.containsNil = left.containsNil || right.containsNil;
+        res.containsFalse = left.containsFalse || right.containsFalse;
+        res.containsTrue = left.containsTrue || right.containsTrue;
+        res.containsOther = left.containsOther || right.containsOther;
+        res.containsMultiple = left.containsMultiple || right.containsMultiple;
+        return res;
+    }
+};
+
+pair<AndInfo, optional<string>> showAnds(const GlobalState &, TypePtr, TypePtr);
+
+pair<AndInfo, optional<string>> showAndElem(const GlobalState &gs, TypePtr ty) {
+    if (auto classType = cast_type<ClassType>(ty.get())) {
+        if (classType->symbol == Symbols::NilClass()) {
+            return make_pair(AndInfo::nilInfo(), nullopt);
+        } else if (classType->symbol == Symbols::TrueClass()) {
+            return make_pair(AndInfo::trueInfo(), make_optional(classType->show(gs)));
+        } else if (classType->symbol == Symbols::FalseClass()) {
+            return make_pair(AndInfo::falseInfo(), make_optional(classType->show(gs)));
+        }
+    } else if (auto andType = cast_type<AndType>(ty.get())) {
+        return showAnds(gs, andType->left, andType->right);
+    }
+
+    return make_pair(AndInfo::otherInfo(), make_optional(ty->show(gs)));
+}
+
+pair<AndInfo, optional<string>> showAnds(const GlobalState &gs, TypePtr left, TypePtr right) {
+    auto [leftInfo, leftStr] = showAndElem(gs, left);
+    auto [rightInfo, rightStr] = showAndElem(gs, right);
+
+    AndInfo merged = AndInfo::merge(leftInfo, rightInfo);
+
+    if (leftStr.has_value() && rightStr.has_value()) {
+        merged.markContainsMultiple();
+        return make_pair(merged, make_optional(fmt::format("{}, {}", *leftStr, *rightStr)));
+    } else if (leftStr.has_value()) {
+        return make_pair(merged, leftStr);
+    } else {
+        return make_pair(merged, rightStr);
+    }
+}
+
 string AndType::show(const GlobalState &gs) const {
-    return fmt::format("T.all({}, {})", this->left->show(gs), this->right->show(gs));
+    auto [info, str] = showAnds(gs, this->left, this->right);
+
+    if (info.containsMultiple) {
+        return fmt::format("T.all({})", *str);
+    } else {
+        return fmt::format("T.all({}, {})", this->left->show(gs), this->right->show(gs));
+    }
 }
 
 string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
