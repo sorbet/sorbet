@@ -208,7 +208,8 @@ def _build_ruby_impl(ctx):
             binaries = binaries,
             includes = incdir,
             internal_includes = internal_incdir,
-            runtime = binaries + [libdir, incdir, sharedir],
+            lib = libdir,
+            share = sharedir,
         ),
         DefaultInfo(
             files = depset(outputs),
@@ -271,7 +272,7 @@ def _ruby_archive_impl(ctx):
 
     ctx.actions.run_shell(
         outputs = [archive],
-        inputs = ruby_info.runtime,
+        inputs = ruby_info.binaries + [ruby_info.includes, ruby_info.lib, ruby_info.share],
         command = ctx.expand_location(_BUILD_ARCHIVE.format(
             hermetic_tar_setup = _HERMETIC_TAR,
             toolchain = ruby_info.toolchain,
@@ -303,6 +304,8 @@ exec "$binary_path" "$@"
 """
 
 def _ruby_binary_impl(ctx):
+    workspace = ctx.label.workspace_name
+
     ruby_info = ctx.attr.ruby[RubyInfo]
 
     wrapper = ctx.actions.declare_file(ctx.label.name)
@@ -321,15 +324,26 @@ def _ruby_binary_impl(ctx):
         output = wrapper,
         content = _BINARY_WRAPPER.format(
             runfiles_setup = _RUNFILES_BASH,
-            workspace = ctx.label.workspace_name,
+            workspace = workspace,
             binary = ctx.label.name,
         ),
         is_executable = True,
     )
 
-    runfiles_bash = ctx.attr._runfiles_bash[DefaultInfo].files
+    runfiles_bash = ctx.attr._runfiles_bash[DefaultInfo].default_runfiles
 
-    runfiles = ctx.runfiles(files = runfiles_bash.to_list() + ruby_info.runtime)
+    symlinks = {}
+
+    symlinks["{}/toolchain/include".format(workspace)] = ruby_info.includes
+    symlinks["{}/toolchain/lib".format(workspace)] = ruby_info.lib
+    symlinks["{}/toolchain/share".format(workspace)] = ruby_info.share
+
+    for target in ruby_info.binaries:
+        symlinks["{}/toolchain/bin/{}".format(workspace, target.basename)] = target
+
+    runfiles = ctx.runfiles(root_symlinks = symlinks)
+    runfiles = runfiles.merge(runfiles_bash)
+    runfiles_bash = ctx.attr._runfiles_bash[DefaultInfo].files
 
     return [DefaultInfo(executable = wrapper, runfiles = runfiles)]
 
