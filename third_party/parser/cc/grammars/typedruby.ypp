@@ -21,10 +21,10 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::typedruby25& driver }
+%param { ruby_parser::typedruby27& driver }
 %parse-param { ruby_parser::SelfPtr self }
-%define api.namespace {ruby_parser::bison::typedruby25}
-%define api.prefix {typedruby25}
+%define api.namespace {ruby_parser::bison::typedruby27}
+%define api.prefix {typedruby27}
 %define api.value.type { union parser_value }
 %define api.token.constructor false
 %define parse.assert
@@ -212,7 +212,6 @@ using namespace std::string_literals;
   f_opt
   fitem
   for_var
-  fsym
   keyword_variable
   lhs
   literal
@@ -230,6 +229,7 @@ using namespace std::string_literals;
   qsymbols
   qwords
   regexp
+  ssym
   simple_numeric
   singleton
   stmt
@@ -392,7 +392,7 @@ union parser_value {
 %code {
 namespace ruby_parser {
 namespace bison {
-namespace typedruby25 {
+namespace typedruby27 {
 
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
@@ -417,7 +417,7 @@ void parser::error(const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
@@ -588,6 +588,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | lhs tEQL mrhs
                     {
                       $$ = driver.build.assign(self, $1, $2, driver.build.array(self, nullptr, $3, nullptr));
+                    }
+                | mlhs tEQL mrhs_arg kRESCUE_MOD stmt
+                    {
+                    ruby_parser::node_list rescue_body(
+						driver.build.rescue_body(self, $4, nullptr, nullptr, nullptr, nullptr, $5));
+                      auto begin_body = driver.build.beginBody(self, $3, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.multi_assign(self, $1, begin_body);
                     }
                 | mlhs tEQL mrhs_arg
                     {
@@ -884,15 +891,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
@@ -926,15 +933,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                     }
                 | primary_value call_op tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value tCOLON2 tIDENTIFIER
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value call_op tCONSTANT
                     {
-                      $$ = driver.build.attrAsgn(self, $1, $2, $3);
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
@@ -976,14 +983,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                 | op
                 | reswords
 
-            fsym: fname
+            fitem: fname
                     {
                       $$ = driver.build.symbol(self, $1);
                     }
                 | symbol
-
-           fitem: fsym
-                | dsym
 
       undef_list: fitem
                     {
@@ -1601,6 +1605,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                       driver.lex.cmdarg.push(false);
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::DEF);
+                      driver.current_arg_stack.push("");
                     }
                     f_arglist bodystmt kEND
                     {
@@ -1610,6 +1615,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
                     }
                 | kDEF singleton dot_or_colon
                     {
@@ -1621,6 +1627,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                       driver.lex.cmdarg.push(false);
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::DEFS);
+                      driver.current_arg_stack.push("");
                     }
                     f_arglist bodystmt kEND
                     {
@@ -1631,6 +1638,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
                     }
                 | kBREAK
                     {
@@ -1912,6 +1920,7 @@ opt_block_args_tail:
  block_param_def: tPIPE opt_bv_decl tPIPE
                     {
                       $$ = driver.build.args(self, $1, $2, $3, true);
+                      driver.current_arg_stack.set("");
                       DIAGCHECK();
                     }
                 | tOROP
@@ -1923,6 +1932,7 @@ opt_block_args_tail:
                     {
                       auto &params = $2;
                       params->concat($3);
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, $1, params, $4, true);
                       DIAGCHECK();
                     }
@@ -2235,7 +2245,6 @@ opt_block_args_tail:
 
          literal: numeric
                 | symbol
-                | dsym
 
          strings: string
                     {
@@ -2424,13 +2433,16 @@ regexp_contents: // nothing
                 | backref
 
 
-          symbol: tSYMBOL
+          symbol: ssym
+                | dsym
+
+            ssym: tSYMBOL
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol(self, $1);
                     }
 
-            dsym: tSYMBEG xstring_contents tSTRING_END
+            dsym: tSYMBEG string_contents tSTRING_END
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol_compose(self, $1, $2, $3);
@@ -2752,11 +2764,13 @@ keyword_variable: kNIL
 
       f_arg_asgn: f_norm_arg
                     {
+                      driver.current_arg_stack.set($1[0].string());
                       $$ = $1;
                     }
 
       f_arg_item: f_arg_asgn
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.arg(self, $1);
                     }
                 | tLPAREN f_margs rparen
@@ -2783,15 +2797,18 @@ keyword_variable: kNIL
                         YYERROR;
                       }
                       driver.lex.declare(label->string());
+                      driver.current_arg_stack.set($1[0].string());
                       $$ = label;
                     }
 
             f_kw: f_label arg_value
                     {
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.kwoptarg(self, $1, $2);
                     }
                 | f_label
                     {
+                      driver.current_arg_stack.set("");
                       $$ = driver.build.kwarg(self, $1);
                     }
 
@@ -2847,11 +2864,13 @@ keyword_variable: kNIL
 
            f_opt: f_arg_asgn tEQL arg_value
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
      f_block_opt: f_arg_asgn tEQL primary_value
                     {
+                      driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 

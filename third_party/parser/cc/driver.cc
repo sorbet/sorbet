@@ -15,12 +15,12 @@ base_driver::base_driver(ruby_version version, const std::string& source, const 
 {
 }
 
-typedruby25::typedruby25(const std::string& source, const struct builder& builder)
-	: base_driver(ruby_version::RUBY_25, source, builder)
+typedruby27::typedruby27(const std::string& source, const struct builder& builder)
+	: base_driver(ruby_version::RUBY_27, source, builder)
 {}
 
-ForeignPtr typedruby25::parse(SelfPtr self) {
-	bison::typedruby25::parser p(*this, self);
+ForeignPtr typedruby27::parse(SelfPtr self) {
+	bison::typedruby27::parser p(*this, self);
 	p.parse();
 	return ast;
 }

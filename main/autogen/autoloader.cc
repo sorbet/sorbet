@@ -42,6 +42,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
     out.preamble = cfg.preamble;
+    out.registryModule = cfg.registryModule;
     for (auto &str : cfg.modules) {
         out.topLevelNamespaceRefs.emplace(gs.enterNameConstant(str));
     }
@@ -192,11 +193,11 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
                                                        return nr.show(gs);
                                                    }));
         if (!root()) {
-            fmt::format_to(buf, "Opus::Require.on_autoload('{}')\n", fullName);
+            fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
         }
         if (!children.empty()) {
-            fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
+            fmt::format_to(buf, "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
                            [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
@@ -216,7 +217,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     }
 
     if (definingFile.exists()) {
-        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\"{})\n", fullName,
+        fmt::format_to(buf, "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFile), casgnArg);
     }
     return to_string(buf);

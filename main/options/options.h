@@ -83,6 +83,7 @@ struct Printers {
     PrinterConfig AutogenClasslist;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
+    PrinterConfig Packager;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
@@ -106,6 +107,7 @@ struct AutoloaderConfig {
     std::vector<std::string> modules;
     std::string rootDir;
     std::string preamble;
+    std::string registryModule;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
     std::vector<std::string> stripPrefixes;
@@ -148,6 +150,7 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool stripeMode = false;
+    bool stripePackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;

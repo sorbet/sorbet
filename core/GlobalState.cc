@@ -355,6 +355,44 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
 
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
+    ENFORCE(id == Symbols::PackageRegistry());
+
+    // PackageSpec is a class that can be subclassed.
+    id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
+    id.data(*this)->setIsModule(false);
+    ENFORCE(id == Symbols::PackageSpec());
+
+    id = id.data(*this)->singletonClass(*this);
+    ENFORCE(id == Symbols::PackageSpecSingleton());
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import());
+    ENFORCE(id == Symbols::PackageSpec_import());
+    {
+        auto &importArg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        // T.class_of(PackageSpec)
+        importArg.type = make_type<ClassType>(Symbols::PackageSpecSingleton());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::export_());
+    ENFORCE(id == Symbols::PackageSpec_export());
+    {
+        enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::exportMethods());
+    ENFORCE(id == Symbols::PackageSpec_export_methods());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        arg.flags.isRepeated = true;
+        auto &blkArg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        blkArg.flags.isBlock = true;
+    }
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

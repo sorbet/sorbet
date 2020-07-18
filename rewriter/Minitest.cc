@@ -23,7 +23,7 @@ public:
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
         if (auto send = ast::cast_tree<ast::Send>(asgn.rhs)) {
             if (send->fun == core::Names::let() && send->args.size() == 2) {
-                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1]->deepCopy());
+                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->args[1].deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
             }
         }
@@ -170,7 +170,7 @@ bool canMoveIntoMethodDef(const ast::TreePtr &exp) {
 // method, and otherwise we replace it with a synthesized 'nil'
 ast::TreePtr getIteratee(ast::TreePtr &exp) {
     if (canMoveIntoMethodDef(exp)) {
-        return exp->deepCopy();
+        return exp.deepCopy();
     } else {
         return ast::MK::RaiseUnimplemented(exp->loc);
     }
@@ -197,10 +197,10 @@ ast::TreePtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast:
             // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
             ast::MethodDef::ARGS_store new_args;
             for (auto &arg : args) {
-                new_args.emplace_back(arg->deepCopy());
+                new_args.emplace_back(arg.deepCopy());
             }
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
-            auto each = ast::MK::Send0Block(send->loc, iteratee->deepCopy(), core::Names::each(), move(blk));
+            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(), move(blk));
             // put that into a method def named the appropriate thing
             auto method = addSigVoid(
                 ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), move(name), move(each)));
@@ -296,7 +296,7 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), std::move(name),
                                                            prepareBody(ctx, std::move(block->body))));
-        method = ast::MK::InsSeq1(send->loc, send->args.front()->deepCopy(), move(method));
+        method = ast::MK::InsSeq1(send->loc, send->args.front().deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 

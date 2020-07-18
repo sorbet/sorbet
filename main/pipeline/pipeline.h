@@ -25,6 +25,9 @@ std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::
                                    const options::Options &opts, WorkerPool &workers,
                                    const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
+std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                     const options::Options &opts, WorkerPool &workers);
+
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers, bool skipConfigatron = false);
 
@@ -38,7 +41,8 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedF
 ast::ParsedFilesOrCancelled
 typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
           WorkerPool &workers, bool cancelable = false,
-          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt);
+          std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
+          bool presorted = false);
 
 ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
 

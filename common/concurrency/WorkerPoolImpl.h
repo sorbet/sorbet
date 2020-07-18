@@ -10,7 +10,7 @@
 namespace spd = spdlog;
 namespace sorbet {
 class WorkerPoolImpl : public WorkerPool {
-    int size;
+    int _size;
     // Tune queue for small size
     struct ConcurrentQueueCustomTraits {
         // General-purpose size type. std::size_t is strongly recommended.
@@ -90,6 +90,7 @@ public:
     ~WorkerPoolImpl();
 
     void multiplexJob(std::string_view taskName, Task t) override;
+    int size() override;
 };
 };     // namespace sorbet
 #endif // SORBET_WORKERPOOL_IMPL_H

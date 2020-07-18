@@ -1208,9 +1208,12 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number of files)).
-    // Those locs aren't useful, either.
+    // We shouldn't add locs for <root> or <PackageRegistry>, otherwise it'll end up with a massive loc list (O(number
+    // of files)). Those locs aren't useful, either.
     ENFORCE(ref(gs) != Symbols::root());
+    ENFORCE(ref(gs) != Symbols::PackageRegistry());
+    // We allow one loc (during class creation) for packages under package registry.
+    ENFORCE(locs_.empty() || owner != Symbols::PackageRegistry());
 
     for (auto &existing : locs_) {
         if (existing.file() == loc.file()) {

@@ -19,12 +19,11 @@ def main
 
   # Safenav
   dog = Dog.new
-  breed = dog&.breed
-# ^ hover: T.nilable(String)
+  breed = dog&.breed # error: This code is unreachable
+# ^ hover: String
         # ^ hover: Dog
             # ^ hover: sig {returns(String)}
-             # ^ hover: sig {returns(String)}
-  
+
   maybeDog = T.let(nil, T.nilable(Dog))
   maybeBreed = maybeDog&.breed
 # ^ hover: T.nilable(String)

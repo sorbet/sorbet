@@ -39,6 +39,7 @@ public:
 
     void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(u4 epoch, bool committed = true);
+    u4 lastDiagnosticEpochForFile(core::FileRef file);
 };
 
 class ErrorEpoch final {

@@ -95,7 +95,7 @@ ast::TreePtr dupReturnsType(core::MutableContext ctx, ast::Send *sharedSig) {
     if (body->args.size() != 1) {
         return nullptr;
     }
-    return body->args[0]->deepCopy();
+    return body->args[0].deepCopy();
 }
 
 // This will raise an error if we've given a type that's not what we want
@@ -135,7 +135,7 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
     if (body->args.size() != 1) {
         return nullptr;
     }
-    ast::TreePtr resultType = body->args[0]->deepCopy();
+    ast::TreePtr resultType = body->args[0].deepCopy();
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);

@@ -27,20 +27,14 @@ public:
     std::atomic<bool> hadCritical{false};
     std::atomic<int> nonSilencedErrorCount{0};
     std::atomic<int> filesFlushedCount{0};
-    bool ignoreFlushes{false};
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
                std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
 
     /** register a new error to be reported */
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);
-    void pushQueryResponse(std::unique_ptr<lsp::QueryResponse> response);
-    /** Extract all query responses. This discards all errors currently present in error Queue */
-    std::pair<std::vector<std::unique_ptr<core::Error>>, std::vector<std::unique_ptr<core::lsp::QueryResponse>>>
-    drainWithQueryResponses();
+    void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
-    /** Extract all errors. This discards all query responses currently present in error Queue */
-    std::vector<std::unique_ptr<core::Error>> drainAllErrors();
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);

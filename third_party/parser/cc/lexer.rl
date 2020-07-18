@@ -1181,6 +1181,25 @@ void lexer::set_state_expr_value() {
     fcall expr_variable;
   }
 
+  # Special case for Ruby > 2.7
+  # If interpolated instance/class variable starts with a digit we parse it as a plain substring
+  # However, "#$1" is still a regular interpolation
+  interp_digit_var = '#' ('@' | '@@') digit c_alpha*;
+
+  action extend_interp_digit_var {
+    if (version >= ruby_version::RUBY_27) {
+      auto& current_literal = literal_();
+      std::string str = tok();
+      current_literal.extend_string(str, ts, te);
+    } else {
+      if (ts[0] == '#' && ts[1] == '@' && ts[2] == '@') {
+        diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
+      } else {
+        diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
+      }
+    }
+  }
+
   # Interpolations with code blocks must match nested curly braces, as
   # interpolation ending is ambiguous with a block ending. So, every
   # opening and closing brace should be matched with e_[lr]brace rules,
@@ -1247,60 +1266,64 @@ void lexer::set_state_expr_value() {
   # above.
 
   interp_words := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      e_bs escape => extend_string_escaped;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      e_bs escape       => extend_string_escaped;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_string := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      e_bs escape => extend_string_escaped;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      e_bs escape       => extend_string_escaped;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_words := |*
-      e_bs c_any  => extend_string_escaped;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      e_bs c_any        => extend_string_escaped;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_string := |*
-      '\\' c_nl   => extend_string_eol;
-      e_bs c_any  => extend_string_escaped;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      '\\' c_nl         => extend_string_eol;
+      e_bs c_any        => extend_string_escaped;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_backslash_delimited := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_backslash_delimited := |*
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   interp_backslash_delimited_words := |*
-      interp_code => extend_interp_code;
-      interp_var  => extend_interp_var;
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      interp_code       => extend_interp_code;
+      interp_digit_var  => extend_interp_digit_var;
+      interp_var        => extend_interp_var;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   plain_backslash_delimited_words := |*
-      c_space+    => extend_string_space;
-      c_eol       => extend_string_eol;
-      c_any       => extend_string;
+      c_space+          => extend_string_space;
+      c_eol             => extend_string_eol;
+      c_any             => extend_string;
   *|;
 
   regexp_modifiers := |*
@@ -2662,7 +2685,23 @@ void lexer::set_state_expr_value() {
   leading_dot := |*
       # Insane leading dots:
       # a #comment
+      #  # post-2.7 comment
       #  .b: a.b
+
+      (c_space* w_space_comment '\n')+
+      => {
+        if (version < ruby_version::RUBY_27) {
+          // Ruby before 2.7 doesn't support comments before leading dot.
+          // If a line after "a" starts with a comment then "a" is a self-contained statement.
+          // So in that case we emit a special tNL token and start reading the
+          // next line as a separate statement.
+          //
+          // Note: block comments before leading dot are not supported on any version of Ruby.
+          emit(token_type::tNL, std::string(), newline_s, newline_s + 1);
+          fhold; fnext line_begin; fbreak;
+        }
+      };
+
       c_space* %{ tm = p; } ('.' | '&.')
       => { p = tm - 1; fgoto expr_end; };
 

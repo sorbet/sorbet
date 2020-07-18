@@ -1,0 +1,11 @@
+# typed: strict
+# assert-fast-path: a.rb
+
+class A
+  extend T::Sig
+
+  sig {returns(Dep::ExportedItem)}
+  def self.get_exported_item
+    Dep::ExportedItem.new
+  end
+end

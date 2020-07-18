@@ -19,12 +19,6 @@ using namespace std;
 string singleTest;
 string webTraceFile;
 
-UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
-    "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols"};
-
 bool isTestMessage(const LSPMessage &msg) {
     return msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo;
 }
@@ -77,7 +71,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, UnorderedSet<string> &filenames,
+void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const vector<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
                              int &nextId) {
     UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
@@ -267,7 +261,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
-    UnorderedSet<std::string> filenames;
+    vector<std::string> filenames;
     std::unique_ptr<LSPWrapper> lspWrapper;
 
     /** Test expectations. */
@@ -280,13 +274,14 @@ TEST_CASE("LSPTest") {
     int nextId = 0;
 
     for (auto &sourceFile : test.sourceFiles) {
-        filenames.insert(test.folder + sourceFile);
+        filenames.push_back(test.folder + sourceFile);
     }
 
     // Initialize lspWrapper.
     {
         shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
         opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+        opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
         lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
         lspWrapper->enableAllExperimentalFeatures();
     }
@@ -332,8 +327,11 @@ TEST_CASE("LSPTest") {
                 make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
             auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
                                                                  "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
-            INFO("Should not receive any response to opening an empty file.");
-            CHECK_EQ(0, countNonTestMessages(responses));
+            // Sorbet will complain about missing packages in packaging mode. Ignore them.
+            if (!lspWrapper->opts->stripePackages) {
+                INFO("Should not receive any response to opening an empty file.");
+                CHECK_EQ(0, countNonTestMessages(responses));
+            }
         }
     }
 

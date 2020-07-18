@@ -74,14 +74,14 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
     auto mdef = ast::cast_tree_const<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
     if (mdef == nullptr || mdef->flags.isSelfMethod) {
-        stats.emplace_back(expr->deepCopy());
+        stats.emplace_back(expr.deepCopy());
         return stats;
     }
 
     auto loc = expr->loc;
 
     // this creates a private copy of the method
-    auto privateCopy = expr->deepCopy();
+    auto privateCopy = expr.deepCopy();
     stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(), move(privateCopy)));
 
     // as well as a public static copy of the method signature
@@ -92,7 +92,7 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
             }
         }
     }
-    auto moduleCopy = expr->deepCopy();
+    auto moduleCopy = expr.deepCopy();
     ENFORCE(moduleCopy, "Should be non-nil.");
     auto *newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy);
     newDefn->flags.isSelfMethod = true;

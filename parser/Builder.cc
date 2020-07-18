@@ -147,7 +147,9 @@ public:
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
             ENFORCE(name->kind == core::NameKind::UTF8);
-            if (driver_->lex.is_declared(name->show(gs_))) {
+            auto name_str = name->show(gs_);
+            if (driver_->lex.is_declared(name_str)) {
+                checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
@@ -223,10 +225,13 @@ public:
         return make_unique<Hash>(collectionLoc(begin, pairs, end), std::move(pairs));
     }
 
-    unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
+    unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {
         core::NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         core::LocOffsets loc = receiver->loc.join(tokLoc(selector));
         if ((dot != nullptr) && dot->string() == "&.") {
+            if (masgn) {
+                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+            }
             return make_unique<CSend>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
         }
         return make_unique<Send>(loc, std::move(receiver), method, sorbet::parser::NodeVec());
@@ -1150,6 +1155,12 @@ public:
         return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
     }
 
+    void checkCircularArgumentReferences(const Node *node, std::string name) {
+        if (name == driver_->current_arg_stack.top()) {
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, name);
+        }
+    }
+
     void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::LocOffsets> &map) {
         for (auto &this_arg : args) {
             if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
@@ -1252,9 +1263,9 @@ ForeignPtr associate(SelfPtr builder, const token *begin, const node_list *pairs
     return build->toForeign(build->associate(begin, build->convertNodeList(pairs), end));
 }
 
-ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector) {
+ForeignPtr attrAsgn(SelfPtr builder, ForeignPtr receiver, const token *dot, const token *selector, bool masgn) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector));
+    return build->toForeign(build->attrAsgn(build->cast_node(receiver), dot, selector, masgn));
 }
 
 ForeignPtr backRef(SelfPtr builder, const token *tok) {

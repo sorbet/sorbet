@@ -126,9 +126,9 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
     auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
-    parent.emplace_back(klass->name->deepCopy());
+    parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst->deepCopy(), std::move(parent),
+    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst.deepCopy(), std::move(parent),
                                    std::move(classRhs));
 
     ast::Send::ARGS_store args;
@@ -145,8 +145,8 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
 
     auto singletonAsgn = ast::MK::Assign(
         stat->loc, std::move(asgn->lhs),
-        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::let(),
-                       ast::MK::Send(stat->loc, classCnst->deepCopy(), core::Names::new_(), std::move(args)),
+        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
+                       ast::MK::Send(stat->loc, classCnst.deepCopy(), core::Names::new_(), std::move(args)),
                        std::move(classCnst)));
 
     vector<ast::TreePtr> result;
@@ -155,13 +155,14 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     return result;
 }
 
-void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr stat, FromWhere fromWhere) {
+void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr stat, FromWhere fromWhere,
+                     vector<ast::TreePtr> &into) {
     auto newStats = processStat(ctx, klass, stat, fromWhere);
     if (newStats.empty()) {
-        klass->rhs.emplace_back(std::move(stat));
+        into.emplace_back(std::move(stat));
     } else {
         for (auto &newStat : newStats) {
-            klass->rhs.emplace_back(std::move(newStat));
+            into.emplace_back(std::move(newStat));
         }
     }
 }
@@ -189,16 +190,29 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
+            vector<ast::TreePtr> newStats;
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
                 for (auto &stat : insSeq->stats) {
-                    collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside);
+                    collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
                 }
-                collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside);
+                collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside, newStats);
             } else {
-                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside);
+                collectNewStats(ctx, klass, std::move(block.body), FromWhere::Inside, newStats);
             }
+
+            ast::InsSeq::STATS_store insSeqStats;
+            for (auto &newStat : newStats) {
+                insSeqStats.emplace_back(std::move(newStat));
+            }
+
+            block.body = ast::MK::InsSeq(block.loc, std::move(insSeqStats), ast::MK::Nil(block.loc));
+            klass->rhs.emplace_back(std::move(stat));
         } else {
-            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside);
+            vector<ast::TreePtr> newStats;
+            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside, newStats);
+            for (auto &newStat : newStats) {
+                klass->rhs.emplace_back(std::move(newStat));
+            }
         }
     }
 }

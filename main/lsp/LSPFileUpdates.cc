@@ -29,7 +29,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         encountered.emplace(f->path());
         updatedFiles.push_back(f);
         auto &ast = older.updatedFileIndexes[i];
-        updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+        updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
     canTakeFastPath = false;
 }
@@ -45,7 +45,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
     for (auto &ast : updatedFileIndexes) {
-        copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree->deepCopy(), ast.file});
+        copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
     return copy;
 }

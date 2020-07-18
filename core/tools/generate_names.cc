@@ -127,6 +127,7 @@ NameDef names[] = {
     {"assertType", "assert_type!"},
     {"cast"},
     {"let"},
+    {"uncheckedLet", "<unchecked_let>"},
     {"unsafe"},
     {"must"},
     {"declareInterface", "interface!"},
@@ -356,6 +357,14 @@ NameDef names[] = {
     {"blockBreak", "<block-break>"},
     {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
+
+    // Packager
+    {"import"},
+    {"export_", "export"},
+    {"PackageSpec", "PackageSpec", true},
+    {"PackageRegistry", "<PackageRegistry>", true},
+    {"exportMethods", "export_methods"},
+    {"PackageMethods", "<PackageMethods>", true},
 
     // GlobalState initEmpty()
     {"Top", "<any>", true},

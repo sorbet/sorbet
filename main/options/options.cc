@@ -68,6 +68,7 @@ const vector<PrintOptions> print_options({
     {"autogen-classlist", &Printers::AutogenClasslist, true},
     {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses, true},
+    {"package-tree", &Printers::Packager},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -131,6 +132,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenClasslist,
         AutogenAutoloader,
         AutogenSubclasses,
+        Packager,
     });
 }
 
@@ -380,6 +382,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
+    options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
+                                    cxxopts::value<bool>());
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -394,6 +398,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("advanced")("autogen-autoloader-root", "Root directory for autoloader output",
                                     cxxopts::value<string>()->default_value("autoloader"));
+    options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
+                                    cxxopts::value<string>()->default_value("Opus::Require"));
     options.add_options("advanced")("autogen-autoloader-samefile",
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
@@ -604,6 +610,7 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
         }
     }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
+    cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     return true;
 }
@@ -835,6 +842,7 @@ void readOptions(Options &opts,
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
+        opts.stripePackages = raw["stripe-packages"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         if (raw.count("error-white-list") > 0) {

@@ -1,0 +1,7 @@
+# typed: strict
+# enable-packager: true
+# assert-slow-path: true
+
+class Package < PackageSpec
+  import Dep
+end

@@ -57,12 +57,36 @@ _TEST_RUNNERS = {
 def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_args = [], tags = []):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
 
+    # The packager step needs folder-based steps since folder structure dictates package membership.
+    # All immediate subdirs of `/packager/` are individual tests.
+    folder_test_dir = "/packager/"
+
     for path in all_paths:
         if path.endswith(".rb") or path.endswith(".rbi"):
+            packager_pos = path.find(folder_test_dir)
+            if packager_pos >= 0:
+                # This is a folder test.
+                final_dirsep = path.find("/", packager_pos + len(folder_test_dir))
+                if final_dirsep >= 0:
+                    test_name = path[0:final_dirsep]
+                    current = tests.get(test_name)
+                    if None == current:
+                        data = {
+                            "path": test_name,
+                            "prefix": test_name + "/",
+                            "sentinel": test_name,
+                            "isMultiFile": False,
+                            "isDirectory": True,
+                            "disabled": "disabled" in test_name,
+                        }
+                        tests[test_name] = data
+                    continue
+
+            # This is not a folder test (common case)
             prefix = dropExtension(basename(path).partition("__")[0])
+
             test_name = dirname(path) + "/" + prefix
 
-            #test_name = test_name.replace("/", "_")
             current = tests.get(test_name)
             if None == current:
                 data = {
@@ -70,6 +94,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
                     "prefix": "{}/{}".format(dirname(path), prefix),
                     "sentinel": path,
                     "isMultiFile": "__" in path,
+                    "isDirectory": False,
                     "disabled": "disabled" in path,
                 }
                 tests[test_name] = data
@@ -95,7 +120,9 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, filter = "*", extra_
             enabled_tests.append(test_name)
 
         data = []
-        if tests[name]["isMultiFile"]:
+        if tests[name]["isDirectory"]:
+            data += native.glob(["{}**/*".format(prefix)])
+        elif tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
         else:
             data += [sentinel]

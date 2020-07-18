@@ -12,6 +12,7 @@
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/errors/parser.h"
 #include "core/errors/plugin.h"
 #include "core/errors/resolver.h"

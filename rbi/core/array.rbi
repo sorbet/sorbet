@@ -629,6 +629,13 @@ class Array < Object
     )
     .returns(Elem)
   end
+  sig do
+    params(
+        arg0: T::Range[Integer],
+        arg1: T::Array[Elem],
+    )
+    .returns(T::Array[Elem])
+  end
   def []=(arg0, arg1, arg2=T.unsafe(nil)); end
 
   # Alias for:
@@ -1437,6 +1444,12 @@ class Array < Object
     )
     .void
   end
+  sig do
+    params(
+      arg0: T::Array[Elem],
+    )
+    .void
+  end
   def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   # Inserts the given values before the element with the given `index`.
@@ -1471,6 +1484,31 @@ class Array < Object
   # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-to_s)
   sig {returns(String)}
   def inspect(); end
+
+
+  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) Intersection ---
+  # Returns a new array containing unique elements common to the two arrays. The
+  # order is preserved from the original array.
+  #
+  # It compares elements using their
+  # [`hash`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-hash) and
+  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-eql-3F)
+  # methods for efficiency.
+  #
+  # ```ruby
+  # [ 1, 1, 3, 5 ] & [ 3, 2, 1 ]                 #=> [ 1, 3 ]
+  # [ 'a', 'b', 'b', 'z' ] & [ 'a', 'b', 'c' ]   #=> [ 'a', 'b' ]
+  # ```
+  #
+  # See also
+  # [`Array#&`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-26).
+  sig do
+    params(
+      arrays: T::Array[T.untyped]
+    )
+    .returns(T::Array[Elem])
+  end
+  def intersection(*arrays); end
 
   # Returns a string created by converting each element of the array to a
   # string, separated by the given `separator`. If the `separator` is `nil`, it

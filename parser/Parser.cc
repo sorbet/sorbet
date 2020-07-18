@@ -52,7 +52,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file,
                              std::vector<std::string> initialLocals) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
-    ruby_parser::typedruby25 driver(string(source.begin(), source.end()), Builder::interface);
+    ruby_parser::typedruby27 driver(string(source.begin(), source.end()), Builder::interface);
 
     for (string local : initialLocals) {
         driver.lex.declare(local);
