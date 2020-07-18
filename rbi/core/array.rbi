@@ -742,7 +742,7 @@ class Array < Object
   # either true/false, or always return a number. It is undefined which value is
   # actually picked up at each iteration.
   sig do
-    params(blk: T.proc.params(arg0: Elem).returns(T::Boolean))
+    params(blk: T.proc.params(arg0: Elem).returns(T.any(Numeric, T::Boolean)))
       .returns(T.nilable(Elem))
   end
   def bsearch(&blk); end
@@ -758,7 +758,7 @@ class Array < Object
   # documentation for
   # [`bsearch`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-bsearch).
   sig do
-    params(blk: T.proc.params(arg0: Elem).returns(T::Boolean))
+    params(blk: T.proc.params(arg0: Elem).returns(T.any(Numeric, T::Boolean)))
       .returns(T.nilable(Integer))
   end
   def bsearch_index(&blk); end

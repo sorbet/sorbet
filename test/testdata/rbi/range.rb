@@ -11,3 +11,7 @@ Range.new(0.5, 2.5).step(2+1i) # error: Expected `T.any(Integer, Float, Rational
 (1.0...20.0)
 ('a'..'z')
 (:a...:z)
+
+# bsearch
+T.reveal_type((1..10).bsearch {|x| x == 1}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type((1..10).bsearch {|x| x }) # error: Revealed type: `T.nilable(Integer)`
