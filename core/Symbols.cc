@@ -760,7 +760,10 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
-    if (!this->owner.exists() || this->owner == Symbols::root()) {
+    if (!this->owner.exists() || this->owner == Symbols::root() ||
+        this->owner.data(gs)->owner == Symbols::PackageRegistry()) {
+        // <PackageRegistry> is an internal detail of --stripe-packages. It only owns synthetic modules that encapsulate
+        // package namespaces; they should not be shown to the user.
         return this->name.data(gs)->show(gs);
     }
 

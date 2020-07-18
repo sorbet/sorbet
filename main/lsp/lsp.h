@@ -83,6 +83,7 @@ public:
     int getTypecheckCount();
 };
 
+// TODO(jvilk): Move to LSPTask.
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
