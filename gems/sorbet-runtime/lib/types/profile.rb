@@ -10,7 +10,11 @@ module T::Profile
     def typecheck_duration_estimate
       total_typechecks = typecheck_samples * SAMPLE_RATE + (SAMPLE_RATE - typecheck_sample_attempts)
       typechecks_measured = typecheck_samples * SAMPLE_RATE
-      typecheck_duration * SAMPLE_RATE * 1.0 * total_typechecks / typechecks_measured
+      if typechecks_measured.positive?
+        typecheck_duration * SAMPLE_RATE * 1.0 * total_typechecks / typechecks_measured
+      else
+        0.0
+      end
     end
 
     def typecheck_count_estimate
