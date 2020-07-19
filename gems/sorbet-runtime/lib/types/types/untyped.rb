@@ -21,5 +21,9 @@ module T::Types
     private def subtype_of_single?(other)
       true
     end
+
+    module Private
+      INSTANCE = Untyped.new.freeze
+    end
   end
 end

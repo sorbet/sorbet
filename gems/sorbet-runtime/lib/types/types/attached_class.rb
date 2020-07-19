@@ -29,5 +29,9 @@ module T::Types
         false
       end
     end
+
+    module Private
+      INSTANCE = AttachedClassType.new.freeze
+    end
   end
 end
