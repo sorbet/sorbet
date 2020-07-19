@@ -29,5 +29,23 @@ module T::Types
         false
       end
     end
+
+    class << self
+      alias_method :unpooled, :new
+      private :new
+    end
+
+    module Private
+      module Pool
+        def self.type_for_module(mod)
+          cached = mod.instance_variable_get(:@__as_sorbet_simple_type)
+          return cached if cached
+
+          type = Simple.unpooled(mod).freeze
+          mod.instance_variable_set(:@__as_sorbet_simple_type, type) unless mod.frozen?
+          type
+        end
+      end
+    end
   end
 end
