@@ -17,3 +17,6 @@ T.reveal_type(with_all) # error: Revealed type: `T.all(Foo, Bar)`
 
 with_all_more = T.let(T.unsafe(nil), T.all(Foo, Bar, Baz))
 T.reveal_type(with_all_more) # error: Revealed type: `T.all(Foo, Bar, Baz)`
+
+with_all_nested = T.let(T.unsafe(nil), T.all(Foo, T.all(Bar, Baz)))
+T.reveal_type(with_all_nested) # error: Revealed type: `T.all(Bar, Baz, Foo)`
