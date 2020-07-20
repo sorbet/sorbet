@@ -52,5 +52,26 @@ module T::Types
       raise "This should never be reached if you're going through `subtype_of?` (and you should be)"
     end
 
+    module Private
+      module Pool
+        def self.union_of_types(type_a, type_b, *types)
+          # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
+          # in cases where NilClass is in `*types`, or there are duplicate types,
+          # or there are nested unions, etc. That's ok, because this is an optimization
+          # which isn't necessary for correctness.
+          if types.empty?
+            if type_b == T::Utils::Nilable::NIL_TYPE && type_a.is_a?(T::Types::Simple)
+              type_a.to_nilable
+            elsif type_a == T::Utils::Nilable::NIL_TYPE && type_b.is_a?(T::Types::Simple)
+              type_b.to_nilable
+            else
+              Union.new([type_a, type_b])
+            end
+          else
+            Union.new([type_a, type_b] + types)
+          end
+        end
+      end
+    end
   end
 end

@@ -26,12 +26,15 @@
 module T
   # T.any(<Type>, <Type>, ...) -- matches any of the types listed
   def self.any(type_a, type_b, *types)
-    T::Types::Union.new([type_a, type_b] + types)
+    type_a = T::Utils.coerce(type_a)
+    type_b = T::Utils.coerce(type_b)
+    types = types.map {|t| T::Utils.coerce(t)} if !types.empty?
+    T::Types::Union::Private::Pool.union_of_types(type_a, type_b, *types)
   end
 
   # Shorthand for T.any(type, NilClass)
   def self.nilable(type)
-    T::Types::Union.new([type, NilClass])
+    T::Types::Union::Private::Pool.union_of_types(T::Utils.coerce(type), T::Utils::Nilable::NIL_TYPE)
   end
 
   # Matches any object. In the static checker, T.untyped allows any
