@@ -32,6 +32,9 @@ module T
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, recursive: T::Boolean).returns(BasicObject)}
   def self.assert_type!(value, type, checked: true, recursive: false); end
 
+  sig {params(value: T.untyped, type: T.untyped).returns(BasicObject)}
+  def self.check_type_recursive!(value, type); end
+
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
   def self.cast(value, type, checked: true); end
 

@@ -46,23 +46,23 @@ module Opus::Types::Test
     end
 
     describe "T.assert_type with collections" do
-      it "does not do recursive type-checking of arrays without `recursive: true`" do
+      it "does not do recursive type-checking of arrays with `assert_type!`" do
         assert_equal([1], T.assert_type!([1], T::Array[String]))
       end
 
-      it "does do recursive type-checking of arrays with `recursive: true`" do
+      it "does do recursive type-checking of arrays with `check_type_recursive!`" do
         assert_raises(TypeError) do
-          T.assert_type!([1], T::Array[String], recursive: true)
+          T.check_type_recursive!([1], T::Array[String])
         end
       end
 
-      it "does not do recursive type-checking of hashes without `recursive: true`" do
+      it "does not do recursive type-checking of hashes with `assert_type!`" do
         assert_equal({x: "y"}, T.assert_type!({x: "y"}, T::Hash[Symbol, Integer]))
       end
 
-      it "does do recursive type-checking of arrays with `recursive: true`" do
+      it "does do recursive type-checking of arrays with `check_type_recursive!`" do
         assert_raises(TypeError) do
-          T.assert_type!({x: "y"}, T::Hash[Symbol, Integer], recursive: true)
+          T.check_type_recursive!({x: "y"}, T::Hash[Symbol, Integer])
         end
       end
     end
