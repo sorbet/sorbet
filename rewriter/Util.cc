@@ -198,7 +198,8 @@ ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
     if (send->fun != core::Names::lambda() && send->fun != core::Names::proc()) {
         return nullptr;
     }
-    if (!send->recv->isSelfReference()) {
+    auto *constRecv = ast::cast_tree<ast::ConstantLit>(send->recv);
+    if (!send->recv->isSelfReference() && constRecv && constRecv->symbol != core::Symbols::Kernel()) {
         return nullptr;
     }
     if (send->block == nullptr) {

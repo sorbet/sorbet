@@ -575,7 +575,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foreign_!")
 
-    <self>.prop(:"foreign_lazy", <emptyTree>::<C String>, {:"foreign" => <self>.lambda() do ||
+    <self>.prop(:"foreign_lazy", <emptyTree>::<C String>, {:"foreign" => <emptyTree>::<C Kernel>.lambda() do ||
           <emptyTree>::<C ForeignClass>
         end, :"without_accessors" => true})
 
