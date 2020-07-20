@@ -48,3 +48,11 @@ T.assert_type!(arr[1..2] = [100, 200], T::Array[Integer])
 # errors
 
 T::Array[Float].new.sum.nan? # error: Method `nan?` does not exist on `Integer` component of `T.any(Integer, Float)`
+
+# bsearch
+T.reveal_type([1,2].bsearch {|x| x == 1}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type([1,2].bsearch {|x| x}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type(['a','b','c'].bsearch {|x| x == 'a'}) # error: Revealed type: `T.nilable(String)`
+
+# bsearch_index
+T.reveal_type(['a','b','c'].bsearch_index {|x| x == 'a'}) # error: Revealed type: `T.nilable(Integer)`
