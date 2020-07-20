@@ -27,5 +27,9 @@ module T::Types
           false
       end
     end
+
+    module Private
+      INSTANCE = SelfType.new.freeze
+    end
   end
 end

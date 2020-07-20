@@ -37,12 +37,12 @@ module T
   # Matches any object. In the static checker, T.untyped allows any
   # method calls or operations.
   def self.untyped
-    T::Types::Untyped.new
+    T::Types::Untyped::Private::INSTANCE
   end
 
   # Indicates a function never returns (e.g. "Kernel#raise")
   def self.noreturn
-    T::Types::NoReturn.new
+    T::Types::NoReturn::Private::INSTANCE
   end
 
   # T.all(<Type>, <Type>, ...) -- matches an object that has all of the types listed
@@ -62,12 +62,12 @@ module T
 
   # Matches `self`:
   def self.self_type
-    T::Types::SelfType.new
+    T::Types::SelfType::Private::INSTANCE
   end
 
   # Matches the instance type in a singleton-class context
   def self.attached_class
-    T::Types::AttachedClassType.new
+    T::Types::AttachedClassType::Private::INSTANCE
   end
 
   # Matches any class that subclasses or includes the provided class
