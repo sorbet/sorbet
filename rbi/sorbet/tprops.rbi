@@ -37,7 +37,7 @@ module T::Props::CustomType
   def self.scalar_type?(val); end
   def self.valid_serialization?(val); end
   def serialize(_instance); end
-  def valid?(value, deep=false); end
+  def valid?(value); end
   include Kernel
 end
 

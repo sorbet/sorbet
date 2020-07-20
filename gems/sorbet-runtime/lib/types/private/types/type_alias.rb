@@ -19,6 +19,11 @@ module T::Private::Types
     end
 
     # @override Base
+    def recursively_valid?(obj)
+      aliased_type.recursively_valid?(obj)
+    end
+
+    # @override Base
     def valid?(obj)
       aliased_type.valid?(obj)
     end

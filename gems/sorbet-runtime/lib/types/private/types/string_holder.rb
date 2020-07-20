@@ -15,7 +15,7 @@ class T::Private::Types::StringHolder < T::Types::Base
   end
 
   # @override Base
-  def valid?(obj, deep=false)
+  def valid?(obj)
     false
   end
 

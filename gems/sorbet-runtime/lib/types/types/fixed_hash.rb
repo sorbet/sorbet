@@ -17,6 +17,14 @@ module T::Types
     end
 
     # @override Base
+    def recursively_valid?(obj)
+      return false unless obj.is_a?(Hash)
+      return false if @types.any? {|key, type| !type.recursively_valid?(obj[key])}
+      return false if obj.any? {|key, _| !@types[key]}
+      true
+    end
+
+    # @override Base
     def valid?(obj)
       return false unless obj.is_a?(Hash)
       return false if @types.any? {|key, type| !type.valid?(obj[key])}

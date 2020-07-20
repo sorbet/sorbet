@@ -15,8 +15,13 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
+    def recursively_valid?(obj)
       obj.is_a?(Enumerator) && super
+    end
+
+    # @override Base
+    def valid?(obj)
+      obj.is_a?(Enumerator)
     end
 
     def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
@@ -28,7 +33,7 @@ module T::Types
         super(T.untyped)
       end
 
-      def valid?(obj, deep=false)
+      def valid?(obj)
         obj.is_a?(Enumerator)
       end
     end

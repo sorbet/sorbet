@@ -12,7 +12,7 @@ class T::Private::Types::NotTyped < T::Types::Base
   end
 
   # @override Base
-  def valid?(obj, deep=false)
+  def valid?(obj)
     raise ERROR_MESSAGE
   end
 

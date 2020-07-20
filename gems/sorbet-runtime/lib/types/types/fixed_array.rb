@@ -18,6 +18,22 @@ module T::Types
     end
 
     # @override Base
+    def recursively_valid?(obj)
+      if obj.is_a?(Array) && obj.length == @types.length
+        i = 0
+        while i < @types.length
+          if !@types[i].recursively_valid?(obj[i])
+            return false
+          end
+          i += 1
+        end
+        true
+      else
+        false
+      end
+    end
+
+    # @override Base
     def valid?(obj)
       if obj.is_a?(Array) && obj.length == @types.length
         i = 0
