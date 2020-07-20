@@ -1082,6 +1082,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
                     }
+                | tDOT2 arg
+                    {
+                      $$ = driver.build.range_inclusive(self, nullptr, $1, $2);
+                    }
+                | tDOT3 arg
+                    {
+                      $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
+                    }
                 | arg tPLUS arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
