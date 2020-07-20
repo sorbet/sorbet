@@ -1429,8 +1429,14 @@ bool SymbolSearchAssertion::matches(const LSPConfiguration &config, const Symbol
     if (name.has_value() && *name != symbol.name) {
         return false;
     }
-    if (container.has_value() && *container != symbol.containerName) {
-        return false;
+    if (container.has_value()) {
+        if (*container == NOTHING_LABEL) {
+            if (symbol.containerName.has_value()) {
+                return false;
+            }
+        } else if (*container != symbol.containerName) {
+            return false;
+        }
     }
     return true;
 }

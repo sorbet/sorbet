@@ -57,7 +57,9 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         }
         auto result =
             make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
-        result->containerName = sym->owner.data(gs)->showFullName(gs);
+        if (!hideSymbol(gs, sym->owner)) {
+            result->containerName = sym->owner.data(gs)->showFullName(gs);
+        }
         results.emplace_back(move(result));
     }
     return results;

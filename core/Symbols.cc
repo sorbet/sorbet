@@ -502,6 +502,15 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
 }
 
 string Symbol::showFullName(const GlobalState &gs) const {
+    if (this->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        auto nameStr = this->name.show(gs);
+        constexpr string_view packageNameSuffix = "_Package"sv;
+        if (absl::EndsWith(nameStr, packageNameSuffix)) {
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
+        }
+    }
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
     string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
 

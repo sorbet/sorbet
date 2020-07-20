@@ -301,7 +301,8 @@ public:
 // that matches the indicated range in the given file.  Options:
 // * `name = "str"` => the result's `name` must *exactly* match the given string
 //   (useful for synthetic results, like the `foo=` of an `attr_writer`)
-// * `container = "str"` => the `containerName` must *exactly* match the given string
+// * `container = "str"` => the `containerName` must *exactly* match the given string (also supports "(nothing)" to
+//   dictate no entry)
 // * `uri = "substr"` => the `location->uri` must *contain* the given string,
 //   rather than matching the containing file
 //   (container + uri can be useful for matching entries in `rbi` files)
