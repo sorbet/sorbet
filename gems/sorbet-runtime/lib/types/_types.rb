@@ -158,10 +158,10 @@ module T
     Private::Casts.cast(value, type, cast_method: "T.assert_type!")
   end
 
-  # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
-  # fail). Use this for debugging typechecking errors, or to ensure that type information is
-  # statically known and being checked appropriately. If `checked` is true, raises an exception at
-  # runtime if the value doesn't match the type.
+  # Dynamically confirm that `value` is recursively a valid value of
+  # type `type`, including recursively through collections. Note that
+  # in some cases this runtime check can be very expensive, especially
+  # with large collections of objects.
   def self.check_type_recursive!(value, type)
     Private::Casts.cast_recursive(value, type, cast_method: "T.check_type_recursive!")
   end
