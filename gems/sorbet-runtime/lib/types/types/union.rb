@@ -54,12 +54,14 @@ module T::Types
 
     module Private
       module Pool
+        # Assumes arguments are T::Types::Base instances.
         def self.union_of_types(type_a, type_b, *types)
-          # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
-          # in cases where NilClass is in `*types`, or there are duplicate types,
-          # or there are nested unions, etc. That's ok, because this is an optimization
-          # which isn't necessary for correctness.
           if types.empty?
+            # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
+            # in cases where there are duplicate types, nested unions, etc.
+            #
+            # That's ok, because this is an optimization which isn't necessary for
+            # correctness.
             if type_b == T::Utils::Nilable::NIL_TYPE && type_a.is_a?(T::Types::Simple)
               type_a.to_nilable
             elsif type_a == T::Utils::Nilable::NIL_TYPE && type_b.is_a?(T::Types::Simple)
@@ -68,6 +70,8 @@ module T::Types
               Union.new([type_a, type_b])
             end
           else
+            # This can't be a `T.nilable(<Module>)` case unless there are duplicates,
+            # which is possible but unexpected.
             Union.new([type_a, type_b] + types)
           end
         end
