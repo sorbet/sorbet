@@ -23,7 +23,7 @@ module T::Types
 
     # @override Base
     def valid?(obj)
-      return false unless obj.is_a?(Enuemrable)
+      obj.is_a?(Enumerable)
     end
 
     # @override Base

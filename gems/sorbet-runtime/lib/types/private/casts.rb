@@ -3,9 +3,13 @@
 
 module T::Private
   module Casts
-    def self.cast(value, type, cast_method:)
+    def self.cast(value, type, cast_method:, recursive: false)
       begin
-        error = T::Utils.coerce(type).error_message_for_obj(value)
+        if recursive
+          error = T::Utils.coerce(type).error_message_for_obj_recursive(value)
+        else
+          error = T::Utils.coerce(type).error_message_for_obj(value)
+        end
         return value unless error
 
         caller_loc = T.must(caller_locations(2..2)).first

@@ -320,7 +320,7 @@ module Opus::Types::Test
       it 'fails if an element of the array is the wrong type under deep checking' do
         type = T::Array[Integer]
         value = [true]
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Array[Integer], " \
                          "got T::Array[T::Boolean]"
         assert_equal(expected_error, msg)
@@ -343,7 +343,7 @@ module Opus::Types::Test
         value = [true, 3.0, false, 4, "5", false]
         expected_error = "Expected type T::Array[T.any(Integer, T::Boolean)], " \
           "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -358,7 +358,7 @@ module Opus::Types::Test
         value = [1, 2, 3]
         expected_error = "Expected type T::Array[String], " \
                          "got T::Array[Integer]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -373,7 +373,7 @@ module Opus::Types::Test
         value = [true, false, 1]
         expected_error = "Expected type T::Array[String], " \
           "got T::Array[T.any(Integer, T::Boolean)]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -398,7 +398,7 @@ module Opus::Types::Test
         value = [Object.new]
         expected_error = "Expected type T::Array[Integer], " \
           "got T::Array[Object]"
-        msg = type.error_message_for_obj(value, deep=true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -470,7 +470,7 @@ module Opus::Types::Test
         value = {
           'oops_string' => 1,
         }
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[String, Integer]"
         assert_equal(expected_error, msg)
       end
@@ -488,7 +488,7 @@ module Opus::Types::Test
         value = {
           sym: 1.0,
         }
-        msg = type.error_message_for_obj(value, deep: true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Hash[Symbol, Integer], got T::Hash[Symbol, Float]"
         assert_equal(expected_error, msg)
       end
@@ -578,7 +578,7 @@ module Opus::Types::Test
       it 'fails if the type is wrong under deep checking' do
         type = T::Range[Float]
         value = (3...10)
-        msg = type.error_message_for_obj(value, deep: true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Range[Float], " \
                          "got T::Range[Integer]"
         assert_equal(expected_error, msg)
@@ -613,7 +613,7 @@ module Opus::Types::Test
       it 'fails if the type is wrong under deep checking' do
         type = T::Set[Float]
         value = Set.new([1, 2, 3])
-        msg = type.error_message_for_obj(value, deep: true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Set[Float], " \
                          "got T::Set[Integer]"
         assert_equal(expected_error, msg)
@@ -654,7 +654,7 @@ module Opus::Types::Test
       it 'fails if an element of the array is the wrong type under deep checking' do
         type = T::Enumerable[Integer]
         value = [true]
-        msg = type.error_message_for_obj(value, deep: true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Enumerable[Integer], " \
                          "got T::Array[T::Boolean]"
         assert_equal(expected_error, msg)
@@ -677,7 +677,7 @@ module Opus::Types::Test
         value = [true, 3.0, false, 4, "5", false]
         expected_error = "Expected type T::Enumerable[T.any(Integer, T::Boolean)], " \
           "got T::Array[T.any(Float, Integer, String, T::Boolean)]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -692,7 +692,7 @@ module Opus::Types::Test
         value = [1, 2, 3]
         expected_error = "Expected type T::Enumerable[String], " \
                          "got T::Array[Integer]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -707,7 +707,7 @@ module Opus::Types::Test
         value = [true, false, 1]
         expected_error = "Expected type T::Enumerable[String], " \
           "got T::Array[T.any(Integer, T::Boolean)]"
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -734,7 +734,7 @@ module Opus::Types::Test
         value = [Object.new]
         expected_error = "Expected type T::Enumerable[Integer], " \
           "got T::Array[Object]"
-        msg = type.error_message_for_obj(value, deep: true)
+        msg = type.error_message_for_obj_recursive(value)
         assert_equal(expected_error, msg)
       end
 
@@ -769,7 +769,7 @@ module Opus::Types::Test
             raise "bad"
           end
         end.new(['str'])
-        msg = type.error_message_for_obj(value, true)
+        msg = type.error_message_for_obj_recursive(value)
         expected_error = "Expected type T::Enumerable[Integer], got T::Array[T.untyped]"
         assert_equal(expected_error, msg)
       end
