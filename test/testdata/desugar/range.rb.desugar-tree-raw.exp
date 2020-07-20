@@ -234,8 +234,8 @@ ClassDef{
               fun = <U new>
               block = nullptr
               args = [
-                EmptyTree
                 Literal{ value = 1 }
+                EmptyTree
               ]
             }
           }
@@ -252,8 +252,8 @@ ClassDef{
               fun = <U new>
               block = nullptr
               args = [
-                Literal{ value = nil }
                 Literal{ value = 1 }
+                Literal{ value = nil }
               ]
             }
           }
@@ -271,134 +271,6 @@ ClassDef{
               }
             ]
           }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U h>
-              }
-            ]
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U i>
-            }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
-              }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = 1 }
-                EmptyTree
-              ]
-            }
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U j>
-            }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
-              }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = 1 }
-                Literal{ value = nil }
-              ]
-            }
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U i>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U j>
-              }
-            ]
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U k>
-            }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
-              }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = nil }
-                EmptyTree
-              ]
-            }
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U l>
-            }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
-              }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = nil }
-                Literal{ value = nil }
-              ]
-            }
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U k>
-              }
-            ]
-          }
         ],
         expr = Send{
           recv = UnresolvedConstantLit{
@@ -410,7 +282,7 @@ ClassDef{
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <U l>
+              name = <U h>
             }
           ]
         }
