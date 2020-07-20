@@ -107,13 +107,6 @@ class Range < Object
   # otherwise, it will be excluded.
   sig do
     type_parameters(:U).params(
-      from: T.nilable(T.type_parameter(:U)),
-      to: T.nilable(T.type_parameter(:U)),
-      exclude_end: T::Boolean
-    ).returns(T::Range[T.type_parameter(:U)])
-  end
-  sig do
-    type_parameters(:U).params(
       from: T.type_parameter(:U),
       to: T.nilable(T.type_parameter(:U)),
       exclude_end: T::Boolean

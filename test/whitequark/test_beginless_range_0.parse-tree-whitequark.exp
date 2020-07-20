@@ -1,2 +1,0 @@
-s(:irange, nil,
-  s(:int, "100"))
