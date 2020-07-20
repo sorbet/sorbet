@@ -565,6 +565,24 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def find_all(&blk); end
 
+  # Returns a new array containing the truthy results (everything except
+  # `false` or `nil`) of running the `block+ for every element in +enum+.
+  #
+  # If no block is given, an
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).filter_map { |i| i * 2 if i.even? } #=> [4, 8, 12, 16, 20]
+  # ```
+  sig do
+     type_parameters(:T)
+     .params(blk: T.proc.params(arg0: Elem).returns(T.any(NilClass, FalseClass, T.type_parameter(:T))))
+     .returns(T::Array[T.type_parameter(:T)])
+  end
+  sig {returns(T::Enumerator[Elem])}
+  def filter_map(&blk); end
+
   # Compares each entry in *enum* with *value* or passes to *block*. Returns the
   # index for the first for which the evaluated value is non-false. If no object
   # matches, returns `nil`

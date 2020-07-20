@@ -19,6 +19,7 @@
 [1, 3, 20].sort_by {|n| [n.to_s, [1, 2]]}
 
 T.assert_type!([1].lazy, Enumerator::Lazy[Integer])
+T.assert_type!([1, 2].filter_map { |x| x.odd? ? x.to_f : x.to_s }, T::Array[T.any(Float, String)])
 
 # There are 3 different ways to call all?, any? and none?
 a = [1, 3, 20]
