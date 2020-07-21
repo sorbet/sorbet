@@ -73,6 +73,14 @@ module Opus::Types::Test
         y = T::Types::Simple::Private::Pool.type_for_module(String)
         assert_equal(x.object_id, y.object_id)
       end
+
+      it 'does not blow up when pooling with frozen module' do
+        m = Module.new
+        m.freeze
+
+        x = T::Types::Simple::Private::Pool.type_for_module(m)
+        assert_instance_of(T::Types::Simple, x)
+      end
     end
 
     describe "Union" do
