@@ -54,8 +54,13 @@ module T::Types
 
     module Private
       module Pool
-        # Assumes arguments are T::Types::Base instances.
-        def self.union_of_types(type_a, type_b, *types)
+        EMPTY_ARRAY = [].freeze
+        private_constant :EMPTY_ARRAY
+
+        # @param type_a [T::Types::Base]
+        # @param type_b [T::Types::Base]
+        # @param types [Array] optional array of additional T::Types::Base instances
+        def self.union_of_types(type_a, type_b, types=EMPTY_ARRAY)
           if types.empty?
             # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
             # in cases where there are duplicate types, nested unions, etc.

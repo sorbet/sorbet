@@ -29,7 +29,7 @@ module T
     type_a = T::Utils.coerce(type_a)
     type_b = T::Utils.coerce(type_b)
     types = types.map {|t| T::Utils.coerce(t)} if !types.empty?
-    T::Types::Union::Private::Pool.union_of_types(type_a, type_b, *types)
+    T::Types::Union::Private::Pool.union_of_types(type_a, type_b, types)
   end
 
   # Shorthand for T.any(type, NilClass)
