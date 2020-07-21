@@ -30,14 +30,16 @@ module T::Props::WeakConstructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_without_defaults(instance, hash)
-    @props_without_defaults&.count do |p, setter_proc|
+    # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
+    # and therefore allocates for each entry.
+    result = 0
+    @props_without_defaults&.each_pair do |p, setter_proc|
       if hash.key?(p)
         instance.instance_exec(hash[p], &setter_proc)
-        true
-      else
-        false
+        result += 1
       end
-    end || 0
+    end
+    result
   end
 
   # Set values for all props that have defaults. Use the default if and only if
@@ -49,14 +51,17 @@ module T::Props::WeakConstructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_with_defaults(instance, hash)
-    @props_with_defaults&.count do |p, default_struct|
+    # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
+    # and therefore allocates for each entry.
+    result = 0
+    @props_with_defaults&.each_pair do |p, default_struct|
       if hash.key?(p)
         instance.instance_exec(hash[p], &default_struct.setter_proc)
-        true
+        result += 1
       else
         default_struct.set_default(instance)
-        false
       end
-    end || 0
+    end
+    result
   end
 end

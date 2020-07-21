@@ -17,11 +17,16 @@ module T::Props::Constructor::DecoratorMethods
   # checked(:never) - O(runtime object construction)
   sig {params(instance: T::Props::Constructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
   def construct_props_without_defaults(instance, hash)
-    @props_without_defaults&.count do |p, setter_proc|
+    # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
+    # and therefore allocates for each entry.
+    result = 0
+    @props_without_defaults&.each_pair do |p, setter_proc|
       begin
         val = hash[p]
         instance.instance_exec(val, &setter_proc)
-        val || hash.key?(p)
+        if val || hash.key?(p)
+          result += 1
+        end
       rescue TypeError, T::Props::InvalidValueError
         if !hash.key?(p)
           raise ArgumentError.new("Missing required prop `#{p}` for class `#{instance.class.name}`")
@@ -29,6 +34,7 @@ module T::Props::Constructor::DecoratorMethods
           raise
         end
       end
-    end || 0
+    end
+    result
   end
 end
