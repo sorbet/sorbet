@@ -221,4 +221,12 @@ rescue <emptyTree>::<C E> => x
   def ssfoo<<C <todo sym>>>(***$3:, &<blk>)
     <emptyTree>
   end
+
+  module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+    def foo<<C <todo sym>>>(&<blk>)
+      <emptyTree>::<C Kernel>.lambda() do |a, b|
+        a.+(b)
+      end
+    end
+  end
 end

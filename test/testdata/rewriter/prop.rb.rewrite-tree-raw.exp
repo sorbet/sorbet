@@ -5762,8 +5762,9 @@ ClassDef{
                 [
                   key = Literal{ value = :"foreign" }
                   value = Send{
-                    recv = Local{
-                      localVariable = <U <self>>
+                    recv = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Kernel>>
                     }
                     fun = <U lambda>
                     block = Block {

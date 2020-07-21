@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def test_lambda<<C <todo sym>>>(&<blk>)
-    <self>.lambda() do |x|
+    <emptyTree>::<C Kernel>.lambda() do |x|
       x.*(x)
     end
   end

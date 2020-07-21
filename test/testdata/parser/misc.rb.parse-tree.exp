@@ -642,5 +642,47 @@ Begin {
       }
       body = NULL
     }
+    Module {
+      name = Const {
+        scope = NULL
+        name = <C <U Foo>>
+      }
+      body = DefMethod {
+        name = <U foo>
+        args = NULL
+        body = Block {
+          send = Send {
+            receiver = Const {
+              scope = NULL
+              name = <C <U Kernel>>
+            }
+            method = <U lambda>
+            args = [
+            ]
+          }
+          args = Args {
+            args = [
+              Arg {
+                name = <U a>
+              }
+              Arg {
+                name = <U b>
+              }
+            ]
+          }
+          body = Send {
+            receiver = LVar {
+              name = <U a>
+            }
+            method = <U +>
+            args = [
+              LVar {
+                name = <U b>
+              }
+            ]
+          }
+        }
+      }
+    }
   ]
 }

@@ -153,3 +153,10 @@ break cfoo 1 do end
 # bare * args
 def sfoo(*); end
 def ssfoo(**); end
+
+# arrow lambda in module
+module Foo
+  def foo
+    ->(a, b) { a + b }
+  end
+end
