@@ -6,6 +6,8 @@
 # Use them at your own risk.
 
 module T::Private
+  sig {params(value: T.untyped, type: T.untyped).returns(BasicObject)}
+  def self.check_type_recursive!(value, type); end
 end
 
 module T::Private::Types

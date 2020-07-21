@@ -52,7 +52,7 @@ module Opus::Types::Test
 
       it "does do recursive type-checking of arrays with `check_type_recursive!`" do
         assert_raises(TypeError) do
-          T::Utils.check_type_recursive!([1], T::Array[String])
+          T::Private.check_type_recursive!([1], T::Array[String])
         end
       end
 
@@ -62,7 +62,7 @@ module Opus::Types::Test
 
       it "does do recursive type-checking of arrays with `check_type_recursive!`" do
         assert_raises(TypeError) do
-          T::Utils.check_type_recursive!({x: "y"}, T::Hash[Symbol, Integer])
+          T::Private.check_type_recursive!({x: "y"}, T::Hash[Symbol, Integer])
         end
       end
     end

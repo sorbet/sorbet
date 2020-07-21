@@ -52,6 +52,4 @@ runtime type system.
 > array contained the values it claimed it did, the Sorbet runtime used to
 > recursively check the type of every member of a collection, which would take a
 > long time for arrays or hashes of a sufficiently large size. Consequently,
-> this behavior was eventually removed. If you do want runtime checking that a
-> given collection is valid, you can use `T.check_type_recursive!` to do
-> thorough runtime type validation.
+> this behavior was eventually removed.

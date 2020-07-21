@@ -2,14 +2,6 @@
 # typed: true
 
 module T::Utils
-  # Dynamically confirm that `value` is recursively a valid value of
-  # type `type`, including recursively through collections. Note that
-  # in some cases this runtime check can be very expensive, especially
-  # with large collections of objects.
-  def self.check_type_recursive!(value, type)
-    T::Private::Casts.cast_recursive(value, type, cast_method: "T.check_type_recursive!")
-  end
-
   # Used to convert from a type specification to a `T::Types::Base`.
   def self.coerce(val)
     if val.is_a?(T::Private::Types::TypeAlias)
