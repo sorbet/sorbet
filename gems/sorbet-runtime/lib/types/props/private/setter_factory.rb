@@ -83,7 +83,7 @@ module T::Props
         proc do |val|
           if val.nil?
             instance_variable_set(accessor_key, nil)
-          elsif non_nil_type.valid?(val)
+          elsif non_nil_type.recursively_valid?(val)
             if validate
               validate.call(prop, val)
             end
