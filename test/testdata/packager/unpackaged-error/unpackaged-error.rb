@@ -1,4 +1,5 @@
-# error: File `test/testdata/packager/unpackaged-error/unpackaged-error.rb` does not belong to a package
+# error: File `
+# ^ We can’t assert the full pathname; see https://github.com/sorbet/sorbet/pull/3310
 # typed: true
 # enable-packager: true
 
