@@ -154,8 +154,24 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
+string showAnds(const GlobalState &, TypePtr, TypePtr);
+
+string showAndElem(const GlobalState &gs, TypePtr ty) {
+    if (auto andType = cast_type<AndType>(ty.get())) {
+        return showAnds(gs, andType->left, andType->right);
+    }
+    return ty->show(gs);
+}
+
+string showAnds(const GlobalState &gs, TypePtr left, TypePtr right) {
+    auto leftStr = showAndElem(gs, left);
+    auto rightStr = showAndElem(gs, right);
+    return fmt::format("{}, {}", leftStr, rightStr);
+}
+
 string AndType::show(const GlobalState &gs) const {
-    return fmt::format("T.all({}, {})", this->left->show(gs), this->right->show(gs));
+    auto str = showAnds(gs, this->left, this->right);
+    return fmt::format("T.all({})", str);
 }
 
 string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
