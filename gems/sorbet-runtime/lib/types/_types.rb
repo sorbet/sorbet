@@ -158,14 +158,6 @@ module T
     Private::Casts.cast(value, type, cast_method: "T.assert_type!")
   end
 
-  # Dynamically confirm that `value` is recursively a valid value of
-  # type `type`, including recursively through collections. Note that
-  # in some cases this runtime check can be very expensive, especially
-  # with large collections of objects.
-  def self.check_type_recursive!(value, type)
-    Private::Casts.cast_recursive(value, type, cast_method: "T.check_type_recursive!")
-  end
-
   # For the static type checker, strips all type information from a value
   # and returns the same value, but statically-typed as `T.untyped`.
   # Can be used to tell the static checker to "trust you" by discarding type information
