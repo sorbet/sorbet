@@ -590,6 +590,9 @@ class Project::Foo
 end
 ```
 
+In the above, `container` can also be the special string `"(nothing)"` to
+indicate that the item has no container.
+
 `symbol-search` can also specify the item's relative rank in the ordered
 search results:
 

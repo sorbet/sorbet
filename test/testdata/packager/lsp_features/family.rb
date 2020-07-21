@@ -13,9 +13,9 @@ class Family
         #     ^^^^^^^^^^^ hover: String("Don\'t have a cow, man.")
     end
 
-    # sig {returns(Bart::Character)}
-    #             bart
-    #                  character
+    sig {returns(Bart::Character)}
+    #            ^^^^ usage: bart
+    #                  ^^^^^^^^^ usage: character
     def son
         Bart::Character.new
     #   ^^^^ usage: bart
@@ -23,5 +23,8 @@ class Family
         #     ^^^^^^^^^ hover: T.class_of(Character)
         #     ^^^^^^^^^ hover: Character class description
         #               ^^^ hover: Description of Character initialize
+        Bart::C # error: Unable to resolve constant `C`
+        #      ^ completion: CatchPhrase, Character
+    #   ^^^^ usage: bart
     end
 end
