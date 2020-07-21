@@ -195,7 +195,7 @@ namespace {
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
 bool isKernel(const ast::TreePtr &expr) {
     if (auto *constRecv = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr)) {
-        return constRecv->cnst == core::Names::Constants::Kernel();
+        return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
     }
     return false;
 }
