@@ -190,6 +190,18 @@ ast::TreePtr ASTUtil::mkNilable(core::LocOffsets loc, ast::TreePtr type) {
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
+namespace {
+
+// Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
+bool isKernel(const ast::TreePtr &expr) {
+    if (auto *constRecv = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr)) {
+        return constRecv->cnst == core::Names::Constants::Kernel();
+    }
+    return false;
+}
+
+} // namespace
+
 ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
     auto *send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
@@ -198,8 +210,8 @@ ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
     if (send->fun != core::Names::lambda() && send->fun != core::Names::proc()) {
         return nullptr;
     }
-    auto *constRecv = ast::cast_tree<ast::ConstantLit>(send->recv);
-    if (!send->recv->isSelfReference() && constRecv && constRecv->symbol != core::Symbols::Kernel()) {
+    // Valid receivers for lambda/proc are either a self reference or `Kernel`
+    if (!send->recv->isSelfReference() && !isKernel(send->recv)) {
         return nullptr;
     }
     if (send->block == nullptr) {
