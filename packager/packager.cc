@@ -689,9 +689,19 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                             // Don't transform, but raise an error on the first line.
                             if (auto e =
                                     ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
+                                auto path = ctx.file.data(gs).path();
+                                auto externalPrefix = "external/com_stripe_ruby_typer/"sv;
+                                if (gs.censorForSnapshotTests) {
+                                    if (absl::StartsWith(path, externalPrefix)) {
+                                        // When running tests from outside of the sorbet repo, the files have a
+                                        // different path in the sandbox.
+                                        path.remove_prefix(externalPrefix.size());
+                                    }
+                                }
+
                                 e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
                                             "of its parent directories",
-                                            ctx.file.data(gs).path());
+                                            path);
                             }
                         }
                     }
