@@ -21,9 +21,9 @@ ClassDef{
               name = <U a>
             }
             rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Range
               }
               fun = <U new>
               block = nullptr
@@ -96,9 +96,9 @@ ClassDef{
             }
             rhs = Send{
               recv = Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U Range>>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Range
                 }
                 fun = <U new>
                 block = nullptr
@@ -120,9 +120,9 @@ ClassDef{
             }
             rhs = Send{
               recv = Send{
-                recv = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <C <U Range>>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::Range
                 }
                 fun = <U new>
                 block = nullptr
@@ -227,9 +227,9 @@ ClassDef{
               name = <U g>
             }
             rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Range
               }
               fun = <U new>
               block = nullptr
