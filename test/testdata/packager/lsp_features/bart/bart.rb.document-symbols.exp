@@ -1,0 +1,85 @@
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "requestMethod": "textDocument/documentSymbol",
+    "result": [
+        {
+            "name": "CatchPhrase",
+            "detail": "",
+            "kind": 14,
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 4
+                },
+                "end": {
+                    "line": 2,
+                    "character": 15
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 2,
+                    "character": 4
+                },
+                "end": {
+                    "line": 2,
+                    "character": 15
+                }
+            },
+            "children": []
+        }, {
+            "name": "Character",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 7,
+                    "character": 0
+                },
+                "end": {
+                    "line": 7,
+                    "character": 15
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 7,
+                    "character": 0
+                },
+                "end": {
+                    "line": 7,
+                    "character": 15
+                }
+            },
+            "children": [
+                {
+                    "name": "initialize",
+                    "detail": "",
+                    "kind": 9,
+                    "range": {
+                        "start": {
+                            "line": 14,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 14,
+                            "character": 18
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 14,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 14,
+                            "character": 18
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        }
+    ]
+}

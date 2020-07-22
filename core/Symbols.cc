@@ -502,6 +502,15 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
 }
 
 string Symbol::showFullName(const GlobalState &gs) const {
+    if (this->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        auto nameStr = this->name.show(gs);
+        constexpr string_view packageNameSuffix = "_Package"sv;
+        if (absl::EndsWith(nameStr, packageNameSuffix)) {
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
+        }
+    }
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
     string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
 
@@ -760,7 +769,11 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
-    if (!this->owner.exists() || this->owner == Symbols::root()) {
+    if (!this->owner.exists() || this->owner == Symbols::root() ||
+        this->owner.data(gs)->owner == Symbols::PackageRegistry()) {
+        // <PackageRegistry> is an internal detail of --stripe-packages. It only owns synthetic modules that encapsulate
+        // package namespaces; they should not be shown to the user. Another way to think about this:
+        // if --stripe-packages hadn't been specified, these constants would have been owned by <root>.
         return this->name.data(gs)->show(gs);
     }
 

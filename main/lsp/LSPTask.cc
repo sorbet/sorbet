@@ -164,7 +164,8 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         const auto &usedConstants = hash.usages.constants;
         auto ref = core::FileRef(i);
 
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
+        const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
+                                                  ref.data(gs).sourceType == core::File::Type::Package);
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
              std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
@@ -234,8 +235,12 @@ LSPTask::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string
             auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
             auto locations = extractLocations(typechecker.state(), run2.responses);
             for (auto const &location : locations) {
-                auto highlight = make_unique<DocumentHighlight>(move(location->range));
-                highlights.push_back(move(highlight));
+                // 'queryBySymbolInFiles' may pick up secondary files required for accurate querying (e.g., package
+                // files)
+                if (location->uri == uri) {
+                    auto highlight = make_unique<DocumentHighlight>(move(location->range));
+                    highlights.push_back(move(highlight));
+                }
             }
         }
     }

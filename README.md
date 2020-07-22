@@ -40,12 +40,11 @@ docs about Stripe-specific development workflows and historical Stripe context.
     - [Testing "Go to Type Definition"](#testing-go-to-type-definition)
     - [Testing hover](#testing-hover)
     - [Testing completion](#testing-completion)
+    - [Testing workspace symbols (symbol search)](#testing-workspace-symbols-symbol-search)
     - [Testing incremental type checking](#testing-incremental-type-checking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
-- [Debugging and profiling](#debugging-and-profiling)
-  - [Debugging](#debugging)
-  - [Profiling](#profiling)
+- [Debugging](#debugging)
 - [Writing docs](#writing-docs)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
@@ -570,6 +569,37 @@ and verify that you're seeing your changes. For documentation specifically,
 nearly all the code paths are shared with hover, so you can alternatively write
 a hover test.
 
+#### Testing workspace symbols (symbol search)
+
+LSP tests can assert that a specific item appears in a symbol search (the
+`textDocument/workspaceSymbols` request) using the `symbol-search` assertion:
+
+```ruby
+class Project::Foo
+#     ^^^ symbol-search: "Foo"
+end
+```
+
+The `symbol-search` can optionally specify _how_ that item should appear in
+search results:
+
+```ruby
+class Project::Foo
+#     ^^^ symbol-search: "Foo", name = "Foo", container = "Project"
+end
+```
+
+In the above, `container` can also be the special string `"(nothing)"` to
+indicate that the item has no container.
+
+`symbol-search` can also specify the item's relative rank in the ordered
+search results:
+
+```ruby
+class Project::Foo
+#     ^^^ symbol-search: "Foo", rank = 1
+end
+```
 
 #### Testing incremental type checking
 

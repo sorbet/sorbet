@@ -97,9 +97,10 @@ public:
 
     const std::string symbol;
     const int version;
+    const bool isDefOfSelf;
 
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
-                 int version);
+                 int version, bool isDefOfSelf);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                int &nextId, const Location &queryLoc);
@@ -300,7 +301,8 @@ public:
 // that matches the indicated range in the given file.  Options:
 // * `name = "str"` => the result's `name` must *exactly* match the given string
 //   (useful for synthetic results, like the `foo=` of an `attr_writer`)
-// * `container = "str"` => the `containerName` must *exactly* match the given string
+// * `container = "str"` => the `containerName` must *exactly* match the given string (also supports "(nothing)" to
+//   dictate no entry)
 // * `uri = "substr"` => the `location->uri` must *contain* the given string,
 //   rather than matching the containing file
 //   (container + uri can be useful for matching entries in `rbi` files)

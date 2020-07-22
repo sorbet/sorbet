@@ -11,7 +11,7 @@ u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
         return 8;
     } else if (q.isDefinition()) {
         return 7;
-    } else if (q.isSend()) {
+    } else if (auto send = q.isSend()) {
         return 6;
     } else if (q.isField()) {
         return 5;

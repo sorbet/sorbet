@@ -347,6 +347,8 @@ TEST_CASE("LSPTest") {
         // Surfaces errors that occur due to differences in how slow and fast paths run.
         // Skip the second iteration if slow path fails to avoid printing out duplicate errors.
         for (int i = 0; i < (skipFastPath ? 1 : 2) && slowPathPassed; i++) {
+            // Print a helpful message when a test fails during the fast path loop.
+            INFO((i == 1 ? "Note: To disable fast path tests, add `# disable-fast-path: true` to the file." : ""));
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
                 auto textDocContents = test.sourceFileContents[filename]->source();
@@ -357,9 +359,6 @@ TEST_CASE("LSPTest") {
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
-            if (i == 2) {
-                FAIL_CHECK("Note: To disable fast path tests, add `# disable-fast-path: true` to the file.");
-            }
         }
     }
 
@@ -425,10 +424,15 @@ TEST_CASE("LSPTest") {
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                     version = defAssertion->version;
                     symbol = defAssertion->symbol;
+                    // Some definition locations are not the definition of themselves.
+                    if (!defAssertion->isDefOfSelf) {
+                        continue;
+                    }
                 } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                     version = usageAssertion->version;
                     symbol = usageAssertion->symbol;
                 }
+
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
                     auto &def = entry->second;
