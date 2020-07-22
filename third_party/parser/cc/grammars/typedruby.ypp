@@ -210,6 +210,7 @@ using namespace std::string_literals;
   f_larglist
   f_marg
   f_opt
+  f_rest_marg
   fitem
   for_var
   keyword_variable
@@ -1723,51 +1724,37 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     }
 
          f_margs: f_marg_list
-                | f_marg_list tCOMMA tSTAR f_norm_arg
+                | f_marg_list tCOMMA f_rest_marg
                     {
                       auto &list = $1;
-                      list->emplace_back(driver.build.restarg(self, $3, $4));
+                      list->emplace_back($3);
                       $$ = list;
                     }
-                | f_marg_list tCOMMA tSTAR f_norm_arg tCOMMA f_marg_list
-                    {
-                      auto &args = $1;
-                      args->emplace_back(driver.build.restarg(self, $3, $4));
-                      args->concat($6);
-                      $$ = args;
-                    }
-                | f_marg_list tCOMMA tSTAR
+                | f_marg_list tCOMMA f_rest_marg tCOMMA f_marg_list
                     {
                       auto &list = $1;
-                      list->emplace_back(driver.build.restarg(self, $3, nullptr));
+                      list->emplace_back($3);
+                      list->concat($5);
                       $$ = list;
                     }
-                | f_marg_list tCOMMA tSTAR            tCOMMA f_marg_list
+                |                    f_rest_marg
                     {
-                      auto &args = $1;
-                      args->emplace_back(driver.build.restarg(self, $3, nullptr));
-                      args->concat($5);
-                      $$ = args;
+                      $$ = driver.alloc.node_list($1);
                     }
-                |                    tSTAR f_norm_arg
+                |                    f_rest_marg tCOMMA f_marg_list
                     {
-                      $$ = driver.alloc.node_list(driver.build.restarg(self, $1, $2));
+                      auto &list = $3;
+                      list->push_front($1);
+                      $$ = list;
                     }
-                |                    tSTAR f_norm_arg tCOMMA f_marg_list
+
+     f_rest_marg: tSTAR f_norm_arg
                     {
-                      auto &args = $4;
-                      args->push_front(driver.build.restarg(self, $1, $2));
-                      $$ = args;
+                      $$ = driver.build.restarg(self, $1, $2);
                     }
-                |                    tSTAR
+                | tSTAR
                     {
-                      $$ = driver.alloc.node_list(driver.build.restarg(self, $1, nullptr));
-                    }
-                |                    tSTAR tCOMMA f_marg_list
-                    {
-                      auto &args = $3;
-                      args->push_front(driver.build.restarg(self, $1, nullptr));
-                      $$ = args;
+                      $$ = driver.build.restarg(self, $1, nullptr);
                     }
 
  block_args_tail: f_block_kwarg tCOMMA f_kwrest opt_f_block_arg
