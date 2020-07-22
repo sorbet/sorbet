@@ -1278,8 +1278,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 result = std::move(res);
             },
             [&](parser::IRange *ret) {
-                core::NameRef range_name = core::Symbols::Range().data(dctx.ctx)->name;
-                TreePtr range = MK::UnresolvedConstant(loc, MK::EmptyTree(), range_name);
+                TreePtr range = MK::Constant(loc, core::Symbols::Range());
                 auto from = node2TreeImpl(dctx, std::move(ret->from));
                 auto to = node2TreeImpl(dctx, std::move(ret->to));
                 auto send = MK::Send2(loc, std::move(range), core::Names::new_(), std::move(from), std::move(to));
