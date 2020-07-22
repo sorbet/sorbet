@@ -375,7 +375,9 @@ public:
         args.emplace_back(Constant(loc, klass));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
-        return Send(loc, std::move(magic), core::Names::defineTopClassOrModule(), std::move(args), flags);
+        // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
+        return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, std::move(magic),
+                    core::Names::defineTopClassOrModule(), std::move(args), flags);
     }
 
     static TreePtr RaiseUnimplemented(core::LocOffsets loc) {

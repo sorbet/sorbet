@@ -12,10 +12,6 @@ u2 getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
     } else if (q.isDefinition()) {
         return 7;
     } else if (auto send = q.isSend()) {
-        if (send->callerSideName == core::Names::defineTopClassOrModule()) {
-            // LSP doesn't need to know about this; sort it to the end.
-            return 1;
-        }
         return 6;
     } else if (q.isField()) {
         return 5;
