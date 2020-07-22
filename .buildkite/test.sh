@@ -37,10 +37,17 @@ echo "--- uploading test results"
 rm -rf _tmp_
 mkdir -p _tmp_/log/junit/
 
-# TODO: does this query omit the snapshot tests?
-./bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
+./bazel query '(tests(//...) + tests(@com_stripe_ruby_typer//test)) except attr("tags", "manual", //...)' | \
+  while read -r line; do
     path="${line/://}"
     path="${path#//}"
+
+    #  @com_stripe_ruby_typer//... -> external/com_stripe_ruby_typer//...
+    path="${path/@/external/}"
+
+    #  .../com_stripe_ruby_typer//... -> .../com_stripe_ruby_typer/...
+    path="${path/\/\//\/}"
+
     cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
 done
 
