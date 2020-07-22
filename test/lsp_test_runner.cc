@@ -357,7 +357,7 @@ TEST_CASE("LSPTest") {
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             slowPathPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
-            if (i == 2) {
+            if (i == 1) {
                 FAIL_CHECK("Note: To disable fast path tests, add `# disable-fast-path: true` to the file.");
             }
         }
