@@ -19,15 +19,8 @@ module T::Types
     # @override Base
     def valid?(obj)
       return false unless obj.is_a?(Hash)
-
-      @types.each do |key, type|
-        return false unless type.valid?(obj[key])
-      end
-
-      obj.each_key do |key|
-        return false unless @types[key]
-      end
-
+      return false if @types.any? {|key, type| !type.valid?(obj[key])}
+      return false if obj.any? {|key, _| !@types[key]}
       true
     end
 

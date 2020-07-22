@@ -192,6 +192,16 @@ module Opus::Types::Test
         msg = @type.error_message_for_obj(["hello", nil])
         assert_equal("Expected type [String, T::Boolean], got type [String, NilClass]", msg)
       end
+
+      it 'valid? does not allocate' do
+        arr = ["foo", false]
+        allocs_when_valid = counting_allocations {@type.valid?(arr)}
+        assert_equal(0, allocs_when_valid)
+
+        arr = [1, 2]
+        allocs_when_invalid = counting_allocations {@type.valid?(arr)}
+        assert_equal(0, allocs_when_invalid)
+      end
     end
 
     describe "FixedHash" do
@@ -227,6 +237,20 @@ module Opus::Types::Test
       it "fails validation if an extra field is present" do
         msg = @type.error_message_for_obj({a: "hello", b: true, d: "ohno"})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: String, b: TrueClass, d: String}", msg)
+      end
+
+      it 'valid? does not allocate' do
+        h = {a: 'foo', b: false, c: nil}
+        allocs_when_valid = counting_allocations {@type.valid?(h)}
+        assert_equal(0, allocs_when_valid)
+
+        h = {a: 'foo', b: 1, c: nil}
+        allocs_when_invalid_type = counting_allocations {@type.valid?(h)}
+        assert_equal(0, allocs_when_invalid_type)
+
+        h = {a: 'foo', b: false, c: nil, d: 'nope'}
+        allocs_when_invalid_key = counting_allocations {@type.valid?(h)}
+        assert_equal(0, allocs_when_invalid_key)
       end
     end
 
