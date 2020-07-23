@@ -59,6 +59,28 @@ module Opus::Types::Test
         allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
         assert_equal(0, allocs_when_invalid)
       end
+
+      it 'uses structural, not reference, equality' do
+        x = T::Types::Simple.new(String)
+        y = T::Types::Simple.new(String)
+        refute_equal(x.object_id, y.object_id)
+        assert_equal(x, y)
+        assert_equal(x.hash, y.hash)
+      end
+
+      it 'pools correctly' do
+        x = T::Types::Simple::Private::Pool.type_for_module(String)
+        y = T::Types::Simple::Private::Pool.type_for_module(String)
+        assert_equal(x.object_id, y.object_id)
+      end
+
+      it 'does not blow up when pooling with frozen module' do
+        m = Module.new
+        m.freeze
+
+        x = T::Types::Simple::Private::Pool.type_for_module(m)
+        assert_instance_of(T::Types::Simple, x)
+      end
     end
 
     describe "Union" do
@@ -108,6 +130,26 @@ module Opus::Types::Test
 
         allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
         assert_equal(0, allocs_when_invalid)
+      end
+
+      it 'uses structural, not reference, equality' do
+        x = T::Types::Union.new([String, NilClass])
+        y = T::Types::Union.new([String, NilClass])
+        refute_equal(x.object_id, y.object_id)
+        assert_equal(x, y)
+        assert_equal(x.hash, y.hash)
+      end
+
+      it 'pools correctly for simple nilable types' do
+        x = T::Types::Union::Private::Pool.union_of_types(
+          T::Utils.coerce(String),
+          T::Utils.coerce(NilClass),
+        )
+        y = T::Types::Union::Private::Pool.union_of_types(
+          T::Utils.coerce(String),
+          T::Utils.coerce(NilClass),
+        )
+        assert_equal(x.object_id, y.object_id)
       end
     end
 
