@@ -15,6 +15,18 @@ module Opus::Types::Test
       GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
     end
 
+    # this checks that both the recursive and nonrecursive path should
+    # have the same behavior
+    private def check_error_message_for_obj(type, value)
+      nonrecursive_msg = type.error_message_for_obj(value)
+      recursive_msg = type.error_message_for_obj_recursive(value)
+      assert(
+        nonrecursive_msg == recursive_msg,
+        "Differing output from valid? and recursively_valid?: #{nonrecursive_msg.inspect} != #{recursive_msg.inspect}",
+      )
+      nonrecursive_msg
+    end
+
     describe "Base" do
       it "raises an error if you override `subtype_of?`" do
         err = assert_raises do
@@ -34,17 +46,17 @@ module Opus::Types::Test
       end
 
       it "passes a validation" do
-        msg = @type.error_message_for_obj(1)
+        msg = check_error_message_for_obj(@type, 1)
         assert_nil(msg)
       end
 
       it "fails a validation with a different type" do
-        msg = @type.error_message_for_obj("1")
+        msg = check_error_message_for_obj(@type, "1")
         assert_equal("Expected type Integer, got type String with value \"1\"", msg)
       end
 
       it "fails a validation with nil" do
-        msg = @type.error_message_for_obj(nil)
+        msg = check_error_message_for_obj(@type, nil)
         assert_equal("Expected type Integer, got type NilClass", msg)
       end
 
@@ -89,17 +101,17 @@ module Opus::Types::Test
       end
 
       it "passes a validation with a non-nil value" do
-        msg = @type.error_message_for_obj(1)
+        msg = check_error_message_for_obj(@type, 1)
         assert_nil(msg)
       end
 
       it "passes a validation with a nil value" do
-        msg = @type.error_message_for_obj(nil)
+        msg = check_error_message_for_obj(@type, nil)
         assert_nil(msg)
       end
 
       it "fails a validation with a different type" do
-        msg = @type.error_message_for_obj("1")
+        msg = check_error_message_for_obj(@type, "1")
         assert_equal("Expected type T.nilable(Integer), got type String with value \"1\"", msg)
       end
 
@@ -162,13 +174,13 @@ module Opus::Types::Test
       it "passes validation with both mixins" do
         @klass.include(Mixin1)
         @klass.include(Mixin2)
-        msg = @type.error_message_for_obj(@klass.new)
+        msg = check_error_message_for_obj(@type, @klass.new)
         assert_nil(msg)
       end
 
       it "fails validation with just Mixin1" do
         @klass.include(Mixin1)
-        msg = @type.error_message_for_obj(@klass.new)
+        msg = check_error_message_for_obj(@type, @klass.new)
         assert_match(
           /Expected type T.all\(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2\), got type #{@klass} with hash -?\d+/,
           msg
@@ -177,7 +189,7 @@ module Opus::Types::Test
 
       it "fails validation with just Mixin2" do
         @klass.include(Mixin2)
-        msg = @type.error_message_for_obj(@klass.new)
+        msg = check_error_message_for_obj(@type, @klass.new)
         assert_match(
           /Expected type T.all\(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2\), got type #{@klass} with hash -?\d+/,
           msg
@@ -216,22 +228,22 @@ module Opus::Types::Test
       end
 
       it "passes validation" do
-        msg = @type.error_message_for_obj(["hello", true])
+        msg = check_error_message_for_obj(@type, ["hello", true])
         assert_nil(msg)
       end
 
       it "fails validation with a non-array" do
-        msg = @type.error_message_for_obj("hello")
+        msg = check_error_message_for_obj(@type, "hello")
         assert_equal("Expected type [String, T::Boolean], got type String with value \"hello\"", msg)
       end
 
       it "fails validation with an array of the wrong size" do
-        msg = @type.error_message_for_obj(["hello", true, false])
+        msg = check_error_message_for_obj(@type, ["hello", true, false])
         assert_equal("Expected type [String, T::Boolean], got array of size 3", msg)
       end
 
       it "fails validation with an array of the right size but wrong types" do
-        msg = @type.error_message_for_obj(["hello", nil])
+        msg = check_error_message_for_obj(@type, ["hello", nil])
         assert_equal("Expected type [String, T::Boolean], got type [String, NilClass]", msg)
       end
 
@@ -252,32 +264,32 @@ module Opus::Types::Test
       end
 
       it "passes validation" do
-        msg = @type.error_message_for_obj({a: "hello", b: true, c: 3})
+        msg = check_error_message_for_obj(@type, {a: "hello", b: true, c: 3})
         assert_nil(msg)
       end
 
       it "passes validation when nilable fields are missing" do
-        msg = @type.error_message_for_obj({a: "hello", b: true})
+        msg = check_error_message_for_obj(@type, {a: "hello", b: true})
         assert_nil(msg)
       end
 
       it "fails validation with a non-hash" do
-        msg = @type.error_message_for_obj("hello")
+        msg = check_error_message_for_obj(@type, "hello")
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type String with value \"hello\"", msg)
       end
 
       it "fails validation with a hash of the wrong types" do
-        msg = @type.error_message_for_obj({a: true, b: true, c: 3})
+        msg = check_error_message_for_obj(@type, {a: true, b: true, c: 3})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: TrueClass, b: TrueClass, c: Integer}", msg)
       end
 
       it "fails validation if a field is missing" do
-        msg = @type.error_message_for_obj({b: true, c: 3})
+        msg = check_error_message_for_obj(@type, {b: true, c: 3})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {b: TrueClass, c: Integer}", msg)
       end
 
       it "fails validation if an extra field is present" do
-        msg = @type.error_message_for_obj({a: "hello", b: true, d: "ohno"})
+        msg = check_error_message_for_obj(@type, {a: "hello", b: true, d: "ohno"})
         assert_equal("Expected type {a: String, b: T::Boolean, c: T.nilable(Numeric)}, got type {a: String, b: TrueClass, d: String}", msg)
       end
 
@@ -300,7 +312,7 @@ module Opus::Types::Test
       it 'fails if value is not an array' do
         type = T::Array[Integer]
         value = 3
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         expected_error = "Expected type T::Array[Integer], " \
                          "got type Integer with value 3"
         assert_equal(expected_error, msg)
@@ -329,7 +341,7 @@ module Opus::Types::Test
       it 'succeeds if all values have the correct type' do
         type = T::Array[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
-        assert_nil(type.error_message_for_obj(value))
+        assert_nil(check_error_message_for_obj(type, value))
       end
 
       it 'does not fail if any of the values is the wrong type under shallow checking' do
@@ -384,7 +396,7 @@ module Opus::Types::Test
         #   "Expected type T::Array[Numeric], got T::Array[Integer]"
         # but with type erasure, we have to leave all runtime checks as
         # covariant.
-        assert_nil(type.error_message_for_obj(value))
+        assert_nil(check_error_message_for_obj(type, value))
       end
 
       it 'does not care about contravariance for the type_member under shallow checking' do
@@ -404,7 +416,7 @@ module Opus::Types::Test
 
       it 'gives the right error when passed a Hash' do
         type = T::Array[Symbol]
-        msg = type.error_message_for_obj({foo: 17})
+        msg = check_error_message_for_obj(type, {foo: 17})
         assert_equal(
           "Expected type T::Array[Symbol], got T::Hash[Symbol, Integer]",
           msg)
@@ -442,7 +454,7 @@ module Opus::Types::Test
 
       it 'gives the right type error for an array' do
         type = T::Hash[Symbol, String]
-        msg = type.error_message_for_obj([:foo])
+        msg = check_error_message_for_obj(type, [:foo])
         assert_equal(
           "Expected type T::Hash[Symbol, String], got T::Array[Symbol]",
           msg)
@@ -517,7 +529,7 @@ module Opus::Types::Test
       it 'works if the type is right' do
         type = T::Enumerator[Integer]
         value = [1, 2, 3].each
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
@@ -541,7 +553,7 @@ module Opus::Types::Test
       it 'works if the range has a start and end' do
         type = T::Range[Integer]
         value = (3...10)
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
@@ -550,7 +562,7 @@ module Opus::Types::Test
         it 'works if the range has no beginning' do
           type = T::Range[Integer]
           value = (nil...10)
-          msg = type.error_message_for_obj(value)
+          msg = check_error_message_for_obj(type, value)
           assert_nil(msg)
         end
       end
@@ -558,14 +570,14 @@ module Opus::Types::Test
       it 'works if the range has no end' do
         type = T::Range[Integer]
         value = (1...nil)
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
       it 'works if the range has no start or end' do
         type = T::Range[T.untyped]
         value = (nil...nil)
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
@@ -600,7 +612,7 @@ module Opus::Types::Test
       it 'works if the type is right' do
         type = T::Set[Integer]
         value = Set.new([1, 2, 3])
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
@@ -634,7 +646,7 @@ module Opus::Types::Test
       it 'fails if value is not an enumerable' do
         type = T::Enumerable[Integer]
         value = 3
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         expected_error = "Expected type T::Enumerable[Integer], " \
                          "got type Integer with value 3"
         assert_equal(expected_error, msg)
@@ -663,7 +675,7 @@ module Opus::Types::Test
       it 'succeeds if all values have the correct type' do
         type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = [true, 3, false, 4, 5, false]
-        assert_nil(type.error_message_for_obj(value))
+        assert_nil(check_error_message_for_obj(type, value))
       end
 
       it 'does not fail if any of the values is the wrong type under shallow checking' do
@@ -714,13 +726,13 @@ module Opus::Types::Test
       it 'wont check unrewindable enumerables' do
         type = T::Enumerable[T.any(Integer, T::Boolean)]
         value = File.new(__FILE__)
-        assert_nil(type.error_message_for_obj(value))
+        assert_nil(check_error_message_for_obj(type, value))
       end
 
       it 'is covariant for the type_member' do
         type = T::Enumerable[Numeric]
         value = [3]
-        assert_nil(type.error_message_for_obj(value))
+        assert_nil(check_error_message_for_obj(type, value))
       end
 
       it 'does not care about contravariance for the type_member under shallow checking' do
@@ -741,14 +753,14 @@ module Opus::Types::Test
       it 'does not check lazy enumerables (for now)' do
         type = T::Enumerable[Integer]
         value = ["bad"].lazy
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
       it 'does not check potentially non-finite enumerables' do
         type = T::Enumerable[Integer]
         value = ["bad"].cycle
-        msg = type.error_message_for_obj(value)
+        msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end
 
@@ -796,20 +808,20 @@ module Opus::Types::Test
 
       it 'passes a validation' do
         type = make_type_alias {T.any(Integer, String)}
-        msg = type.error_message_for_obj(1)
+        msg = check_error_message_for_obj(type, 1)
         assert_nil(msg)
       end
 
       it 'provides errors on failed validation' do
         type = make_type_alias {T.any(Integer, String)}
-        msg = type.error_message_for_obj(true)
+        msg = check_error_message_for_obj(type, true)
         assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
       end
 
       it 'defers block evaluation' do
         crash_type = make_type_alias {raise 'crash'}
         assert_raises(RuntimeError) do
-          crash_type.error_message_for_obj(1)
+          check_error_message_for_obj(crash_type, 1)
         end
       end
     end
@@ -854,26 +866,26 @@ module Opus::Types::Test
       end
 
       it 'passes validation with a value from the enum' do
-        msg = @type.error_message_for_obj(:foo)
+        msg = check_error_message_for_obj(@type, :foo)
         assert_nil(msg)
       end
 
       it 'fails validation with a value not from the enum' do
-        msg = @type.error_message_for_obj(:baz)
+        msg = check_error_message_for_obj(@type, :baz)
         assert_equal("Expected type T.enum([:foo, :bar]), got :baz", msg)
       end
 
       it 'does not coerce types' do
-        msg = @type.error_message_for_obj('foo')
+        msg = check_error_message_for_obj(@type, 'foo')
         assert_equal('Expected type T.enum([:foo, :bar]), got "foo"', msg)
 
         type = T.enum(['foo', 'bar'])
-        msg = type.error_message_for_obj(:foo)
+        msg = check_error_message_for_obj(type, :foo)
         assert_equal('Expected type T.enum(["foo", "bar"]), got :foo', msg)
       end
 
       it 'fails validation with a nil value' do
-        msg = @type.error_message_for_obj(nil)
+        msg = check_error_message_for_obj(@type, nil)
         assert_equal("Expected type T.enum([:foo, :bar]), got nil", msg)
       end
     end
@@ -957,11 +969,11 @@ module Opus::Types::Test
       end
 
       it 'allows procs' do
-        assert_nil(@type.error_message_for_obj(proc {|x, y| x + y}))
+        assert_nil(check_error_message_for_obj(@type, proc {|x, y| x + y}))
       end
 
       it 'allows lambdas' do
-        assert_nil(@type.error_message_for_obj(->(x, y) {x + y}))
+        assert_nil(check_error_message_for_obj(@type, ->(x, y) {x + y}))
       end
 
       it 'disallows custom callables' do
@@ -972,7 +984,7 @@ module Opus::Types::Test
         end
 
         callable = k.new
-        msg = @type.error_message_for_obj(callable)
+        msg = check_error_message_for_obj(@type, callable)
         assert_match(/Expected type T.proc/, msg)
       end
 
@@ -1013,47 +1025,47 @@ module Opus::Types::Test
       end
 
       it 'passes validation with a subclass' do
-        msg = @type.error_message_for_obj(Sub)
+        msg = check_error_message_for_obj(@type, Sub)
         assert_nil(msg)
       end
 
       it 'passes validation with the class itself' do
-        msg = @type.error_message_for_obj(Base)
+        msg = check_error_message_for_obj(@type, Base)
         assert_nil(msg)
       end
 
       it 'fails validation with some other class' do
-        msg = @type.error_message_for_obj(InterfaceImplementor1)
+        msg = check_error_message_for_obj(@type, InterfaceImplementor1)
         assert_equal("Expected type T.class_of(Opus::Types::Test::TypesTest::Base), got Opus::Types::Test::TypesTest::InterfaceImplementor1", msg)
       end
 
       it 'fails validation with a non-class' do
-        msg = @type.error_message_for_obj(1)
+        msg = check_error_message_for_obj(@type, 1)
         assert_equal('Expected type T.class_of(Opus::Types::Test::TypesTest::Base), got 1', msg)
 
-        msg = @type.error_message_for_obj(Mixin1)
+        msg = check_error_message_for_obj(@type, Mixin1)
         assert_equal('Expected type T.class_of(Opus::Types::Test::TypesTest::Base), got Opus::Types::Test::TypesTest::Mixin1', msg)
       end
 
       it 'fails validation with a nil value' do
-        msg = @type.error_message_for_obj(nil)
+        msg = check_error_message_for_obj(@type, nil)
         assert_equal('Expected type T.class_of(Opus::Types::Test::TypesTest::Base), got nil', msg)
       end
 
       it 'fails validation with when supplied an instance of the subclass' do
-        msg = @type.error_message_for_obj(Sub.new)
+        msg = check_error_message_for_obj(@type, Sub.new)
         assert_match(/Expected type T.class_of\(Opus::Types::Test::TypesTest::Base\), got/, msg)
       end
 
       it 'works for a mixin' do
         type = T.class_of(Mixin1)
-        msg = type.error_message_for_obj(WithMixin)
+        msg = check_error_message_for_obj(type, WithMixin)
         assert_nil(msg)
       end
 
       it 'can not just be .singleton_class' do
         type = T::Utils.coerce(Mixin1.singleton_class)
-        msg = type.error_message_for_obj(WithMixin)
+        msg = check_error_message_for_obj(type, WithMixin)
         assert_equal('Expected type , got type Class with value Opus::Types::Test::TypesTest::WithMixin', msg)
       end
     end
