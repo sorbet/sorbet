@@ -52,7 +52,7 @@ module T::Props
       end
       private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
         proc do |val|
-          if non_nil_type.valid?(val)
+          if non_nil_type.recursively_valid?(val)
             if validate
               validate.call(prop, val)
             end
