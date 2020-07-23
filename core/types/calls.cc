@@ -712,6 +712,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
         }
     }
 
+    if (data->isMethodWithKwnil() && !args.args.empty()) {
+        // the called method as explicitely stated no keyword argument with `**nil`
+        auto back = args.args.back()->type.get();
+        if (isa_type<ShapeType>(back) || back->derivesFrom(gs, Symbols::Hash())) {
+            // the method is called with keyword arguments
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
+                                       errors::Infer::MethodArgumentCountMismatch)) {
+                e.setHeader("No keyword accepted for method `{}`", data->show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined with `{}` here", data->show(gs), "**nil");
+            }
+        }
+    }
+
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwargs && ait != aend) {
