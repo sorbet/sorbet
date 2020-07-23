@@ -43,6 +43,11 @@ module T::Types
     end
 
     # @override Base
+    def recursively_valid?(obj)
+      @types.any? {|type| type.recursively_valid?(obj)}
+    end
+
+    # @override Base
     def valid?(obj)
       @types.any? {|type| type.valid?(obj)}
     end

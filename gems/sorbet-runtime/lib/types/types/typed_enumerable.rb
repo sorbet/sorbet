@@ -23,13 +23,18 @@ module T::Types
 
     # @override Base
     def valid?(obj)
+      obj.is_a?(Enumerable)
+    end
+
+    # @override Base
+    def recursively_valid?(obj)
       return false unless obj.is_a?(Enumerable)
       case obj
       when Array
         begin
           it = 0
           while it < obj.count
-            return false unless @type.valid?(obj[it])
+            return false unless @type.recursively_valid?(obj[it])
             it += 1
           end
           return true
@@ -42,8 +47,8 @@ module T::Types
         value_type = types[1]
         obj.each_pair do |key, val|
           # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
-          # iterate over a [key, value] array, so we can't juse use the @type.valid?(v)
-          return false if !key_type.valid?(key) || !value_type.valid?(val)
+          # iterate over a [key, value] array, so we can't juse use the @type.recursively_valid?(v)
+          return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
         end
         return true
       when Enumerator
@@ -54,10 +59,10 @@ module T::Types
         # boundlessness, it does not express a type. For example `(nil...nil)` is not a T::Range[NilClass], its a range
         # of unknown types (T::Range[T.untyped]).
         # Similarly, `(nil...1)` is not a `T::Range[T.nilable(Integer)]`, it's a boundless range of Integer.
-        (obj.begin.nil? || @type.valid?(obj.begin)) && (obj.end.nil? || @type.valid?(obj.end))
+        (obj.begin.nil? || @type.recursively_valid?(obj.begin)) && (obj.end.nil? || @type.recursively_valid?(obj.end))
       when Set
         obj.each do |item|
-          return false unless @type.valid?(item)
+          return false unless @type.recursively_valid?(item)
         end
 
         return true
