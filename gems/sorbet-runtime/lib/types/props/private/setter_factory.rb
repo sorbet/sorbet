@@ -52,6 +52,11 @@ module T::Props
       end
       private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
         proc do |val|
+          # this use of recursively_valid? is intentional: unlike for
+          # methods, we want to make sure data at the 'edge'
+          # (e.g. models that go into databases or structs serialized
+          # from disk) are correct, so we use more thorough runtime
+          # checks there
           if non_nil_type.recursively_valid?(val)
             if validate
               validate.call(prop, val)
@@ -83,6 +88,11 @@ module T::Props
         proc do |val|
           if val.nil?
             instance_variable_set(accessor_key, nil)
+          # this use of recursively_valid? is intentional: unlike for
+          # methods, we want to make sure data at the 'edge'
+          # (e.g. models that go into databases or structs serialized
+          # from disk) are correct, so we use more thorough runtime
+          # checks there
           elsif non_nil_type.recursively_valid?(val)
             if validate
               validate.call(prop, val)
