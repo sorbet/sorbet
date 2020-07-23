@@ -90,6 +90,7 @@ public:
         static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
         [[deprecated]] static constexpr u4 METHOD_IMPLEMENTATION = 0x0000'2000;
         static constexpr u4 METHOD_INCOMPATIBLE_OVERRIDE = 0x0000'4000;
+        static constexpr u4 METHOD_WITH_KWNIL = 0x0000'8000;
 
         // Type flags
         static constexpr u4 TYPE_COVARIANT = 0x0000'0010;
@@ -217,6 +218,11 @@ public:
     inline bool isOverride() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
+    }
+
+    inline bool isMethodWithKwnil() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_WITH_KWNIL) != 0;
     }
 
     inline bool isCovariant() const {
@@ -389,6 +395,11 @@ public:
     inline void setGenericMethod() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_GENERIC;
+    }
+
+    inline void setMethodWithKwnil() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_WITH_KWNIL;
     }
 
     inline void setOverridable() {

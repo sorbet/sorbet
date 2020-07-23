@@ -957,6 +957,10 @@ class SymbolDefiner {
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->setRewriterSynthesized();
         }
+
+        if (method.flags.isKwnil) {
+            sym.data(ctx)->setMethodWithKwnil();
+        }
         ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash).exists());
         return sym;
     }
