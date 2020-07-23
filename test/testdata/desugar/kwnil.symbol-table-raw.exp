@@ -1,0 +1,21 @@
+class <C <U <root>>> < <C <U Object>> ()
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/kwnil.rb start=3:1 end=6:29}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/kwnil.rb start=??? end=???}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
+    method <C <U Object>><U f1> : private (<blk>) @ Loc {file=test/testdata/desugar/kwnil.rb start=3:1 end=3:14}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/kwnil.rb start=??? end=???}
+    method <C <U Object>><U f2> : private (args, <blk>) @ Loc {file=test/testdata/desugar/kwnil.rb start=4:1 end=4:21}
+      argument args<repeated> @ Loc {file=test/testdata/desugar/kwnil.rb start=4:9 end=4:13}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/kwnil.rb start=??? end=???}
+    method <C <U Object>><U f3> : private (a, b, c, <blk>) @ Loc {file=test/testdata/desugar/kwnil.rb start=5:1 end=5:23}
+      argument a<> @ Loc {file=test/testdata/desugar/kwnil.rb start=5:8 end=5:9}
+      argument b<> @ Loc {file=test/testdata/desugar/kwnil.rb start=5:11 end=5:12}
+      argument c<> @ Loc {file=test/testdata/desugar/kwnil.rb start=5:14 end=5:15}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/kwnil.rb start=??? end=???}
+    method <C <U Object>><U f4> : private (a, b, c, <blk>) @ Loc {file=test/testdata/desugar/kwnil.rb start=6:1 end=6:24}
+      argument a<> @ Loc {file=test/testdata/desugar/kwnil.rb start=6:8 end=6:9}
+      argument b<> @ Loc {file=test/testdata/desugar/kwnil.rb start=6:11 end=6:12}
+      argument c<repeated> @ Loc {file=test/testdata/desugar/kwnil.rb start=6:15 end=6:16}
+      argument <blk><block> @ Loc {file=test/testdata/desugar/kwnil.rb start=??? end=???}
+

@@ -31,6 +31,15 @@ struct DesugarContext final {
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
 };
 
+struct DesugarArgs final {
+    MethodDef::ARGS_store args;
+    InsSeq::STATS_store destructures;
+    bool isKwnil;
+
+    DesugarArgs(MethodDef::ARGS_store args, InsSeq::STATS_store destructures, bool isKwnil)
+        : args(std::move(args)), destructures(std::move(destructures)), isKwnil(isKwnil){};
+};
+
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
     auto blkIdent = cast_tree_const<UnresolvedIdent>(blkArg.expr);
     ENFORCE(blkIdent != nullptr, "BlockArg must wrap UnresolvedIdent in desugar.");
@@ -39,10 +48,10 @@ core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
 
 TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what);
 
-pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
-                                                             unique_ptr<parser::Node> &argnode) {
+DesugarArgs desugarArgs(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &argnode) {
     MethodDef::ARGS_store args;
     InsSeq::STATS_store destructures;
+    bool isKwnil = false;
 
     if (auto *oargs = parser::cast_node<parser::Args>(argnode.get())) {
         args.reserve(oargs->args.size());
@@ -55,6 +64,8 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
                 unique_ptr<parser::Node> destructure =
                     make_unique<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, std::move(destructure)));
+            } else if (auto *lhs = parser::cast_node<parser::Kwnilarg>(arg.get())) {
+                isKwnil = true;
             } else {
                 args.emplace_back(node2TreeImpl(dctx, std::move(arg)));
             }
@@ -65,7 +76,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         Exception::raise("not implemented: {}", argnode->nodeName());
     }
 
-    return make_pair(std::move(args), std::move(destructures));
+    return DesugarArgs(std::move(args), std::move(destructures), isKwnil);
 }
 
 TreePtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &bodynode,
@@ -208,7 +219,7 @@ TreePtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::Loc declLoc
     // Reset uniqueCounter within this scope (to keep numbers small)
     u4 uniqueCounter = 1;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
-    auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
+    auto [args, destructures, isKwnil] = desugarArgs(dctx1, loc, argnode);
 
     if (args.empty() || !isa_tree<BlockArg>(args.back())) {
         auto blkLoc = core::LocOffsets::none();
@@ -224,7 +235,9 @@ TreePtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::Loc declLoc
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
-    cast_tree<MethodDef>(mdef)->flags.isSelfMethod = isSelf;
+    auto tdef = cast_tree<MethodDef>(mdef);
+    tdef->flags.isSelfMethod = isSelf;
+    tdef->flags.isKwnil = isKwnil;
     return mdef;
 }
 
@@ -972,7 +985,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     send = cast_tree<Send>(iff->elsep);
                     ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
                 }
-                auto [args, destructures] = desugarArgs(dctx, loc, block->args);
+                auto [args, destructures, isKwnil] = desugarArgs(dctx, loc, block->args);
                 auto desugaredBody = desugarBody(dctx, loc, block->body, std::move(destructures));
 
                 // TODO the send->block's loc is too big and includes the whole send

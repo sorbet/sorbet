@@ -608,6 +608,9 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     if (this->flags.isRewriterSynthesized) {
         stringifiedFlags.emplace_back("rewriter");
     }
+    if (this->flags.isKwnil) {
+        stringifiedFlags.emplace_back("kwnil");
+    }
     fmt::format_to(buf, "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
     printTabs(buf, tabs + 1);

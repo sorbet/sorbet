@@ -1,0 +1,17 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def f1<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+  end
+
+  def f2<<C <todo sym>>>(*args, &<blk>)
+    <emptyTree>
+  end
+
+  def f3<<C <todo sym>>>(a, b, c, &<blk>)
+    <emptyTree>
+  end
+
+  def f4<<C <todo sym>>>(a, b, *c, &<blk>)
+    <emptyTree>
+  end
+end

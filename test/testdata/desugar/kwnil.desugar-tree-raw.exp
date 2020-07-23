@@ -1,0 +1,70 @@
+ClassDef{
+  kind = class
+  name = EmptyTree<<C <U <root>>>>
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+    }]
+  rhs = [
+    MethodDef{
+      flags = {kwnil}
+      name = <U f1><<C <U <todo sym>>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {kwnil}
+      name = <U f2><<C <U <todo sym>>>>
+      args = [RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U args>
+        } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {kwnil}
+      name = <U f3><<C <U <todo sym>>>>
+      args = [UnresolvedIdent{
+          kind = Local
+          name = <U a>
+        }, UnresolvedIdent{
+          kind = Local
+          name = <U b>
+        }, UnresolvedIdent{
+          kind = Local
+          name = <U c>
+        }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {kwnil}
+      name = <U f4><<C <U <todo sym>>>>
+      args = [UnresolvedIdent{
+          kind = Local
+          name = <U a>
+        }, UnresolvedIdent{
+          kind = Local
+          name = <U b>
+        }, RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U c>
+        } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+  ]
+}
