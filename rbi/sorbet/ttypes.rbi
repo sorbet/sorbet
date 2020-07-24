@@ -9,11 +9,13 @@ end
 class T::Types::Base
   def self.method_added(method_name); end
   def valid?(obj); end
+  def recursively_valid?(obj); end
   def name; end
   def subtype_of?(t2); end
   def to_s; end
   def describe_obj(obj); end
   def error_message_for_obj(obj); end
+  def error_message_for_obj_recursive(obj); end
   def validate!(obj); end
   def hash; end
   def ==(other); end

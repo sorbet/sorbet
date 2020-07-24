@@ -6,6 +6,7 @@ require_relative 'setters'
 require_relative 'constructor'
 require_relative 'deserialize'
 require_relative 'prop_definition'
+require_relative 'typecheck'
 
 namespace :bench do
   task :getters do
@@ -28,5 +29,9 @@ namespace :bench do
     SorbetBenchmarks::PropDefinition.run
   end
 
-  task all: [:getters, :setters, :constructor, :deserialize, :prop_definition]
+  task :typecheck do
+    SorbetBenchmarks::Typecheck.run
+  end
+
+  task all: [:getters, :setters, :constructor, :deserialize, :prop_definition, :typecheck]
 end

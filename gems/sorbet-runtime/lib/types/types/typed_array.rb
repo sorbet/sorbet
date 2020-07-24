@@ -13,8 +13,13 @@ module T::Types
     end
 
     # @override Base
-    def valid?(obj)
+    def recursively_valid?(obj)
       obj.is_a?(Array) && super
+    end
+
+    # @override Base
+    def valid?(obj)
+      obj.is_a?(Array)
     end
 
     def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride

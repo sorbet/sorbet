@@ -21,7 +21,7 @@ module T::Utils
     elsif val == ::Range
       T::Range[T.untyped]
     elsif val.is_a?(Module)
-      T::Types::Simple.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      T::Types::Simple::Private::Pool.type_for_module(val)
     elsif val.is_a?(::Array)
       T::Types::FixedArray.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
     elsif val.is_a?(::Hash)
@@ -162,7 +162,7 @@ module T::Utils
     elsif classes.length > 1
       T::Types::Union.new(classes)
     else
-      T::Types::Simple.new(classes.first)
+      T::Types::Simple::Private::Pool.type_for_module(classes.first)
     end
   end
 

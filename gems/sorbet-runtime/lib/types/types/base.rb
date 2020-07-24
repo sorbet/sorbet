@@ -16,6 +16,11 @@ module T::Types
       end
     end
 
+    # this will be redefined in certain subclasses
+    def recursively_valid?(obj)
+      valid?(obj)
+    end
+
     def valid?(obj)
       raise NotImplementedError
     end
@@ -124,6 +129,14 @@ module T::Types
 
     def error_message_for_obj(obj)
       if valid?(obj)
+        nil
+      else
+        "Expected type #{self.name}, got #{describe_obj(obj)}"
+      end
+    end
+
+    def error_message_for_obj_recursive(obj)
+      if recursively_valid?(obj)
         nil
       else
         "Expected type #{self.name}, got #{describe_obj(obj)}"

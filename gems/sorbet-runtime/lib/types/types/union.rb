@@ -43,6 +43,11 @@ module T::Types
     end
 
     # @override Base
+    def recursively_valid?(obj)
+      @types.any? {|type| type.recursively_valid?(obj)}
+    end
+
+    # @override Base
     def valid?(obj)
       @types.any? {|type| type.valid?(obj)}
     end
@@ -52,5 +57,35 @@ module T::Types
       raise "This should never be reached if you're going through `subtype_of?` (and you should be)"
     end
 
+    module Private
+      module Pool
+        EMPTY_ARRAY = [].freeze
+        private_constant :EMPTY_ARRAY
+
+        # @param type_a [T::Types::Base]
+        # @param type_b [T::Types::Base]
+        # @param types [Array] optional array of additional T::Types::Base instances
+        def self.union_of_types(type_a, type_b, types=EMPTY_ARRAY)
+          if types.empty?
+            # We aren't guaranteed to detect a simple `T.nilable(<Module>)` type here
+            # in cases where there are duplicate types, nested unions, etc.
+            #
+            # That's ok, because this is an optimization which isn't necessary for
+            # correctness.
+            if type_b == T::Utils::Nilable::NIL_TYPE && type_a.is_a?(T::Types::Simple)
+              type_a.to_nilable
+            elsif type_a == T::Utils::Nilable::NIL_TYPE && type_b.is_a?(T::Types::Simple)
+              type_b.to_nilable
+            else
+              Union.new([type_a, type_b])
+            end
+          else
+            # This can't be a `T.nilable(<Module>)` case unless there are duplicates,
+            # which is possible but unexpected.
+            Union.new([type_a, type_b] + types)
+          end
+        end
+      end
+    end
   end
 end
