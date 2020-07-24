@@ -10,6 +10,8 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+namespace {
+
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                      core::LocOffsets loc) {
     thenb->flags |= CFG::WAS_JUMP_DESTINATION;
@@ -38,20 +40,6 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocO
         from->bexit.thenb = to;
         from->bexit.loc = loc;
         to->backEdges.emplace_back(from);
-    }
-}
-
-void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
-    auto *db = inWhat.deadBlock();
-    if (from != db) {
-        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
-        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
-        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::LocalVariable::unconditional();
-        from->bexit.elseb = db;
-        from->bexit.thenb = db;
-        from->bexit.loc = loc;
-        db->backEdges.emplace_back(from);
     }
 }
 
@@ -104,6 +92,22 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
         return fnd->second;
     } else {
         return global2Local(cctx, sym);
+    }
+}
+
+} // namespace
+
+void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
+    auto *db = inWhat.deadBlock();
+    if (from != db) {
+        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
+        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
+        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
+        from->bexit.cond = core::LocalVariable::unconditional();
+        from->bexit.elseb = db;
+        from->bexit.thenb = db;
+        from->bexit.loc = loc;
+        db->backEdges.emplace_back(from);
     }
 }
 

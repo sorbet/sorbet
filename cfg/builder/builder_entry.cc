@@ -7,8 +7,6 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
-
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
