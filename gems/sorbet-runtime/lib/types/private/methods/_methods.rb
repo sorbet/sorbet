@@ -216,9 +216,6 @@ module T::Private::Methods
         &blk
       )
 
-      # Shouldn't happen
-      return if method_sig.nil?
-
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
       # don't want that extra layer of indirection in the callstack
       if method_sig.mode == T::Private::Methods::Modes.abstract
