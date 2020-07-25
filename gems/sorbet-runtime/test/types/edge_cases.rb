@@ -36,18 +36,128 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal("foo", klass.new.bar = "foo")
   end
 
-  it 'handles aliased methods' do
-    klass = Class.new do
-      extend T::Sig
-      extend T::Helpers
-      sig {returns(Symbol)}
-      def foo
-        :foo
+  describe 'aliasing' do
+    describe 'instance method' do
+      it 'handles alias_method with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol)}
+          def foo
+            :foo
+          end
+          alias_method :bar, :foo
+        end
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
       end
-      alias_method :bar, :foo
+
+      it 'handles alias_method without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol).checked(:never)}
+          def foo
+            :foo
+          end
+          alias_method :bar, :foo
+        end
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
+      end
+
+      it 'handles alias with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol)}
+          def foo
+            :foo
+          end
+          alias :bar :foo
+        end
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
+      end
+
+      it 'handles alias without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol).checked(:never)}
+          def foo
+            :foo
+          end
+          alias :bar :foo
+        end
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
+      end
     end
-    assert_equal(:foo, klass.new.foo)
-    assert_equal(:foo, klass.new.bar)
+
+    describe 'singleton method' do
+      it 'handles alias_method with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol)}
+          def self.foo
+            :foo
+          end
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+
+      it 'handles alias_method without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol).checked(:never)}
+          def self.foo
+            :foo
+          end
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+
+      it 'handles alias with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo
+            :foo
+          end
+          class << self
+            alias :bar :foo
+          end
+        end
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+
+      it 'handles alias without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo
+            :foo
+          end
+          class << self
+            alias :bar :foo
+          end
+        end
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+    end
   end
 
   it 'works for any_instance' do

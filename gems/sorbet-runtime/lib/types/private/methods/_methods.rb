@@ -206,22 +206,18 @@ module T::Private::Methods
     # (or unwrap back to the original method).
     new_method = nil
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
-      if !T::Private::Methods.has_sig_block_for_method(new_method)
-        # This should only happen if the user used alias_method to grab a handle
-        # to the original pre-unwound `sig` method. I guess we'll just proxy the
-        # call forever since we don't know who is holding onto this handle to
-        # replace it.
-        new_new_method = mod.instance_method(method_name)
-        if new_method == new_new_method
-          raise "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
-          "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
-          "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method. " \
-          "Contact #dev-productivity if you're really stuck."
-        end
-        return new_new_method.bind(self).call(*args, &blk)
-      end
+      method_sig = T::Private::Methods.maybe_run_sig_block_for_method(new_method)
+      method_sig ||= T::Private::Methods._handle_missing_method_signature(
+        mod,
+        new_method,
+        method_name,
+        self,
+        *args,
+        &blk
+      )
 
-      method_sig = T::Private::Methods.run_sig_block_for_method(new_method)
+      # Shouldn't happen
+      return if method_sig.nil?
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
       # don't want that extra layer of indirection in the callstack
@@ -249,6 +245,43 @@ module T::Private::Methods
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
       add_module_with_final(hook_mod)
+    end
+  end
+
+  def self._handle_missing_method_signature(mod, new_method, method_name, obj, *args, &blk)
+    if (original_name = new_method.original_name)
+      # We're handling a case where `alias_method` was called for a method
+      # which had already had a `sig` applied.
+      method_sig = T::Private::Methods.signature_for_method(mod.instance_method(original_name))
+
+      # Note, this logic is duplicated above, make sure to keep changes in sync.
+      if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+        # Checked, so copy the original signature to the aliased copy.
+        T::Private::Methods.unwrap_method(mod, method_sig, new_method)
+      else
+        # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
+        mod.send(:alias_method, method_name, original_name)
+      end
+
+      method_sig
+    else
+      msg = "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
+        "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
+        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method. " \
+        "Contact #dev-productivity if you're really stuck."
+
+      new_new_method = mod.instance_method(method_name)
+      if new_method == new_new_method
+        # No way of recovering.
+        raise msg
+      else
+        # This shouldn't be reachable anymore, but historically we've handled this case,
+        # so soft-assert rather than exploding.
+        T::Configuration.soft_assert_handler(msg)
+        new_new_method.bind(obj).call(*args, &blk)
+      end
+
+      nil
     end
   end
 
