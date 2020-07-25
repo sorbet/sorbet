@@ -48,23 +48,28 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol)}
-          def foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol)}
+          def foo(x=:foo)
+            x
           end
           alias_method :bar, :foo
         end
         assert_equal(:foo, klass.new.foo)
         assert_equal(:foo, klass.new.bar)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.new.bar(1)
+        end
       end
 
       it 'handles alias_method without runtime checking' do
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol).checked(:never)}
-          def foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def foo(x=:foo)
+            x
           end
           alias_method :bar, :foo
         end
@@ -81,23 +86,28 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol)}
-          def foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol)}
+          def foo(x=:foo)
+            x
           end
           alias :bar :foo
         end
         assert_equal(:foo, klass.new.foo)
         assert_equal(:foo, klass.new.bar)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.new.bar(1)
+        end
       end
 
       it 'handles alias without runtime checking' do
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol).checked(:never)}
-          def foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def foo(x=:foo)
+            x
           end
           alias :bar :foo
         end
