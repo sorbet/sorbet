@@ -207,14 +207,7 @@ module T::Private::Methods
     new_method = nil
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_method(new_method)
-      method_sig ||= T::Private::Methods._handle_missing_method_signature(
-        mod,
-        new_method,
-        method_name,
-        self,
-        *args,
-        &blk
-      )
+      method_sig ||= T::Private::Methods._handle_missing_method_signature(mod, original_method, __callee__)
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
       # don't want that extra layer of indirection in the callstack
@@ -245,24 +238,24 @@ module T::Private::Methods
     end
   end
 
-  def self._handle_missing_method_signature(mod, new_method, method_name, obj, *args, &blk)
-    original_name = new_method.original_name
-    method_sig = T::Private::Methods.signature_for_method(mod.instance_method(original_name)) if original_name
+  def self._handle_missing_method_signature(mod, original_method, callee)
+    method_sig = T::Private::Methods.signature_for_method(original_method)
+    aliasing_method = mod.instance_method(callee)
 
-    if method_sig
-      # We're handling a case where `alias_method` was called for a method
-      # which had already had a `sig` applied.
+    if method_sig && aliasing_method != original_method && aliasing_method.original_name == original_method.name
+      # We're handling a case where `alias` or `alias_method` was called for a
+      # method which had already had a `sig` applied.
       #
       # Note, this logic is duplicated above, make sure to keep changes in sync.
       if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         # Checked, so copy the original signature to the aliased copy.
-        T::Private::Methods.unwrap_method(mod, method_sig, new_method)
+        T::Private::Methods.unwrap_method(mod, method_sig, aliasing_method)
       else
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
-        mod.send(:alias_method, method_name, original_name)
+        mod.send(:alias_method, callee, original_method.name)
       end
     else
-      raise "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
+      raise "`sig` not present for method `#{aliasing_method.name}` but you're trying to run it anyways. " \
         "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
         "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
     end
