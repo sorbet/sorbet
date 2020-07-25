@@ -249,11 +249,13 @@ module T::Private::Methods
   end
 
   def self._handle_missing_method_signature(mod, new_method, method_name, obj, *args, &blk)
-    if (original_name = new_method.original_name)
+    original_name = new_method.original_name
+    method_sig = T::Private::Methods.signature_for_method(mod.instance_method(original_name)) if original_name
+
+    if method_sig
       # We're handling a case where `alias_method` was called for a method
       # which had already had a `sig` applied.
-      method_sig = T::Private::Methods.signature_for_method(mod.instance_method(original_name))
-
+      #
       # Note, this logic is duplicated above, make sure to keep changes in sync.
       if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         # Checked, so copy the original signature to the aliased copy.
@@ -262,8 +264,6 @@ module T::Private::Methods
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
         mod.send(:alias_method, method_name, original_name)
       end
-
-      method_sig
     else
       msg = "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
         "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
@@ -280,9 +280,9 @@ module T::Private::Methods
         T::Configuration.soft_assert_handler(msg)
         new_new_method.bind(obj).call(*args, &blk)
       end
-
-      nil
     end
+
+    method_sig
   end
 
   # Executes the `sig` block, and converts the resulting Declaration
