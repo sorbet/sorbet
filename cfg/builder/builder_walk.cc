@@ -117,7 +117,7 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::L
     inserted.value->isSynthetic = true;
 }
 
-BasicBlock *CFGBuilder::buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *current) {
+BasicBlock *CFGBuilder::buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method) {
     InlinedVector<core::LocalVariable, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
     for (int i = 0; i < h->keys.size(); i++) {
@@ -134,8 +134,7 @@ BasicBlock *CFGBuilder::buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *cur
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
 
     auto isPrivateOk = false;
-    current->exprs.emplace_back(cctx.target, h->loc,
-                                make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs, isPrivateOk));
+    current->exprs.emplace_back(cctx.target, h->loc, make_unique<Send>(magic, method, h->loc, vars, locs, isPrivateOk));
     return current;
 }
 
@@ -336,7 +335,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
                     if (argIdx + 1 == s->args.size() && ast::isa_tree<ast::Hash>(exp)) {
-                        current = buildHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current);
+                        current = buildHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current,
+                                            core::Names::buildKeywordArgs());
                     } else {
                         current = walk(cctx.withTarget(temp), exp.get(), current);
                     }
@@ -663,7 +663,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
-            [&](ast::Hash *h) { ret = buildHash(cctx, h, current); },
+            [&](ast::Hash *h) { ret = buildHash(cctx, h, current, core::Names::buildHash()); },
 
             [&](ast::Array *a) {
                 InlinedVector<core::LocalVariable, 2> vars;

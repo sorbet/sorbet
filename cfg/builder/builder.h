@@ -23,7 +23,7 @@ private:
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::LocOffsets loc,
                                std::unique_ptr<Instruction> inst);
-    static BasicBlock *buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *current);
+    static BasicBlock *buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method);
 };
 
 class CFGContext {
