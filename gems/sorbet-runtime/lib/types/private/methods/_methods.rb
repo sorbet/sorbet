@@ -265,21 +265,9 @@ module T::Private::Methods
         mod.send(:alias_method, method_name, original_name)
       end
     else
-      msg = "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
+      raise "`sig` not present for method `#{method_name}` but you're trying to run it anyways. " \
         "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
-        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method. " \
-        "Contact #dev-productivity if you're really stuck."
-
-      new_new_method = mod.instance_method(method_name)
-      if new_method == new_new_method
-        # No way of recovering.
-        raise msg
-      else
-        # This shouldn't be reachable anymore, but historically we've handled this case,
-        # so soft-assert rather than exploding.
-        T::Configuration.soft_assert_handler(msg)
-        new_new_method.bind(obj).call(*args, &blk)
-      end
+        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
     end
 
     method_sig
