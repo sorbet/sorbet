@@ -330,10 +330,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 InlinedVector<core::LocalVariable, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
+                int argIdx = -1;
                 for (auto &exp : s->args) {
+                    argIdx++;
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
-                    current = walk(cctx.withTarget(temp), exp.get(), current);
+                    if (argIdx + 1 == s->args.size() && ast::isa_tree<ast::Hash>(exp)) {
+                        current = buildHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current);
+                    } else {
+                        current = walk(cctx.withTarget(temp), exp.get(), current);
+                    }
 
                     args.emplace_back(temp);
                     argLocs.emplace_back(exp->loc);
