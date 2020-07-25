@@ -117,7 +117,7 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::L
     inserted.value->isSynthetic = true;
 }
 
-BasicBlock *CFGBuilder::buildHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method) {
+BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method) {
     InlinedVector<core::LocalVariable, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
     for (int i = 0; i < h->keys.size(); i++) {
@@ -335,8 +335,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
                     if (argIdx + 1 == s->args.size() && ast::isa_tree<ast::Hash>(exp)) {
-                        current = buildHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current,
-                                            core::Names::buildKeywordArgs());
+                        current = walkHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current,
+                                           core::Names::buildKeywordArgs());
                     } else {
                         current = walk(cctx.withTarget(temp), exp.get(), current);
                     }
@@ -663,7 +663,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
-            [&](ast::Hash *h) { ret = buildHash(cctx, h, current, core::Names::buildHash()); },
+            [&](ast::Hash *h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
 
             [&](ast::Array *a) {
                 InlinedVector<core::LocalVariable, 2> vars;
