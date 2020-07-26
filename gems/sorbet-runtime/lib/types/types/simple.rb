@@ -12,7 +12,11 @@ module T::Types
 
     # @override Base
     def name
-      @raw_type.name
+      # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)
+      #
+      # `name` isn't normally a hot path for types, but it is used in initializing a T::Types::Union,
+      # and so in `T.nilable`, and so in runtime constructions like `x = T.let(nil, T.nilable(Integer))`.
+      @name ||= @raw_type.name.freeze
     end
 
     # @override Base
