@@ -208,7 +208,7 @@ NodeDef nodes[] = {
     {
         "EncodingLiteral",
         "__ENCODING__",
-        vector<FieldDef>(),
+        vector<FieldDef>({{"name", FieldType::Name}}),
     },
     // "ensure" keyword
     {

@@ -1677,8 +1677,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 auto res = unsupportedNode(dctx, redo);
                 result = std::move(res);
             },
-            [&](parser::EncodingLiteral *redo) {
-                auto res = unsupportedNode(dctx, redo);
+            [&](parser::EncodingLiteral *encodingLiteral) {
+                TreePtr res = make_tree<ast::Literal>(loc, core::make_type<core::ClassType>(core::Symbols::Encoding()));
                 result = std::move(res);
             },
 

@@ -609,7 +609,7 @@ public:
     }
 
     unique_ptr<Node> encodingLiteral(const token *tok) {
-        return make_unique<EncodingLiteral>(tokLoc(tok));
+        return make_unique<EncodingLiteral>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> false_(const token *tok) {

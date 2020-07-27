@@ -393,6 +393,9 @@ void GlobalState::initEmpty() {
         blkArg.flags.isBlock = true;
     }
 
+    id = synthesizeClass(core::Names::Constants::Encoding());
+    ENFORCE(id == Symbols::Encoding());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
