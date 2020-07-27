@@ -10,6 +10,8 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+namespace {
+
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                      core::LocOffsets loc) {
     thenb->flags |= CFG::WAS_JUMP_DESTINATION;
@@ -38,20 +40,6 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocO
         from->bexit.thenb = to;
         from->bexit.loc = loc;
         to->backEdges.emplace_back(from);
-    }
-}
-
-void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
-    auto *db = inWhat.deadBlock();
-    if (from != db) {
-        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
-        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
-        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::LocalVariable::unconditional();
-        from->bexit.elseb = db;
-        from->bexit.thenb = db;
-        from->bexit.loc = loc;
-        db->backEdges.emplace_back(from);
     }
 }
 
@@ -107,10 +95,47 @@ core::LocalVariable unresolvedIdent2Local(CFGContext cctx, ast::UnresolvedIdent 
     }
 }
 
+} // namespace
+
+void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
+    auto *db = inWhat.deadBlock();
+    if (from != db) {
+        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
+        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
+        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
+        from->bexit.cond = core::LocalVariable::unconditional();
+        from->bexit.elseb = db;
+        from->bexit.thenb = db;
+        from->bexit.loc = loc;
+        db->backEdges.emplace_back(from);
+    }
+}
+
 void CFGBuilder::synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::LocOffsets loc,
                                 unique_ptr<Instruction> inst) {
     auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
     inserted.value->isSynthetic = true;
+}
+
+BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method) {
+    InlinedVector<core::LocalVariable, 2> vars;
+    InlinedVector<core::LocOffsets, 2> locs;
+    for (int i = 0; i < h->keys.size(); i++) {
+        core::LocalVariable keyTmp = cctx.newTemporary(core::Names::hashTemp());
+        core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
+        current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
+        current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
+        vars.emplace_back(keyTmp);
+        vars.emplace_back(valTmp);
+        locs.emplace_back(h->keys[i]->loc);
+        locs.emplace_back(h->values[i]->loc);
+    }
+    core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
+    synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
+
+    auto isPrivateOk = false;
+    current->exprs.emplace_back(cctx.target, h->loc, make_unique<Send>(magic, method, h->loc, vars, locs, isPrivateOk));
+    return current;
 }
 
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
@@ -304,10 +329,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 InlinedVector<core::LocalVariable, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
+                int argIdx = -1;
                 for (auto &exp : s->args) {
+                    argIdx++;
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
-                    current = walk(cctx.withTarget(temp), exp.get(), current);
+                    if (argIdx + 1 == s->args.size() && ast::isa_tree<ast::Hash>(exp)) {
+                        current = walkHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current,
+                                           core::Names::buildKeywordArgs());
+                    } else {
+                        current = walk(cctx.withTarget(temp), exp.get(), current);
+                    }
 
                     args.emplace_back(temp);
                     argLocs.emplace_back(exp->loc);
@@ -631,28 +663,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
-            [&](ast::Hash *h) {
-                InlinedVector<core::LocalVariable, 2> vars;
-                InlinedVector<core::LocOffsets, 2> locs;
-                for (int i = 0; i < h->keys.size(); i++) {
-                    core::LocalVariable keyTmp = cctx.newTemporary(core::Names::hashTemp());
-                    core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
-                    current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
-                    current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
-                    vars.emplace_back(keyTmp);
-                    vars.emplace_back(valTmp);
-                    locs.emplace_back(h->keys[i]->loc);
-                    locs.emplace_back(h->values[i]->loc);
-                }
-                core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
-                synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
-
-                auto isPrivateOk = false;
-                current->exprs.emplace_back(
-                    cctx.target, h->loc,
-                    make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs, isPrivateOk));
-                ret = current;
-            },
+            [&](ast::Hash *h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
 
             [&](ast::Array *a) {
                 InlinedVector<core::LocalVariable, 2> vars;
