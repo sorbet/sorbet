@@ -104,7 +104,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @rubyIdPrecomputed_final = internal unnamed_addr global i64 0, align 8
 @str_final = private unnamed_addr constant [6 x i8] c"final\00", align 1
 @str_n = private unnamed_addr constant [2 x i8] c"n\00", align 1
-@"str_<build-hash>" = private unnamed_addr constant [13 x i8] c"<build-hash>\00", align 1
+@"str_<build-keyword-args>" = private unnamed_addr constant [21 x i8] c"<build-keyword-args>\00", align 1
 @str_params = private unnamed_addr constant [7 x i8] c"params\00", align 1
 @str_returns = private unnamed_addr constant [8 x i8] c"returns\00", align 1
 @str_keep_self_def = private unnamed_addr constant [14 x i8] c"keep_self_def\00", align 1
@@ -248,7 +248,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   store i64 %26, i64* @rubyIdPrecomputed_final, align 8
   %27 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i64 3) #13
   %28 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_n, i64 0, i64 0), i64 1) #13
-  %29 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<build-hash>", i64 0, i64 0), i64 12) #13
+  %29 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_<build-keyword-args>", i64 0, i64 0), i64 20) #13
   %30 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_params, i64 0, i64 0), i64 6) #13
   %31 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_returns, i64 0, i64 0), i64 7) #13
   %32 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @str_keep_self_def, i64 0, i64 0), i64 13) #13

@@ -87,7 +87,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
 @rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
 @str_b = private unnamed_addr constant [2 x i8] c"b\00", align 1
-@"str_<build-hash>" = private unnamed_addr constant [13 x i8] c"<build-hash>\00", align 1
+@"str_<build-keyword-args>" = private unnamed_addr constant [21 x i8] c"<build-keyword-args>\00", align 1
 @ic_call_via_vm_puts = internal global %struct.FunctionInlineCache zeroinitializer
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 
@@ -175,7 +175,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   store i64 %19, i64* @rubyIdPrecomputed_a, align 8
   %20 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_b, i64 0, i64 0), i64 1) #9
   store i64 %20, i64* @rubyIdPrecomputed_b, align 8
-  %21 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<build-hash>", i64 0, i64 0), i64 12) #9
+  %21 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_<build-keyword-args>", i64 0, i64 0), i64 20) #9
   %22 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #9
   %23 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !10
   %24 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %23, i64 0, i32 17
