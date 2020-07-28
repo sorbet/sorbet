@@ -456,7 +456,7 @@ def _rubyfmt_static_deps_impl(ctx):
 
     libs = depset([ruby_info.static_libs])
 
-    return [DefaultInfo(files=libs)]
+    return [DefaultInfo(files = libs)]
 
 _rubyfmt_static_deps = rule(
     attrs = {
