@@ -408,6 +408,7 @@ NameDef names[] = {
     {"Struct", "Struct", true},
     {"File", "File", true},
     {"Encoding", "Encoding", true},
+    {"getEncoding", "<get-encoding>"},
     {"Static", "Static", true},
     {"StubModule", "StubModule", true},
     {"StubSuperClass", "StubSuperClass", true},

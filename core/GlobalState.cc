@@ -581,6 +581,14 @@ void GlobalState::initEmpty() {
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
 
+    // Synthesize <Magic>#<getEncoding>() => Encoding
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::getEncoding());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
+
     // Synthesize <DeclBuilderForProcs>#<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
