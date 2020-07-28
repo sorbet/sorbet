@@ -103,10 +103,10 @@ echo "ruby_version = $ruby_version"
 static_libs="$base/{static_libs}"
 mkdir -p "$static_libs"
 
-# from https://github.com/penelopezone/rubyfmt/blob/3051835cc28db04e9d9caf0c8430407ca0347e83/librubyfmt/build.rs#L34
-ar crus "libripper.$ruby_version-static.a" ext/ripper/ripper.o
+cp libruby*-static.a "$static_libs"
 
-cp "libruby.$ruby_version-static.a" "$static_libs"
+# from https://github.com/penelopezone/rubyfmt/blob/3051835cc28db04e9d9caf0c8430407ca0347e83/librubyfmt/build.rs#L34
+ar crs "libripper.$ruby_version-static.a" ext/ripper/ripper.o
 cp "libripper.$ruby_version-static.a" "$static_libs"
 
 internal_incdir="$base/{internal_incdir}"
