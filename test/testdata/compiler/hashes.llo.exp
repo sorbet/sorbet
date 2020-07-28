@@ -87,7 +87,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
 @rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
 @str_b = private unnamed_addr constant [2 x i8] c"b\00", align 1
-@"<keyword-args-singleton>" = internal unnamed_addr global i64 0
+@"str_<build-keyword-args>" = private unnamed_addr constant [21 x i8] c"<build-keyword-args>\00", align 1
 @ic_call_via_vm_puts = internal global %struct.FunctionInlineCache zeroinitializer
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 
@@ -112,8 +112,6 @@ declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #2
 
 declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 
-declare i64 @rb_hash_new() local_unnamed_addr #2
-
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #2
@@ -128,14 +126,14 @@ declare i64 @rb_gv_get(i8*) local_unnamed_addr #2
 
 declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #2
 
-declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
+declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #2
 
-declare i64 @rb_hash_clear(i64) local_unnamed_addr #2
+declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
 
 ; Function Attrs: noinline nounwind ssp uwtable
 declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #4
 
-; Function Attrs: sspreq
+; Function Attrs: nounwind sspreq
 define void @Init_hashes() local_unnamed_addr #5 {
 entry:
   %callArgs.i = alloca [4 x i64], align 8
@@ -177,42 +175,41 @@ sorbet_readRealpath.exit:                         ; preds = %6
   store i64 %19, i64* @rubyIdPrecomputed_a, align 8
   %20 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_b, i64 0, i64 0), i64 1) #9
   store i64 %20, i64* @rubyIdPrecomputed_b, align 8
-  %keywordArgsSingleton.i = tail call i64 @rb_hash_new()
-  store i64 %keywordArgsSingleton.i, i64* @"<keyword-args-singleton>", align 8
-  %21 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #9
-  %22 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !10
-  %23 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %22, i64 0, i32 17
-  %24 = load i64, i64* %23, align 8, !tbaa !12
-  %25 = bitcast [4 x i64]* %callArgs.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %25)
+  %21 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_<build-keyword-args>", i64 0, i64 0), i64 20) #9
+  %22 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #9
+  %23 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !10
+  %24 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %23, i64 0, i32 17
+  %25 = load i64, i64* %24, align 8, !tbaa !12
+  %26 = bitcast [4 x i64]* %callArgs.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %26)
   %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %26 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
-  %27 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %26, i64 0, i32 2
-  %28 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %27, align 8, !tbaa !22
-  %29 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %28, i64 0, i32 2
-  %30 = bitcast %struct.rb_iseq_struct** %29 to i8**
-  store i8* %"stackFrame_func_<root>.<static-init>$153.i", i8** %30, align 8, !tbaa !25
-  %31 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %28, i64 0, i32 4
-  %32 = load i64*, i64** %31, align 8, !tbaa !27
-  %33 = load i64, i64* %32, align 8, !tbaa !4
-  %34 = and i64 %33, -129
-  store i64 %34, i64* %32, align 8, !tbaa !4
-  %35 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %28, i64 0, i32 0
-  %36 = getelementptr inbounds i8, i8* %"stackFrame_func_<root>.<static-init>$153.i", i64 16
-  %37 = bitcast i8* %36 to %struct.rb_iseq_constant_body**
-  %38 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %37, align 8, !tbaa !28
-  %39 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %38, i64 0, i32 2
-  %40 = load i64*, i64** %39, align 8, !tbaa !30
-  %41 = getelementptr inbounds i64, i64* %40, i64 1
-  store i64* %41, i64** %35, align 8, !tbaa !10
-  %42 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !dbg !39, !tbaa !10
-  %43 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %42, i64 0, i32 17, !dbg !39
-  %44 = load i64, i64* %43, align 8, !dbg !39, !tbaa !12
-  %45 = icmp eq i64 %44, %24, !dbg !39
-  br i1 %45, label %"func_<root>.<static-init>$153.exit", label %codeRepl, !dbg !39, !prof !44
+  %27 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
+  %28 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %27, i64 0, i32 2
+  %29 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %28, align 8, !tbaa !22
+  %30 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %29, i64 0, i32 2
+  %31 = bitcast %struct.rb_iseq_struct** %30 to i8**
+  store i8* %"stackFrame_func_<root>.<static-init>$153.i", i8** %31, align 8, !tbaa !25
+  %32 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %29, i64 0, i32 4
+  %33 = load i64*, i64** %32, align 8, !tbaa !27
+  %34 = load i64, i64* %33, align 8, !tbaa !4
+  %35 = and i64 %34, -129
+  store i64 %35, i64* %33, align 8, !tbaa !4
+  %36 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %29, i64 0, i32 0
+  %37 = getelementptr inbounds i8, i8* %"stackFrame_func_<root>.<static-init>$153.i", i64 16
+  %38 = bitcast i8* %37 to %struct.rb_iseq_constant_body**
+  %39 = load %struct.rb_iseq_constant_body*, %struct.rb_iseq_constant_body** %38, align 8, !tbaa !28
+  %40 = getelementptr inbounds %struct.rb_iseq_constant_body, %struct.rb_iseq_constant_body* %39, i64 0, i32 2
+  %41 = load i64*, i64** %40, align 8, !tbaa !30
+  %42 = getelementptr inbounds i64, i64* %41, i64 1
+  store i64* %42, i64** %36, align 8, !tbaa !10
+  %43 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !dbg !39, !tbaa !10
+  %44 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %43, i64 0, i32 17, !dbg !39
+  %45 = load i64, i64* %44, align 8, !dbg !39, !tbaa !12
+  %46 = icmp eq i64 %45, %25, !dbg !39
+  br i1 %46, label %"func_<root>.<static-init>$153.exit", label %codeRepl, !dbg !39, !prof !44
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
-  tail call fastcc void @Init_hashes.cold.1(i64 %24) #10
+  tail call fastcc void @Init_hashes.cold.1(i64 %25) #10
   unreachable
 
 "func_<root>.<static-init>$153.exit":             ; preds = %sorbet_readRealpath.exit
@@ -220,7 +217,6 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8, !dbg !46
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9, !dbg !46
   %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9, !dbg !45
-  %"<keyword-args-singleton>.i" = load i64, i64* @"<keyword-args-singleton>", align 8, !dbg !47
   %callArgs0Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0, !dbg !47
   store i64 %rawSym.i, i64* %callArgs0Addr.i, align 8, !dbg !47
   %callArgs1Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 1, !dbg !47
@@ -229,11 +225,11 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   store i64 %rawSym15.i, i64* %callArgs2Addr.i, align 8, !dbg !47
   %callArgs3Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3, !dbg !47
   store i64 5, i64* %callArgs3Addr.i, align 8, !dbg !47
-  %46 = tail call i64 @rb_hash_clear(i64 %"<keyword-args-singleton>.i") #9, !dbg !47, !noalias !48
-  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgs0Addr.i, i64 %"<keyword-args-singleton>.i") #9, !dbg !47
-  store i64 %"<keyword-args-singleton>.i", i64* %callArgs0Addr.i, align 8, !dbg !39
-  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %24, i64 %21, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9, !dbg !39
-  call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %25)
+  %47 = tail call i64 @rb_hash_new_with_size(i64 2) #9, !dbg !47, !noalias !48
+  call void @rb_hash_bulk_insert(i64 4, i64* nonnull %callArgs0Addr.i, i64 %47) #9, !dbg !47
+  store i64 %47, i64* %callArgs0Addr.i, align 8, !dbg !39
+  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %25, i64 %22, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9, !dbg !39
+  call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %26)
   ret void
 }
 
@@ -255,7 +251,7 @@ attributes #1 = { noreturn }
 attributes #2 = { "addedToSilenceEmptyAttrsError" }
 attributes #3 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #4 = { noinline nounwind ssp uwtable }
-attributes #5 = { sspreq }
+attributes #5 = { nounwind sspreq }
 attributes #6 = { argmemonly nounwind }
 attributes #7 = { cold minsize noreturn nounwind sspreq }
 attributes #8 = { noreturn nounwind }
@@ -314,5 +310,5 @@ attributes #10 = { noinline }
 !46 = !DILocation(line: 4, column: 7, scope: !40)
 !47 = !DILocation(line: 4, column: 6, scope: !40)
 !48 = !{!49}
-!49 = distinct !{!49, !50, !"sorbet_populateKeywordArgSingleton: argument 0"}
-!50 = distinct !{!50, !"sorbet_populateKeywordArgSingleton"}
+!49 = distinct !{!49, !50, !"sorbet_buildHashIntrinsic: argument 0"}
+!50 = distinct !{!50, !"sorbet_buildHashIntrinsic"}
