@@ -95,10 +95,7 @@ run_cmd ./configure \
 run_cmd make V=1 -j8
 run_cmd make V=1 install
 
-echo $build_dir
-
 ruby_version=$(./miniruby -r ./rbconfig.rb -e 'puts "#{{RbConfig::CONFIG["MAJOR"]}}.#{{RbConfig::CONFIG["MINOR"]}}"')
-echo "ruby_version = $ruby_version"
 
 static_libs="$base/{static_libs}"
 mkdir -p "$static_libs"
