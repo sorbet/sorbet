@@ -68,6 +68,8 @@ public:
                        const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
+    static llvm::Value *keywordArgsSingleton(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                             const IREmitterContext &irctx);
 };
 } // namespace sorbet::compiler
 #endif

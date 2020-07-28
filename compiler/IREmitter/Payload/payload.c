@@ -1107,6 +1107,15 @@ VALUE sorbet_buildHashIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const
     return ret;
 }
 
+void sorbet_populateKeywordArgSingleton(VALUE keywordArgsSingleton, int argc, const VALUE *const restrict argv) {
+    // this comes from internal.h
+    void rb_hash_bulk_insert(long, const VALUE *, VALUE);
+
+    // We have to clear, because rb_hash_bulk_insert appends to the end; it doesn't overwrite what's there.
+    rb_hash_clear(keywordArgsSingleton);
+    rb_hash_bulk_insert(argc, argv, keywordArgsSingleton);
+}
+
 VALUE sorbet_buildArrayIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                  VALUE closure) {
     if (argc == 0) {

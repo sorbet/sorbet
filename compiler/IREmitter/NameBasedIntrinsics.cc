@@ -189,6 +189,30 @@ public:
     }
 } ExceptionRetry;
 
+class BuildKeywordArgs : public NameBasedIntrinsicMethod {
+public:
+    BuildKeywordArgs() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
+
+    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
+                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
+        auto &builder = builderCast(build);
+
+        auto keywordArgsSingleton = Payload::keywordArgsSingleton(cs, builder, irctx);
+
+        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
+        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
+
+        builder.CreateCall(cs.module->getFunction("sorbet_populateKeywordArgSingleton"),
+                           {keywordArgsSingleton, argc, argv});
+
+        return keywordArgsSingleton;
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::buildKeywordArgs()};
+    }
+} BuildKeywordArgs;
+
 enum ShouldTakeReciever {
     TakesReciever,
     NoReciever,
@@ -249,7 +273,8 @@ static const vector<CallCMethod> knownCMethods{
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock, &ExceptionRetry,
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,
+        &CallWithBlock,      &ExceptionRetry,       &BuildKeywordArgs,
     };
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);

@@ -588,9 +588,10 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
     auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
         auto globalInitBuilder = llvm::IRBuilder<>(cs);
 
+        auto isConstant = false;
         auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
         auto global =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+            new llvm::GlobalVariable(*cs.module, tp, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
 
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         auto *singletonValue =
@@ -601,7 +602,51 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
         return global;
     });
 
-    return builderCast(build).CreateLoad(global, "<retry-singleton>");
+    return builderCast(build).CreateLoad(global, rawName);
+}
+
+// We pass keyword args via a global singleton to avoid allocating a Hash for every method that
+// takes keyword args. The Ruby VM also does not allocate when passing a Hash literal of keyword
+// args to a method, so this is to get pairity with the Ruby VM.
+//
+// The Ruby VM avoid allocating by pushing the values of the keyword args onto the VM stack, and
+// records information in an operand to the VM bytecode `send` instruction. For example:
+//
+//     ❯ ruby --dump=insns 'foo({x: 12}, {y: 34})'
+//     == disasm: #<ISeq:<main>@foo.rb:1 (1,0)-(1,19)> (catch: FALSE)
+//     0000 putself                                                         (   1)[Li]
+//     0001 duphash                      {:x=>12}
+//     0003 putobject                    34
+//     0005 opt_send_without_block       <callinfo!mid:foo, argc:2, kw:[y], FCALL|KWARG>, <callcache>
+//     0008 leave
+//
+// The dump above hides this, but that `kw:[y]` bit indicates that there is a
+// rb_call_info_with_kwarg struct passed as an operand to the `opt_send_without_block` instruction
+// that remembers the keys of the values that have been pushed onto the stack, so that it can pop
+// them and put them into locals right before jumping to the body of the method.
+llvm::Value *Payload::keywordArgsSingleton(CompilerState &cs, llvm::IRBuilderBase &build,
+                                           const IREmitterContext &irctx) {
+    // TODO(jez) Replace all getInt64Ty with CompilerState::getValueType calls, for consistency and readiability.
+    auto valueTp = llvm::Type::getInt64Ty(cs); // VALUE
+    auto rawName = "<keyword-args-singleton>";
+    auto global = cs.module->getOrInsertGlobal(rawName, valueTp, [&] {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        auto isConstant = false;
+        auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
+        auto global = new llvm::GlobalVariable(*cs.module, valueTp, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               zero, rawName);
+
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        auto singletonValue =
+            globalInitBuilder.CreateCall(cs.module->getFunction("rb_hash_new"), {}, "keywordArgsSingleton");
+
+        globalInitBuilder.CreateStore(singletonValue, global);
+
+        return global;
+    });
+
+    return builderCast(build).CreateLoad(global, rawName);
 }
 
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym,
