@@ -52,7 +52,7 @@ class Symbol < Object
   # See String#<=> for more information.
   sig do
     params(
-        other: Symbol,
+        other: Object,
     )
     .returns(T.nilable(Integer))
   end
