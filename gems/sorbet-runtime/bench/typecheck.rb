@@ -85,6 +85,15 @@ module SorbetBenchmarks
       end
       puts "sig {params(x: T.nilable(Example)).void} twice, μs/iter"
       puts result
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          arg_plus_kwargs(:foo, x: 1, y: 2)
+          arg_plus_kwargs(:bar, x: 1)
+        end
+      end
+      puts "sig {params(s: Symbol, x: Integer, y: Integer).void} (with kwargs) twice, μs/iter"
+      puts result
     end
 
     sig {params(x: Integer).void}
@@ -98,5 +107,8 @@ module SorbetBenchmarks
 
     sig {params(x: T.nilable(Example)).void}
     def self.nilable_application_class_param(x); end
+
+    sig {params(s: Symbol, x: Integer, y: Integer).void}
+    def self.arg_plus_kwargs(s, x:, y: 0); end
   end
 end
