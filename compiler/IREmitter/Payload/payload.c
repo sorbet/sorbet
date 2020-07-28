@@ -966,10 +966,12 @@ VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
 }
 
 VALUE sorbet_readKWRestArgs(VALUE maybeHash) {
+    // This is similar to what the Ruby VM does:
+    // https://github.com/ruby/ruby/blob/37c2cd3fa47c709570e22ec4dac723ca211f423a/vm_args.c#L483-L487
     if (maybeHash == RUBY_Qundef) {
         return rb_hash_new();
     }
-    return maybeHash;
+    return rb_hash_dup(maybeHash);
 }
 
 VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *argArray) {
