@@ -1312,7 +1312,7 @@ public:
     }
 } SorbetPrivateStatic_sig;
 
-class Magic_buildHash : public IntrinsicMethod {
+class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
@@ -1333,7 +1333,7 @@ public:
         }
         res.returnType = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
     }
-} Magic_buildHash;
+} Magic_buildHashOrKeywordArgs;
 
 class Magic_buildArray : public IntrinsicMethod {
 public:
@@ -2262,7 +2262,8 @@ const vector<Intrinsic> intrinsicMethods{
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
 
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHash},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildKeywordArgs(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},

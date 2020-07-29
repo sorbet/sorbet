@@ -1679,7 +1679,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             },
             [&](parser::EncodingLiteral *encodingLiteral) {
                 auto recv = MK::Constant(loc, core::Symbols::Magic());
-                return MK::Send0(loc, std::move(recv), core::Names::getEncoding());
+                result = MK::Send0(loc, std::move(recv), core::Names::getEncoding());
             },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },

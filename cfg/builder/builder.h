@@ -20,8 +20,10 @@ private:
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
     static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
+    static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::LocOffsets loc,
                                std::unique_ptr<Instruction> inst);
+    static BasicBlock *walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method);
 };
 
 class CFGContext {

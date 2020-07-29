@@ -146,9 +146,10 @@ class T::Private::Methods::Signature
     # can't) match the definition of the method we're validating. In addition, Ruby has a bug that
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
-    if (args.length > @req_arg_count) && (!@kwarg_types.empty? || @has_keyrest) && args[-1].is_a?(Hash)
+    args_length = args.length
+    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || @has_keyrest) && args[-1].is_a?(Hash)
       kwargs = args[-1]
-      args = args[0...-1]
+      args_length -= 1
     else
       kwargs = EMPTY_HASH
     end
@@ -156,19 +157,19 @@ class T::Private::Methods::Signature
     arg_types = @arg_types
 
     if @has_rest
-      arg_types += [[@rest_name, @rest_type]] * (args.length - @arg_types.length)
+      arg_types += [[@rest_name, @rest_type]] * (args_length - @arg_types.length)
 
-    elsif (args.length < @req_arg_count) || (args.length > @arg_types.length)
+    elsif (args_length < @req_arg_count) || (args_length > @arg_types.length)
       expected_str = @req_arg_count.to_s
       if @arg_types.length != @req_arg_count
         expected_str += "..#{@arg_types.length}"
       end
-      raise ArgumentError.new("wrong number of arguments (given #{args.length}, expected #{expected_str})")
+      raise ArgumentError.new("wrong number of arguments (given #{args_length}, expected #{expected_str})")
     end
 
     begin
       it = 0
-      while it < args.length
+      while it < args_length
         yield arg_types[it][0], args[it], arg_types[it][1]
         it += 1
       end
