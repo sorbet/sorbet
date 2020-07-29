@@ -207,7 +207,11 @@ module T::Private::Methods
     new_method = nil
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_method(new_method)
-      method_sig ||= T::Private::Methods._handle_missing_method_signature(mod, original_method, __callee__)
+      method_sig ||= T::Private::Methods._handle_missing_method_signature(
+        is_singleton_method ? self.singleton_class : self.class,
+        original_method,
+        __callee__,
+      )
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
       # don't want that extra layer of indirection in the callstack
@@ -238,9 +242,11 @@ module T::Private::Methods
     end
   end
 
-  def self._handle_missing_method_signature(mod, original_method, callee)
+  def self._handle_missing_method_signature(klass, original_method, callee)
     method_sig = T::Private::Methods.signature_for_method(original_method)
-    aliasing_method = mod.instance_method(callee)
+
+    aliasing_method = klass.instance_method(callee)
+    aliasing_mod = aliasing_method.owner
 
     if method_sig && aliasing_method != original_method && aliasing_method.original_name == original_method.name
       # We're handling a case where `alias` or `alias_method` was called for a
@@ -249,10 +255,10 @@ module T::Private::Methods
       # Note, this logic is duplicated above, make sure to keep changes in sync.
       if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         # Checked, so copy the original signature to the aliased copy.
-        T::Private::Methods.unwrap_method(mod, method_sig, aliasing_method)
+        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, aliasing_method)
       else
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
-        mod.send(:alias_method, callee, original_method.name)
+        aliasing_mod.send(:alias_method, callee, original_method.name)
       end
     else
       raise "`sig` not present for method `#{aliasing_method.name}` but you're trying to run it anyways. " \

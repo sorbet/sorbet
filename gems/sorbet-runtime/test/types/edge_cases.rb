@@ -119,6 +119,42 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         allocs = counting_allocations {obj.bar}
         assert_equal(0, allocs)
       end
+
+      it 'handles alias to superclass method with runtime checking' do
+        superclass = Class.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        subclass = Class.new(superclass) do
+          alias_method :bar, :foo
+        end
+
+        assert_equal(:foo, subclass.new.foo)
+        assert_equal(:foo, subclass.new.bar)
+      end
+
+      it 'handles alias to superclass method without runtime checking' do
+        superclass = Class.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        subclass = Class.new(superclass) do
+          alias_method :bar, :foo
+        end
+
+        assert_equal(:foo, subclass.new.foo)
+        assert_equal(:foo, subclass.new.bar)
+      end
     end
 
     describe 'singleton method' do
@@ -182,6 +218,46 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal(:foo, klass.bar)
         assert_equal(:foo, klass.foo)
+      end
+
+      it 'handles alias_method to superclass method with runtime checking' do
+        superclass = Class.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol)}
+          def self.foo(x=:foo)
+            x
+          end
+        end
+
+        subclass = Class.new(superclass) do
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+
+        assert_equal(:foo, subclass.foo)
+        assert_equal(:foo, subclass.bar)
+      end
+
+      it 'handles alias_method to superclass method without runtime checking' do
+        superclass = Class.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def self.foo(x=:foo)
+            x
+          end
+        end
+
+        subclass = Class.new(superclass) do
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+
+        assert_equal(:foo, subclass.foo)
+        assert_equal(:foo, subclass.bar)
       end
     end
   end
