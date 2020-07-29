@@ -120,7 +120,7 @@ class String < Object
   # ```
   sig do
     params(
-        other: String,
+        other: Object,
     )
     .returns(T.nilable(Integer))
   end

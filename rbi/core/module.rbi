@@ -86,7 +86,7 @@ class Module < Object
   # `other_module` is not a module, or if the two values are incomparable.
   sig do
     params(
-        other: Module,
+        other: Object,
     )
     .returns(T.nilable(Integer))
   end

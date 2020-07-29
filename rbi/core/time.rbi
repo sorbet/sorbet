@@ -403,7 +403,7 @@ class Time < Object
   # ```
   sig do
     params(
-        other: Time,
+        other: Object,
     )
     .returns(T.nilable(Integer))
   end
