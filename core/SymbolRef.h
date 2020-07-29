@@ -483,6 +483,10 @@ public:
         return SymbolRef(nullptr, 105);
     }
 
+    static SymbolRef Encoding() {
+        return SymbolRef(nullptr, 106);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 3 - 3);
