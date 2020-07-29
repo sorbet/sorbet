@@ -872,7 +872,7 @@ class Regexp < Object
   sig {returns(T.nilable(MatchData))}
   sig do
     params(
-        arg0: Integer,
+      arg0: T.any(Integer, Symbol),
     )
     .returns(T.nilable(String))
   end
