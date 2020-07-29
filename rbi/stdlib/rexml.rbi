@@ -69,7 +69,7 @@ end
 class REXML::AttlistDecl < ::REXML::Child
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Attribute)
 
   # Create an
   # [`AttlistDecl`](https://docs.ruby-lang.org/en/2.6.0/REXML/AttlistDecl.html),
@@ -255,9 +255,9 @@ end
 # [`Attributes`](https://docs.ruby-lang.org/en/2.6.0/REXML/Attributes.html) of
 # an Element and provides operations for accessing elements in that set.
 class REXML::Attributes < ::Hash
-  K = type_member(:out)
-  V = type_member(:out)
-  Elem = type_member(:out)
+  K = type_member(fixed: String)
+  V = type_member(fixed: String)
+  Elem = type_member(fixed: REXML::Attribute)
 
   # Constructor
   # element
@@ -643,7 +643,7 @@ end
 class REXML::DocType < ::REXML::Parent
   include(::REXML::XMLTokens)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Child)
 
   DEFAULT_ENTITIES = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
@@ -756,7 +756,7 @@ end
 # write a default declaration for you. See |DECLARATION| and |write|.
 class REXML::Document < ::REXML::Element
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Child)
 
   # A convenient default [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
   # declaration. If you want an
@@ -949,7 +949,7 @@ class REXML::Element < ::REXML::Parent
   include(::REXML::Namespace)
   include(::REXML::XMLTokens)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Child)
 
   UNDEFINED = T.let(T.unsafe(nil), String)
 
@@ -1499,7 +1499,7 @@ end
 class REXML::Elements
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Element)
 
   # Constructor
   # parent
@@ -2244,7 +2244,7 @@ end
 class REXML::Parent < ::REXML::Child
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Child)
 
   # Constructor @param parent if supplied, will be set as the parent of this
   # object
@@ -2977,7 +2977,7 @@ end
 class REXML::SyncEnumerator
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member(fixed: REXML::Element)
 
   # Creates a new
   # [`SyncEnumerator`](https://docs.ruby-lang.org/en/2.6.0/REXML/SyncEnumerator.html)
