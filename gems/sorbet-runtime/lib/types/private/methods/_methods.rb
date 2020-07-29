@@ -260,7 +260,7 @@ module T::Private::Methods
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
         aliasing_mod.send(:alias_method, callee, original_method.name)
       end
-    else
+    elsif !method_sig && aliasing_method == original_method
       raise "`sig` not present for method `#{aliasing_method.name}` but you're trying to run it anyways. " \
         "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
         "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."

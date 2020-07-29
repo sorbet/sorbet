@@ -259,6 +259,56 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
       end
+
+      it 'handles method reference without sig' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+      end
+
+      it 'handles method reference with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+
+          sig { params(x: Integer).returns(Integer) }
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+        assert_raises(TypeError) do
+          klass.foo(["-1", "-2", "-3"])
+        end
+      end
+
+      it 'handles method reference without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+
+          sig { params(x: Integer).returns(Integer).checked(:never) }
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+        assert_equal(["-1", "-2", "-3"], klass.foo(["-1", "-2", "-3"]))
+      end
     end
   end
 
