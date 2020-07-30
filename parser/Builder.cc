@@ -148,6 +148,15 @@ public:
             auto name = id->name.data(gs_);
             ENFORCE(name->kind == core::NameKind::UTF8);
             auto name_str = name->show(gs_);
+            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+                if (driver_->numparam_stack.has_ordinary_params()) {
+                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                }
+
+                driver_->lex.declare(name_str);
+                driver_->numparam_stack.regis(name_str[1] - 48);
+            }
+
             if (driver_->lex.is_declared(name_str)) {
                 checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);

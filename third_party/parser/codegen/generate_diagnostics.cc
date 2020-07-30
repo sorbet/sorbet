@@ -58,6 +58,7 @@ tuple<string, string> MESSAGES[] = {
     {"InvalidReturn", "invalid return in class/module body"},
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
     {"CantAssignToNumparam", "cannot assign to numbered parameter {}"},
+    {"OrdinaryParamDefined", "ordinary parameter is defined"},
     {"CircularArgumentReference", "circular argument reference {}"},
 
     // Parser warnings
