@@ -199,7 +199,11 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
-            driver_->lex.declare(name->show(gs_));
+            auto name_str = name->show(gs_);
+            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+                error(ruby_parser::dclass::CantAssignToNumparam, id->loc, name_str);
+            }
+            driver_->lex.declare(name_str);
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
@@ -1233,6 +1237,10 @@ public:
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
                parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
                parser::isa_node<Hash>(&node);
+    }
+
+    bool isNumberedParameterName(std::string name) {
+        return name.length() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9';
     }
 };
 
