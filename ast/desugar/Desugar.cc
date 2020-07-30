@@ -61,6 +61,12 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
                 args.emplace_back(node2TreeImpl(dctx, std::move(arg)));
             }
         }
+    } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode.get())) {
+        // The block use numbered parameters like `_1` or `_9` so we add them as parameters
+        for (int i = 1; i <= numparams->max; i++) {
+            core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + std::to_string(i));
+            args.emplace_back(MK::Local(loc, name));
+        }
     } else if (argnode.get() == nullptr) {
         // do nothing
     } else {
@@ -950,6 +956,38 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 result = std::move(res);
             },
             [&](parser::Block *block) {
+                block->send->loc = loc;
+                auto recv = node2TreeImpl(dctx, std::move(block->send));
+                Send *send;
+                TreePtr res;
+                if ((send = cast_tree<Send>(recv)) != nullptr) {
+                    res = std::move(recv);
+                } else {
+                    // This must have been a csend; That will have been desugared
+                    // into an insseq with an If in the expression.
+                    res = std::move(recv);
+                    auto *is = cast_tree<InsSeq>(res);
+                    if (!is) {
+                        if (auto e = dctx.ctx.beginError(block->loc, core::errors::Desugar::UnsupportedNode)) {
+                            e.setHeader("No body in block");
+                        }
+                        auto res = MK::EmptyTree();
+                        result = std::move(res);
+                        return;
+                    }
+                    auto *iff = cast_tree<If>(is->expr);
+                    ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
+                    send = cast_tree<Send>(iff->elsep);
+                    ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
+                }
+                auto [args, destructures] = desugarArgs(dctx, loc, block->args);
+                auto desugaredBody = desugarBody(dctx, loc, block->body, std::move(destructures));
+
+                // TODO the send->block's loc is too big and includes the whole send
+                send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
+                result = std::move(res);
+            },
+            [&](parser::NumBlock *block) {
                 block->send->loc = loc;
                 auto recv = node2TreeImpl(dctx, std::move(block->send));
                 Send *send;
