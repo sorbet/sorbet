@@ -354,9 +354,18 @@ public:
             }
         }
 
+        bool numblock = false;
+        if (auto *numparams = parser::cast_node<NumParams>(args.get())) {
+            numblock = true;
+        }
+
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
+            if (numblock) {
+                return make_unique<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
+                                             std::move(body));
+            }
             return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
                                       std::move(body));
         }
@@ -373,7 +382,12 @@ public:
 
         auto &send = exprs->front();
         core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
-        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        unique_ptr<Node> block;
+        if (numblock) {
+            block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body));
+        } else {
+            block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        }
         exprs->front().swap(block);
         return methodCall;
     }
@@ -834,6 +848,13 @@ public:
 
     unique_ptr<Node> nth_ref(const token *tok) {
         return make_unique<NthRef>(tokLoc(tok), atoi(tok->string().c_str()));
+    }
+
+    unique_ptr<Node> numparams(size_t max_numparam) {
+        // At this point, we might not have a node to get the location so we use a dummy one for now,
+        // errors will later be rattached to the block itself.
+        auto loc = core::LocOffsets();
+        return make_unique<NumParams>(loc, max_numparam);
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -1638,6 +1659,18 @@ ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
     return build->toForeign(build->nth_ref(tok));
 }
 
+ForeignPtr numparams(SelfPtr builder, size_t max_numparam) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->numparams(max_numparam));
+}
+
+ForeignPtr numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
+                    const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(
+        build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
+}
+
 ForeignPtr op_assign(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
     auto build = cast_builder(builder);
     return build->toForeign(build->op_assign(build->cast_node(lhs), op, build->cast_node(rhs)));
@@ -1905,6 +1938,8 @@ struct ruby_parser::builder Builder::interface = {
     nil,
     not_op,
     nth_ref,
+    numparams,
+    numblock,
     op_assign,
     optarg_,
     pair,
