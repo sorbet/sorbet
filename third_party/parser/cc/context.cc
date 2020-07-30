@@ -39,8 +39,20 @@ void Context::reset() {
     stack.clear();
 }
 
+bool Context::inBlock() {
+    return !stack.empty() && stack[stack.size() - 1] == State::BLOCK;
+}
+
 bool Context::inClass() {
     return !stack.empty() && stack[stack.size() - 1] == State::CLASS;
+}
+
+bool Context::inDynamicBlock() {
+    return inBlock() || inLambda();
+}
+
+bool Context::inLambda() {
+    return !stack.empty() && stack[stack.size() - 1] == State::LAMBDA;
 }
 
 bool Context::indirectlyInDef() {

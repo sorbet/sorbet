@@ -1973,6 +1973,7 @@ opt_block_args_tail:
 
           lambda:   {
                       driver.lex.extend_dynamic();
+                      driver.lex.context.push(Context::State::LAMBDA);
                     }
                   f_larglist
                     {
