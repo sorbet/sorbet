@@ -2131,6 +2131,23 @@ void lexer::set_state_expr_value() {
         fnext expr_end; fbreak;
       };
 
+      ':' ( '@'  %{ tm = p - 1; }
+          | '@@' %{ tm = p - 2; }
+          ) [0-9]*
+      => {
+        if (version == ruby_version::RUBY_27) {
+          if (ts[0] == ':' && ts[1] == '@' && ts[2] == '@') {
+            diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts + 1, te));
+          } else {
+            diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts + 1, te));
+          }
+        } else {
+          emit(token_type::tCOLON, tok(ts, ts + 1), ts, ts + 1);
+          p = ts;
+        }
+        fnext expr_end; fbreak;
+      };
+
       #
       # AMBIGUOUS TERNARY OPERATOR
       #
