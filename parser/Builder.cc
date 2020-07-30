@@ -153,6 +153,32 @@ public:
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
+                auto raw_context = driver_->lex.context.stackCopy();
+                auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
+
+                // ignore current block scope
+                raw_context.pop_back();
+                raw_numparam_stack.pop_back();
+
+                for (auto outer_scope : raw_context) {
+                    if (outer_scope == ruby_parser::Context::State::BLOCK ||
+                        outer_scope == ruby_parser::Context::State::LAMBDA) {
+                        auto outer_scope_has_numparams = raw_numparam_stack.back() > 0;
+                        raw_numparam_stack.pop_back();
+
+                        if (outer_scope_has_numparams) {
+                            error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
+                        } else {
+                            // for now it's ok, but an outer scope can also be a block
+                            // with numparams, so we need to continue
+                        }
+                    } else {
+                        // found an outer scope that can't have numparams
+                        // like def/class/etc
+                        break;
+                    }
+                }
+
                 driver_->lex.declare(name_str);
                 driver_->numparam_stack.regis(name_str[1] - 48);
             }

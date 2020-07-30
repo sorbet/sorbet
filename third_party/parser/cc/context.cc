@@ -77,3 +77,9 @@ bool Context::moduleDefintinionAllowed() {
 bool Context::dynamicConstDefintinionAllowed() {
     return classDefintinionAllowed();
 }
+
+std::vector<State> Context::stackCopy() {
+    std::vector<State> copy;
+    copy.assign(stack.begin(), stack.end());
+    return copy;
+}

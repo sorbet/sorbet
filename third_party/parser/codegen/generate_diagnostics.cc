@@ -59,6 +59,7 @@ tuple<string, string> MESSAGES[] = {
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
     {"CantAssignToNumparam", "cannot assign to numbered parameter {}"},
     {"OrdinaryParamDefined", "ordinary parameter is defined"},
+    {"NumparamUsedInOuterScope", "numbered parameter is already used in an outer scope"},
     {"CircularArgumentReference", "circular argument reference {}"},
 
     // Parser warnings

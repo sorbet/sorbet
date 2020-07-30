@@ -196,6 +196,12 @@ public:
         }
     }
 
+    std::vector<int> stackCopy() {
+        std::vector<int> copy;
+        copy.assign(stack.begin(), stack.end());
+        return copy;
+    }
+
 private:
     void set(int value) {
         if (!stack.empty()) {

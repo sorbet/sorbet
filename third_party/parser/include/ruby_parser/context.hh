@@ -30,6 +30,7 @@ public:
     bool classDefintinionAllowed();
     bool moduleDefintinionAllowed();
     bool dynamicConstDefintinionAllowed();
+    std::vector<State> stackCopy();
 
 private:
     std::vector<State> stack;
