@@ -6,7 +6,6 @@ authorURL: https://twitter.com/jez_io
 authorImageURL: https://avatars0.githubusercontent.com/u/5544532?s=460&v=4
 ---
 
-
 Yesterday Square [posted an article][introducing-rbs] to their blog introducing
 [RBS][rbs] (Ruby Signature), a type syntax format for Ruby 3.
 
@@ -20,11 +19,11 @@ that build on top of that syntax.
 With that in mind, I'd love to start a discussion of some of the finer points of
 what this announcement means for Ruby, and for Sorbet.
 
-[introducing-rbs]: https://developer.squareup.com/blog/the-state-of-ruby-3-typing/
+[introducing-rbs]:
+  https://developer.squareup.com/blog/the-state-of-ruby-3-typing/
 [rbs]: https://github.com/ruby/rbs
 
 <!--truncate-->
-
 
 ## RBI? RBS?
 
@@ -35,12 +34,12 @@ them how they're thinking about types so that Sorbet wil be ready. We're
 [committed][faq-migration] to supporting Ruby 3's type syntax.
 
 [rubyconf-2019]: https://youtu.be/2g9R7PUCEXo?t=2076
-[faq-migration]: https://sorbet.org/docs/faq#when-ruby-3-gets-types-what-will-the-migration-plan-look-like
+[faq-migration]:
+  https://sorbet.org/docs/faq#when-ruby-3-gets-types-what-will-the-migration-plan-look-like
 
 In the mean time, we've kept busy. While the Ruby core team has been working on
 the RBS syntax over the past year, the Sorbet team has delivered tons of other
 features. A sampling of features that didn't exist a year ago:
-
 
 - Go to Definition (Aug 2019)
 - [Exhaustiveness checking](/docs/exhaustiveness) (Aug 2019)
@@ -104,13 +103,13 @@ typing, inline type annotations become essential. Types carry intent, and there
 are frequently places where inferring the intent could be ambiguous. Consider
 this snippet:
 
-
 ```ruby
 xs = [1, 2, 3]
 xs << nil
 
 # what's the type of xs? 🤔
 ```
+
 [→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Axs%20%3D%20%5B1%2C%202%2C%203%5D%0Axs%20%3C%3C%20nil)
 
 A type checker could infer one of two types here:
@@ -126,7 +125,8 @@ either might make sense. Explicit annotations resolve these ambiguities. In this
 case, Sorbet assumes (2) by default, but other type systems do other things. For
 example, Flow [assumes (1) by default][flow-example].
 
-[flow-example]: https://flow.org/try/#0MYewdgzgLgBAHhGBeGBtAjAGhgJmwZgF0BuAKAQDoAHAVwgAsAKMGgG1YEpig
+[flow-example]:
+  https://flow.org/try/#0MYewdgzgLgBAHhGBeGBtAjAGhgJmwZgF0BuAKAQDoAHAVwgAsAKMGgG1YEpig
 
 Here's how to use an inline annotation in Sorbet to explicitly declare that (1)
 is intended:
@@ -148,7 +148,6 @@ annotations without changing Ruby syntax, because that would require everyone to
 upgrade to a specific Ruby version to benefit. Because Sorbet values inline type
 annotations, we embedded a type annotation language in Ruby with no syntax
 changes needed:
-
 
 ```ruby
 extend T::Sig
@@ -196,7 +195,8 @@ nine] of percentage of files at `# typed: true` or above—which is to say, thos
 millions of lines of Ruby use a lot of types. We have hundreds of engineers
 writing Ruby and using our Sorbet-powered IDE every day.
 
-[second nine]: https://en.wikipedia.org/wiki/High_availability#Percentage_calculation
+[second nine]:
+  https://en.wikipedia.org/wiki/High_availability#Percentage_calculation
 
 Sorbet type checks these millions of lines of Ruby code in seconds, helps
 prevent countless production incidents, and helps new Stripe engineers spin up
