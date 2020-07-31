@@ -208,7 +208,7 @@ module T::Private::Methods
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_method(new_method)
       method_sig ||= T::Private::Methods._handle_missing_method_signature(
-        is_singleton_method ? self.singleton_class : self.class,
+        self,
         original_method,
         __callee__,
       )
@@ -242,28 +242,45 @@ module T::Private::Methods
     end
   end
 
-  def self._handle_missing_method_signature(klass, original_method, callee)
+  def self._handle_missing_method_signature(receiver, original_method, callee)
     method_sig = T::Private::Methods.signature_for_method(original_method)
+    if !method_sig
+      raise "`sig` not present for method `#{callee}` on #{receiver.inspect} but you're trying to run it anyways. " \
+        "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
+        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
+    end
 
-    aliasing_method = klass.instance_method(callee)
-    aliasing_mod = aliasing_method.owner
+    if receiver.class <= original_method.owner
+      receiving_class = receiver.class
+    elsif receiver.singleton_class <= original_method.owner
+      receiving_class = receiver.singleton_class
+    elsif receiver.is_a?(Module) && receiver <= original_method.owner
+      receiving_class = receiver
+    else
+      raise "#{receiver} is not related to #{original_method} - how did we get here?"
+    end
 
-    if method_sig && aliasing_method != original_method && aliasing_method.original_name == original_method.name
-      # We're handling a case where `alias` or `alias_method` was called for a
-      # method which had already had a `sig` applied.
-      #
+    # Check for a case where `alias` or `alias_method` was called for a
+    # method which had already had a `sig` applied. In that case, we want
+    # to avoid hitting this slow path again, by moving to a faster validator
+    # just like we did or will for the original method.
+    #
+    # If this isn't an `alias` or `alias_method` case, we're probably in the
+    # middle of some metaprogramming using a Method object, e.g. a pattern like
+    # `arr.map(&method(:foo))`. There's nothing really we can do to optimize
+    # that here.
+    receiving_method = receiving_class.instance_method(callee)
+    if receiving_method != original_method && receiving_method.original_name == original_method.name
+      aliasing_mod = receiving_method.owner
+
       # Note, this logic is duplicated above, make sure to keep changes in sync.
       if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         # Checked, so copy the original signature to the aliased copy.
-        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, aliasing_method)
+        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, original_method)
       else
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
         aliasing_mod.send(:alias_method, callee, original_method.name)
       end
-    else
-      raise "`sig` not present for method `#{aliasing_method.name}` but you're trying to run it anyways. " \
-        "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
-        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
     end
 
     method_sig
