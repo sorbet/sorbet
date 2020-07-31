@@ -136,6 +136,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, subclass.new.foo)
         assert_equal(:foo, subclass.new.bar)
+        assert_equal(:foo, superclass.new.foo)
       end
 
       it 'handles alias to superclass method without runtime checking' do
@@ -239,6 +240,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
+        assert_equal(:foo, superclass.foo)
       end
 
       it 'handles alias_method to superclass method without runtime checking' do
