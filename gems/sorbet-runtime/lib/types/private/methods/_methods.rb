@@ -254,8 +254,10 @@ module T::Private::Methods
       receiving_class = receiver.class
     elsif receiver.singleton_class <= original_method.owner
       receiving_class = receiver.singleton_class
+    elsif receiver.is_a?(Module) && receiver <= original_method.owner
+      receiving_class = receiver
     else
-      raise "#{receiver} is not related to #{original_method}, how did we get here?"
+      raise "#{receiver} is not related to #{original_method} - how did we get here?"
     end
 
     # Check for a case where `alias` or `alias_method` was called for a

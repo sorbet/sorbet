@@ -36,6 +36,24 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal("foo", klass.new.bar = "foo")
   end
 
+  it 'handles module_function on including class' do
+    mod = Module.new do
+      extend T::Sig
+      extend T::Helpers
+      sig { params(foo: String).returns(String) }
+      module_function def foo(foo)
+        foo
+      end
+    end
+
+    klass = Class.new do
+      include mod
+    end
+
+    assert_equal('bar', klass.new.send(:foo, 'bar'))
+    assert_equal('bar', mod.foo('bar'))
+  end
+
   private def counting_allocations
     before = GC.stat[:total_allocated_objects]
     yield
