@@ -219,3 +219,6 @@ We're happy that the Ruby core team is focused on continually improving Ruby,
 because we are too. ❤️
 
 — Jake "jez" Zimmerman, on behalf of the Sorbet team
+
+_Thanks to Dmitry Petrashko, James Iry, Trevor Elliot, and Soutaro Matsumoto for
+reading early drafts of this post._
