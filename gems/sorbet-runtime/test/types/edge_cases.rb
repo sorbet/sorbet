@@ -157,6 +157,44 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.new.bar)
         assert_equal(:foo, superclass.new.foo)
       end
+
+      it 'handles alias_method to included method with runtime checking' do
+        mod = Module.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        klass = Class.new do
+          include mod
+          alias_method :bar, :foo
+        end
+
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
+      end
+
+      it 'handles alias_method to included method without runtime checking' do
+        mod = Module.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        klass = Class.new do
+          include mod
+          alias_method :bar, :foo
+        end
+
+        assert_equal(:foo, klass.new.foo)
+        assert_equal(:foo, klass.new.bar)
+      end
     end
 
     describe 'singleton method' do
@@ -262,6 +300,100 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
         assert_equal(:foo, superclass.foo)
+      end
+
+      it 'handles alias_method to extended method with runtime checking' do
+        mod = Module.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        klass = Class.new do
+          extend mod
+
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+
+      it 'handles alias_method to extended method without runtime checking' do
+        mod = Module.new do
+          extend T::Sig
+
+          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          def foo(x=:foo)
+            x
+          end
+        end
+
+        klass = Class.new do
+          extend mod
+
+          class << self
+            alias_method :bar, :foo
+          end
+        end
+
+        assert_equal(:foo, klass.foo)
+        assert_equal(:foo, klass.bar)
+      end
+
+      it 'handles method reference without sig' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+      end
+
+      it 'handles method reference with runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+
+          sig { params(x: Integer).returns(Integer) }
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+        assert_raises(TypeError) do
+          klass.foo(["-1", "-2", "-3"])
+        end
+      end
+
+      it 'handles method reference without runtime checking' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          def self.foo(arr)
+            arr.map(&method(:bar))
+          end
+
+          sig { params(x: Integer).returns(Integer).checked(:never) }
+          def self.bar(x)
+            -x
+          end
+        end
+        assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
+        assert_equal(["-1", "-2", "-3"], klass.foo(["-1", "-2", "-3"]))
       end
     end
   end
