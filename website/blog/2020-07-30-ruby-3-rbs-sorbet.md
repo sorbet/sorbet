@@ -220,5 +220,5 @@ because we are too. ❤️
 
 — Jake "jez" Zimmerman, on behalf of the Sorbet team
 
-_Thanks to Dmitry Petrashko, James Iry, Trevor Elliot, and Soutaro Matsumoto for
-reading early drafts of this post._
+_Thanks to Dmitry Petrashko, James Iry, Trevor Elliott, and Soutaro Matsumoto
+for reading early drafts of this post._
