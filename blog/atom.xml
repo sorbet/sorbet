@@ -2,12 +2,34 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://sorbet.org/blog</id>
     <title>Sorbet Blog</title>
-    <updated>2019-12-20T06:00:00.000Z</updated>
+    <updated>2020-07-30T06:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2020 Stripe</rights>
+    <entry>
+        <title type="html"><![CDATA[Types in Ruby 3, RBS, and Sorbet]]></title>
+        <id>https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html</id>
+        <link href="https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html"/>
+        <updated>2020-07-30T06:00:00.000Z</updated>
+        <summary type="html"><![CDATA[<p>Yesterday Square <a href="https://developer.squareup.com/blog/the-state-of-ruby-3-typing/">posted an article</a> to their blog introducing
+<a href="https://github.com/ruby/rbs">RBS</a> (Ruby Signature), a type syntax format for Ruby 3.</p>
+<p>We’d like to take a second to speak to how RBS relates to Sorbet. The short
+version: Sorbet will happily incorporate RBS as a way to specify type
+annotations, in addition to the existing syntax Sorbet supports. Stripe still
+has a very strong commitment to Sorbet’s continued progress and success. While
+the Ruby core team has been working on syntax, we’ve been working on features
+that build on top of that syntax.</p>
+<p>With that in mind, I’d love to start a discussion of some of the finer points of
+what this announcement means for Ruby, and for Sorbet.</p>
+]]></summary>
+        <author>
+            <name>Jake Zimmerman</name>
+            <email/>
+            <uri>https://twitter.com/jez_io</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Announcing Sorbet 0.5]]></title>
         <id>https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5.html</id>

@@ -4,7 +4,7 @@
         <title>Sorbet Blog</title>
         <link>https://sorbet.org/blog</link>
         <description>The best place to stay up-to-date with the latest Sorbet news and events.</description>
-        <lastBuildDate>Fri, 20 Dec 2019 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 30 Jul 2020 06:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <image>
@@ -13,6 +13,23 @@
             <link>https://sorbet.org/blog</link>
         </image>
         <copyright>© 2020 Stripe</copyright>
+        <item>
+            <title><![CDATA[Types in Ruby 3, RBS, and Sorbet]]></title>
+            <link>https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html</link>
+            <guid>https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html</guid>
+            <pubDate>Thu, 30 Jul 2020 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Yesterday Square <a href="https://developer.squareup.com/blog/the-state-of-ruby-3-typing/">posted an article</a> to their blog introducing
+<a href="https://github.com/ruby/rbs">RBS</a> (Ruby Signature), a type syntax format for Ruby 3.</p>
+<p>We’d like to take a second to speak to how RBS relates to Sorbet. The short
+version: Sorbet will happily incorporate RBS as a way to specify type
+annotations, in addition to the existing syntax Sorbet supports. Stripe still
+has a very strong commitment to Sorbet’s continued progress and success. While
+the Ruby core team has been working on syntax, we’ve been working on features
+that build on top of that syntax.</p>
+<p>With that in mind, I’d love to start a discussion of some of the finer points of
+what this announcement means for Ruby, and for Sorbet.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Announcing Sorbet 0.5]]></title>
             <link>https://sorbet.org/blog/2019/12/20/announcing-sorbet-0.5.html</link>

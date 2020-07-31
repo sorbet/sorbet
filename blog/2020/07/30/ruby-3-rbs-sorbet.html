@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Types in Ruby 3, RBS, and Sorbet · Sorbet</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Yesterday Square [posted an article][introducing-rbs] to their blog introducing"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Types in Ruby 3, RBS, and Sorbet · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet"/><meta property="og:description" content="Yesterday Square [posted an article][introducing-rbs] to their blog introducing"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class="siteNavGroupActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/blog/2020/07/30/ruby-3-rbs-sorbet">Types in Ruby 3, RBS, and Sorbet</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/12/20/announcing-sorbet-0.5">Announcing Sorbet 0.5</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/06/20/open-sourcing-sorbet">Open-sourcing Sorbet: a fast, powerful type checker for Ruby</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/05/16/state-of-sorbet-spring-2019">State of Sorbet Spring 2019</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2020/07/30/ruby-3-rbs-sorbet">Types in Ruby 3, RBS, and Sorbet</a></h1><p class="post-meta">July 30, 2020</p><div class="authorBlock"><p class="post-authorName"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener">Jake Zimmerman</a></p><div class="authorPhoto"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener"><img src="https://avatars0.githubusercontent.com/u/5544532?s=460&amp;v=4" alt="Jake Zimmerman"/></a></div></div></header><div><span><p>Yesterday Square <a href="https://developer.squareup.com/blog/the-state-of-ruby-3-typing/">posted an article</a> to their blog introducing
+<a href="https://github.com/ruby/rbs">RBS</a> (Ruby Signature), a type syntax format for Ruby 3.</p>
+<p>We’d like to take a second to speak to how RBS relates to Sorbet. The short
+version: Sorbet will happily incorporate RBS as a way to specify type
+annotations, in addition to the existing syntax Sorbet supports. Stripe still
+has a very strong commitment to Sorbet’s continued progress and success. While
+the Ruby core team has been working on syntax, we’ve been working on features
+that build on top of that syntax.</p>
+<p>With that in mind, I’d love to start a discussion of some of the finer points of
+what this announcement means for Ruby, and for Sorbet.</p>
+<!--truncate-->
+<h2><a class="anchor" aria-hidden="true" id="rbi-rbs"></a><a href="#rbi-rbs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>RBI? RBS?</h2>
+<p>As <a href="https://youtu.be/2g9R7PUCEXo?t=2076">Matz announced at RubyConf 2019</a>, Ruby 3 plans to ship type
+annotations for the standard library in a particular format. We’ve been meeting
+with Matz and the Ruby core team to provide input on our experience and learn
+from them how they’re thinking about types so that Sorbet wil be ready. We’re
+<a href="https://sorbet.org/docs/faq#when-ruby-3-gets-types-what-will-the-migration-plan-look-like">committed</a> to supporting Ruby 3’s type syntax.</p>
+<p>In the mean time, we’ve kept busy. While the Ruby core team has been working on
+the RBS syntax over the past year, the Sorbet team has delivered tons of other
+features. A sampling of features that didn’t exist a year ago:</p>
+<ul>
+<li>Go to Definition (Aug 2019)</li>
+<li><a href="/docs/exhaustiveness">Exhaustiveness checking</a> (Aug 2019)</li>
+<li><a href="/docs/tenum">Typed enums</a> (Nov 2019)</li>
+<li>Autocompletion (Nov 2019)</li>
+<li>Step-function improvements in IDE speed (Feb 2020, June 2020)</li>
+</ul>
+<p>These features make Sorbet users more productive, empowering them to do more
+with Sorbet. We’ll happily incorporate any other syntax the Ruby core team wants
+to build.</p>
+<h2><a class="anchor" aria-hidden="true" id="wait-a-wholly-separate-file"></a><a href="#wait-a-wholly-separate-file" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wait, a wholly separate file?</h2>
+<p>RBS type signatures are placed in a separate file. While Sorbet also offers
+inline syntax (more later), we believe that supporting type signatures in a
+separate file is necessary. Consider: most of the Ruby standard library is
+implemented in C for performance (e.g., all <code>Array</code> and <code>Hash</code> functions, and
+many others). There must be a way to ascribe types to these internally defined
+classes and methods.</p>
+<p>Providing types for the standard library is incredibly important! In completely
+untyped, unannotated Ruby codebases, people who try out Sorbet for the first
+time find that about 25% of call sites already have static type coverage. Why?
+Everyday Ruby code uses the standard library abundantly, and Sorbet includes
+type definitions for the standard library out of the box!</p>
+<p>Additionally, there will always be libraries that prefer not using type
+annotations. To integrate an untyped library into a typed Ruby codebase, there
+must be a place for these types to live outside of that project. In fact, we
+already have the <a href="https://github.com/sorbet/sorbet-typed">sorbet-typed</a> repo for this purpose.</p>
+<p>Thus, both Sorbet and Ruby 3 support type annotations in separate files (via RBI
+files and RBS files, respectively).</p>
+<h2><a class="anchor" aria-hidden="true" id="what-about-inline-type-annotations"></a><a href="#what-about-inline-type-annotations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What about inline type annotations?</h2>
+<p>There are people using Ruby who still prefer type annotations to live in the
+code itself. We’ve built Sorbet to cater to both groups: those who <strong>like and
+don’t like</strong> type annotations benefit from Sorbet.</p>
+<p>How? Sorbet implements a <a href="/docs/gradual">gradual type system</a>. Without any type annotations,
+Sorbet will do its best to understand and offer feedback on your code. With type
+annotations exclusively in separate files, Sorbet will understand more and offer
+better feedback. With inline type annotations, people can tell Sorbet every
+little detail about their code so Sorbet can offer incredible feedback. For
+these people, reading the types is as valuable as reading the code itself.</p>
+<p>Sorbet has always provided syntax for inline type annotations. Annotations
+aren’t required by Sorbet—they’re there for the people who want to empower
+Sorbet to help them even more. Whether you love type annotations or not, Sorbet
+still provides value.</p>
+<h2><a class="anchor" aria-hidden="true" id="why-are-inline-type-annotations-useful"></a><a href="#why-are-inline-type-annotations-useful" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why are inline type annotations useful?</h2>
+<p>As we mentioned above, for those teams and projects who really want static
+typing, inline type annotations become essential. Types carry intent, and there
+are frequently places where inferring the intent could be ambiguous. Consider
+this snippet:</p>
+<pre><code class="hljs css language-ruby">xs = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+xs &lt;&lt; <span class="hljs-literal">nil</span>
+
+<span class="hljs-comment"># what's the type of xs? 🤔</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Axs%20%3D%20%5B1%2C%202%2C%203%5D%0Axs%20%3C%3C%20nil">→ View on sorbet.run</a></p>
+<p>A type checker could infer one of two types here:</p>
+<ol>
+<li>either the programmer meant for <code>xs</code> to be an array of <code>Integer</code>'s and
+<code>nil</code>'s (i.e., <code>T::Array[T.nilable(Integer)]</code> in Sorbet’s syntax), or</li>
+<li>the programmer made a mistake, and didn’t intend to allow <code>nil</code>'s in <code>xs</code>
+(i.e., it was intended to be a <code>T::Array[Integer]</code>, and this code should
+report a static error).</li>
+</ol>
+<p>Any static checker must assume one of these outcomes, but there are times when
+either might make sense. Explicit annotations resolve these ambiguities. In this
+case, Sorbet assumes (2) by default, but other type systems do other things. For
+example, Flow <a href="https://flow.org/try/#0MYewdgzgLgBAHhGBeGBtAjAGhgJmwZgF0BuAKAQDoAHAVwgAsAKMGgG1YEpig">assumes (1) by default</a>.</p>
+<p>Here’s how to use an inline annotation in Sorbet to explicitly declare that (1)
+is intended:</p>
+<pre><code class="hljs css language-ruby">xs = T.let([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], T::Array[T.nilable(Integer)])
+xs &lt;&lt; <span class="hljs-literal">nil</span>
+
+<span class="hljs-comment"># the type of xs is unambiguous 👌</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Axs%20%3D%20T.let(%5B1%2C%202%2C%203%5D%2C%20T%3A%3AArray%5BT.nilable(Integer)%5D)%0Axs%20%3C%3C%20nil">→
+View on sorbet.run</a></p>
+<h2><a class="anchor" aria-hidden="true" id="inline-type-annotations-must-be-ruby-syntax"></a><a href="#inline-type-annotations-must-be-ruby-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Inline type annotations must be Ruby syntax</h2>
+<p>For the time being, Matz and the Ruby core team want to experiment with type
+annotations without changing Ruby syntax, because that would require everyone to
+upgrade to a specific Ruby version to benefit. Because Sorbet values inline type
+annotations, we embedded a type annotation language in Ruby with no syntax
+changes needed:</p>
+<pre><code class="hljs css language-ruby">extend T::Sig
+
+sig {params(<span class="hljs-symbol">strings:</span> T::Array[String]).returns(Integer)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">count_letters</span><span class="hljs-params">(strings)</span></span>
+  strings.map(&amp;<span class="hljs-symbol">:length</span>).sum
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams(strings%3A%20T%3A%3AArray%5BString%5D).returns(Integer)%7D%0Adef%20count_letters(strings)%0A%20%20strings.map(%26%3Alength).sum%0Aend">→
+View on sorbet.run</a></p>
+<p>Sorbet’s syntax is 100% valid Ruby, which has tons of benefits!</p>
+<ul>
+<li>Syntax highlighting for type annotations already works in 100% of Ruby
+editors.</li>
+<li>There’s no transpiler step required—Ruby code with Sorbet type annotations
+runs directly.</li>
+<li>Every RuboCop rule ever written works with Sorbet type annotations.</li>
+<li>Any Ruby IDE with Go to Definition already has Go to Definition on type
+annotations.</li>
+<li>Sorbet’s RBI files are just Ruby code with empty method bodies, reusing the
+inline syntax.</li>
+<li>It’s backwards compatible with all supported versions of Ruby.</li>
+</ul>
+<p>The obvious downside is that there are prettier inline type annotation syntaxes
+that are not valid Ruby. The Ruby grammar is not so complicated that it couldn’t
+be changed to support type annotations. But again, this syntax does so well
+<strong>because</strong> it doesn’t fracture the Ruby community with incompatible syntax
+changes.</p>
+<h2><a class="anchor" aria-hidden="true" id="sorbet-is-committed-to-improving"></a><a href="#sorbet-is-committed-to-improving" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet is committed to improving</h2>
+<p>At the end of the day, it’s not a choice between Ruby 3 or Sorbet—you can have
+both at the same time. We love that the Ruby core team is bringing types to
+Ruby, and we’re happy to incorporate their work into Sorbet. We plan to give
+back too: it’s likely that the initial release of RBS files for the Ruby
+standard library will be created by converting Sorbet’s already extensive
+standard library annotations into the RBS format.</p>
+<p>At the same time, we’re hard at work improving Sorbet. Stripe has millions of
+lines of Ruby code and that number is only growing. We’re nearing our <a href="https://en.wikipedia.org/wiki/High_availability#Percentage_calculation">second
+nine</a> of percentage of files at <code># typed: true</code> or above—which is to say, those
+millions of lines of Ruby use a lot of types. We have hundreds of engineers
+writing Ruby and using our Sorbet-powered IDE every day.</p>
+<p>Sorbet type checks these millions of lines of Ruby code in seconds, helps
+prevent countless production incidents, and helps new Stripe engineers spin up
+fast. And it does all this today! If you want to try it out, check out the docs:</p>
+<p><a href="https://sorbet.org/docs/adopting">→ Adopting Sorbet in an Existing Codebase</a></p>
+<p>or play around with small Sorbet examples online:</p>
+<p><a href="https://sorbet.run">→ Sorbet playground</a></p>
+<p>Sorbet already has extensive type annotations for the Ruby standard library,
+thanks in large part to the nearly 200 contributors to Sorbet that you can find
+<a href="https://github.com/sorbet/sorbet/graphs/contributors">on GitHub</a>, the vast majority of whom come to Sorbet from outside
+of Stripe and the Sorbet team.</p>
+<p>We’re happy that the Ruby core team is focused on continually improving Ruby,
+because we are too. ❤️</p>
+<p>— Jake “jez” Zimmerman, on behalf of the Sorbet team</p>
+</span></div></div><div class="blogSocialSection"></div></div><div class="blog-recent"><a class="button" href="/blog/">Recent Posts</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#rbi-rbs">RBI? RBS?</a></li><li><a href="#wait-a-wholly-separate-file">Wait, a wholly separate file?</a></li><li><a href="#what-about-inline-type-annotations">What about inline type annotations?</a></li><li><a href="#why-are-inline-type-annotations-useful">Why are inline type annotations useful?</a></li><li><a href="#inline-type-annotations-must-be-ruby-syntax">Inline type annotations must be Ruby syntax</a></li><li><a href="#sorbet-is-committed-to-improving">Sorbet is committed to improving</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'fa1ec885ab70787d636759b88e509b92',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
