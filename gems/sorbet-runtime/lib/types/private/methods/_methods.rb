@@ -255,7 +255,7 @@ module T::Private::Methods
       # Note, this logic is duplicated above, make sure to keep changes in sync.
       if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         # Checked, so copy the original signature to the aliased copy.
-        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, aliasing_method)
+        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, original_method)
       else
         # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
         aliasing_mod.send(:alias_method, callee, original_method.name)

@@ -154,6 +154,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, subclass.new.foo)
         assert_equal(:foo, subclass.new.bar)
+        assert_equal(:foo, superclass.new.foo)
       end
     end
 
@@ -258,6 +259,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
+        assert_equal(:foo, superclass.foo)
       end
     end
   end
