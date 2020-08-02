@@ -79,6 +79,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_raises(TypeError) do
           klass.new.bar(1)
         end
+
+        # Should use fast path
+        obj = klass.new
+        allocs = counting_allocations {obj.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias_method without runtime checking' do
@@ -117,6 +122,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_raises(TypeError) do
           klass.new.bar(1)
         end
+
+        # Should use fast path
+        obj = klass.new
+        allocs = counting_allocations {obj.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias without runtime checking' do
