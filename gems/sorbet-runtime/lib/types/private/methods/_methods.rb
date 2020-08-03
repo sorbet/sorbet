@@ -272,15 +272,8 @@ module T::Private::Methods
     receiving_method = receiving_class.instance_method(callee)
     if receiving_method != original_method && receiving_method.original_name == original_method.name
       aliasing_mod = receiving_method.owner
-
-      # Note, this logic is duplicated above, make sure to keep changes in sync.
-      if method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-        # Checked, so copy the original signature to the aliased copy.
-        T::Private::Methods.unwrap_method(aliasing_mod, method_sig, original_method)
-      else
-        # Unchecked, so just make `alias_method` behave as if it had been called pre-sig.
-        aliasing_mod.send(:alias_method, callee, original_method.name)
-      end
+      method_sig = method_sig.as_alias(callee)
+      unwrap_method(aliasing_mod, method_sig, original_method)
     end
 
     method_sig
@@ -304,7 +297,7 @@ module T::Private::Methods
         Signature.new_untyped(method: original_method)
       end
 
-    unwrap_method(hook_mod, signature, original_method)
+    unwrap_method(signature.method.owner, signature, original_method)
     signature
   end
 
@@ -356,8 +349,8 @@ module T::Private::Methods
     end
   end
 
-  def self.unwrap_method(hook_mod, signature, original_method)
-    maybe_wrapped_method = CallValidation.wrap_method_if_needed(signature.method.owner, signature, original_method)
+  def self.unwrap_method(mod, signature, original_method)
+    maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
 

@@ -121,6 +121,15 @@ class T::Private::Methods::Signature
     end
   end
 
+  attr_writer :method_name
+  protected :method_name=
+
+  def as_alias(alias_name)
+    new_sig = clone
+    new_sig.method_name = alias_name
+    new_sig
+  end
+
   def arg_count
     @arg_types.length
   end
