@@ -2189,6 +2189,20 @@ void lexer::set_state_expr_value() {
       # KEYWORDS AND PUNCTUATION
       #
 
+      # Ruby >= 2.7 emits it as two tPIPE terminals
+      # while Ruby < 2.7 as a single tOROP (like in `a || b`)
+      '||'
+      => {
+        if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tPIPE, tok(ts, ts + 1), ts, ts + 1);
+          fhold;
+          fnext expr_beg; fbreak;
+        } else {
+          p -= 2;
+          fgoto expr_end;
+        }
+      };
+
       # a({b=>c})
       e_lbrace
       => {

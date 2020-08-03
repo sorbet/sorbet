@@ -1910,11 +1910,6 @@ opt_block_args_tail:
                       driver.current_arg_stack.set("");
                       DIAGCHECK();
                     }
-                | tOROP
-                    {
-                      $$ = driver.build.args(self, $1, nullptr, $1, true);
-                      DIAGCHECK();
-                    }
                 | tPIPE block_param opt_bv_decl tPIPE
                     {
                       auto &params = $2;
