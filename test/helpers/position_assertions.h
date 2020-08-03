@@ -32,6 +32,10 @@ public:
     static std::unique_ptr<Range> makeRange(int sourceLine, int startChar = 0,
                                             int endChar = RangeAssertion::END_OF_LINE_POS);
 
+    static bool compareByRange(const std::shared_ptr<RangeAssertion> &a, const std::shared_ptr<RangeAssertion> &b) {
+        return a->cmp(*b) < 0;
+    }
+
     /**
      * Filters a vector of assertions and returns only ErrorAssertions.
      */
@@ -102,8 +106,9 @@ public:
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
                  int version, bool isDefOfSelf);
 
-    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, const Location &queryLoc);
+    static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                      LSPWrapper &wrapper, int &nextId, const Location &queryLoc,
+                      const std::vector<std::shared_ptr<DefAssertion>> &definitions);
 
     std::string toString() const override;
 };
