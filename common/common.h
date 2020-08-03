@@ -32,22 +32,32 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 
+// A faster version of ENFORCE that does not emit a timer. Useful for checks that happen extremely frequently and
+// are O(1). Please avoid using unless ENFORCE shows up in profiles.
+#define ENFORCE_FAST(x, ...)                                                                                \
+    do {                                                                                                    \
+        if (::sorbet::debug_mode) {                                                                         \
+            if (!(x)) {                                                                                     \
+                ::sorbet::Exception::failInFuzzer();                                                        \
+                if (stopInDebugger()) {                                                                     \
+                    (void)!(x);                                                                             \
+                }                                                                                           \
+                ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
+            }                                                                                               \
+        }                                                                                                   \
+    } while (false);
+
 // Used for cases like https://xkcd.com/2200/
 // where there is some assumption that you believe should always hold.
 // Please use this to explicitly write down what assumptions was the code written under.
 // One day they might be violated and you'll help the next person debug the issue.
-#define ENFORCE(x, ...)                                                                                           \
+// Emits a timer so that expensive checks show up in traces in debug builds.
+#define ENFORCE(...)                                                                                              \
     do {                                                                                                          \
         if (::sorbet::debug_mode) {                                                                               \
             auto __enforceTimer =                                                                                 \
                 ::sorbet::Timer(*(::spdlog::default_logger_raw()), "ENFORCE(" __FILE__ ":" QUOTED(__LINE__) ")"); \
-            if (!(x)) {                                                                                           \
-                ::sorbet::Exception::failInFuzzer();                                                              \
-                if (stopInDebugger()) {                                                                           \
-                    (void)!(x);                                                                                   \
-                }                                                                                                 \
-                ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__));       \
-            }                                                                                                     \
+            ENFORCE_FAST(__VA_ARGS__);                                                                            \
         }                                                                                                         \
     } while (false);
 
