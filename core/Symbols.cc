@@ -138,22 +138,22 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
-    ENFORCE(this->exists());
+    ENFORCE_FAST(this->exists());
     return dataAllowingNone(gs);
 }
 
 SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
-    ENFORCE(_id < gs.symbols.size());
+    ENFORCE_FAST(_id < gs.symbols.size());
     return SymbolData(gs.symbols[this->_id], gs);
 }
 
 const SymbolData SymbolRef::data(const GlobalState &gs) const {
-    ENFORCE(this->exists());
+    ENFORCE_FAST(this->exists());
     return dataAllowingNone(gs);
 }
 
 const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
-    ENFORCE(_id < gs.symbols.size());
+    ENFORCE_FAST(_id < gs.symbols.size());
     return SymbolData(const_cast<Symbol &>(gs.symbols[this->_id]), gs);
 }
 
