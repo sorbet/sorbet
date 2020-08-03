@@ -1281,7 +1281,7 @@ SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs),
 SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs) : gs(gs), symbolCountAtCreation(gs.symbolsUsed()) {}
 
 void SymbolDataDebugCheck::check() const {
-    ENFORCE(symbolCountAtCreation == gs.symbolsUsed());
+    ENFORCE_FAST(symbolCountAtCreation == gs.symbolsUsed());
 }
 
 Symbol *SymbolData::operator->() {
