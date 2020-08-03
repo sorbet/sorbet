@@ -297,7 +297,7 @@ module T::Private::Methods
         Signature.new_untyped(method: original_method)
       end
 
-    unwrap_method(hook_mod, signature, original_method)
+    unwrap_method(signature.method.owner, signature, original_method)
     signature
   end
 
@@ -349,8 +349,8 @@ module T::Private::Methods
     end
   end
 
-  def self.unwrap_method(hook_mod, signature, original_method)
-    maybe_wrapped_method = CallValidation.wrap_method_if_needed(signature.method.owner, signature, original_method)
+  def self.unwrap_method(mod, signature, original_method)
+    maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
 

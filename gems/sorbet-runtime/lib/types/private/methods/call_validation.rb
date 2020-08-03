@@ -12,9 +12,7 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
-    # Use `original_method.name` not `method_sig.method_name` to get visibility
-    # so that we handle aliases correctly (we want the visibility before aliasing).
-    original_visibility = visibility_method_name(mod, original_method.name)
+    original_visibility = visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       T::Private::ClassUtils.replace_method(mod, method_sig.method_name) do |*args, &blk|
         # TODO: write a cop to ensure that abstract methods have an empty body

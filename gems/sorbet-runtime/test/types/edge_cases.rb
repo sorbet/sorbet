@@ -165,6 +165,16 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.new.foo)
         assert_equal(:foo, subclass.new.bar)
         assert_equal(:foo, superclass.new.foo)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          subclass.new.bar(1)
+        end
+
+        # Should use fast path
+        obj = subclass.new
+        allocs = counting_allocations {obj.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias to superclass method without runtime checking' do
@@ -184,6 +194,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.new.foo)
         assert_equal(:foo, subclass.new.bar)
         assert_equal(:foo, superclass.new.foo)
+
+        # Shouldn't add overhead
+        obj = subclass.new
+        allocs = counting_allocations {obj.bar}
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to included method with runtime checking' do
@@ -203,6 +218,16 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, klass.new.foo)
         assert_equal(:foo, klass.new.bar)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.new.bar(1)
+        end
+
+        # Should use fast path
+        obj = klass.new
+        allocs = counting_allocations {obj.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias_method to included method without runtime checking' do
@@ -222,6 +247,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, klass.new.foo)
         assert_equal(:foo, klass.new.bar)
+
+        # Shouldn't add overhead
+        obj = klass.new
+        allocs = counting_allocations {obj.bar}
+        assert_equal(0, allocs)
       end
     end
 
@@ -230,9 +260,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol)}
-          def self.foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol)}
+          def self.foo(x=:foo)
+            x
           end
           class << self
             alias_method :bar, :foo
@@ -240,6 +270,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal(:foo, klass.bar)
         assert_equal(:foo, klass.foo)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.bar(1)
+        end
+
+        # Should use fast path
+        allocs = counting_allocations {klass.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias_method without runtime checking' do
@@ -256,14 +295,20 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal(:foo, klass.bar)
         assert_equal(:foo, klass.foo)
+
+        # Shouldn't add overhead
+        klass.bar # Need extra call since first one came before `foo` unwrap
+        allocs = counting_allocations {klass.bar}
+        assert_equal(0, allocs)
       end
 
       it 'handles alias with runtime checking' do
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          def self.foo
-            :foo
+          sig {params(x: Symbol).returns(Symbol)}
+          def self.foo(x=:foo)
+            x
           end
           class << self
             alias :bar :foo
@@ -271,12 +316,22 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal(:foo, klass.bar)
         assert_equal(:foo, klass.foo)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.bar(1)
+        end
+
+        # Should use fast path
+        allocs = counting_allocations {klass.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias without runtime checking' do
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
+          sig {returns(Symbol).checked(:never)}
           def self.foo
             :foo
           end
@@ -286,6 +341,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal(:foo, klass.bar)
         assert_equal(:foo, klass.foo)
+
+        # Shouldn't add overhead
+        klass.bar # Need extra call since first one came before `foo` unwrap
+        allocs = counting_allocations {klass.bar}
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to superclass method with runtime checking' do
@@ -307,6 +367,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
         assert_equal(:foo, superclass.foo)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          subclass.bar(1)
+        end
+
+        # Should use fast path
+        allocs = counting_allocations {subclass.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias_method to superclass method without runtime checking' do
@@ -328,6 +397,10 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, subclass.foo)
         assert_equal(:foo, subclass.bar)
         assert_equal(:foo, superclass.foo)
+
+        # Shouldn't add overhead
+        allocs = counting_allocations {subclass.bar}
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to extended method with runtime checking' do
@@ -350,6 +423,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, klass.foo)
         assert_equal(:foo, klass.bar)
+
+        # Should still validate
+        assert_raises(TypeError) do
+          klass.bar(1)
+        end
+
+        # Should use fast path
+        allocs = counting_allocations {klass.bar}
+        assert(allocs < 5)
       end
 
       it 'handles alias_method to extended method without runtime checking' do
@@ -372,6 +454,10 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         assert_equal(:foo, klass.foo)
         assert_equal(:foo, klass.bar)
+
+        # Shouldn't add overhead
+        allocs = counting_allocations {klass.bar}
+        assert_equal(0, allocs)
       end
 
       it 'handles method reference without sig' do
