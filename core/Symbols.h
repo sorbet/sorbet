@@ -118,12 +118,12 @@ public:
     TypePtr externalType(const GlobalState &gs) const;
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
     inline const InlinedVector<SymbolRef, 4> &mixins() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
@@ -190,52 +190,52 @@ public:
     }
 
     inline bool isOverloaded() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERLOADED) != 0;
     }
 
     inline bool isAbstract() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_ABSTRACT) != 0;
     }
 
     inline bool isIncompatibleOverride() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_INCOMPATIBLE_OVERRIDE) != 0;
     }
 
     inline bool isGenericMethod() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_GENERIC) != 0;
     }
 
     inline bool isOverridable() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDABLE) != 0;
     }
 
     inline bool isOverride() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
     }
 
     inline bool isCovariant() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
+        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
         return (flags & Symbol::Flags::TYPE_COVARIANT) != 0;
     }
 
     inline bool isInvariant() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
+        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
         return (flags & Symbol::Flags::TYPE_INVARIANT) != 0;
     }
 
     inline bool isContravariant() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
+        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
         return (flags & Symbol::Flags::TYPE_CONTRAVARIANT) != 0;
     }
 
     inline bool isFixed() const {
-        ENFORCE(isTypeArgument() || isTypeMember());
+        ENFORCE_NO_TIMER(isTypeArgument() || isTypeMember());
         return (flags & Symbol::Flags::TYPE_FIXED) != 0;
     }
 
@@ -250,22 +250,22 @@ public:
     }
 
     inline bool isPublic() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return !isProtected() && !isPrivate();
     }
 
     inline bool isProtected() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PROTECTED) != 0;
     }
 
     inline bool isPrivate() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
     inline bool isClassOrModuleModule() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
             return true;
         if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS)
@@ -274,7 +274,7 @@ public:
     }
 
     inline bool isClassModuleSet() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return flags & (Symbol::Flags::CLASS_OR_MODULE_MODULE | Symbol::Flags::CLASS_OR_MODULE_CLASS);
     }
 
@@ -288,22 +288,22 @@ public:
     }
 
     inline bool isClassOrModuleInterface() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_INTERFACE) != 0;
     }
 
     inline bool isClassOrModuleLinearizationComputed() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_LINEARIZATION_COMPUTED) != 0;
     }
 
     inline bool isClassOrModuleFinal() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_FINAL) != 0;
     }
 
     inline bool isClassOrModuleSealed() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_SEALED) != 0;
     }
 
@@ -539,7 +539,7 @@ public:
     SymbolRef superClassOrRebind; // method arugments store rebind here
 
     inline SymbolRef superClass() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_NO_TIMER(isClassOrModule());
         return superClassOrRebind;
     }
 
@@ -554,7 +554,7 @@ public:
     }
 
     SymbolRef rebind() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return superClassOrRebind;
     }
 
@@ -563,7 +563,7 @@ public:
     TypePtr resultType;
 
     bool hasSig() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return resultType != nullptr;
     }
 
@@ -580,12 +580,12 @@ public:
     };
 
     ArgumentsStore &arguments() {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }
 
     const ArgumentsStore &arguments() const {
-        ENFORCE(isMethod());
+        ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }
 

@@ -272,9 +272,9 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
 // In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
 // The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
 ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
-    ENFORCE(ofClass.exists());
+    ENFORCE_NO_TIMER(ofClass.exists());
     auto data = ofClass.data(gs);
-    ENFORCE(data->isClassOrModule());
+    ENFORCE_NO_TIMER(data->isClassOrModule());
     if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
@@ -290,7 +290,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 newMixins.emplace_back(mixin);
                 continue;
             }
-            ENFORCE(mixin.data(gs)->isClassOrModule());
+            ENFORCE_NO_TIMER(mixin.data(gs)->isClassOrModule());
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
@@ -320,7 +320,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             }
         }
     }
-    ENFORCE(data->isClassOrModuleLinearizationComputed());
+    ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
     return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
