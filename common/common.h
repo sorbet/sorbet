@@ -34,7 +34,7 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 
 // A faster version of ENFORCE that does not emit a timer. Useful for checks that happen extremely frequently and
 // are O(1). Please avoid using unless ENFORCE shows up in profiles.
-#define ENFORCE_FAST(x, ...)                                                                                \
+#define ENFORCE_NO_TIMER(x, ...)                                                                            \
     do {                                                                                                    \
         if (::sorbet::debug_mode) {                                                                         \
             if (!(x)) {                                                                                     \
@@ -57,7 +57,7 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
         if (::sorbet::debug_mode) {                                                                               \
             auto __enforceTimer =                                                                                 \
                 ::sorbet::Timer(*(::spdlog::default_logger_raw()), "ENFORCE(" __FILE__ ":" QUOTED(__LINE__) ")"); \
-            ENFORCE_FAST(__VA_ARGS__);                                                                            \
+            ENFORCE_NO_TIMER(__VA_ARGS__);                                                                        \
         }                                                                                                         \
     } while (false);
 

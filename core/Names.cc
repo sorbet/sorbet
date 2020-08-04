@@ -153,21 +153,21 @@ void Name::sanityCheck(const GlobalState &gs) const {
     NameRef current = this->ref(gs);
     switch (this->kind) {
         case NameKind::UTF8:
-            ENFORCE_FAST(current == const_cast<GlobalState &>(gs).enterNameUTF8(this->raw.utf8),
-                         "Name table corrupted, re-entering UTF8 name gives different id");
+            ENFORCE_NO_TIMER(current == const_cast<GlobalState &>(gs).enterNameUTF8(this->raw.utf8),
+                             "Name table corrupted, re-entering UTF8 name gives different id");
             break;
         case NameKind::UNIQUE: {
-            ENFORCE_FAST(this->unique.original._id < current._id, "unique name id not bigger than original");
-            ENFORCE_FAST(this->unique.num > 0, "unique num == 0");
+            ENFORCE_NO_TIMER(this->unique.original._id < current._id, "unique name id not bigger than original");
+            ENFORCE_NO_TIMER(this->unique.num > 0, "unique num == 0");
             NameRef current2 = const_cast<GlobalState &>(gs).freshNameUnique(this->unique.uniqueNameKind,
                                                                              this->unique.original, this->unique.num);
-            ENFORCE_FAST(current == current2, "Name table corrupted, re-entering UNIQUE name gives different id");
+            ENFORCE_NO_TIMER(current == current2, "Name table corrupted, re-entering UNIQUE name gives different id");
             break;
         }
         case NameKind::CONSTANT:
-            ENFORCE_FAST(this->cnst.original._id < current._id, "constant name id not bigger than original");
-            ENFORCE_FAST(current == const_cast<GlobalState &>(gs).enterNameConstant(this->cnst.original),
-                         "Name table corrupted, re-entering CONSTANT name gives different id");
+            ENFORCE_NO_TIMER(this->cnst.original._id < current._id, "constant name id not bigger than original");
+            ENFORCE_NO_TIMER(current == const_cast<GlobalState &>(gs).enterNameConstant(this->cnst.original),
+                             "Name table corrupted, re-entering CONSTANT name gives different id");
             break;
     }
 }

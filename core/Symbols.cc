@@ -138,22 +138,22 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
-    ENFORCE_FAST(this->exists());
+    ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
 }
 
 SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
-    ENFORCE_FAST(_id < gs.symbols.size());
+    ENFORCE_NO_TIMER(_id < gs.symbols.size());
     return SymbolData(gs.symbols[this->_id], gs);
 }
 
 const SymbolData SymbolRef::data(const GlobalState &gs) const {
-    ENFORCE_FAST(this->exists());
+    ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
 }
 
 const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
-    ENFORCE_FAST(_id < gs.symbols.size());
+    ENFORCE_NO_TIMER(_id < gs.symbols.size());
     return SymbolData(const_cast<Symbol &>(gs.symbols[this->_id]), gs);
 }
 
@@ -1086,20 +1086,20 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     if (current != Symbols::root()) {
         SymbolRef current2 =
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
-        ENFORCE_FAST(current == current2);
+        ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
-            ENFORCE_FAST(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
-            ENFORCE_FAST(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) +
-                                                " corresponds to a core::Symbols::noSymbol()");
+            ENFORCE_NO_TIMER(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
+            ENFORCE_NO_TIMER(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) +
+                                                    " corresponds to a core::Symbols::noSymbol()");
         }
     }
     if (this->isMethod()) {
         if (isa_type<AliasType>(this->resultType.get())) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE_FAST(this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));
         } else {
-            ENFORCE_FAST(!this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(!this->arguments().empty(), this->show(gs));
         }
     }
 }
@@ -1281,7 +1281,7 @@ SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs),
 SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs) : gs(gs), symbolCountAtCreation(gs.symbolsUsed()) {}
 
 void SymbolDataDebugCheck::check() const {
-    ENFORCE_FAST(symbolCountAtCreation == gs.symbolsUsed());
+    ENFORCE_NO_TIMER(symbolCountAtCreation == gs.symbolsUsed());
 }
 
 Symbol *SymbolData::operator->() {
