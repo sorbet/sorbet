@@ -485,6 +485,22 @@ module Opus::Types::Test
         end
         assert_match(/\AParameter 'c': Expected type Integer, got type String with value "bye"/, err.message)
       end
+
+
+      it 'raises an error when two parameters have the same name' do
+
+        @mod.sig { params(_: Integer, _: Integer).returns(String) }
+        def @mod.bar(_, _)
+          ""
+        end
+
+        err = assert_raises(RuntimeError) do
+          @mod.bar(0, 0)
+        end
+
+        lines = err.message.split("\n")
+        assert_equal("The declaration for `bar` has arguments with duplicate names", lines[0])
+      end
     end
 
     # These tests should behave identically with and without a declaration
