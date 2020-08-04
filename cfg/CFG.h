@@ -41,7 +41,7 @@ public:
 
     std::unique_ptr<Instruction> value;
 
-    Binding(core::LocalVariable bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
+    Binding(LocalRef bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
@@ -68,8 +68,8 @@ public:
         counterInc("basicblocks");
     };
 
-    std::string toString(const core::GlobalState &gs) const;
-    std::string showRaw(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
 };
 
 class CFGContext;
