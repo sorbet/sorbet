@@ -1086,20 +1086,20 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     if (current != Symbols::root()) {
         SymbolRef current2 =
             const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
-        ENFORCE(current == current2);
+        ENFORCE_FAST(current == current2);
         for (auto &e : members()) {
-            ENFORCE(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
-            ENFORCE(e.second.exists(),
-                    name.toString(gs) + "." + e.first.toString(gs) + " corresponds to a core::Symbols::noSymbol()");
+            ENFORCE_FAST(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
+            ENFORCE_FAST(e.second.exists(), name.toString(gs) + "." + e.first.toString(gs) +
+                                                " corresponds to a core::Symbols::noSymbol()");
         }
     }
     if (this->isMethod()) {
         if (isa_type<AliasType>(this->resultType.get())) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE(this->arguments().empty(), this->show(gs));
+            ENFORCE_FAST(this->arguments().empty(), this->show(gs));
         } else {
-            ENFORCE(!this->arguments().empty(), this->show(gs));
+            ENFORCE_FAST(!this->arguments().empty(), this->show(gs));
         }
     }
 }

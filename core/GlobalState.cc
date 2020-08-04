@@ -868,19 +868,19 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
 }
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
-    ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
-    ENFORCE(name.exists(), "entering symbol with non-existing name");
+    ENFORCE_FAST(owner.exists(), "entering symbol in to non-existing owner");
+    ENFORCE_FAST(name.exists(), "entering symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
-        ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
+        ENFORCE_FAST((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
         return store;
     }
 
-    ENFORCE(!symbolTableFrozen);
+    ENFORCE_FAST(!symbolTableFrozen);
 
     SymbolRef ret = SymbolRef(this, symbols.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on symbol invalidates `store`
@@ -1472,7 +1472,7 @@ void GlobalState::sanityCheck() const {
             continue;
         }
         const Name &nm = names[ent.second];
-        ENFORCE(ent.first == nm.hash(*this), "name hash table corruption");
+        ENFORCE_FAST(ent.first == nm.hash(*this), "name hash table corruption");
     }
 }
 

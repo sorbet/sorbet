@@ -554,7 +554,7 @@ public:
     }
 
     SymbolRef rebind() const {
-        ENFORCE(isMethod());
+        ENFORCE_FAST(isMethod());
         return superClassOrRebind;
     }
 
@@ -563,7 +563,7 @@ public:
     TypePtr resultType;
 
     bool hasSig() const {
-        ENFORCE(isMethod());
+        ENFORCE_FAST(isMethod());
         return resultType != nullptr;
     }
 
@@ -580,12 +580,12 @@ public:
     };
 
     ArgumentsStore &arguments() {
-        ENFORCE(isMethod());
+        ENFORCE_FAST(isMethod());
         return arguments_;
     }
 
     const ArgumentsStore &arguments() const {
-        ENFORCE(isMethod());
+        ENFORCE_FAST(isMethod());
         return arguments_;
     }
 
