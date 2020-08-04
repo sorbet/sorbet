@@ -6,8 +6,11 @@
 namespace sorbet::compiler {
 
 enum class FunctionType {
-    // Top-level methods
-    TopLevel,
+    // A normal method
+    Method,
+
+    // A static-init method
+    StaticInit,
 
     // Blocks used within a method
     Block,
@@ -27,7 +30,9 @@ enum class FunctionType {
 
 constexpr bool functionTypePushesFrame(FunctionType ty) {
     switch (ty) {
-        case FunctionType::TopLevel:
+        case FunctionType::Method:
+            return false;
+        case FunctionType::StaticInit:
             return false;
         case FunctionType::Block:
             return false;

@@ -30,7 +30,7 @@ namespace {
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
-    ENFORCE(ty == FunctionType::Block || ty == FunctionType::TopLevel);
+    ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInit);
 
     if (ty == FunctionType::Block) {
         auto blockLink = irctx.blockLinks[blockId];
@@ -50,7 +50,8 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
     llvm::IRBuilder<> builder = static_cast<llvm::IRBuilder<> &>(build);
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
-        case FunctionType::TopLevel:
+        case FunctionType::Method:
+        case FunctionType::StaticInit:
         case FunctionType::Block:
         case FunctionType::Rescue:
         case FunctionType::Ensure: {
@@ -86,7 +87,8 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
         builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
         setupStackFrame(cs, md, irctx, builder, rubyBlockId);
         auto lastLoc = core::Loc::none();
-        Payload::setLineNumber(cs, builder, core::Loc(cs.file, md.loc), md.symbol, lastLoc,
+        auto startLoc = IREmitterHelpers::getMethodStart(cs, md.symbol);
+        Payload::setLineNumber(cs, builder, core::Loc(cs.file, md.loc), startLoc, lastLoc,
                                irctx.iseqEncodedPtrsByFunction[rubyBlockId],
                                irctx.lineNumberPtrsByFunction[rubyBlockId]);
     }
@@ -106,7 +108,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
         IREmitterHelpers::emitDebugLoc(cs, builder, irctx, rubyBlockId, loc);
 
         auto blockType = irctx.rubyBlockType[rubyBlockId];
-        if (blockType == FunctionType::TopLevel || blockType == FunctionType::Block) {
+        if (blockType == FunctionType::Method || blockType == FunctionType::StaticInit ||
+            blockType == FunctionType::Block) {
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
             auto maxPositionalArgCount = 0;
             auto minPositionalArgCount = 0;
@@ -459,7 +462,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
         }
 
         switch (blockType) {
-            case FunctionType::TopLevel:
+            case FunctionType::Method:
+            case FunctionType::StaticInit:
                 // jump to sig verification that will come before user body
                 builder.CreateBr(irctx.sigVerificationBlock);
                 break;
@@ -501,6 +505,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
     UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
+    auto startLoc = IREmitterHelpers::getMethodStart(base, cfg.symbol);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyBlockId]);
@@ -519,7 +524,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
             for (cfg::Binding &bind : bb->exprs) {
                 auto loc = core::Loc(cs.file, bind.loc);
 
-                lastLoc = Payload::setLineNumber(cs, builder, loc, cfg.symbol, lastLoc,
+                lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
                                                  irctx.iseqEncodedPtrsByFunction[bb->rubyBlockId],
                                                  irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
 
@@ -556,7 +561,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         isTerminated = true;
                         auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                         switch (irctx.rubyBlockType[bb->rubyBlockId]) {
-                            case FunctionType::TopLevel: {
+                            case FunctionType::Method:
+                            case FunctionType::StaticInit: {
                                 Payload::varSet(cs, returnValue(cs), var, builder, irctx, bb->rubyBlockId);
                                 builder.CreateBr(irctx.postProcessBlock);
                                 break;
@@ -724,7 +730,8 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
         builder.SetInsertPoint(irctx.blockExitMapping[rubyBlockId]);
 
         switch (irctx.rubyBlockType[rubyBlockId]) {
-            case FunctionType::TopLevel:
+            case FunctionType::Method:
+            case FunctionType::StaticInit:
                 builder.CreateUnreachable();
                 break;
 
@@ -870,7 +877,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     auto isRoot = owner == core::Symbols::rootSingleton();
     llvm::Function *entryFunc;
 
-    if (IREmitterHelpers::isStaticInit(cs, sym)) {
+    if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {
         if (!isRoot) {
             return;
         }
@@ -894,7 +901,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     auto bb = llvm::BasicBlock::Create(cs, "entry", entryFunc);
     builder.SetInsertPoint(bb);
 
-    if (IREmitterHelpers::isStaticInit(cs, sym)) {
+    if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {
         // We include sorbet_version.c when compiling sorbet_llvm itself to get the expected version.
         // The actual version will be linked into libruby.so and compared against at runtime.
         auto compileTimeBuildSCMRevision = sorbet_getBuildSCMRevision();

@@ -56,7 +56,18 @@ public:
 
 class IREmitterHelpers {
 public:
-    static bool isStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
+    static bool isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
+
+    // Returns a core::Loc whose start and end positions containt the bounds of the method sym.
+    static core::Loc getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::Loc declLoc,
+                                         core::LocOffsets offsets);
+
+    // Returns a core::Loc whose begin pos contains the start line of the method.
+    static core::Loc getMethodStart(const core::GlobalState &gs, core::SymbolRef sym) {
+        auto loc = sym.data(gs)->loc();
+        return getMethodLineBounds(gs, sym, loc, loc.offsets());
+    }
+
     static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym);

@@ -17,6 +17,8 @@ sed -i'.bak' 's/define i64\*\* @sorbet_/define available_externally i64\*\* @sor
 sed -i'.bak' 's/define zeroext i1 @sorbet_/define available_externally zeroext i1 @sorbet_/g' "$payload"
 sed -i'.bak' 's/define void @sorbet_/define available_externally void @sorbet_/g' "$payload"
 
+sed -i'.bak' 's/define %struct.rb_control_frame_struct\* @sorbet_/define available_externally %struct.rb_control_frame_struct\* @sorbet_/g' "$payload"
+
 # mark class constants as, well, constant.
 
 # quoting spec

@@ -277,7 +277,8 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
     auto *et = cs.getRubyExceptionFFIType();
     for (int i = 0; i <= cfg.maxRubyBlockId; i++) {
         switch (blockTypes[i]) {
-            case FunctionType::TopLevel:
+            case FunctionType::Method:
+            case FunctionType::StaticInit:
                 funcs[i] = func;
                 break;
 
@@ -338,10 +339,24 @@ int resolveParent(const vector<FunctionType> &blockTypes, const vector<int> &blo
 
 // Returns the mapping of ruby block id to function type, as well as the mapping from basic block to exception handling
 // body block id.
-void determineBlockTypes(cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &blockParents,
+void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &blockParents,
                          vector<int> &exceptionHandlingBlockHeaders, vector<int> &basicBlockJumpOverrides) {
     // ruby block 0 is always the top-level of the method being compiled
-    blockTypes[0] = FunctionType::TopLevel;
+    if (cfg.symbol.data(cs)->name == core::Names::staticInit()) {
+        // NOTE: We're explicitly not using IREmitterHelpers::isFileOrClassStaticInit here, as we want to distinguish
+        // between the file-level and class/module static-init methods.
+        //
+        // When ruby runs the `Init_` function to initialize the whole object for this function it pushes a c frame for
+        // that function on the ruby stack, and we update that frame with the iseq that we make for tracking line
+        // numbers.  However when we run our static-init methods for classes and modules we call the c functions
+        // directly, and want to avoid mutating the ruby stack frame. Thus those functions get marked as StaticInit,
+        // while the file-level static-init gets marked as Method.
+        //
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/load.c#L1033-L1034
+        blockTypes[0] = FunctionType::StaticInit;
+    } else {
+        blockTypes[0] = FunctionType::Method;
+    }
 
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
@@ -432,7 +447,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<FunctionType> blockTypes(cfg.maxRubyBlockId + 1, FunctionType::Unused);
     vector<int> blockParents(cfg.maxRubyBlockId + 1, 0);
     vector<int> exceptionHandlingBlockHeaders(cfg.maxBasicBlockId + 1, 0);
-    determineBlockTypes(cfg, blockTypes, blockParents, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
+    determineBlockTypes(cs, cfg, blockTypes, blockParents, exceptionHandlingBlockHeaders, basicBlockJumpOverrides);
 
     vector<llvm::Function *> rubyBlock2Function(cfg.maxRubyBlockId + 1, nullptr);
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
@@ -461,7 +476,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                                                  nullptr, "callArgs");
         llvm::Value *localClosure = nullptr;
         switch (blockTypes[i]) {
-            case FunctionType::TopLevel:
+            case FunctionType::Method:
+            case FunctionType::StaticInit:
                 if (!escapedVariableIndices.empty())
                     localClosure = builder.CreateCall(
                         cs.module->getFunction("sorbet_allocClosureAsValue"),
@@ -667,15 +683,24 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + suffix;
 }
 
-bool IREmitterHelpers::isStaticInit(const core::GlobalState &cs, core::SymbolRef sym) {
+bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
     return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
            core::Names::staticInit();
 }
 
+core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::Loc declLoc,
+                                                core::LocOffsets offsets) {
+    if (IREmitterHelpers::isFileOrClassStaticInit(gs, sym)) {
+        return core::Loc(declLoc.file(), core::LocOffsets{0, offsets.endLoc});
+    } else {
+        return core::Loc(declLoc.file(), offsets);
+    }
+}
+
 namespace {
 llvm::GlobalValue::LinkageTypes getFunctionLinkageType(CompilerState &cs, core::SymbolRef sym) {
-    if (IREmitterHelpers::isStaticInit(cs, sym)) {
+    if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {
         // this is top level code that shoudln't be callable externally.
         // Even more, sorbet reuses symbols used for these and thus if we mark them non-private we'll get link errors
         return llvm::Function::InternalLinkage;

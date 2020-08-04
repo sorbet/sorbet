@@ -59,8 +59,8 @@ public:
                                  llvm::Value *rubySym);
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
-    static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc, core::SymbolRef sym,
-                                   core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr,
+    static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
+                                   core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr,
                                    llvm::AllocaInst *lineNumberPtr);
     static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
                                const IREmitterContext &irctx, int rubyBlockId);

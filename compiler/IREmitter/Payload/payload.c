@@ -895,7 +895,8 @@ extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const r
                                             VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp, int local_size,
                                             int stack_max);
 
-const VALUE **sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
+const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
+                                                   unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_control_frame_t *cfp = GET_EC()->cfp;
 
@@ -919,12 +920,12 @@ const VALUE **sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
         // We need to make sure to preserve the value of $! on the frame stack.
         VALUE currentException = rb_errinfo();
         VM_STACK_ENV_WRITE(GET_EC()->cfp->ep, VM_ENV_INDEX_LAST_LVAR, currentException);
-    } else {
+    } else if (!isClassOrModuleStaticInit) {
         cfp->iseq = iseq;
         VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
     }
 
-    return &cfp->pc;
+    return cfp;
 }
 
 extern void rb_vm_pop_frame(rb_execution_context_t *ec);
@@ -933,9 +934,12 @@ void sorbet_popRubyStack() {
     rb_vm_pop_frame(GET_EC());
 }
 
-const VALUE *sorbet_getIseqEncoded(unsigned char *iseqchar) {
-    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
-    return iseq->body->iseq_encoded;
+const VALUE **sorbet_getPc(rb_control_frame_t *cfp) {
+    return &cfp->pc;
+}
+
+const VALUE *sorbet_getIseqEncoded(rb_control_frame_t *cfp) {
+    return cfp->iseq->body->iseq_encoded;
 }
 
 void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation) {

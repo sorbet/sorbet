@@ -408,7 +408,8 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
                          int rubyBlockId) {
     auto &builder = builderCast(build);
     switch (irctx.rubyBlockType[rubyBlockId]) {
-        case FunctionType::TopLevel:
+        case FunctionType::Method:
+        case FunctionType::StaticInit:
             return builder.CreateCall(cs.module->getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
 
         case FunctionType::Block:
@@ -439,8 +440,9 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
     string_view funcName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
-        case FunctionType::TopLevel: {
-            if (IREmitterHelpers::isStaticInit(cs, md.symbol)) {
+        case FunctionType::Method:
+        case FunctionType::StaticInit: {
+            if (IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
                 funcName = "<top (required)>";
             } else {
                 funcName = md.symbol.data(cs)->name.data(cs)->shortName(cs);
@@ -499,7 +501,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs.withFunctionEntry(bei);
 
-    auto loc = core::Loc(md.declLoc.file(), md.loc);
+    auto loc = IREmitterHelpers::getMethodLineBounds(cs, md.symbol, md.declLoc, md.loc);
     auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
     auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
@@ -525,10 +527,17 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
                                int rubyBlockId) {
     auto name = IREmitterHelpers::getFunctionName(cs, md.symbol);
 
-    if (irctx.rubyBlockType[rubyBlockId] == FunctionType::TopLevel) {
-        return name;
-    } else {
-        return name + "$block_" + std::to_string(rubyBlockId);
+    switch (irctx.rubyBlockType[rubyBlockId]) {
+        case FunctionType::Method:
+        case FunctionType::StaticInit:
+            return name;
+
+        case FunctionType::Block:
+        case FunctionType::Rescue:
+        case FunctionType::Ensure:
+        case FunctionType::ExceptionBegin:
+        case FunctionType::Unused:
+            return name + "$block_" + std::to_string(rubyBlockId);
     }
 }
 
@@ -576,8 +585,12 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
-    auto pc = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"), {iseqType, stackFrame});
-    auto iseq_encoded = builder.CreateCall(cs.module->getFunction("sorbet_getIseqEncoded"), {stackFrame});
+    auto *isClassOrModuleStaticInit =
+        llvm::ConstantInt::get(cs, llvm::APInt(1, irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInit));
+    auto cfp = builder.CreateCall(cs.module->getFunction("sorbet_setRubyStackFrame"),
+                                  {isClassOrModuleStaticInit, iseqType, stackFrame});
+    auto pc = builder.CreateCall(cs.module->getFunction("sorbet_getPc"), {cfp});
+    auto iseq_encoded = builder.CreateCall(cs.module->getFunction("sorbet_getIseqEncoded"), {cfp});
     return {pc, iseq_encoded};
 }
 
@@ -604,7 +617,7 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
     return builderCast(build).CreateLoad(global, "<retry-singleton>");
 }
 
-core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::SymbolRef sym,
+core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::Loc methodStart,
                                  core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {
         return lastLoc;
@@ -614,7 +627,7 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     if (lastLoc.exists() && lastLoc.position(cs).first.line == lineno) {
         return lastLoc;
     }
-    auto offset = lineno - sym.data(cs)->loc().position(cs).first.line;
+    auto offset = lineno - methodStart.position(cs).first.line;
     builder.CreateCall(cs.module->getFunction("sorbet_setLineNumber"),
                        {llvm::ConstantInt::get(cs, llvm::APInt(32, offset)), builder.CreateLoad(iseqEncodedPtr),
                         builder.CreateLoad(lineNumberPtr)});
