@@ -118,12 +118,12 @@ public:
     TypePtr externalType(const GlobalState &gs) const;
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
-        ENFORCE(isClassOrModule());
+        ENFORCE_FAST(isClassOrModule());
         return mixins_;
     }
 
     inline const InlinedVector<SymbolRef, 4> &mixins() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_FAST(isClassOrModule());
         return mixins_;
     }
 
@@ -539,7 +539,7 @@ public:
     SymbolRef superClassOrRebind; // method arugments store rebind here
 
     inline SymbolRef superClass() const {
-        ENFORCE(isClassOrModule());
+        ENFORCE_FAST(isClassOrModule());
         return superClassOrRebind;
     }
 
