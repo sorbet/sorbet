@@ -154,6 +154,57 @@ public:
     }
 };
 
+class max_numparam_stack {
+    std::vector<int> stack;
+
+    friend class base_driver;
+
+public:
+    max_numparam_stack() = default;
+
+    void set_ordinary_params() {
+        set(-1);
+    }
+
+    bool has_ordinary_params() {
+        return top() < 0;
+    }
+
+    bool has_numparams() {
+        return top() > 0;
+    }
+
+    void regis(int numparam) {
+        int top = this->top();
+        set(top >= numparam ? top : numparam);
+    }
+
+    int top() {
+        if (stack.empty()) {
+            return 0;
+        }
+        return stack.back();
+    }
+
+    void push() {
+        stack.push_back(0);
+    }
+
+    void pop() {
+        if (!stack.empty()) {
+            stack.pop_back();
+        }
+    }
+
+private:
+    void set(int value) {
+        if (!stack.empty()) {
+            stack.pop_back();
+        }
+        stack.push_back(value);
+    }
+};
+
 class base_driver {
 public:
     diagnostics_t diagnostics;
@@ -161,6 +212,7 @@ public:
     lexer lex;
     mempool alloc;
     current_arg_stack current_arg_stack;
+    max_numparam_stack numparam_stack;
 
     bool pending_error;
     size_t def_level;
