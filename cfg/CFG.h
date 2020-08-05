@@ -76,6 +76,7 @@ class CFGContext;
 
 class CFG final {
     friend class CFGBuilder;
+    friend class LocalRef;
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
@@ -94,7 +95,6 @@ public:
      * the entry point is going to be the last node in sorted array.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
-    std::vector<core::LocalVariable> localVariables;
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -102,8 +102,6 @@ public:
     BasicBlock *deadBlock() {
         return basicBlocks[1].get();
     };
-
-    LocalRef enterLocal(core::LocalVariable variable);
 
     // Abbreviated debug output, useful if you already know what you're looking at
     std::string toString(const core::GlobalState &gs) const;
@@ -124,9 +122,6 @@ public:
     static constexpr int ENSURE_BLOCK_OFFSET = 2;
     static constexpr int ELSE_BLOCK_OFFSET = 3;
 
-    std::vector<int> minLoops;
-    std::vector<int> maxLoopWrite;
-
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
@@ -140,10 +135,18 @@ public:
         std::vector<std::vector<bool>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
+    LocalRef enterLocal(core::LocalVariable variable);
 
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops, int rubyBlockid);
+    std::vector<int> minLoops;
+    std::vector<int> maxLoopWrite;
+    /**
+     * Maps from LocalRef -> LocalVariable. Lets us compactly construct maps involving only the variables included
+     * in the CFG.
+     */
+    std::vector<core::LocalVariable> localVariables;
 };
 
 } // namespace sorbet::cfg

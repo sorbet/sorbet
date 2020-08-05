@@ -25,6 +25,8 @@ public:
 
     core::LocalVariable data(const CFG &cfg) const;
     int id() const;
+    int minLoops(const CFG &cfg) const;
+    int maxLoopWrite(const CFG &cfg) const;
     bool exists() const;
     bool isAliasForGlobal(const core::GlobalState &gs, const CFG &cfg) const;
     bool isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const;
@@ -41,6 +43,7 @@ public:
 };
 CheckSize(LocalRef, 4, 4);
 
+// TODO(jvilk): Remove when I remove all maps using LocalRef as a key.
 template <typename H> H AbslHashValue(H h, const LocalRef &m) {
     return H::combine(std::move(h), m.id());
 }

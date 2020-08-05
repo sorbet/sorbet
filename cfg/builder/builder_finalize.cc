@@ -300,7 +300,6 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
         auto local = 0;
         for (auto read : RnW.reads[bb->id]) {
             if (read) {
-                // TODO(jvilk): Can I initilaize minLoops to INT_MAX?
                 auto curMin = cfg.minLoops[local];
                 if (curMin > bb->outerLoops) {
                     curMin = bb->outerLoops;
@@ -317,7 +316,6 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
 
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
-            // TODO(jvilk): Can I initialize maxLoopWrite to 0?
             int curMin = cfg.minLoops[what.id()];
             int curMax = cfg.maxLoopWrite[what.id()];
             if (curMin > bb->outerLoops) {

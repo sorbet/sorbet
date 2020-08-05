@@ -85,7 +85,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
     for (auto &pair : env.vars) {
         auto local = pair.first;
         auto &state = pair.second;
-        if (enteringLoop && bb->outerLoops <= inWhat.maxLoopWrite[local.id()]) {
+        if (enteringLoop && bb->outerLoops <= local.maxLoopWrite(inWhat)) {
             continue;
         }
         auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
@@ -640,7 +640,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
             pair.second.knownTruthy = other.getKnownTruthy(var);
         }
 
-        if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= inWhat.maxLoopWrite[var.id()]) {
+        if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
         bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
@@ -686,8 +686,8 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         auto var = pair.first;
         core::TypeAndOrigins tp;
 
-        auto bindMinLoops = inWhat.minLoops[var.id()];
-        if (bb->outerLoops == bindMinLoops || bindMinLoops == inWhat.maxLoopWrite[var.id()]) {
+        auto bindMinLoops = var.minLoops(inWhat);
+        if (bb->outerLoops == bindMinLoops || bindMinLoops == var.maxLoopWrite(inWhat)) {
             continue;
         }
 

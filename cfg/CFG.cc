@@ -25,6 +25,14 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
 LocalRef CFG::enterLocal(core::LocalVariable variable) {
     int id = this->maxVariableId++;
     this->localVariables.emplace_back(variable);
+
+    // Default values
+    this->minLoops.emplace_back(INT_MAX);
+    this->maxLoopWrite.emplace_back(0);
+
+    ENFORCE(this->localVariables.size() == this->minLoops.size());
+    ENFORCE(this->localVariables.size() == this->maxLoopWrite.size());
+
     return LocalRef(id);
 }
 
@@ -288,10 +296,23 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
 Binding::Binding(LocalRef bind, core::LocOffsets loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
-// Defined here because it accesses CFG
+// Defined here because they access CFG
+
 core::LocalVariable LocalRef::data(const CFG &cfg) const {
     ENFORCE(this->exists());
     return cfg.localVariables[this->_id];
+}
+
+int LocalRef::minLoops(const CFG &cfg) const {
+    ENFORCE(cfg.minLoops.size() > this->_id);
+    ENFORCE(this->exists());
+    return cfg.minLoops[this->_id];
+}
+
+int LocalRef::maxLoopWrite(const CFG &cfg) const {
+    ENFORCE(cfg.maxLoopWrite.size() > this->_id);
+    ENFORCE(this->exists());
+    return cfg.maxLoopWrite[this->_id];
 }
 
 } // namespace sorbet::cfg
