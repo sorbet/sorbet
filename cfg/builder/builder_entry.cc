@@ -16,7 +16,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
     UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;
-    CFGContext cctx(ctx, *res.get(), LocalRef::none(), 0, nullptr, nullptr, nullptr, aliases,
+    CFGContext cctx(ctx, *res.get(), LocalRef::noVariable(), 0, nullptr, nullptr, nullptr, aliases,
                     discoveredUndeclaredFields, temporaryCounter);
 
     LocalRef retSym = cctx.newTemporary(core::Names::returnMethodTemp());
@@ -34,7 +34,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     for (auto &argExpr : md.args) {
         i++;
         auto *a = ast::MK::arg2Local(argExpr);
-        synthesizeExpr(entry, a->localVariable, a->loc, make_unique<LoadArg>(md.symbol, i));
+        synthesizeExpr(entry, enterLocal(*res, a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
     }
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     LocalRef retSym1 = LocalRef::finalReturn();

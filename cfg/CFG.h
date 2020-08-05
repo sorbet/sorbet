@@ -94,6 +94,7 @@ public:
      * the entry point is going to be the last node in sorted array.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
+    std::vector<core::LocalVariable> localVariables;
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -101,6 +102,8 @@ public:
     BasicBlock *deadBlock() {
         return basicBlocks[1].get();
     };
+
+    LocalRef enterLocal(core::LocalVariable variable);
 
     // Abbreviated debug output, useful if you already know what you're looking at
     std::string toString(const core::GlobalState &gs) const;

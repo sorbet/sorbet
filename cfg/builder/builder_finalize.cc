@@ -80,7 +80,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (!thenb->bexit.cond.variable.isBlockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
                     // Don't remove block headers
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
@@ -182,8 +182,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 auto &otherAlias = other[local];
                 if (alias.exists()) {
                     if (!otherAlias.exists() || alias != otherAlias) {
-                        current[local] = LocalRef::none(); // note: this is correct but too conservative. In particular
-                                                           // for loop headers
+                        current[local] = LocalRef::noVariable(); // note: this is correct but too conservative. In
+                                                                 // particular for loop headers
                     }
                 }
 
@@ -198,7 +198,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             /* invalidate a stale record */
             for (auto &alias : current) {
                 if (alias == bind.bind.variable) {
-                    alias = LocalRef::none();
+                    alias = LocalRef::noVariable();
                 }
             }
             /* dealias */

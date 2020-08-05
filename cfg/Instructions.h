@@ -13,16 +13,19 @@ namespace sorbet::cfg {
 class CFG;
 
 class LocalRef final {
+    int _id;
+
 public:
-    core::LocalVariable _variable;
-    LocalRef() : _variable(){};
-    LocalRef(core::LocalVariable id) : _variable(id){};
+    LocalRef() : _id(0){};
+    LocalRef(int id) : _id(id){};
+    LocalRef(const LocalRef &) = default;
+    LocalRef(LocalRef &&) = default;
+    LocalRef &operator=(LocalRef &&) = default;
+    LocalRef &operator=(const LocalRef &) = default;
+
     core::LocalVariable data(const CFG &cfg) const;
-    int minLoops(const CFG &cfg) const;
-    int maxLoopWrite(const CFG &cfg) const;
     int id() const;
     bool exists() const;
-    bool isBlockCall() const;
     bool isAliasForGlobal(const core::GlobalState &gs, const CFG &cfg) const;
     bool isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -30,11 +33,17 @@ public:
     bool operator==(const LocalRef &rhs) const;
     bool operator!=(const LocalRef &rhs) const;
 
-    static LocalRef none();
-    static LocalRef finalReturn();
+    static LocalRef noVariable();
+    static LocalRef blockCall();
     static LocalRef selfVariable();
     static LocalRef unconditional();
+    static LocalRef finalReturn();
 };
+CheckSize(LocalRef, 4, 4);
+
+template <typename H> H AbslHashValue(H h, const LocalRef &m) {
+    return H::combine(std::move(h), m.id());
+}
 
 class VariableUseSite {
 public:
@@ -83,7 +92,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Ident, 24, 8);
+CheckSize(Ident, 16, 8);
 
 class Alias final : public Instruction {
 public:

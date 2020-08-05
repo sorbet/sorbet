@@ -145,15 +145,16 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 }
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("{}.{}({})", this->recv.toString(gs, cfg), this->fun.data(gs)->toString(gs),
-                       fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs); }));
+    return fmt::format(
+        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.data(gs)->toString(gs),
+        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
         this->recv.toString(gs, cfg), this->fun.data(gs)->showRaw(gs),
-        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, tabs + 1); }));
+        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
 }
 
 string LoadArg::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -219,4 +220,57 @@ string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int
                            spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type->show(gs));
     }
 }
+
+int LocalRef::id() const {
+    return this->_id;
+}
+
+bool LocalRef::exists() const {
+    return this->_id > 0;
+}
+
+bool LocalRef::isAliasForGlobal(const core::GlobalState &gs, const CFG &cfg) const {
+    return this->data(cfg).isAliasForGlobal(gs);
+}
+
+bool LocalRef::isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const {
+    return this->data(cfg).isSyntheticTemporary(gs);
+}
+
+string LocalRef::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    return this->data(cfg).toString(gs);
+}
+
+string LocalRef::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
+    return this->data(cfg).showRaw(gs);
+}
+
+bool LocalRef::operator==(const LocalRef &rhs) const {
+    return this->_id == rhs._id;
+}
+
+bool LocalRef::operator!=(const LocalRef &rhs) const {
+    return this->_id != rhs._id;
+}
+
+LocalRef LocalRef::noVariable() {
+    return LocalRef(0);
+}
+
+LocalRef LocalRef::blockCall() {
+    return LocalRef(1);
+}
+
+LocalRef LocalRef::selfVariable() {
+    return LocalRef(2);
+}
+
+LocalRef LocalRef::unconditional() {
+    return LocalRef(3);
+}
+
+LocalRef LocalRef::finalReturn() {
+    return LocalRef(4);
+}
+
 } // namespace sorbet::cfg

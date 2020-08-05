@@ -22,12 +22,36 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     return r.get();
 }
 
+LocalRef CFG::enterLocal(core::LocalVariable variable) {
+    int id = this->maxVariableId++;
+    this->localVariables.emplace_back(variable);
+    return LocalRef(id);
+}
+
 CFG::CFG() {
     freshBlock(0, 0); // entry;
     freshBlock(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond.variable = core::LocalVariable::unconditional();
+    deadBlock()->bexit.cond.variable = LocalRef::unconditional();
+
+    // Enter a few fixed local variables
+    // TODO: How often are these unused?
+    LocalRef noVariable = this->enterLocal(core::LocalVariable::noVariable());
+    ENFORCE(!noVariable.exists());
+    ENFORCE(noVariable.id() == 0 && noVariable == LocalRef::noVariable());
+
+    LocalRef blockCall = this->enterLocal(core::LocalVariable::blockCall());
+    ENFORCE(blockCall == LocalRef::blockCall());
+
+    LocalRef selfVariable = this->enterLocal(core::LocalVariable::selfVariable());
+    ENFORCE(selfVariable == LocalRef::selfVariable());
+
+    LocalRef unconditional = this->enterLocal(core::LocalVariable::unconditional());
+    ENFORCE(unconditional == LocalRef::unconditional());
+
+    LocalRef finalReturn = this->enterLocal(core::LocalVariable(core::Names::finalReturn(), 0));
+    ENFORCE(finalReturn == LocalRef::finalReturn());
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
@@ -263,5 +287,11 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
 
 Binding::Binding(LocalRef bind, core::LocOffsets loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
+
+// Defined here because it accesses CFG
+core::LocalVariable LocalRef::data(const CFG &cfg) const {
+    ENFORCE(this->exists());
+    return cfg.localVariables[this->_id];
+}
 
 } // namespace sorbet::cfg

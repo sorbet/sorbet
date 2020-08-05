@@ -11,7 +11,7 @@ public:
 
 private:
     static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
-    static LocalRef enterLocal(core::Context ctx, CFG &cfg, core::LocalVariable local);
+    static LocalRef enterLocal(CFG &cfg, core::LocalVariable local);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
