@@ -12,7 +12,7 @@
 namespace sorbet::cfg {
 class CFG;
 
-class LocalRef {
+class LocalRef final {
 public:
     core::LocalVariable _variable;
     LocalRef() : _variable(){};
@@ -27,10 +27,13 @@ public:
     bool isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
+    bool operator==(const LocalRef &rhs) const;
+    bool operator!=(const LocalRef &rhs) const;
 
     static LocalRef none();
     static LocalRef finalReturn();
     static LocalRef selfVariable();
+    static LocalRef unconditional();
 };
 
 class VariableUseSite {

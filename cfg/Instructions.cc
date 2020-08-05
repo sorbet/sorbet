@@ -27,15 +27,15 @@ Return::Return(LocalRef what) : what(what) {
 }
 
 string SolveConstraint::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("Solve<{}, {}>", this->send.toString(gs), this->link->fun.toString(gs));
+    return fmt::format("Solve<{}, {}>", this->send.toString(gs, cfg), this->link->fun.toString(gs));
 }
 
 string SolveConstraint::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs), this->link->fun.showRaw(gs));
+    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs, cfg), this->link->fun.showRaw(gs));
 }
 
 string Return::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("return {}", this->what.toString(gs));
+    return fmt::format("return {}", this->what.toString(gs, cfg));
 }
 
 string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
@@ -48,7 +48,7 @@ BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what)
 }
 
 string BlockReturn::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs), this->what.toString(gs));
+    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs), this->what.toString(gs, cfg));
 }
 
 string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
@@ -69,9 +69,8 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
-Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc,
-           const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs,
-           bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
+Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, const InlinedVector<LocalRef, 2> &args,
+           InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
       link(move(link)) {
     this->args.resize(args.size());
@@ -205,15 +204,15 @@ string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
-        return this->variable.toString(gs);
+    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
+        return this->variable.toString(gs, cfg);
     } else {
         return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type->show(gs));
     }
 }
 
 string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    if (this->variable == core::LocalVariable::unconditional() || this->type == nullptr) {
+    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
         return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs, cfg));
     } else {
         return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
