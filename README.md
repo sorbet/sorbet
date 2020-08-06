@@ -422,6 +422,19 @@ If a location should not report any definition or usage, then use the magic labe
 # ^ def: (nothing)
 ```
 
+If a location should report multiple definitions (e.g., a class or module opened
+in multiple files), then you can add a second `def` with the same name:
+
+```ruby
+class Foo
+  #   ^^^ def: foo
+end
+
+class Foo
+  #   ^^^ def: foo
+end
+```
+
 #### Testing "Go to Type Definition"
 
 This is somewhat similar to "Find Definition" above, but also slightly different
