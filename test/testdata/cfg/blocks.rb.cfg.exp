@@ -34,19 +34,19 @@ subgraph "cluster_::BlockTest#blockPass" {
 
     "bb::BlockTest#blockPass_1" -> "bb::BlockTest#blockPass_1" [style="bold"];
     "bb::BlockTest#blockPass_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: BlockTest, <selfRestore>$8: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: BlockTest)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_5" [style="bold"];
     "bb::BlockTest#blockPass_2" -> "bb::BlockTest#blockPass_3" [style="tapered"];
 
     "bb::BlockTest#blockPass_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$8: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$7, foo>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: BlockTest)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$7, foo>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_3" -> "bb::BlockTest#blockPass_1" [style="bold"];
     "bb::BlockTest#blockPass_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: BlockTest, <selfRestore>$8: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: BlockTest = loadSelf\l<blk>$9: T.untyped = load_yield_params(foo)\l<blk>$10: Integer(0) = 0\lx$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(0))\l<blk>$10: Integer(1) = 1\ly$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(1))\l<blockReturnTemp>$11: T.untyped = x$1\l<blockReturnTemp>$12: T.noreturn = blockreturn<foo> <blockReturnTemp>$11: T.untyped\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: BlockTest)\louterLoops: 1\l<self>: BlockTest = loadSelf\l<blk>$9: T.untyped = load_yield_params(foo)\l<blk>$10: Integer(0) = 0\lx$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(0))\l<blk>$10: Integer(1) = 1\ly$1: T.untyped = <blk>$9: T.untyped.[](<blk>$10: Integer(1))\l<blockReturnTemp>$11: T.untyped = x$1\l<blockReturnTemp>$12: T.noreturn = blockreturn<foo> <blockReturnTemp>$11: T.untyped\l<unconditional>\l"
     ];
 
     "bb::BlockTest#blockPass_5" -> "bb::BlockTest#blockPass_2" [style="bold"];

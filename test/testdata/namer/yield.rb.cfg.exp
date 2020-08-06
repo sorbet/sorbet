@@ -88,19 +88,19 @@ subgraph "cluster_::Main#blockyield" {
 
     "bb::Main#blockyield_1" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: Main, <selfRestore>$5: Main, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <blk>: T.untyped)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_5" [style="bold"];
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_3" [style="tapered"];
 
     "bb::Main#blockyield_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$5: Main, <block-pre-call-temp>$4: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, yielder>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, yielder>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: Main, <selfRestore>$5: Main, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <blk>: T.untyped)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$6: T.untyped = load_yield_params(yielder)\l<blk>$7: Integer(0) = 0\li$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<yielder> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Main, <blk>: T.untyped)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$6: T.untyped = load_yield_params(yielder)\l<blk>$7: Integer(0) = 0\li$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<yielder> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_5" -> "bb::Main#blockyield_2" [style="bold"];
@@ -123,19 +123,19 @@ subgraph "cluster_::Main#main" {
 
     "bb::Main#main_1" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: Main, <selfRestore>$6: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#main_2" -> "bb::Main#main_5" [style="bold"];
     "bb::Main#main_2" -> "bb::Main#main_3" [style="tapered"];
 
     "bb::Main#main_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$6: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\ll: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<<block-pre-call-temp>$5, lambda>\l<self>: Main = <selfRestore>$6\l<cfgAlias>$16: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$18: Symbol(:\"yielder\") = :\"yielder\"\l<statTemp>$14: T.untyped = <cfgAlias>$16: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$18: Symbol(:\"yielder\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$22: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$24: Symbol(:\"blockpass\") = :\"blockpass\"\l<statTemp>$20: T.untyped = <cfgAlias>$22: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$24: Symbol(:\"blockpass\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$30: Symbol(:\"mixed\") = :\"mixed\"\l<statTemp>$26: T.untyped = <cfgAlias>$28: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$30: Symbol(:\"mixed\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$33: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$35: Symbol(:\"blockyield\") = :\"blockyield\"\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$33: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$35: Symbol(:\"blockyield\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main)\ll: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<<block-pre-call-temp>$5, lambda>\l<self>: Main = <selfRestore>$6\l<cfgAlias>$16: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$18: Symbol(:\"yielder\") = :\"yielder\"\l<statTemp>$14: T.untyped = <cfgAlias>$16: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$18: Symbol(:\"yielder\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$22: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$24: Symbol(:\"blockpass\") = :\"blockpass\"\l<statTemp>$20: T.untyped = <cfgAlias>$22: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$24: Symbol(:\"blockpass\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$30: Symbol(:\"mixed\") = :\"mixed\"\l<statTemp>$26: T.untyped = <cfgAlias>$28: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$30: Symbol(:\"mixed\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$33: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$35: Symbol(:\"blockyield\") = :\"blockyield\"\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$33: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$35: Symbol(:\"blockyield\"), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_3" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: Main, <selfRestore>$6: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$7: T.untyped = load_yield_params(lambda)\l<blk>$8: Integer(0) = 0\lx$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<statTemp>$10: NilClass = <self>: Main.puts(x$1: T.untyped)\l<blockReturnTemp>$9: Integer(3) = 3\l<blockReturnTemp>$13: T.noreturn = blockreturn<lambda> <blockReturnTemp>$9: Integer(3)\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Main)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$7: T.untyped = load_yield_params(lambda)\l<blk>$8: Integer(0) = 0\lx$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<statTemp>$10: NilClass = <self>: Main.puts(x$1: T.untyped)\l<blockReturnTemp>$9: Integer(3) = 3\l<blockReturnTemp>$13: T.noreturn = blockreturn<lambda> <blockReturnTemp>$9: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::Main#main_5" -> "bb::Main#main_2" [style="bold"];

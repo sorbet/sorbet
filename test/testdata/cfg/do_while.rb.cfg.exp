@@ -88,7 +88,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
-        label = "block[id=21, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\louterLoops: 1\l<statTemp>$40 = 2\l<statTemp>$38 = <self>.puts(<statTemp>$40)\ly = 1\l<unconditional>\l"
+        label = "block[id=21, rubyBlockId=0](<self>: T.class_of(<root>), y: Integer(0))\louterLoops: 1\l<statTemp>$40 = 2\l<statTemp>$38 = <self>.puts(<statTemp>$40)\ly = 1\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_21" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];

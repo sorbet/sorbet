@@ -58,19 +58,19 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_6" [
-        label = "block[id=6, rubyBlockId=1](<self>: Test, <selfRestore>$17: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=6, rubyBlockId=1](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_9" [style="bold"];
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
     "bb::Test#normalize_params_7" [
-        label = "block[id=7, rubyBlockId=0](<selfRestore>$17: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$16, map>\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test)\l<returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$16, map>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_11" [style="bold"];
     "bb::Test#normalize_params_9" [
-        label = "block[id=9, rubyBlockId=1](<self>: Test, <selfRestore>$17: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$18: [T.untyped] = load_yield_params(map)\l<blk>$19: Integer(0) = 0\le$1: T.untyped = <blk>$18: [T.untyped].[](<blk>$19: Integer(0))\l<blockReturnTemp>$20: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$23: T.noreturn = blockreturn<map> <blockReturnTemp>$20: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=1](<self>: Test)\louterLoops: 1\l<self>: Test = loadSelf\l<blk>$18: [T.untyped] = load_yield_params(map)\l<blk>$19: Integer(0) = 0\le$1: T.untyped = <blk>$18: [T.untyped].[](<blk>$19: Integer(0))\l<blockReturnTemp>$20: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)\l<blockReturnTemp>$23: T.noreturn = blockreturn<map> <blockReturnTemp>$20: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_9" -> "bb::Test#normalize_params_6" [style="bold"];

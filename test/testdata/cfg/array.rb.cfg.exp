@@ -88,36 +88,36 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_1" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_2" [
-        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(TestArray), <selfRestore>$8: T.class_of(TestArray), <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2, rubyBlockId=1](<self>: T.class_of(TestArray), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_5" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_2" -> "bb::<Class:TestArray>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<selfRestore>$8: T.class_of(TestArray), <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$8\l<cfgAlias>$18: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<block-pre-call-temp>$20: Sorbet::Private::Static::Void = <cfgAlias>$18: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(TestArray))\l<selfRestore>$21: T.class_of(TestArray) = <self>\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(TestArray))\l<statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$8\l<cfgAlias>$18: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<block-pre-call-temp>$20: Sorbet::Private::Static::Void = <cfgAlias>$18: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(TestArray))\l<selfRestore>$21: T.class_of(TestArray) = <self>\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(TestArray), <selfRestore>$8: T.class_of(TestArray), <block-pre-call-temp>$7: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$14: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$14: T.class_of(Integer))\l<blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$11: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$14: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$14: T.class_of(Integer))\l<blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$11: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_6" [
-        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(TestArray), <selfRestore>$21: T.class_of(TestArray), <block-pre-call-temp>$20: Sorbet::Private::Static::Void)\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=6, rubyBlockId=2](<self>: T.class_of(TestArray), <block-pre-call-temp>$20: Sorbet::Private::Static::Void, <selfRestore>$21: T.class_of(TestArray))\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_9" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_6" -> "bb::<Class:TestArray>#<static-init>_7" [style="tapered"];
 
     "bb::<Class:TestArray>#<static-init>_7" [
-        label = "block[id=7, rubyBlockId=0](<selfRestore>$21: T.class_of(TestArray), <block-pre-call-temp>$20: Sorbet::Private::Static::Void)\l<statTemp>$16: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$20, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$21\l<cfgAlias>$32: T.class_of(T::Sig) = alias <C Sig>\l<cfgAlias>$34: T.class_of(T) = alias <C T>\l<statTemp>$29: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$32: T.class_of(T::Sig))\l<cfgAlias>$37: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$39: Symbol(:\"an_int\") = :\"an_int\"\l<statTemp>$35: Symbol(:\"an_int\") = <cfgAlias>$37: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$39: Symbol(:\"an_int\"))\l<cfgAlias>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$44: Symbol(:\"a_string\") = :\"a_string\"\l<statTemp>$40: Symbol(:\"a_string\") = <cfgAlias>$42: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$44: Symbol(:\"a_string\"))\l<cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: Symbol(:\"test_arrays\") = :\"test_arrays\"\l<statTemp>$45: Symbol(:\"test_arrays\") = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$49: Symbol(:\"test_arrays\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<block-pre-call-temp>$20: Sorbet::Private::Static::Void, <selfRestore>$21: T.class_of(TestArray))\l<statTemp>$16: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$20, sig>\l<self>: T.class_of(TestArray) = <selfRestore>$21\l<cfgAlias>$32: T.class_of(T::Sig) = alias <C Sig>\l<cfgAlias>$34: T.class_of(T) = alias <C T>\l<statTemp>$29: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$32: T.class_of(T::Sig))\l<cfgAlias>$37: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$39: Symbol(:\"an_int\") = :\"an_int\"\l<statTemp>$35: Symbol(:\"an_int\") = <cfgAlias>$37: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$39: Symbol(:\"an_int\"))\l<cfgAlias>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$44: Symbol(:\"a_string\") = :\"a_string\"\l<statTemp>$40: Symbol(:\"a_string\") = <cfgAlias>$42: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$44: Symbol(:\"a_string\"))\l<cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$49: Symbol(:\"test_arrays\") = :\"test_arrays\"\l<statTemp>$45: Symbol(:\"test_arrays\") = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$49: Symbol(:\"test_arrays\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_9" [
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(TestArray), <selfRestore>$21: T.class_of(TestArray), <block-pre-call-temp>$20: Sorbet::Private::Static::Void)\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$27: T.class_of(String) = alias <C String>\l<blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$27: T.class_of(String))\l<blockReturnTemp>$28: T.noreturn = blockreturn<sig> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$27: T.class_of(String) = alias <C String>\l<blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$27: T.class_of(String))\l<blockReturnTemp>$28: T.noreturn = blockreturn<sig> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_9" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
