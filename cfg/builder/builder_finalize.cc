@@ -346,7 +346,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     const vector<vector<bool>> &writesByBlock = RnW.writes;
     const vector<vector<bool>> &deadByBlock = RnW.dead;
 
-    // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
+    // iterate over basic blocks in reverse and found upper bounds on what could a block need.
     vector<vector<bool>> upperBounds1 = readsByBlock;
     bool changed = true;
     {
@@ -381,7 +381,11 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         }
     }
 
-    vector<vector<bool>> upperBounds2(cfg.maxBasicBlockId, vector<bool>(cfg.maxVariableId));
+    vector<vector<bool>> upperBounds2(cfg.maxBasicBlockId);
+    // Preallocate vectors.
+    for (auto bb = 0; bb < cfg.maxBasicBlockId; bb++) {
+        upperBounds2[bb].resize(cfg.maxVariableId);
+    }
 
     changed = true;
     {
@@ -391,7 +395,6 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
                 BasicBlock *bb = *it;
                 auto &upperBoundsForBlock = upperBounds2[bb->id];
-                upperBoundsForBlock.resize(cfg.maxVariableId);
 
                 bool modified = false;
                 for (BasicBlock *edge : bb->backEdges) {
