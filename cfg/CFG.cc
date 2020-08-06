@@ -301,7 +301,6 @@ Binding::Binding(LocalRef bind, core::LocOffsets loc, unique_ptr<Instruction> va
 // Defined here because they access CFG
 
 core::LocalVariable LocalRef::data(const CFG &cfg) const {
-    ENFORCE(this->exists());
     return cfg.localVariables[this->_id];
 }
 
