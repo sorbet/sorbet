@@ -163,14 +163,13 @@ LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, vector<LocalRe
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     vector<vector<LocalRef>> outAliases;
 
-    outAliases.resize(cfg.maxBasicBlockId);
+    outAliases.resize(cfg.maxBasicBlockId, vector<LocalRef>(cfg.maxVariableId));
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         auto &bb = *it;
         if (bb == cfg.deadBlock()) {
             continue;
         }
         vector<LocalRef> &current = outAliases[bb->id];
-        current.resize(cfg.maxVariableId);
         if (!bb->backEdges.empty()) {
             current = outAliases[bb->backEdges[0]->id];
         }
@@ -382,7 +381,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         }
     }
 
-    vector<vector<bool>> upperBounds2(cfg.maxBasicBlockId);
+    vector<vector<bool>> upperBounds2(cfg.maxBasicBlockId, vector<bool>(cfg.maxVariableId));
 
     changed = true;
     {
