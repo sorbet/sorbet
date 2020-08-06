@@ -2,6 +2,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/Timer.h"
 #include "core/core.h"
+
 #include "core/errors/resolver.h"
 
 #include "absl/algorithm/container.h"
@@ -245,6 +246,31 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                             supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn->show(ctx));
+            }
+        }
+    }
+}
+
+void validateBlockDefinition(const core::Context ctx, core::SymbolRef method) {
+    auto methodInfo = method.data(ctx);
+    for (auto &arg : methodInfo->arguments()) {
+        if (arg.flags.isBlock) {
+            auto blockType = core::Types::dropNil(ctx, arg.type);
+            // Technically it should be possible to pass in a type param here, however this is broken now. See
+            // https://github.com/sorbet/sorbet/issues/2888
+            // For now assuming that we can only pass in the Proc or T.proc.
+            // If that issue gets fixed we should be able to use the following lines instead
+            // auto isTypeVar = core::isa_type<core::TypeVar>(blockType.get());
+            // if (isTypeVar || !blockType->derivesFrom(ctx, core::Symbols::Proc())) {
+            if (!blockType->derivesFrom(ctx, core::Symbols::Proc())) {
+                if (auto e = ctx.state.beginError(arg.typeLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`: block parameters should be defined as callable objects", "sig",
+                                arg.show(ctx));
+                    e.addErrorLine(arg.typeLoc, "Parameter was defined as `{}`, but should be T.proc or Proc instead",
+                                   blockType->show(ctx));
+                    e.replaceWith("Wrap in T.proc", arg.typeLoc, "T.proc({})", arg.typeLoc.source(ctx.state));
+                    arg.type = core::Types::untyped(ctx, method);
+                }
             }
         }
     }
@@ -579,6 +605,7 @@ public:
         }
 
         validateOverriding(ctx, methodDef->symbol);
+        validateBlockDefinition(ctx, methodDef->symbol);
         return tree;
     }
 };

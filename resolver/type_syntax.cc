@@ -276,7 +276,8 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
                                 getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
-                            sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key->loc), name,
+                            sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key->loc),
+                                                                         core::Loc(ctx.file, value->loc), name,
                                                                          resultAndBind.type, resultAndBind.rebind});
                         }
                     }

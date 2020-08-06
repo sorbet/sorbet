@@ -1465,6 +1465,7 @@ private:
                 ENFORCE(spec->type != nullptr);
                 arg.type = spec->type;
                 arg.loc = spec->loc;
+                arg.typeLoc = spec->typeLoc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
             } else {

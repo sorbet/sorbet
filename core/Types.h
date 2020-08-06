@@ -43,6 +43,7 @@ public:
     NameRef name;
     SymbolRef rebind;
     Loc loc;
+    Loc typeLoc;
     TypePtr type;
 
     /*

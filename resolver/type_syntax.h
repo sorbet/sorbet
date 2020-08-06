@@ -11,6 +11,7 @@ namespace sorbet::resolver {
 struct ParsedSig {
     struct ArgSpec {
         core::Loc loc;
+        core::Loc typeLoc;
         core::NameRef name;
         core::TypePtr type;
         core::SymbolRef rebind;

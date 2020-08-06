@@ -1007,6 +1007,7 @@ ArgInfo ArgInfo::deepCopy() const {
     result.flags = this->flags;
     result.type = this->type;
     result.loc = this->loc;
+    result.typeLoc = this->typeLoc;
     result.name = this->name;
     result.rebind = this->rebind;
     return result;
