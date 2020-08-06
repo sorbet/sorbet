@@ -143,10 +143,14 @@ private:
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;
     /**
-     * Maps from LocalRef -> LocalVariable. Lets us compactly construct maps involving only the variables included
+     * Maps from LocalRef ID -> LocalVariable. Lets us compactly construct maps involving only the variables included
      * in the CFG.
      */
     std::vector<core::LocalVariable> localVariables;
+    /**
+     * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
+     */
+    UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
 };
 
 } // namespace sorbet::cfg

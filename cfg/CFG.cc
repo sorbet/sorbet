@@ -23,17 +23,19 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
 }
 
 LocalRef CFG::enterLocal(core::LocalVariable variable) {
-    int id = this->maxVariableId++;
-    this->localVariables.emplace_back(variable);
+    if (!localVariableToLocalRef.contains(variable)) {
+        int id = this->maxVariableId++;
+        this->localVariables.emplace_back(variable);
 
-    // Default values
-    this->minLoops.emplace_back(INT_MAX);
-    this->maxLoopWrite.emplace_back(0);
+        // Default values
+        this->minLoops.emplace_back(INT_MAX);
+        this->maxLoopWrite.emplace_back(0);
 
-    ENFORCE(this->localVariables.size() == this->minLoops.size());
-    ENFORCE(this->localVariables.size() == this->maxLoopWrite.size());
-
-    return LocalRef(id);
+        ENFORCE(this->localVariables.size() == this->minLoops.size());
+        ENFORCE(this->localVariables.size() == this->maxLoopWrite.size());
+        localVariableToLocalRef[variable] = LocalRef(id);
+    }
+    return localVariableToLocalRef[variable];
 }
 
 CFG::CFG() {
