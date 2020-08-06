@@ -82,6 +82,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     markLoopHeaders(ctx, *res);
     sanityCheck(ctx, *res);
     res->sanityCheck(ctx);
+    histogramInc("cfgbuilder.maxVariableId", res->maxVariableId);
     return res;
 }
 
