@@ -162,8 +162,10 @@ LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, vector<LocalRe
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     vector<vector<LocalRef>> outAliases;
-
-    outAliases.resize(cfg.maxBasicBlockId, vector<LocalRef>(cfg.maxVariableId));
+    outAliases.resize(cfg.maxBasicBlockId);
+    for (auto bbId = 0; bbId < cfg.maxBasicBlockId; bbId++) {
+        outAliases[bbId].resize(cfg.maxVariableId);
+    }
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         auto &bb = *it;
         if (bb == cfg.deadBlock()) {
@@ -175,11 +177,11 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
         }
 
         for (BasicBlock *parent : bb->backEdges) {
-            vector<LocalRef> other = outAliases[parent->id];
+            const vector<LocalRef> &other = outAliases[parent->id];
             auto local = 0;
             for (auto &alias : current) {
-                auto &otherAlias = other[local];
                 if (alias.exists()) {
+                    auto &otherAlias = other[local];
                     if (!otherAlias.exists() || alias != otherAlias) {
                         current[local] = LocalRef::noVariable(); // note: this is correct but too conservative. In
                                                                  // particular for loop headers
