@@ -359,10 +359,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
                 int sz = upperBoundsForBlock.size();
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
+                    changed = mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]) || changed;
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
+                    changed = mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]) || changed;
                 }
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
@@ -372,7 +372,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                     // to how our "pinning" type inference works. We can remove this
                     // inner condition when we get a better type inference
                     // algorithm.
-                    if (isDead && bb->outerLoops <= cfg.minLoops[local]) {
+                    if (isDead && bb->outerLoops <= cfg.minLoops[local] && upperBoundsForBlock[local]) {
+                        changed = true;
                         upperBoundsForBlock[local] = false;
                     }
                     local++;
