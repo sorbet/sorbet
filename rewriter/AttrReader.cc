@@ -64,12 +64,12 @@ bool isT(const ast::TreePtr &expr) {
     return root != nullptr && root->symbol == core::Symbols::root();
 }
 
-bool isTNilable(const ast::TreePtr &expr) {
-    auto *nilable = ast::cast_tree_const<ast::Send>(expr);
-    return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+bool isTNilableOrUntyped(const ast::TreePtr &expr) {
+    auto *send = ast::cast_tree_const<ast::Send>(expr);
+    return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) && isT(send->recv);
 }
 
-bool hasNilableReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
+bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
             "We weren't given a send node that's a valid signature");
 
@@ -81,7 +81,7 @@ bool hasNilableReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
     if (body.args.size() != 1) {
         return false;
     }
-    return isTNilable(body.args[0]);
+    return isTNilableOrUntyped(body.args[0]);
 }
 
 ast::TreePtr dupReturnsType(core::MutableContext ctx, ast::Send *sharedSig) {
@@ -212,7 +212,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
     }
 
     bool declareIvars = false;
-    if (sig != nullptr && hasNilableReturns(ctx, *prevStat)) {
+    if (sig != nullptr && hasNilableOrUntypedReturns(ctx, *prevStat)) {
         declareIvars = true;
     }
 
