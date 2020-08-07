@@ -268,7 +268,7 @@ void validateBlockDefinition(const core::Context ctx, core::SymbolRef method) {
                                 arg.show(ctx));
                     e.addErrorLine(arg.typeLoc, "Parameter was defined as `{}`, but should be T.proc or Proc instead",
                                    blockType->show(ctx));
-                    e.replaceWith("Wrap in T.proc", arg.typeLoc, "T.proc({})", arg.typeLoc.source(ctx.state));
+                    e.replaceWith("Wrap in T.proc", arg.typeLoc, "T.proc.returns({})", arg.typeLoc.source(ctx.state));
                     arg.type = core::Types::untyped(ctx, method);
                 }
             }

@@ -5,7 +5,7 @@ class A
   extend T::Sig
 
   sig do
-    params(block: T.proc(String)).returns(String)
+    params(block: T.proc.returns(String)).returns(String)
                 # ^^^^^^ error: Malformed `sig`: block parameters should be defined as callable objects
                 # ^^^^^^ apply-code-action: [A] Wrap in T.proc
   end
