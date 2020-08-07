@@ -357,12 +357,12 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
-                int sz = upperBoundsForBlock.size();
+                auto sz = count(upperBoundsForBlock.begin(), upperBoundsForBlock.end(), true);
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    changed = mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]) || changed;
+                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    changed = mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]) || changed;
+                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
@@ -373,13 +373,11 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                     // inner condition when we get a better type inference
                     // algorithm.
                     if (isDead && bb->outerLoops <= cfg.minLoops[local] && upperBoundsForBlock[local]) {
-                        changed = true;
                         upperBoundsForBlock[local] = false;
                     }
                     local++;
                 }
-
-                changed = changed || (upperBoundsForBlock.size() != sz);
+                changed = changed || sz != count(upperBoundsForBlock.begin(), upperBoundsForBlock.end(), true);
             }
         }
     }

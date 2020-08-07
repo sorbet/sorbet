@@ -100,7 +100,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_3" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$14: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$14: T.class_of(Integer))\l<blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$11: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: T.class_of(TestArray), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$14: T.class_of(Integer) = alias <C Integer>\l<blockReturnTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$14: T.class_of(Integer))\l<blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$11: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_5" -> "bb::<Class:TestArray>#<static-init>_2" [style="bold"];
@@ -117,7 +117,7 @@ subgraph "cluster_::<Class:TestArray>#<static-init>" {
 
     "bb::<Class:TestArray>#<static-init>_7" -> "bb::<Class:TestArray>#<static-init>_1" [style="bold"];
     "bb::<Class:TestArray>#<static-init>_9" [
-        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$27: T.class_of(String) = alias <C String>\l<blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$27: T.class_of(String))\l<blockReturnTemp>$28: T.noreturn = blockreturn<sig> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=2](<self>: T.class_of(TestArray), <block-pre-call-temp>$20: Sorbet::Private::Static::Void, <selfRestore>$21: T.class_of(TestArray))\louterLoops: 1\l<self>: T::Private::Methods::DeclBuilder = loadSelf\l<cfgAlias>$27: T.class_of(String) = alias <C String>\l<blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$27: T.class_of(String))\l<blockReturnTemp>$28: T.noreturn = blockreturn<sig> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder\l<unconditional>\l"
     ];
 
     "bb::<Class:TestArray>#<static-init>_9" -> "bb::<Class:TestArray>#<static-init>_6" [style="bold"];

@@ -46,50 +46,50 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: A, <blockReturnTemp>$9: NilClass, <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<self>: A = loadSelf\l<magic>$11: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$10: T.untyped = <get-current-exception>\l<exceptionValue>$10: T.untyped\l"
+        label = "block[id=5, rubyBlockId=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: NilClass, <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<self>: A = loadSelf\l<magic>$11: T.class_of(<Magic>) = alias <C <Magic>>\l<exceptionValue>$10: T.untyped = <get-current-exception>\l<exceptionValue>$10: T.untyped\l"
     ];
 
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_8" [style="tapered"];
 
     "bb::A#initialize_7" [
-        label = "block[id=7, rubyBlockId=3](<blockReturnTemp>$9: T.nilable(Integer), <exceptionValue>$10: T.untyped, <magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\lse$1: T.untyped = <exceptionValue>$10\l<cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$15: T.untyped = se$1: T.untyped.is_a?(<cfgAlias>$14: T.class_of(StandardError))\l<isaCheckTemp>$15: T.untyped\l"
+        label = "block[id=7, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer), <exceptionValue>$10: T.untyped, <magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\lse$1: T.untyped = <exceptionValue>$10\l<cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$15: T.untyped = se$1: T.untyped.is_a?(<cfgAlias>$14: T.class_of(StandardError))\l<isaCheckTemp>$15: T.untyped\l"
     ];
 
     "bb::A#initialize_7" -> "bb::A#initialize_11" [style="bold"];
     "bb::A#initialize_7" -> "bb::A#initialize_12" [style="tapered"];
 
     "bb::A#initialize_8" [
-        label = "block[id=8, rubyBlockId=2](<magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<blockReturnTemp>$9: Integer(1) = 1\l<exceptionValue>$10: T.untyped = <get-current-exception>\l<exceptionValue>$10: T.untyped\l"
+        label = "block[id=8, rubyBlockId=2](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<blockReturnTemp>$9: Integer(1) = 1\l<exceptionValue>$10: T.untyped = <get-current-exception>\l<exceptionValue>$10: T.untyped\l"
     ];
 
     "bb::A#initialize_8" -> "bb::A#initialize_7" [style="bold"];
     "bb::A#initialize_8" -> "bb::A#initialize_9" [style="tapered"];
 
     "bb::A#initialize_9" [
-        label = "block[id=9, rubyBlockId=5](<blockReturnTemp>$9: Integer(1), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=5](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: Integer(1), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<unconditional>\l"
     ];
 
     "bb::A#initialize_9" -> "bb::A#initialize_10" [style="bold"];
     "bb::A#initialize_10" [
-        label = "block[id=10, rubyBlockId=4](<blockReturnTemp>$9: T.nilable(Integer), <gotoDeadTemp>$16: T.nilable(TrueClass))\louterLoops: 1\l<gotoDeadTemp>$16: T.nilable(TrueClass)\l"
+        label = "block[id=10, rubyBlockId=4](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer), <gotoDeadTemp>$16: T.nilable(TrueClass))\louterLoops: 1\l<gotoDeadTemp>$16: T.nilable(TrueClass)\l"
     ];
 
     "bb::A#initialize_10" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_10" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_11" [
-        label = "block[id=11, rubyBlockId=3](<magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<exceptionValue>$10: NilClass = nil\l<keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$10: NilClass)\l<blockReturnTemp>$9: Integer(2) = 2\l<unconditional>\l"
+        label = "block[id=11, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$11: T.class_of(<Magic>), <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<exceptionValue>$10: NilClass = nil\l<keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$10: NilClass)\l<blockReturnTemp>$9: Integer(2) = 2\l<unconditional>\l"
     ];
 
     "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];
     "bb::A#initialize_12" [
-        label = "block[id=12, rubyBlockId=3](<blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::A#initialize_12" -> "bb::A#initialize_10" [style="bold"];
     "bb::A#initialize_13" [
-        label = "block[id=13, rubyBlockId=1](<blockReturnTemp>$9: Integer)\louterLoops: 1\l<blockReturnTemp>$18: T.noreturn = blockreturn<map> <blockReturnTemp>$9: Integer\l<unconditional>\l"
+        label = "block[id=13, rubyBlockId=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: Integer, <gotoDeadTemp>$16: NilClass)\louterLoops: 1\l<blockReturnTemp>$18: T.noreturn = blockreturn<map> <blockReturnTemp>$9: Integer\l<unconditional>\l"
     ];
 
     "bb::A#initialize_13" -> "bb::A#initialize_2" [style="bold"];

@@ -82,7 +82,7 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_5" [
-        label = "block[id=5, rubyBlockId=1](<self>: Bar)\louterLoops: 1\l<self>: Bar = loadSelf\l<blk>$7: T.untyped = load_yield_params(super)\l<blk>$8: Integer(0) = 0\la$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<blockReturnTemp>$9: NilClass = <self>: Bar.puts(a$1: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<super> <blockReturnTemp>$9: NilClass\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=1](<self>: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Bar)\louterLoops: 1\l<self>: Bar = loadSelf\l<blk>$7: T.untyped = load_yield_params(super)\l<blk>$8: Integer(0) = 0\la$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<blockReturnTemp>$9: NilClass = <self>: Bar.puts(a$1: T.untyped)\l<blockReturnTemp>$12: T.noreturn = blockreturn<super> <blockReturnTemp>$9: NilClass\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_5" -> "bb::Bar#baz_2" [style="bold"];
