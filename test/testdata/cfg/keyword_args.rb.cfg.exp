@@ -1,0 +1,21 @@
+digraph "keyword_args.rb" {
+subgraph "cluster_::<Class:<root>>#<static-init>" {
+    label = "::<Class:<root>>#<static-init>";
+    color = blue;
+    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
+    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<Class:<root>>#<static-init>_0" [
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<hashTemp>$5: Symbol(:\"bar\") = :\"bar\"\l<hashTemp>$6: Symbol(:\"qux\") = :\"qux\"\l<magic>$7: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$4: {bar: Symbol(:\"qux\")} = <magic>$7: T.class_of(<Magic>).<build-keyword-args>(<hashTemp>$5: Symbol(:\"bar\"), <hashTemp>$6: Symbol(:\"qux\"))\l<returnMethodTemp>$2: T.untyped = <self>: T.class_of(<root>).foo(<statTemp>$4: {bar: Symbol(:\"qux\")})\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+    "bb::<Class:<root>>#<static-init>_1" [
+        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+    ];
+
+    "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
+}
+
+}
+
