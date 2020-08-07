@@ -333,11 +333,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 for (auto &exp : s->args) {
                     argIdx++;
                     LocalRef temp;
-                    temp = cctx.newTemporary(core::Names::statTemp());
                     if (argIdx + 1 == s->args.size() && ast::isa_tree<ast::Hash>(exp)) {
+                        temp = cctx.newTemporary(core::Names::keywordArgsTemp());
                         current = walkHash(cctx.withTarget(temp), ast::cast_tree<ast::Hash>(exp), current,
                                            core::Names::buildKeywordArgs());
                     } else {
+                        temp = cctx.newTemporary(core::Names::statTemp());
                         current = walk(cctx.withTarget(temp), exp.get(), current);
                     }
 

@@ -67,6 +67,7 @@ NameDef names[] = {
     {"selfLocal", "<self>"},
     {"selfRestore", "<selfRestore>"}, // used to restore self in case block changes it
     {"hashTemp", "<hashTemp>"},
+    {"keywordArgsTemp", "<keywordArgsTemp>"},
     {"arrayTemp", "<arrayTemp>"},
     {"rescueTemp", "<rescueTemp>"},
     {"exceptionValue", "<exceptionValue>"},
