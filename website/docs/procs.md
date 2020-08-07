@@ -194,5 +194,5 @@ end
 ```
 
 In general, you're better off avoiding `Proc.new` if you can. There's a
-[rubocop rule](https://www.rubocop.org/en/stable/cops_style/#styleproc) you can
-use to enforce this.
+[rubocop rule](https://docs.rubocop.org/rubocop/cops_style.html#styleproc) you
+can use to enforce this.
