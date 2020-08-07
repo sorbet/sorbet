@@ -2202,6 +2202,7 @@ class Array < Object
   # a.sample(random: Random.new(1))     #=> 6
   # a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
   # ```
+  sig { returns(T.nilable(Elem)) }
   sig do
     params(
         arg0: Integer,
