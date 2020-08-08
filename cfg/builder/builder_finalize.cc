@@ -10,18 +10,40 @@ using namespace std;
 namespace sorbet::cfg {
 
 namespace {
-bool mergeUpperBounds(vector<bool> &into, const vector<bool> &from) {
-    ENFORCE(into.size() == from.size());
+void mergeUpperBounds(vector<int> &into, const vector<int> &from) {
+    into.insert(into.end(), from.begin(), from.end());
+}
+
+void mergeUpperBounds(vector<int> &into, const vector<bool> &from) {
     auto local = 0;
-    bool changed = false;
     for (auto val : from) {
-        if (val && !into[local]) {
-            into[local] = val;
-            changed = true;
+        if (val) {
+            into.emplace_back(local);
         }
         local++;
     }
-    return changed;
+}
+
+void sortAndDedupe(vector<int> &buffer) {
+    fast_sort(buffer);
+    buffer.resize(std::distance(buffer.begin(), std::unique(buffer.begin(), buffer.end())));
+}
+
+// Given sorted vectors `data` and `toRemove`, removes `toRemove` from `data`.
+void removeFrom(vector<int> &data, const vector<int> &toRemove) {
+    auto dataIt = data.begin();
+    auto removeIt = toRemove.begin();
+    while (dataIt != data.end() && removeIt != toRemove.end()) {
+        const int datum = *dataIt;
+        const int remove = *removeIt;
+        if (datum == remove) {
+            dataIt = data.erase(dataIt);
+        } else if (datum < remove) {
+            dataIt++;
+        } else {
+            removeIt++;
+        }
+    }
 }
 } // namespace
 
@@ -349,44 +371,52 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     const vector<vector<bool>> &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<vector<bool>> upperBounds1 = readsByBlock;
+    vector<vector<int>> upperBounds1(cfg.maxBasicBlockId);
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
+        // Initialize upperBounds1
+        for (BasicBlock *bb : cfg.forwardsTopoSort) {
+            auto &upperBoundsForBlock = upperBounds1[bb->id];
+            mergeUpperBounds(upperBoundsForBlock, readsByBlock[bb->id]);
+        }
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
-                auto sz = count(upperBoundsForBlock.begin(), upperBoundsForBlock.end(), true);
+                const auto sz = upperBoundsForBlock.size();
                 if (bb->bexit.thenb != cfg.deadBlock()) {
                     mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
                     mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
+                sortAndDedupe(upperBoundsForBlock);
+
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
+                vector<int> toRemove;
                 auto local = 0;
                 for (auto isDead : deadByBlock[bb->id]) {
                     // TODO(nelhage) We can't erase for variables inside loops, due
                     // to how our "pinning" type inference works. We can remove this
                     // inner condition when we get a better type inference
                     // algorithm.
-                    if (isDead && bb->outerLoops <= cfg.minLoops[local] && upperBoundsForBlock[local]) {
-                        upperBoundsForBlock[local] = false;
+                    if (isDead && bb->outerLoops <= cfg.minLoops[local]) {
+                        toRemove.emplace_back(local);
                     }
                     local++;
                 }
-                changed = changed || sz != count(upperBoundsForBlock.begin(), upperBoundsForBlock.end(), true);
+                sortAndDedupe(toRemove);
+                removeFrom(upperBoundsForBlock, toRemove);
+
+                // Remove
+                changed = changed || sz != upperBoundsForBlock.size();
             }
         }
     }
 
-    vector<vector<bool>> upperBounds2(cfg.maxBasicBlockId);
-    // Preallocate vectors.
-    for (auto bb = 0; bb < cfg.maxBasicBlockId; bb++) {
-        upperBounds2[bb].resize(cfg.maxVariableId);
-    }
+    vector<vector<int>> upperBounds2(cfg.maxBasicBlockId);
 
     changed = true;
     {
@@ -396,15 +426,16 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
                 BasicBlock *bb = *it;
                 auto &upperBoundsForBlock = upperBounds2[bb->id];
-
-                bool modified = false;
+                const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        modified = mergeUpperBounds(upperBoundsForBlock, writesByBlock[edge->id]);
-                        modified = mergeUpperBounds(upperBoundsForBlock, upperBounds2[edge->id]) || modified;
+                        mergeUpperBounds(upperBoundsForBlock, writesByBlock[edge->id]);
+                        mergeUpperBounds(upperBoundsForBlock, upperBounds2[edge->id]);
                     }
                 }
-                changed = changed || modified;
+                sortAndDedupe(upperBoundsForBlock);
+
+                changed = changed || sz != upperBoundsForBlock.size();
             }
         }
     }
@@ -412,13 +443,13 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
-            auto set2 = upperBounds2[it->id];
-            auto local = 0;
-            for (auto el : upperBounds1[it->id]) {
-                if (el && set2[local]) {
-                    it->args.emplace_back(local);
-                }
-                local++;
+            const auto &set1 = upperBounds1[it->id];
+            const auto &set2 = upperBounds2[it->id];
+            vector<int> intersection;
+            // TODO(jvilk): There's no back_emplacer :(
+            set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), back_inserter(intersection));
+            for (auto local : intersection) {
+                it->args.emplace_back(local);
             }
             fast_sort(it->args,
                       [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable.id() < rhs.variable.id(); });
