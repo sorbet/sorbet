@@ -24,11 +24,12 @@ struct DesugarContext final {
     core::NameRef enclosingBlockArg;
     core::Loc enclosingMethodLoc;
     core::NameRef enclosingMethodName;
+    bool isInArgs;
 
     DesugarContext(core::MutableContext ctx, u4 &uniqueCounter, core::NameRef enclosingBlockArg,
-                   core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName)
+                   core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName, bool isInSig = false)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
-          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), isInArgs(isInSig){};
 };
 
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
@@ -445,7 +446,10 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     }
 
                     auto array = make_unique<parser::Array>(loc, std::move(argnodes));
-                    auto args = node2TreeImpl(dctx, std::move(array));
+
+                    DesugarContext newDctx(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg,
+                                           dctx.enclosingMethodLoc, dctx.enclosingMethodName, true);
+                    auto args = node2TreeImpl(newDctx, std::move(array));
                     auto method =
                         MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
 
@@ -474,12 +478,14 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     Send::ARGS_store args;
                     unique_ptr<parser::Node> block;
                     args.reserve(send->args.size());
+                    DesugarContext newDctx(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg,
+                                           dctx.enclosingMethodLoc, dctx.enclosingMethodName, true);
                     for (auto &stat : send->args) {
                         if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
                             ENFORCE(block == nullptr, "passing a block where there is no block");
                             block = std::move(bp->block);
                         } else {
-                            args.emplace_back(node2TreeImpl(dctx, std::move(stat)));
+                            args.emplace_back(node2TreeImpl(newDctx, std::move(stat)));
                         }
                     };
 
@@ -1260,6 +1266,33 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         }
                     }
                 };
+
+                UnorderedSet<core::NameRef> hashKeySymbols;
+                auto &gs = dctx.ctx.state;
+                for (auto &key : keys) {
+                    auto lit = ast::cast_tree_const<ast::Literal>(key);
+                    core::NameRef nameRef;
+                    if (!lit) {
+                        continue;
+                    }
+                    if (lit->isSymbol(gs)) {
+                        nameRef = lit->asSymbol(gs);
+                    } else if (lit->isString(gs)) {
+                        nameRef = lit->asString(gs);
+                    } else {
+                        continue;
+                    }
+
+                    if (hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
+                        hashKeySymbols.insert(nameRef);
+                    } else {
+                        if (auto e = dctx.ctx.beginError(key->loc, core::errors::Desugar::DuplicatedHashKeys)) {
+                            auto errorMessage = dctx.isInArgs ? ConstExprStr("Parameter name `{}` is duplicated")
+                                                              : ConstExprStr("Hash key `{}` is duplicated");
+                            e.setHeader(errorMessage, nameRef.toString(gs));
+                        }
+                    }
+                }
 
                 TreePtr res;
                 if (keys.empty()) {
