@@ -1101,11 +1101,13 @@ VALUE sorbet_boolToRuby(_Bool b) {
 
 VALUE sorbet_buildHashIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                 VALUE closure) {
-    // this comes from internal.h
-    void rb_hash_bulk_insert(long, const VALUE *, VALUE);
-
     VALUE ret = rb_hash_new_with_size(argc / 2);
     if (argc != 0) {
+        // We can use rb_hash_bulk_insert here because rb_hash_new was freshly allocated.
+        // We have tried in the past to use rb_hash_bulk_insert after clearing an existing hash,
+        // and things broke wonderfully, because Ruby Hash objects are either backed by a small (<8 element)
+        // or large hash table implementation, and neither Hash#clear nor rb_hash_bulk_insert doesn't
+        // change what kind of Hash object it is.
         rb_hash_bulk_insert(argc, argv, ret);
     }
     return ret;
