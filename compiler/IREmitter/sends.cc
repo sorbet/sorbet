@@ -201,6 +201,12 @@ llvm::Value *IREmitterHelpers::fillSendArgArray(CompilerState &cs, llvm::IRBuild
         int argId = 0;
         auto it = args.begin() + offset;
         for (; argId < length; argId += 1, ++it) {
+            // the sendArgArray is always a pointer to an array of VALUEs. That is, since the
+            // outermost type is a pointer, not an array, the first 0 in the instruction:
+            //   getelementptr inbounds <type>, <type>* %s, i64 0, i64 <argId>
+            // just means to offset 0 from the pointer's contents. Then the second index is into the
+            // array (so for this type of pointer-to-array, the first index will always be 0,
+            // unless you're trying to do something more powerful with GEP, like compute sizeof)
             llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                       llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
             auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);

@@ -459,7 +459,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> functionInitializersByFunction;
     vector<llvm::BasicBlock *> argumentSetupBlocksByFunction;
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
-    vector<llvm::AllocaInst *> sendArgArrays;
+    vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
     vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
     vector<llvm::Value *> escapedClosure;
@@ -500,7 +500,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
         ENFORCE(localClosure != nullptr);
         escapedClosure.emplace_back(localClosure);
-        sendArgArrays.emplace_back(sendArgArray);
+        sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
         auto iseqEncodedPtr = builder.CreateAlloca(iseqEncodedPtrType, nullptr, "iseqEncodedStore");
@@ -616,7 +616,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         llvmBlocks,
         move(basicBlockJumpOverrides),
         move(basicBlockRubyBlockId),
-        move(sendArgArrays),
+        move(sendArgArrayByBlock),
         escapedClosure,
         std::move(escapedVariableIndices),
         {},

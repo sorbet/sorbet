@@ -675,19 +675,21 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
         // alias to a field or constant
         auto alias = irctx.aliases.at(local);
 
-        if (alias.kind == Alias::AliasKind::Constant) {
-            return Payload::getRubyConstant(cs, alias.constantSym, builder);
-        } else if (alias.kind == Alias::AliasKind::GlobalField) {
-            return builder.CreateCall(cs.module->getFunction("sorbet_globalVariableGet"),
-                                      {Payload::idIntern(cs, builder, alias.globalField.data(cs)->shortName(cs))});
-        } else if (alias.kind == Alias::AliasKind::ClassField) {
-            return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
-                                      {getClassVariableStoreClass(cs, builder, irctx),
-                                       Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
-        } else if (alias.kind == Alias::AliasKind::InstanceField) {
-            return builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableGet"),
-                                      {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
-                                       Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
+        switch (alias.kind) {
+            case Alias::AliasKind::Constant:
+                return Payload::getRubyConstant(cs, alias.constantSym, builder);
+            case Alias::AliasKind::GlobalField:
+                return builder.CreateCall(cs.module->getFunction("sorbet_globalVariableGet"),
+                                          {Payload::idIntern(cs, builder, alias.globalField.data(cs)->shortName(cs))});
+            case Alias::AliasKind::ClassField:
+                return builder.CreateCall(cs.module->getFunction("sorbet_classVariableGet"),
+                                          {getClassVariableStoreClass(cs, builder, irctx),
+                                           Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
+            case Alias::AliasKind::InstanceField:
+                return builder.CreateCall(
+                    cs.module->getFunction("sorbet_instanceVariableGet"),
+                    {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
+                     Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
