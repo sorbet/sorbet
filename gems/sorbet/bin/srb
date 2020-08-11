@@ -23,7 +23,7 @@ Options:
 For full help:
   https://sorbet.org
 EOF
-  exit 0
+  exit 1
 }
 
 subcommand=$1
