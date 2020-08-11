@@ -150,7 +150,7 @@ fi
   ruby_loc=$(bundle exec which ruby | sed -e 's,toolchain/bin/,,')
   if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
     info "├─ Bundle was able to find ruby"
-  else 
+  else
     attn "├─ ruby in path:  ${ruby_loc}"
     attn "├─ expected ruby: ${RUBY_WRAPPER_LOC}"
     error "└─ Bundle failed to find ruby"
