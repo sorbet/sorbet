@@ -33,12 +33,14 @@ def __lldb_init_module(debugger, internal_dict):
     ci = debugger.GetCommandInterpreter()
     ci.HandleCommand("command script add -f lldbinit.cmd_rubysourcemap rubysourcemap", result)
     ci.HandleCommand("command script add -f lldbinit.cmd_llvmsourcemap llvmsourcemap", result)
+    ci.HandleCommand("command script add -f lldbinit.cmd_dump_ruby_stack rubystack", result)
 
     cyan="\x1b[0;36m"
     cnone="\x1b[0m"
 
     print("(lldb) Run %srubysourcemap%s to set up Ruby source maps" % (cyan, cnone))
     print("(lldb) Run %sllvmsourcemap%s to set up LLVM source maps" % (cyan, cnone))
+    print("(lldb) Run %srubystack%s to dump the ruby stack" % (cyan, cnone))
 
 
 def cmd_rubysourcemap(debugger, command, result, dict):
@@ -63,3 +65,16 @@ def cmd_llvmsourcemap(debugger, command, result, dict):
     source_map_command = 'settings set -- target.source-map /proc/self/cwd/external/llvm %s' % llvm_path
     print('(lldb) %s' % source_map_command)
     ci.HandleCommand(source_map_command, result)
+
+def cmd_dump_ruby_stack(debugger, command, result, internal_dict):
+    """
+    Print out the cfp that's given, or the top of the ruby stack by default.
+    """
+    ci = debugger.GetCommandInterpreter()
+    if command:
+        cfp = command
+    else:
+        cfp = 'ruby_current_execution_context_ptr->cfp'
+    dump_command = 'call rb_vmdebug_stack_dump_raw(ruby_current_execution_context_ptr, {})'.format(cfp)
+    print('(lldb) {}'.format(dump_command))
+    ci.HandleCommand(dump_command, result)
