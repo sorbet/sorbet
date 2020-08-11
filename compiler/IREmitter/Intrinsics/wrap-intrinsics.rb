@@ -3,7 +3,7 @@
 
 require 'set'
 require 'optparse'
-require_relative '../../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib'
+require_relative '../../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime'
 
 class Module
   include T::Sig
@@ -71,7 +71,6 @@ module Intrinsics
       "Array#at",
       "Array#clear",
       "Array#delete",
-      "Array#each",
       "Array#include?",
       "Array#initialize_copy",
       "Array#last",

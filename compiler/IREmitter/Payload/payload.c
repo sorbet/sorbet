@@ -1220,24 +1220,6 @@ VALUE sorbet_enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eo
     return RARRAY_LEN(array);
 }
 
-VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                           VALUE closure) {
-    sorbet_ensure_arity(argc, 0);
-    if (blk == NULL) {
-        return rb_enumeratorize_with_size(recv, ID2SYM(fun), 0, NULL,
-                                          (rb_enumerator_size_func *)sorbet_enumerator_size_func_array_length);
-    }
-
-    for (long idx = 0; idx < RARRAY_LEN(recv); idx++) {
-        VALUE elem = RARRAY_AREF(recv, idx);
-        VALUE blockArg = sorbet_rubyNil();
-        long blockArgc = 1;
-        (*blk)(elem, closure, blockArgc, &elem, blockArg);
-    }
-
-    return recv;
-}
-
 VALUE sorbet_rb_hash_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                VALUE closure) {
     rb_check_arity(argc, 1, 1);

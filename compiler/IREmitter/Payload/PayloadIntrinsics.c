@@ -92,16 +92,6 @@ VALUE sorbet_int_rb_ary_delete(VALUE recv, ID fun, int argc, VALUE *const restri
     return rb_ary_delete(recv, arg_0);
 }
 
-// Array#each
-// Calling convention: 0
-extern VALUE rb_ary_each(VALUE obj);
-
-VALUE sorbet_int_rb_ary_each(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk,
-                             VALUE closure) {
-    rb_check_arity(argc, 0, 0);
-    return rb_ary_each(recv);
-}
-
 // Array#include?
 // Calling convention: 1
 extern VALUE rb_ary_includes(VALUE obj, VALUE arg_0);

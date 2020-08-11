@@ -10,7 +10,6 @@
     {core::Symbols::Array(), "at", "sorbet_int_rb_ary_at", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "clear", "sorbet_int_rb_ary_clear", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "delete", "sorbet_int_rb_ary_delete", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Array(), "each", "sorbet_int_rb_ary_each", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "include?", "sorbet_int_rb_ary_includes", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "initialize_copy", "sorbet_int_rb_ary_replace", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "last", "sorbet_int_rb_ary_last", Intrinsics::HandleBlock::Unhandled},
