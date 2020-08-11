@@ -489,8 +489,8 @@ module Opus::Types::Test
 
       it 'raises an error when two parameters have the same name' do
 
-        @mod.sig { params(a: Integer, a: Integer).returns(String) }
-        def @mod.bar(a, a)
+        @mod.sig { params(_: Integer, _: Integer).returns(String) }
+        def @mod.bar(_, _)
           ""
         end
 
