@@ -1,4 +1,5 @@
 #include "cfg/builder/builder.h"
+#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Names.h"
@@ -8,31 +9,6 @@
 using namespace std;
 
 namespace sorbet::cfg {
-
-namespace {
-void mergeUpperBounds(vector<int> &into, const vector<int> &from) {
-    vector<int> merged;
-    set_union(into.begin(), into.end(), from.begin(), from.end(), back_inserter(merged));
-    into = move(merged);
-}
-
-// Given sorted vectors `data` and `toRemove`, removes `toRemove` from `data`.
-void removeFrom(vector<int> &data, const vector<int> &toRemove) {
-    auto dataIt = data.begin();
-    auto removeIt = toRemove.begin();
-    while (dataIt != data.end() && removeIt != toRemove.end()) {
-        const int datum = *dataIt;
-        const int remove = *removeIt;
-        if (datum == remove) {
-            dataIt = data.erase(dataIt);
-        } else if (datum < remove) {
-            dataIt++;
-        } else {
-            removeIt++;
-        }
-    }
-}
-} // namespace
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
     if (!ctx.state.lspQuery.isEmpty()) {
@@ -364,10 +340,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
                 const auto sz = upperBoundsForBlock.size();
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
+                    setMerge(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
+                    setMerge(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
 
                 // Any variable that we write and do not read is dead on entry to
@@ -403,8 +379,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        mergeUpperBounds(upperBoundsForBlock, writesByBlock[edge->id]);
-                        mergeUpperBounds(upperBoundsForBlock, upperBounds2[edge->id]);
+                        setMerge(upperBoundsForBlock, writesByBlock[edge->id]);
+                        setMerge(upperBoundsForBlock, upperBounds2[edge->id]);
                     }
                 }
 

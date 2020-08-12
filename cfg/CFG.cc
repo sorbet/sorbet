@@ -1,6 +1,7 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
 #include "common/formatting.h"
 #include "common/sort.h"
@@ -124,20 +125,20 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
 
         // Convert sets to sorted vectors.
-        auto &blockReadsIter = target.reads[bb->id];
-        blockReadsIter.reserve(blockReads.size());
-        blockReadsIter.insert(blockReadsIter.end(), blockReads.begin(), blockReads.end());
-        fast_sort(blockReadsIter);
+        auto &blockReadsVector = target.reads[bb->id];
+        blockReadsVector.reserve(blockReads.size());
+        blockReadsVector.insert(blockReadsVector.end(), blockReads.begin(), blockReads.end());
+        fast_sort(blockReadsVector);
 
-        auto &blockWriteSet = target.writes[bb->id];
-        blockWriteSet.reserve(blockWrites.size());
-        blockWriteSet.insert(blockWriteSet.end(), blockWrites.begin(), blockWrites.end());
-        fast_sort(blockWriteSet);
+        auto &blockWriteVector = target.writes[bb->id];
+        blockWriteVector.reserve(blockWrites.size());
+        blockWriteVector.insert(blockWriteVector.end(), blockWrites.begin(), blockWrites.end());
+        fast_sort(blockWriteVector);
 
-        auto &blockDeadSet = target.dead[bb->id];
-        blockDeadSet.reserve(blockDead.size());
-        blockDeadSet.insert(blockDeadSet.end(), blockDead.begin(), blockDead.end());
-        fast_sort(blockDeadSet);
+        auto &blockDeadVector = target.dead[bb->id];
+        blockDeadVector.reserve(blockDead.size());
+        blockDeadVector.insert(blockDeadVector.end(), blockDead.begin(), blockDead.end());
+        fast_sort(blockDeadVector);
     }
 
     vector<pair<int, int>> usageCounts(maxVariableId);
@@ -149,7 +150,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             const auto &blockReads = target.reads[blockId];
             const auto &blockWrites = target.writes[blockId];
             vector<int> blockReadsAndWrites;
-            blockReadsAndWrites.reserve(blockReadsAndWrites.size() + blockWrites.size());
+            blockReadsAndWrites.reserve(max(blockReads.size(), blockWrites.size()));
             set_union(blockReads.begin(), blockReads.end(), blockWrites.begin(), blockWrites.end(),
                       back_inserter(blockReadsAndWrites));
             for (auto local : blockReadsAndWrites) {
@@ -171,25 +172,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
-            auto toRemoveIt = blockWritesToRemove.begin();
-            auto &blockWrites = target.writes[blockId];
-            auto blockWritesIt = blockWrites.begin();
-            while (toRemoveIt != blockWritesToRemove.end() && blockWritesIt != blockWrites.end()) {
-                auto toRemove = *toRemoveIt;
-                auto write = *blockWritesIt;
-                if (toRemove == write) {
-                    blockWritesIt = blockWrites.erase(blockWritesIt);
-                    toRemoveIt++;
-                } else if (toRemove < write) {
-                    // Not present in write.
-                    toRemoveIt++;
-                } else {
-                    // write < toRemove
-                    // Not removed.
-                    blockWritesIt++;
-                }
-            }
-
+            removeFrom(target.writes[blockId], blockWritesToRemove);
             blockId++;
         }
     }
