@@ -11,22 +11,9 @@ namespace sorbet::cfg {
 
 namespace {
 void mergeUpperBounds(vector<int> &into, const vector<int> &from) {
-    into.insert(into.end(), from.begin(), from.end());
-}
-
-void mergeUpperBounds(vector<int> &into, const vector<bool> &from) {
-    auto local = 0;
-    for (auto val : from) {
-        if (val) {
-            into.emplace_back(local);
-        }
-        local++;
-    }
-}
-
-void sortAndDedupe(vector<int> &buffer) {
-    fast_sort(buffer);
-    buffer.resize(std::distance(buffer.begin(), std::unique(buffer.begin(), buffer.end())));
+    vector<int> merged;
+    set_union(into.begin(), into.end(), from.begin(), from.end(), back_inserter(merged));
+    into = move(merged);
 }
 
 // Given sorted vectors `data` and `toRemove`, removes `toRemove` from `data`.
@@ -277,7 +264,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 continue;
             }
 
-            bool wasRead = RnW.reads[it->id][bind.bind.variable.id()]; // read in the same block
+            bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
             if (!wasRead) {
                 for (const auto &arg : it->bexit.thenb->args) {
                     if (arg.variable == bind.bind.variable) {
@@ -320,16 +307,12 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        auto local = 0;
-        for (auto read : RnW.reads[bb->id]) {
-            if (read) {
-                auto curMin = cfg.minLoops[local];
-                if (curMin > bb->outerLoops) {
-                    curMin = bb->outerLoops;
-                }
-                cfg.minLoops[local] = curMin;
+        for (auto local : RnW.reads[bb->id]) {
+            auto curMin = cfg.minLoops[local];
+            if (curMin > bb->outerLoops) {
+                curMin = bb->outerLoops;
             }
-            local++;
+            cfg.minLoops[local] = curMin;
         }
     }
     for (const auto &bb : cfg.basicBlocks) {
@@ -366,20 +349,15 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    const vector<vector<bool>> &readsByBlock = RnW.reads;
-    const vector<vector<bool>> &writesByBlock = RnW.writes;
-    const vector<vector<bool>> &deadByBlock = RnW.dead;
+    const vector<vector<int>> &readsByBlock = RnW.reads;
+    const vector<vector<int>> &writesByBlock = RnW.writes;
+    const vector<vector<int>> &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<vector<int>> upperBounds1(cfg.maxBasicBlockId);
+    vector<vector<int>> upperBounds1(readsByBlock.begin(), readsByBlock.end());
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
-        // Initialize upperBounds1
-        for (BasicBlock *bb : cfg.forwardsTopoSort) {
-            auto &upperBoundsForBlock = upperBounds1[bb->id];
-            mergeUpperBounds(upperBoundsForBlock, readsByBlock[bb->id]);
-        }
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
@@ -391,23 +369,19 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 if (bb->bexit.elseb != cfg.deadBlock()) {
                     mergeUpperBounds(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
-                sortAndDedupe(upperBoundsForBlock);
 
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
                 vector<int> toRemove;
-                auto local = 0;
-                for (auto isDead : deadByBlock[bb->id]) {
+                for (auto local : deadByBlock[bb->id]) {
                     // TODO(nelhage) We can't erase for variables inside loops, due
                     // to how our "pinning" type inference works. We can remove this
                     // inner condition when we get a better type inference
                     // algorithm.
-                    if (isDead && bb->outerLoops <= cfg.minLoops[local]) {
+                    if (bb->outerLoops <= cfg.minLoops[local]) {
                         toRemove.emplace_back(local);
                     }
-                    local++;
                 }
-                sortAndDedupe(toRemove);
                 removeFrom(upperBoundsForBlock, toRemove);
 
                 // Remove
@@ -433,7 +407,6 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                         mergeUpperBounds(upperBoundsForBlock, upperBounds2[edge->id]);
                     }
                 }
-                sortAndDedupe(upperBoundsForBlock);
 
                 changed = changed || sz != upperBoundsForBlock.size();
             }

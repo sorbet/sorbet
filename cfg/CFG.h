@@ -125,14 +125,15 @@ public:
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        std::vector<std::vector<bool>> reads;
-        std::vector<std::vector<bool>> writes;
+        std::vector<UnorderedSet<int>> readsSet;
+        std::vector<std::vector<int>> reads;
+        std::vector<std::vector<int>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        std::vector<std::vector<bool>> dead;
+        std::vector<std::vector<int>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
     LocalRef enterLocal(core::LocalVariable variable);

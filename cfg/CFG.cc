@@ -3,6 +3,7 @@
 #include "absl/strings/str_split.h"
 #include "common/Timer.h"
 #include "common/formatting.h"
+#include "common/sort.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;
@@ -67,23 +68,20 @@ CFG::CFG() {
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
     CFG::ReadsAndWrites target;
+    target.readsSet.resize(maxBasicBlockId);
     target.reads.resize(maxBasicBlockId);
     target.writes.resize(maxBasicBlockId);
     target.dead.resize(maxBasicBlockId);
-    vector<vector<bool>> readsAndWrites(maxBasicBlockId);
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
-        auto &blockWrites = target.writes[bb->id];
-        blockWrites.resize(maxVariableId);
-        auto &blockReads = target.reads[bb->id];
-        blockReads.resize(maxVariableId);
-        auto &blockDead = target.dead[bb->id];
-        blockDead.resize(maxVariableId);
-        auto &blockReadsAndWrites = readsAndWrites[bb->id];
-        blockReadsAndWrites.resize(maxVariableId);
+        UnorderedSet<int> blockWrites;
+        blockWrites.reserve(maxVariableId);
+        auto &blockReads = target.readsSet[bb->id];
+        blockReads.reserve(maxVariableId);
+        UnorderedSet<int> blockDead;
+        blockDead.reserve(maxVariableId);
         for (Binding &bind : bb->exprs) {
-            blockWrites[bind.bind.variable.id()] = true;
-            blockReadsAndWrites[bind.bind.variable.id()] = true;
+            blockWrites.insert(bind.bind.variable.id());
             /*
              * When we write to an alias, we rely on the type information being
              * propagated through block arguments from the point of
@@ -92,77 +90,106 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
              */
             if (bind.bind.variable.isAliasForGlobal(ctx, *this) &&
                 cast_instruction<Alias>(bind.value.get()) == nullptr) {
-                blockReads[bind.bind.variable.id()] = true;
+                blockReads.insert(bind.bind.variable.id());
             }
 
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
-                blockReads[v->what.id()] = true;
-                blockReadsAndWrites[v->what.id()] = true;
+                blockReads.insert(v->what.id());
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                blockReads[v->recv.variable.id()] = true;
-                blockReadsAndWrites[v->recv.variable.id()] = true;
+                blockReads.insert(v->recv.variable.id());
                 for (auto &arg : v->args) {
-                    blockReads[arg.variable.id()] = true;
-                    blockReadsAndWrites[arg.variable.id()] = true;
+                    blockReads.insert(arg.variable.id());
                 }
             } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
-                blockReads[v->what.variable.id()] = true;
+                blockReads.insert(v->what.variable.id());
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                blockReads[v->what.variable.id()] = true;
-                blockReadsAndWrites[v->what.variable.id()] = true;
+                blockReads.insert(v->what.variable.id());
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                blockReads[v->what.variable.id()] = true;
-                blockReadsAndWrites[v->what.variable.id()] = true;
+                blockReads.insert(v->what.variable.id());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                blockReads[v->value.variable.id()] = true;
-                blockReadsAndWrites[v->value.variable.id()] = true;
+                blockReads.insert(v->value.variable.id());
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
-                blockReads[v->fallback.id()] = true;
-                blockReadsAndWrites[v->fallback.id()] = true;
+                blockReads.insert(v->fallback.id());
             } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
-                blockReads[v->send.id()] = true;
-                blockReadsAndWrites[v->send.id()] = true;
+                blockReads.insert(v->send.id());
             }
 
-            auto fnd = blockReads[bind.bind.variable.id()];
-            if (!fnd) {
-                blockDead[bind.bind.variable.id()] = true;
+            if (!blockReads.contains(bind.bind.variable.id())) {
+                blockDead.insert(bind.bind.variable.id());
             }
         }
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
-            blockReads[bb->bexit.cond.variable.id()] = true;
-            blockReadsAndWrites[bb->bexit.cond.variable.id()] = true;
+            blockReads.insert(bb->bexit.cond.variable.id());
         }
+
+        // Convert sets to sorted vectors.
+        auto &blockReadsIter = target.reads[bb->id];
+        blockReadsIter.insert(blockReadsIter.end(), blockReads.begin(), blockReads.end());
+        fast_sort(blockReadsIter);
+
+        auto &blockWriteSet = target.writes[bb->id];
+        blockWriteSet.insert(blockWriteSet.end(), blockWrites.begin(), blockWrites.end());
+        fast_sort(blockWriteSet);
+
+        auto &blockDeadSet = target.dead[bb->id];
+        blockDeadSet.insert(blockDeadSet.end(), blockDead.begin(), blockDead.end());
+        fast_sort(blockDeadSet);
     }
-    vector<pair<int, int>> usageCounts;
-    usageCounts.resize(maxVariableId);
+
+    vector<pair<int, int>> usageCounts(maxVariableId);
 
     {
         Timer timeit(ctx.state.tracer(), "privates1");
 
         for (u4 blockId = 0; blockId < maxBasicBlockId; blockId++) {
-            auto local = 0;
-            for (auto el : readsAndWrites[blockId]) {
-                if (el) {
-                    if (usageCounts[local].first == 0) {
-                        usageCounts[local].second = blockId;
-                    }
-                    usageCounts[local].first += 1;
+            const auto &blockReads = target.reads[blockId];
+            const auto &blockWrites = target.writes[blockId];
+            vector<int> blockReadsAndWrites;
+            blockReadsAndWrites.reserve(blockReadsAndWrites.size() + blockWrites.size());
+            set_union(blockReads.begin(), blockReads.end(), blockWrites.begin(), blockWrites.end(),
+                      back_inserter(blockReadsAndWrites));
+            for (auto local : blockReadsAndWrites) {
+                if (usageCounts[local].first == 0) {
+                    usageCounts[local].second = blockId;
                 }
-                local++;
+                usageCounts[local].first += 1;
             }
         }
     }
     {
         Timer timeit(ctx.state.tracer(), "privates2");
         auto local = 0;
+        vector<vector<int>> writesToRemove(maxBasicBlockId);
         for (const auto &usages : usageCounts) {
             if (usages.first == 1) {
-                target.writes[usages.second][local] = false;
+                writesToRemove[usages.second].emplace_back(local);
             }
 
             local++;
+        }
+        auto blockId = 0;
+        for (const auto &blockWritesToRemove : writesToRemove) {
+            auto toRemoveIt = blockWritesToRemove.begin();
+            auto &blockWrites = target.writes[blockId];
+            auto blockWritesIt = blockWrites.begin();
+            while (toRemoveIt != blockWritesToRemove.end() && blockWritesIt != blockWrites.end()) {
+                auto toRemove = *toRemoveIt;
+                auto write = *blockWritesIt;
+                if (toRemove == write) {
+                    blockWritesIt = blockWrites.erase(blockWritesIt);
+                    toRemoveIt++;
+                } else if (toRemove < write) {
+                    // Not present in write.
+                    toRemoveIt++;
+                } else {
+                    // write < toRemove
+                    // Not removed.
+                    blockWritesIt++;
+                }
+            }
+
+            blockId++;
         }
     }
 
