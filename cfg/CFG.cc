@@ -125,14 +125,17 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 
         // Convert sets to sorted vectors.
         auto &blockReadsIter = target.reads[bb->id];
+        blockReadsIter.reserve(blockReads.size());
         blockReadsIter.insert(blockReadsIter.end(), blockReads.begin(), blockReads.end());
         fast_sort(blockReadsIter);
 
         auto &blockWriteSet = target.writes[bb->id];
+        blockWriteSet.reserve(blockWrites.size());
         blockWriteSet.insert(blockWriteSet.end(), blockWrites.begin(), blockWrites.end());
         fast_sort(blockWriteSet);
 
         auto &blockDeadSet = target.dead[bb->id];
+        blockDeadSet.reserve(blockDead.size());
         blockDeadSet.insert(blockDeadSet.end(), blockDead.begin(), blockDead.end());
         fast_sort(blockDeadSet);
     }
@@ -165,8 +168,6 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             if (usages.first == 1) {
                 writesToRemove[usages.second].emplace_back(local);
             }
-
-            local++;
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
