@@ -17,6 +17,6 @@ def foo
     # testing for endless ranges
     g = (1..)
     h = Range.new(1, nil)
-    T.reveal_type(g) # error: Revealed type: `T::Range[Integer(1)]`
     T.reveal_type(h) # error: Revealed type: `T::Range[Integer(1)]`
+    T.reveal_type(g) # error: Revealed type: `T::Range[Integer]`
 end
