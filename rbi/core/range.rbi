@@ -102,18 +102,6 @@ class Range < Object
   extend T::Generic
   Elem = type_member(:out)
 
-  # Constructs a range using the given `begin` and `end`. If the `exclude_end`
-  # parameter is omitted or is `false`, the range will include the end object;
-  # otherwise, it will be excluded.
-  sig do
-    type_parameters(:U).params(
-      from: T.type_parameter(:U),
-      to: T.nilable(T.type_parameter(:U)),
-      exclude_end: T::Boolean
-    ).returns(T::Range[T.type_parameter(:U)])
-  end
-  def self.new(from, to, exclude_end=false); end
-
   # Returns `true` only if `obj` is a
   # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html), has equivalent
   # begin and end items (by comparing them with `==`), and has the same
