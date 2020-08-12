@@ -149,7 +149,8 @@ module T::Types
         # enumerating the object is a destructive operation and might hang.
         obj.class
       else
-        self.class.new(type_from_instances(obj))
+        # This is a specialized enumerable type, just return the class.
+        Object.instance_method(:class).bind(obj).call
       end
     end
 
