@@ -169,6 +169,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             if (usages.first == 1) {
                 writesToRemove[usages.second].emplace_back(local);
             }
+            local++;
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
