@@ -418,15 +418,45 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::Cl
     validateFinalMethodHelper(ctx, singleton, klass);
 }
 
+// Ignore RBI files for the purpose of checking sealed (unless there are no other files).
+// Sealed violations in RBI files too frequently come from generated RBI files, and usually if
+// people are using sealed!, they're trying to make the source available to Sorbet anyways.
+// Regardless, the runtime will still ultimately check violations in untyped code.
+core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
+    core::FileRef bestFile;
+    for (const auto &cur : klass.data(ctx)->locs()) {
+        auto curFile = cur.file();
+
+        if (!bestFile.exists()) {
+            bestFile = curFile;
+            continue;
+        }
+
+        if (curFile.data(ctx).isRBI()) {
+            continue;
+        }
+
+        if (bestFile.data(ctx).isRBI()) {
+            bestFile = curFile;
+            continue;
+        }
+
+        if (curFile.data(ctx).strictLevel > bestFile.data(ctx).strictLevel) {
+            bestFile = curFile;
+        }
+    }
+
+    return bestFile;
+}
+
 void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
                                   const core::SymbolRef errMsgClass, const string_view verb) {
-    auto klassFile = klass.data(ctx)->loc().file();
+    auto klassFile = bestNonRBIFile(ctx, klass);
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
             continue;
         }
-        // Statically, we allow including / extending in any file that adds a loc to sealedLocs.
-        // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
+        // TODO(jez) sealedLocs is actually always one loc. We should add an ENFORCE or error message for this.
         if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
@@ -444,9 +474,7 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
 
 void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    // Statically, we allow a subclass in any file that adds a loc to sealedLocs.
-    // This is less restrictive than the runtime, because the runtime doesn't have to deal with RBI files.
-    auto file = klass.data(ctx)->loc().file();
+    auto file = bestNonRBIFile(ctx, klass);
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed() &&
         !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
         if (auto e =

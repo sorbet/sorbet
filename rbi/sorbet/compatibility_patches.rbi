@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 # These modules provide optional runtime compatibility patches to fix
 # behaviour modified by sorbet-runtime
