@@ -131,11 +131,11 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
     }
 }
 
-LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, vector<LocalRef> &aliases) {
+LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, UnorderedMap<LocalRef, LocalRef> &aliases) {
     if (what.isSyntheticTemporary(ctx, cfg)) {
-        auto fnd = aliases[what.id()];
-        if (fnd.exists()) {
-            return fnd;
+        auto fnd = aliases.find(what.id());
+        if (fnd != aliases.end()) {
+            return fnd->second;
         }
     }
     return what;
@@ -146,34 +146,33 @@ LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, vector<LocalRe
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
-    vector<vector<LocalRef>> outAliases;
+    vector<UnorderedMap<LocalRef, LocalRef>> outAliases;
     outAliases.resize(cfg.maxBasicBlockId);
-    for (auto bbId = 0; bbId < cfg.maxBasicBlockId; bbId++) {
-        outAliases[bbId].resize(cfg.maxVariableId);
-    }
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         auto &bb = *it;
         if (bb == cfg.deadBlock()) {
             continue;
         }
-        vector<LocalRef> &current = outAliases[bb->id];
+        auto &current = outAliases[bb->id];
         if (!bb->backEdges.empty()) {
             current = outAliases[bb->backEdges[0]->id];
         }
 
         for (BasicBlock *parent : bb->backEdges) {
-            const vector<LocalRef> &other = outAliases[parent->id];
-            auto local = 0;
-            for (auto &alias : current) {
-                if (alias.exists()) {
-                    auto &otherAlias = other[local];
-                    if (!otherAlias.exists() || alias != otherAlias) {
-                        current[local] = LocalRef::noVariable(); // note: this is correct but too conservative. In
-                                                                 // particular for loop headers
+            const auto &other = outAliases[parent->id];
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                auto &el = *it;
+                auto fnd = other.find(el.first);
+                if (fnd != other.end()) {
+                    if (fnd->second != el.second) {
+                        current.erase(it++);
+                    } else {
+                        ++it;
                     }
+                } else {
+                    current.erase(it++); // note: this is correct but too conservative. In particular for loop headers
                 }
-
-                local++;
             }
         }
 
@@ -182,9 +181,11 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 i->what = maybeDealias(ctx, cfg, i->what, current);
             }
             /* invalidate a stale record */
-            for (auto &alias : current) {
-                if (alias == bind.bind.variable) {
-                    alias = LocalRef::noVariable();
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                if (it->second == bind.bind.variable) {
+                    current.erase(it++);
+                } else {
+                    ++it;
                 }
             }
             /* dealias */

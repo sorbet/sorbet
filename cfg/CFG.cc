@@ -76,11 +76,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         UnorderedSet<int> blockWrites;
-        blockWrites.reserve(maxVariableId);
         auto &blockReads = target.readsSet[bb->id];
-        blockReads.reserve(maxVariableId);
         UnorderedSet<int> blockDead;
-        blockDead.reserve(maxVariableId);
         for (Binding &bind : bb->exprs) {
             blockWrites.insert(bind.bind.variable.id());
             /*
