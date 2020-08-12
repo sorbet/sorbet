@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.flatfile() do ||
       begin
-        <self>.from(::Range.new(1, 2), :"foo")
+        <self>.from(::<Magic>.<build-range>(1, 2), :"foo")
         <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
         <self>.field(:"baz")
       end

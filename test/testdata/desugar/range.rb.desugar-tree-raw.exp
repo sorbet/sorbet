@@ -23,9 +23,9 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Range
+                symbol = ::<Magic>
               }
-              fun = <U new>
+              fun = <U <build-range>>
               block = nullptr
               args = [
                 Literal{ value = 1 }
@@ -59,14 +59,13 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Range
+                symbol = ::<Magic>
               }
-              fun = <U new>
+              fun = <U <build-range>>
               block = nullptr
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
-                Literal{ value = true }
               ]
             }
           }
@@ -98,9 +97,9 @@ ClassDef{
               recv = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::Range
+                  symbol = ::<Magic>
                 }
-                fun = <U new>
+                fun = <U <build-range>>
                 block = nullptr
                 args = [
                   Literal{ value = 1 }
@@ -122,9 +121,9 @@ ClassDef{
               recv = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::Range
+                  symbol = ::<Magic>
                 }
-                fun = <U new>
+                fun = <U <build-range>>
                 block = nullptr
                 args = [
                   Literal{ value = "a" }
@@ -229,9 +228,9 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::Range
+                symbol = ::<Magic>
               }
-              fun = <U new>
+              fun = <U <build-range>>
               block = nullptr
               args = [
                 Literal{ value = 1 }

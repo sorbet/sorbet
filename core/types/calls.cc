@@ -1363,6 +1363,34 @@ public:
     }
 } Magic_buildArray;
 
+class Magic_buildRange : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(!args.args.empty(), "Magic_buildRange called without argument");
+
+        auto type_member = dropType(gs, args.args[0]->type);
+
+        if (args.args.size() > 1) {
+            auto other = dropType(gs, args.args[1]->type);
+            if (other != Types::untypedUntracked() && other != type_member) {
+                type_member = Types::untypedUntracked();
+            }
+        }
+
+        res.returnType = Types::rangeOf(gs, type_member);
+    }
+
+private:
+    static TypePtr dropType(const GlobalState &gs, const TypePtr type) {
+        auto t = Types::dropLiteral(type);
+        t = Types::dropNil(gs, t);
+        if (t->isBottom()) {
+            return Types::untypedUntracked();
+        }
+        return t;
+    }
+} Magic_buildRange;
+
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
         if (auto *ot = cast_type<OrType>(type.get())) {
@@ -2265,6 +2293,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildKeywordArgs(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},

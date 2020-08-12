@@ -438,6 +438,23 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+
+    // Synthesize <Magic>.<build-range>(from: T.untyped, to: T.untyped) => Range
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildRange());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::rangeOfUntyped();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
     // Synthesize <Magic>.<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
     {
