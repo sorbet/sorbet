@@ -2,6 +2,12 @@
 require_relative '../test_helper'
 
 class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
+  module TypeImpersonatingAnother
+    def self.name
+      "String"
+    end
+  end
+
   cases = [
     # Basic:
     [String, "String"],
@@ -10,6 +16,7 @@ class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
     [T::Types, "T::Types"],
     [self, "Opus::Types::Test::TypesToRubyTest"],
     [Symbol, "Symbol"],
+    [TypeImpersonatingAnother, "Opus::Types::Test::TypesToRubyTest::TypeImpersonatingAnother"],
 
     # Nilable:
     [T.nilable(String), "T.nilable(String)"],

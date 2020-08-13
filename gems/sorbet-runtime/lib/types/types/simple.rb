@@ -16,7 +16,7 @@ module T::Types
       #
       # `name` isn't normally a hot path for types, but it is used in initializing a T::Types::Union,
       # and so in `T.nilable`, and so in runtime constructions like `x = T.let(nil, T.nilable(Integer))`.
-      @name ||= @raw_type.name.freeze
+      @name ||= Module.instance_method(:name).bind(@raw_type).call.freeze
     end
 
     # @override Base
