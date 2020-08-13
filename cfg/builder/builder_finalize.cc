@@ -349,17 +349,20 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
 
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
-                vector<int> toRemove;
-                for (auto local : deadByBlock[bb->id]) {
-                    // TODO(nelhage) We can't erase for variables inside loops, due
-                    // to how our "pinning" type inference works. We can remove this
-                    // inner condition when we get a better type inference
-                    // algorithm.
-                    if (bb->outerLoops <= cfg.minLoops[local]) {
-                        toRemove.emplace_back(local);
+                const auto &deadForBlock = deadByBlock[bb->id];
+                if (!deadForBlock.empty()) {
+                    vector<int> toRemove;
+                    for (auto local : deadForBlock) {
+                        // TODO(nelhage) We can't erase for variables inside loops, due
+                        // to how our "pinning" type inference works. We can remove this
+                        // inner condition when we get a better type inference
+                        // algorithm.
+                        if (bb->outerLoops <= cfg.minLoops[local]) {
+                            toRemove.emplace_back(local);
+                        }
                     }
+                    removeFrom(upperBoundsForBlock, toRemove);
                 }
-                removeFrom(upperBoundsForBlock, toRemove);
 
                 // Remove
                 changed = changed || sz != upperBoundsForBlock.size();
@@ -395,14 +398,24 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         for (auto &it : cfg.basicBlocks) {
             const auto &set1 = upperBounds1[it->id];
             const auto &set2 = upperBounds2[it->id];
-            vector<int> intersection;
-            // TODO(jvilk): There's no back_emplacer :(
-            set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(), back_inserter(intersection));
-            for (auto local : intersection) {
-                it->args.emplace_back(local);
+            auto set1It = set1.begin();
+            auto set2It = set2.begin();
+            // Note: The loop enqueues arguments in sorted order. If args has any members already, we'll need to sort
+            // it!
+            ENFORCE(it->args.empty());
+            while (set1It != set1.end() && set2It != set2.end()) {
+                const auto set1El = *set1It;
+                const auto set2El = *set2It;
+                if (set1El == set2El) {
+                    it->args.emplace_back(set1El);
+                    set1It++;
+                    set2It++;
+                } else if (set1El < set2El) {
+                    set1It++;
+                } else {
+                    set2It++;
+                }
             }
-            fast_sort(it->args,
-                      [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable.id() < rhs.variable.id(); });
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }
