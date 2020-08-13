@@ -11,6 +11,7 @@ class Context {
 public:
     enum class State {
         CLASS,
+        MODULE,
         SCLASS,
         DEF,
         DEFS,
