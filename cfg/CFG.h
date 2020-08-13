@@ -141,6 +141,7 @@ public:
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops, int rubyBlockid);
+    void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;
     /**

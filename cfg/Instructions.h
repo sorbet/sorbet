@@ -43,12 +43,11 @@ public:
 };
 CheckSize(LocalRef, 4, 4);
 
-// TODO(jvilk): Remove when I remove all maps using LocalRef as a key.
 template <typename H> H AbslHashValue(H h, const LocalRef &m) {
     return H::combine(std::move(h), m.id());
 }
 
-class VariableUseSite {
+class VariableUseSite final {
 public:
     LocalRef variable;
     core::TypePtr type;

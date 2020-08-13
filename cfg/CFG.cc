@@ -24,20 +24,26 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     return r.get();
 }
 
+void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
+    int id = this->maxVariableId++;
+    this->localVariables.emplace_back(variable);
+
+    // Default values
+    this->minLoops.emplace_back(INT_MAX);
+    this->maxLoopWrite.emplace_back(0);
+
+    ENFORCE(this->localVariables.size() == this->minLoops.size());
+    ENFORCE(this->localVariables.size() == this->maxLoopWrite.size());
+    ref = LocalRef(id);
+}
+
 LocalRef CFG::enterLocal(core::LocalVariable variable) {
-    if (!localVariableToLocalRef.contains(variable)) {
-        int id = this->maxVariableId++;
-        this->localVariables.emplace_back(variable);
-
-        // Default values
-        this->minLoops.emplace_back(INT_MAX);
-        this->maxLoopWrite.emplace_back(0);
-
-        ENFORCE(this->localVariables.size() == this->minLoops.size());
-        ENFORCE(this->localVariables.size() == this->maxLoopWrite.size());
-        localVariableToLocalRef[variable] = LocalRef(id);
+    auto &ref = localVariableToLocalRef[variable];
+    if (!ref.exists() && variable.exists()) {
+        // ref is an out parameter.
+        enterLocalInternal(variable, ref);
     }
-    return localVariableToLocalRef[variable];
+    return ref;
 }
 
 CFG::CFG() {
@@ -48,10 +54,9 @@ CFG::CFG() {
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
 
     // Enter a few fixed local variables
-    // TODO: How often are these unused?
-    LocalRef noVariable = this->enterLocal(core::LocalVariable::noVariable());
-    ENFORCE(!noVariable.exists());
-    ENFORCE(noVariable.id() == 0 && noVariable == LocalRef::noVariable());
+    // noVariable is special because it doesn't 'exist'.
+    this->enterLocalInternal(core::LocalVariable::noVariable(),
+                             localVariableToLocalRef[core::LocalVariable::noVariable()]);
 
     LocalRef blockCall = this->enterLocal(core::LocalVariable::blockCall());
     ENFORCE(blockCall == LocalRef::blockCall());
