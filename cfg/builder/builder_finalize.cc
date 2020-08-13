@@ -155,39 +155,52 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             continue;
         }
         auto &current = outAliases[bb->id];
-        if (!bb->backEdges.empty()) {
-            current = outAliases[bb->backEdges[0]->id];
-        }
 
-        for (BasicBlock *parent : bb->backEdges) {
-            const auto &other = outAliases[parent->id];
-            for (auto it = current.begin(); it != current.end(); /* nothing */) {
-                auto &el = *it;
-                auto fnd = other.find(el.first);
-                if (fnd != other.end()) {
-                    if (fnd->second != el.second) {
-                        current.erase(it++);
+        if (!bb->backEdges.empty()) {
+            // Take the intersection of all of the back edges' aliases.
+            current = outAliases[bb->backEdges[0]->id];
+            for (auto i = 1; i < bb->backEdges.size(); i++) {
+                auto *parent = bb->backEdges[i];
+                const auto &other = outAliases[parent->id];
+                for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                    auto &el = *it;
+                    auto fnd = other.find(el.first);
+                    if (fnd != other.end()) {
+                        if (fnd->second != el.second) {
+                            current.erase(it++);
+                        } else {
+                            ++it;
+                        }
                     } else {
-                        ++it;
+                        current.erase(
+                            it++); // note: this is correct but too conservative. In particular for loop headers
                     }
-                } else {
-                    current.erase(it++); // note: this is correct but too conservative. In particular for loop headers
                 }
             }
+        }
+
+        // Overapproximation of the set of variables that have aliases.
+        // Will have false positives, but no false negatives. Avoids an expensive inner loop below.
+        UnorderedSet<LocalRef> mayHaveAlias;
+        for (auto &alias : current) {
+            mayHaveAlias.insert(alias.second);
         }
 
         for (Binding &bind : bb->exprs) {
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 i->what = maybeDealias(ctx, cfg, i->what, current);
             }
-            /* invalidate a stale record */
-            for (auto it = current.begin(); it != current.end(); /* nothing */) {
-                if (it->second == bind.bind.variable) {
-                    current.erase(it++);
-                } else {
-                    ++it;
+            if (mayHaveAlias.contains(bind.bind.variable)) {
+                /* invalidate a stale record (uncommon) */
+                for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                    if (it->second == bind.bind.variable) {
+                        current.erase(it++);
+                    } else {
+                        ++it;
+                    }
                 }
             }
+
             /* dealias */
             if (!bind.value->isSynthetic) {
                 // we don't allow dealiasing values into synthetic instructions
@@ -209,6 +222,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 current[bind.bind.variable.id()] = i->what;
+                mayHaveAlias.insert(i->what);
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
@@ -331,10 +345,11 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     const vector<vector<int>> &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<vector<int>> upperBounds1(readsByBlock.begin(), readsByBlock.end());
+    vector<vector<int>> upperBounds1;
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
+        upperBounds1 = readsByBlock;
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
