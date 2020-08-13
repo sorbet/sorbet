@@ -402,7 +402,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             auto set2It = set2.begin();
             // Note: The loop enqueues arguments in sorted order. If args has any members already, we'll need to sort
             // it!
-            ENFORCE(it->args.empty());
+            ENFORCE_NO_TIMER(it->args.empty());
             while (set1It != set1.end() && set2It != set2.end()) {
                 const auto set1El = *set1It;
                 const auto set2El = *set2It;

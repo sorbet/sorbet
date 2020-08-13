@@ -20,6 +20,12 @@ void removeFrom(vector<int> &data, const vector<int> &toRemove) {
 }
 
 void setMerge(vector<int> &into, const vector<int> &from) {
+    // A decent proportion of merges are just copies.
+    if (into.empty()) {
+        into = from;
+        return;
+    }
+
     auto intoIt = into.begin();
     auto fromIt = from.begin();
 
