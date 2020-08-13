@@ -346,6 +346,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::T(), "must", "sorbet_T_must", Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {

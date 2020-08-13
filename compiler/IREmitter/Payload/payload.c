@@ -1167,6 +1167,15 @@ VALUE sorbet_T_unsafe(VALUE recv, ID fun, int argc, const VALUE *const restrict 
     return argv[0];
 }
 
+VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    if (UNLIKELY(argv[0] == Qnil)) {
+        rb_raise(rb_eTypeError, "Passed `nil` into T.must");
+    } else {
+        return argv[0];
+    }
+}
+
 VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                           VALUE closure) {
     sorbet_ensure_arity(argc, 0);
