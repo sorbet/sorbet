@@ -1026,7 +1026,7 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   def self.wait(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
@@ -1119,7 +1119,7 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   def self.waitpid(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
@@ -1141,7 +1141,7 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns([Integer, Process::Status])
+    .returns(T.nilable([Integer, Process::Status]))
   end
   def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 end
