@@ -11,8 +11,6 @@
 #include <memory>
 
 namespace sorbet::cfg {
-class CFG;
-
 class VariableUseSite final {
 public:
     LocalRef variable;
