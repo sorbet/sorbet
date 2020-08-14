@@ -75,7 +75,15 @@ public:
 class CFGContext;
 
 class CFG final {
-    class UnfreezeCFGLocalVariables;
+public:
+    class UnfreezeCFGLocalVariables final {
+        CFG &cfg;
+
+    public:
+        UnfreezeCFGLocalVariables(CFG &cfg);
+
+        ~UnfreezeCFGLocalVariables();
+    };
 
     friend class CFGBuilder;
     friend class LocalRef;
@@ -84,7 +92,6 @@ class CFG final {
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
      */
-public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
@@ -157,16 +164,6 @@ private:
      * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
      */
     UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
-
-    // Only privileged code can decide to unfreeze the local variable table.
-    class UnfreezeCFGLocalVariables final {
-        CFG &cfg;
-
-    public:
-        UnfreezeCFGLocalVariables(CFG &cfg);
-
-        ~UnfreezeCFGLocalVariables();
-    };
 };
 
 } // namespace sorbet::cfg
