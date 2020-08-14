@@ -42,11 +42,12 @@ void setMerge(vector<int> &into, const vector<int> &from) {
         } else {
             // intoEl > fromEl
             // Present in from, not in into.
-            // Insert at intoIt just before intoEl
-            intoIt = into.insert(intoIt, fromEl);
-            // intoIt now points to an entry containing fromEl; we can skip past it.
-            intoIt++;
-            fromIt++;
+            // Rather than insert in the middle of the vector, break out and do a set union.
+            vector<int> merged(into.begin(), intoIt);
+            merged.reserve(max(into.size(), from.size()));
+            set_union(intoIt, into.end(), fromIt, from.end(), back_inserter(merged));
+            into = move(merged);
+            return;
         }
     }
     while (fromIt != from.end()) {

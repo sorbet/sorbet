@@ -15,6 +15,14 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+UnfreezeCFGLocalVariables::UnfreezeCFGLocalVariables(CFG &cfg) : cfg(cfg) {
+    this->cfg.localVariablesFrozen = false;
+}
+
+UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
+    this->cfg.localVariablesFrozen = true;
+}
+
 BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
@@ -25,6 +33,7 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
 }
 
 void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
+    ENFORCE_NO_TIMER(!this->localVariablesFrozen);
     int id = this->maxVariableId++;
     this->localVariables.emplace_back(variable);
 
@@ -53,6 +62,7 @@ CFG::CFG() {
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
 
+    UnfreezeCFGLocalVariables unfreezeVars(*this);
     // Enter a few fixed local variables
     // noVariable is special because it doesn't 'exist'.
     this->enterLocalInternal(core::LocalVariable::noVariable(),

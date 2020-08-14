@@ -74,9 +74,19 @@ public:
 
 class CFGContext;
 
+class UnfreezeCFGLocalVariables final {
+    CFG &cfg;
+
+public:
+    UnfreezeCFGLocalVariables(CFG &cfg);
+
+    ~UnfreezeCFGLocalVariables();
+};
+
 class CFG final {
     friend class CFGBuilder;
     friend class LocalRef;
+    friend class UnfreezeCFGLocalVariables;
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
@@ -144,6 +154,7 @@ private:
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;
+    bool localVariablesFrozen = true;
     /**
      * Maps from LocalRef ID -> LocalVariable. Lets us compactly construct maps involving only the variables included
      * in the CFG.

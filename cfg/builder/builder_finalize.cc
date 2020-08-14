@@ -246,6 +246,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         return;
     }
 
+    Timer timeit(ctx.state.tracer(), "cfg.removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {

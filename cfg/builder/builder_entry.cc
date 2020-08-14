@@ -8,6 +8,7 @@ using namespace std;
 namespace sorbet::cfg {
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
+    Timer timeit(ctx.state.tracer(), "cfg");
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
     unique_ptr<CFG> res(new CFG); // private constructor
@@ -19,24 +20,32 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     CFGContext cctx(ctx, *res.get(), LocalRef::noVariable(), 0, nullptr, nullptr, nullptr, aliases,
                     discoveredUndeclaredFields, temporaryCounter);
 
-    LocalRef retSym = cctx.newTemporary(core::Names::returnMethodTemp());
-
+    LocalRef retSym;
     BasicBlock *entry = res->entry();
-    auto selfClaz = md.symbol.data(ctx)->rebind();
-    if (!selfClaz.exists()) {
-        selfClaz = md.symbol;
+    BasicBlock *cont;
+    {
+        UnfreezeCFGLocalVariables unfreezeVars(*res);
+        retSym = cctx.newTemporary(core::Names::returnMethodTemp());
+
+        auto selfClaz = md.symbol.data(ctx)->rebind();
+        if (!selfClaz.exists()) {
+            selfClaz = md.symbol;
+        }
+        synthesizeExpr(entry, LocalRef::selfVariable(), md.loc,
+                       make_unique<Cast>(LocalRef::selfVariable(),
+                                         selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
+                                         core::Names::cast()));
+
+        int i = -1;
+        for (auto &argExpr : md.args) {
+            i++;
+            auto *a = ast::MK::arg2Local(argExpr);
+            synthesizeExpr(entry, enterLocal(*res, a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
+        }
+        cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     }
-    synthesizeExpr(entry, LocalRef::selfVariable(), md.loc,
-                   make_unique<Cast>(LocalRef::selfVariable(),
-                                     selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
-                                     core::Names::cast()));
-    int i = -1;
-    for (auto &argExpr : md.args) {
-        i++;
-        auto *a = ast::MK::arg2Local(argExpr);
-        synthesizeExpr(entry, enterLocal(*res, a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
-    }
-    auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
+    // Past this point, res->localVariables is a fixed size.
+
     LocalRef retSym1 = LocalRef::finalReturn();
 
     auto rvLoc = cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())
@@ -87,6 +96,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 }
 
 void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
+    Timer timeit(ctx.state.tracer(), "cfg.fillInTopoSorts");
     auto &target1 = cfg.forwardsTopoSort;
     target1.resize(cfg.basicBlocks.size());
     int count = topoSortFwd(target1, 0, cfg.entry());
