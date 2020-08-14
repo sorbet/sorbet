@@ -5,6 +5,8 @@ using namespace std;
 
 namespace sorbet::cfg {
 core::LocalVariable LocalRef::data(const CFG &cfg) const {
+    ENFORCE(cfg.localVariables.size() > this->_id);
+    // Note: It's OK to call `.data()` of a variable that doesn't exist; it returns `LocalVariable::noVariable`.
     return cfg.localVariables[this->_id];
 }
 
