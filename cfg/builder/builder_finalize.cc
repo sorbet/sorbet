@@ -380,8 +380,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                     setDifferenceInplace(upperBoundsForBlock, toRemove);
                 }
 
-                // Remove
-                changed = changed || sz != upperBoundsForBlock.size();
+                changed = changed || (upperBoundsForBlock.size() != sz);
             }
         }
     }
@@ -416,8 +415,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             const auto &set2 = upperBounds2[it->id];
             auto set1It = set1.begin();
             auto set2It = set2.begin();
-            // Note: The loop enqueues arguments in sorted order. If args has any members already, we'll need to sort
-            // it!
+            // Note: The loop enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
             while (set1It != set1.end() && set2It != set2.end()) {
                 const auto set1El = *set1It;
@@ -432,6 +430,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                     set2It++;
                 }
             }
+            // it->args is now sorted in LocalRef ID order.
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }

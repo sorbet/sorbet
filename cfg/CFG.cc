@@ -15,11 +15,11 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-UnfreezeCFGLocalVariables::UnfreezeCFGLocalVariables(CFG &cfg) : cfg(cfg) {
+CFG::UnfreezeCFGLocalVariables::UnfreezeCFGLocalVariables(CFG &cfg) : cfg(cfg) {
     this->cfg.localVariablesFrozen = false;
 }
 
-UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
+CFG::UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
     this->cfg.localVariablesFrozen = true;
 }
 

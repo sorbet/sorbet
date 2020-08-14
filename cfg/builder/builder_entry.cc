@@ -24,7 +24,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     BasicBlock *entry = res->entry();
     BasicBlock *cont;
     {
-        UnfreezeCFGLocalVariables unfreezeVars(*res);
+        CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
         auto selfClaz = md.symbol.data(ctx)->rebind();
@@ -40,7 +40,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         for (auto &argExpr : md.args) {
             i++;
             auto *a = ast::MK::arg2Local(argExpr);
-            synthesizeExpr(entry, enterLocal(*res, a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
+            synthesizeExpr(entry, res->enterLocal(a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
         }
         cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     }
@@ -96,7 +96,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 }
 
 void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
-    Timer timeit(ctx.state.tracer(), "cfg.fillInTopoSorts");
     auto &target1 = cfg.forwardsTopoSort;
     target1.resize(cfg.basicBlocks.size());
     int count = topoSortFwd(target1, 0, cfg.entry());

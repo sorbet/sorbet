@@ -263,7 +263,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
             [&](ast::Local *a) {
                 current->exprs.emplace_back(cctx.target, a->loc,
-                                            make_unique<Ident>(enterLocal(cctx.inWhat, a->localVariable)));
+                                            make_unique<Ident>(cctx.inWhat.enterLocal(a->localVariable)));
                 ret = current;
             },
             [&](ast::Assign *a) {
@@ -271,7 +271,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs)) {
                     lhs = global2Local(cctx, lhsIdent->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs)) {
-                    lhs = enterLocal(cctx.inWhat, lhsLocal->localVariable);
+                    lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a->lhs)) {
                     lhs = unresolvedIdent2Local(cctx, ident);
                     ENFORCE(lhs.exists());
@@ -382,7 +382,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     for (int i = 0; i < blockArgs.size(); ++i) {
                         auto &arg = blockArgs[i];
-                        LocalRef argLoc = enterLocal(cctx.inWhat, arg.local);
+                        LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
 
                         if (arg.flags.isRepeated) {
                             if (i != 0) {
@@ -600,7 +600,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
 
-                    auto localVar = enterLocal(cctx.inWhat, local->localVariable);
+                    auto localVar = cctx.inWhat.enterLocal(local->localVariable);
                     rescueHandlersBlock->exprs.emplace_back(localVar, rescueCase->var->loc,
                                                             make_unique<Ident>(exceptionValue));
 
@@ -716,10 +716,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         }
         throw;
     }
-}
-
-LocalRef CFGBuilder::enterLocal(CFG &cfg, core::LocalVariable local) {
-    return cfg.enterLocal(local);
 }
 
 LocalRef CFGContext::newTemporary(core::NameRef name) {

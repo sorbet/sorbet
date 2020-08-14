@@ -74,16 +74,9 @@ public:
 
 class CFGContext;
 
-class UnfreezeCFGLocalVariables final {
-    CFG &cfg;
-
-public:
-    UnfreezeCFGLocalVariables(CFG &cfg);
-
-    ~UnfreezeCFGLocalVariables();
-};
-
 class CFG final {
+    class UnfreezeCFGLocalVariables;
+
     friend class CFGBuilder;
     friend class LocalRef;
     friend class UnfreezeCFGLocalVariables;
@@ -164,6 +157,16 @@ private:
      * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
      */
     UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
+
+    // Only privileged code can decide to unfreeze the local variable table.
+    class UnfreezeCFGLocalVariables final {
+        CFG &cfg;
+
+    public:
+        UnfreezeCFGLocalVariables(CFG &cfg);
+
+        ~UnfreezeCFGLocalVariables();
+    };
 };
 
 } // namespace sorbet::cfg
