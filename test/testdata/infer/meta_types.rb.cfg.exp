@@ -64,7 +64,7 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_3" -> "bb::TestMetaType#testit_4" [style="bold"];
     "bb::TestMetaType#testit_4" [
-        label = "block[id=4, rubyBlockId=0](<self>: TestMetaType, <statTemp>$14: Object)\l<statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)\l<ifTemp>$25: T.untyped = <self>: TestMetaType._()\l<ifTemp>$25: T.untyped\l"
+        label = "block[id=4, rubyBlockId=0](<statTemp>$14: Object, <self>: TestMetaType)\l<statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)\l<ifTemp>$25: T.untyped = <self>: TestMetaType._()\l<ifTemp>$25: T.untyped\l"
     ];
 
     "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_5" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_7" [
-        label = "block[id=7, rubyBlockId=0](<self>: TestMetaType, <statTemp>$24: Object)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<statTemp>$24: Object, <self>: TestMetaType)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];

@@ -246,7 +246,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         return;
     }
 
-    Timer timeit(ctx.state.tracer(), "cfg.removeDeadAssigns");
+    Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
@@ -257,6 +257,9 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
             }
 
             bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
+
+            // TODO(jvilk): When I change the sort order of block args to be in LocalRef variable order, we can
+            // early-abort the loops below if `arg.variable > bind.bind.variable`.
             if (!wasRead) {
                 for (const auto &arg : it->bexit.thenb->args) {
                     if (arg.variable == bind.bind.variable) {
@@ -431,6 +434,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 }
             }
             // it->args is now sorted in LocalRef ID order.
+            // TODO(jvilk): Remove this sort. I've kept it for now to avoid dirtying the PR diff.
+            fast_sort(it->args, [&cfg](const auto &lhs, const auto &rhs) -> bool {
+                return lhs.variable.data(cfg) < rhs.variable.data(cfg);
+            });
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }

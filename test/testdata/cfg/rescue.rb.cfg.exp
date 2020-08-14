@@ -18,7 +18,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3, rubyBlockId=2](<self>: Object, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>))\l<cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$10: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$9: T.class_of(StandardError))\l<isaCheckTemp>$10: T.untyped\l"
+        label = "block[id=3, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>))\l<cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>\l<isaCheckTemp>$10: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$9: T.class_of(StandardError))\l<isaCheckTemp>$10: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_7" [style="bold"];
@@ -37,7 +37,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6, rubyBlockId=3](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: T.nilable(TrueClass))\l<throwAwayTemp>$13: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$12: T.nilable(TrueClass)\l"
+        label = "block[id=6, rubyBlockId=3](<returnMethodTemp>$2: T.untyped, <self>: Object, <gotoDeadTemp>$12: T.nilable(TrueClass))\l<throwAwayTemp>$13: T.untyped = <self>: Object.d()\l<gotoDeadTemp>$12: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
@@ -49,7 +49,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_7" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: Object, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped, <self>: Object)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_6" [style="bold"];
