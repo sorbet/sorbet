@@ -322,22 +322,4 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
 Binding::Binding(LocalRef bind, core::LocOffsets loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(std::move(value)) {}
 
-// Defined here because they access CFG
-
-core::LocalVariable LocalRef::data(const CFG &cfg) const {
-    return cfg.localVariables[this->_id];
-}
-
-int LocalRef::minLoops(const CFG &cfg) const {
-    ENFORCE(cfg.minLoops.size() > this->_id);
-    ENFORCE(this->exists());
-    return cfg.minLoops[this->_id];
-}
-
-int LocalRef::maxLoopWrite(const CFG &cfg) const {
-    ENFORCE(cfg.maxLoopWrite.size() > this->_id);
-    ENFORCE(this->exists());
-    return cfg.maxLoopWrite[this->_id];
-}
-
 } // namespace sorbet::cfg
