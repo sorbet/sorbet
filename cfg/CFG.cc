@@ -185,7 +185,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
-            removeFrom(target.writes[blockId], blockWritesToRemove);
+            setDifferenceInplace(target.writes[blockId], blockWritesToRemove);
             blockId++;
         }
     }

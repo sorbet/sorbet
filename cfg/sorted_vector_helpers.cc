@@ -3,7 +3,7 @@
 using namespace std;
 
 namespace sorbet::cfg {
-void removeFrom(vector<int> &data, const vector<int> &toRemove) {
+void setDifferenceInplace(vector<int> &data, const vector<int> &toRemove) {
     auto dataIt = data.begin();
     auto removeIt = toRemove.begin();
     while (dataIt != data.end() && removeIt != toRemove.end()) {
@@ -19,8 +19,8 @@ void removeFrom(vector<int> &data, const vector<int> &toRemove) {
     }
 }
 
-void setMerge(vector<int> &into, const vector<int> &from) {
-    // A decent proportion of merges are just copies.
+void setUnionInplace(vector<int> &into, const vector<int> &from) {
+    // A decent proportion of unions are just copies.
     if (into.empty()) {
         into = from;
         return;
@@ -42,7 +42,7 @@ void setMerge(vector<int> &into, const vector<int> &from) {
         } else {
             // intoEl > fromEl
             // Present in from, not in into.
-            // Rather than insert in the middle of the vector, break out and do a set union.
+            // Rather than insert in the middle of the vector, break out of loop and do a set union.
             vector<int> merged(into.begin(), intoIt);
             merged.reserve(max(into.size(), from.size()));
             set_union(intoIt, into.end(), fromIt, from.end(), back_inserter(merged));
