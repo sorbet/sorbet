@@ -133,7 +133,7 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
 
 LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, UnorderedMap<LocalRef, LocalRef> &aliases) {
     if (what.isSyntheticTemporary(ctx, cfg)) {
-        auto fnd = aliases.find(what.id());
+        auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;
         }
@@ -221,7 +221,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
-                current[bind.bind.variable.id()] = i->what;
+                current[bind.bind.variable] = i->what;
                 mayHaveAlias.insert(i->what);
             }
         }
