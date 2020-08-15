@@ -1,0 +1,30 @@
+{
+  "editor.insertSpaces": true,
+  "editor.rulers": [120],
+  // Clangd 9.0 has a new semantic highlighting feature, but it's buggy and causes
+  // syntax highlighting colors to "bleed" into adjacent lines. Thus, we disable it.
+  // We should revisit this option next time we upgrade clang.
+  "clangd.semanticHighlighting": false,
+  // Disable feature where Clangd auto-imports headers for missing references.
+  // It inserts relative paths that we don't want.
+  "clangd.arguments": ["--header-insertion=never"],
+  "clangd.path": "bazel-sorbet_llvm/external/llvm_toolchain/bin/clangd",
+  "files.associations": {
+    "*.rbi": "ruby",
+    "*.rbupdated": "ruby",
+    "*.rbedited": "ruby"
+  },
+  "[cpp]": {
+    // Runs clang-format when you save (provided by vscode-clangd).
+    // We do not enable this globally as our RBIs and Markdown don't conform to a specific style.
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+  },
+  "[markdown]": {
+    "editor.rulers": [80]
+  },
+  "[ruby]": {
+    "editor.tabSize": 2
+  }
+}
