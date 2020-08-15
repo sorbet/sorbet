@@ -23,6 +23,10 @@ CFG::UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
     this->cfg.localVariablesFrozen = true;
 }
 
+int CFG::maxVariableId() const {
+    return this->localVariables.size();
+}
+
 BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
@@ -34,7 +38,7 @@ BasicBlock *CFG::freshBlock(int outerLoops, int rubyBlockId) {
 
 void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
     ENFORCE_NO_TIMER(!this->localVariablesFrozen);
-    int id = this->maxVariableId++;
+    int id = this->localVariables.size();
     this->localVariables.emplace_back(variable);
 
     // Default values
@@ -153,7 +157,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         fast_sort(blockDeadVector);
     }
 
-    vector<pair<int, int>> usageCounts(maxVariableId);
+    vector<pair<int, int>> usageCounts(this->maxVariableId());
 
     {
         Timer timeit(ctx.state.tracer(), "privates1");

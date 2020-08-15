@@ -24,7 +24,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 }
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
-    used_vars.resize(cfg->maxVariableId);
+    used_vars.resize(cfg->maxVariableId());
     for (auto &bb : cfg->basicBlocks) {
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() &&

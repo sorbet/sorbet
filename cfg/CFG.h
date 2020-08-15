@@ -95,7 +95,12 @@ public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
-    int maxVariableId = 0;
+
+    /**
+     * Get the maximum local variable ID. Used to size vectors that contain an entry per LocalRef.
+     */
+    int maxVariableId() const;
+
     core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
