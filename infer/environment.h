@@ -23,7 +23,7 @@ class Environment;
 // it only makes sense for us to store it if we are going to use it
 // wallk all the instructions and collect knowledge that we may ever need
 class KnowledgeFilter {
-    UnorderedSet<core::LocalVariable> used_vars;
+    std::vector<bool> used_vars;
 
 public:
     KnowledgeFilter(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
@@ -31,7 +31,7 @@ public:
     KnowledgeFilter(KnowledgeFilter &) = delete;
     KnowledgeFilter(KnowledgeFilter &&) = delete;
 
-    bool isNeeded(core::LocalVariable var);
+    bool isNeeded(cfg::LocalRef var);
 };
 
 class KnowledgeRef;
@@ -41,9 +41,9 @@ class KnowledgeRef;
 struct KnowledgeFact {
     bool isDead = false;
     /* the following type tests are known to be true */
-    InlinedVector<std::pair<core::LocalVariable, core::TypePtr>, 1> yesTypeTests;
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
     /* the following type tests are known to be false */
-    InlinedVector<std::pair<core::LocalVariable, core::TypePtr>, 1> noTypeTests;
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, const KnowledgeFact &other);
@@ -55,7 +55,7 @@ struct KnowledgeFact {
 
     void sanityCheck() const;
 
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
@@ -85,7 +85,7 @@ public:
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
 
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
     static TestedKnowledge empty; // optimization
 
@@ -127,37 +127,37 @@ public:
         TestedKnowledge knowledge;
         bool knownTruthy;
     };
-    UnorderedMap<core::LocalVariable, VariableState> vars;
+    // TODO(jvilk): Use vectors.
+    UnorderedMap<cfg::LocalRef, VariableState> vars;
 
-    UnorderedMap<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
+    UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
 
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
-    bool hasType(core::Context ctx, core::LocalVariable symbol) const;
+    bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
 
     // NB: you can't call this function on vars in the first basic block since
     // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const;
+    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
     const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
-    const TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) const;
-    bool getKnownTruthy(core::LocalVariable var) const;
+    const TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) const;
+    bool getKnownTruthy(cfg::LocalRef var) const;
 
-    TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) {
+    TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) {
         return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
     }
 
     /* propagate knowledge on `to = from` */
-    void propagateKnowledge(core::Context ctx, core::LocalVariable to, core::LocalVariable from,
-                            KnowledgeFilter &knowledgeFilter);
+    void propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from, KnowledgeFilter &knowledgeFilter);
 
     /* variable was reasigned. Forget everything about previous value */
-    void clearKnowledge(core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter);
+    void clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter);
 
     /* Special case sources of knowledge */
-    void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
+    void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter);
 
-    void setTypeAndOrigin(core::LocalVariable symbol, const core::TypeAndOrigins &typeAndOrigins);
+    void setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins);
 
     /*
      * Create an Environment out of this one that holds if final condition in
@@ -169,10 +169,10 @@ public:
      * then discard it, so the mixed lifetimes are not a problem in practice.
      */
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                       const UnorderedMap<core::LocalVariable, VariableState> &filter);
+                                       const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
-    void assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVariable cond, core::Loc loc,
-                         const UnorderedMap<core::LocalVariable, VariableState> &filter);
+    void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
+                         const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
     void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter);
@@ -186,12 +186,12 @@ public:
     // method on `Type` or otherwise handled there.
     core::TypePtr getReturnType(core::Context ctx, core::TypePtr procType);
 
-    core::TypePtr processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                                 KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+    core::TypePtr processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                                 int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                                  core::TypePtr &methodReturnType);
 
-    void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
-    void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
+    void ensureGoodCondition(core::Context ctx, cfg::LocalRef cond) {}
+    void ensureGoodAssignTarget(core::Context ctx, cfg::LocalRef target) {}
 
     void cloneFrom(const Environment &rhs);
 };

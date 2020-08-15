@@ -161,8 +161,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             i++;
             if (!current.isDead) {
                 current.ensureGoodAssignTarget(ctx, bind.bind.variable);
-                bind.bind.type = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind.variable],
-                                                        knowledgeFilter, *constr, methodReturnType);
+                bind.bind.type =
+                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
+                                           knowledgeFilter, *constr, methodReturnType);
                 if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type->isUntyped()) {
