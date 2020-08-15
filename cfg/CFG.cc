@@ -162,10 +162,12 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     {
         Timer timeit(ctx.state.tracer(), "privates1");
 
-        for (u4 blockId = 0; blockId < maxBasicBlockId; blockId++) {
+        for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
             const auto &blockReads = target.reads[blockId];
             const auto &blockWrites = target.writes[blockId];
             vector<int> blockReadsAndWrites;
+            // Assumption: Most items in blockWrites are in blockReads, so this is a conservative preallocation. It
+            // should strictly avoid allocation work that would normally happen as part of the union.
             blockReadsAndWrites.reserve(max(blockReads.size(), blockWrites.size()));
             set_union(blockReads.begin(), blockReads.end(), blockWrites.begin(), blockWrites.end(),
                       back_inserter(blockReadsAndWrites));

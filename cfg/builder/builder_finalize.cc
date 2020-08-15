@@ -172,8 +172,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                             ++it;
                         }
                     } else {
-                        current.erase(
-                            it++); // note: this is correct but too conservative. In particular for loop headers
+                        // note: this is correct but too conservative. In particular for loop headers
+                        current.erase(it++);
                     }
                 }
             }
