@@ -3,7 +3,7 @@
 using namespace std;
 
 namespace sorbet::cfg {
-void setDifferenceInplace(vector<int> &data, const vector<int> &toRemove) {
+void SortedVectorHelpers::setDifferenceInplace(vector<int> &data, const vector<int> &toRemove) {
     auto dataIt = data.begin();
     auto removeIt = toRemove.begin();
     while (dataIt != data.end() && removeIt != toRemove.end()) {
@@ -19,7 +19,7 @@ void setDifferenceInplace(vector<int> &data, const vector<int> &toRemove) {
     }
 }
 
-void setUnionInplace(vector<int> &into, const vector<int> &from) {
+void SortedVectorHelpers::setUnionInplace(vector<int> &into, const vector<int> &from) {
     // A decent proportion of unions are just copies.
     if (into.empty()) {
         into = from;

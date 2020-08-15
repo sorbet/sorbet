@@ -360,10 +360,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
                 const auto sz = upperBoundsForBlock.size();
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
+                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
+                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
 
                 // Any variable that we write and do not read is dead on entry to
@@ -380,7 +380,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                             toRemove.emplace_back(local);
                         }
                     }
-                    setDifferenceInplace(upperBoundsForBlock, toRemove);
+                    SortedVectorHelpers::setDifferenceInplace(upperBoundsForBlock, toRemove);
                 }
 
                 changed = changed || (upperBoundsForBlock.size() != sz);
@@ -401,8 +401,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        setUnionInplace(upperBoundsForBlock, writesByBlock[edge->id]);
-                        setUnionInplace(upperBoundsForBlock, upperBounds2[edge->id]);
+                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, writesByBlock[edge->id]);
+                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds2[edge->id]);
                     }
                 }
 

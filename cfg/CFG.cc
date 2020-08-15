@@ -191,7 +191,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
-            setDifferenceInplace(target.writes[blockId], blockWritesToRemove);
+            SortedVectorHelpers::setDifferenceInplace(target.writes[blockId], blockWritesToRemove);
             blockId++;
         }
     }
