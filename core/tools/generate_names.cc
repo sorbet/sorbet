@@ -325,6 +325,7 @@ NameDef names[] = {
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
 
+    {"instanceOf_p", "instance_of?"},
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
     {"lessThan", "<"},
