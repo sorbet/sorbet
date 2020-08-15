@@ -50,6 +50,8 @@ bool LocalRef::operator!=(const LocalRef &rhs) const {
     return this->_id != rhs._id;
 }
 
+// Note: The special ID values below are validated in CFG.cc in the CFG constructor.
+
 LocalRef LocalRef::noVariable() {
     return LocalRef(0);
 }
