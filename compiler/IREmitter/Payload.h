@@ -1,6 +1,7 @@
 #ifndef SORBET_COMPILER_PAYLOAD_H
 #define SORBET_COMPILER_PAYLOAD_H
 
+#include "cfg/LocalRef.h"
 #include "compiler/Core/ForwardDeclarations.h"
 #include "core/core.h"
 
@@ -62,9 +63,9 @@ public:
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
                                    core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr,
                                    llvm::AllocaInst *lineNumberPtr);
-    static llvm::Value *varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &builder,
+    static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
                                const IREmitterContext &irctx, int rubyBlockId);
-    static void varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &builder,
+    static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
                        const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);

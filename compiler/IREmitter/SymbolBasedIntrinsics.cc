@@ -271,7 +271,7 @@ public:
         }
 
         auto &builder = builderCast(build);
-        auto self = Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId);
+        auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId);
         auto args = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         return IREmitterHelpers::callViaRubyVMSimple(cs, build, self, args, argc, "new");

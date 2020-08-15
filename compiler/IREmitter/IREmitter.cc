@@ -121,9 +121,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             llvm::Value *argArrayRaw = !isBlock ? func->arg_begin() + 1 : func->arg_begin() + 3;
             llvm::Value *hashArgs;
 
-            core::LocalVariable blkArgName;
-            core::LocalVariable restArgName;
-            core::LocalVariable kwRestArgName;
+            cfg::LocalRef blkArgName;
+            cfg::LocalRef restArgName;
+            cfg::LocalRef kwRestArgName;
 
             auto argsFlags = getArgFlagsForBlockId(cs, rubyBlockId, cfg.symbol, irctx);
             {
@@ -305,7 +305,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 // box `self`
                 if (!isBlock) {
                     auto selfArgRaw = func->arg_begin() + 2;
-                    Payload::varSet(cs, core::LocalVariable::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
+                    Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
                 }
 
                 for (auto i = 0; i < maxPositionalArgCount; i++) {
@@ -316,13 +316,13 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         builder.SetInsertPoint(block);
                     }
                     const auto a = irctx.rubyBlockArgs[rubyBlockId][i];
-                    if (!a._name.exists()) {
+                    if (!a.data(cfg)._name.exists()) {
                         cs.failCompilation(md.declLoc,
                                            "this method has a block argument construct that's not supported");
                     }
 
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
-                    auto name = a._name.data(cs)->shortName(cs);
+                    auto name = a.data(cfg)._name.data(cs)->shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
                     auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
                     Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
@@ -405,7 +405,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
                         if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
                             auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
-                            auto rawId = Payload::idIntern(cs, builder, name._name.data(cs)->shortName(cs));
+                            auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.data(cs)->shortName(cs));
                             auto rawRubySym =
                                 builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
 
@@ -484,8 +484,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
     }
 }
 
-core::LocalVariable returnValue(CompilerState &cs) {
-    return {Names::returnValue(cs), 1};
+cfg::LocalRef returnValue(cfg::CFG &cfg, CompilerState &cs) {
+    return cfg.enterLocal({Names::returnValue(cs), 1});
 }
 
 llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx, const cfg::BasicBlock *from,
@@ -504,7 +504,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
-    UnorderedSet<core::LocalVariable> loadYieldParamsResults; // methods calls on these are ignored
+    UnorderedSet<cfg::LocalRef> loadYieldParamsResults; // methods calls on these are ignored
     auto startLoc = IREmitterHelpers::getMethodStart(base, cfg.symbol);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
@@ -547,7 +547,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::Send *i) {
-                        if (i->recv.variable._name == core::Names::blkArg() &&
+                        if (i->recv.variable.data(cfg)._name == core::Names::blkArg() &&
                             loadYieldParamsResults.contains(i->recv.variable)) {
                             // this loads an argument of a block.
                             // They are already loaded in preambula of the method
@@ -563,7 +563,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         switch (irctx.rubyBlockType[bb->rubyBlockId]) {
                             case FunctionType::Method:
                             case FunctionType::StaticInit: {
-                                Payload::varSet(cs, returnValue(cs), var, builder, irctx, bb->rubyBlockId);
+                                Payload::varSet(cs, returnValue(cfg, cs), var, builder, irctx, bb->rubyBlockId);
                                 builder.CreateBr(irctx.postProcessBlock);
                                 break;
                             }
@@ -696,7 +696,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                 auto *thenb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.thenb);
                 auto *elseb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.elseb);
 
-                if (thenb != elseb && bb->bexit.cond.variable != core::LocalVariable::blockCall()) {
+                if (thenb != elseb && bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
                     auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, bb->rubyBlockId);
                     auto condValue = Payload::testIsTruthy(cs, builder, var);
 
@@ -754,7 +754,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     // we're only using the top-level ruby block at this point
     auto rubyBlockId = 0;
 
-    auto var = Payload::varGet(cs, returnValue(cs), builder, irctx, rubyBlockId);
+    auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyBlockId);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
@@ -822,6 +822,7 @@ void emitSigVerification(CompilerState &base, cfg::CFG &cfg, const ast::MethodDe
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
+    cfg::CFG::UnfreezeCFGLocalVariables unfreezeVars(cfg);
 
     llvm::Function *func;
 

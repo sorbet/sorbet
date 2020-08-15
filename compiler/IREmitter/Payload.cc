@@ -668,7 +668,7 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 
 } // namespace
 
-llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm::IRBuilderBase &build,
+llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &build,
                              const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
     if (irctx.aliases.contains(local)) {
@@ -688,7 +688,7 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
             case Alias::AliasKind::InstanceField:
                 return builder.CreateCall(
                     cs.module->getFunction("sorbet_instanceVariableGet"),
-                    {varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
+                    {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
                      Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
         }
     }
@@ -704,7 +704,7 @@ llvm::Value *Payload::varGet(CompilerState &cs, core::LocalVariable local, llvm:
     return Payload::unboxRawValue(cs, builder, irctx.llvmVariables.at(local));
 }
 
-void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *var, llvm::IRBuilderBase &build,
+void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &build,
                      const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
     if (irctx.aliases.contains(local)) {
@@ -726,7 +726,7 @@ void Payload::varSet(CompilerState &cs, core::LocalVariable local, llvm::Value *
                                 Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(cs.module->getFunction("sorbet_instanceVariableSet"),
-                               {Payload::varGet(cs, core::LocalVariable::selfVariable(), builder, irctx, rubyBlockId),
+                               {Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
                                 Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
         }
         return;

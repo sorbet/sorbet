@@ -102,7 +102,7 @@ public:
                                                              llvm::Function *mainFunc);
 
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                      int rubyBlockId, int bodyRubyBlockId, core::LocalVariable exceptionValue);
+                                      int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue);
 
     static void emitDebugLoc(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                              int rubyBlockId, core::Loc loc);

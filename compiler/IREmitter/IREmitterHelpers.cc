@@ -18,8 +18,8 @@ using namespace std;
 namespace sorbet::compiler {
 
 // Iterate over all instructions in the CFG, populating the alias map.
-UnorderedMap<core::LocalVariable, Alias> setupAliases(CompilerState &cs, const cfg::CFG &cfg) {
-    UnorderedMap<core::LocalVariable, Alias> aliases{};
+UnorderedMap<cfg::LocalRef, Alias> setupAliases(CompilerState &cs, const cfg::CFG &cfg) {
+    UnorderedMap<cfg::LocalRef, Alias> aliases{};
 
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
@@ -65,28 +65,28 @@ UnorderedMap<core::LocalVariable, Alias> setupAliases(CompilerState &cs, const c
     return aliases;
 }
 
-UnorderedMap<core::LocalVariable, llvm::AllocaInst *>
+UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
-                    const UnorderedMap<core::LocalVariable, optional<int>> &variablesPrivateToBlocks,
+                    const UnorderedMap<cfg::LocalRef, optional<int>> &variablesPrivateToBlocks,
                     const IREmitterContext &irctx) {
-    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    UnorderedMap<cfg::LocalRef, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
         // nill out block local variables.
         auto valueType = cs.getValueType();
-        vector<pair<core::LocalVariable, optional<int>>> variablesPrivateToBlocksSorted;
+        vector<pair<cfg::LocalRef, optional<int>>> variablesPrivateToBlocksSorted;
 
         for (const auto &entry : variablesPrivateToBlocks) {
             variablesPrivateToBlocksSorted.emplace_back(entry);
         }
         fast_sort(variablesPrivateToBlocksSorted,
-                  [](const auto &left, const auto &right) -> bool { return left.first < right.first; });
+                  [](const auto &left, const auto &right) -> bool { return left.first.id() < right.first.id(); });
         for (const auto &entry : variablesPrivateToBlocksSorted) {
             auto var = entry.first;
             if (entry.second == std::nullopt) {
                 continue;
             }
-            auto svName = var._name.data(cs)->shortName(cs);
+            auto svName = var.data(cfg)._name.data(cs)->shortName(cs);
             builder.SetInsertPoint(irctx.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
@@ -111,7 +111,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
     {
         // reserve the magical return value
         auto name = Names::returnValue(cs);
-        auto var = core::LocalVariable{name, 1};
+        auto var = cfg.enterLocal(core::LocalVariable{name, 1});
         auto nameStr = name.data(cs)->toString(cs);
         llvmVariables[var] =
             builder.CreateAlloca(cs.getValueType(), nullptr, llvm::StringRef(nameStr.data(), nameStr.length()));
@@ -125,19 +125,19 @@ namespace {
 // Bundle up a bunch of state used for capture tracking to simplify the interface in findCaptures below.
 class TrackCaptures final {
 public:
-    const UnorderedMap<core::LocalVariable, Alias> &aliases;
+    const UnorderedMap<cfg::LocalRef, Alias> &aliases;
 
-    UnorderedMap<core::LocalVariable, optional<int>> privateUsages;
-    UnorderedMap<core::LocalVariable, int> escapedIndexes;
+    UnorderedMap<cfg::LocalRef, optional<int>> privateUsages;
+    UnorderedMap<cfg::LocalRef, int> escapedIndexes;
     int escapedIndexCounter;
     bool usesBlockArg;
-    core::LocalVariable blkArg;
+    cfg::LocalRef blkArg;
 
-    TrackCaptures(const UnorderedMap<core::LocalVariable, Alias> &aliases)
+    TrackCaptures(const UnorderedMap<cfg::LocalRef, Alias> &aliases)
         : aliases(aliases), privateUsages{}, escapedIndexes{}, escapedIndexCounter{0},
-          usesBlockArg{false}, blkArg{core::LocalVariable::noVariable()} {}
+          usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
 
-    void trackBlockUsage(cfg::BasicBlock *bb, core::LocalVariable lv) {
+    void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
         usesBlockArg = usesBlockArg || lv == blkArg;
         auto fnd = privateUsages.find(lv);
         if (fnd != privateUsages.end()) {
@@ -156,12 +156,12 @@ public:
         const auto alias = aliases.find(lv);
         if (alias != aliases.end()) {
             if (alias->second.kind == Alias::AliasKind::InstanceField) {
-                trackBlockUsage(bb, core::LocalVariable::selfVariable());
+                trackBlockUsage(bb, cfg::LocalRef::selfVariable());
             }
         }
     }
 
-    tuple<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>, bool> finalize() {
+    tuple<UnorderedMap<cfg::LocalRef, optional<int>>, UnorderedMap<cfg::LocalRef, int>, bool> finalize() {
         return {std::move(privateUsages), std::move(escapedIndexes), usesBlockArg};
     }
 };
@@ -170,9 +170,9 @@ public:
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-tuple<UnorderedMap<core::LocalVariable, optional<int>>, UnorderedMap<core::LocalVariable, int>, bool>
+tuple<UnorderedMap<cfg::LocalRef, optional<int>>, UnorderedMap<cfg::LocalRef, int>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
-             const UnorderedMap<core::LocalVariable, Alias> &aliases) {
+             const UnorderedMap<cfg::LocalRef, Alias> &aliases) {
     TrackCaptures usage(aliases);
 
     int argId = -1;
@@ -185,9 +185,10 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
             local = ast::cast_tree_const<ast::Local>(arg);
         }
         ENFORCE(local);
-        usage.trackBlockUsage(cfg.entry(), local->localVariable);
+        auto localRef = cfg.enterLocal(local->localVariable);
+        usage.trackBlockUsage(cfg.entry(), localRef);
         if (cfg.symbol.data(cs)->arguments()[argId].flags.isBlock) {
-            usage.blkArg = local->localVariable;
+            usage.blkArg = localRef;
         }
     }
 
@@ -359,13 +360,13 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     }
 
     for (auto &b : cfg.basicBlocks) {
-        if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
+        if (b->bexit.cond.variable == cfg::LocalRef::blockCall()) {
             blockTypes[b->rubyBlockId] = FunctionType::Block;
 
             // the else branch always points back to the original owning rubyBlockId of the block call
             blockParents[b->rubyBlockId] = resolveParent(blockTypes, blockParents, b->bexit.elseb->rubyBlockId);
 
-        } else if (b->bexit.cond.variable._name == core::Names::exceptionValue()) {
+        } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             auto *bodyBlock = b->bexit.elseb;
             auto *handlersBlock = b->bexit.thenb;
 
@@ -536,18 +537,18 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
     vector<shared_ptr<core::SendAndBlockLink>> blockLinks(rubyBlock2Function.size());
-    vector<vector<core::LocalVariable>> rubyBlockArgs(rubyBlock2Function.size());
+    vector<vector<cfg::LocalRef>> rubyBlockArgs(rubyBlock2Function.size());
 
     {
         // fill in data about args for main function
         for (auto &treeArg : md.args) {
             auto *a = ast::MK::arg2Local(treeArg);
-            rubyBlockArgs[0].emplace_back(a->localVariable);
+            rubyBlockArgs[0].emplace_back(cfg.enterLocal(a->localVariable));
         }
     }
 
     for (auto &b : cfg.basicBlocks) {
-        if (b->bexit.cond.variable == core::LocalVariable::blockCall()) {
+        if (b->bexit.cond.variable == cfg::LocalRef::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
             basicBlockJumpOverrides[b->id] = b->bexit.elseb->id;
             auto backId = -1;
@@ -564,11 +565,10 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
 
-            rubyBlockArgs[b->rubyBlockId].resize(expectedSend->link->argFlags.size(),
-                                                 core::LocalVariable::noVariable());
+            rubyBlockArgs[b->rubyBlockId].resize(expectedSend->link->argFlags.size(), cfg::LocalRef::noVariable());
             for (auto &maybeCallOnLoadYieldArg : b->bexit.thenb->exprs) {
                 auto maybeCast = cfg::cast_instruction<cfg::Send>(maybeCallOnLoadYieldArg.value.get());
-                if (maybeCast == nullptr || maybeCast->recv.variable._name != core::Names::blkArg() ||
+                if (maybeCast == nullptr || maybeCast->recv.variable.data(cfg)._name != core::Names::blkArg() ||
                     maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
                     continue;
                 }
@@ -578,7 +578,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 }
                 rubyBlockArgs[b->rubyBlockId][litType->value] = maybeCallOnLoadYieldArg.bind.variable;
             }
-        } else if (b->bexit.cond.variable._name == core::Names::exceptionValue()) {
+        } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
                 continue;
             }

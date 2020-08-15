@@ -61,7 +61,7 @@ struct IREmitterContext {
     //
     // This mapping is essentially, "if you were about to access a local variable corresponding to an alias,
     // this is the thing you should access instead"
-    UnorderedMap<core::LocalVariable, Alias> aliases;
+    UnorderedMap<cfg::LocalRef, Alias> aliases;
 
     // Contains llvm::BasicBlocks (insertion points) to hold code for a Ruby method or block that runs first,
     // before starting to execute the user-written body.
@@ -121,13 +121,13 @@ struct IREmitterContext {
     std::vector<llvm::Value *> escapedClosure;
 
     // TODO(jez) document escapedVariableIndices
-    UnorderedMap<core::LocalVariable, int> escapedVariableIndices;
+    UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
 
     // Every local variable (including arguments) shows up as either an index into the closure (escapedVariableIndices)
     // or something that was explicitly stack allocated.
     //
     // This mapping holds the latter: locals that don't come from the closure.
-    UnorderedMap<core::LocalVariable, llvm::AllocaInst *> llvmVariables;
+    UnorderedMap<cfg::LocalRef, llvm::AllocaInst *> llvmVariables;
 
     // Verifies arguments against the types dictated by the SymbolRef for this method.
     // Only one llvm::BasicBlock because Ruby blocks don't get their arg types checked--only Ruby methods.
@@ -147,7 +147,7 @@ struct IREmitterContext {
 
     // idx: cfg::BasicBlock::rubyBlockId
     // val: The arguments for that Ruby method or block.
-    std::vector<std::vector<core::LocalVariable>> rubyBlockArgs;
+    std::vector<std::vector<cfg::LocalRef>> rubyBlockArgs;
 
     // Each Ruby method and Ruby block gets compiled to an llvm::Function so that it can be called
     // directly like any other C function.

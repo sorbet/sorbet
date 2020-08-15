@@ -22,7 +22,7 @@ class ExceptionState {
     const int handlersRubyBlockId;
     const int ensureRubyBlockId;
     const int elseRubyBlockId;
-    core::LocalVariable exceptionValue;
+    cfg::LocalRef exceptionValue;
     llvm::Function *currentFunc;
 
     llvm::Value *previousException = nullptr;
@@ -30,7 +30,7 @@ class ExceptionState {
     llvm::Value *exceptionResultPtr = nullptr;
 
     ExceptionState(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx, int rubyBlockId,
-                   int bodyRubyBlockId, core::LocalVariable exceptionValue)
+                   int bodyRubyBlockId, cfg::LocalRef exceptionValue)
         : cs(cs), builder(static_cast<llvm::IRBuilder<> &>(builder)), irctx(irctx), rubyBlockId(rubyBlockId),
           bodyRubyBlockId(bodyRubyBlockId), handlersRubyBlockId(bodyRubyBlockId + cfg::CFG::HANDLERS_BLOCK_OFFSET),
           ensureRubyBlockId(bodyRubyBlockId + cfg::CFG::ENSURE_BLOCK_OFFSET),
@@ -40,7 +40,7 @@ class ExceptionState {
 public:
     // Setup the context for compiling exception-handling code, and bring some needed constants into scope.
     static ExceptionState setup(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                int rubyBlockId, int bodyRubyBlockId, core::LocalVariable exceptionValue) {
+                                int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue) {
         ExceptionState state(cs, builder, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
         // Allocate a place to store the exception result from sorbet_try. This must go in the function init block,
@@ -210,7 +210,7 @@ public:
 
 void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderBase &build,
                                              const IREmitterContext &irctx, int rubyBlockId, int bodyRubyBlockId,
-                                             core::LocalVariable exceptionValue) {
+                                             cfg::LocalRef exceptionValue) {
     auto state = ExceptionState::setup(cs, build, irctx, rubyBlockId, bodyRubyBlockId, exceptionValue);
 
     auto exceptionResult = state.runBody();
