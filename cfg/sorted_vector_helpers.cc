@@ -50,10 +50,9 @@ void SortedVectorHelpers::setUnionInplace(vector<int> &into, const vector<int> &
             return;
         }
     }
-    while (fromIt != from.end()) {
+    if (fromIt != from.end()) {
         // These are all missing from into and are > than anything in into.
-        into.emplace_back(*fromIt);
-        fromIt++;
+        into.insert(into.end(), fromIt, from.end());
     }
 }
 } // namespace sorbet::cfg
