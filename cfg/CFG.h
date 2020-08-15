@@ -97,9 +97,9 @@ public:
     int maxRubyBlockId = 0;
 
     /**
-     * Get the maximum local variable ID. Used to size vectors that contain an entry per LocalRef.
+     * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
      */
-    int maxVariableId() const;
+    int numLocalVariables() const;
 
     core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;

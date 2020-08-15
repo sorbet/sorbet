@@ -23,7 +23,7 @@ CFG::UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
     this->cfg.localVariablesFrozen = true;
 }
 
-int CFG::maxVariableId() const {
+int CFG::numLocalVariables() const {
     return this->localVariables.size();
 }
 
@@ -157,7 +157,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         fast_sort(blockDeadVector);
     }
 
-    vector<pair<int, int>> usageCounts(this->maxVariableId());
+    vector<pair<int, int>> usageCounts(this->numLocalVariables());
 
     {
         Timer timeit(ctx.state.tracer(), "privates1");
