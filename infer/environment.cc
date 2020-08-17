@@ -944,6 +944,13 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = std::move(argType);
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
+            [&](cfg::ArgPresent *i) {
+                /* Return an opaque boolean value that indicates whether or not arg was provided */
+                ENFORCE(ctx.owner == i->method);
+
+                tp.type = core::Types::Boolean();
+                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+            },
             [&](cfg::LoadYieldParams *insn) {
                 ENFORCE(insn->link);
                 ENFORCE(insn->link->result);

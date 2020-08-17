@@ -36,13 +36,82 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
                                          selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
                                          core::Names::cast()));
 
+        BasicBlock *presentCont = entry;
+        BasicBlock *defaultCont = nullptr;
+
+        auto &argInfos = md.symbol.data(ctx)->arguments();
+        bool isAbstract = md.symbol.data(ctx)->isAbstract();
+        bool seenKeyword = false;
         int i = -1;
         for (auto &argExpr : md.args) {
             i++;
             auto *a = ast::MK::arg2Local(argExpr);
-            synthesizeExpr(entry, res->enterLocal(a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
+            auto local = res->enterLocal(a->localVariable);
+            auto &info = argInfos[i];
+
+            seenKeyword = seenKeyword || info.flags.isKeyword;
+
+            // If defaultCont is non-null, that means that the previous argument had a default. If the current argument
+            // also has a default, and is not a keyword, block or repeated arg, then we can continue by extending that
+            // fall-through case. However if any of those conditions fail, we must merge the two paths back together,
+            // and break out of the fast-path for defaulting.
+            if (defaultCont && (seenKeyword || info.flags.isBlock || info.flags.isRepeated || !info.flags.isDefault)) {
+                auto *join = res->freshBlock(cctx.loops, presentCont->rubyBlockId);
+                unconditionalJump(presentCont, join, *res, core::LocOffsets::none());
+                unconditionalJump(defaultCont, join, *res, core::LocOffsets::none());
+                presentCont = join;
+                defaultCont = nullptr;
+            }
+
+            // Ignore defaults for abstract methods
+            if (!isAbstract) {
+                // Only emit conditional arg loading if the arg has a default
+                if (auto *opt = ast::cast_tree<ast::OptionalArg>(argExpr)) {
+                    auto defLoc = opt->default_->loc;
+
+                    auto *presentNext = res->freshBlock(cctx.loops, presentCont->rubyBlockId);
+                    auto *defaultNext = res->freshBlock(cctx.loops, presentCont->rubyBlockId);
+
+                    auto present = cctx.newTemporary(core::Names::argPresent());
+                    synthesizeExpr(presentCont, present, core::LocOffsets::none(),
+                                   make_unique<ArgPresent>(md.symbol, i));
+                    conditionalJump(presentCont, present, presentNext, defaultNext, *res, a->loc);
+
+                    if (defaultCont) {
+                        unconditionalJump(defaultCont, defaultNext, *res, core::LocOffsets::none());
+                    }
+
+                    // Walk the default, and check the type of its final value
+                    auto result = cctx.newTemporary(core::Names::statTemp());
+                    defaultNext = walk(cctx.withTarget(result), *opt->default_, defaultNext);
+
+                    if (info.type) {
+                        auto tmp = cctx.newTemporary(core::Names::castTemp());
+                        synthesizeExpr(defaultNext, tmp, defLoc,
+                                       make_unique<Cast>(result, info.type, core::Names::let()));
+                        cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
+                    }
+
+                    // defaultNext->exprs.emplace_back(local, a->loc, make_unique<Ident>(result));
+                    synthesizeExpr(defaultNext, local, a->loc, make_unique<Ident>(result));
+
+                    presentCont = presentNext;
+                    defaultCont = defaultNext;
+                }
+            }
+
+            synthesizeExpr(presentCont, local, a->loc, make_unique<LoadArg>(md.symbol, i));
         }
-        cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
+
+        // Join the presentCont and defaultCont paths together
+        if (defaultCont) {
+            auto *join = res->freshBlock(cctx.loops, presentCont->rubyBlockId);
+            unconditionalJump(presentCont, join, *res, core::LocOffsets::none());
+            unconditionalJump(defaultCont, join, *res, core::LocOffsets::none());
+            presentCont = join;
+        }
+
+        cont = walk(cctx.withTarget(retSym), md.rhs.get(), presentCont);
     }
     // Past this point, res->localVariables is a fixed size.
 

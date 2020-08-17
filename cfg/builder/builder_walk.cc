@@ -10,10 +10,8 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-namespace {
-
-void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
-                     core::LocOffsets loc) {
+void CFGBuilder::conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
+                                 core::LocOffsets loc) {
     thenb->flags |= CFG::WAS_JUMP_DESTINATION;
     elseb->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
@@ -29,7 +27,7 @@ void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBl
     }
 }
 
-void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
+void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
     to->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
@@ -42,6 +40,8 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocO
         to->backEdges.emplace_back(from);
     }
 }
+
+namespace {
 
 LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     // Note: this will add an empty local to aliases if 'what' is not there

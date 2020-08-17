@@ -167,6 +167,21 @@ public:
 };
 CheckSize(LoadArg, 24, 8);
 
+class ArgPresent final : public Instruction {
+public:
+    core::SymbolRef method;
+    u2 argId;
+
+    ArgPresent(core::SymbolRef method, int argId) : method(method), argId(argId) {
+        categoryCounterInc("cfg", "argpresent");
+    }
+
+    const core::ArgInfo &argument(const core::GlobalState &gs) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+};
+CheckSize(ArgPresent, 24, 8);
+
 class LoadYieldParams final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
