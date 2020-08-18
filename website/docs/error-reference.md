@@ -55,10 +55,10 @@ and should not be reported.
 
 ## 3011
 
-There was a hash with a duplicated keys. If you are trying to make a sig with 
-duplicated parameter names like `sig {params(_: String, _: Integer).void}`, 
-you need to choose better names, for example
- `sig {params(_1: String, _2: Integer).void}`.
+There was a hash with a duplicated keys. If you are trying to make a sig with
+duplicated parameter names like `sig {params(_: String, _: Integer).void}`, you
+need to choose better names, for example
+`sig {params(_1: String, _2: Integer).void}`.
 
 ## 4002
 
