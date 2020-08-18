@@ -30,7 +30,7 @@
 # File::Constants.
 class File < IO
   # platform specific alternative separator
-  ALT_SEPARATOR = T.let(T.unsafe(nil), NilClass)
+  ALT_SEPARATOR = T.let(nil, T.nilable(String))
   APPEND = T.let(T.unsafe(nil), Integer)
   BINARY = T.let(T.unsafe(nil), Integer)
   CREAT = T.let(T.unsafe(nil), Integer)
