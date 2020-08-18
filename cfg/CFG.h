@@ -41,7 +41,7 @@ public:
 
     std::unique_ptr<Instruction> value;
 
-    Binding(core::LocalVariable bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
+    Binding(LocalRef bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
@@ -68,22 +68,39 @@ public:
         counterInc("basicblocks");
     };
 
-    std::string toString(const core::GlobalState &gs) const;
-    std::string showRaw(core::Context ctx) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
 };
 
 class CFGContext;
 
 class CFG final {
+public:
+    class UnfreezeCFGLocalVariables final {
+        CFG &cfg;
+
+    public:
+        UnfreezeCFGLocalVariables(CFG &cfg);
+
+        ~UnfreezeCFGLocalVariables();
+    };
+
     friend class CFGBuilder;
+    friend class LocalRef;
+    friend class UnfreezeCFGLocalVariables;
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
      */
-public:
     core::SymbolRef symbol;
     int maxBasicBlockId = 0;
     int maxRubyBlockId = 0;
+
+    /**
+     * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
+     */
+    int numLocalVariables() const;
+
     core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
@@ -120,26 +137,38 @@ public:
     static constexpr int ENSURE_BLOCK_OFFSET = 2;
     static constexpr int ELSE_BLOCK_OFFSET = 3;
 
-    UnorderedMap<core::LocalVariable, int> minLoops;
-    UnorderedMap<core::LocalVariable, int> maxLoopWrite;
-
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        std::vector<UnorderedSet<core::LocalVariable>> reads;
-        std::vector<UnorderedSet<core::LocalVariable>> writes;
+        std::vector<UnorderedSet<int>> readsSet;
+        std::vector<std::vector<int>> reads;
+        std::vector<std::vector<int>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        std::vector<UnorderedSet<core::LocalVariable>> dead;
+        std::vector<std::vector<int>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
+    LocalRef enterLocal(core::LocalVariable variable);
 
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops, int rubyBlockid);
+    void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
+    std::vector<int> minLoops;
+    std::vector<int> maxLoopWrite;
+    bool localVariablesFrozen = true;
+    /**
+     * Maps from LocalRef ID -> LocalVariable. Lets us compactly construct maps involving only the variables included
+     * in the CFG.
+     */
+    std::vector<core::LocalVariable> localVariables;
+    /**
+     * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
+     */
+    UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
 };
 
 } // namespace sorbet::cfg

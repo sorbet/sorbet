@@ -306,6 +306,28 @@ module Opus::Types::Test
         assert_empty(lines[3..-1])
       end
 
+      class TestEnumerable
+        include Enumerable
+
+        def each
+          yield "something"
+        end
+      end
+
+      it "raises a sensible error for custom enumerable validation errors" do
+        @mod.sig { returns(T::Array[String]) }
+        def @mod.foo
+          TestEnumerable.new
+        end
+
+        err = assert_raises(TypeError) do
+          @mod.foo
+        end
+        assert_match(
+          "Return value: Expected type T::Array[String], got Opus::Types::Test::MethodValidationTest::TestEnumerable",
+          err.message.lines[0])
+      end
+
       describe 'ranges' do
         describe 'return type is non-nilable integer' do
           it 'permits a range that has integers on start and end' do

@@ -70,7 +70,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
 }
 
 void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, cfg::Send *snd,
-                                  const UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>> &blockLocals,
+                                  const UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals,
                                   UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
     InlinedVector<const core::TypeAndOrigins *, 2> args;
@@ -137,7 +137,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
 UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
                                                               unique_ptr<cfg::CFG> &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
-    vector<UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
+    vector<UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
     localsStoringArguments.resize(cfg->maxBasicBlockId);
 
     // indicates what type should an argument have for basic block to execute
@@ -150,8 +150,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
         if (bb == cfg->deadBlock()) {
             continue;
         }
-        UnorderedMap<core::LocalVariable, InlinedVector<core::NameRef, 1>> &blockLocals =
-            localsStoringArguments[bb->id];
+        UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals = localsStoringArguments[bb->id];
         UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements = argTypesForBBToPass[bb->id];
 
         for (auto bbparent : bb->backEdges) {

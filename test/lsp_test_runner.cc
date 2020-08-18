@@ -370,10 +370,11 @@ TEST_CASE("LSPTest") {
     // Usage and def assertions
     {
         // Sort by symbol.
-        // symbol => [ (version => DefAssertion), (DefAssertion | UsageAssertion)[] ]
+        // symbol => [ (version => vector<DefAssertion>), (DefAssertion | UsageAssertion)[] ]
         // Note: Using a vector in pair since order matters; assertions are ordered by location, which
         // is used when comparing against LSP responses.
-        UnorderedMap<string, pair<UnorderedMap<int, shared_ptr<DefAssertion>>, vector<shared_ptr<RangeAssertion>>>>
+        UnorderedMap<string,
+                     pair<UnorderedMap<int, vector<shared_ptr<DefAssertion>>>, vector<shared_ptr<RangeAssertion>>>>
             defUsageMap;
 
         // symbol => [ TypeDefAssertion[], TypeAssertion[] ]
@@ -385,34 +386,29 @@ TEST_CASE("LSPTest") {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
                 auto &defMap = entry.first;
-                INFO(fmt::format(
-                    "Found multiple def comments for label `{}` version `{}`.\nPlease use unique labels and versions "
-                    "for definition assertions. Note that these labels do not need to match the pointed-to "
-                    "identifiers.\nFor example, the following is completely valid:\n foo = 3\n#^^^ def: bar 100",
-                    defAssertion->symbol, defAssertion->version));
-                CHECK_FALSE(defMap.contains(defAssertion->version));
-                defMap[defAssertion->version] = defAssertion;
-                entry.second.push_back(defAssertion);
+                defMap[defAssertion->version].emplace_back(defAssertion);
+                entry.second.emplace_back(defAssertion);
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
-                entry.second.push_back(usageAssertion);
+                entry.second.emplace_back(usageAssertion);
             } else if (auto typeDefAssertion = dynamic_pointer_cast<TypeDefAssertion>(assertion)) {
                 auto &[typeDefs, _typeAssertions] = typeDefMap[typeDefAssertion->symbol];
-                typeDefs.push_back(typeDefAssertion);
+                typeDefs.emplace_back(typeDefAssertion);
             } else if (auto typeAssertion = dynamic_pointer_cast<TypeAssertion>(assertion)) {
                 auto &[_typeDefs, typeAssertions] = typeDefMap[typeAssertion->symbol];
-                typeAssertions.push_back(typeAssertion);
+                typeAssertions.emplace_back(typeAssertion);
             }
         }
 
         // Check each def/usage assertion.
         for (auto &entry : defUsageMap) {
             auto &entryAssertions = entry.second.second;
-            // Sort assertions in (filename, range) order
-            fast_sort(entryAssertions,
-                      [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-                          return a->cmp(*b) < 0;
-                      });
+            // Sort def|usage assertions in (filename, range) order
+            fast_sort(entryAssertions, RangeAssertion::compareByRange);
+            // Sort def assertions in (filename, range) order
+            for (auto &versionDefEntry : entry.second.first) {
+                fast_sort(versionDefEntry.second, RangeAssertion::compareByRange);
+            }
 
             auto &defAssertions = entry.second.first;
             // Shouldn't be possible to have an entry with 0 assertions, but explicitly check anyway.
@@ -435,10 +431,10 @@ TEST_CASE("LSPTest") {
 
                 auto entry = defAssertions.find(version);
                 if (entry != defAssertions.end()) {
-                    auto &def = entry->second;
+                    auto &defs = entry->second;
                     auto queryLoc = assertion->getLocation(config);
-                    // Check that a definition request at this location returns def.
-                    def->check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc);
+                    // Check that a definition request at this location returns defs.
+                    DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
                     // Check that a reference request at this location returns entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           entryAssertions);

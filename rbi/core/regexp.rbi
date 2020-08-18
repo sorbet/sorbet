@@ -869,12 +869,12 @@ class Regexp < Object
   # Regexp.last_match(:lhs) #=> "var"
   # Regexp.last_match(:rhs) #=> "val"
   # ```
-  sig {returns(MatchData)}
+  sig {returns(T.nilable(MatchData))}
   sig do
     params(
-        arg0: Integer,
+      arg0: T.any(Integer, Symbol),
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   def self.last_match(arg0=T.unsafe(nil)); end
 

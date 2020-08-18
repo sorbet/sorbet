@@ -1,6 +1,7 @@
 #ifndef SORBET_INSTRUCTIONS_H
 #define SORBET_INSTRUCTIONS_H
 
+#include "cfg/LocalRef.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/LocalVariable.h"
@@ -10,19 +11,18 @@
 #include <memory>
 
 namespace sorbet::cfg {
-
-class VariableUseSite {
+class VariableUseSite final {
 public:
-    core::LocalVariable variable;
+    LocalRef variable;
     core::TypePtr type;
     VariableUseSite() = default;
-    VariableUseSite(core::LocalVariable local) : variable(local){};
+    VariableUseSite(LocalRef local) : variable(local){};
     VariableUseSite(const VariableUseSite &) = delete;
     const VariableUseSite &operator=(const VariableUseSite &rhs) = delete;
     VariableUseSite(VariableUseSite &&) = default;
     VariableUseSite &operator=(VariableUseSite &&rhs) = default;
-    std::string toString(const core::GlobalState &gs) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 
 // TODO: convert it to implicitly numbered instead of explicitly bound
@@ -33,8 +33,8 @@ public:
 class Instruction {
 public:
     virtual ~Instruction() = default;
-    virtual std::string toString(const core::GlobalState &gs) const = 0;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const = 0;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const = 0;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const = 0;
     Instruction() = default;
     bool isSynthetic = false;
 };
@@ -52,13 +52,13 @@ template <class To> bool isa_instruction(Instruction *what) {
 
 class Ident final : public Instruction {
 public:
-    core::LocalVariable what;
+    LocalRef what;
 
-    Ident(core::LocalVariable what);
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    Ident(LocalRef what);
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Ident, 24, 8);
+CheckSize(Ident, 16, 8);
 
 class Alias final : public Instruction {
 public:
@@ -67,19 +67,18 @@ public:
 
     Alias(core::SymbolRef what, core::NameRef name = core::NameRef::noName());
 
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Alias, 24, 8);
 
 class SolveConstraint final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    core::LocalVariable send;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable send)
-        : link(link), send(send){};
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    LocalRef send;
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : link(link), send(send){};
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(SolveConstraint, 40, 8);
 
@@ -93,12 +92,12 @@ public:
     bool isPrivateOk;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(core::LocalVariable recv, core::NameRef fun, core::LocOffsets receiverLoc,
-         const InlinedVector<core::LocalVariable, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs,
-         bool isPrivateOk = false, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
+    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, const InlinedVector<LocalRef, 2> &args,
+         InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
+         const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Send, 160, 8);
 
@@ -106,9 +105,9 @@ class Return final : public Instruction {
 public:
     VariableUseSite what;
 
-    Return(core::LocalVariable what);
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    Return(LocalRef what);
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Return, 40, 8);
 
@@ -117,19 +116,19 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     VariableUseSite what;
 
-    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, LocalRef what);
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(BlockReturn, 56, 8);
 
 class LoadSelf final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    core::LocalVariable fallback;
-    LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable fallback);
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    LocalRef fallback;
+    LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, LocalRef fallback);
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadSelf, 40, 8);
 
@@ -138,8 +137,8 @@ public:
     core::TypePtr value;
 
     Literal(const core::TypePtr &value);
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Literal, 32, 8);
 
@@ -148,8 +147,8 @@ public:
     GetCurrentException() {
         categoryCounterInc("cfg", "GetCurrentException");
     };
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(GetCurrentException, 16, 8);
 
@@ -163,8 +162,8 @@ public:
     };
 
     const core::ArgInfo &argument(const core::GlobalState &gs) const;
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadArg, 24, 8);
 
@@ -175,8 +174,8 @@ public:
     LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadYieldParams, 32, 8);
 
@@ -186,11 +185,10 @@ public:
     core::TypePtr type;
     core::NameRef cast;
 
-    Cast(core::LocalVariable value, const core::TypePtr &type, core::NameRef cast)
-        : value(value), type(type), cast(cast) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : value(value), type(type), cast(cast) {}
 
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Cast, 64, 8);
 
@@ -198,12 +196,12 @@ class TAbsurd final : public Instruction {
 public:
     VariableUseSite what;
 
-    TAbsurd(core::LocalVariable what) : what(what) {
+    TAbsurd(LocalRef what) : what(what) {
         categoryCounterInc("cfg", "tabsurd");
     }
 
-    virtual std::string toString(const core::GlobalState &gs) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(TAbsurd, 40, 8);
 
