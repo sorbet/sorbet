@@ -54,12 +54,12 @@ class A1
   # should fail: multiple upper and lower bounds specified
   T12 = type_member(lower: Integer, lower: String, upper: BasicObject, upper: TrueClass)
       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String` is not a subtype of `TrueClass`
-                                  # ^^^^^ error: Parameter name `lower` is duplicated
-                                                                     # ^^^^^ error: Parameter name `upper` is duplicated
+                                  # ^^^^^ error: Hash key `lower` is duplicated
+                                                                     # ^^^^^ error: Hash key `upper` is duplicated
 
   # should fail: multiple fixed values provided
   T13 = type_member(fixed: Integer, fixed: String)
-                                  # ^^^^^ error: Parameter name `fixed` is duplicated
+                                  # ^^^^^ error: Hash key `fixed` is duplicated
 end
 
 module M
