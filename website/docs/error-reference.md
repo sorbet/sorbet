@@ -55,10 +55,27 @@ and should not be reported.
 
 ## 3011
 
-There was a hash with a duplicated keys. If you are trying to make a sig with
-duplicated parameter names like `sig {params(_: String, _: Integer).void}`, you
-need to choose better names, for example
-`sig {params(_1: String, _2: Integer).void}`.
+There was a Hash literal with duplicated keys.
+
+```ruby
+{my_key: 1, my_key: 2} # error: `my_key` is duplicated
+```
+
+This error can also be caused when trying to write a `sig` for a method with
+duplicated parameter names:
+
+```ruby
+sig {params(_: String, _: Integer).void} # error: `_` is duplicated
+def foo(_, _); end
+```
+
+To write a `sig` for this method, rename the method's parameters to have unique
+names:
+
+```ruby
+sig {params(_1: String, _2: Integer).void} # ok
+def foo(_1, _2); end
+```
 
 ## 4002
 
