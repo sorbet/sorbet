@@ -37,12 +37,12 @@
 module Comparable
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns -1.
-  sig { params(other: T.untyped).returns(T::Boolean) }
+  sig { params(other: T.self_type).returns(T::Boolean) }
   def <(other); end
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns -1 or 0.
-  sig { params(other: T.untyped).returns(T::Boolean) }
+  sig { params(other: T.self_type).returns(T::Boolean) }
   def <=(other); end
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
@@ -52,12 +52,12 @@ module Comparable
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns 1.
-  sig { params(other: T.untyped).returns(T::Boolean) }
+  sig { params(other: T.self_type).returns(T::Boolean) }
   def >(other); end
 
   # Compares two objects based on the receiver's `<=>` method, returning true if
   # it returns 0 or 1.
-  sig { params(other: T.untyped).returns(T::Boolean) }
+  sig { params(other: T.self_type).returns(T::Boolean) }
   def >=(other); end
 
   # Returns `false` if *obj* `<=>` *min* is less than zero or if *anObject*
