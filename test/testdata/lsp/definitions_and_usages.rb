@@ -36,7 +36,7 @@ class TestClass
   end
 
   def method_with_optional_arg(foo = 3, bar = 5)
-                             # ^^^ def: fooOpt
+                             # ^^^ def: fooOpt 1
                                       # ^^^ def: barOpt
     foo + 4
   # ^^^ usage: fooOpt

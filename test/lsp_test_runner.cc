@@ -416,22 +416,34 @@ TEST_CASE("LSPTest") {
 
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
-                int version = -1;
+                vector<int> versions;
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
-                    version = defAssertion->version;
+                    versions.push_back(defAssertion->version);
                     symbol = defAssertion->symbol;
                     // Some definition locations are not the definition of themselves.
                     if (!defAssertion->isDefOfSelf) {
                         continue;
                     }
                 } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
-                    version = usageAssertion->version;
+                    versions = usageAssertion->versions;
                     symbol = usageAssertion->symbol;
                 }
 
-                auto entry = defAssertions.find(version);
-                if (entry != defAssertions.end()) {
-                    auto &defs = entry->second;
+                vector<shared_ptr<DefAssertion>> defs;
+                for (auto version : versions) {
+                    auto entry = defAssertions.find(version);
+                    if (entry != defAssertions.end()) {
+                        defs.insert(defs.end(), entry->second.begin(), entry->second.end());
+                    } else {
+                        FAIL_CHECK(fmt::format("Found usage comment for label {0} version {1} without matching def "
+                                               "comment. Please add a `# "
+                                               "^^ def: {0} {1}` assertion that points to the definition of the "
+                                               "pointed-to thing being used.",
+                                               symbol, version));
+                    }
+                }
+
+                if (!defs.empty()) {
                     auto queryLoc = assertion->getLocation(config);
                     // Check that a definition request at this location returns defs.
                     DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
@@ -449,10 +461,7 @@ TEST_CASE("LSPTest") {
                     UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                                     filteredEntryAssertions);
                 } else {
-                    FAIL_CHECK(fmt::format(
-                        "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
-                        "^^ def: {0} {1}` assertion that points to the definition of the pointed-to thing being used.",
-                        symbol, version));
+                    FAIL_CHECK(fmt::format("Found no assertion assertions about {0}", symbol));
                 }
             }
         }
