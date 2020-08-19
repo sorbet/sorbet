@@ -364,22 +364,6 @@ class Time < Object
   end
   def -(arg0); end
 
-  sig do
-    params(
-        arg0: Time,
-    )
-    .returns(T::Boolean)
-  end
-  def <(arg0); end
-
-  sig do
-    params(
-        arg0: Time,
-    )
-    .returns(T::Boolean)
-  end
-  def <=(arg0); end
-
   # Comparison---Compares `time` with `other_time`.
   #
   # -1, 0, +1 or nil depending on whether `time` is less  than, equal to, or
@@ -408,22 +392,6 @@ class Time < Object
     .returns(T.nilable(Integer))
   end
   def <=>(other); end
-
-  sig do
-    params(
-        arg0: Time,
-    )
-    .returns(T::Boolean)
-  end
-  def >(arg0); end
-
-  sig do
-    params(
-        arg0: Time,
-    )
-    .returns(T::Boolean)
-  end
-  def >=(arg0); end
 
   # Returns a canonical string representation of *time*.
   #

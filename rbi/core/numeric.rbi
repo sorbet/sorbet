@@ -141,22 +141,6 @@ class Numeric < Object
   sig {returns(Numeric)}
   def -@(); end
 
-  sig do
-    params(
-        arg0: Numeric,
-    )
-    .returns(T::Boolean)
-  end
-  def <(arg0); end
-
-  sig do
-    params(
-        arg0: Numeric,
-    )
-    .returns(T::Boolean)
-  end
-  def <=(arg0); end
-
   # Returns zero if `number` equals `other`, otherwise returns `nil`.
   sig do
     params(
@@ -165,22 +149,6 @@ class Numeric < Object
     .returns(Integer)
   end
   def <=>(arg0); end
-
-  sig do
-    params(
-        arg0: Numeric,
-    )
-    .returns(T::Boolean)
-  end
-  def >(arg0); end
-
-  sig do
-    params(
-        arg0: Numeric,
-    )
-    .returns(T::Boolean)
-  end
-  def >=(arg0); end
 
   # Returns the absolute value of `num`.
   #
