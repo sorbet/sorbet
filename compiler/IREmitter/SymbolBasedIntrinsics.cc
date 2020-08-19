@@ -326,6 +326,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::TrueClass(), "!", "sorbet_int_bool_false", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::FalseClass(), "!", "sorbet_int_bool_true", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Integer(), "+", "sorbet_rb_int_plus", Intrinsics::HandleBlock::Unhandled},

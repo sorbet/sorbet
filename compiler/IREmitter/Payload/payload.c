@@ -1415,20 +1415,6 @@ VALUE sorbet_rb_int_to_s(VALUE x, ID fun, int argc, const VALUE *const restrict 
     return rb_any_to_s(x);
 }
 
-VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    // RTEST is false when the value is Qfalse or Qnil
-    if (RTEST(recv)) {
-        if (recv == Qtrue) {
-            return Qfalse;
-        } else {
-            // slow path - dispatch via the VM
-            return rb_funcallv(recv, rb_intern("!"), argc, argv);
-        }
-    } else {
-        return Qtrue;
-    }
-}
-
 extern VALUE rb_obj_as_string_result(VALUE, VALUE);
 
 extern VALUE rb_str_concat_literals(int, const VALUE *const restrict);
