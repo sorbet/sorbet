@@ -1250,11 +1250,12 @@ class String < Object
   # `each_line`.
   sig do
     params(
-        arg0: String,
+        separator: String,
+        chomp: T::Boolean,
     )
     .returns(T::Array[String])
   end
-  def lines(arg0=T.unsafe(nil)); end
+  def lines(separator = $/, chomp: false); end
 
   # If *integer* is greater than the length of *str*, returns a new `String` of
   # length *integer* with *str* left justified and padded with *padstr*;
