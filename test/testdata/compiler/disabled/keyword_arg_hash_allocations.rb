@@ -4,7 +4,7 @@
 
 class Main
   def self.main(arg0: 42, arg1: 253)
-    [arg0, arg1]
+    arg0 + arg1
   end
 end
 
