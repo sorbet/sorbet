@@ -156,7 +156,8 @@ class Hash < Object
   # h2 < h1    #=> false
   # h1 < h1    #=> false
   # ```
-  def <(_); end
+  sig { params(other: T.self_type).returns(T::Boolean) }
+  def <(other); end
 
   # Returns `true` if *hash* is subset of *other* or equals to *other*.
   #
@@ -167,7 +168,8 @@ class Hash < Object
   # h2 <= h1   #=> false
   # h1 <= h1   #=> true
   # ```
-  def <=(_); end
+  sig { params(other: T.self_type).returns(T::Boolean) }
+  def <=(other); end
 
   # Equality---Two hashes are equal if they each contain the same number of keys
   # and if each key-value pair is equal to (according to `Object#==`) the
@@ -202,7 +204,8 @@ class Hash < Object
   # h2 > h1    #=> true
   # h1 > h1    #=> false
   # ```
-  def >(_); end
+  sig { params(other: T.self_type).returns(T::Boolean) }
+  def >(other); end
 
   # Returns `true` if *other* is subset of *hash* or equals to *hash*.
   #
@@ -213,7 +216,8 @@ class Hash < Object
   # h2 >= h1   #=> true
   # h1 >= h1   #=> true
   # ```
-  def >=(_); end
+  sig { params(other: T.self_type).returns(T::Boolean) }
+  def >=(other); end
 
   # Creates a new hash populated with the given objects.
   #
