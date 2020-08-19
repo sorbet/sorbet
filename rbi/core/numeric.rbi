@@ -146,7 +146,7 @@ class Numeric < Object
     params(
         arg0: Numeric,
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   def <=>(arg0); end
 
