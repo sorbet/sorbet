@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params({:"implied_string" => <emptyTree>::<C String>}).returns(::NilClass)
     end
 
-    def self.implied_string<<C <todo sym>>>(implied_string = <emptyTree>, &<blk>)
+    def self.implied_string<<C <todo sym>>>(implied_string = ::T.untyped(), &<blk>)
       <emptyTree>
     end
 
@@ -211,16 +211,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_self_def(<self>, :"get_root_const")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"root_const")
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"implied_string" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
-    end
-
-    def self.implied_string<defaultArg>1<<C <todo sym>>>(implied_string = <emptyTree>, &<blk>)
-      ::T.untyped()
-    end
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"implied_string<defaultArg>1")
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)

@@ -2010,7 +2010,6 @@ end
 
 class Dir
   def self.exists?(_); end
-
 end
 
 class ERB

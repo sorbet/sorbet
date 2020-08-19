@@ -20,21 +20,8 @@ begin
       end
     end
 
-    def take_arguments<defaultArg>1(a, b, c, d, e, f, g)
-      1
-    end
-
-    def take_arguments<defaultArg>2(a, b, c, d, e, f, g)
-      2
-    end
-
     def self.<static-init>(<blk>)
-      begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"take_arguments")
-        ::Sorbet::Private::Static.keep_def(<self>, :"take_arguments<defaultArg>1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"take_arguments<defaultArg>2")
-        <emptyTree>
-      end
+      ::Sorbet::Private::Static.keep_def(<self>, :"take_arguments")
     end
   end
   <emptyTree>

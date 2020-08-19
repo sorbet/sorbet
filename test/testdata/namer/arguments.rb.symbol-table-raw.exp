@@ -3,22 +3,6 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/arguments.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=2:8}
-    method <C <U A>><DA <U take_arguments> $1> (a, b, c, d, e, f, g) @ Loc {file=test/testdata/namer/arguments.rb start=3:27 end=3:28}
-      argument a<> @ Loc {file=test/testdata/namer/arguments.rb start=3:22 end=3:23}
-      argument b<optional> @ Loc {file=test/testdata/namer/arguments.rb start=3:25 end=3:26}
-      argument c<repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:31 end=3:32}
-      argument d<keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:34 end=3:36}
-      argument e<optional, keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:38 end=3:40}
-      argument f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:43 end=3:46}
-      argument g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:49 end=3:50}
-    method <C <U A>><DA <U take_arguments> $2> (a, b, c, d, e, f, g) @ Loc {file=test/testdata/namer/arguments.rb start=3:40 end=3:41}
-      argument a<> @ Loc {file=test/testdata/namer/arguments.rb start=3:22 end=3:23}
-      argument b<optional> @ Loc {file=test/testdata/namer/arguments.rb start=3:25 end=3:26}
-      argument c<repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:31 end=3:32}
-      argument d<keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:34 end=3:36}
-      argument e<optional, keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:38 end=3:40}
-      argument f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:43 end=3:46}
-      argument g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:49 end=3:50}
     method <C <U A>><U take_arguments> (a, b, c, d, e, f, g) @ Loc {file=test/testdata/namer/arguments.rb start=3:3 end=3:51}
       argument a<> @ Loc {file=test/testdata/namer/arguments.rb start=3:22 end=3:23}
       argument b<optional> @ Loc {file=test/testdata/namer/arguments.rb start=3:25 end=3:26}
