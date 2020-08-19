@@ -2,15 +2,29 @@
 
 set -euo pipefail
 
-discovery=1
-if [[ $# -eq 1 ]]; then
-  input=$(realpath "$1")
-  discovery=""
-fi
+verbose=
+benchmarks=()
+while getopts 'vf:' optname; do
+  case $optname in
+    v)
+      verbose=1
+      ;;
+
+    f)
+      benchmarks+=( "$OPTARG" )
+      ;;
+
+    *)
+      echo "Usage: $0 [-v] [-f path/to/benchmark.rb]*"
+      exit 1
+      ;;
+  esac
+done
 
 cd "$(dirname "$0")"
 cd ../..
 # we are now at the repo root.
+repo_root="$PWD"
 
 rm -rf tmp/bench
 mkdir -p tmp/bench
@@ -20,45 +34,89 @@ mkdir -p tmp/bench
 bazel build //main:sorbet -c opt
 bazel run @sorbet_ruby//:ruby -c opt -- --version
 
-paths=(test/testdata/ruby_benchmark)
+if [ "${#benchmarks[@]}" -eq 0 ]; then
+  paths=(test/testdata/ruby_benchmark)
 
-rb_src=()
-if [[ "1" == "$discovery" ]]; then
   while IFS='' read -r line; do
-      rb_src+=("$line")
-  done < <(find "${paths[@]}" -name '*.rb' | grep -v disabled | sort)
-else
-  rb_src=("$input")
+    benchmarks+=( "$line" )
+  done < <(find "${paths[@]}" -name '*.rb' | grep -v -E '(disabled|too_slow)' | sort)
 fi
 
-pushd tmp/bench &>/dev/null
-    (time for _ in {1..10}; do ../../bazel-bin/external/sorbet_ruby/toolchain/bin/ruby -r ../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb -e 1 --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > baseline_time
-    minutes_baseline=$(cut -d "m" -f1 < baseline_time)
-    seconds_baseline=$(cut -d "m" -f2 < baseline_time | cut -d "s" -f 1)
-    baseline_time=$(echo "scale=3;(${minutes_baseline} * 60 + ${seconds_baseline})/10"| bc)
-    echo -e "ruby vm startup time:\t$baseline_time"
-popd &>/dev/null
 
+ruby="${repo_root}/bazel-bin/external/sorbet_ruby/ruby"
+sorbet="${repo_root}/bazel-sorbet_llvm/external/com_stripe_ruby_typer"
+
+command=()
+
+set_startup() {
+  unset llvmir
+  command=(
+    "${ruby}" \
+      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      "--disable=gems" "--disable=did_you_mean" \
+      -e 1 \
+  )
+}
+
+set_interpreted() {
+  unset llvmir
+  command=(
+    "${ruby}" \
+      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      "--disable=gems" "--disable=did_you_mean" \
+      ./target.rb \
+  )
+}
+
+set_compiled() {
+  export llvmir=.
+  command=( \
+    "${ruby}" \
+      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
+      -r "${repo_root}/test/patch_require.rb" \
+      "--disable=gems" "--disable=did_you_mean" \
+      -e "\$__sorbet_ruby_realpath='target.rb'; require './target.rb.so'" \
+  )
+}
+
+measure() {
+  pushd tmp/bench &>/dev/null
+  (time for _ in {1..10}; do "${command[@]}"; done) 2>&1|grep real | cut -d$'\t' -f 2 > measurement
+  minutes=$(cut -d "m" -f1 < measurement)
+  seconds=$(cut -d "m" -f2 < measurement | cut -d "s" -f 1)
+  popd &>/dev/null
+
+  time="$(echo "scale=3;(${minutes} * 60 + ${seconds})/10" | bc)"
+  echo -en "$time"
+}
+
+compile_benchmark() {
+  benchmark="$1"
+
+  rm tmp/bench/*
+  cp "$benchmark" tmp/bench/target.rb
+  llvmir=. test/run_sorbet.sh tmp/bench/target.rb &>/dev/null
+}
+
+echo "ruby vm startup time: $(set_startup; measure)"
 
 echo -e "source\tinterpreted\tcompiled"
-for this_src in "${rb_src[@]}"; do
-    rm tmp/bench/*
-    cp "$this_src" tmp/bench/target.rb
-    echo -en "${this_src#test/testdata/ruby_benchmark/}\t"
-    llvmir=. test/run_sorbet.sh tmp/bench/target.rb &>/dev/null
-    pushd tmp/bench &>/dev/null
-    (time for _ in {1..10}; do ../../bazel-bin/external/sorbet_ruby/toolchain/bin/ruby -r ../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb ./target.rb --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > ruby_runtime
+for benchmark in "${benchmarks[@]}"; do
+  echo -en "${benchmark#test/testdata/ruby_benchmark/}\t"
 
-    minutes_ruby=$(cut -d "m" -f1 < ruby_runtime)
-    seconds_ruby=$(cut -d "m" -f2 < ruby_runtime | cut -d "s" -f 1)
-    ruby_time=$(echo "scale=3;(${minutes_ruby} * 60 + ${seconds_ruby})/10"| bc)
-    echo -en "$ruby_time\t"
+  compile_benchmark "$benchmark"
 
-    (time for _ in {1..10}; do ../../bazel-bin/external/sorbet_ruby/toolchain/bin/ruby -r ../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb ../../test/patch_require.rb -e "require './target.rb.so'" --disable=gems --disable=did_you_mean ; done) 2>&1|grep real | cut -d$'\t' -f 2 > compiled_runtime
-    minutes_compiled=$(cut -d "m" -f1 < compiled_runtime)
-    seconds_compiled=$(cut -d "m" -f2 < compiled_runtime | cut -d "s" -f 1)
-    compiled_time=$(echo "scale=3;(${minutes_compiled} * 60 + ${seconds_compiled})/10"| bc)
-    echo -e "$compiled_time"
-    popd &>/dev/null
+  set_interpreted
+  if [ -n "$verbose" ]; then
+    echo "interpreted: ${command[*]}" >&2
+  fi
+  echo -en "$(measure)\t"
+
+  set_compiled
+  if [ -n "$verbose" ]; then
+    echo "compiled: ${command[*]}" >&2
+  fi
+  echo -en "$(measure)\n"
+
 done
 
