@@ -16,6 +16,7 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/NameBasedIntrinsics.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
@@ -53,9 +54,8 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DoNothingIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        return Payload::rubyNil(cs, build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        return Payload::rubyNil(mcctx.cs, mcctx.build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::keepForIde(), core::Names::keepForTypechecking(), core::Names::keepForCfg()};
@@ -73,9 +73,10 @@ std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolR
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DefineClassIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
         auto sym = typeToSym(cs, send->args[0].type);
         auto attachedClass = sym.data(cs)->attachedClass(cs);
 
@@ -122,9 +123,8 @@ public:
 class IdentityIntrinsic : public NameBasedIntrinsicMethod {
 public:
     IdentityIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        return Payload::varGet(cs, send->args[0].variable, build, irctx, rubyBlockId);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        return Payload::varGet(mcctx.cs, mcctx.send->args[0].variable, mcctx.build, mcctx.irctx, mcctx.rubyBlockId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::suggestType()};
@@ -134,15 +134,19 @@ public:
 class CallWithBlock : public NameBasedIntrinsicMethod {
 public:
     CallWithBlock() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
         // args[3...] are the remaining arguements
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
-        auto &builder = builderCast(build);
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto &irctx = mcctx.irctx;
+        auto rubyBlockId = mcctx.rubyBlockId;
+        auto *send = mcctx.send;
+
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
         auto recv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
@@ -157,7 +161,7 @@ public:
 
         auto numArgs = send->args.size() - 3;
         auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, numArgs, true));
-        auto *argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args, 3, numArgs);
+        auto *argv = IREmitterHelpers::fillSendArgArray(mcctx, 3, numArgs);
 
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncProc"), {recv, rawId, argc, argv, blockAsProc},
                                   "rawSendWithProcResult");
@@ -171,9 +175,11 @@ class ExceptionRetry : public NameBasedIntrinsicMethod {
 public:
     ExceptionRetry() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
 
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = static_cast<llvm::IRBuilder<> &>(mcctx.build);
+        auto &irctx = mcctx.irctx;
+        auto rubyBlockId = mcctx.rubyBlockId;
 
         auto *retrySingleton = Payload::retrySingleton(cs, builder, irctx);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, retrySingleton);
@@ -206,11 +212,14 @@ public:
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
           takesReciever(takesReciever){};
 
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto &irctx = mcctx.irctx;
+        auto rubyBlockId = mcctx.rubyBlockId;
+        auto *send = mcctx.send;
 
-        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
+        auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *recv;
         if (takesReciever == TakesReciever) {
@@ -220,8 +229,8 @@ public:
         }
 
         llvm::Value *blkPtr;
-        if (blk != nullptr) {
-            blkPtr = blk;
+        if (mcctx.blk != nullptr) {
+            blkPtr = mcctx.blk;
         } else {
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }

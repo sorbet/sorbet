@@ -12,8 +12,7 @@ struct IREmitterContext;
 class SymbolBasedIntrinsicMethod {
 public:
     const Intrinsics::HandleBlock blockHandled;
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &builder,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const = 0;
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const = 0;
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 

@@ -18,6 +18,7 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/Names/Names.h"
 #include <string_view>
@@ -554,7 +555,12 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             return;
                         }
 
-                        auto rawCall = IREmitterHelpers::emitMethodCall(cs, builder, i, irctx, bb->rubyBlockId);
+                        llvm::Function *blk = nullptr;
+                        if (i->link != nullptr) {
+                            blk = irctx.rubyBlocks2Functions[i->link->rubyBlockId];
+                        }
+                        MethodCallContext mcctx{cs, builder, irctx, bb->rubyBlockId, i, blk};
+                        auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
                         Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::Return *i) {

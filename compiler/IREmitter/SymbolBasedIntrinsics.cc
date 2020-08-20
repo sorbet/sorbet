@@ -16,6 +16,7 @@
 #include "compiler/IREmitter/IREmitter.h"
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
@@ -61,16 +62,18 @@ public:
     CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, Intrinsics::HandleBlock handleBlocks)
         : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+        auto rubyBlockId = mcctx.rubyBlockId;
 
-        auto argv = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
+        auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
 
-        auto recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
+        auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
         llvm::Value *blkPtr;
-        if (blk != nullptr) {
-            blkPtr = blk;
+        if (mcctx.blk != nullptr) {
+            blkPtr = mcctx.blk;
         } else {
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
@@ -78,7 +81,8 @@ public:
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {recv, fun, argc, argv, blkPtr, irctx.escapedClosure[rubyBlockId]}, "rawSendResult");
+                                  {recv, fun, argc, argv, blkPtr, mcctx.irctx.escapedClosure[rubyBlockId]},
+                                  "rawSendResult");
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -92,9 +96,11 @@ public:
 class DefineMethodIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     DefineMethodIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+        auto *send = mcctx.send;
+
         bool isSelf = send->fun == core::Names::keepSelfDef();
         ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
         auto ownerSym = typeToSym(cs, send->args[0].type);
@@ -131,7 +137,7 @@ public:
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
         // meta-progrmaming methods applied to an abstract method definition, see
         // https://github.com/stripe/sorbet_llvm/issues/115 for more information.
-        return Payload::varGet(cs, send->args[1].variable, builder, irctx, rubyBlockId);
+        return Payload::varGet(cs, send->args[1].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
     }
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -145,10 +151,9 @@ public:
 class SorbetPrivateStaticSigIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     SorbetPrivateStaticSigIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
-        return Payload::rubyNil(cs, builder);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        return Payload::rubyNil(mcctx.cs, builder);
     }
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -163,18 +168,19 @@ public:
 class Module_tripleEq : public SymbolBasedIntrinsicMethod {
 public:
     Module_tripleEq() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto *send = mcctx.send;
         auto representedClass = core::Types::getRepresentedClass(cs, send->recv.type.get());
         if (!representedClass.exists()) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto recvType = representedClass.data(cs)->externalType(cs);
         auto &arg0 = send->args[0];
 
-        auto &builder = builderCast(build);
+        auto &builder = builderCast(mcctx.build);
 
-        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
+        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
         auto representedClassValue = Payload::getRubyConstant(cs, representedClass, builder);
         auto classEq = builder.CreateICmpEQ(recvValue, representedClassValue, "Module_tripleEq_shortCircuit");
 
@@ -186,14 +192,14 @@ public:
         builder.CreateCondBr(expected, fastStart, slowStart);
 
         builder.SetInsertPoint(fastStart);
-        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, irctx, rubyBlockId);
+        auto arg0Value = Payload::varGet(cs, arg0.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
         auto typeTest = Payload::typeTest(cs, builder, arg0Value, recvType);
         auto fastPath = Payload::boolToRuby(cs, builder, typeTest);
         auto fastEnd = builder.GetInsertBlock();
         builder.CreateBr(cont);
 
         builder.SetInsertPoint(slowStart);
-        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+        auto slowPath = IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         auto slowEnd = builder.GetInsertBlock();
         builder.CreateBr(cont);
 
@@ -217,11 +223,12 @@ public:
 class Regexp_new : public SymbolBasedIntrinsicMethod {
 public:
     Regexp_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto *send = mcctx.send;
         if (send->args.size() < 1 || send->args.size() > 2) {
             // todo: make this work with options.
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto options = 0;
         if (send->args.size() == 2) {
@@ -229,7 +236,7 @@ public:
             auto literalOptions = core::cast_type<core::LiteralType>(arg1.type.get());
             if (literalOptions == nullptr ||
                 literalOptions->literalKind != core::LiteralType::LiteralTypeKind::Integer) {
-                return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+                return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
             }
             options = literalOptions->value;
         }
@@ -237,9 +244,9 @@ public:
         auto &arg0 = send->args[0];
         auto literal = core::cast_type<core::LiteralType>(arg0.type.get());
         if (literal == nullptr || literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        auto &builder = builderCast(build);
+        auto &builder = builderCast(mcctx.build);
         auto str = core::NameRef(cs, literal->value).data(cs)->shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
@@ -255,26 +262,27 @@ public:
 class TEnum_new : public SymbolBasedIntrinsicMethod {
 public:
     TEnum_new() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &cs = mcctx.cs;
+        auto *send = mcctx.send;
         // Instead of `MyEnum::X$1.new(...)`, we want to do `<self>.new(...)` to get back to what
         // would have happened at runtime. This is effecctively "undo-ing" the earlier DSL pass.
         auto appliedType = core::cast_type<core::AppliedType>(send->recv.type.get());
         if (appliedType == nullptr) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
         auto attachedClass = appliedType->klass.data(cs)->attachedClass(cs);
         ENFORCE(attachedClass.exists());
         if (!attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
-            return IREmitterHelpers::emitMethodCallViaRubyVM(cs, build, send, irctx, rubyBlockId, blk);
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto &builder = builderCast(build);
-        auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId);
-        auto args = IREmitterHelpers::fillSendArgArray(cs, builder, irctx, rubyBlockId, send->args);
+        auto &builder = builderCast(mcctx.build);
+        auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
-        return IREmitterHelpers::callViaRubyVMSimple(cs, build, self, args, argc, "new");
+        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, self, args, argc, "new");
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
@@ -291,10 +299,9 @@ public:
 class TEnum_abstract : public SymbolBasedIntrinsicMethod {
 public:
     TEnum_abstract() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
-    virtual llvm::Value *makeCall(CompilerState &cs, cfg::Send *send, llvm::IRBuilderBase &build,
-                                  const IREmitterContext &irctx, int rubyBlockId, llvm::Function *blk) const override {
-        auto &builder = builderCast(build);
-        return Payload::rubyNil(cs, builder);
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        auto &builder = builderCast(mcctx.build);
+        return Payload::rubyNil(mcctx.cs, builder);
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
