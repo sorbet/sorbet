@@ -2689,9 +2689,11 @@ class Net::HTTPFound < Net::HTTPRedirection
   HAS_BODY = ::T.unsafe(nil)
 end
 
-class Net::HTTPGatewayTimeOut < Net::HTTPServerError
+class Net::HTTPGatewayTimeout < Net::HTTPServerError
   HAS_BODY = ::T.unsafe(nil)
 end
+
+Net::HTTPGatewayTimeOut = Net::HTTPGatewayTimeout
 
 # [`HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
 # is the parent of the HTTPRequest class. Do not use this directly; use a
@@ -3175,9 +3177,11 @@ class Net::HTTPRequestHeaderFieldsTooLarge < Net::HTTPClientError
   HAS_BODY = ::T.unsafe(nil)
 end
 
-class Net::HTTPRequestTimeOut < Net::HTTPClientError
+class Net::HTTPRequestTimeout < Net::HTTPClientError
   HAS_BODY = ::T.unsafe(nil)
 end
+
+Net::HTTPRequestTimeOut = Net::HTTPRequestTimeout
 
 class Net::HTTPRequestURITooLong < Net::HTTPClientError
   HAS_BODY = ::T.unsafe(nil)
