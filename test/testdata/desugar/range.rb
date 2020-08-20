@@ -19,4 +19,7 @@ def foo
     h = Range.new(1, nil)
     T.reveal_type(g) # error: Revealed type: `T::Range[Integer]`
     T.reveal_type(h) # error: Revealed type: `T::Range[T.untyped]`
+
+    i = (1.."a")
+    T.reveal_type(i) # error: Revealed type: `T::Range[T.untyped]`
 end

@@ -270,6 +270,38 @@ ClassDef{
               }
             ]
           }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U h>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U i>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = "a" }
+              ]
+            }
+          }
         ],
         expr = Send{
           recv = UnresolvedConstantLit{
@@ -281,7 +313,7 @@ ClassDef{
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <U h>
+              name = <U i>
             }
           ]
         }
