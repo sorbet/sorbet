@@ -601,9 +601,10 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
     auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
         auto globalInitBuilder = llvm::IRBuilder<>(cs);
 
+        auto isConstant = false;
         auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
         auto global =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+            new llvm::GlobalVariable(*cs.module, tp, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
 
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         auto *singletonValue =
@@ -614,7 +615,7 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
         return global;
     });
 
-    return builderCast(build).CreateLoad(global, "<retry-singleton>");
+    return builderCast(build).CreateLoad(global, rawName);
 }
 
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::Loc methodStart,
