@@ -13,6 +13,11 @@ extend T::Sig
 # ^^^^ error: Hash key `bar` is duplicated
 }
 
+{
+  :baz => nil,
+  'baz' => nil
+}
+
 sig {params(x: {y: Integer, y: Integer}).void}
                           # ^ error: Hash key `y` is duplicated
 def foo(x)

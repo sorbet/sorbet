@@ -1263,14 +1263,16 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 };
 
                 UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
+                UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
                 auto &gs = dctx.ctx.state;
                 for (auto &key : keys) {
                     auto lit = ast::cast_tree_const<ast::Literal>(key);
+                    auto isSymbol = lit->isSymbol(gs);
                     core::NameRef nameRef;
                     if (!lit) {
                         continue;
                     }
-                    if (lit->isSymbol(gs)) {
+                    if (isSymbol) {
                         nameRef = lit->asSymbol(gs);
                     } else if (lit->isString(gs)) {
                         nameRef = lit->asString(gs);
@@ -1278,13 +1280,22 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         continue;
                     }
 
-                    if (hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
+                    if (isSymbol && hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
                         hashKeySymbols[nameRef] = key->loc;
+                    } else if (!isSymbol && hashKeyStrings.find(nameRef) == hashKeyStrings.end()) {
+                        hashKeyStrings[nameRef] = key->loc;
                     } else {
                         if (auto e = dctx.ctx.beginError(key->loc, core::errors::Desugar::DuplicatedHashKeys)) {
+                            core::LocOffsets originalLoc;
+                            if (isSymbol) {
+                                originalLoc = hashKeySymbols[nameRef];
+                            } else {
+                                originalLoc = hashKeyStrings[nameRef];
+                            }
+
                             e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                            e.addErrorLine(core::Loc(dctx.ctx.file, hashKeySymbols[nameRef]),
-                                           "First occurrence of `{}` hash key", nameRef.toString(gs));
+                            e.addErrorLine(core::Loc(dctx.ctx.file, originalLoc), "First occurrence of `{}` hash key",
+                                           nameRef.toString(gs));
                         }
                     }
                 }
