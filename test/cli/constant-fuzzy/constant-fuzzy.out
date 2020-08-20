@@ -62,8 +62,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
     https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L116: Did you mean: `IO`?
      116 |class IO < Object
           ^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L6: Did you mean: `Net`?
-     6 |module Net
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L3: Did you mean: `Net`?
+     3 |module Net
         ^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002
