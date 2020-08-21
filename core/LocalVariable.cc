@@ -24,7 +24,7 @@ bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
            _name == Names::arrayTemp() || _name == Names::rescueTemp() || _name == Names::exceptionValue() ||
            _name == Names::exceptionClassTemp() || _name == Names::gotoDeadTemp() || _name == Names::isaCheckTemp() ||
            _name == Names::throwAwayTemp() || _name == Names::castTemp() || _name == Names::finalReturn() ||
-           _name == Names::cfgAlias() || _name == Names::magic() || _name == Names::argPresent();
+           _name == Names::cfgAlias() || _name == Names::magic();
 }
 
 bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {
