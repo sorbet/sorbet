@@ -52,7 +52,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             seenKeyword = seenKeyword || argInfo.flags.isKeyword;
 
             // If defaultCont is non-null, that means that the previous argument had a default. If the current argument
-            // also has a default, and is not a keyword, block or repeated arg, then we can continue by extending that
+            // has a default and also is not a keyword, block or repeated arg, then we can continue by extending that
             // fall-through case. However if any of those conditions fail, we must merge the two paths back together,
             // and break out of the fast-path for defaulting.
             if (defaultCont &&
@@ -61,7 +61,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
                 defaultCont = nullptr;
             }
 
-            // Ignore defaults for abstract methods
+            // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
             if (!isAbstract) {
                 // Only emit conditional arg loading if the arg has a default
                 if (auto *opt = ast::cast_tree<ast::OptionalArg>(argExpr)) {

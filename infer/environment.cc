@@ -945,7 +945,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },
             [&](cfg::ArgPresent *i) {
-                /* Return an opaque boolean value that indicates whether or not arg was provided */
+                // Return an unanalyzable boolean value that indicates whether or not arg was provided
+                // It's unanalyzable because it varies by each individual call site.
                 ENFORCE(ctx.owner == i->method);
 
                 tp.type = core::Types::Boolean();
