@@ -155,7 +155,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     auto present = cctx.newTemporary(core::Names::argPresent());
     auto methodSymbol = cctx.inWhat.symbol;
-    synthesizeExpr(presentCont, present, core::LocOffsets::none(), make_unique<ArgPresent>(methodSymbol, argIndex));
+    synthesizeExpr(presentCont, present, argLoc, make_unique<ArgPresent>(methodSymbol, argIndex));
     conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, argLoc);
 
     if (defaultCont != nullptr) {
