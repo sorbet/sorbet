@@ -55,7 +55,7 @@ struct Alias;
 // for each Ruby block like `do ...  end` inside a Ruby method, with 0 meaning "outside a Ruby block").
 // It might make sense to newtype this someday.
 struct IREmitterContext {
-    core::SymbolRef forMethod;
+    cfg::CFG &cfg;
 
     // Sorbet uses cfg::Alias to link a local variable to a global construct, like an instance variable or a constant.
     //

@@ -608,7 +608,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess", mainFunc);
 
     IREmitterContext approximation{
-        cfg.symbol,
+        cfg,
         aliases,
         functionInitializersByFunction,
         argumentSetupBlocksByFunction,
