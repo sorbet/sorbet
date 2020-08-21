@@ -137,6 +137,44 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *curr
     return current;
 }
 
+BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
+    auto *join = cctx.inWhat.freshBlock(cctx.loops, a->rubyBlockId);
+    unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
+    unconditionalJump(b, join, cctx.inWhat, core::LocOffsets::none());
+    return join;
+}
+
+tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
+                                                                    const core::ArgInfo &argInfo, LocalRef argLocal,
+                                                                    core::LocOffsets argLoc, ast::TreePtr &def,
+                                                                    BasicBlock *presentCont, BasicBlock *defaultCont) {
+    auto defLoc = def->loc;
+
+    auto *presentNext = cctx.inWhat.freshBlock(cctx.loops, presentCont->rubyBlockId);
+    auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops, presentCont->rubyBlockId);
+
+    auto present = cctx.newTemporary(core::Names::argPresent());
+    auto methodSymbol = cctx.inWhat.symbol;
+    synthesizeExpr(presentCont, present, core::LocOffsets::none(), make_unique<ArgPresent>(methodSymbol, argIndex));
+    conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, argLoc);
+
+    if (defaultCont != nullptr) {
+        unconditionalJump(defaultCont, defaultNext, cctx.inWhat, core::LocOffsets::none());
+    }
+
+    // Walk the default, and check the type of its final value
+    auto result = cctx.newTemporary(core::Names::statTemp());
+    defaultNext = walk(cctx.withTarget(result), *def, defaultNext);
+
+    if (argInfo.type != nullptr) {
+        auto tmp = cctx.newTemporary(core::Names::castTemp());
+        synthesizeExpr(defaultNext, tmp, defLoc, make_unique<Cast>(result, argInfo.type, core::Names::let()));
+        cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
+    }
+
+    return {result, presentNext, defaultNext};
+}
+
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
