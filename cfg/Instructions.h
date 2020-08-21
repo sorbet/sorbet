@@ -157,7 +157,7 @@ public:
     core::SymbolRef method;
     u2 argId;
 
-    LoadArg(core::SymbolRef method, int argId) : method(method), argId(argId) {
+    LoadArg(core::SymbolRef method, u2 argId) : method(method), argId{argId} {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -172,7 +172,7 @@ public:
     core::SymbolRef method;
     u2 argId;
 
-    ArgPresent(core::SymbolRef method, int argId) : method(method), argId(argId) {
+    ArgPresent(core::SymbolRef method, u2 argId) : method(method), argId{argId} {
         categoryCounterInc("cfg", "argpresent");
     }
 
