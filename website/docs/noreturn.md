@@ -20,21 +20,22 @@ This powers dead code analysis. If you try to do something with a value of type
 extend T::Sig
 
 sig {returns(T.noreturn)}
-def infinitely_loops
+def loop_forever
   loop {}
 end
 
 sig {returns(T.noreturn)}
-def exits_program
+def exit_program
   exit
 end
 
 sig {returns(T.noreturn)}
-def always_raises
+def raise_always
   raise RuntimeError
 end
 
-puts foo # error: This code is unreachable
+x = exit_program 
+puts x # error: This code is unreachable
 ```
 
 `T.noreturn` is a subtype of every type, but no type except `T.noreturn`
