@@ -163,6 +163,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     }
 
     // Walk the default, and check the type of its final value
+    // Walk the default, and check the type of its final value, but discard the result of the cast.
     auto result = cctx.newTemporary(core::Names::statTemp());
     defaultNext = walk(cctx.withTarget(result), *def, defaultNext);
 
