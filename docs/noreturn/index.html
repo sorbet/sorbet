@@ -75,21 +75,22 @@ return are: infinite loops, exiting the program, and raising exceptions.</p>
 extend T::Sig
 
 sig {returns(T.noreturn)}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">infinitely_loops</span></span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">loop_forever</span></span>
   loop {}
 <span class="hljs-keyword">end</span>
 
 sig {returns(T.noreturn)}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">exits_program</span></span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">exit_program</span></span>
   exit
 <span class="hljs-keyword">end</span>
 
 sig {returns(T.noreturn)}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">always_raises</span></span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">raise_always</span></span>
   raise RuntimeError
 <span class="hljs-keyword">end</span>
 
-puts foo <span class="hljs-comment"># error: This code is unreachable</span>
+x = exit_program
+puts x <span class="hljs-comment"># error: This code is unreachable</span>
 </code></pre>
 <p><code>T.noreturn</code> is a subtype of every type, but no type except <code>T.noreturn</code>
 (trivially) and <code>T.untyped</code> is a subtype of <code>T.noreturn</code>.</p>
