@@ -34,7 +34,7 @@ def raise_always
   raise RuntimeError
 end
 
-x = exit_program 
+x = exit_program
 puts x # error: This code is unreachable
 ```
 
