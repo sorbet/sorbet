@@ -1368,26 +1368,23 @@ public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
         ENFORCE(!args.args.empty(), "Magic_buildRange called without argument");
 
-        auto type_member = dropType(gs, args.args[0]->type);
+        auto rangeElemType = Types::dropLiteral(args.args[0]->type);
+        if (!rangeElemType->isNilClass()) {
+            rangeElemType = Types::dropNil(gs, rangeElemType);
+        }
 
         if (args.args.size() > 1) {
-            auto other = dropType(gs, args.args[1]->type);
-            if (other != Types::untypedUntracked() && other != type_member) {
-                type_member = Types::untypedUntracked();
+            auto other = Types::dropLiteral(args.args[1]->type);
+            if (rangeElemType->isNilClass() && other->isNilClass()) {
+                rangeElemType = Types::untypedUntracked();
+            } else if (rangeElemType->isNilClass()) {
+                rangeElemType = Types::dropNil(gs, other);
+            } else if (other->isUntyped() || (!other->isNilClass() && !Types::equiv(gs, other, rangeElemType))) {
+                rangeElemType = Types::untypedUntracked();
             }
         }
 
-        res.returnType = Types::rangeOf(gs, type_member);
-    }
-
-private:
-    static TypePtr dropType(const GlobalState &gs, const TypePtr type) {
-        auto t = Types::dropLiteral(type);
-        t = Types::dropNil(gs, t);
-        if (t->isBottom()) {
-            return Types::untypedUntracked();
-        }
-        return t;
+        res.returnType = Types::rangeOf(gs, rangeElemType);
     }
 } Magic_buildRange;
 
