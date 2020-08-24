@@ -18,7 +18,34 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U a>
+              name = <U untyped>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              fun = <U let>
+              block = nullptr
+              args = [
+                Literal{ value = 42 }
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U untyped>
+                  block = nullptr
+                  args = [
+                  ]
+                }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr1>
             }
             rhs = Send{
               recv = ConstantLit{
@@ -33,28 +60,24 @@ ClassDef{
               ]
             }
           }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U b>
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
             }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr1>
               }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = 1 }
-                Literal{ value = 2 }
-              ]
-            }
+            ]
           }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U c>
+              name = <U lr2>
             }
             rhs = Send{
               recv = ConstantLit{
@@ -69,29 +92,484 @@ ClassDef{
               ]
             }
           }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U d>
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
             }
-            rhs = Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <C <U Range>>
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr2>
               }
-              fun = <U new>
-              block = nullptr
-              args = [
-                Literal{ value = 1 }
-                Literal{ value = 2 }
-                Literal{ value = true }
-              ]
-            }
+            ]
           }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U e>
+              name = <U lr3>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr3>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr4>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr4>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr5>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                EmptyTree
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr5>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr6>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                EmptyTree
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr6>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr7>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = "a" }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr7>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr8>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr8>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr9>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr9>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr10>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                EmptyTree
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr10>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr11>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                EmptyTree
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr11>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr12>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr12>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr13>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr13>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr14>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr14>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr15>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr15>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr16>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr16>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr_first>
             }
             rhs = Send{
               recv = Send{
@@ -112,10 +590,24 @@ ClassDef{
               ]
             }
           }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr_first>
+              }
+            ]
+          }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U f>
+              name = <U lr_last>
             }
             rhs = Send{
               recv = Send{
@@ -146,102 +638,140 @@ ClassDef{
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <U a>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U b>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U c>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U d>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U e>
-              }
-            ]
-          }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <C <U T>>
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            args = [
-              UnresolvedIdent{
-                kind = Local
-                name = <U f>
+                name = <U lr_last>
               }
             ]
           }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U g>
+              name = <U rn1>
             }
             rhs = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::<Magic>
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
               }
-              fun = <U <build-range>>
+              fun = <U new>
               block = nullptr
               args = [
-                Literal{ value = 1 }
-                EmptyTree
               ]
             }
           }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn1>
+              }
+            ]
+          }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U h>
+              name = <U rn2>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn2>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn3>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn3>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn4>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+                Literal{ value = true }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn4>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn5>
             }
             rhs = Send{
               recv = UnresolvedConstantLit{
@@ -266,9 +796,27 @@ ClassDef{
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <U g>
+                name = <U rn5>
               }
             ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn6>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = true }
+              ]
+            }
           }
           Send{
             recv = UnresolvedConstantLit{
@@ -280,25 +828,920 @@ ClassDef{
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <U h>
+                name = <U rn6>
               }
             ]
           }
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
-              name = <U i>
+              name = <U rn7>
             }
             rhs = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::<Magic>
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
               }
-              fun = <U <build-range>>
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn7>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn8>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn8>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn9>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
               block = nullptr
               args = [
                 Literal{ value = 1 }
-                Literal{ value = "a" }
+                Literal{ value = "c" }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn9>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn10>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn10>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn11>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn11>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn12>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn12>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn_first>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U Range>>
+                }
+                fun = <U new>
+                block = nullptr
+                args = [
+                  Literal{ value = 1 }
+                  Literal{ value = 42 }
+                ]
+              }
+              fun = <U first>
+              block = nullptr
+              args = [
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn_first>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U rn_last>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U Range>>
+                }
+                fun = <U new>
+                block = nullptr
+                args = [
+                  Literal{ value = "a" }
+                  Literal{ value = "z" }
+                ]
+              }
+              fun = <U last>
+              block = nullptr
+              args = [
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U rn_last>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr1>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U T>>
+                }
+                cnst = <C <U Range>>
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr1>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr2>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr2>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr3>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr3>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr4>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+                Literal{ value = true }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr4>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr5>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr5>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr6>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = true }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr6>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr7>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr7>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr8>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = nil }
+                Literal{ value = nil }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr8>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr9>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  Send{
+                    recv = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U T>>
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = "c" }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr9>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr10>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                Literal{ value = 42 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr10>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr11>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr11>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr12>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  cnst = <C <U Range>>
+                }
+                fun = <U []>
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
+                ]
+              }
+              fun = <U new>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr12>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr_first>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U T>>
+                    }
+                    cnst = <C <U Range>>
+                  }
+                  fun = <U []>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Integer>>
+                    }
+                  ]
+                }
+                fun = <U new>
+                block = nullptr
+                args = [
+                  Literal{ value = 1 }
+                  Literal{ value = 42 }
+                ]
+              }
+              fun = <U first>
+              block = nullptr
+              args = [
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U tr_first>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U tr_last>
+            }
+            rhs = Send{
+              recv = Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U T>>
+                    }
+                    cnst = <C <U Range>>
+                  }
+                  fun = <U []>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
+                  ]
+                }
+                fun = <U new>
+                block = nullptr
+                args = [
+                  Literal{ value = "a" }
+                  Literal{ value = "z" }
+                ]
+              }
+              fun = <U last>
+              block = nullptr
+              args = [
               ]
             }
           }
@@ -313,7 +1756,7 @@ ClassDef{
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <U i>
+              name = <U tr_last>
             }
           ]
         }
