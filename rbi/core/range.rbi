@@ -331,7 +331,7 @@ class Range < Object
   sig do
     params(
         _begin: Elem,
-        _end: Elem,
+        _end: T.nilable(Elem),
         exclude_end: T::Boolean,
     )
     .void
