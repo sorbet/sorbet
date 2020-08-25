@@ -9,7 +9,7 @@ namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 constexpr size_t MAX_DB_SIZE_BYTES =
-    2L * 1024 * 1024 * 1024; // 2G. This is both maximum fs db size and max virtual memory usage.
+    4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
 struct KeyValueStore::DBState {
     MDB_env *env;
 };
