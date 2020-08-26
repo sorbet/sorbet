@@ -20,12 +20,14 @@ class TestClass
   def method_reusing_argnames(
     a: 42,
   # ^ def: adef 2
+     # ^^ def: adef 3 default-arg-value
     b: 15
   # ^ def: bdef 2
+     # ^^ def: bdef 3 default-arg-value
   )
   a + b
-# ^ usage: adef 2
-    # ^ usage: bdef 2
+# ^ usage: adef 2,3
+    # ^ usage: bdef 2,3
   end
 end
 

@@ -387,7 +387,12 @@ TEST_CASE("LSPTest") {
                 auto &entry = defUsageMap[defAssertion->symbol];
                 auto &defMap = entry.first;
                 defMap[defAssertion->version].emplace_back(defAssertion);
-                entry.second.emplace_back(defAssertion);
+
+                // If this is a definition that corresponds to an argument default, don't add it to the list of
+                // assertions to be explicitly checked -- it's only present for validating usage queries.
+                if (!defAssertion->isDefaultArgValue) {
+                    entry.second.emplace_back(defAssertion);
+                }
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
                 entry.second.emplace_back(usageAssertion);
@@ -418,12 +423,12 @@ TEST_CASE("LSPTest") {
                 string_view symbol;
                 vector<int> versions;
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
-                    versions.push_back(defAssertion->version);
-                    symbol = defAssertion->symbol;
                     // Some definition locations are not the definition of themselves.
-                    if (!defAssertion->isDefOfSelf) {
+                    if (!defAssertion->isDefOfSelf || defAssertion->isDefaultArgValue) {
                         continue;
                     }
+                    versions.push_back(defAssertion->version);
+                    symbol = defAssertion->symbol;
                 } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                     versions = usageAssertion->versions;
                     symbol = usageAssertion->symbol;

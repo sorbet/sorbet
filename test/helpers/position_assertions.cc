@@ -436,14 +436,16 @@ tuple<string_view, vector<int>, string_view> getSymbolVersionAndOption(string_vi
 }
 
 DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
-                           int version, bool isDefOfSelf)
-    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version), isDefOfSelf(isDefOfSelf) {}
+                           int version, bool isDefOfSelf, bool isDefaultArgValue)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version), isDefOfSelf(isDefOfSelf),
+      isDefaultArgValue(isDefaultArgValue) {}
 
 shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                             string_view assertionContents, string_view assertionType) {
     auto [symbol, versions, option] = getSymbolVersionAndOption(assertionContents);
     auto notDefOfSelf = option == "not-def-of-self";
-    if (!notDefOfSelf && !option.empty()) {
+    auto defaultExpr = option == "default-arg-value";
+    if (!notDefOfSelf && !defaultExpr && !option.empty()) {
         ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
                           fmt::format("Unexpected def assertion option: `{}`", option));
     }
@@ -451,7 +453,7 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
         ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
                           fmt::format("Too many versions given for `{}`", symbol));
     }
-    return make_shared<DefAssertion>(filename, range, assertionLine, symbol, versions[0], !notDefOfSelf);
+    return make_shared<DefAssertion>(filename, range, assertionLine, symbol, versions[0], !notDefOfSelf, defaultExpr);
 }
 
 vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {

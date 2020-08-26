@@ -19,14 +19,16 @@ class TestClass
 
   def method_with_keyword_args(
     meaning_of_life: 42,
-  # ^^^^^^^^^^^^^^^ def: meaning_of_life
+  # ^^^^^^^^^^^^^^^ def: meaning_of_life 1
+                   # ^^ def: meaning_of_life 2 default-arg-value
     coolest_angle: 15
-  # ^^^^^^^^^^^^^ def: coolest_angle
+  # ^^^^^^^^^^^^^ def: coolest_angle 1
+                 # ^^ def: coolest_angle 2 default-arg-value
   )
     meaning_of_life + 1
-  # ^^^^^^^^^^^^^^^ usage: meaning_of_life
+  # ^^^^^^^^^^^^^^^ usage: meaning_of_life 1,2
     coolest_angle + 1
-  # ^^^^^^^^^^^^^ usage: coolest_angle
+  # ^^^^^^^^^^^^^ usage: coolest_angle 1,2
   end
 
   def method_with_rest_arg(*arr)
@@ -37,11 +39,13 @@ class TestClass
 
   def method_with_optional_arg(foo = 3, bar = 5)
                              # ^^^ def: fooOpt 1
+                                   # ^ def: fooOpt 2 default-arg-value
                                       # ^^^ def: barOpt
+                                            # ^ def: barOpt 2 default-arg-value
     foo + 4
-  # ^^^ usage: fooOpt
+  # ^^^ usage: fooOpt 1,2
     bar + 10
-  # ^^^ usage: barOpt
+  # ^^^ usage: barOpt 1,2
   end
 end
 
