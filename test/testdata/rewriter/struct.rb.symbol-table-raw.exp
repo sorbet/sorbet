@@ -15,14 +15,6 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U AccidentallyStruct>><C <U A>><U foo=> (foo, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
         argument foo<> @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U AccidentallyStruct>><C <U A>><DA <U initialize> $1> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:27 end=42:30}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U AccidentallyStruct>><C <U A>><DA <U initialize> $2> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:27 end=42:30}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:27 end=42:30}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U AccidentallyStruct>><C <U A>><U initialize> (foo, bar, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:21 end=42:24}
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:27 end=42:30}
@@ -70,9 +62,6 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U MixinStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=45:18}
     class <C <U MixinStruct>><C <U MyKeywordInitStruct>> < <C <U Struct>> (<C <U MyMixin>>) @ Loc {file=test/testdata/rewriter/struct.rb start=56:3 end=62:6}
       type-member(=) <C <U MixinStruct>><C <U MyKeywordInitStruct>><C <U Elem>> -> LambdaParam(<C <U MixinStruct>><C <U MyKeywordInitStruct>><C <U Elem>>, fixed=T.untyped) @ Loc {file=test/testdata/rewriter/struct.rb start=56:3 end=62:6}
-      method <C <U MixinStruct>><C <U MyKeywordInitStruct>><DA <U initialize> $1> (x, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=56:37 end=56:38}
-        argument x<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=56:37 end=56:38}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U MixinStruct>><C <U MyKeywordInitStruct>><U initialize> (x, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=56:3 end=62:6}
         argument x<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=56:37 end=56:38}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
@@ -94,9 +83,6 @@ class <C <U <root>>> < <C <U Object>> ()
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>><C <U MyStruct>> < <C <U Struct>> (<C <U MyMixin>>) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=54:6}
       type-member(=) <C <U MixinStruct>><C <U MyStruct>><C <U Elem>> -> LambdaParam(<C <U MixinStruct>><C <U MyStruct>><C <U Elem>>, fixed=T.untyped) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=54:6}
-      method <C <U MixinStruct>><C <U MyStruct>><DA <U initialize> $1> (x, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=50:26 end=50:27}
-        argument x<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=50:26 end=50:27}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U MixinStruct>><C <U MyStruct>><U initialize> (x, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=54:6}
         argument x<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=50:26 end=50:27}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
@@ -132,14 +118,6 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U RealStruct>><C <U A>><U foo=> (foo, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
         argument foo<> @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStruct>><C <U A>><DA <U initialize> $1> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:27 end=15:30}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStruct>><C <U A>><DA <U initialize> $2> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:27 end=15:30}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:27 end=15:30}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U RealStruct>><C <U A>><U initialize> (foo, bar, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=15:5 end=15:31}
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:21 end=15:24}
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:27 end=15:30}
@@ -160,14 +138,6 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U RealStruct>><C <U KeywordInit>><U foo=> (foo, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
         argument foo<> @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStruct>><C <U KeywordInit>><DA <U initialize> $1> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
-        argument foo<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
-        argument bar<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:37 end=16:40}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStruct>><C <U KeywordInit>><DA <U initialize> $2> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:37 end=16:40}
-        argument foo<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
-        argument bar<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:37 end=16:40}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U RealStruct>><C <U KeywordInit>><U initialize> (foo, bar, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:61}
         argument foo<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:31 end=16:34}
         argument bar<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:37 end=16:40}
@@ -197,14 +167,6 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U RealStructDesugar>><S <C <U A>> $1><C <U <AttachedClass>>> -> LambdaParam(<C <U RealStructDesugar>><S <C <U A>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStructDesugar>><C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=19:11 end=19:12}
       method <C <U RealStructDesugar>><S <C <U A>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=29:8}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStructDesugar>><S <C <U A>> $1><DA <U new> $1> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=26:26 end=26:29}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:21 end=25:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:39 end=25:42}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U RealStructDesugar>><S <C <U A>> $1><DA <U new> $2> (foo, bar, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=26:35 end=26:38}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:21 end=25:24}
-        argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:39 end=25:42}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U RealStructDesugar>><S <C <U A>> $1><U new> (foo, bar, <blk>) -> AppliedType {         klass = <C <U RealStructDesugar>><C <U A>>         targs = [           <C <U Elem>> = T.untyped         ]       } @ Loc {file=test/testdata/rewriter/struct.rb start=26:9 end=26:39}
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:21 end=25:24}
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:39 end=25:42}
@@ -221,9 +183,6 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U TwoStructs>><C <U A>><U foo=> (foo, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
         argument foo<> @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U TwoStructs>><C <U A>><DA <U initialize> $1> (foo, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U TwoStructs>><C <U A>><U initialize> (foo, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=33:5 end=33:25}
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
@@ -238,9 +197,6 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U TwoStructs>><C <U B>><U foo=> (foo, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
         argument foo<> @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-      method <C <U TwoStructs>><C <U B>><DA <U initialize> $1> (foo, <blk>) -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
-        argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
-        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U TwoStructs>><C <U B>><U initialize> (foo, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:25}
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}

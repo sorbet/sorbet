@@ -81,6 +81,7 @@ NameDef names[] = {
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
     {"unconditional", "<unconditional>"},
+    {"argPresent", "<argPresent>"},
     // end CFG temporaries
 
     {"include"},

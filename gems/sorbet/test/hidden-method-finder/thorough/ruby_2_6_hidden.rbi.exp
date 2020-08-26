@@ -2020,14 +2020,12 @@ end
 
 class Dir
   def self.exists?(_); end
-
 end
 
 class ERB
   def def_method(mod, methodname, fname=T.unsafe(nil)); end
 
   def def_module(methodname=T.unsafe(nil)); end
-
 end
 
 class Encoding
@@ -2606,7 +2604,6 @@ class Gem::Security::Signer
   include ::Gem::DefaultUserInteraction
   include ::Gem::Text
   def options(); end
-
 end
 
 class Gem::Security::Signer

@@ -8,7 +8,6 @@
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
 #include "rewriter/DSLBuilder.h"
-#include "rewriter/DefaultArgs.h"
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
 #include "rewriter/Flatten.h"
@@ -188,8 +187,7 @@ ast::TreePtr Rewriter::run(core::MutableContext ctx, ast::TreePtr tree) {
     // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This
     // is a rare case: in general, we should *not* add new DSL passes here.
     auto flattened = Flatten::run(ctx, std::move(ast));
-    auto defaulted = DefaultArgs::run(ctx, std::move(flattened));
-    auto cleaned = Cleanup::run(ctx, std::move(defaulted));
+    auto cleaned = Cleanup::run(ctx, std::move(flattened));
     auto verifiedResult = ast::Verifier::run(ctx, std::move(cleaned));
     return verifiedResult;
 }

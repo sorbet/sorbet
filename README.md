@@ -415,6 +415,22 @@ If a variable is re-defined, it can be annotated with a version number:
     # ^ usage: a 2
 ```
 
+`usage` annotations can accept multiple version numbers, separated by a `,`. This is useful if you have variables that
+get re-defined through multiple-paths:
+
+```ruby
+  if some_condition
+    a = 10
+  # ^ def a 1
+  else
+    a = 'hello'
+  # ^ def: a 2
+  end
+
+  p a
+  # ^ usage: a 1,2
+```
+
 If a location should not report any definition or usage, then use the magic label `(nothing)`:
 
 ```ruby
@@ -434,6 +450,22 @@ class Foo
   #   ^^^ def: foo
 end
 ```
+
+When marking definitions that correspond to method arguments that have defaults, multiple definitions will need to be
+marked: one for the argument definition itself and one for its default value. The default value needs to be given a
+different version number, and also marked `default-arg-value`:
+
+```ruby
+  def foo(a: 1)
+        # ^ def: a 1
+           # ^ def: a 2 default-arg-value
+    p a
+    # ^ usage: a 1,2
+  end
+```
+
+This is due to the translation of defaults into the CFG: there is a synthetic conditional that chooses either to
+initialize the variable from the argument passed at the send, or to the default value when no value is present.
 
 #### Testing "Go to Type Definition"
 

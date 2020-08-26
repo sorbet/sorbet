@@ -169,6 +169,18 @@ const core::ArgInfo &LoadArg::argument(const core::GlobalState &gs) const {
     return this->method.data(gs)->arguments()[this->argId];
 }
 
+string ArgPresent::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    return fmt::format("arg_present({})", this->argument(gs).argumentName(gs));
+}
+
+string ArgPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    return fmt::format("ArgPresent {{ argument = {} }}", this->argument(gs).argumentName(gs));
+}
+
+const core::ArgInfo &ArgPresent::argument(const core::GlobalState &gs) const {
+    return this->method.data(gs)->arguments()[this->argId];
+}
+
 string LoadYieldParams::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format("load_yield_params({})", this->link->fun.toString(gs));
 }
