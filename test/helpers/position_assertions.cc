@@ -2,6 +2,7 @@
 // ^ Include first because it violates linting rules.
 
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/formatting.h"
@@ -450,8 +451,10 @@ shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Ran
                           fmt::format("Unexpected def assertion option: `{}`", option));
     }
     if (versions.size() > 1) {
-        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
-                          fmt::format("Too many versions given for `{}`", symbol));
+        ADD_FAIL_CHECK_AT(
+            string(filename).c_str(), assertionLine + 1,
+            fmt::format("`def` assertions can only have a single version, but found multiple for symbol `{}` : {}",
+                        symbol, absl::StrJoin(versions, ",")));
     }
     return make_shared<DefAssertion>(filename, range, assertionLine, symbol, versions[0], !notDefOfSelf, defaultExpr);
 }
