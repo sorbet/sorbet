@@ -1366,24 +1366,24 @@ public:
 class Magic_buildRange : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        ENFORCE(!args.args.empty(), "Magic_buildRange called without argument");
+        ENFORCE(args.args.size() == 2, "Magic_buildRange called without argument");
 
         auto rangeElemType = Types::dropLiteral(args.args[0]->type);
-        if (!rangeElemType->isNilClass()) {
+        auto firstArgIsNil = rangeElemType->isNilClass();
+        if (!firstArgIsNil) {
             rangeElemType = Types::dropNil(gs, rangeElemType);
         }
-
-        if (args.args.size() > 1) {
-            auto other = Types::dropLiteral(args.args[1]->type);
-            if (rangeElemType->isNilClass() && other->isNilClass()) {
+        auto other = Types::dropLiteral(args.args[1]->type);
+        auto secondArgIsNil = other->isNilClass();
+        if (firstArgIsNil) {
+            if (secondArgIsNil) {
                 rangeElemType = Types::untypedUntracked();
-            } else if (rangeElemType->isNilClass()) {
+            } else {
                 rangeElemType = Types::dropNil(gs, other);
-            } else if (other->isUntyped() || (!other->isNilClass() && !Types::equiv(gs, other, rangeElemType))) {
-                rangeElemType = Types::untypedUntracked();
             }
+        } else if (other->isUntyped() || (!secondArgIsNil && !Types::equiv(gs, other, rangeElemType))) {
+            rangeElemType = Types::untypedUntracked();
         }
-
         res.returnType = Types::rangeOf(gs, rangeElemType);
     }
 } Magic_buildRange;
