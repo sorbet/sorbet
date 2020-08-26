@@ -123,19 +123,19 @@ struct IREmitterContext {
     // TODO(jez) document escapedVariableIndices
     UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
 
+    // When arguments have defaults, the use of the default is guarded by a call to ArgPresent. The ArgPresent variables
+    // are initialized during setupArguments, but need to be available by argument index.
+    //
+    // idx: Argument index into the method arguments
+    // val: The local ref that holds the result of the ArgPresent instruction, or cfg::LocalRef::noVariable if the
+    //      argument does not have a default value.
+    std::vector<cfg::LocalRef> argPresentVariables;
+
     // Every local variable (including arguments) shows up as either an index into the closure (escapedVariableIndices)
     // or something that was explicitly stack allocated.
     //
     // This mapping holds the latter: locals that don't come from the closure.
     UnorderedMap<cfg::LocalRef, llvm::AllocaInst *> llvmVariables;
-
-    // Verifies arguments against the types dictated by the SymbolRef for this method.
-    // Only one llvm::BasicBlock because Ruby blocks don't get their arg types checked--only Ruby methods.
-    //
-    // Compiled sig verification does not rely on sorbet-runtime at all, and thus can be much faster.
-    // In particular, Ruby methods compiled by SorbetLLVM don't appear to have been wrapped and redefined the same way
-    // sorbet-runtime methods do.
-    llvm::BasicBlock *sigVerificationBlock;
 
     // Insertion point for code that runs at the end of a Ruby method (i.e., where returns go)
     // This handles return type checking, among other things.

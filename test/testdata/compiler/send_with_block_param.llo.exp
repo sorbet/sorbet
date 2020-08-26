@@ -216,13 +216,13 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %46 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %45, i64 0, i32 17, !dbg !44
   %47 = load i64, i64* %46, align 8, !dbg !44, !tbaa !12
   %48 = icmp eq i64 %47, %27, !dbg !44
-  br i1 %48, label %afterSend30.i, label %codeRepl, !dbg !44, !prof !45
+  br i1 %48, label %afterSend29.i, label %codeRepl, !dbg !44, !prof !45
 
 codeRepl:                                         ; preds = %sorbet_readRealpath.exit
   tail call fastcc void @Init_send_with_block_param.cold.1(i64 %27) #10
   unreachable
 
-afterSend30.i:                                    ; preds = %sorbet_readRealpath.exit
+afterSend29.i:                                    ; preds = %sorbet_readRealpath.exit
   %rubyId_to_proc.i = load i64, i64* @rubyIdPrecomputed_to_proc, align 8, !dbg !39
   %callArgs0Addr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0, !dbg !46
   %49 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*, !dbg !46
@@ -238,13 +238,13 @@ afterSend30.i:                                    ; preds = %sorbet_readRealpath
   %53 = icmp eq i64 %call_via_vm_to_proc.i, 8, !dbg !39
   br i1 %53, label %"func_<root>.<static-init>$153.exit", label %54, !dbg !39
 
-54:                                               ; preds = %afterSend30.i
+54:                                               ; preds = %afterSend29.i
   %55 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !39, !tbaa !10
   %56 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %55, i64 0, i32 17, !dbg !39
   store i64 %call_via_vm_to_proc.i, i64* %56, align 8, !dbg !39, !tbaa !51
   br label %"func_<root>.<static-init>$153.exit", !dbg !39
 
-"func_<root>.<static-init>$153.exit":             ; preds = %afterSend30.i, %54
+"func_<root>.<static-init>$153.exit":             ; preds = %afterSend29.i, %54
   %57 = call i64 @rb_funcallv(i64 %52, i64 %rubyId_map.i, i32 0, i64* null) #9, !dbg !39
   store i64 %57, i64* %callArgs0Addr.i, align 16, !dbg !52
   %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %27, i64 %24, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #9, !dbg !52

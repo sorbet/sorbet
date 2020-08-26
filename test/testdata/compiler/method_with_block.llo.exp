@@ -878,15 +878,15 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %83, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #13, !dbg !88
   %84 = getelementptr inbounds i64, i64* %72, i64 9, !dbg !88
   store i64* %84, i64** %67, align 8, !dbg !88, !tbaa !12
-  %rawSym52.i = tail call i64 @rb_id2sym(i64 %rubyId_boo.i) #13, !dbg !89
+  %rawSym51.i = tail call i64 @rb_id2sym(i64 %rubyId_boo.i) #13, !dbg !89
   tail call void @rb_define_method(i64 %83, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_boo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#boo" to i64 (...)*), i32 -1) #13, !dbg !89
   %85 = getelementptr inbounds i64, i64* %72, i64 13, !dbg !89
   store i64* %85, i64** %67, align 8, !dbg !89, !tbaa !12
-  %rawSym63.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #13, !dbg !90
+  %rawSym62.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #13, !dbg !90
   tail call void @rb_define_method(i64 %83, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#bar" to i64 (...)*), i32 -1) #13, !dbg !90
   %86 = getelementptr inbounds i64, i64* %72, i64 17, !dbg !90
   store i64* %86, i64** %67, align 8, !dbg !90, !tbaa !12
-  %rawSym74.i = tail call i64 @rb_id2sym(i64 %rubyId_baz.i) #13, !dbg !91
+  %rawSym73.i = tail call i64 @rb_id2sym(i64 %rubyId_baz.i) #13, !dbg !91
   tail call void @rb_define_method(i64 %83, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_baz, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#baz" to i64 (...)*), i32 -1) #13, !dbg !91
   %87 = getelementptr inbounds i64, i64* %72, i64 21, !dbg !91
   store i64* %87, i64** %67, align 8, !dbg !91, !tbaa !12

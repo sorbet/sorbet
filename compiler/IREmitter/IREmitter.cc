@@ -285,17 +285,19 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             vector<llvm::BasicBlock *> fillFromDefaultBlocks;
             {
                 // create blocks for arg filling
-                for (auto i = 0; i < numOptionalArgs + 1; i++) {
-                    auto suffix = i == numOptionalArgs ? "Done" : to_string(i);
+                for (auto i = 0; i < numOptionalArgs; i++) {
+                    auto suffix = to_string(i);
                     checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
                     fillFromDefaultBlocks.emplace_back(
                         llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
-                    // Don't bother making the "Done" block for fillFromArgBlocks
-                    if (i < numOptionalArgs) {
-                        fillFromArgBlocks.emplace_back(
-                            llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
-                    }
+                    fillFromArgBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"fillFromArgBlock", suffix}, func));
                 }
+
+                // create "Done" blocks (not needed for fillFromArgBlocks)
+                auto suffix = "Done" + to_string(numOptionalArgs);
+                checkBlocks.emplace_back(llvm::BasicBlock::Create(cs, {"checkBlock", suffix}, func));
+                fillFromDefaultBlocks.emplace_back(
+                    llvm::BasicBlock::Create(cs, {"fillFromDefaultBlock", suffix}, func));
             }
             {
                 // fill local variables from args
@@ -320,6 +322,12 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     if (!a.data(cfg)._name.exists()) {
                         cs.failCompilation(md.declLoc,
                                            "this method has a block argument construct that's not supported");
+                    }
+
+                    // mark the arg as present
+                    auto &argPresent = irctx.argPresentVariables[i];
+                    if (!isBlock && argPresent.exists()) {
+                        Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyBlockId);
                     }
 
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
@@ -356,42 +364,29 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     builder.CreateCondBr(expected, fillFromDefaultBlocks[i], fillFromArgBlocks[i]);
                 }
             }
-            auto optionalMethodIndex = 0;
+
             {
                 // build fillFromDefaultBlocks
                 for (auto i = 0; i < numOptionalArgs; i++) {
-                    auto &block = fillFromDefaultBlocks[i];
-                    builder.SetInsertPoint(block);
-                    if (!isBlock && md.name.data(cs)->kind == core::NameKind::UNIQUE &&
-                        md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) {
-                        // This method is already a default method so don't fill in
-                        // another other defaults for it or else it is turtles all the
-                        // way down
-                    } else {
-                        llvm::Value *rawValue;
-                        if (!isBlock) {
-                            optionalMethodIndex++;
-                            auto argMethodName =
-                                cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md.name, optionalMethodIndex);
-                            ENFORCE(argMethodName.exists(), "Default argument method for " + md.name.toString(cs) +
-                                                                to_string(optionalMethodIndex) + " does not exist");
-                            auto argMethod = md.symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
-                            ENFORCE(argMethod.exists());
-                            auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
-                            rawValue = builder.CreateCall(
-                                fillDefaultFunc,
-                                {argCountRaw, argArrayRaw, func->arg_begin() + 2 /* this is wrong for block*/});
-                        } else {
-                            rawValue = Payload::rubyNil(cs, builder);
-                        }
-                        auto argIndex = i + minPositionalArgCount;
-                        auto a = irctx.rubyBlockArgs[rubyBlockId][argIndex];
+                    builder.SetInsertPoint(fillFromDefaultBlocks[i]);
 
-                        Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
+                    auto argIndex = i + minPositionalArgCount;
+                    if (!isBlock) {
+                        auto argPresent = irctx.argPresentVariables[argIndex];
+                        if (argPresent.exists()) {
+                            Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
+                                            rubyBlockId);
+                        }
+                    } else {
+                        auto a = irctx.rubyBlockArgs[rubyBlockId][argIndex];
+                        Payload::varSet(cs, a, Payload::rubyNil(cs, builder), builder, irctx, rubyBlockId);
                     }
+
+                    // fall through to the next default arg init block
                     builder.CreateBr(fillFromDefaultBlocks[i + 1]);
                 }
             }
+
             {
                 // Tie up all the "Done" blocks at the end
                 builder.SetInsertPoint(checkBlocks[numOptionalArgs]);
@@ -410,46 +405,35 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                             auto rawRubySym =
                                 builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
 
+                            auto argPresent = irctx.argPresentVariables[argId];
                             auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
                             auto isItUndef = Payload::testIsUndef(cs, builder, passedValue);
 
+                            auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);
                             auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
                             auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
-                            auto isUndefEnd = builder.GetInsertBlock();
-                            builder.CreateCondBr(isItUndef, kwArgDefault, kwArgContinue);
-                            builder.SetInsertPoint(kwArgDefault);
                             llvm::Value *defaultValue;
-                            if ((md.name.data(cs)->kind == core::NameKind::UNIQUE &&
-                                 md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg) ||
-                                !argsFlags[argId].isDefault) {
-                                // This method is already a default method so don't fill in
-                                // another other defaults for it or else it is turtles all the
-                                // way down
+                            builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
 
-                                defaultValue = Payload::rubyNil(cs, builder);
-                            } else {
-                                optionalMethodIndex++;
-                                auto argMethodName = cs.gs.lookupNameUnique(core::UniqueNameKind::DefaultArg, md.name,
-                                                                            optionalMethodIndex);
-                                ENFORCE(argMethodName.exists(), "Default argument method for " + md.name.toString(cs) +
-                                                                    to_string(optionalMethodIndex) + " does not exist");
-                                auto argMethod = md.symbol.data(cs)->owner.data(cs)->findMember(cs, argMethodName);
-                                ENFORCE(argMethod.exists());
-                                auto fillDefaultFunc = IREmitterHelpers::getOrCreateFunction(cs, argMethod);
-                                defaultValue = builder.CreateCall(
-                                    fillDefaultFunc,
-                                    {argCountRaw, argArrayRaw, func->arg_begin() + 2 /* this is wrong for block*/});
-                                // insert default computation
+                            // Write a default value out, and mark the variable as missing
+                            builder.SetInsertPoint(kwArgDefault);
+                            if (!isBlock && argPresent.exists()) {
+                                Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
+                                                rubyBlockId);
                             }
-                            auto kwArgDefaultEnd = builder.GetInsertBlock();
+                            // TODO(trevor) should this be undef?
+                            defaultValue = Payload::rubyNil(cs, builder);
                             builder.CreateBr(kwArgContinue);
+
+                            builder.SetInsertPoint(kwArgSet);
+                            if (!isBlock && argPresent.exists()) {
+                                Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx,
+                                                rubyBlockId);
+                            }
+                            Payload::varSet(cs, name, passedValue, builder, irctx, rubyBlockId);
+                            builder.CreateBr(kwArgContinue);
+
                             builder.SetInsertPoint(kwArgContinue);
-
-                            auto kwArgValue = builder.CreatePHI(builder.getInt64Ty(), 2, "kwArgValue");
-                            kwArgValue->addIncoming(passedValue, isUndefEnd);
-                            kwArgValue->addIncoming(defaultValue, kwArgDefaultEnd);
-
-                            Payload::varSet(cs, name, kwArgValue, builder, irctx, rubyBlockId);
                         }
                     }
                     if (hasKWRestArgs) {
@@ -465,10 +449,6 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
         switch (blockType) {
             case FunctionType::Method:
             case FunctionType::StaticInit:
-                // jump to sig verification that will come before user body
-                builder.CreateBr(irctx.sigVerificationBlock);
-                break;
-
             case FunctionType::Block:
             case FunctionType::ExceptionBegin:
             case FunctionType::Rescue:
@@ -507,6 +487,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
     llvm::IRBuilder<> builder(base);
     UnorderedSet<cfg::LocalRef> loadYieldParamsResults; // methods calls on these are ignored
     auto startLoc = IREmitterHelpers::getMethodStart(base, cfg.symbol);
+    auto &arguments = cfg.symbol.data(base)->arguments();
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyBlockId]);
@@ -657,8 +638,35 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
                                                                 bind.bind.variable);
                     },
+                    [&](cfg::ArgPresent *i) {
+                        ENFORCE(bb->rubyBlockId == 0, "ArgPresent found outside of entry-method");
+                        // Intentionally omitted: the result of the ArgPresent call is filled out in `setupArguments`
+                    },
                     [&](cfg::LoadArg *i) {
-                        /* intentionally omitted, it's part of method preambula */
+                        ENFORCE(bb->rubyBlockId == 0, "LoadArg found outside of entry-method");
+
+                        // Argument values are loaded by `setupArguments`, we just need to check their type here
+                        auto &argInfo = arguments[i->argId];
+                        auto local = irctx.rubyBlockArgs[0][i->argId];
+                        auto var = Payload::varGet(cs, local, builder, irctx, 0);
+                        if (auto &expectedType = argInfo.type) {
+                            auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
+                            auto successBlock =
+                                llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+                            auto failBlock =
+                                llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+                            auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
+                            builder.CreateCondBr(expected, successBlock, failBlock);
+                            builder.SetInsertPoint(failBlock);
+                            // this will throw exception
+                            builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
+                                               {var, Payload::toCString(cs, "sig", builder),
+                                                Payload::toCString(cs, expectedType->show(cs), builder)});
+                            builder.CreateUnreachable();
+                            builder.SetInsertPoint(successBlock);
+                        }
                     },
                     [&](cfg::LoadYieldParams *i) {
                         loadYieldParamsResults.insert(bind.bind.variable);
@@ -790,42 +798,6 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
 }
 
-void emitSigVerification(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md, const IREmitterContext &irctx) {
-    auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[0]);
-    llvm::IRBuilder<> builder(cs);
-    builder.SetInsertPoint(irctx.sigVerificationBlock);
-
-    if (!(md.name.data(cs)->kind == core::NameKind::UNIQUE &&
-          md.name.data(cs)->unique.uniqueNameKind == core::UniqueNameKind::DefaultArg)) {
-        int argId = -1;
-        for (auto &argInfo : cfg.symbol.data(cs)->arguments()) {
-            argId += 1;
-            auto local = irctx.rubyBlockArgs[0][argId];
-            auto var = Payload::varGet(cs, local, builder, irctx, 0);
-            auto &expectedType = argInfo.type;
-            if (!expectedType) {
-                continue;
-            }
-            auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
-            auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
-
-            auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
-
-            auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
-            builder.CreateCondBr(expected, successBlock, failBlock);
-            builder.SetInsertPoint(failBlock);
-            // this will throw exception
-            builder.CreateCall(
-                cs.module->getFunction("sorbet_cast_failure"),
-                {var, Payload::toCString(cs, "sig", builder), Payload::toCString(cs, expectedType->show(cs), builder)});
-            builder.CreateUnreachable();
-            builder.SetInsertPoint(successBlock);
-        }
-    }
-
-    builder.CreateBr(irctx.userEntryBlockByFunction[0]);
-}
-
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {
     Timer timer(cs.gs.tracer(), "IREmitter::run");
     cfg::CFG::UnfreezeCFGLocalVariables unfreezeVars(cfg);
@@ -855,7 +827,6 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     setupStackFrames(cs, md, irctx);
     setupArguments(cs, cfg, md, irctx);
-    emitSigVerification(cs, cfg, md, irctx);
 
     emitUserBody(cs, cfg, irctx);
     emitDeadBlocks(cs, cfg, irctx);

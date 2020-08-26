@@ -187,7 +187,7 @@ argArrayExpandArrayTest:                          ; preds = %functionEntryInitia
   %18 = and i64 %arg1_maybeExpandToFullArgs, -9, !dbg !33
   %19 = icmp eq i64 %18, 0, !dbg !33
   %20 = or i1 %17, %19, !dbg !33
-  br i1 %20, label %fillFromDefaultBlockDone, label %sorbet_isa_Array.exit, !dbg !33
+  br i1 %20, label %fillFromDefaultBlockDone2, label %sorbet_isa_Array.exit, !dbg !33
 
 sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArrayTest
   %21 = inttoptr i64 %arg1_maybeExpandToFullArgs to %struct.RBasic*, !dbg !33
@@ -195,7 +195,7 @@ sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArray
   %23 = load i64, i64* %22, align 8, !dbg !33, !tbaa !34
   %24 = and i64 %23, 31, !dbg !33
   %25 = icmp eq i64 %24, 7, !dbg !33
-  br i1 %25, label %argArrayExpand, label %fillFromDefaultBlockDone, !dbg !33
+  br i1 %25, label %argArrayExpand, label %fillFromDefaultBlockDone2, !dbg !33
 
 argArrayExpand:                                   ; preds = %sorbet_isa_Array.exit
   %26 = and i64 %23, 33554432, !dbg !33
@@ -235,14 +235,14 @@ rb_array_len.exit:                                ; preds = %34, %38
 fillFromArgBlock0:                                ; preds = %fillRequiredArgs
   %rawArg_el1 = load i64, i64* %argArrayPhi, align 8, !dbg !33
   %default1 = icmp eq i32 %argcPhi, 1, !dbg !33
-  br i1 %default1, label %fillFromDefaultBlockDone, label %fillFromArgBlock1, !dbg !33, !prof !37
+  br i1 %default1, label %fillFromDefaultBlockDone2, label %fillFromArgBlock1, !dbg !33, !prof !37
 
 fillFromArgBlock1:                                ; preds = %fillFromArgBlock0
   %46 = getelementptr i64, i64* %argArrayPhi, i64 1, !dbg !33
   %rawArg_el2 = load i64, i64* %46, align 8, !dbg !33
-  br label %fillFromDefaultBlockDone, !dbg !33
+  br label %fillFromDefaultBlockDone2, !dbg !33
 
-fillFromDefaultBlockDone:                         ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %fillFromArgBlock0, %fillFromArgBlock1
+fillFromDefaultBlockDone2:                        ; preds = %sorbet_isa_Array.exit, %argArrayExpandArrayTest, %fillFromArgBlock0, %fillFromArgBlock1
   %el2.sroa.0.0 = phi i64 [ %rawArg_el2, %fillFromArgBlock1 ], [ 8, %fillFromArgBlock0 ], [ 8, %argArrayExpandArrayTest ], [ 8, %sorbet_isa_Array.exit ], !dbg !33
   %el1.sroa.0.1 = phi i64 [ %rawArg_el1, %fillFromArgBlock1 ], [ %rawArg_el1, %fillFromArgBlock0 ], [ %arg1_maybeExpandToFullArgs, %argArrayExpandArrayTest ], [ %arg1_maybeExpandToFullArgs, %sorbet_isa_Array.exit ], !dbg !33
   %47 = getelementptr inbounds i64, i64* %14, i64 7
@@ -255,20 +255,20 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %argcPhi = phi i32 [ %argc, %functionEntryInitializers ], [ %45, %rb_array_len.exit ], !dbg !33
   %argArrayPhi = phi i64* [ %argArray, %functionEntryInitializers ], [ %43, %rb_array_len.exit ], !dbg !33
   %default0 = icmp eq i32 %argcPhi, 0, !dbg !33
-  br i1 %default0, label %fillFromDefaultBlockDone.thread, label %fillFromArgBlock0, !dbg !33, !prof !37
+  br i1 %default0, label %fillFromDefaultBlockDone2.thread, label %fillFromArgBlock0, !dbg !33, !prof !37
 
-fillFromDefaultBlockDone.thread:                  ; preds = %fillRequiredArgs
+fillFromDefaultBlockDone2.thread:                 ; preds = %fillRequiredArgs
   %50 = getelementptr inbounds i64, i64* %14, i64 7
   store i64* %50, i64** %9, align 8, !tbaa !13
   br label %codeRepl, !dbg !38
 
-typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone
+typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone2
   %51 = and i64 %el2.sroa.0.0, 1, !dbg !39
   %52 = icmp eq i64 %51, 0, !dbg !39
   br i1 %52, label %codeRepl68, label %typeTestSuccess36, !dbg !39, !prof !37
 
-codeRepl:                                         ; preds = %fillFromDefaultBlockDone.thread, %fillFromDefaultBlockDone
-  %el1.sroa.0.157 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone ]
+codeRepl:                                         ; preds = %fillFromDefaultBlockDone2.thread, %fillFromDefaultBlockDone2
+  %el1.sroa.0.157 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
   tail call fastcc void @"func_<root>.<static-init>$153$block_1.cold.1"(i64 %el1.sroa.0.157) #12, !dbg !38
   unreachable
 

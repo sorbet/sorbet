@@ -173,13 +173,13 @@ declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.Func
 define i64 @"func_Object#delegate"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #8 !dbg !8 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
-  %"stackFrame_func_Object#delegate48" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#delegate" to i64*), align 8
+  %"stackFrame_func_Object#delegate47" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#delegate" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !12
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !14
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_Object#delegate48", i64* %4, align 8, !tbaa !18
+  store i64 %"stackFrame_func_Object#delegate47", i64* %4, align 8, !tbaa !18
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !20
   %7 = load i64, i64* %6, align 8, !tbaa !4
@@ -222,15 +222,15 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs
   %"call_via_vm_==" = call i64 @sorbet_callFunc(i64 %"call_via_vm_+", i64 %"rubyId_==", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_=="), !dbg !32
   %21 = and i64 %"call_via_vm_==", -9, !dbg !32
   %22 = icmp eq i64 %21, 0, !dbg !32
-  %.sink49 = select i1 %22, i64 5, i64 3, !dbg !32
+  %.sink48 = select i1 %22, i64 5, i64 3, !dbg !32
   %rubyStr_ok.sink = select i1 %22, i64 %rubyStr_fail, i64 %rubyStr_ok, !dbg !32
   %ic_call_via_vm_puts.1.sink = select i1 %22, %struct.FunctionInlineCache* @ic_call_via_vm_puts, %struct.FunctionInlineCache* @ic_call_via_vm_puts.1, !dbg !32
-  %23 = getelementptr inbounds i64, i64* %14, i64 %.sink49
+  %23 = getelementptr inbounds i64, i64* %14, i64 %.sink48
   store i64* %23, i64** %9, align 8, !tbaa !12
   store i64 %rubyStr_ok.sink, i64* %callArgs0Addr, align 8, !dbg !40
-  %call_via_vm_puts33 = call i64 @sorbet_callFunc(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull %ic_call_via_vm_puts.1.sink), !dbg !40
+  %call_via_vm_puts32 = call i64 @sorbet_callFunc(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull %ic_call_via_vm_puts.1.sink), !dbg !40
   store i64* %15, i64** %9, align 8, !tbaa !12
-  ret i64 %call_via_vm_puts33
+  ret i64 %call_via_vm_puts32
 
 codeRepl:                                         ; preds = %fillRequiredArgs
   tail call fastcc void @"func_Object#delegate.cold.1"(i64 %selfRaw) #15, !dbg !36
@@ -390,9 +390,9 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %56, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_delegate, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#delegate" to i64 (...)*), i32 -1) #13, !dbg !52
   %78 = getelementptr inbounds i64, i64* %50, i64 22, !dbg !52
   store i64* %78, i64** %45, align 8, !dbg !52, !tbaa !12
-  %callArgs0Addr37.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !61
-  store i64 %call_via_vm_new.i, i64* %callArgs0Addr37.i, align 8, !dbg !61
-  %call_via_vm_delegate.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_delegate.i, i32 1, i64* nonnull %callArgs0Addr37.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_delegate) #13, !dbg !61
+  %callArgs0Addr36.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !61
+  store i64 %call_via_vm_new.i, i64* %callArgs0Addr36.i, align 8, !dbg !61
+  %call_via_vm_delegate.i = call i64 @sorbet_callFunc(i64 %34, i64 %rubyId_delegate.i, i32 1, i64* nonnull %callArgs0Addr36.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_delegate) #13, !dbg !61
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %35)
   ret void
 }
@@ -400,13 +400,13 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_A#+"(i32 %argc, i64* nocapture readnone %argArray, i64 returned %selfRaw) #8 !dbg !62 {
 functionEntryInitializers:
-  %"stackFrame_func_A#+15" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A#+" to i64*), align 8
+  %"stackFrame_func_A#+13" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_A#+" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !12
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !14
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_A#+15", i64* %4, align 8, !tbaa !18
+  store i64 %"stackFrame_func_A#+13", i64* %4, align 8, !tbaa !18
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !20
   %7 = load i64, i64* %6, align 8, !tbaa !4

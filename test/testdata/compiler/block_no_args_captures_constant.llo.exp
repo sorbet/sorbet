@@ -193,13 +193,13 @@ functionEntryInitializers:
   %8 = load %struct.sorbet_Closure*, %struct.sorbet_Closure** %7, align 8, !tbaa !14
   %9 = getelementptr inbounds %struct.sorbet_Closure, %struct.sorbet_Closure* %8, i64 0, i32 1, i64 0
   store i64 8, i64* %9, align 8
-  %"stackFrame_func_Object#foo25" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
+  %"stackFrame_func_Object#foo24" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
   %10 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !18
   %11 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %10, i64 0, i32 2
   %12 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %11, align 8, !tbaa !19
   %13 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %12, i64 0, i32 2
   %14 = bitcast %struct.rb_iseq_struct** %13 to i64*
-  store i64 %"stackFrame_func_Object#foo25", i64* %14, align 8, !tbaa !22
+  store i64 %"stackFrame_func_Object#foo24", i64* %14, align 8, !tbaa !22
   %15 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %12, i64 0, i32 4
   %16 = load i64*, i64** %15, align 8, !tbaa !24
   %17 = load i64, i64* %16, align 8, !tbaa !4

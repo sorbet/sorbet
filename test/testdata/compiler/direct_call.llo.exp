@@ -147,13 +147,13 @@ declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.Func
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_Object#foo"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #7 !dbg !8 {
 functionEntryInitializers:
-  %"stackFrame_func_Object#foo13" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
+  %"stackFrame_func_Object#foo12" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#foo" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !12
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !14
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_Object#foo13", i64* %4, align 8, !tbaa !18
+  store i64 %"stackFrame_func_Object#foo12", i64* %4, align 8, !tbaa !18
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !20
   %7 = load i64, i64* %6, align 8, !tbaa !4
@@ -193,13 +193,13 @@ codeRepl:                                         ; preds = %fillRequiredArgs
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_Object#bar"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #7 !dbg !35 {
 functionEntryInitializers:
-  %"stackFrame_func_Object#bar14" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#bar" to i64*), align 8
+  %"stackFrame_func_Object#bar13" = load i64, i64* bitcast (i8** @"stackFramePrecomputed_func_Object#bar" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !12
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !14
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %"stackFrame_func_Object#bar14", i64* %4, align 8, !tbaa !18
+  store i64 %"stackFrame_func_Object#bar13", i64* %4, align 8, !tbaa !18
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !20
   %7 = load i64, i64* %6, align 8, !tbaa !4
@@ -338,14 +338,14 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   tail call void @rb_define_method(i64 %51, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#foo" to i64 (...)*), i32 -1) #13, !dbg !52
   %52 = getelementptr inbounds i64, i64* %45, i64 8, !dbg !52
   store i64* %52, i64** %40, align 8, !dbg !52, !tbaa !12
-  %rawSym23.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #13, !dbg !50
+  %rawSym22.i = tail call i64 @rb_id2sym(i64 %rubyId_bar.i) #13, !dbg !50
   tail call void @rb_define_method(i64 %51, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_bar, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#bar" to i64 (...)*), i32 -1) #13, !dbg !50
   %53 = getelementptr inbounds i64, i64* %45, i64 12, !dbg !50
   store i64* %53, i64** %40, align 8, !dbg !50, !tbaa !12
   %call_via_vm_bar.i = tail call i64 @sorbet_callFunc(i64 %29, i64 %rubyId_bar.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_bar) #13, !dbg !53
-  %callArgs0Addr40.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !54
-  store i64 %call_via_vm_bar.i, i64* %callArgs0Addr40.i, align 8, !dbg !54
-  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %29, i64 %26, i32 1, i64* nonnull %callArgs0Addr40.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #13, !dbg !54
+  %callArgs0Addr39.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !54
+  store i64 %call_via_vm_bar.i, i64* %callArgs0Addr39.i, align 8, !dbg !54
+  %call_via_vm_puts.i = call i64 @sorbet_callFunc(i64 %29, i64 %26, i32 1, i64* nonnull %callArgs0Addr39.i, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_puts) #13, !dbg !54
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %30)
   ret void
 }

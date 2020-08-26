@@ -210,7 +210,8 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
                 [&](cfg::BlockReturn *i) { usage.trackBlockUsage(bb.get(), i->what.variable); },
                 [&](cfg::LoadSelf *i) { /*nothing*/ /*todo: how does instance exec pass self?*/ },
                 [&](cfg::Literal *i) { /* nothing*/ }, [&](cfg::GetCurrentException *i) { /*nothing*/ },
-                [&](cfg::LoadArg *i) { /*nothing*/ }, [&](cfg::LoadYieldParams *i) { /*nothing*/ },
+                [&](cfg::ArgPresent *i) { /*nothing*/ }, [&](cfg::LoadArg *i) { /*nothing*/ },
+                [&](cfg::LoadYieldParams *i) { /*nothing*/ },
                 [&](cfg::Cast *i) { usage.trackBlockUsage(bb.get(), i->value.variable); },
                 [&](cfg::TAbsurd *i) { usage.trackBlockUsage(bb.get(), i->what.variable); });
         }
@@ -510,8 +511,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         i++;
     }
 
-    llvm::BasicBlock *sigVerificationBlock = llvm::BasicBlock::Create(cs, "checkSig", rubyBlock2Function[0]);
-
     vector<llvm::BasicBlock *> blockExits(cfg.maxRubyBlockId + 1);
     for (auto rubyBlockId = 0; rubyBlockId <= cfg.maxRubyBlockId; ++rubyBlockId) {
         blockExits[rubyBlockId] =
@@ -547,6 +546,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
 
+    int numArgs = md.symbol.data(cs)->arguments().size();
+    vector<cfg::LocalRef> argPresentVariables(numArgs, cfg::LocalRef::noVariable());
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == cfg::LocalRef::blockCall()) {
             userEntryBlockByFunction[b->rubyBlockId] = llvmBlocks[b->bexit.thenb->id];
@@ -602,6 +603,21 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             if (auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId)) {
                 userEntryBlockByFunction[ensureBlockId] = llvmBlocks[ensureBlock->id];
             }
+        } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::argPresent()) {
+            // the ArgPresent instruction is always the last one generated in the block
+            int argId = -1;
+            auto &bind = b->exprs.back();
+            typecase(
+                bind.value.get(),
+                [&](cfg::ArgPresent *i) {
+                    ENFORCE(bind.bind.variable == b->bexit.cond.variable);
+                    argId = i->argId;
+                },
+                [](cfg::Instruction *i) { /* do nothing */ });
+
+            ENFORCE(argId >= 0, "Missing an index for argPresent condition variable");
+
+            argPresentVariables[argId] = b->bexit.cond.variable;
         }
     }
 
@@ -619,8 +635,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(sendArgArrayByBlock),
         escapedClosure,
         std::move(escapedVariableIndices),
+        std::move(argPresentVariables),
         {},
-        sigVerificationBlock,
         postProcessBlock,
         move(blockLinks),
         move(rubyBlockArgs),

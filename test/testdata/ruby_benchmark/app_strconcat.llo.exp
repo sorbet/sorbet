@@ -277,24 +277,24 @@ afterSend.i:                                      ; preds = %"fastSymCallIntrins
   %65 = or i1 %62, %64, !dbg !49
   br i1 %65, label %79, label %73, !dbg !49
 
-"alternativeCallIntrinsic_Integer_+107.i":        ; preds = %sorbet_stringInterpolate.exit.i
-  %"call_via_vm_+119.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_+.i", i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+.3") #10, !dbg !50
+"alternativeCallIntrinsic_Integer_+106.i":        ; preds = %sorbet_stringInterpolate.exit.i
+  %"call_via_vm_+118.i" = call i64 @sorbet_callFunc(i64 %i.sroa.0.0.i, i64 %"rubyId_+.i", i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+.3") #10, !dbg !50
   br label %BB2.i.backedge, !dbg !50
 
-"fastSymCallIntrinsic_Integer_+108.i":            ; preds = %sorbet_stringInterpolate.exit.i
+"fastSymCallIntrinsic_Integer_+107.i":            ; preds = %sorbet_stringInterpolate.exit.i
   %66 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 2) #10, !dbg !50
   %67 = extractvalue { i64, i1 } %66, 1, !dbg !50
   %68 = extractvalue { i64, i1 } %66, 0, !dbg !50
   br i1 %67, label %69, label %BB2.i.backedge, !dbg !50
 
-69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+108.i"
+69:                                               ; preds = %"fastSymCallIntrinsic_Integer_+107.i"
   %70 = ashr i64 %68, 1, !dbg !50
   %71 = xor i64 %70, -9223372036854775808, !dbg !50
   %72 = call i64 @rb_int2big(i64 %71) #10, !dbg !50
   br label %BB2.i.backedge, !dbg !50
 
-BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+108.i", %"alternativeCallIntrinsic_Integer_+107.i"
-  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+119.i", %"alternativeCallIntrinsic_Integer_+107.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+108.i" ]
+BB2.i.backedge:                                   ; preds = %69, %"fastSymCallIntrinsic_Integer_+107.i", %"alternativeCallIntrinsic_Integer_+106.i"
+  %i.sroa.0.0.i.be = phi i64 [ %"call_via_vm_+118.i", %"alternativeCallIntrinsic_Integer_+106.i" ], [ %72, %69 ], [ %68, %"fastSymCallIntrinsic_Integer_+107.i" ]
   br label %BB2.i
 
 73:                                               ; preds = %56
@@ -388,7 +388,7 @@ sorbet_stringInterpolate.exit.i:                  ; preds = %130, %124
   %134 = call i64 @rb_str_concat_literals(i32 5, i64* nonnull %callArgs0Addr.i) #10, !dbg !49
   store i64* %49, i64** %36, align 8, !dbg !49, !tbaa !10
   store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !50
-  br i1 %51, label %"fastSymCallIntrinsic_Integer_+108.i", label %"alternativeCallIntrinsic_Integer_+107.i", !dbg !50
+  br i1 %51, label %"fastSymCallIntrinsic_Integer_+107.i", label %"alternativeCallIntrinsic_Integer_+106.i", !dbg !50
 
 "func_<root>.<static-init>$153.exit":             ; preds = %afterSend.i
   store i64* %42, i64** %36, align 8, !tbaa !10

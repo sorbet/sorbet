@@ -12,12 +12,15 @@ class Main
 
   sig {params(x: String).void}
   def self.takes_string(x)
+    # NOTE: we need to use x, as we only type check arguments that get used
+    T.unsafe(x)
   end
 end
 
 begin
   Main.takes_string(T.unsafe(0))
 rescue TypeError => exn
+  puts 'Found `TypeError`'
   puts exn.message.match(/Expected.*/).to_s
   # We explicitly need to print the backtrace information to reliably get the
   # former crash we were seeing to happen.

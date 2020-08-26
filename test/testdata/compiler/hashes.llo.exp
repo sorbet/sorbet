@@ -216,13 +216,13 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
   %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8, !dbg !45
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8, !dbg !46
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_a.i) #9, !dbg !46
-  %rawSym15.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9, !dbg !45
+  %rawSym14.i = tail call i64 @rb_id2sym(i64 %rubyId_b.i) #9, !dbg !45
   %callArgs0Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 0, !dbg !47
   store i64 %rawSym.i, i64* %callArgs0Addr.i, align 8, !dbg !47
   %callArgs1Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 1, !dbg !47
   store i64 3, i64* %callArgs1Addr.i, align 8, !dbg !47
   %callArgs2Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 2, !dbg !47
-  store i64 %rawSym15.i, i64* %callArgs2Addr.i, align 8, !dbg !47
+  store i64 %rawSym14.i, i64* %callArgs2Addr.i, align 8, !dbg !47
   %callArgs3Addr.i = getelementptr inbounds [4 x i64], [4 x i64]* %callArgs.i, i64 0, i64 3, !dbg !47
   store i64 5, i64* %callArgs3Addr.i, align 8, !dbg !47
   %47 = tail call i64 @rb_hash_new_with_size(i64 2) #9, !dbg !47, !noalias !48

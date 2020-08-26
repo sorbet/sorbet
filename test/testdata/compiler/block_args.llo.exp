@@ -179,14 +179,14 @@ functionEntryInitializers:
   store i64* %15, i64** %9, align 8, !tbaa !13
   %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !33
   %default0 = icmp eq i32 %argc, 0, !dbg !34
-  br i1 %default0, label %fillFromDefaultBlockDone.thread, label %fillFromDefaultBlockDone, !dbg !34, !prof !35
+  br i1 %default0, label %fillFromDefaultBlockDone1.thread, label %fillFromDefaultBlockDone1, !dbg !34, !prof !35
 
-fillFromDefaultBlockDone.thread:                  ; preds = %functionEntryInitializers
+fillFromDefaultBlockDone1.thread:                 ; preds = %functionEntryInitializers
   %callArgs0Addr23 = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs, i64 0, i64 0, !dbg !33
   store i64 3, i64* %callArgs0Addr23, align 8, !dbg !33
   br label %"alternativeCallIntrinsic_Integer_+", !dbg !33
 
-fillFromDefaultBlockDone:                         ; preds = %functionEntryInitializers
+fillFromDefaultBlockDone1:                        ; preds = %functionEntryInitializers
   %rawArg_x = load i64, i64* %argArray, align 8, !dbg !34
   %16 = and i64 %rawArg_x, 1, !dbg !33
   %17 = icmp eq i64 %16, 0, !dbg !33
@@ -198,13 +198,13 @@ afterSend:                                        ; preds = %21, %"fastSymCallIn
   %"symIntrinsicRawPhi_+" = phi i64 [ %"call_via_vm_+", %"alternativeCallIntrinsic_Integer_+" ], [ %24, %21 ], [ %20, %"fastSymCallIntrinsic_Integer_+" ], !dbg !33
   ret i64 %"symIntrinsicRawPhi_+", !dbg !36
 
-"alternativeCallIntrinsic_Integer_+":             ; preds = %fillFromDefaultBlockDone, %fillFromDefaultBlockDone.thread
-  %callArgs0Addr25 = phi i64* [ %callArgs0Addr23, %fillFromDefaultBlockDone.thread ], [ %callArgs0Addr, %fillFromDefaultBlockDone ]
-  %x.sroa.0.024 = phi i64 [ 8, %fillFromDefaultBlockDone.thread ], [ %rawArg_x, %fillFromDefaultBlockDone ]
+"alternativeCallIntrinsic_Integer_+":             ; preds = %fillFromDefaultBlockDone1, %fillFromDefaultBlockDone1.thread
+  %callArgs0Addr25 = phi i64* [ %callArgs0Addr23, %fillFromDefaultBlockDone1.thread ], [ %callArgs0Addr, %fillFromDefaultBlockDone1 ]
+  %x.sroa.0.024 = phi i64 [ 8, %fillFromDefaultBlockDone1.thread ], [ %rawArg_x, %fillFromDefaultBlockDone1 ]
   %"call_via_vm_+" = call i64 @sorbet_callFunc(i64 %x.sroa.0.024, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr25, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+"), !dbg !33
   br label %afterSend, !dbg !33
 
-"fastSymCallIntrinsic_Integer_+":                 ; preds = %fillFromDefaultBlockDone
+"fastSymCallIntrinsic_Integer_+":                 ; preds = %fillFromDefaultBlockDone1
   %18 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_x, i64 2) #11, !dbg !33
   %19 = extractvalue { i64, i1 } %18, 1, !dbg !33
   %20 = extractvalue { i64, i1 } %18, 0, !dbg !33

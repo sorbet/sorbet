@@ -295,13 +295,13 @@ codeRepl:                                         ; preds = %sorbet_readRealpath
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @func_Foo.bar(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #9 !dbg !52 {
 functionEntryInitializers:
-  %stackFrame_func_Foo.bar13 = load i64, i64* bitcast (i8** @stackFramePrecomputed_func_Foo.bar to i64*), align 8
+  %stackFrame_func_Foo.bar12 = load i64, i64* bitcast (i8** @stackFramePrecomputed_func_Foo.bar to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !22
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %stackFrame_func_Foo.bar13, i64* %4, align 8, !tbaa !25
+  store i64 %stackFrame_func_Foo.bar12, i64* %4, align 8, !tbaa !25
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !27
   %7 = load i64, i64* %6, align 8, !tbaa !4
