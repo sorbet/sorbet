@@ -89,9 +89,15 @@ where what the phases of Sorbet actually do are documented.
 │  ┌─────────────────┐      │  ┌─────────────────┐      │  ┌─────────────────┐      │
 │  │ ast::Expression │      │  │ ast::Expression │      │  │ ast::Expression │      │
 │  └─────────────────┘      │  └─────────────────┘      │  └─────────────────┘      │
-│                           │   │                       │   │                       │
-│     definition_validator  │   │ definition_validator  │   │ definition_validator  │
-│                           │   ▼                       │   ▼                       │
+│  │                        │  │                        │  │                        │
+│  │ definition_validator   │  │ definition_validator   │  │ definition_validator   │
+│  ▼                        │  ▼                        │  ▼                        │
+│  ┌─────────────────┐      │  ┌─────────────────┐      │  ┌─────────────────┐      │
+│  │ ast::Expression │      │  │ ast::Expression │      │  │ ast::Expression │      │
+│  └─────────────────┘      │  └─────────────────┘      │  └─────────────────┘      │
+│           │               │           │               │           │               │
+│           │ class_flatten │           │ class_flatten │           │ class_flatten │
+│           ▼               │           ▼               │           ▼               │
 │  ┌─────────────────┐      │  ┌─────────────────┐      │  ┌─────────────────┐      │
 │  │ ast::Expression │      │  │ ast::Expression │      │  │ ast::Expression │      │
 │  └─────────────────┘      │  └─────────────────┘      │  └─────────────────┘      │
@@ -108,6 +114,7 @@ where what the phases of Sorbet actually do are documented.
 │   │   cfg::CFG   │        │   │   cfg::CFG   │        │   │   cfg::CFG   │        │
 │   │ (with types) │        │   │ (with types) │        │   │ (with types) │        │
 │   └──────────────┘        │   └──────────────┘        │   └──────────────┘        │
+│                           │                           │                           │
 └───────────────────────────┴───────────────────────────┴───────────────────────────┘
 ```
 
