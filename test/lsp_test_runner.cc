@@ -440,18 +440,21 @@ TEST_CASE("LSPTest") {
                     if (entry != defAssertions.end()) {
                         defs.insert(defs.end(), entry->second.begin(), entry->second.end());
                     } else {
-                        FAIL_CHECK(fmt::format("Found usage comment for label {0} version {1} without matching def "
-                                               "comment. Please add a `# "
-                                               "^^ def: {0} {1}` assertion that points to the definition of the "
-                                               "pointed-to thing being used.",
-                                               symbol, version));
+                        ADD_FAIL_CHECK_AT(
+                            assertion->filename.c_str(), assertion->range->start->line + 1,
+                            fmt::format("Found usage comment for label {0} version {1} without matching def "
+                                        "comment. Please add a `# "
+                                        "^^ def: {0} {1}` assertion that points to the definition of the "
+                                        "pointed-to thing being used.",
+                                        symbol, version));
                     }
                 }
 
                 // if there were versions that weren't present in the defAssertions map, an error will have been raised,
                 // but the test will proceed to this point.
                 if (defs.empty()) {
-                    FAIL(fmt::format("Found no def comments for usage comment `{}`", symbol));
+                    ADD_FAIL_AT(assertion->filename.c_str(), assertion->range->start->line + 1,
+                                fmt::format("Found no def comments for usage comment `{}`", symbol));
                 }
 
                 auto queryLoc = assertion->getLocation(config);
