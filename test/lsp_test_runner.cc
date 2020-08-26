@@ -448,26 +448,27 @@ TEST_CASE("LSPTest") {
                     }
                 }
 
-                if (!defs.empty()) {
-                    auto queryLoc = assertion->getLocation(config);
-                    // Check that a definition request at this location returns defs.
-                    DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
-                    // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
-                                          entryAssertions);
-                    // Check that a highlight request at this location returns all of the entryAssertions for the same
-                    // file as the request.
-                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
-                    for (auto &e : entryAssertions) {
-                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
-                            filteredEntryAssertions.push_back(e);
-                        }
-                    }
-                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
-                                                    filteredEntryAssertions);
-                } else {
-                    FAIL_CHECK(fmt::format("Found no assertion assertions about {0}", symbol));
+                // if there were versions that weren't present in the defAssertions map, an error will have been raised,
+                // but the test will proceed to this point.
+                if (defs.empty()) {
+                    FAIL(fmt::format("Found no def comments for usage comment `{}`", symbol));
                 }
+
+                auto queryLoc = assertion->getLocation(config);
+                // Check that a definition request at this location returns defs.
+                DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
+                // Check that a reference request at this location returns entryAssertions.
+                UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, entryAssertions);
+                // Check that a highlight request at this location returns all of the entryAssertions for the same
+                // file as the request.
+                vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                for (auto &e : entryAssertions) {
+                    if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
+                        filteredEntryAssertions.push_back(e);
+                    }
+                }
+                UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                filteredEntryAssertions);
             }
         }
 
