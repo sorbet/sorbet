@@ -45,6 +45,37 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
+              name = <U nilable>
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <C <U T>>
+              }
+              fun = <U let>
+              block = nullptr
+              args = [
+                Literal{ value = 42 }
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U T>>
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Integer>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
               name = <U lr1>
             }
             rhs = Send{
@@ -563,6 +594,114 @@ ClassDef{
               UnresolvedIdent{
                 kind = Local
                 name = <U lr16>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr17>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U nilable>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr17>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr18>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U nilable>
+                }
+                Literal{ value = 1 }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr18>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr19>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U nilable>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U nilable>
+                }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr19>
               }
             ]
           }

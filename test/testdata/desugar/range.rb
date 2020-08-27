@@ -1,6 +1,7 @@
 # typed: true
 def foo
   untyped = T.let(42, T.untyped)
+  nilable = T.let(42, T.nilable(Integer))
 
   # Literal ranges
 
@@ -51,6 +52,15 @@ def foo
 
   lr16 = untyped..untyped
   T.reveal_type(lr16) # error: Revealed type: `T::Range[T.untyped]`
+
+  lr17 = 1..nilable
+  T.reveal_type(lr17) # error: Revealed type: `T::Range[Integer]`
+
+  lr18 = nilable..1
+  T.reveal_type(lr18) # error: Revealed type: `T::Range[Integer]`
+
+  lr19 = nilable..nilable
+  T.reveal_type(lr19) # error: Revealed type: `T::Range[Integer]`
 
   lr_first = (1..42).first
   T.reveal_type(lr_first) # error: Revealed type: `Integer`
