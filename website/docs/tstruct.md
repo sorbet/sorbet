@@ -24,9 +24,9 @@ require 'sorbet-runtime'
 # (1) Create a new class that subclasses `T::Struct`
 class MyStruct < T::Struct
   # (2) Declare fields on the struct with the `prop` and `const` DSL
-  prop :x, Integer
-  const :y, T.nilable(String)
-  const :z, Float, default: 0.5
+  prop :foo, Integer
+  const :bar, T.nilable(String)
+  const :quz, Float, default: 0.5
 end
 ```
 
@@ -38,14 +38,14 @@ fields.
 
 ```ruby
 # (1) Initialize an instance of the struct
-my_struct = MyStruct.new(x: 3)
+my_struct = MyStruct.new(foo: 3)
 
 # (2) Use the generated field getters and setters
-my_struct.x # => 3
-my_struct.y # => nil
-my_struct.z # => 0.5
-my_struct.x = 4
-my_struct.x # => 4
+my_struct.foo # => 3
+my_struct.bar # => nil
+my_struct.quz # => 0.5
+my_struct.foo = 4
+my_struct.foo # => 4
 ```
 
 Note that:
@@ -64,7 +64,7 @@ A particularly common case is to convert an struct to a Hash. Because this is so
 common, this conversion has been built in (it still must be explicitly called):
 
 ```ruby
-my_struct.serialize # => { "x": 4, "z": 0.5 }
+my_struct.serialize # => { "foo": 4, "quz": 0.5 }
 ```
 
-Note that `y` is skipped because it is nil.
+Note that `bar` is skipped because it is `nil`.
