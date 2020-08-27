@@ -4,7 +4,9 @@
 
 i = 0
 x = T.let(true, T::Boolean)
-while i < 100_000
+while i < 1_000_000
   x = !x
   i += 1
 end
+puts i
+puts x
