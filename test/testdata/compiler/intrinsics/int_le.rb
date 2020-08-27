@@ -14,4 +14,8 @@ puts(test(10, 10.0))
 puts(test(10, 0.0))
 puts(test(10, 100**100))
 
-test(10, "foo")
+begin
+  test(10, "foo")
+rescue ArgumentError => exn
+  puts exn.message
+end
