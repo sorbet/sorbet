@@ -68,48 +68,52 @@
 <p>While Sorbet supports using Hashes and Structs, it isn’t always possible to
 model them statically.</p>
 <p>The <code>sorbet-runtime</code> gem ships with an alternative to using Ruby’s <code>Hash</code> or
-<code>Struct</code> classes that is more well supported: <code>T::Struct</code>. It works like this:</p>
+<code>Struct</code> classes that is more well supported: <code>T::Struct</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-a-new-struct-class"></a><a href="#creating-a-new-struct-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating a new struct class</h2>
+<p>To use <code>T::Struct</code>, first create a new class that directly inherits from it.
+Then, in the body of the class, declare the fields on the struct.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
+<span class="hljs-comment"># (1) Create a new class that subclasses `T::Struct`</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyStruct</span> &lt; T::Struct</span>
-  prop <span class="hljs-symbol">:x</span>, Integer
-  const <span class="hljs-symbol">:y</span>, T.nilable(String)
-  const <span class="hljs-symbol">:z</span>, Float, <span class="hljs-symbol">default:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>
+  <span class="hljs-comment"># (2) Declare fields on the struct with the `prop` and `const` DSL</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+  const <span class="hljs-symbol">:bar</span>, T.nilable(String)
+  const <span class="hljs-symbol">:quz</span>, Float, <span class="hljs-symbol">default:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>This is basically the same as having written code like this:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyStruct</span> &lt; T::Struct</span>
-  sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String, <span class="hljs-symbol">z:</span> Float).void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">x:</span>, <span class="hljs-symbol">y:</span> <span class="hljs-literal">nil</span>, <span class="hljs-symbol">z:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>)</span></span>; ...; <span class="hljs-keyword">end</span>
+<h2><a class="anchor" aria-hidden="true" id="creating-and-using-an-instance-of-a-struct"></a><a href="#creating-and-using-an-instance-of-a-struct" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating and using an instance of a struct</h2>
+<p>After defining a struct class, create instances of the class with <code>new</code> as
+usual. Then use the generated getters and setters to access the instance’s
+fields.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Initialize an instance of the struct</span>
+my_struct = MyStruct.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">3</span>)
 
-  sig {returns(Integer)}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x</span>;</span> ...; <span class="hljs-keyword">end</span>
-
-  sig {params(<span class="hljs-symbol">arg0:</span> Integer).returns(Integer)}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">x=</span><span class="hljs-params">(arg<span class="hljs-number">0</span>)</span></span>; ...; <span class="hljs-keyword">end</span>
-
-  sig {returns(T.nilable(String))}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">y</span>;</span> ...; <span class="hljs-keyword">end</span>
-
-  sig {returns(Float)}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">z</span>;</span> ...; <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># (2) Use the generated field getters and setters</span>
+my_struct.foo <span class="hljs-comment"># =&gt; 3</span>
+my_struct.bar <span class="hljs-comment"># =&gt; nil</span>
+my_struct.quz <span class="hljs-comment"># =&gt; 0.5</span>
+my_struct.foo = <span class="hljs-number">4</span>
+my_struct.foo <span class="hljs-comment"># =&gt; 4</span>
 </code></pre>
-<p>It can be used like this:</p>
-<pre><code class="hljs css language-ruby">my_struct = MyStruct.new(<span class="hljs-symbol">x:</span> <span class="hljs-number">3</span>)
-my_struct.x <span class="hljs-comment"># =&gt; 3</span>
-my_struct.y <span class="hljs-comment"># =&gt; nil</span>
-my_struct.z <span class="hljs-comment"># =&gt; 0.5</span>
-my_struct.x = <span class="hljs-number">4</span>
-my_struct.x <span class="hljs-comment"># =&gt; 4</span>
-</code></pre>
+<p>Note that:</p>
+<ul>
+<li><code>new</code> takes in a keyword argument corresponding to each field.</li>
+<li>Props declared with <code>default</code> are initialized to their default values if an
+initializer is not provided.</li>
+<li>Props whose type is <code>T.nilable(...)</code> are initialized to <code>nil</code> if an
+initializer is not provided.</li>
+<li>Props declared as <code>const</code> may not be mutated, so they only have getters and
+don’t have setters.</li>
+</ul>
 <h2><a class="anchor" aria-hidden="true" id="converting-structs-to-other-types"></a><a href="#converting-structs-to-other-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting structs to other types</h2>
 <p>A particularly common case is to convert an struct to a Hash. Because this is so
 common, this conversion has been built in (it still must be explicitly called):</p>
-<pre><code class="hljs css language-ruby">my_struct.serialize <span class="hljs-comment"># =&gt; { "x": 3 }</span>
+<pre><code class="hljs css language-ruby">my_struct.serialize <span class="hljs-comment"># =&gt; { "foo": 4, "quz": 0.5 }</span>
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness Checking</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#converting-structs-to-other-types">Converting structs to other types</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<p>Note that <code>bar</code> is skipped because it is <code>nil</code>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness Checking</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-a-new-struct-class">Creating a new struct class</a></li><li><a href="#creating-and-using-an-instance-of-a-struct">Creating and using an instance of a struct</a></li><li><a href="#converting-structs-to-other-types">Converting structs to other types</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2019 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
