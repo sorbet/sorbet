@@ -23,7 +23,7 @@ def foo
   T.reveal_type(lr6) # error: Revealed type: `T::Range[Integer]`
 
   lr7 = (1.."a")
-  T.reveal_type(lr7) # error: Revealed type: `T::Range[T.untyped]`
+  T.reveal_type(lr7) # error: Revealed type: `T::Range[T.any(Integer, String)]`
 
   lr8 = nil..42
   T.reveal_type(lr8) # error: Revealed type: `T::Range[Integer]`

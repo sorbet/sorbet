@@ -1382,7 +1382,7 @@ public:
                 rangeElemType = Types::dropNil(gs, other);
             }
         } else if (other->isUntyped() || (!secondArgIsNil && !Types::equiv(gs, other, rangeElemType))) {
-            rangeElemType = Types::untypedUntracked();
+            rangeElemType = Types::any(gs, rangeElemType, other);
         }
         res.returnType = Types::rangeOf(gs, rangeElemType);
     }
