@@ -265,7 +265,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         auto rawId = Payload::idIntern(cs, builder, str);
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
                                   {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
-                                   args, mcctx.blk, irctx.escapedClosure[rubyBlockId]},
+                                   args, mcctx.blk, irctx.localsOffset[rubyBlockId]},
                                   "rawSendResult");
 
     } else if (send->fun == core::Names::super()) {

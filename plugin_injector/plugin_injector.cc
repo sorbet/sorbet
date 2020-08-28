@@ -72,6 +72,12 @@ public:
     unique_ptr<llvm::DIBuilder> debugInfo;
     llvm::DICompileUnit *compileUnit = nullptr;
 
+    // The basic-block that holds the initialization of string constants.
+    llvm::BasicBlock *allocRubyIdsEntry;
+
+    // The basic-block that holds the initialization of static-init constants.
+    llvm::BasicBlock *initializeStaticInitNamesEntry;
+
     // The function that holds calls to global constructors
     //
     // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
@@ -184,18 +190,26 @@ public:
 
             threadState->file = loc.file();
 
-            auto linkageType = llvm::Function::InternalLinkage;
-            auto argTys = std::vector<llvm::Type *>{llvm::Type::getInt64Ty(lctx)};
-            auto varArgs = false;
-            auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), argTys, varArgs);
-            auto globalConstructors = llvm::Function::Create(ft, linkageType, "sorbet_globalConstructors", *module);
-            threadState->globalConstructorsEntry = llvm::BasicBlock::Create(lctx, "entry", globalConstructors);
+            {
+                auto linkageType = llvm::Function::InternalLinkage;
+                auto argTys = std::vector<llvm::Type *>{llvm::Type::getInt64Ty(lctx)};
+                auto varArgs = false;
+                auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(lctx), argTys, varArgs);
+                auto globalConstructors = llvm::Function::Create(ft, linkageType, "sorbet_globalConstructors", *module);
+                threadState->allocRubyIdsEntry = llvm::BasicBlock::Create(lctx, "allocRubyIds", globalConstructors);
+                threadState->initializeStaticInitNamesEntry =
+                    llvm::BasicBlock::Create(lctx, "initializeStaticInitNames", globalConstructors);
+                threadState->globalConstructorsEntry =
+                    llvm::BasicBlock::Create(lctx, "globalConstructors", globalConstructors);
+            }
+
         } else {
             ENFORCE(threadState->file == loc.file());
             ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
+                                      threadState->allocRubyIdsEntry, threadState->initializeStaticInitNamesEntry,
                                       threadState->globalConstructorsEntry);
         try {
             compiler::IREmitter::run(state, cfg, md);
@@ -218,9 +232,18 @@ public:
         auto threadState = getTypecheckThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
 
-        llvm::IRBuilder<> builder(lctx);
-        builder.SetInsertPoint(threadState->globalConstructorsEntry);
-        builder.CreateRetVoid();
+        {
+            llvm::IRBuilder<> builder(lctx);
+
+            builder.SetInsertPoint(threadState->allocRubyIdsEntry);
+            builder.CreateBr(threadState->initializeStaticInitNamesEntry);
+
+            builder.SetInsertPoint(threadState->initializeStaticInitNamesEntry);
+            builder.CreateBr(threadState->globalConstructorsEntry);
+
+            builder.SetInsertPoint(threadState->globalConstructorsEntry);
+            builder.CreateRetVoid();
+        }
 
         unique_ptr<llvm::Module> module = move(threadState->combinedModule);
         unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
@@ -246,7 +269,7 @@ public:
 
         debug->finalize();
 
-        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr);
+        compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr, nullptr);
         if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
             if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
                 cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");

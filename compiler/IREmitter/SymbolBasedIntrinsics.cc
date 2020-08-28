@@ -81,7 +81,7 @@ public:
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {recv, fun, argc, argv, blkPtr, mcctx.irctx.escapedClosure[rubyBlockId]},
+                                  {recv, fun, argc, argv, blkPtr, mcctx.irctx.localsOffset[rubyBlockId]},
                                   "rawSendResult");
     };
 

@@ -96,20 +96,8 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
     }
 
     {
-        // nill out closure variables
-
-        builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
-        auto escapedVariablesCount = irctx.escapedVariableIndices.size();
-        for (auto i = 0; i < escapedVariablesCount; i++) {
-            auto store = builder.CreateCall(cs.module->getFunction("sorbet_getClosureElem"),
-                                            {irctx.escapedClosure[0], llvm::ConstantInt::get(cs, llvm::APInt(32, i))},
-                                            "nillingOutClosureVars");
-            builder.CreateStore(Payload::rubyNil(cs, builder), store);
-        }
-    }
-
-    {
         // reserve the magical return value
+        builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
         auto name = Names::returnValue(cs);
         auto var = cfg.enterLocal(core::LocalVariable{name, 1});
         auto nameStr = name.data(cs)->toString(cs);
@@ -290,7 +278,7 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
                                            llvm::Twine{func->getName()} + "$block_" + llvm::Twine(i), *cs.module);
                 // setup argument names
                 fp->arg_begin()->setName("firstYieldArgRaw");
-                (fp->arg_begin() + 1)->setName("captures");
+                (fp->arg_begin() + 1)->setName("localsOffset");
                 (fp->arg_begin() + 2)->setName("argc");
                 (fp->arg_begin() + 3)->setName("argArray");
                 (fp->arg_begin() + 4)->setName("blockArg");
@@ -311,7 +299,7 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
                 // argument names
                 fp->arg_begin()->setName("pc");
                 (fp->arg_begin() + 1)->setName("iseq_encoded");
-                (fp->arg_begin() + 2)->setName("captures");
+                (fp->arg_begin() + 2)->setName("localsOffset");
 
                 funcs[i] = fp;
                 break;
@@ -430,6 +418,44 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
+// Returns the number of scopes that must be traversed to get back out out to the top-level method frame.
+int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, int rubyBlockId) {
+    auto level = 0;
+
+    while (true) {
+        switch (blockTypes[rubyBlockId]) {
+            case FunctionType::Method:
+            case FunctionType::StaticInit:
+                return level;
+
+            case FunctionType::Block:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
+                // Increment the level, as we're crossing through a non-method stack frame to get back to our parent.
+                ++level;
+                rubyBlockId = blockParents[rubyBlockId];
+                break;
+
+            case FunctionType::ExceptionBegin:
+            case FunctionType::Unused:
+                // ExceptionBegin is considered to be part of the containing frame, so there's no block present here,
+                // and unused functions will never be called, so it's fine for them to have garbage values here.
+                rubyBlockId = blockParents[rubyBlockId];
+                break;
+        }
+    }
+}
+
+vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
+    vector<int> levels(blockTypes.size(), 0);
+
+    for (auto i=0; i < blockTypes.size(); ++i) {
+        levels[i] = getBlockLevel(blockParents, blockTypes, i);
+    }
+
+    return levels;
+}
+
 IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg,
                                                                     const ast::MethodDef &md,
                                                                     llvm::Function *mainFunc) {
@@ -455,6 +481,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::DISubprogram *> blockScopes(cfg.maxRubyBlockId + 1, nullptr);
     getRubyBlocks2FunctionsMapping(cs, cfg, mainFunc, blockTypes, rubyBlock2Function, blockScopes);
 
+    auto blockLevels = getBlockLevels(blockParents, blockTypes);
+
     auto aliases = setupAliases(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg, aliases);
@@ -464,7 +492,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
     vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
-    vector<llvm::Value *> escapedClosure;
+
+    bool useLocalsOffset = IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol);
+    vector<llvm::Value *> localsOffset;
 
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
@@ -476,32 +506,30 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         builder.SetInsertPoint(inits);
         auto sendArgArray = builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount),
                                                  nullptr, "callArgs");
-        llvm::Value *localClosure = nullptr;
+        llvm::Value *offsetValue = nullptr;
         switch (blockTypes[i]) {
             case FunctionType::Method:
             case FunctionType::StaticInit:
-                if (!escapedVariableIndices.empty())
-                    localClosure = builder.CreateCall(
-                        cs.module->getFunction("sorbet_allocClosureAsValue"),
-                        {llvm::ConstantInt::get(cs, llvm::APInt(32, escapedVariableIndices.size()))}, "captures");
-                else {
-                    localClosure = Payload::rubyNil(cs, builder);
+                if (useLocalsOffset) {
+                    offsetValue = builder.CreateLoad(IREmitterHelpers::getStaticInitLocalsOffset(cs, md.symbol));
+                } else {
+                    offsetValue = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false));
                 }
                 break;
 
             case FunctionType::Block:
-                localClosure = fun->arg_begin() + 1;
+                offsetValue = fun->arg_begin() + 1;
                 break;
 
             case FunctionType::ExceptionBegin:
             case FunctionType::Rescue:
             case FunctionType::Ensure:
             case FunctionType::Unused:
-                localClosure = fun->arg_begin() + 2;
+                offsetValue = fun->arg_begin() + 2;
                 break;
         }
-        ENFORCE(localClosure != nullptr);
-        escapedClosure.emplace_back(localClosure);
+        ENFORCE(offsetValue != nullptr);
+        localsOffset.emplace_back(offsetValue);
         sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
@@ -633,7 +661,8 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(basicBlockJumpOverrides),
         move(basicBlockRubyBlockId),
         move(sendArgArrayByBlock),
-        escapedClosure,
+        useLocalsOffset,
+        localsOffset,
         std::move(escapedVariableIndices),
         std::move(argPresentVariables),
         {},
@@ -643,6 +672,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(rubyBlock2Function),
         move(blockTypes),
         move(blockParents),
+        move(blockLevels),
         move(lineNumberPtrsByFunction),
         move(iseqEncodedPtrsByFunction),
         usesBlockArgs,
@@ -712,6 +742,16 @@ core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, cor
     } else {
         return core::Loc(declLoc.file(), offsets);
     }
+}
+
+llvm::GlobalVariable *IREmitterHelpers::getStaticInitLocalsOffset(CompilerState &cs, core::SymbolRef sym) {
+    string rawName = "offset_";
+    rawName += sym.show(cs);
+    return static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, llvm::Type::getInt64Ty(cs), [&] {
+        return new llvm::GlobalVariable(*cs.module, llvm::Type::getInt64Ty(cs), false,
+                                        llvm::GlobalVariable::InternalLinkage,
+                                        llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false)), rawName);
+    }));
 }
 
 namespace {

@@ -825,7 +825,7 @@ int sorbet_rubyIseqTypeEnsure() {
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
 void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
-                                    int iseqType, int startline, int endline) {
+                                    int iseqType, int startline, int endline, ID *locals, int numLocals) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -876,6 +876,19 @@ void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VAL
         iseq->body->local_table = ids;
     }
 
+    if (iseqType == ISEQ_TYPE_METHOD && numLocals > 0) {
+        // this is a simplified version of `iseq_set_local_table` from
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1767-L1789
+
+        // allocate space for the names of the locals
+        ID *ids = (ID *)ALLOC_N(ID, numLocals);
+
+        memcpy(ids, locals, numLocals * sizeof(ID));
+
+        iseq->body->local_table = ids;
+        iseq->body->local_table_size = numLocals;
+    }
+
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
     return (void *)iseq;
 }
@@ -890,6 +903,102 @@ const VALUE sorbet_readRealpath() {
     return realpath;
 }
 
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
+#define GET_PREV_EP(ep) ((VALUE *)((ep)[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03))
+
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L2919-L2928
+static const VALUE *vm_get_ep(const VALUE *const reg_ep, rb_num_t lv) {
+    rb_num_t i;
+    const VALUE *ep = reg_ep;
+    for (i = 0; i < lv; i++) {
+        ep = GET_PREV_EP(ep);
+    }
+    return ep;
+}
+
+SORBET_INLINE
+static int computeLocalIndex(long baseOffset, long index) {
+    // Local offset calculation needs to take into account the fixed values that
+    // are present on the stack:
+    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1509
+    return baseOffset + index + VM_ENV_DATA_SIZE;
+}
+
+// Read a value from the locals from this stack frame.
+//
+// * localsOffset - Offset into the locals (for static-init)
+// * index - local var index
+// * level - the number of blocks that need to be crossed to reach the
+//           outer-most stack frame.
+SORBET_INLINE
+VALUE sorbet_readLocal(long localsOffset, long index, long level) {
+    int offset = computeLocalIndex(localsOffset, index);
+    return *(vm_get_ep(GET_EC()->cfp->ep, level) - offset);
+}
+
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L349-L359
+SORBET_ATTRIBUTE(noinline)
+static void vm_env_write_slowpath(const VALUE *ep, int index, VALUE v) {
+    /* remember env value forcely */
+    rb_gc_writebarrier_remember(VM_ENV_ENVVAL(ep));
+    VM_FORCE_WRITE(&ep[index], v);
+    VM_ENV_FLAGS_UNSET(ep, VM_ENV_FLAG_WB_REQUIRED);
+}
+
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L361-L371
+SORBET_INLINE
+static inline void vm_env_write(const VALUE *ep, int index, VALUE v) {
+    VALUE flags = ep[VM_ENV_DATA_INDEX_FLAGS];
+    if (LIKELY((flags & VM_ENV_FLAG_WB_REQUIRED) == 0)) {
+        VM_STACK_ENV_WRITE(ep, index, v);
+    } else {
+        vm_env_write_slowpath(ep, index, v);
+    }
+}
+
+// Write a value into the locals from this stack frame.
+//
+// * localsOffset - Offset into the locals (for static-init)
+// * index - local var index
+// * level - the number of blocks that need to be crossed to reach the
+//           outer-most stack frame.
+// * value - the value to write
+SORBET_INLINE
+void sorbet_writeLocal(long localsOffset, long index, long level, VALUE value) {
+    int offset = computeLocalIndex(localsOffset, index);
+    vm_env_write(vm_get_ep(GET_EC()->cfp->ep, level), -offset, value);
+}
+
+// This is an inlined version of c_stack_overflow(GET_EC(), TRUE).
+//
+// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L34-L48
+SORBET_ATTRIBUTE(__noreturn__, always_inline)
+static void sorbet_stackoverflow() {
+    // visible, but not exported through a header
+    extern VALUE rb_ec_backtrace_object(const rb_execution_context_t *);
+
+    rb_execution_context_t *ec = GET_EC();
+
+    VALUE mesg = rb_ec_vm_ptr(ec)->special_exceptions[ruby_error_sysstack];
+    // The original line here is:
+    // > ec->raised_flag = RAISED_STACKOVERFLOW;
+    // but RAISED_STACKOVERFLOW (value 2) is defined in eval_intern.h which
+    // causes compile errors when we include it.
+    ec->raised_flag = 2;
+
+    VALUE at = rb_ec_backtrace_object(ec);
+    mesg = ruby_vm_special_exception_copy(mesg);
+    rb_ivar_set(mesg, idBt, at);
+    rb_ivar_set(mesg, idBt_locations, at);
+
+    ec->errinfo = mesg;
+
+    // This is an inlined version of EC_JUMP_TAG(ec, TAG_RAISE). EC_JUMP_TAG is
+    // defined in eval_intern.h, which causes compile errors when we include it.
+    ec->tag->state = TAG_RAISE;
+    RUBY_LONGJMP(ec->tag->buf, 1);
+}
+
 /* Defined in vm_insnhelper.c, but not exported via any header */
 extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const rb_iseq_t *iseq, VALUE type, VALUE self,
                                             VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp, int local_size,
@@ -898,31 +1007,63 @@ extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const r
 const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
                                                    unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
-    rb_control_frame_t *cfp = GET_EC()->cfp;
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
 
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
     if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
         // Self is the same in exception-handlers
-        rb_execution_context_t *ec = GET_EC();
-        VALUE self = ec->cfp->self;
+        VALUE self = cfp->self;
 
         // there is only ever one local for rescue/ensure frames, this mirrors the implementation in
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2085-L2101
-        VALUE *sp = ec->cfp->sp + 1;
+        VALUE *sp = cfp->sp + 1;
         int num_locals = iseq->body->local_table_size - 1;
 
         VALUE blockHandler = VM_GUARDED_PREV_EP(cfp->ep);
         VALUE me = 0;
 
+        // write the exception value on the stack (as an argument to the rescue frame)
+        cfp->sp[0] = rb_errinfo();
+
+        // NOTE: there's no explicit check for stack overflow, because `rb_vm_push_frame` will do that check
         cfp = rb_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
                                num_locals, iseq->body->stack_max);
-
-        // We need to make sure to preserve the value of $! on the frame stack.
-        VALUE currentException = rb_errinfo();
-        VM_STACK_ENV_WRITE(GET_EC()->cfp->ep, VM_ENV_INDEX_LAST_LVAR, currentException);
     } else if (!isClassOrModuleStaticInit) {
         cfp->iseq = iseq;
         VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+
+        // For methods, allocate their locals on the ruby stack. This mirrors the implementation in vm_push_frame:
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L214-L248
+        if (iseq_type == ISEQ_TYPE_METHOD) {
+            // make sure that we have enough space to allocate locals
+            int local_size = iseq->body->local_table_size;
+            int stack_max = iseq->body->stack_max;
+
+            WHEN_VM_STACK_OVERFLOWED(cfp, cfp->sp, local_size + stack_max) sorbet_stackoverflow();
+
+            // save the current state of the stack
+            VALUE cref_or_me = cfp->ep[VM_ENV_DATA_INDEX_ME_CREF]; // -2
+            VALUE prev_ep = cfp->ep[VM_ENV_DATA_INDEX_SPECVAL];    // -1
+            VALUE type = cfp->ep[VM_ENV_DATA_INDEX_FLAGS];         // -0
+
+            // C frames push no locals, so the address we want to treat as the top of the stack lies at -2.
+            // NOTE: we're explicitly discarding the const qualifier from ep, because we need to write to the stack.
+            VALUE *sp = (VALUE *)&cfp->ep[-2];
+
+            // setup locals
+            for (int i = 0; i < local_size; ++i) {
+                *sp++ = RUBY_Qnil;
+            }
+
+            // restore the previous state of the stack
+            *sp++ = cref_or_me;
+            *sp++ = prev_ep;
+            *sp = type;
+
+            cfp->ep = cfp->bp = sp;
+            cfp->sp = sp + 1;
+        }
     }
 
     return cfp;

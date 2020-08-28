@@ -18,9 +18,11 @@ namespace sorbet::compiler {
 
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
                              llvm::DIBuilder *debug, llvm::DICompileUnit *compileUnit, core::FileRef file,
+                             llvm::BasicBlock *allocRubyIdsEntry, llvm::BasicBlock *initializeStaticInitNamesEntry,
                              llvm::BasicBlock *globalConstructorsEntry)
-    : gs(gs), lctx(lctx), module(module), globalConstructorsEntry(globalConstructorsEntry), debug(debug),
-      compileUnit(compileUnit), functionEntryInitializers(nullptr), file(file) {}
+    : gs(gs), lctx(lctx), module(module), allocRubyIdsEntry(allocRubyIdsEntry),
+      initializeStaticInitNamesEntry(initializeStaticInitNamesEntry), globalConstructorsEntry(globalConstructorsEntry),
+      debug(debug), compileUnit(compileUnit), functionEntryInitializers(nullptr), file(file) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);

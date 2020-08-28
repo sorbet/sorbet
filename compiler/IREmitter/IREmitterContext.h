@@ -117,8 +117,19 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId;
     std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
 
-    // TODO(jez) document escapedClosure
-    std::vector<llvm::Value *> escapedClosure;
+    // The localsOffset values are only needed in Payload::varGet/Payload::varSet when we know that we're compiling a
+    // static-init function. This boolean indicates whether or not that value needs to be used when computing the index
+    // into the locals.
+    bool useLocalsOffset;
+
+    // When static-init methods for classes or modules are run, they don't push a ruby-level function frame. As a
+    // result, they store their locals in a region of the locals for the file-level static init. This vector keeps the
+    // offsets for individual static-init methods, so that they can be used to index into the correct region of the
+    // top-level static-init method.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: an offset into the locals of the top-level static-init, or 0 if this is not a static-init method
+    std::vector<llvm::Value *> localsOffset;
 
     // TODO(jez) document escapedVariableIndices
     UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
@@ -166,6 +177,13 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId
     // val: cfg::BasicBlock::rubyBlockId
     std::vector<int> rubyBlockParent;
+
+    // The level of a ruby block corresponds to the nesting depth of non-method stack frames when it's called. So for a
+    // block at the top-level of the method, the value would be 1.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: the number of scopes traversed to get back to the top-level method frame at runtime
+    std::vector<int> rubyBlockLevel;
 
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;

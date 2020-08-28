@@ -238,7 +238,7 @@ public:
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {recv, fun, argc, argv, blkPtr, irctx.escapedClosure[rubyBlockId]}, "rawSendResult");
+                                  {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]}, "rawSendResult");
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {cs.gs.lookupNameUTF8(rubyMethod)};
