@@ -436,8 +436,8 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
 }
 
 std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                   const IREmitterContext &irctx,
-                                                   const ast::MethodDef &md, int rubyBlockId) {
+                                                   const IREmitterContext &irctx, const ast::MethodDef &md,
+                                                   int rubyBlockId) {
     string_view funcName;
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
@@ -499,8 +499,8 @@ bool allocatesLocals(CompilerState &cs, const IREmitterContext &irctx, core::Sym
 }
 
 // Fill the locals array with interned ruby IDs.
-void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                int rubyBlockId, int baseOffset, llvm::Value *locals) {
+void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx, int rubyBlockId,
+                int baseOffset, llvm::Value *locals) {
     auto &builder = builderCast(build);
 
     // The map used to store escaped variables isn't stable, so we first sort it into a vector. This isn't great, but
@@ -565,8 +565,8 @@ tuple<llvm::GlobalVariable *, llvm::GlobalVariable *, int> getStaticInitLocals(C
 // that this addresses:
 //
 // (1) Normal methods:
-//     Allocate an array on the C stack (of the method we're emitting) that is large enough to contain all of the escaped locals, and place their ids
-//     inside of it
+//     Allocate an array on the C stack (of the method we're emitting) that is large enough to contain all of the
+//     escaped locals, and place their ids inside of it
 //
 // (2) static-init methods:
 //     Re-focus on the file-level static-init method, extending its array of locals to include the ones required for
@@ -575,8 +575,8 @@ tuple<llvm::GlobalVariable *, llvm::GlobalVariable *, int> getStaticInitLocals(C
 // (3) Blocks and exception-related functions:
 //     All locals are inherited from the containing method, so none need to be allocated in the iseq
 tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilderBase &build,
-                                              const IREmitterContext &irctx,
-                                              const ast::MethodDef &md, int rubyBlockId) {
+                                              const IREmitterContext &irctx, const ast::MethodDef &md,
+                                              int rubyBlockId) {
     auto &builder = builderCast(build);
     llvm::Value *locals = nullptr;
     llvm::Value *numLocals = nullptr;
@@ -626,7 +626,8 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
 
             // Finally, we only set the locals pointer to a non-null value if this is the top-level static-init, as
             // that is the function that will be responsible for allocating the frame used by all static-init methods.
-            // (The top-level static-init method has a name like `<static-init>$123>` not just `<static-init>`, which is why this check works)
+            // (The top-level static-init method has a name like `<static-init>$123>` not just `<static-init>`, which is
+            // why this check works)
             if (md.symbol.data(cs)->name == core::Names::staticInit()) {
                 numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
                 locals = llvm::ConstantPointerNull::get(idPtrType);
@@ -644,8 +645,8 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
     return {locals, numLocals};
 }
 
-llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterContext &irctx,
-                                            const ast::MethodDef &md, int rubyBlockId, llvm::GlobalVariable *store) {
+llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
+                                            int rubyBlockId, llvm::GlobalVariable *store) {
     std::vector<llvm::Type *> argTys{llvm::Type::getInt64Ty(cs)};
     auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), argTys, false);
     auto constr =

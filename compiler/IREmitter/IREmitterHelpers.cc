@@ -449,7 +449,7 @@ int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, i
 vector<int> getBlockLevels(vector<int> &blockParents, vector<FunctionType> &blockTypes) {
     vector<int> levels(blockTypes.size(), 0);
 
-    for (auto i=0; i < blockTypes.size(); ++i) {
+    for (auto i = 0; i < blockTypes.size(); ++i) {
         levels[i] = getBlockLevel(blockParents, blockTypes, i);
     }
 
