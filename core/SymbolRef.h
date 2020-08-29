@@ -515,33 +515,33 @@ public:
     }
 
     static SymbolRef PackageRegistry() {
-        return SymbolRef(nullptr, 99);
+        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 85);
     }
 
     static SymbolRef PackageSpec() {
-        return SymbolRef(nullptr, 100);
+        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 86);
     }
 
     static SymbolRef PackageSpecSingleton() {
-        return SymbolRef(nullptr, 101);
+        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 87);
     }
 
     // 102 is the attached class of PackageSpecSingleton
 
     static SymbolRef PackageSpec_import() {
-        return SymbolRef(nullptr, 103);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
     }
 
     static SymbolRef PackageSpec_export() {
-        return SymbolRef(nullptr, 104);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 6);
     }
 
     static SymbolRef PackageSpec_export_methods() {
-        return SymbolRef(nullptr, 105);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 7);
     }
 
     static SymbolRef Encoding() {
-        return SymbolRef(nullptr, 106);
+        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 88);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -567,10 +567,10 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 400;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 24;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 29;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 2;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 2;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 95;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
