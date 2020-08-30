@@ -486,13 +486,9 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 80);
     }
 
-    // 85 is the attached class of VOIDSingleton
-
     static SymbolRef T_Sig_WithoutRuntimeSingleton() {
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 81);
     }
-
-    // 87 is the attached class of T_Sig_WithoutRuntimeSingleton
 
     static SymbolRef sigWithoutRuntime() {
         return SymbolRef(nullptr, SymbolRef::Kind::Method, 3);
@@ -525,8 +521,6 @@ public:
     static SymbolRef PackageSpecSingleton() {
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 87);
     }
-
-    // 102 is the attached class of PackageSpecSingleton
 
     static SymbolRef PackageSpec_import() {
         return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
