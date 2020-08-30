@@ -180,7 +180,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
-    for (int i = 1; i < gs.methodsUsed(); ++i) {
+    for (int i = 0; i < gs.methodsUsed(); ++i) {
         auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::Method, i);
         ENFORCE(ref.data(gs)->isMethod());
         auto loc = ref.data(gs)->loc();
