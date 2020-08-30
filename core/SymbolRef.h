@@ -45,7 +45,7 @@ class SymbolRef final {
     }
 
 public:
-    // TODO: Enforce that this is only 3 bits?
+    // If you add Symbol Kinds, make sure KIND_BITS is kept in sync!
     enum class Kind : u1 {
         ClassOrModule = 0,
         Method = 1,
@@ -67,27 +67,27 @@ public:
     }
 
     u4 classOrModuleIndex() const {
-        ENFORCE(kind() == Kind::ClassOrModule);
+        ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return unsafeTableIndex();
     }
 
     u4 methodIndex() const {
-        ENFORCE(kind() == Kind::Method);
+        ENFORCE_NO_TIMER(kind() == Kind::Method);
         return unsafeTableIndex();
     }
 
     u4 fieldIndex() const {
-        ENFORCE(kind() == Kind::Field);
+        ENFORCE_NO_TIMER(kind() == Kind::Field);
         return unsafeTableIndex();
     }
 
     u4 typeArgumentIndex() const {
-        ENFORCE(kind() == Kind::TypeArgument);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
         return unsafeTableIndex();
     }
 
     u4 typeMemberIndex() const {
-        ENFORCE(kind() == Kind::TypeMember);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeMember);
         return unsafeTableIndex();
     }
 
@@ -106,6 +106,7 @@ public:
     }
 
     bool inline exists() const {
+        // 'false' if Kind is ClassOrModule and index is 0, which is SymbolRef::noSymbol.
         return _id;
     }
 
