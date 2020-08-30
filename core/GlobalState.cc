@@ -56,23 +56,15 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
     : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
       lspQuery(lsp::Query::noQuery()), epochManager(move(epochManager)) {
-    // Empirically determined to be the smallest powers of two larger than the
-    // values required by the payload
-    unsigned int maxNameCount = 32768;
-    unsigned int maxClassAndModuleCount = 8192;
-    unsigned int maxMethodCount = 32768;
-    unsigned int maxFieldCount = 4096;
-    unsigned int maxTypeArgumentCount = 256;
-    unsigned int maxTypeMemberCount = 4096;
+    // Reserve memory in internal vectors for the contents of payload.
+    names.reserve(PAYLOAD_MAX_NAME_COUNT);
+    classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
+    methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
+    fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
+    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    names.reserve(maxNameCount);
-    classAndModules.reserve(maxClassAndModuleCount);
-    methods.reserve(maxMethodCount);
-    fields.reserve(maxFieldCount);
-    typeArguments.reserve(maxTypeArgumentCount);
-    typeMembers.reserve(maxTypeMemberCount);
-
-    int namesByHashSize = 2 * maxNameCount;
+    int namesByHashSize = 2 * PAYLOAD_MAX_NAME_COUNT;
     namesByHash.resize(namesByHashSize);
     ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
 }

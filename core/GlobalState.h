@@ -51,6 +51,15 @@ public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
 
+    // Empirically determined to be the smallest powers of two larger than the
+    // values required by the payload. Enforced in payload.cc.
+    static constexpr unsigned int PAYLOAD_MAX_NAME_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_CLASS_AND_MODULE_COUNT = 8192;
+    static constexpr unsigned int PAYLOAD_MAX_METHOD_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_FIELD_COUNT = 4096;
+    static constexpr unsigned int PAYLOAD_MAX_TYPE_ARGUMENT_COUNT = 256;
+    static constexpr unsigned int PAYLOAD_MAX_TYPE_MEMBER_COUNT = 4096;
+
     void initEmpty();
     void installIntrinsics();
 
