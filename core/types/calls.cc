@@ -1381,7 +1381,7 @@ public:
             } else {
                 rangeElemType = Types::dropNil(gs, other);
             }
-        } else if (other->isUntyped() || (!secondArgIsNil && !Types::equiv(gs, other, rangeElemType))) {
+        } else if (!secondArgIsNil) {
             rangeElemType = Types::any(gs, rangeElemType, Types::dropNil(gs, other));
         }
         res.returnType = Types::rangeOf(gs, rangeElemType);
