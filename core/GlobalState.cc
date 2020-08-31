@@ -1938,22 +1938,26 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     for (const auto *symbolType : {&this->classAndModules, &this->fields, &this->typeArguments, &this->typeMembers}) {
         counter = 0;
         for (const auto &sym : *symbolType) {
-            hierarchyHash = mix(hierarchyHash, sym.hash(*this));
-            counter++;
-            if (DEBUG_HASHING_TAIL && counter > symbolType->size() - 15) {
-                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+            if (!sym.ignoreInHashing(*this)) {
+                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+                counter++;
+                if (DEBUG_HASHING_TAIL && counter > symbolType->size() - 15) {
+                    errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+                }
             }
         }
     }
 
     counter = 0;
     for (const auto &sym : this->methods) {
-        auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
-        target = mix(target, sym.hash(*this));
-        hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
-        counter++;
-        if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
-            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+        if (!sym.ignoreInHashing(*this)) {
+            auto &target = methodHashes[NameHash(*this, sym.name.data(*this))];
+            target = mix(target, sym.hash(*this));
+            hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+            counter++;
+            if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
+                errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+            }
         }
     }
 
