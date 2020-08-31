@@ -598,6 +598,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 }
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
+    ctx.state.tracer().debug("Rewriting packaged file {}", file.file.data(ctx).path());
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     auto moduleWrapper =
         ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
