@@ -136,7 +136,7 @@ public:
     unsigned int typeArgumentsUsed() const;
     unsigned int typeMembersUsed() const;
     unsigned int filesUsed() const;
-    unsigned int allSymbolsUsed() const;
+    unsigned int symbolsUsedTotal() const;
 
     void sanityCheck() const;
     void markAsPayload();

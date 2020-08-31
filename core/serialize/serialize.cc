@@ -853,7 +853,7 @@ std::vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
-    ENFORCE(gs.files.empty() && gs.names.empty() && gs.allSymbolsUsed() == 0, "Can't load into a non-empty state");
+    ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbolsUsedTotal() == 0, "Can't load into a non-empty state");
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
     gs.installIntrinsics();

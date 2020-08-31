@@ -103,9 +103,9 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     fastPath = false;
     if (optionalCommonParent != nullptr) {
         if (from.namesUsed() == optionalCommonParent->namesUsed() &&
-            from.allSymbolsUsed() == optionalCommonParent->allSymbolsUsed()) {
+            from.symbolsUsedTotal() == optionalCommonParent->symbolsUsedTotal()) {
             ENFORCE(to.namesUsed() >= from.namesUsed());
-            ENFORCE(to.allSymbolsUsed() >= from.allSymbolsUsed());
+            ENFORCE(to.symbolsUsedTotal() >= from.symbolsUsedTotal());
             fastPath = true;
         }
     }

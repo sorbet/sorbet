@@ -1589,7 +1589,7 @@ unsigned int GlobalState::namesUsed() const {
     return names.size();
 }
 
-unsigned int GlobalState::allSymbolsUsed() const {
+unsigned int GlobalState::symbolsUsedTotal() const {
     return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeArgumentsUsed() + typeMembersUsed();
 }
 
