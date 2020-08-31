@@ -598,7 +598,11 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 }
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName) {
-    ctx.state.tracer().debug("Rewriting packaged file {}", file.file.data(ctx).path());
+    if (ast::isa_tree<ast::EmptyTree>(file.tree)) {
+        // Nothing to wrap. This occurs when a file is marked typed: Ignore.
+        return file;
+    }
+
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     auto moduleWrapper =
         ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
