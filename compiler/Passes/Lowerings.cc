@@ -36,7 +36,6 @@ const vector<pair<string, string>> knownSymbolMapping = {
     {"Method", "rb_cMethod"},
     {"Module", "rb_cModule"},
     {"Numeric", "rb_cNumeric"},
-    {"NillClass", "rb_cNillClass"},
     {"FalseClass", "rb_cFalseClass"},
     {"TrueClass", "rb_cTrueClass"},
     {"Float", "rb_cFloat"},
