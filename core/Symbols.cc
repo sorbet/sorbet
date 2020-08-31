@@ -1372,16 +1372,10 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
 SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
 
 SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs)
-    : gs(gs), classAndModulesAtCreation(gs.classAndModulesUsed()), methodsAtCreation(gs.methodsUsed()),
-      fieldsAtCreation(gs.fieldsUsed()), typeArgumentsAtCreation(gs.typeArgumentsUsed()),
-      typeMembersAtCreation(gs.typeMembersUsed()) {}
+    : gs(gs), symbolCountAtCreation(gs.symbolsUsedTotal()) {}
 
 void SymbolDataDebugCheck::check() const {
-    ENFORCE_NO_TIMER(classAndModulesAtCreation == gs.classAndModulesUsed());
-    ENFORCE_NO_TIMER(methodsAtCreation == gs.methodsUsed());
-    ENFORCE_NO_TIMER(fieldsAtCreation == gs.fieldsUsed());
-    ENFORCE_NO_TIMER(typeArgumentsAtCreation == gs.typeArgumentsUsed());
-    ENFORCE_NO_TIMER(typeMembersAtCreation == gs.typeMembersUsed());
+    ENFORCE_NO_TIMER(symbolCountAtCreation == gs.symbolsUsedTotal());
 }
 
 Symbol *SymbolData::operator->() {

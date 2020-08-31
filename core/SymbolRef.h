@@ -9,11 +9,7 @@ class Symbol;
 class GlobalState;
 struct SymbolDataDebugCheck {
     const GlobalState &gs;
-    const unsigned int classAndModulesAtCreation;
-    const unsigned int methodsAtCreation;
-    const unsigned int fieldsAtCreation;
-    const unsigned int typeArgumentsAtCreation;
-    const unsigned int typeMembersAtCreation;
+    const unsigned int symbolCountAtCreation;
 
     SymbolDataDebugCheck(const GlobalState &gs);
     void check() const;
