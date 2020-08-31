@@ -102,7 +102,7 @@ public:
     }
 
     bool inline exists() const {
-        // 'false' if Kind is ClassOrModule and index is 0, which is SymbolRef::noSymbol.
+        //  ClassOrModule and id are both 0, for SymbolRef::noSymbol.
         return _id != 0;
     }
 
