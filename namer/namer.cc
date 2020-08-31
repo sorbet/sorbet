@@ -52,7 +52,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().raw());
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
     }
 
     DefinitionKind kind() const {
@@ -200,7 +200,7 @@ public:
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        return FoundDefinitionRef(DefinitionKind::Symbol, symbol.raw());
+        return FoundDefinitionRef(DefinitionKind::Symbol, symbol.rawId());
     }
 
     void addModifier(Modifier &&mod) {

@@ -249,7 +249,7 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
                 return true;
             }
             if (getArity(gs, s1) == getArity(gs, s2)) {
-                return s1.raw() < s2.raw();
+                return s1.rawId() < s2.rawId();
             }
             return false;
         });

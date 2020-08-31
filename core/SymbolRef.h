@@ -58,7 +58,7 @@ public:
         return static_cast<Kind>(_id & KIND_MASK);
     }
 
-    u4 raw() const {
+    u4 rawId() const {
         return _id;
     }
 
@@ -565,7 +565,7 @@ public:
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
-    return H::combine(std::move(h), m.raw());
+    return H::combine(std::move(h), m.rawId());
 }
 
 } // namespace sorbet::core
