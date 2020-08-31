@@ -164,9 +164,9 @@ header. To see the C++ header, first build Sorbet, then look inside bazel at
 
 The header itself is generated using [parser/tools/generate_ast.cc].
 
-In general, the IR the parser generates is models Ruby very granularly. This
-fine granularity is frequently extra fine for the purpose of typechecking. We
-use the Desugar and Rewriter passes to simplify the IR before typechecking.
+In general, the IR the parser generates models Ruby very granularly. This fine
+granularity is frequently extra fine for the purpose of typechecking. We use the
+Desugar and Rewriter passes to simplify the IR before typechecking.
 
 
 ### Desugar
@@ -316,9 +316,8 @@ we had a bunch of `Symbol`s marked `<todo sym>` representing classes' ancestors.
 Another example: after Namer, we'd created `Symbol`s for methods, but none of
 these `Symbol`s carried knowledge of their arguments' types.
 
-There are many specialized jobs of Resolver, but we're just goign to call out
-two: resolve constants, resolve type members, and resolve sigs. We'll discuss
-each in turn.
+There are many specialized jobs of Resolver, but we're just going to call out
+two: resolve constants, and resolve sigs. We'll discuss each in turn.
 
 **Resolve constants**: After Namer, constants literals (like `A::B`) in our
 trees manifest as `UnresolvedConstantLit` nodes. An `ast::UnresolvedConstantLit`
@@ -332,6 +331,8 @@ constants). To fill in a sig, Sorbet parses information out of the `ast::Send`
 nodes corresponding to sig builder methods, uses this to create `core::Type`s,
 and stores those types on the `Symbol`s corresponding to the method and
 arguments of that method.
+
+<!-- TODO(trevor) Do we want to talk about resolve type members here? -->
 
 There are a handful of other things that the Resolver does (it computes and
 records a linearization of the ancestor hierarchy so `derivesFrom` checks are
