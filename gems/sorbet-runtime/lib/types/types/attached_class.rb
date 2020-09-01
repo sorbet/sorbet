@@ -12,7 +12,7 @@ module T::Types
 
     # @override Base
     def name
-      "AttachedClass"
+      "T.attached_class"
     end
 
     # @override Base
