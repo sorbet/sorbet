@@ -1090,7 +1090,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value);
                 ENFORCE(c->cast != core::Names::uncheckedLet());
-                if (c->cast != core::Names::cast()) {
+                if (c->cast == core::Names::let() || c->cast == core::Names::assertType()) {
                     if (c->cast == core::Names::assertType() && ty.type->isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
