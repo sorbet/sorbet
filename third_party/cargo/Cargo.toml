@@ -1,0 +1,38 @@
+# this file defines the superset of dependencies from the rubyfmt repo, it is
+# not an exact copy of the rubyfmt Cargo.toml. This is essentially so that
+# using cargo raze to pull all the deps in to third party does the right thing
+[package]
+name = "rubyfmt"
+version = "0.1.0"
+authors = ["Penelope Phippen <penelopedotzone@gmail.com>", "Siân Griffin <sean@seantheprogrammer.com>"]
+license = "MIT OR Apache-2.0"
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# librubyfmt's dependencies
+serde = { version = "1.0", features=["derive"] }
+serde_json = "1.0.40"
+bytecount = "0.6.0"
+backtrace = "0.3.45"
+jemallocator = { version = "0.3.0", features = ["disable_initial_exec_tls"] }
+libc = "0.2.68"
+log = { version = "0.4.8", features = ["max_level_debug", "release_max_level_warn"] }
+simplelog = "0.8"
+# ripper deserialize's dependencies
+syn = { version = "=1.0.17", features = ["full"] }
+quote = "=1.0.3"
+proc-macro2 = "=1.0.10"
+
+[build-dependencies]
+cc = "1.0"
+
+[lib]
+path = "fake_lib.rs"
+
+[raze]
+# The WORKSPACE relative path to the Cargo.toml working directory.
+workspace_path = "//third_party/cargo"
+target = "x86_64-unknown-linux-gnu"

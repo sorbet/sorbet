@@ -1,0 +1,70 @@
+Build options: --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD --incompatible_strict_action_env --cxxopt='-std=c++17' --host_cxxopt='-std=c++17' --copt='-march=sandybridge' --copt=-fno-omit-frame-pointer --copt=-fstack-protector --copt=-Werror --copt=-Wimplicit-fallthrough --host_copt=-O1 --host_copt=-DFORCE_DEBUG --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable --host_cxxopt=-Wno-pass-failed --copt=-Wno-macro-redefined --define='versioned=false' --define='linkshared=false' --define='unsanitized=true' --strip=never --subcommands=1 --explain=file.txt --verbose_explanations
+Executing action 'BazelWorkspaceStatusAction stable-status.txt': unconditional execution is requested.
+Executing action 'Compiling Rust lib syn (79 files)': action command has changed.
+New action: Compiling Rust lib syn (79 files)
+  Environment variable: CARGO_PKG_VERSION=0.0.0
+  Environment variable: CARGO_PKG_VERSION_MAJOR=0
+  Environment variable: CARGO_PKG_VERSION_MINOR=0
+  Environment variable: CARGO_PKG_VERSION_PATCH=0
+  Environment variable: CARGO_PKG_VERSION_PRE=''
+  Environment variable: CARGO_PKG_AUTHORS=''
+  Environment variable: CARGO_PKG_NAME=syn
+  Environment variable: CARGO_PKG_DESCRIPTION=''
+  Environment variable: CARGO_PKG_HOMEPAGE=''
+  Environment variable: CARGO_CFG_TARGET_OS=darwin
+  Environment variable: CARGO_CFG_TARGET_ARCH=x86_64
+  Environment variable: CARGO_MANIFEST_DIR='${pwd}/third_party/cargo/vendor/syn-1.0.17'
+  Environment variable: SYSROOT=''
+  Argument: bazel-out/darwin-opt-exec-2B5CBBC6/bin/external/io_bazel_rules_rust/util/process_wrapper/process_wrapper
+  Argument: --subst
+  Argument: 'pwd=${pwd}'
+  Argument: --
+  Argument: external/rust_darwin_x86_64/bin/rustc
+  Argument: third_party/cargo/vendor/syn-1.0.17/src/lib.rs
+  Argument: '--crate-name=syn'
+  Argument: '--crate-type=lib'
+  Argument: '--codegen=metadata=-557180715'
+  Argument: '--out-dir=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/syn-1.0.17'
+  Argument: '--codegen=extra-filename=-557180715'
+  Argument: '--codegen=opt-level=0'
+  Argument: '--codegen=debuginfo=0'
+  Argument: '--emit=dep-info,link'
+  Argument: '--color=always'
+  Argument: '--target=x86_64-apple-darwin'
+  Argument: --cfg
+  Argument: 'feature="clone-impls"'
+  Argument: --cfg
+  Argument: 'feature="default"'
+  Argument: --cfg
+  Argument: 'feature="derive"'
+  Argument: --cfg
+  Argument: 'feature="parsing"'
+  Argument: --cfg
+  Argument: 'feature="printing"'
+  Argument: --cfg
+  Argument: 'feature="proc-macro"'
+  Argument: --cfg
+  Argument: 'feature="quote"'
+  Argument: --cfg
+  Argument: 'feature="visit"'
+  Argument: --cfg
+  Argument: 'feature="full"'
+  Argument: -L
+  Argument: external/rust_darwin_x86_64/lib/rustlib/x86_64-apple-darwin/lib
+  Argument: '--cap-lints=allow'
+  Argument: '--cfg=use_proc_macro'
+  Argument: '--edition=2018'
+  Argument: '--codegen=linker=/private/var/tmp/_bazel_penelope/690820e8db5d6129e1066bf3208cd84d/external/llvm_toolchain/bin/cc_wrapper.sh'
+  Argument: --codegen
+  Argument: 'link-args=-no-canonical-prefixes -lm -headerpad_max_install_names --sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'
+  Argument: --extern
+  Argument: 'unicode_xid=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/unicode-xid-0.2.1/libunicode_xid-236103402.rlib'
+  Argument: --extern
+  Argument: 'proc_macro2=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/proc-macro2-1.0.10/libproc_macro2-931039943.rlib'
+  Argument: --extern
+  Argument: 'quote=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/quote-1.0.3/libquote--1395167792.rlib'
+  Argument: '-Ldependency=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/unicode-xid-0.2.1'
+  Argument: '-Ldependency=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/proc-macro2-1.0.10'
+  Argument: '-Ldependency=bazel-out/darwin-fastbuild/bin/third_party/cargo/vendor/quote-1.0.3'
+.
+Executing action 'Compiling Rust proc-macro ripper_deserialize (1 files)': no entry in the cache (action is new).
