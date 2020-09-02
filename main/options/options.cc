@@ -339,7 +339,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "reserve-field-table-capacity", "Preallocate the specified number of entries in the field table",
         cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)));
     options.add_options("advanced")(
-        "reserve-type-argument-table-capacity", "Preallocate the specified number of entries in the type member table",
+        "reserve-type-argument-table-capacity", "Preallocate the specified number of entries in the type argument table",
         cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)));
     options.add_options("advanced")(
         "reserve-type-member-table-capacity", "Preallocate the specified number of entries in the type member table",
