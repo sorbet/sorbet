@@ -98,9 +98,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
         {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
-    for (auto pair : symbolTypes) {
-        auto kind = pair.first;
-        auto used = pair.second;
+    for (auto [kind,used] : symbolTypes) {
         for (u4 idx = 0; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
             if (!hideSymbol(gs, ref) &&

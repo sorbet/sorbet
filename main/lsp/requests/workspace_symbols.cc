@@ -241,9 +241,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     // First pass: prefix-only matches on namespace
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
-        for (auto pair : symbolKinds) {
-            const auto kind = pair.first;
-            const auto size = pair.second;
+        for (auto [kind,size] : symbolKinds) {
             for (u4 i = 0; i < size; ++i) {
                 auto sym = core::SymbolRef(gs, kind, i);
                 if (sym.exists()) {
@@ -305,7 +303,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
             }
         }
     }
-    fast_sort(candidates, [](pair<core::SymbolRef, int> &left, pair<core::SymbolRef, int> &right) -> bool {
+    fast_sort(candidates, [](auto &left, auto &right) -> bool {
         return left.second < right.second;
     });
     for (auto &candidate : candidates) {
