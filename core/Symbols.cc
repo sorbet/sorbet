@@ -151,7 +151,7 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
         type = SymbolRef::Kind::TypeArgument;
         distance = this - gs.typeArguments.data();
     } else {
-        ENFORCE(false);
+        ENFORCE(false, "Invalid/unrecognized symbol type");
     }
 
     return SymbolRef(gs, type, distance);
@@ -227,15 +227,15 @@ void printTabs(fmt::memory_buffer &to, int count) {
     fmt::format_to(to, "{}", ident);
 }
 
-SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 _id)
-    : _id((_id << KIND_BITS) | static_cast<u4>(kind)) {
+SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
+    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER((_id >> (32 - KIND_BITS)) == 0);
+    ENFORCE_NO_TIMER((id >> (32 - KIND_BITS)) == 0);
 }
-SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 _id)
-    : _id((_id << KIND_BITS) | static_cast<u4>(kind)) {
+SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
+    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER((_id >> (32 - KIND_BITS)) == 0);
+    ENFORCE_NO_TIMER((id >> (32 - KIND_BITS)) == 0);
 }
 
 string SymbolRef::showRaw(const GlobalState &gs) const {

@@ -87,8 +87,8 @@ public:
         return unsafeTableIndex();
     }
 
-    SymbolRef(GlobalState const *from, Kind type, u4 _id);
-    SymbolRef(const GlobalState &from, Kind type, u4 _id);
+    SymbolRef(GlobalState const *from, Kind type, u4 id);
+    SymbolRef(const GlobalState &from, Kind type, u4 id);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
