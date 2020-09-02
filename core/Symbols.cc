@@ -134,7 +134,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
 
 SymbolRef Symbol::ref(const GlobalState &gs) const {
     u4 distance = 0;
-    SymbolRef::Kind type = SymbolRef::Kind::ClassOrModule;
+    auto type = SymbolRef::Kind::ClassOrModule;
     if (isClassOrModule()) {
         type = SymbolRef::Kind::ClassOrModule;
         distance = this - gs.classAndModules.data();
