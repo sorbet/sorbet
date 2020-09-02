@@ -215,10 +215,10 @@ module Sorbet::Private
 
       def gem_from_location(location)
         match =
+          location&.match(/^.*\/(?:gems\/(?:(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/)?|ruby\/[\d.]+\/)gems\/([^\/]+)-([^-\/]+)\//i) || # gem
           location&.match(/^.*\/(ruby)\/([\d.]+)\//) || # ruby stdlib
           location&.match(/^.*\/(jruby)-([\d.]+)\//) || # jvm ruby stdlib
-          location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) || # rubygems
-          location&.match(/^.*\/gems\/(?:(?:j?ruby-)?[\d.]+(?:@[^\/]+)?(?:\/bundler)?\/)?gems\/([^\/]+)-([^-\/]+)\//i) # gem
+          location&.match(/^.*\/(site_ruby)\/([\d.]+)\//) # rubygems
         if match.nil?
           # uncomment to generate files for methods outside of gems
           # {
