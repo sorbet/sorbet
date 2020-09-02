@@ -228,14 +228,14 @@ void printTabs(fmt::memory_buffer &to, int count) {
 }
 
 SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
-    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
+    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER((id >> (32 - KIND_BITS)) == 0);
+    ENFORCE_NO_TIMER(id <= ID_MASK);
 }
 SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
-    : _id((id << KIND_BITS) | static_cast<u4>(kind)) {
+    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER((id >> (32 - KIND_BITS)) == 0);
+    ENFORCE_NO_TIMER(id <= ID_MASK);
 }
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
