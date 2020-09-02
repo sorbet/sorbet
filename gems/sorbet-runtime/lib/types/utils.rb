@@ -168,7 +168,7 @@ module T::Utils
 
   def self.all_subclasses_of_sealed_class(klass)
     if !T::Private::Sealed.sealed_module?(klass)
-      "#{mod} is not declared `sealed!`"
+      raise "#{klass} is not declared `sealed!`"
     end
 
     klass.instance_variable_get(:@sorbet_sealed_module_all_subclasses)
