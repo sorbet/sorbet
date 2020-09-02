@@ -4,31 +4,6 @@
     "requestMethod": "textDocument/documentSymbol",
     "result": [
         {
-            "name": "CatchPhrase",
-            "detail": "",
-            "kind": 14,
-            "range": {
-                "start": {
-                    "line": 2,
-                    "character": 4
-                },
-                "end": {
-                    "line": 2,
-                    "character": 15
-                }
-            },
-            "selectionRange": {
-                "start": {
-                    "line": 2,
-                    "character": 4
-                },
-                "end": {
-                    "line": 2,
-                    "character": 15
-                }
-            },
-            "children": []
-        }, {
             "name": "Character",
             "detail": "",
             "kind": 5,
@@ -80,6 +55,31 @@
                     "children": []
                 }
             ]
+        }, {
+            "name": "CatchPhrase",
+            "detail": "",
+            "kind": 14,
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 4
+                },
+                "end": {
+                    "line": 2,
+                    "character": 15
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 2,
+                    "character": 4
+                },
+                "end": {
+                    "line": 2,
+                    "character": 15
+                }
+            },
+            "children": []
         }
     ]
 }

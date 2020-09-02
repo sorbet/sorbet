@@ -169,7 +169,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (bind.bind.type && !bind.bind.type->isUntyped()) {
                         typedSendCount++;
                     } else if (bind.bind.type->hasUntyped()) {
-                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame()._id););
+                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame().rawId()););
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
                         }

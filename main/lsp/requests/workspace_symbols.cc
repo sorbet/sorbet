@@ -16,6 +16,11 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 
+struct PartialMatch {
+    uint score = 0;
+    string_view::const_iterator matchEnd = nullptr; // progress in query match
+};
+
 class SymbolMatcher final {
 public:
     static constexpr size_t MAX_RESULTS = 50;
@@ -33,9 +38,35 @@ private:
 
     const LSPConfiguration &config;
     const core::GlobalState &gs;
+    vector<PartialMatch> classOrModuleMatches;
+    vector<PartialMatch> methodMatches;
+    vector<PartialMatch> fieldMatches;
+    vector<PartialMatch> typeArgumentMatches;
+    vector<PartialMatch> typeMemberMatches;
+
+    PartialMatch &getPartialMatch(core::SymbolRef ref) {
+        switch (ref.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule:
+                return classOrModuleMatches[ref.classOrModuleIndex()];
+            case core::SymbolRef::Kind::Method:
+                return methodMatches[ref.methodIndex()];
+            case core::SymbolRef::Kind::Field:
+                return fieldMatches[ref.fieldIndex()];
+            case core::SymbolRef::Kind::TypeArgument:
+                return typeArgumentMatches[ref.typeArgumentIndex()];
+            case core::SymbolRef::Kind::TypeMember:
+                return typeMemberMatches[ref.typeMemberIndex()];
+        }
+    }
+
+    void updatePartialMatch(core::SymbolRef symbolRef, string_view::const_iterator queryBegin,
+                            string_view::const_iterator queryEnd, size_t &ceilingScore);
 };
 
-SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs) : config(config), gs(gs) {}
+SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs)
+    : config(config), gs(gs), classOrModuleMatches(gs.classAndModulesUsed()), methodMatches(gs.methodsUsed()),
+      fieldMatches(gs.fieldsUsed()), typeArgumentMatches(gs.typeArgumentsUsed()),
+      typeMemberMatches(gs.typeMembersUsed()) {}
 
 /**
  * Converts a symbol into any (supported) SymbolInformation objects.
@@ -81,11 +112,6 @@ inline bool isEligibleSymbol(const core::NameData &nameData) {
     }
     return true;
 }
-
-struct PartialMatch {
-    uint score = 0;
-    string_view::const_iterator matchEnd = nullptr; // progress in query match
-};
 
 /** Returns a PartialMatch for the given symbol/query. */
 PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator queryBegin,
@@ -154,7 +180,45 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
     }
     return {score, matchEnd};
 }
-} // namespace
+
+void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::const_iterator queryBegin,
+                                       string_view::const_iterator queryEnd, size_t &ceilingScore) {
+    auto symbolData = symbolRef.data(gs);
+    auto nameData = symbolData->name.data(gs);
+    if (!isEligibleSymbol(nameData)) {
+        return;
+    }
+    auto shortName = nameData->shortName(gs);
+    auto &partialMatch = getPartialMatch(symbolRef);
+    partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
+    for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+         previousAncestorRef != ancestorRef && ancestorRef.exists();
+         previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+        auto &ancestorMatch = getPartialMatch(ancestorRef);
+        auto ancestorEnd = ancestorMatch.matchEnd;
+        if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+            break; // no further ancestor will be of any help
+        }
+        if (ancestorEnd == queryEnd) {
+            continue; // ancestor matched everything, so skip to its parent
+        }
+        auto ancestorScore = ancestorMatch.score;
+        auto plusMatch = partialMatchSymbol(shortName, ancestorEnd, queryEnd, true, ceilingScore - ancestorScore);
+        if (plusMatch.matchEnd - partialMatch.matchEnd > 0) {
+            partialMatch.score = ancestorScore + plusMatch.score;
+            partialMatch.matchEnd = plusMatch.matchEnd;
+        } else if (plusMatch.matchEnd == partialMatch.matchEnd) {
+            auto combinedScore = ancestorScore + plusMatch.score;
+            if (combinedScore < partialMatch.score) {
+                partialMatch.score = combinedScore;
+            }
+        }
+    }
+    if (partialMatch.matchEnd == queryEnd) {
+        // update ceiling so we stop looking at bad matches
+        ceilingScore = min(ceilingScore, partialMatch.score * WORST_TO_BEST_RATIO);
+    }
+}
 
 vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_view, size_t maxResults) {
     vector<unique_ptr<SymbolInformation>> results;
@@ -165,47 +229,24 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
         return results;
     }
     size_t ceilingScore = INT_MAX;
-    vector<PartialMatch> partialMatches(gs.symbolsUsed());
+
+    const vector<pair<core::SymbolRef::Kind, uint>> symbolKinds = {
+        {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
+        {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
+        {core::SymbolRef::Kind::Method, gs.methodsUsed()},
+        {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
+        {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
+    };
+
     // First pass: prefix-only matches on namespace
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
-        for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
-            auto symbolRef = core::SymbolRef(gs, symbolIndex);
-            auto symbolData = symbolRef.data(gs);
-            auto nameData = symbolData->name.data(gs);
-            if (!isEligibleSymbol(nameData)) {
-                continue;
-            }
-            auto shortName = nameData->shortName(gs);
-            auto &partialMatch = partialMatches[symbolIndex] =
-                partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
-            for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
-                 previousAncestorRef != ancestorRef && ancestorRef.exists();
-                 previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
-                auto &ancestorMatch = partialMatches[ancestorRef._id];
-                auto ancestorEnd = ancestorMatch.matchEnd;
-                if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
-                    break; // no further ancestor will be of any help
+        for (auto [kind, size] : symbolKinds) {
+            for (u4 i = 0; i < size; ++i) {
+                auto sym = core::SymbolRef(gs, kind, i);
+                if (sym.exists()) {
+                    updatePartialMatch(core::SymbolRef(gs, kind, i), queryBegin, queryEnd, ceilingScore);
                 }
-                if (ancestorEnd == queryEnd) {
-                    continue; // ancestor matched everything, so skip to its parent
-                }
-                auto ancestorScore = ancestorMatch.score;
-                auto plusMatch =
-                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, true, ceilingScore - ancestorScore);
-                if (plusMatch.matchEnd - partialMatch.matchEnd > 0) {
-                    partialMatch.score = ancestorScore + plusMatch.score;
-                    partialMatch.matchEnd = plusMatch.matchEnd;
-                } else if (plusMatch.matchEnd == partialMatch.matchEnd) {
-                    auto combinedScore = ancestorScore + plusMatch.score;
-                    if (combinedScore < partialMatch.score) {
-                        partialMatch.score = combinedScore;
-                    }
-                }
-            }
-            if (partialMatch.matchEnd == queryEnd) {
-                // update ceiling so we stop looking at bad matches
-                ceilingScore = min(ceilingScore, partialMatch.score * WORST_TO_BEST_RATIO);
             }
         }
     }
@@ -214,52 +255,57 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     // prefix-only requirement for non-matches) Don't update partialMatches,
     // because we will continue using it to keep the prefix-only scores for
     // owner-namespaces.
-    vector<pair<u4, int>> candidates;
+    vector<pair<core::SymbolRef, int>> candidates;
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
-        for (u4 symbolIndex = 1; symbolIndex < gs.symbolsUsed(); symbolIndex++) {
-            auto symbolRef = core::SymbolRef(gs, symbolIndex);
-            auto symbolData = symbolRef.data(gs);
-            auto nameData = symbolData->name.data(gs);
-            if (!isEligibleSymbol(nameData)) {
-                continue;
-            }
-            auto shortName = nameData->shortName(gs);
-            uint bestScore = ceilingScore;
-            auto [partialScore, partialMatchEnd] =
-                partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
-            if (partialMatchEnd == queryEnd) {
-                bestScore = partialScore;
-            }
-            for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
-                 previousAncestorRef != ancestorRef && ancestorRef.exists();
-                 previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
-                auto [ancestorScore, ancestorEnd] = partialMatches[ancestorRef._id];
-                if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
-                    break; // no further ancestor will be of any help
+        for (auto [kind, size] : symbolKinds) {
+            for (u4 i = 0; i < size; ++i) {
+                auto symbolRef = core::SymbolRef(gs, kind, i);
+                if (!symbolRef.exists()) {
+                    continue;
                 }
-                if (ancestorEnd == queryEnd) {
-                    continue; // ancestor matched everything, so skip to its parent
+                auto symbolData = symbolRef.data(gs);
+                auto nameData = symbolData->name.data(gs);
+                if (!isEligibleSymbol(nameData)) {
+                    continue;
                 }
-                if (ancestorScore >= bestScore) {
-                    continue; // matching this ancestor would be worse
+                auto shortName = nameData->shortName(gs);
+                uint bestScore = ceilingScore;
+                auto [partialScore, partialMatchEnd] =
+                    partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);
+                if (partialMatchEnd == queryEnd) {
+                    bestScore = partialScore;
                 }
-                auto [plusScore, plusEnd] =
-                    partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestScore - ancestorScore);
-                if (plusEnd == queryEnd) {
-                    bestScore = min(bestScore, ancestorScore + plusScore);
+                for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
+                     previousAncestorRef != ancestorRef && ancestorRef.exists();
+                     previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.data(gs)->owner) {
+                    auto [ancestorScore, ancestorEnd] = getPartialMatch(ancestorRef);
+                    if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+                        break; // no further ancestor will be of any help
+                    }
+                    if (ancestorEnd == queryEnd) {
+                        continue; // ancestor matched everything, so skip to its parent
+                    }
+                    if (ancestorScore >= bestScore) {
+                        continue; // matching this ancestor would be worse
+                    }
+                    auto [plusScore, plusEnd] =
+                        partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestScore - ancestorScore);
+                    if (plusEnd == queryEnd) {
+                        bestScore = min(bestScore, ancestorScore + plusScore);
+                    }
                 }
-            }
-            if (bestScore < ceilingScore) {
-                // update ceiling so we stop looking at bad matches
-                ceilingScore = min(ceilingScore, bestScore * WORST_TO_BEST_RATIO);
-                candidates.emplace_back(symbolIndex, bestScore);
+                if (bestScore < ceilingScore) {
+                    // update ceiling so we stop looking at bad matches
+                    ceilingScore = min(ceilingScore, bestScore * WORST_TO_BEST_RATIO);
+                    candidates.emplace_back(symbolRef, bestScore);
+                }
             }
         }
     }
-    fast_sort(candidates, [](pair<u4, int> &left, pair<u4, int> &right) -> bool { return left.second < right.second; });
+    fast_sort(candidates, [](auto &left, auto &right) -> bool { return left.second < right.second; });
     for (auto &candidate : candidates) {
-        core::SymbolRef ref(gs, candidate.first);
+        auto ref = candidate.first;
         auto maxLocations = min(MAX_LOCATIONS_PER_SYMBOL, maxResults - results.size());
         for (auto &symbolInformation : symbolRef2SymbolInformations(ref, maxLocations)) {
             results.emplace_back(move(symbolInformation));
@@ -270,7 +316,8 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     }
     ENFORCE(results.size() <= maxResults);
     return results;
-} // namespace sorbet::realmain::lsp
+}
+} // namespace
 
 WorkspaceSymbolsTask::WorkspaceSymbolsTask(const LSPConfiguration &config, MessageId id,
                                            unique_ptr<WorkspaceSymbolParams> params)

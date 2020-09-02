@@ -1,1 +1,1 @@
---reserve-symbol-table-capacity --reserve-name-table-capacity OK
+--reserve-*-table-capacity OK
