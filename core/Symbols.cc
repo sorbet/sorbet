@@ -604,6 +604,24 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     return false;
 }
 
+bool Symbol::isHiddenFromPrintingRecursive(const GlobalState &gs) const {
+    for (auto childPair : this->members()) {
+        if (childPair.first == Names::singleton() || childPair.first == Names::attached() ||
+            childPair.first == Names::classMethods()) {
+            continue;
+        }
+        if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
+            return true;
+        }
+
+        if (childPair.second.data(gs)->isHiddenFromPrintingRecursive(gs)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     fmt::memory_buffer buf;
 
@@ -764,17 +782,9 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             continue;
         }
 
-        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs)) {
-            bool hadPrintableChild = false;
-            for (auto childPair : pair.second.data(gs)->members()) {
-                if (!childPair.second.data(gs)->isHiddenFromPrinting(gs)) {
-                    hadPrintableChild = true;
-                    break;
-                }
-            }
-            if (!hadPrintableChild) {
-                continue;
-            }
+        if (!showFull && pair.second.data(gs)->isHiddenFromPrinting(gs) &&
+            !pair.second.data(gs)->isHiddenFromPrintingRecursive(gs)) {
+            continue;
         }
 
         auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);

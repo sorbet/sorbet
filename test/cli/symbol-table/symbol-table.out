@@ -1,0 +1,14 @@
+No errors! Great job.
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/symbol-table/symbol-table.rb:2
+      argument <blk><block> @ Loc {file=test/cli/symbol-table/symbol-table.rb start=??? end=???}
+  module ::Net < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L3
+    module ::Net::SSH < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L7653
+      module ::Net::SSH::Authentication < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#L7663
+        module ::Net::SSH::Authentication::CustomModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/symbol-table/symbol-table.rb:2
+        class ::Net::SSH::Authentication::<Class:CustomModule>[<AttachedClass>] < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
+          type-member(+) ::Net::SSH::Authentication::<Class:CustomModule>::<AttachedClass> -> T.attached_class (of Net::SSH::Authentication::CustomModule) @ test/cli/symbol-table/symbol-table.rb:2
+          method ::Net::SSH::Authentication::<Class:CustomModule>#<static-init> (<blk>) @ test/cli/symbol-table/symbol-table.rb:2
+            argument <blk><block> @ Loc {file=test/cli/symbol-table/symbol-table.rb start=??? end=???}
+

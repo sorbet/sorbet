@@ -605,6 +605,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
+    bool isHiddenFromPrintingRecursive(const GlobalState &gs) const;
+
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
                                     bool showRaw = false) const;
 
