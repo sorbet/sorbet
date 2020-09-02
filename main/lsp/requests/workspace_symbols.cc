@@ -241,7 +241,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     // First pass: prefix-only matches on namespace
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass1");
-        for (auto [kind,size] : symbolKinds) {
+        for (auto [kind, size] : symbolKinds) {
             for (u4 i = 0; i < size; ++i) {
                 auto sym = core::SymbolRef(gs, kind, i);
                 if (sym.exists()) {
@@ -258,7 +258,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     vector<pair<core::SymbolRef, int>> candidates;
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
-        for (auto [kind,size] : symbolKinds) {
+        for (auto [kind, size] : symbolKinds) {
             for (u4 i = 0; i < size; ++i) {
                 auto symbolRef = core::SymbolRef(gs, kind, i);
                 if (!symbolRef.exists()) {
@@ -303,9 +303,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
             }
         }
     }
-    fast_sort(candidates, [](auto &left, auto &right) -> bool {
-        return left.second < right.second;
-    });
+    fast_sort(candidates, [](auto &left, auto &right) -> bool { return left.second < right.second; });
     for (auto &candidate : candidates) {
         auto ref = candidate.first;
         auto maxLocations = min(MAX_LOCATIONS_PER_SYMBOL, maxResults - results.size());

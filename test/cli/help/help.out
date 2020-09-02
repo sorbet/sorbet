@@ -63,7 +63,7 @@ Usage:
                                 in the field table (default: 0)
       --reserve-type-argument-table-capacity arg
                                 Preallocate the specified number of entries
-                                in the type member table (default: 0)
+                                in the type argument table (default: 0)
       --reserve-type-member-table-capacity arg
                                 Preallocate the specified number of entries
                                 in the type member table (default: 0)
