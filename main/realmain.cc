@@ -445,7 +445,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.sleepInSlowPath) {
         gs->sleepInSlowPath = true;
     }
-    gs->preallocateTables(opts.reserveSymbolTableCapacity, opts.reserveNameTableCapacity);
+    gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                          opts.reserveTypeMemberTableCapacity, opts.reserveNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }
@@ -607,7 +609,7 @@ int realmain(int argc, char *argv[]) {
             vector<pair<string, int>> withNames;
             long sum = 0;
             for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef(*gs, e.first).dataAllowingNone(*gs)->showFullName(*gs),
+                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).dataAllowingNone(*gs)->showFullName(*gs),
                                        e.second);
                 sum += e.second;
             }

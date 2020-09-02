@@ -330,8 +330,21 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
     options.add_options("advanced")(
-        "reserve-symbol-table-capacity", "Preallocate the specified number of entries in the symbol table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveSymbolTableCapacity)));
+        "reserve-class-table-capacity", "Preallocate the specified number of entries in the class and modules table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveClassTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-method-table-capacity", "Preallocate the specified number of entries in the method table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveMethodTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-field-table-capacity", "Preallocate the specified number of entries in the field table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-type-argument-table-capacity",
+        "Preallocate the specified number of entries in the type argument table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-type-member-table-capacity", "Preallocate the specified number of entries in the type member table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)));
     options.add_options("advanced")(
         "reserve-name-table-capacity", "Preallocate the specified number of entries in the name table",
         cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveNameTableCapacity)));
@@ -833,7 +846,11 @@ void readOptions(Options &opts,
             }
         }
         opts.reserveNameTableCapacity = raw["reserve-name-table-capacity"].as<u4>();
-        opts.reserveSymbolTableCapacity = raw["reserve-symbol-table-capacity"].as<u4>();
+        opts.reserveClassTableCapacity = raw["reserve-class-table-capacity"].as<u4>();
+        opts.reserveMethodTableCapacity = raw["reserve-method-table-capacity"].as<u4>();
+        opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<u4>();
+        opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<u4>();
+        opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<u4>();
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");

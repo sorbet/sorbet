@@ -188,7 +188,7 @@ TEST_CASE("CloneSubstitutePayload") {
 
     sorbet::core::GlobalSubstitution subst(*c1, *c2);
     REQUIRE_EQ("<U test new name>", subst.substitute(n1).showRaw(*c2));
-    REQUIRE_EQ(c1->symbolsUsed(), c2->symbolsUsed());
-    REQUIRE_EQ(c1->symbolsUsed(), gs.symbolsUsed());
+    REQUIRE_EQ(c1->symbolsUsedTotal(), c2->symbolsUsedTotal());
+    REQUIRE_EQ(c1->symbolsUsedTotal(), gs.symbolsUsedTotal());
 }
 } // namespace sorbet

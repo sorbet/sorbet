@@ -133,8 +133,28 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
 }
 
 SymbolRef Symbol::ref(const GlobalState &gs) const {
-    auto distance = this - gs.symbols.data();
-    return SymbolRef(gs, distance);
+    u4 distance = 0;
+    auto type = SymbolRef::Kind::ClassOrModule;
+    if (isClassOrModule()) {
+        type = SymbolRef::Kind::ClassOrModule;
+        distance = this - gs.classAndModules.data();
+    } else if (isMethod()) {
+        type = SymbolRef::Kind::Method;
+        distance = this - gs.methods.data();
+    } else if (isField() || isStaticField()) {
+        type = SymbolRef::Kind::Field;
+        distance = this - gs.fields.data();
+    } else if (isTypeMember()) {
+        type = SymbolRef::Kind::TypeMember;
+        distance = this - gs.typeMembers.data();
+    } else if (isTypeArgument()) {
+        type = SymbolRef::Kind::TypeArgument;
+        distance = this - gs.typeArguments.data();
+    } else {
+        ENFORCE(false, "Invalid/unrecognized symbol type");
+    }
+
+    return SymbolRef(gs, type, distance);
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
@@ -143,8 +163,23 @@ SymbolData SymbolRef::data(GlobalState &gs) const {
 }
 
 SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
-    ENFORCE_NO_TIMER(_id < gs.symbols.size());
-    return SymbolData(gs.symbols[this->_id], gs);
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            ENFORCE_NO_TIMER(classOrModuleIndex() < gs.classAndModules.size());
+            return SymbolData(gs.classAndModules[classOrModuleIndex()], gs);
+        case SymbolRef::Kind::Method:
+            ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
+            return SymbolData(gs.methods[methodIndex()], gs);
+        case SymbolRef::Kind::Field:
+            ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
+            return SymbolData(gs.fields[fieldIndex()], gs);
+        case SymbolRef::Kind::TypeArgument:
+            ENFORCE_NO_TIMER(typeArgumentIndex() < gs.typeArguments.size());
+            return SymbolData(gs.typeArguments[typeArgumentIndex()], gs);
+        case SymbolRef::Kind::TypeMember:
+            ENFORCE_NO_TIMER(typeMemberIndex() < gs.typeMembers.size());
+            return SymbolData(gs.typeMembers[typeMemberIndex()], gs);
+    }
 }
 
 const SymbolData SymbolRef::data(const GlobalState &gs) const {
@@ -153,12 +188,38 @@ const SymbolData SymbolRef::data(const GlobalState &gs) const {
 }
 
 const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
-    ENFORCE_NO_TIMER(_id < gs.symbols.size());
-    return SymbolData(const_cast<Symbol &>(gs.symbols[this->_id]), gs);
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            ENFORCE_NO_TIMER(classOrModuleIndex() < gs.classAndModules.size());
+            return SymbolData(const_cast<Symbol &>(gs.classAndModules[classOrModuleIndex()]), gs);
+        case SymbolRef::Kind::Method:
+            ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
+            return SymbolData(const_cast<Symbol &>(gs.methods[methodIndex()]), gs);
+        case SymbolRef::Kind::Field:
+            ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
+            return SymbolData(const_cast<Symbol &>(gs.fields[fieldIndex()]), gs);
+        case SymbolRef::Kind::TypeArgument:
+            ENFORCE_NO_TIMER(typeArgumentIndex() < gs.typeArguments.size());
+            return SymbolData(const_cast<Symbol &>(gs.typeArguments[typeArgumentIndex()]), gs);
+        case SymbolRef::Kind::TypeMember:
+            ENFORCE_NO_TIMER(typeMemberIndex() < gs.typeMembers.size());
+            return SymbolData(const_cast<Symbol &>(gs.typeMembers[typeMemberIndex()]), gs);
+    }
 }
 
 bool SymbolRef::isSynthetic() const {
-    return this->_id < Symbols::MAX_SYNTHETIC_SYMBOLS;
+    switch (this->kind()) {
+        case Kind::ClassOrModule:
+            return classOrModuleIndex() < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS;
+        case Kind::Method:
+            return methodIndex() < Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS;
+        case Kind::Field:
+            return fieldIndex() < Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS;
+        case Kind::TypeArgument:
+            return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
+        case Kind::TypeMember:
+            return typeMemberIndex() < Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
+    }
 }
 
 void printTabs(fmt::memory_buffer &to, int count) {
@@ -166,8 +227,16 @@ void printTabs(fmt::memory_buffer &to, int count) {
     fmt::format_to(to, "{}", ident);
 }
 
-SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
-SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
+SymbolRef::SymbolRef(const GlobalState &from, SymbolRef::Kind kind, u4 id)
+    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
+    // If this fails, the symbol table is too big :(
+    ENFORCE_NO_TIMER(id <= ID_MASK);
+}
+SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
+    : _id(id | (static_cast<u4>(kind) << ID_BITS)) {
+    // If this fails, the symbol table is too big :(
+    ENFORCE_NO_TIMER(id <= ID_MASK);
+}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
@@ -1084,8 +1153,32 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2 =
-            const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
+        SymbolRef current2;
+        switch (current.kind()) {
+            case SymbolRef::Kind::ClassOrModule:
+                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+                break;
+            case SymbolRef::Kind::Method:
+                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
+                break;
+            case SymbolRef::Kind::Field:
+                if (isField()) {
+                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
+                } else {
+                    current2 =
+                        const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+                }
+                break;
+            case SymbolRef::Kind::TypeArgument:
+                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner, this->name,
+                                                                           this->variance());
+                break;
+            case SymbolRef::Kind::TypeMember:
+                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner, this->name,
+                                                                         this->variance());
+                break;
+        }
+
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
             ENFORCE_NO_TIMER(e.first.exists(), name.toString(gs) + " has a member symbol without a name");
@@ -1278,10 +1371,11 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
 
 SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
 
-SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs) : gs(gs), symbolCountAtCreation(gs.symbolsUsed()) {}
+SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs)
+    : gs(gs), symbolCountAtCreation(gs.symbolsUsedTotal()) {}
 
 void SymbolDataDebugCheck::check() const {
-    ENFORCE_NO_TIMER(symbolCountAtCreation == gs.symbolsUsed());
+    ENFORCE_NO_TIMER(symbolCountAtCreation == gs.symbolsUsedTotal());
 }
 
 Symbol *SymbolData::operator->() {
