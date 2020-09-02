@@ -557,7 +557,7 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, MAX_SYNTHETIC_CLASS_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 400;
+    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 29;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 2;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 2;
