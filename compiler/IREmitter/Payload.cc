@@ -316,8 +316,11 @@ const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
 }
 
 static bool isProc(core::SymbolRef sym) {
-    auto id = sym._id;
-    return id >= core::Symbols::Proc0()._id && id <= core::Symbols::last_proc()._id;
+    if (sym.kind() != core::SymbolRef::Kind::ClassOrModule) {
+        return false;
+    }
+    auto id = sym.classOrModuleIndex();
+    return id >= core::Symbols::Proc0().classOrModuleIndex() && id <= core::Symbols::last_proc().classOrModuleIndex();
 }
 
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val, const core::TypePtr &type) {
