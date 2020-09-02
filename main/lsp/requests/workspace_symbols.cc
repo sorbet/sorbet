@@ -260,9 +260,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     vector<pair<core::SymbolRef, int>> candidates;
     {
         Timer timeit(gs.tracer(), "SymbolMatcher::doQuery::pass2");
-        for (auto pair : symbolKinds) {
-            const auto kind = pair.first;
-            const auto size = pair.second;
+        for (auto [kind,size] : symbolKinds) {
             for (u4 i = 0; i < size; ++i) {
                 auto symbolRef = core::SymbolRef(gs, kind, i);
                 if (!symbolRef.exists()) {
