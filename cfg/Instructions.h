@@ -200,7 +200,9 @@ public:
     core::TypePtr type;
     core::NameRef cast;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : value(value), type(type), cast(cast) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : value(value), type(type), cast(cast) {
+        ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let());
+    }
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
