@@ -37,7 +37,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     const u1 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         Timer timeit(gs->tracer(), "read_global_state.source");
-        sorbet::rbi::polulateRBIsInto(gs);
+        sorbet::rbi::populateRBIsInto(gs);
     } else {
         Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
