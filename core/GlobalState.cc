@@ -917,7 +917,7 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
     data->flags = flags;
     data->owner = owner;
     data->addLoc(*this, loc);
-    DEBUG_ONLY(categoryCounterInc("symbols", "method"));
+    DEBUG_ONLY(categoryCounterInc("symbols", "class"));
     wasModified_ = true;
 
     return ret;
