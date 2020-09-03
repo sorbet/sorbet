@@ -22,3 +22,5 @@ def foo(x)
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Child2` wasn't handled
   end
 end
+
+T.reveal_type(Parent.sealed_subclasses) # error: Revealed type: `T::Set[T.any(T.class_of(Child1), T.class_of(Child2))]`
