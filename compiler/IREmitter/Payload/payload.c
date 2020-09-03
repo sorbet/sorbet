@@ -984,6 +984,65 @@ extern rb_control_frame_t *rb_vm_push_frame(rb_execution_context_t *sec, const r
                                             VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp, int local_size,
                                             int stack_max);
 
+// NOTE: this is marked noinline so that there's only ever one copy that lives in the ruby runtime, cutting down on the
+// size of generated artifacts. If we decide that speed is more important, this could be marked alwaysinline to avoid
+// the function call.
+SORBET_ATTRIBUTE(noinline)
+void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq) {
+    // Self is the same in exception-handlers
+    VALUE self = cfp->self;
+
+    // there is only ever one local for rescue/ensure frames, this mirrors the implementation in
+    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2085-L2101
+    VALUE *sp = cfp->sp + 1;
+    int num_locals = iseq->body->local_table_size - 1;
+
+    VALUE blockHandler = VM_GUARDED_PREV_EP(cfp->ep);
+    VALUE me = 0;
+
+    // write the exception value on the stack (as an argument to the rescue frame)
+    cfp->sp[0] = rb_errinfo();
+
+    // NOTE: there's no explicit check for stack overflow, because `rb_vm_push_frame` will do that check
+    cfp = rb_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
+                           num_locals, iseq->body->stack_max);
+}
+
+// NOTE: this is marked noinline so that there's only ever one copy that lives in the ruby runtime, cutting down on the
+// size of generated artifacts. If we decide that speed is more important, this could be marked alwaysinline to avoid
+// the function call.
+SORBET_ATTRIBUTE(noinline)
+void sorbet_setMethodStackFrame(rb_execution_context_t *ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq) {
+    // make sure that we have enough space to allocate locals
+    int local_size = iseq->body->local_table_size;
+    int stack_max = iseq->body->stack_max;
+
+    WHEN_VM_STACK_OVERFLOWED(cfp, cfp->sp, local_size + stack_max) sorbet_stackoverflow();
+
+    // save the current state of the stack
+    VALUE cref_or_me = cfp->ep[VM_ENV_DATA_INDEX_ME_CREF]; // -2
+    VALUE prev_ep = cfp->ep[VM_ENV_DATA_INDEX_SPECVAL];    // -1
+    VALUE type = cfp->ep[VM_ENV_DATA_INDEX_FLAGS];         // -0
+
+    // C frames push no locals, so the address we want to treat as the top of the stack lies at -2.
+    // NOTE: we're explicitly discarding the const qualifier from ep, because we need to write to the stack.
+    VALUE *sp = (VALUE *)&cfp->ep[-2];
+
+    // setup locals
+    for (int i = 0; i < local_size; ++i) {
+        *sp++ = RUBY_Qnil;
+    }
+
+    // restore the previous state of the stack
+    *sp++ = cref_or_me;
+    *sp++ = prev_ep;
+    *sp = type;
+
+    cfp->ep = cfp->bp = sp;
+    cfp->sp = sp + 1;
+}
+
+SORBET_INLINE
 const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
                                                    unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
@@ -992,23 +1051,7 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticIn
 
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
     if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
-        // Self is the same in exception-handlers
-        VALUE self = cfp->self;
-
-        // there is only ever one local for rescue/ensure frames, this mirrors the implementation in
-        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2085-L2101
-        VALUE *sp = cfp->sp + 1;
-        int num_locals = iseq->body->local_table_size - 1;
-
-        VALUE blockHandler = VM_GUARDED_PREV_EP(cfp->ep);
-        VALUE me = 0;
-
-        // write the exception value on the stack (as an argument to the rescue frame)
-        cfp->sp[0] = rb_errinfo();
-
-        // NOTE: there's no explicit check for stack overflow, because `rb_vm_push_frame` will do that check
-        cfp = rb_vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
-                               num_locals, iseq->body->stack_max);
+        sorbet_setExceptionStackFrame(ec, cfp, iseq);
     } else if (!isClassOrModuleStaticInit) {
         cfp->iseq = iseq;
         VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
@@ -1016,33 +1059,7 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticIn
         // For methods, allocate their locals on the ruby stack. This mirrors the implementation in vm_push_frame:
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L214-L248
         if (iseq_type == ISEQ_TYPE_METHOD) {
-            // make sure that we have enough space to allocate locals
-            int local_size = iseq->body->local_table_size;
-            int stack_max = iseq->body->stack_max;
-
-            WHEN_VM_STACK_OVERFLOWED(cfp, cfp->sp, local_size + stack_max) sorbet_stackoverflow();
-
-            // save the current state of the stack
-            VALUE cref_or_me = cfp->ep[VM_ENV_DATA_INDEX_ME_CREF]; // -2
-            VALUE prev_ep = cfp->ep[VM_ENV_DATA_INDEX_SPECVAL];    // -1
-            VALUE type = cfp->ep[VM_ENV_DATA_INDEX_FLAGS];         // -0
-
-            // C frames push no locals, so the address we want to treat as the top of the stack lies at -2.
-            // NOTE: we're explicitly discarding the const qualifier from ep, because we need to write to the stack.
-            VALUE *sp = (VALUE *)&cfp->ep[-2];
-
-            // setup locals
-            for (int i = 0; i < local_size; ++i) {
-                *sp++ = RUBY_Qnil;
-            }
-
-            // restore the previous state of the stack
-            *sp++ = cref_or_me;
-            *sp++ = prev_ep;
-            *sp = type;
-
-            cfp->ep = cfp->bp = sp;
-            cfp->sp = sp + 1;
+            sorbet_setMethodStackFrame(ec, cfp, iseq);
         }
     }
 
