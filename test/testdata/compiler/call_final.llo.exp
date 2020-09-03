@@ -157,8 +157,14 @@ declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #4
 ; Function Attrs: noreturn nounwind ssp uwtable
 declare void @sorbet_raiseArity(i32, i32, i32) local_unnamed_addr #5
 
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #6
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #6
+
 ; Function Attrs: inaccessiblememonly
-declare i32 @ruby_stack_check() local_unnamed_addr #6
+declare i32 @ruby_stack_check() local_unnamed_addr #7
 
 ; Function Attrs: nounwind ssp uwtable
 declare i8* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, i8*, i32, i32, i32, i64* nocapture readonly, i32) local_unnamed_addr #0
@@ -186,16 +192,16 @@ declare void @rb_gc_writebarrier_remember(i64) local_unnamed_addr #2
 declare %struct.rb_control_frame_struct* @sorbet_setRubyStackFrame(i1 zeroext, i32, i8*) local_unnamed_addr #0
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #8
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #7
+declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #8
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly ssp uwtable
-declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #8
+declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #9
 
 ; Function Attrs: nounwind sspreq
-define void @Init_call_final() local_unnamed_addr #9 {
+define void @Init_call_final() local_unnamed_addr #10 {
 entry:
   %locals1.i.i = alloca [0 x i64], align 8
   %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.17, i64 0, i64 0)) #14
@@ -372,12 +378,12 @@ sorbet_writeLocal.exit.i.i:                       ; preds = %86, %84
 
 95:                                               ; preds = %sorbet_writeLocal.exit.i.i
   %96 = load i64, i64* @rb_cModule, align 8, !dbg !49, !tbaa !4
-  %97 = tail call i64 @rb_obj_is_kind_of(i64 %93, i64 %96) #7, !dbg !49
+  %97 = tail call i64 @rb_obj_is_kind_of(i64 %93, i64 %96) #8, !dbg !49
   %98 = icmp eq i64 %97, 0, !dbg !49
   br i1 %98, label %codeRepl, label %sorbet_isa_class_of.exit.i1.i, !dbg !49, !prof !51
 
 sorbet_isa_class_of.exit.i1.i:                    ; preds = %95
-  %99 = tail call i64 @rb_class_inherited_p(i64 %93, i64 %62) #7, !dbg !49
+  %99 = tail call i64 @rb_class_inherited_p(i64 %93, i64 %62) #8, !dbg !49
   %100 = icmp eq i64 %99, 0, !dbg !49
   br i1 %100, label %codeRepl, label %typeTestSuccess.i.i, !dbg !49, !prof !52
 
@@ -472,7 +478,7 @@ codeRepl5:                                        ; preds = %sorbet_readRealpath
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @func_A.foo(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #10 !dbg !59 {
+define i64 @func_A.foo(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 !dbg !59 {
 functionEntryInitializers:
   %stackFrame_func_A.foo = load i8*, i8** @stackFramePrecomputed_func_A.foo, align 8
   %0 = tail call %struct.rb_control_frame_struct* @sorbet_setRubyStackFrame(i1 false, i32 1, i8* %stackFrame_func_A.foo)
@@ -514,12 +520,12 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 
 18:                                               ; preds = %13
   %19 = load i64, i64* @rb_cModule, align 8, !dbg !60, !tbaa !4
-  %20 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %19) #7, !dbg !60
+  %20 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %19) #8, !dbg !60
   %21 = icmp eq i64 %20, 0, !dbg !60
   br i1 %21, label %codeRepl19, label %sorbet_isa_class_of.exit, !dbg !60, !prof !51
 
 sorbet_isa_class_of.exit:                         ; preds = %18
-  %22 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %14) #7, !dbg !60
+  %22 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %14) #8, !dbg !60
   %23 = icmp eq i64 %22, 0, !dbg !60
   br i1 %23, label %codeRepl19, label %typeTestSuccess, !dbg !60, !prof !52
 
@@ -543,7 +549,7 @@ codeRepl:                                         ; preds = %typeTestSuccess
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_B#caller"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #10 !dbg !63 {
+define i64 @"func_B#caller"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 !dbg !63 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %"stackFrame_func_B#caller" = load i8*, i8** @"stackFramePrecomputed_func_B#caller", align 8
@@ -580,7 +586,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %16 = tail call i64 @sorbet_getConstantEpoch(), !dbg !64
   %guardUpdated = icmp eq i64 %15, %16, !dbg !64
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !64
-  %17 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %14) #7, !dbg !64
+  %17 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %14) #8, !dbg !64
   %18 = icmp eq i64 %17, 20, !dbg !64
   br i1 %18, label %afterCallFinal_foo, label %codeRepl, !dbg !64, !prof !40
 
@@ -613,12 +619,6 @@ afterCallFinal_foo:                               ; preds = %13
   %directSendResult = call i64 @func_A.foo(i32 1, i64* nonnull %callArgs0Addr, i64 %24), !dbg !66
   ret i64 %directSendResult
 }
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #11
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #11
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq
 define internal fastcc void @Init_call_final.cold.1(i64) unnamed_addr #12 {
@@ -680,12 +680,12 @@ attributes #2 = { "addedToSilenceEmptyAttrsError" }
 attributes #3 = { noinline nounwind ssp uwtable }
 attributes #4 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #5 = { noreturn nounwind ssp uwtable }
-attributes #6 = { inaccessiblememonly "addedToSilenceEmptyAttrsError" }
-attributes #7 = { nounwind readnone }
-attributes #8 = { alwaysinline norecurse nounwind readonly ssp uwtable }
-attributes #9 = { nounwind sspreq }
-attributes #10 = { nounwind sspreq uwtable }
-attributes #11 = { argmemonly nounwind }
+attributes #6 = { argmemonly nounwind }
+attributes #7 = { inaccessiblememonly "addedToSilenceEmptyAttrsError" }
+attributes #8 = { nounwind readnone }
+attributes #9 = { alwaysinline norecurse nounwind readonly ssp uwtable }
+attributes #10 = { nounwind sspreq }
+attributes #11 = { nounwind sspreq uwtable }
 attributes #12 = { cold minsize noreturn nounwind sspreq }
 attributes #13 = { cold minsize noreturn nounwind sspreq uwtable }
 attributes #14 = { nounwind }

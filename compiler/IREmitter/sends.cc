@@ -63,8 +63,8 @@ llvm::Value *tryFinalCall(MethodCallContext &mcctx) {
                     auto argsCount = llvmFunc->arg_begin();
                     auto argsArray = llvmFunc->arg_begin() + 1;
                     auto cs2 = cs.withFunctionEntry(bb1);
-                    auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, selfVar, argsArray, argsCount,
-                                                                    send->fun.data(cs)->shortName(cs));
+                    auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, mcctx.irctx, selfVar, argsArray,
+                                                                    argsCount, send->fun.data(cs)->shortName(cs));
                     funcBuilder.CreateRet(rt);
                     funcBuilder.SetInsertPoint(bb1);
                     funcBuilder.CreateBr(bb2);
@@ -253,51 +253,62 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto str = send->fun.data(cs)->shortName(cs);
 
     // fill in args
-    auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
 
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
-    auto var = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
-    if (send->link != nullptr) {
-        // this send has a block!
-        auto rawId = Payload::idIntern(cs, builder, str);
-        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlock"),
-                                  {var, rawId, llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)),
-                                   args, mcctx.blk, irctx.localsOffset[rubyBlockId]},
-                                  "rawSendResult");
-
-    } else if (send->fun == core::Names::super()) {
-        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"),
-                                  {llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)), args},
-                                  "rawSendResult");
+    auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
+    auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
+    if (send->fun == core::Names::super()) {
+        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"), {argc, argv}, "rawSendResult");
     } else {
-        return callViaRubyVMSimple(cs, mcctx.build, var, args,
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)), str);
+        return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, str, mcctx.blk,
+                                   irctx.localsOffset[rubyBlockId]);
     }
 };
 
-llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *self,
-                                                   llvm::Value *argv, llvm::Value *argc, string_view name) {
-    auto &builder = builderCast(build);
-    auto str = name;
+llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, string slowFunName) {
     auto icValidatorFunc = cs.module->getFunction("sorbet_inlineCacheInvalidated");
     auto inlineCacheType =
         (llvm::StructType *)(((llvm::PointerType *)((icValidatorFunc->arg_begin() + 1)->getType()))->getElementType());
     ENFORCE(inlineCacheType != nullptr);
+
     auto methodEntryType = (llvm::StructType *)(inlineCacheType->elements()[0]);
-    auto slowFunctionName = "call_via_vm_" + (string)str;
-    auto intt = llvm::Type::getInt64Ty(cs);
+    auto intTy = llvm::Type::getInt64Ty(cs);
     auto nullv = llvm::ConstantPointerNull::get(methodEntryType->getPointerTo());
-    auto cache =
+
+    auto *cache =
         new llvm::GlobalVariable(*cs.module, inlineCacheType, false, llvm::GlobalVariable::InternalLinkage,
-                                 llvm::ConstantStruct::get(inlineCacheType, nullv, llvm::ConstantInt::get(intt, 0),
-                                                           llvm::ConstantInt::get(intt, 0)),
-                                 llvm::Twine("ic_") + slowFunctionName);
-    auto rawId = Payload::idIntern(cs, builder, str);
-    return builder.CreateCall(cs.module->getFunction("sorbet_callFunc"), {self, rawId, argc, argv, cache},
-                              slowFunctionName);
+                                 llvm::ConstantStruct::get(inlineCacheType, nullv, llvm::ConstantInt::get(intTy, 0),
+                                                           llvm::ConstantInt::get(intTy, 0)),
+                                 llvm::Twine("ic_") + slowFunName);
+
+    return cache;
+}
+
+llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
+                                                   const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
+                                                   llvm::Value *argc, string_view name, llvm::Function *blkFun,
+                                                   llvm::Value *localsOffset) {
+    auto &builder = builderCast(build);
+
+    auto rawId = Payload::idIntern(cs, builder, name);
+    if (blkFun != nullptr) {
+        // blocks require a locals offset parameter
+        ENFORCE(localsOffset != nullptr);
+
+        auto slowFunctionName = "callFuncWithBlock_" + (string)name;
+        auto *cache = makeInlineCache(cs, slowFunctionName);
+        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlockWithCache"),
+                                  {self, rawId, argc, argv, blkFun, localsOffset, cache}, slowFunctionName);
+    } else {
+        auto slowFunctionName = "callFunc_" + (string)name;
+        auto *cache = makeInlineCache(cs, slowFunctionName);
+        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncWithCache"), {self, rawId, argc, argv, cache},
+                                  slowFunctionName);
+    }
 }
 
 } // namespace sorbet::compiler

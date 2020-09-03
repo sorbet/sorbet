@@ -282,7 +282,7 @@ public:
         auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, mcctx.irctx, mcctx.rubyBlockId);
         auto args = IREmitterHelpers::fillSendArgArray(mcctx);
         auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
-        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, self, args, argc, "new");
+        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, args, argc, "new");
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {

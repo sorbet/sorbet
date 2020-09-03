@@ -630,26 +630,6 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
     }
 }
 
-SORBET_INLINE
-VALUE sorbet_callFuncProc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
-                          VALUE proc) {
-    if (!NIL_P(proc)) {
-        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
-        vm_block_handler_verify(proc);
-        GET_EC()->passed_block_handler = proc;
-    }
-
-    // NOTE: rb_funcall_with_block is restricted to only calling public methods. Manually setting up the block handler
-    // and using rb_funcallv allows us to call private/protected methods.
-    return rb_funcallv(recv, func, argc, argv);
-}
-
-SORBET_INLINE
-VALUE sorbet_callFuncBlock(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
-                           BlockFFIType blockImpl, VALUE closure) {
-    return rb_block_call(recv, func, argc, argv, blockImpl, closure);
-}
-
 // defining a way to allocate storage for custom class:
 //      VALUE allocate(VALUE klass);
 //      rb_define_alloc_func(class, &allocate)
@@ -1664,13 +1644,54 @@ void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache
 }
 
 SORBET_ATTRIBUTE(noinline)
-VALUE sorbet_callFunc(VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
-                      struct FunctionInlineCache *cache) {
+VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
+                               SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
+                               struct FunctionInlineCache *cache) {
     if (UNLIKELY(sorbet_getMethodEpoch() != cache->method_state) ||
         UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
         sorbet_inlineCacheInvalidated(recv, cache, func);
     }
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
+}
+
+SORBET_INLINE
+VALUE sorbet_callFuncProcWithCache(VALUE recv, ID func, int argc,
+                                   SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, VALUE proc,
+                                   struct FunctionInlineCache *cache) {
+    if (!NIL_P(proc)) {
+        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
+        vm_block_handler_verify(proc);
+        GET_EC()->passed_block_handler = proc;
+    }
+
+    return sorbet_callFuncWithCache(recv, func, argc, argv, cache);
+}
+
+struct sorbet_iterMethodArg {
+    VALUE recv;
+    ID func;
+    int argc;
+    const VALUE *argv;
+    struct FunctionInlineCache *cache;
+};
+
+static VALUE sorbet_iterMethod(VALUE obj) {
+    struct sorbet_iterMethodArg *arg = (struct sorbet_iterMethodArg *)obj;
+    return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->cache);
+}
+
+SORBET_ATTRIBUTE(noinline)
+VALUE sorbet_callFuncBlockWithCache(VALUE recv, ID func, int argc,
+                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, BlockFFIType blockImpl,
+                                    VALUE closure, struct FunctionInlineCache *cache) {
+    struct sorbet_iterMethodArg arg;
+    arg.recv = recv;
+    arg.func = func;
+    arg.argc = argc;
+    arg.argv = argv;
+    arg.cache = cache;
+
+    return rb_iterate(sorbet_iterMethod, (VALUE)&arg, blockImpl, closure);
 }
 
 // ****

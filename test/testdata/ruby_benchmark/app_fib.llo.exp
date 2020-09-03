@@ -96,7 +96,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_- = private unnamed_addr constant [2 x i8] c"-\00", align 1
 @"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
-@"ic_call_via_vm_+" = internal global %struct.FunctionInlineCache zeroinitializer
+@"ic_callFunc_+" = internal global %struct.FunctionInlineCache zeroinitializer
 @"str_Return value" = private unnamed_addr constant [13 x i8] c"Return value\00", align 1
 @"stackFramePrecomputed_func_HasFib.<static-init>" = internal unnamed_addr global i8* null, align 8
 @"<static-init-locals-storage>.5" = internal global [1 x i64] zeroinitializer
@@ -154,8 +154,14 @@ declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #4
 ; Function Attrs: noreturn nounwind ssp uwtable
 declare void @sorbet_raiseArity(i32, i32, i32) local_unnamed_addr #5
 
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #6
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #6
+
 ; Function Attrs: inaccessiblememonly
-declare i32 @ruby_stack_check() local_unnamed_addr #6
+declare i32 @ruby_stack_check() local_unnamed_addr #7
 
 ; Function Attrs: nounwind ssp uwtable
 declare i8* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, i8*, i32, i32, i32, i64* nocapture readonly, i32) local_unnamed_addr #0
@@ -183,27 +189,27 @@ declare void @rb_gc_writebarrier_remember(i64) local_unnamed_addr #2
 declare %struct.rb_control_frame_struct* @sorbet_setRubyStackFrame(i1 zeroext, i32, i8*) local_unnamed_addr #0
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #7
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #8
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #7
+declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #8
 
 ; Function Attrs: nounwind ssp uwtable
 declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #0
 
 ; Function Attrs: nounwind readnone speculatable
-declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #8
+declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #9
 
 declare i64 @rb_int2big(i64) local_unnamed_addr #2
 
 ; Function Attrs: alwaysinline norecurse nounwind readonly ssp uwtable
-declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #9
+declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #10
 
 ; Function Attrs: noinline nounwind ssp uwtable
-declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
+declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @func_HasFib.fib(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #10 !dbg !8 {
+define i64 @func_HasFib.fib(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #11 !dbg !8 {
 functionEntryInitializers:
   %callArgs = alloca [1 x i64], align 8
   %stackFrame_func_HasFib.fib = load i8*, i8** @stackFramePrecomputed_func_HasFib.fib, align 8
@@ -242,7 +248,7 @@ sorbet_rb_int_minus.exit115:                      ; preds = %sorbet_rb_int_lt.ex
   br i1 %16, label %"alternativeCallIntrinsic_Integer_+", label %"fastSymCallIntrinsic_Integer_+", !dbg !28, !prof !34
 
 BB4:                                              ; preds = %44, %39, %48, %"alternativeCallIntrinsic_Integer_+"
-  %"<returnMethodTemp>.sroa.0.0" = phi i64 [ %"call_via_vm_+", %"alternativeCallIntrinsic_Integer_+" ], [ %49, %48 ], [ %47, %44 ], [ %43, %39 ], !dbg !35
+  %"<returnMethodTemp>.sroa.0.0" = phi i64 [ %"callFunc_+", %"alternativeCallIntrinsic_Integer_+" ], [ %49, %48 ], [ %47, %44 ], [ %43, %39 ], !dbg !35
   store i64* %8, i64** %1, align 8, !tbaa !27
   %17 = and i64 %"<returnMethodTemp>.sroa.0.0", 1
   %18 = icmp eq i64 %17, 0
@@ -274,12 +280,12 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
 
 27:                                               ; preds = %22
   %28 = load i64, i64* @rb_cModule, align 8, !dbg !29, !tbaa !4
-  %29 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %28) #7, !dbg !29
+  %29 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %28) #8, !dbg !29
   %30 = icmp eq i64 %29, 0, !dbg !29
   br i1 %30, label %codeRepl122, label %sorbet_isa_class_of.exit, !dbg !29, !prof !37
 
 sorbet_isa_class_of.exit:                         ; preds = %27
-  %31 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %23) #7, !dbg !29
+  %31 = tail call i64 @rb_class_inherited_p(i64 %selfRaw, i64 %23) #8, !dbg !29
   %32 = icmp eq i64 %31, 0, !dbg !29
   br i1 %32, label %codeRepl122, label %typeTestSuccess, !dbg !29, !prof !34
 
@@ -305,7 +311,7 @@ codeRepl:                                         ; preds = %typeTestSuccess
   unreachable
 
 "alternativeCallIntrinsic_Integer_+":             ; preds = %sorbet_rb_int_minus.exit115
-  %"call_via_vm_+" = call i64 @sorbet_callFunc(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_call_via_vm_+"), !dbg !28
+  %"callFunc_+" = call i64 @sorbet_callFuncWithCache(i64 %directSendResult, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+"), !dbg !28
   br label %BB4, !dbg !28
 
 "fastSymCallIntrinsic_Integer_+":                 ; preds = %sorbet_rb_int_minus.exit115
@@ -340,7 +346,7 @@ codeRepl121:                                      ; preds = %BB4
 }
 
 ; Function Attrs: nounwind sspreq
-define void @Init_app_fib() local_unnamed_addr #11 {
+define void @Init_app_fib() local_unnamed_addr #12 {
 entry:
   %locals1.i.i = alloca [0 x i64], align 8
   %callArgs.i = alloca [1 x i64], align 8
@@ -508,12 +514,12 @@ sorbet_writeLocal.exit.i.i:                       ; preds = %85, %83
 
 94:                                               ; preds = %sorbet_writeLocal.exit.i.i
   %95 = load i64, i64* @rb_cModule, align 8, !dbg !65, !tbaa !4
-  %96 = tail call i64 @rb_obj_is_kind_of(i64 %92, i64 %95) #7, !dbg !65
+  %96 = tail call i64 @rb_obj_is_kind_of(i64 %92, i64 %95) #8, !dbg !65
   %97 = icmp eq i64 %96, 0, !dbg !65
   br i1 %97, label %codeRepl, label %sorbet_isa_class_of.exit.i.i, !dbg !65, !prof !37
 
 sorbet_isa_class_of.exit.i.i:                     ; preds = %94
-  %98 = tail call i64 @rb_class_inherited_p(i64 %92, i64 %61) #7, !dbg !65
+  %98 = tail call i64 @rb_class_inherited_p(i64 %92, i64 %61) #8, !dbg !65
   %99 = icmp eq i64 %98, 0, !dbg !65
   br i1 %99, label %codeRepl, label %typeTestSuccess.i.i, !dbg !65, !prof !34
 
@@ -581,12 +587,6 @@ codeRepl4:                                        ; preds = %sorbet_readRealpath
   ret void
 }
 
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #12
-
-; Function Attrs: argmemonly nounwind
-declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #12
-
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
 define internal fastcc void @func_HasFib.fib.cold.1(i64 %rawArg_n) unnamed_addr #13 {
 newFuncRoot:
@@ -639,13 +639,13 @@ attributes #2 = { "addedToSilenceEmptyAttrsError" }
 attributes #3 = { noinline nounwind ssp uwtable }
 attributes #4 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #5 = { noreturn nounwind ssp uwtable }
-attributes #6 = { inaccessiblememonly "addedToSilenceEmptyAttrsError" }
-attributes #7 = { nounwind readnone }
-attributes #8 = { nounwind readnone speculatable }
-attributes #9 = { alwaysinline norecurse nounwind readonly ssp uwtable }
-attributes #10 = { nounwind sspreq uwtable }
-attributes #11 = { nounwind sspreq }
-attributes #12 = { argmemonly nounwind }
+attributes #6 = { argmemonly nounwind }
+attributes #7 = { inaccessiblememonly "addedToSilenceEmptyAttrsError" }
+attributes #8 = { nounwind readnone }
+attributes #9 = { nounwind readnone speculatable }
+attributes #10 = { alwaysinline norecurse nounwind readonly ssp uwtable }
+attributes #11 = { nounwind sspreq uwtable }
+attributes #12 = { nounwind sspreq }
 attributes #13 = { cold minsize noreturn nounwind sspreq uwtable }
 attributes #14 = { cold minsize noreturn nounwind sspreq }
 attributes #15 = { nounwind }

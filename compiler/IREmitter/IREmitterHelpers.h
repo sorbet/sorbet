@@ -85,8 +85,12 @@ public:
 
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
-    static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *self,
-                                            llvm::Value *argv, llvm::Value *argc, std::string_view name);
+    static llvm::Value *makeInlineCache(CompilerState &cs, std::string slowFunName);
+
+    static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
+                                            const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
+                                            llvm::Value *argc, std::string_view name, llvm::Function *blkFun = nullptr,
+                                            llvm::Value *localsOffset = nullptr);
 
     static llvm::Value *emitMethodCallDirrect(MethodCallContext &mcctx, core::SymbolRef funSym);
 

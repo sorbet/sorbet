@@ -85,10 +85,10 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_Object = private unnamed_addr constant [7 x i8] c"Object\00", align 1
 @str_cast = private unnamed_addr constant [5 x i8] c"cast\00", align 1
 @str_A = private unnamed_addr constant [2 x i8] c"A\00", align 1
-@ic_call_via_vm_foo = internal global %struct.FunctionInlineCache zeroinitializer
 @rubyIdPrecomputed_foo = internal unnamed_addr global i64 0, align 8
 @str_foo = private unnamed_addr constant [4 x i8] c"foo\00", align 1
-@ic_call_via_vm_foo.1 = internal global %struct.FunctionInlineCache zeroinitializer
+@ic_callFunc_foo = internal global %struct.FunctionInlineCache zeroinitializer
+@ic_callFunc_foo.1 = internal global %struct.FunctionInlineCache zeroinitializer
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -157,7 +157,7 @@ declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #6
 declare i64 @sorbet_getConstantEpoch() local_unnamed_addr #7
 
 ; Function Attrs: noinline nounwind ssp uwtable
-declare i64 @sorbet_callFunc(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
+declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_Object#doubleCast"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #8 !dbg !8 {
@@ -215,11 +215,11 @@ codeRepl54:                                       ; preds = %fillRequiredArgs
   unreachable
 
 typeTestSuccess28:                                ; preds = %17
-  %call_via_vm_foo = tail call i64 @sorbet_callFunc(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo), !dbg !28
+  %callFunc_foo = tail call i64 @sorbet_callFuncWithCache(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo), !dbg !28
   %23 = getelementptr inbounds i64, i64* %7, i64 3
   store i64* %23, i64** %1, align 8, !tbaa !27
-  %call_via_vm_foo43 = tail call i64 @sorbet_callFunc(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_call_via_vm_foo.1), !dbg !33
-  ret i64 %call_via_vm_foo43
+  %callFunc_foo43 = tail call i64 @sorbet_callFuncWithCache(i64 %rawArg_a, i64 %rubyId_foo, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo.1), !dbg !33
+  ret i64 %callFunc_foo43
 
 codeRepl:                                         ; preds = %17
   tail call void @sorbet_cast_failure(i64 %rawArg_a, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_cast, i64 0, i64 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_A, i64 0, i64 0)) #13, !dbg !34
