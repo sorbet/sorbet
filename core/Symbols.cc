@@ -994,7 +994,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType.get());
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
     auto currentClasses = appliedType->targs[0];
 
     auto iter = currentClasses.get();
@@ -1035,7 +1035,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType.get());
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Array(), "sealedSubclasses should always be Array");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
 
     auto currentClasses = appliedType->targs[0];
     if (currentClasses->isBottom()) {
