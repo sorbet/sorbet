@@ -51,4 +51,18 @@ module Main
   def generic_class_module_glb
     T.assert_type!(0, T.all(A, T::Hash[String, String])) # error: does not have asserted type `T.all(T::Hash[String, String], A)`
   end
+
+  def generic_class_lub(b)
+    if b == 1
+      xs = T::Array[T.nilable(String)].new
+    elsif b == 2
+      xs = nil
+    else
+      xs = T::Array[T.untyped].new
+    end
+    
+    # T.any(nil, T::Array[T.nilable(String)], T::Array[T.untyped]) => T.nlable(T::Array[T.untyped])
+
+    T.assert_type!(xs, T.nilable(T::Array[T.untyped]))
+  end
 end
