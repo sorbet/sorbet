@@ -102,13 +102,14 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         categoryCounterInc("lubDistributeOr.outcome", "worst");
         return OrType::make_shared(t1, underlying(t2));
     }
-    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
     // lub back everything except typesConsumed
     auto remainingTypes = filterOrComponents(t1, typesConsumed);
     if (remainingTypes == nullptr) {
+        categoryCounterInc("lubDistributeOr.outcome", "t2");
         // t1 <: t2
         return t2;
     }
+    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
     return OrType::make_shared(move(remainingTypes), underlying(t2));
 }
 
