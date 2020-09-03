@@ -62,7 +62,6 @@ module Main
     end
     
     # T.any(nil, T::Array[T.nilable(String)], T::Array[T.untyped]) => T.nlable(T::Array[T.untyped])
-
     T.assert_type!(xs, T.nilable(T::Array[T.untyped]))
   end
 end

@@ -87,7 +87,6 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
 
     for (auto &component : originalOrComponents) {
         auto lubbed = Types::any(gs, component, t2);
-        // Fact: t2 <: lubbed and component <: lubbed by construction (lubbed = T.any(t2, component))
         if (lubbed.get() == component.get()) {
             // lubbed == component, so t2 <: component and t2 <: t1
             categoryCounterInc("lubDistributeOr.outcome", "t1");
