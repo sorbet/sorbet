@@ -166,14 +166,6 @@ module T::Utils
     end
   end
 
-  def self.all_subclasses_of_sealed_class(klass)
-    if !T::Private::Sealed.sealed_module?(klass)
-      raise "#{klass} is not declared `sealed!`"
-    end
-
-    klass.instance_variable_get(:@sorbet_sealed_module_all_subclasses)
-  end
-
   module Nilable
     # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.

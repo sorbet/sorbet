@@ -169,7 +169,7 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
       sealed!
     end
 
-    assert_equal(Set.new, T::Utils.all_subclasses_of_sealed_class(parent))
+    assert_equal(Set.new, parent.sealed_subclasses)
   end
 
   it "can enumerate all a sealed class's subclasses" do
@@ -181,7 +181,7 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
     a = Class.new(parent)
     b = Class.new(parent)
 
-    assert_equal(Set[a, b], T::Utils.all_subclasses_of_sealed_class(parent))
+    assert_equal(Set[a, b], parent.sealed_subclasses)
   end
 
   it "can enumerate all the classes which include a sealed module" do
@@ -197,15 +197,7 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
       include parent
     end
 
-    assert_equal(Set[a, b], T::Utils.all_subclasses_of_sealed_class(parent))
+    assert_equal(Set[a, b], parent.sealed_subclasses)
   end
 
-  it "throws an exception if we try to get subclasses of a non-sealed parent" do
-    parent = Class.new
-    err = assert_raises(RuntimeError) do
-      res = T::Utils.all_subclasses_of_sealed_class(parent)
-    end
-
-    assert_match(/is not declared `sealed!`/, err.message)
-  end
 end

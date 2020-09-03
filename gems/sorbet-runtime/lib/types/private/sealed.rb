@@ -9,6 +9,10 @@ module T::Private::Sealed
       T::Private::Sealed.validate_inheritance(this_line, self, 'inherited')
       @sorbet_sealed_module_all_subclasses << other
     end
+
+    def sealed_subclasses
+      @sorbet_sealed_module_all_subclasses
+    end
   end
 
   module NoIncludeExtend
@@ -24,6 +28,10 @@ module T::Private::Sealed
       this_line = Kernel.caller.find {|line| !line.match(/in `extended'$/)}
       T::Private::Sealed.validate_inheritance(this_line, self, 'extended')
       @sorbet_sealed_module_all_subclasses << other
+    end
+
+    def sealed_subclasses
+      @sorbet_sealed_module_all_subclasses
     end
   end
 
