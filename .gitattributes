@@ -2,3 +2,6 @@
 test/**/*.out diff
 *.llo.exp linguist-language=LLVM
 *.ll.exp linguist-language=LLVM
+
+test/testdata/**/*.llo.exp linguist-generated
+test/testdata/**/*.ll.exp linguist-generated
