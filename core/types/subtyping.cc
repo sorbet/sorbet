@@ -87,23 +87,34 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
 
     for (auto &component : originalOrComponents) {
         auto lubbed = Types::any(gs, component, t2);
+        // Fact: t2 <: lubbed and component <: lubbed by construction (lubbed = T.any(t2, component))
         if (lubbed.get() == component.get()) {
+            // lubbed == component, so t2 <: component and t2 <: t1
             categoryCounterInc("lubDistributeOr.outcome", "t1");
             return t1;
-        }
-        if (lubbed.get() == t2.get()) {
-            categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
+        } else if (lubbed.get() == t2.get()) {
+            // lubbed == t2, so component <: t2
+            // Thus, we don't need to include component in the final OrType; it's subsumed by t2.
             typesConsumed.emplace_back(component.get());
+        } else if (Types::isSubType(gs, lubbed, t2)) {
+            // lubbed <: t2, so t2 == lubbed.
+            typesConsumed.emplace_back(component.get());
+        } else if (Types::isSubType(gs, lubbed, component)) {
+            // lubbed <: component, so component == lubbed.
+            categoryCounterInc("lubDistributeOr.outcome", "t1'");
+            return t1;
         }
     }
     if (typesConsumed.empty()) {
+        // t1 has no components that overlap with t2
         categoryCounterInc("lubDistributeOr.outcome", "worst");
         return OrType::make_shared(t1, underlying(t2));
     }
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-    // lub back everything except typesComsumed
+    // lub back everything except typesConsumed
     auto remainingTypes = filterOrComponents(t1, typesConsumed);
     if (remainingTypes == nullptr) {
+        // t1 <: t2
         return t2;
     }
     return OrType::make_shared(move(remainingTypes), underlying(t2));
