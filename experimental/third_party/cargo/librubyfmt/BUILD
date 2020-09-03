@@ -22,7 +22,13 @@ rust_library(
             "//third_party/cargo/vendor/simplelog-0.8.0:simplelog",
     ],
     proc_macro_deps = [
-            "//experimental/cargo/ripper_deserialize:ripper_deserialize",
+            "//experimental/third_party/cargo/ripper_deserialize:ripper_deserialize",
             ],
     edition = "2018",
 )
+
+cc_library(
+        name = "rubyfmt_macro_wrappers",
+        srcs = ["src/rubyfmt.c"],
+        deps = ["@ruby_2_6//:headers"],
+        )

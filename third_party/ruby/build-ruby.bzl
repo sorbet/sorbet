@@ -190,8 +190,10 @@ def _build_ruby_impl(ctx):
 
     internal_incdir = ctx.actions.declare_directory("toolchain/internal_include")
     static_libs = ctx.actions.declare_file("toolchain/static_libs")
+    static_lib_ruby = ctx.actions.declare_file("toolchain/static_libs/libruby.2.6-static.a")
+    static_lib_ripper = ctx.actions.declare_file("toolchain/static_libs/libripper.2.6-static.a")
 
-    outputs = binaries + [libdir, incdir, sharedir, internal_incdir, static_libs]
+    outputs = binaries + [libdir, incdir, sharedir, internal_incdir, static_libs, static_lib_ruby, static_lib_ripper]
 
     # Build
     ctx.actions.run_shell(
@@ -207,6 +209,8 @@ def _build_ruby_impl(ctx):
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
             static_libs = static_libs.path,
+            static_lib_ruby = static_lib_ruby.path,
+            static_lib_ripper = static_lib_ripper.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             bundler = ctx.files.bundler[0].path,
@@ -224,10 +228,13 @@ def _build_ruby_impl(ctx):
             lib = libdir,
             share = sharedir,
             static_libs = static_libs,
+            static_lib_ruby = static_lib_ruby,
+            static_lib_ripper = static_lib_ripper,
         ),
         DefaultInfo(
             files = depset(outputs),
         ),
+        CcInfo(),
     ]
 
 _build_ruby = rule(
@@ -259,6 +266,7 @@ _build_ruby = rule(
     provides = [
         RubyInfo,
         DefaultInfo,
+        CcInfo,
     ],
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
     implementation = _build_ruby_impl,
@@ -451,16 +459,47 @@ _ruby_internal_headers = rule(
 def _rubyfmt_static_deps_impl(ctx):
     ruby_info = ctx.attr.ruby[RubyInfo]
 
-    libs = depset([ruby_info.static_libs])
+    libs = [ruby_info.static_lib_ruby, ruby_info.static_lib_ripper]
+    cc_toolchain = find_cpp_toolchain(ctx)
 
-    return [DefaultInfo(files = libs)]
+    cc_toolchain = ctx.attr._cc_toolchain[cc_common.CcToolchainInfo]
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
+
+    build = []
+
+    for file in libs:
+        print(file)
+        library_to_link = cc_common.create_library_to_link(
+                cc_toolchain=cc_toolchain,
+                actions = ctx.actions,
+                feature_configuration = feature_configuration,
+                static_library = file,
+                )
+        build.append(library_to_link)
+
+    build = depset(build)
+    li = cc_common.create_linker_input(
+        owner = ctx.label,
+        libraries = build,
+    )
+    lc = cc_common.create_linking_context(linker_inputs=depset([li]))
+    return [CcInfo(linking_context=lc)]
 
 _rubyfmt_static_deps = rule(
     attrs = {
         "ruby": attr.label(
-            providers = [RubyInfo],
+            providers = [CcInfo],
+        ),
+        "_cc_toolchain": attr.label(
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
     },
+    fragments = ["cpp"],
     implementation = _rubyfmt_static_deps_impl,
 )
 

@@ -5,9 +5,6 @@ use std::io::{Cursor, Write};
 use std::slice;
 use std::str;
 
-#[global_allocator]
-static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-
 pub type RawStatus = i64;
 
 #[macro_use]
