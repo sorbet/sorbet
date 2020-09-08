@@ -1363,6 +1363,31 @@ public:
     }
 } Magic_buildArray;
 
+class Magic_buildRange : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
+
+        auto rangeElemType = Types::dropLiteral(args.args[0]->type);
+        auto firstArgIsNil = rangeElemType->isNilClass();
+        if (!firstArgIsNil) {
+            rangeElemType = Types::dropNil(gs, rangeElemType);
+        }
+        auto other = Types::dropLiteral(args.args[1]->type);
+        auto secondArgIsNil = other->isNilClass();
+        if (firstArgIsNil) {
+            if (secondArgIsNil) {
+                rangeElemType = Types::untypedUntracked();
+            } else {
+                rangeElemType = Types::dropNil(gs, other);
+            }
+        } else if (!secondArgIsNil) {
+            rangeElemType = Types::any(gs, rangeElemType, Types::dropNil(gs, other));
+        }
+        res.returnType = Types::rangeOf(gs, rangeElemType);
+    }
+} Magic_buildRange;
+
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
         if (auto *ot = cast_type<OrType>(type.get())) {
@@ -2265,6 +2290,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildKeywordArgs(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
