@@ -1366,7 +1366,7 @@ public:
 class Magic_buildRange : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
-        ENFORCE(args.args.size() == 2, "Magic_buildRange called without argument");
+        ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
 
         auto rangeElemType = Types::dropLiteral(args.args[0]->type);
         auto firstArgIsNil = rangeElemType->isNilClass();

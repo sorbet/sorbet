@@ -88,6 +88,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
+                Literal{ value = false }
               ]
             }
           }
@@ -120,6 +121,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
+                Literal{ value = true }
               ]
             }
           }
@@ -152,6 +154,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
+                Literal{ value = false }
               ]
             }
           }
@@ -184,6 +187,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
+                Literal{ value = true }
               ]
             }
           }
@@ -216,6 +220,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 EmptyTree
+                Literal{ value = false }
               ]
             }
           }
@@ -248,6 +253,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 EmptyTree
+                Literal{ value = true }
               ]
             }
           }
@@ -280,6 +286,7 @@ ClassDef{
               args = [
                 Literal{ value = 1 }
                 Literal{ value = "a" }
+                Literal{ value = false }
               ]
             }
           }
@@ -312,6 +319,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
+                Literal{ value = false }
               ]
             }
           }
@@ -344,6 +352,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
+                Literal{ value = true }
               ]
             }
           }
@@ -376,6 +385,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 EmptyTree
+                Literal{ value = false }
               ]
             }
           }
@@ -408,6 +418,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 EmptyTree
+                Literal{ value = true }
               ]
             }
           }
@@ -440,6 +451,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
+                Literal{ value = false }
               ]
             }
           }
@@ -472,6 +484,7 @@ ClassDef{
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
+                Literal{ value = true }
               ]
             }
           }
@@ -507,6 +520,7 @@ ClassDef{
                   name = <U untyped>
                 }
                 Literal{ value = 42 }
+                Literal{ value = false }
               ]
             }
           }
@@ -542,6 +556,7 @@ ClassDef{
                   kind = Local
                   name = <U untyped>
                 }
+                Literal{ value = false }
               ]
             }
           }
@@ -580,6 +595,7 @@ ClassDef{
                   kind = Local
                   name = <U untyped>
                 }
+                Literal{ value = false }
               ]
             }
           }
@@ -615,6 +631,7 @@ ClassDef{
                   kind = Local
                   name = <U nilable>
                 }
+                Literal{ value = false }
               ]
             }
           }
@@ -650,6 +667,7 @@ ClassDef{
                   name = <U nilable>
                 }
                 Literal{ value = 1 }
+                Literal{ value = false }
               ]
             }
           }
@@ -688,6 +706,7 @@ ClassDef{
                   kind = Local
                   name = <U nilable>
                 }
+                Literal{ value = false }
               ]
             }
           }
@@ -721,6 +740,7 @@ ClassDef{
                 args = [
                   Literal{ value = 1 }
                   Literal{ value = 42 }
+                  Literal{ value = false }
                 ]
               }
               fun = <U first>
@@ -759,6 +779,7 @@ ClassDef{
                 args = [
                   Literal{ value = "a" }
                   Literal{ value = "z" }
+                  Literal{ value = false }
                 ]
               }
               fun = <U last>

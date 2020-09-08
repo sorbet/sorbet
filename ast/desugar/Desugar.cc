@@ -1281,14 +1281,16 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 auto recv = MK::Constant(loc, core::Symbols::Magic());
                 auto from = node2TreeImpl(dctx, std::move(ret->from));
                 auto to = node2TreeImpl(dctx, std::move(ret->to));
-                auto send = MK::Send2(loc, std::move(recv), core::Names::buildRange(), std::move(from), std::move(to));
+                auto excludeEnd = MK::False(loc);
+                auto send = MK::Send3(loc, std::move(recv), core::Names::buildRange(), std::move(from), std::move(to), std::move(excludeEnd));
                 result = std::move(send);
             },
             [&](parser::ERange *ret) {
                 auto recv = MK::Constant(loc, core::Symbols::Magic());
                 auto from = node2TreeImpl(dctx, std::move(ret->from));
                 auto to = node2TreeImpl(dctx, std::move(ret->to));
-                auto send = MK::Send2(loc, std::move(recv), core::Names::buildRange(), std::move(from), std::move(to));
+                auto excludeEnd = MK::True(loc);
+                auto send = MK::Send3(loc, std::move(recv), core::Names::buildRange(), std::move(from), std::move(to), std::move(excludeEnd));
                 result = std::move(send);
             },
             [&](parser::Regexp *regexpNode) {
