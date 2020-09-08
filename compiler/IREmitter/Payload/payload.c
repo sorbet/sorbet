@@ -1259,6 +1259,16 @@ VALUE sorbet_buildArrayIntrinsic(VALUE recv, ID fun, int argc, const VALUE *cons
     return rb_ary_new_from_values(argc, argv);
 }
 
+VALUE sorbet_buildRangeIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                 VALUE closure) {
+    sorbet_ensure_arity(argc, 3);
+
+    VALUE start = argv[0];
+    VALUE end = argv[1];
+    VALUE excludeEnd = argv[2];
+    return rb_range_new(start, end, excludeEnd);
+}
+
 VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
     sorbet_ensure_arity(argc, 3);
