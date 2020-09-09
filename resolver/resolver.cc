@@ -2758,6 +2758,64 @@ public:
     }
 };
 
+class ResolveMixesInClassMethodsWalk {
+    void processMixesInClassMethods(core::MutableContext ctx, ast::Send &send) {
+        if (!ctx.owner.data(ctx)->isClassOrModule() || !ctx.owner.data(ctx)->isClassOrModuleModule()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` can only be declared inside a module, not a class", send.fun.data(ctx)->show(ctx));
+            }
+            // Keep processing it anyways
+        }
+
+        if (send.args.size() != 1) {
+            // The arity mismatch error will be emitted later by infer.
+            return;
+        }
+        auto &front = send.args.front();
+        auto *id = ast::cast_tree<ast::ConstantLit>(front);
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClassOrModule()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Argument to `{}` must be statically resolvable to a module",
+                            send.fun.data(ctx)->show(ctx));
+            }
+            return;
+        }
+        if (id->symbol.data(ctx)->isClassOrModuleClass()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
+                            id->symbol.data(ctx)->show(ctx));
+            }
+            return;
+        }
+        if (id->symbol == ctx.owner) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Must not pass your self to `{}`", send.fun.data(ctx)->show(ctx));
+            }
+            return;
+        }
+        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
+        if (existing.exists() && existing != id->symbol) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send.fun.data(ctx)->show(ctx),
+                            existing.data(ctx)->show(ctx), id->symbol.data(ctx)->show(ctx));
+            }
+            return;
+        }
+
+        auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
+        mixedInClassMethods.emplace_back(id->symbol);
+    }
+
+public:
+    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
+            processMixesInClassMethods(ctx, send);
+        }
+        return tree;
+    }
+};
+
 class ResolveSanityCheckWalk {
 public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
