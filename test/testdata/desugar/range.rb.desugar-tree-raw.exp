@@ -727,6 +727,144 @@ ClassDef{
           Assign{
             lhs = UnresolvedIdent{
               kind = Local
+              name = <U lr20>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                EmptyTree
+                Literal{ value = 1 }
+                Literal{ value = false }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr20>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr21>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                EmptyTree
+                Literal{ value = nil }
+                Literal{ value = false }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr21>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr22>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                EmptyTree
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U untyped>
+                }
+                Literal{ value = false }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr22>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U lr23>
+            }
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::<Magic>
+              }
+              fun = <U <build-range>>
+              block = nullptr
+              args = [
+                EmptyTree
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U nilable>
+                }
+                Literal{ value = false }
+              ]
+            }
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <U lr23>
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
               name = <U lr_first>
             }
             rhs = Send{
