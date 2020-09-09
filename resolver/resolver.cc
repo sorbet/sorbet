@@ -2793,14 +2793,6 @@ class ResolveMixesInClassMethodsWalk {
             }
             return;
         }
-        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
-        if (existing.exists() && existing != id->symbol) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send.fun.data(ctx)->show(ctx),
-                            existing.data(ctx)->show(ctx), id->symbol.data(ctx)->show(ctx));
-            }
-            return;
-        }
 
         auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
         mixedInClassMethods.emplace_back(id->symbol);

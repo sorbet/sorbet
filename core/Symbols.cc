@@ -871,8 +871,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             continue;
         }
 
-        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
+        if (pair.first == Names::singleton() || pair.first == Names::attached()) {
             continue;
         }
 
