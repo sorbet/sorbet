@@ -35,3 +35,12 @@ a.none? { |i| i }
 a.one?
 a.one?(1)
 a.one? { |i| i }
+
+# detect
+p = T.let(->{ 1 }, T.proc.returns(Integer))
+T.reveal_type([1,2].detect) # error: Revealed type: `T::Enumerator[Integer]`
+T.reveal_type([1,2].detect {|x| false}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type([1,2].detect(-> {}) {|x| false}) # error: Revealed type: `T.untyped`
+T.reveal_type([1,2].detect(-> {})) # error: Revealed type: `T::Enumerator[T.untyped]`
+T.reveal_type([1,2].detect(p) {|x| false}) # error: Revealed type: `Integer`
+T.reveal_type([1,2].detect(p)) # error: Revealed type: `T::Enumerator[Integer]`
