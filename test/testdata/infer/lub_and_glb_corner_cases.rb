@@ -64,4 +64,14 @@ module Main
     # T.any(nil, T::Array[T.nilable(String)], T::Array[T.untyped]) => T.nlable(T::Array[T.untyped])
     T.assert_type!(xs, T.nilable(T::Array[T.untyped]))
   end
+
+  def generic_class_nilable_array_tuple_lub
+    a = T.let(nil, T.nilable(T::Array[Float]))
+    b = T.let(nil, T.nilable(T::Array[Integer]))
+    T.assert_type!([a, b], [T.nilable(T::Array[Float]), T.nilable(T::Array[Integer])])
+    # This reproduces a bug in Sorbet. In the buggy version, the above T.assert_type! passes,
+    # but the below statement would not error.
+    [a, b].each(&:lazy)
+    #            ^^^^^ error: Method `lazy` does not exist on `NilClass`
+  end
 end
