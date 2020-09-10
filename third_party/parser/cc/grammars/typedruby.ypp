@@ -1490,10 +1490,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                         delimited_block->end);
                       DIAGCHECK();
                     }
-                | tLAMBDA lambda
+                | tLAMBDA
+                    {
+                      driver.lex.context.push(Context::State::LAMBDA);
+                    }
+                    lambda
                     {
                       auto lambda_call = driver.build.callLambda(self, $1);
-                      auto &lambda = $2;
+                      auto &lambda = $3;
                       $$ = driver.build.block(self, lambda_call,
                         lambda->begin,
                         lambda->args,
@@ -1593,6 +1597,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       driver.lex.extend_static();
                       driver.lex.cmdarg.push(false);
+                      driver.lex.context.push(Context::State::MODULE);
                     }
                     bodystmt kEND
                     {
@@ -1608,6 +1613,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
 
                       driver.lex.cmdarg.pop();
                       driver.lex.unextend();
+                      driver.lex.context.pop();
                     }
                 | kDEF fname
                     {
@@ -1970,6 +1976,7 @@ opt_block_args_tail:
                     }
                   f_larglist
                     {
+                      driver.lex.context.pop();
                       driver.lex.cmdarg.push(false);
                     }
                   lambda_body
