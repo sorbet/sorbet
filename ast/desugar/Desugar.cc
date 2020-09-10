@@ -62,7 +62,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
             }
         }
     } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode.get())) {
-        // The block use numbered parameters like `_1` or `_9` so we add them as parameters
+        // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
         for (int i = 1; i <= numparams->max; i++) {
             core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + std::to_string(i));
             args.emplace_back(MK::Local(loc, name));
