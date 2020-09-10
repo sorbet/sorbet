@@ -128,8 +128,8 @@ TreePtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser
 }
 
 TreePtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-        unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
-        unique_ptr<parser::Node> &blockBody) {
+                     unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
+                     unique_ptr<parser::Node> &blockBody) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, std::move(blockSend));
     Send *send;
