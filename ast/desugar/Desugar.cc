@@ -55,6 +55,8 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
                 unique_ptr<parser::Node> destructure =
                     make_unique<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, std::move(destructure)));
+            } else if (auto *lhs = parser::cast_node<parser::Kwnilarg>(arg.get())) {
+                // TODO implement logic for `**nil` args
             } else {
                 args.emplace_back(node2TreeImpl(dctx, std::move(arg)));
             }
