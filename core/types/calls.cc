@@ -433,14 +433,8 @@ bool extendsTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass) {
 /**
  * Make an autocorrection for adding `extend T::Helpers`, when needed.
  */
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalState &gs, const Type *thisType,
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass,
                                                                  const Loc &call) {
-    auto *classType = cast_type<ClassType>(thisType);
-    if (classType == nullptr) {
-        return nullopt;
-    }
-
-    auto enclosingClass = classType->symbol.data(gs)->topAttachedClass(gs);
     if (extendsTHelpers(gs, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
@@ -537,8 +531,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                     args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed()) {
+                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
                     if (auto suggestion =
-                            maybeSuggestExtendTHelpers(gs, thisType, core::Loc(args.locs.file, args.locs.call))) {
+                            maybeSuggestExtendTHelpers(gs, attachedClass, core::Loc(args.locs.file, args.locs.call))) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
