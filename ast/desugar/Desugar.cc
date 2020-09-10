@@ -126,6 +126,40 @@ TreePtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser
 
     return body;
 }
+
+TreePtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
+        unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
+        unique_ptr<parser::Node> &blockBody) {
+    blockSend->loc = loc;
+    auto recv = node2TreeImpl(dctx, std::move(blockSend));
+    Send *send;
+    TreePtr res;
+    if ((send = cast_tree<Send>(recv)) != nullptr) {
+        res = std::move(recv);
+    } else {
+        // This must have been a csend; That will have been desugared
+        // into an insseq with an If in the expression.
+        res = std::move(recv);
+        auto *is = cast_tree<InsSeq>(res);
+        if (!is) {
+            if (auto e = dctx.ctx.beginError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
+                e.setHeader("No body in block");
+            }
+            return MK::EmptyTree();
+        }
+        auto *iff = cast_tree<If>(is->expr);
+        ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
+        send = cast_tree<Send>(iff->elsep);
+        ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
+    }
+    auto [args, destructures] = desugarArgs(dctx, loc, blockArgs);
+    auto desugaredBody = desugarBody(dctx, loc, blockBody, std::move(destructures));
+
+    // TODO the send->block's loc is too big and includes the whole send
+    send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
+    return res;
+}
+
 bool isStringLit(DesugarContext dctx, TreePtr &expr) {
     Literal *lit;
     return (lit = cast_tree<Literal>(expr)) && lit->isString(dctx.ctx);
@@ -993,68 +1027,10 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 result = std::move(res);
             },
             [&](parser::Block *block) {
-                block->send->loc = loc;
-                auto recv = node2TreeImpl(dctx, std::move(block->send));
-                Send *send;
-                TreePtr res;
-                if ((send = cast_tree<Send>(recv)) != nullptr) {
-                    res = std::move(recv);
-                } else {
-                    // This must have been a csend; That will have been desugared
-                    // into an insseq with an If in the expression.
-                    res = std::move(recv);
-                    auto *is = cast_tree<InsSeq>(res);
-                    if (!is) {
-                        if (auto e = dctx.ctx.beginError(block->loc, core::errors::Desugar::UnsupportedNode)) {
-                            e.setHeader("No body in block");
-                        }
-                        auto res = MK::EmptyTree();
-                        result = std::move(res);
-                        return;
-                    }
-                    auto *iff = cast_tree<If>(is->expr);
-                    ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
-                    send = cast_tree<Send>(iff->elsep);
-                    ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
-                }
-                auto [args, destructures] = desugarArgs(dctx, loc, block->args);
-                auto desugaredBody = desugarBody(dctx, loc, block->body, std::move(destructures));
-
-                // TODO the send->block's loc is too big and includes the whole send
-                send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
-                result = std::move(res);
+                result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
             },
             [&](parser::NumBlock *block) {
-                block->send->loc = loc;
-                auto recv = node2TreeImpl(dctx, std::move(block->send));
-                Send *send;
-                TreePtr res;
-                if ((send = cast_tree<Send>(recv)) != nullptr) {
-                    res = std::move(recv);
-                } else {
-                    // This must have been a csend; That will have been desugared
-                    // into an insseq with an If in the expression.
-                    res = std::move(recv);
-                    auto *is = cast_tree<InsSeq>(res);
-                    if (!is) {
-                        if (auto e = dctx.ctx.beginError(block->loc, core::errors::Desugar::UnsupportedNode)) {
-                            e.setHeader("No body in block");
-                        }
-                        auto res = MK::EmptyTree();
-                        result = std::move(res);
-                        return;
-                    }
-                    auto *iff = cast_tree<If>(is->expr);
-                    ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
-                    send = cast_tree<Send>(iff->elsep);
-                    ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
-                }
-                auto [args, destructures] = desugarArgs(dctx, loc, block->args);
-                auto desugaredBody = desugarBody(dctx, loc, block->body, std::move(destructures));
-
-                // TODO the send->block's loc is too big and includes the whole send
-                send->block = MK::Block(loc, std::move(desugaredBody), std::move(args));
-                result = std::move(res);
+                result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
             },
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
