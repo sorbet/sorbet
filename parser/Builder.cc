@@ -1274,7 +1274,7 @@ public:
                parser::isa_node<Hash>(&node);
     }
 
-    bool isNumberedParameterName(std::string name) {
+    bool isNumberedParameterName(std::string_view name) {
         return name.length() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9';
     }
 };
