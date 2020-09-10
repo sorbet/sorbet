@@ -22,11 +22,15 @@ public:
     void push(State state);
     void pop();
     void reset();
+    bool inBlock();
     bool inClass();
+    bool inDynamicBlock();
+    bool inLambda();
     bool indirectlyInDef();
     bool classDefintinionAllowed();
     bool moduleDefintinionAllowed();
     bool dynamicConstDefintinionAllowed();
+    std::vector<State> stackCopy();
 
 private:
     std::vector<State> stack;

@@ -154,6 +154,78 @@ public:
     }
 };
 
+// This stack stores the numparams used in each scope (ie a module, lambda, etc...)
+// For each scope we save the highest numparam used (or 0) and all the nodes in the
+// scope referencing a numparam.
+//
+// The stack as 3 states:
+//  * `top = 0`: no parameter (ordinary or numbered) in this scope
+//  * `top < 0`: ordinary parameter(s) in this scope
+//  * `top > 0`: at leat one numbered parameter in this scope (top being the highest one found)
+class max_numparam_stack {
+    struct NumparamScope {
+        int max;
+        ruby_parser::node_list* decls;
+    };
+
+    std::vector<NumparamScope> stack;
+
+    friend class base_driver;
+
+public:
+    max_numparam_stack() = default;
+
+    // We encountered an ordinary param while visiting the scope (top = -1)
+    void set_ordinary_params() {
+        if (!stack.empty()) {
+            top()->max = -1;
+        }
+    }
+
+    // Have we encountered an ordinary param before? (top < 0)
+    bool seen_ordinary_params() {
+        return stack.empty() ? false : top()->max < 0;
+    }
+
+    // Have we encountered a num param before? (top > 0)
+    bool seen_numparams() {
+        return stack.empty() ? false : top()->max > 0;
+    }
+
+    // Register a numparam in the current scope
+    void regis(int numparam, ruby_parser::node_list* decls) {
+        if (stack.empty()) {
+            push(decls);
+        } else {
+            top()->decls->concat(decls);
+        }
+        if (numparam > top()->max) {
+            top()->max = numparam;
+        }
+    }
+
+    // Current scope
+    NumparamScope* top() {
+        return &stack.back();
+    }
+
+    // Push a new scope on the stack (top = 0)
+    void push(ruby_parser::node_list* decls) {
+        stack.push_back(NumparamScope {0, decls});
+    }
+
+    // Pop the current scope
+    void pop() {
+        if (!stack.empty()) {
+            stack.pop_back();
+        }
+    }
+
+    std::vector<NumparamScope> stackCopy() {
+        return stack;
+    }
+};
+
 class base_driver {
 public:
     diagnostics_t diagnostics;
@@ -161,6 +233,7 @@ public:
     lexer lex;
     mempool alloc;
     current_arg_stack current_arg_stack;
+    max_numparam_stack numparam_stack;
 
     bool pending_error;
     size_t def_level;

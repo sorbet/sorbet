@@ -1,0 +1,3 @@
+s(:defs,
+  s(:self), :m, nil,
+  s(:send, nil, :_1))

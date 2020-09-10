@@ -1927,12 +1927,14 @@ opt_block_args_tail:
 
  block_param_def: tPIPE opt_bv_decl tPIPE
                     {
+                      driver.numparam_stack.set_ordinary_params();
                       $$ = driver.build.args(self, $1, $2, $3, true);
                       driver.current_arg_stack.set("");
                       DIAGCHECK();
                     }
                 | tPIPE block_param opt_bv_decl tPIPE
                     {
+                      driver.numparam_stack.set_ordinary_params();
                       auto &params = $2;
                       params->concat($3);
                       driver.current_arg_stack.set("");
@@ -1973,6 +1975,7 @@ opt_block_args_tail:
 
           lambda:   {
                       driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                     }
                   f_larglist
                     {
@@ -1982,16 +1985,21 @@ opt_block_args_tail:
                   lambda_body
                     {
                       driver.lex.cmdarg.pop();
-
                       auto &delimited_block = $4;
-                      delimited_block->args = $2;
+                      if (driver.numparam_stack.seen_numparams()) {
+                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                      } else {
+                        delimited_block->args = $2;
+                      }
                       $$ = delimited_block;
 
+                      driver.numparam_stack.pop();
                       driver.lex.unextend();
                     }
 
      f_larglist: tLPAREN2 f_args opt_bv_decl tRPAREN
                     {
+                      driver.numparam_stack.set_ordinary_params();
                       auto &args = $2;
                       args->concat($3);
                       $$ = driver.build.args(self, $1, args, $4, true);
@@ -1999,6 +2007,9 @@ opt_block_args_tail:
                     }
                 | f_args
                     {
+                      if ($1->size() > 0) {
+                        driver.numparam_stack.set_ordinary_params();
+                      }
                       $$ = driver.build.args(self, nullptr, $1, nullptr, true);
                       DIAGCHECK();
                     }
@@ -2165,25 +2176,38 @@ opt_block_args_tail:
 
       brace_body:   {
                       driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                     }
                     opt_block_param bodystmt
                     {
-                      $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
-
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr);
+                      } else {
+                        $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
+                      }
+                      driver.numparam_stack.pop();
                       driver.lex.unextend();
                     }
 
          do_body:   {
                       driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                     }
                     {
                       driver.lex.cmdarg.push(false);
                     }
                     opt_block_param bodystmt
                     {
-                      $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr);
+                      } else {
+                        $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
+                      }
                       driver.lex.unextend();
 
+                      driver.numparam_stack.pop();
                       driver.lex.cmdarg.pop();
                     }
 
@@ -2769,6 +2793,7 @@ keyword_variable: kNIL
                     {
                       auto ident = $1;
                       driver.lex.declare(ident->string());
+                      driver.numparam_stack.set_ordinary_params();
                       $$ = ident;
                     }
 
@@ -2808,6 +2833,7 @@ keyword_variable: kNIL
                       }
                       driver.lex.declare(label->string());
                       driver.current_arg_stack.set($1[0].string());
+                      driver.numparam_stack.set_ordinary_params();
                       $$ = label;
                     }
 
