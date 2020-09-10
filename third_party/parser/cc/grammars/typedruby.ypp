@@ -1975,7 +1975,7 @@ opt_block_args_tail:
 
           lambda:   {
                       driver.lex.extend_dynamic();
-                      driver.numparam_stack.push();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                       driver.lex.context.push(Context::State::LAMBDA);
                     }
                   f_larglist
@@ -1987,8 +1987,8 @@ opt_block_args_tail:
                     {
                       driver.lex.cmdarg.pop();
                       auto &delimited_block = $4;
-                      if (driver.numparam_stack.has_numparams()) {
-                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top());
+                      if (driver.numparam_stack.seen_numparams()) {
+                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->decls);
                       } else {
                         delimited_block->args = $2;
                       }
@@ -2177,12 +2177,12 @@ opt_block_args_tail:
 
       brace_body:   {
                       driver.lex.extend_dynamic();
-                      driver.numparam_stack.push();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                     }
                     opt_block_param bodystmt
                     {
-                      if (driver.numparam_stack.has_numparams()) {
-                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top());
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr);
                       } else {
                         $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
@@ -2193,15 +2193,15 @@ opt_block_args_tail:
 
          do_body:   {
                       driver.lex.extend_dynamic();
-                      driver.numparam_stack.push();
+                      driver.numparam_stack.push(driver.alloc.node_list());
                     }
                     {
                       driver.lex.cmdarg.push(false);
                     }
                     opt_block_param bodystmt
                     {
-                      if (driver.numparam_stack.has_numparams()) {
-                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top());
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr);
                       } else {
                         $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);

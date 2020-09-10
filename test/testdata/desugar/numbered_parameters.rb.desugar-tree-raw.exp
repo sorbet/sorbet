@@ -13,18 +13,7 @@ ClassDef{
           kind = Local
           name = <U <blk>>
         } }]
-      rhs = Send{
-        recv = UnresolvedIdent{
-          kind = Local
-          name = <U <blk>>
-        }
-        fun = <U call>
-        block = nullptr
-        args = [
-          Literal{ value = 42 }
-          Literal{ value = "foo" }
-        ]
-      }
+      rhs = EmptyTree
     }
 
     Send{
@@ -351,6 +340,59 @@ ClassDef{
               name = <U _1>
             }
           ]
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+        ]
+        body = InsSeq{
+          stats = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _3>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _3>
+            }
+          ],
+          expr = UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
         }
       }
       args = [

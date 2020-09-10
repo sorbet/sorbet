@@ -1,8 +1,6 @@
 # typed: true
 
-def foo
-  yield(42, "foo")
-end
+def foo; end
 
 foo { _1 }
 foo { _9 }
@@ -15,3 +13,12 @@ foo do _2 * _1 end
 -> { _1 }
 -> { _9 }
 -> { _2 * _1 }
+
+foo do
+  _2
+  _3
+  _1
+  _2
+  _3
+  _1
+end

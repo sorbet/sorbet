@@ -37,6 +37,43 @@ core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
     return blkIdent->name;
 }
 
+// Get the num from the name of the Node if it's a LVar.
+// Return -1 otherwise.
+int numparamNum(DesugarContext dctx, parser::Node *decl) {
+    if (auto *lvar = parser::cast_node<parser::LVar>(decl)) {
+        auto name_str = lvar->name.show(dctx.ctx);
+        return name_str[1] - 48;
+    }
+    return -1;
+}
+
+// Get the highest numparams used in `decls`
+// Return 0 if the list of declarations is empty.
+int numparamMax(DesugarContext dctx, parser::NodeVec *decls) {
+    int max = 0;
+    for (auto &decl : *decls) {
+        auto num = numparamNum(dctx, decl.get());
+        if (num > max) {
+            max = num;
+        }
+    }
+    return max;
+}
+
+// Create a local variable from the first declaration for the name "_num" from all the `decls` if any.
+// Return a dummy variable if no declaration is found for `num`.
+TreePtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls) {
+    for (auto &decl : *decls) {
+        if (auto *lvar = parser::cast_node<parser::LVar>(decl.get())) {
+            if (numparamNum(dctx, decl.get()) == num) {
+                return MK::Local(lvar->loc, lvar->name);
+            }
+        }
+    }
+    core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + std::to_string(num));
+    return MK::Local(core::LocOffsets::none(), name);
+}
+
 TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what);
 
 pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
@@ -63,9 +100,9 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         }
     } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode.get())) {
         // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
-        for (int i = 1; i <= numparams->max; i++) {
-            core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + std::to_string(i));
-            args.emplace_back(MK::Local(loc, name));
+        // from _1 to the highest number used.
+        for (int i = 1; i <= numparamMax(dctx, &numparams->decls); i++) {
+            args.emplace_back(numparamTree(dctx, i, &numparams->decls));
         }
     } else if (argnode.get() == nullptr) {
         // do nothing

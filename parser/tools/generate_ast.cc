@@ -409,7 +409,7 @@ NodeDef nodes[] = {
     {
         "NumParams",
         "numparams",
-        vector<FieldDef>({{"max", FieldType::Uint}}),
+        vector<FieldDef>({{"decls", FieldType::NodeVec}}),
     },
     // a block with numbered parameters
     {

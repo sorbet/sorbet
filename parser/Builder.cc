@@ -149,7 +149,7 @@ public:
             ENFORCE(name->kind == core::NameKind::UTF8);
             auto name_str = name->show(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
-                if (driver_->numparam_stack.has_ordinary_params()) {
+                if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
@@ -163,7 +163,7 @@ public:
                 for (auto outer_scope : raw_context) {
                     if (outer_scope == ruby_parser::Context::State::BLOCK ||
                         outer_scope == ruby_parser::Context::State::LAMBDA) {
-                        auto outer_scope_has_numparams = raw_numparam_stack.back() > 0;
+                        auto outer_scope_has_numparams = raw_numparam_stack.back().max > 0;
                         raw_numparam_stack.pop_back();
 
                         if (outer_scope_has_numparams) {
@@ -180,7 +180,10 @@ public:
                 }
 
                 driver_->lex.declare(name_str);
-                driver_->numparam_stack.regis(name_str[1] - 48);
+                auto intro = make_unique<LVar>(node->loc, id->name);
+                auto decls = driver_->alloc.node_list();
+                decls->emplace_back(toForeign(std::move(intro)));
+                driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
             }
 
             if (driver_->lex.is_declared(name_str)) {
@@ -889,11 +892,14 @@ public:
         return make_unique<NthRef>(tokLoc(tok), atoi(tok->string().c_str()));
     }
 
-    unique_ptr<Node> numparams(size_t max_numparam) {
-        // At this point, we might not have a node to get the location so we use a dummy one for now,
-        // errors will later be rattached to the block itself.
-        auto loc = core::LocOffsets();
-        return make_unique<NumParams>(loc, max_numparam);
+    unique_ptr<Node> numparams(sorbet::parser::NodeVec declaringNodes) {
+        // During desugar we will create implicit arguments for the block based on on the highest
+        // numparam used in it's body.
+        // We will use the first node declaring a numbered parameter for the location of the implicit arg.
+        // In the meantime, we need a loc for the NumParams node to pass the sanity check at the end of the
+        // parsing phase so we arbitrary pick the first one from the node list (we know there is at least one).
+        auto dummyLoc = declaringNodes.at(0)->loc;
+        return make_unique<NumParams>(dummyLoc, std::move(declaringNodes));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -1702,9 +1708,9 @@ ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
     return build->toForeign(build->nth_ref(tok));
 }
 
-ForeignPtr numparams(SelfPtr builder, size_t max_numparam) {
+ForeignPtr numparams(SelfPtr builder, const node_list *declaringNodes) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->numparams(max_numparam));
+    return build->toForeign(build->numparams(build->convertNodeList(declaringNodes)));
 }
 
 ForeignPtr numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,

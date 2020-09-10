@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def foo<<C <todo sym>>>(&<blk>)
-    <blk>.call(42, "foo")
+    <emptyTree>
   end
 
   <self>.foo() do |_1|
@@ -37,5 +37,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C Kernel>.lambda() do |_1, _2|
     _2.*(_1)
+  end
+
+  <self>.foo() do |_1, _2, _3|
+    begin
+      _2
+      _3
+      _1
+      _2
+      _3
+      _1
+    end
   end
 end

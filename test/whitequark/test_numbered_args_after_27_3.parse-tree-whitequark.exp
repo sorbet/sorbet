@@ -1,7 +1,9 @@
 s(:numblock,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
-  s(:numparams, 9),
+  s(:numparams,
+    s(:lvar, :_1),
+    s(:lvar, :_9)),
   s(:send,
     s(:lvar, :_1), :+,
     s(:lvar, :_9)))
