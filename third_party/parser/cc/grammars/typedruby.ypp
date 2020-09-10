@@ -2000,7 +2000,6 @@ opt_block_args_tail:
 
      f_larglist: tLPAREN2 f_args opt_bv_decl tRPAREN
                     {
-                      std::cout << "f_larglist: tLPAREN2 f_args opt_bv_decl tRPAREN" << "\n";
                       driver.numparam_stack.set_ordinary_params();
                       auto &args = $2;
                       args->concat($3);
@@ -2010,7 +2009,6 @@ opt_block_args_tail:
                 | f_args
                     {
                       if ($1->size() > 0) {
-                        std::cout << "f_args" << "\n";
                         driver.numparam_stack.set_ordinary_params();
                       }
                       $$ = driver.build.args(self, nullptr, $1, nullptr, true);
