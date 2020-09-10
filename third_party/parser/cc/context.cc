@@ -79,7 +79,5 @@ bool Context::dynamicConstDefintinionAllowed() {
 }
 
 std::vector<State> Context::stackCopy() {
-    std::vector<State> copy;
-    copy.assign(stack.begin(), stack.end());
-    return copy;
+    return stack;
 }
