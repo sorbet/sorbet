@@ -1976,7 +1976,6 @@ opt_block_args_tail:
           lambda:   {
                       driver.lex.extend_dynamic();
                       driver.numparam_stack.push(driver.alloc.node_list());
-                      driver.lex.context.push(Context::State::LAMBDA);
                     }
                   f_larglist
                     {
