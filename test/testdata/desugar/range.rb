@@ -62,6 +62,18 @@ def foo
   lr19 = nilable..nilable
   T.reveal_type(lr19) # error: Revealed type: `T::Range[Integer]`
 
+  lr20 = (..1)
+  T.reveal_type(lr20) # error: Revealed type: `T::Range[Integer]`
+
+  lr21 = (..nil)
+  T.reveal_type(lr21) # error: Revealed type: `T::Range[T.untyped]`
+
+  lr22 = (..untyped)
+  T.reveal_type(lr22) # error: Revealed type: `T::Range[T.untyped]`
+
+  lr23 = (..nilable)
+  T.reveal_type(lr23) # error: Revealed type: `T::Range[Integer]`
+
   lr_first = (1..42).first
   T.reveal_type(lr_first) # error: Revealed type: `Integer`
 
@@ -132,7 +144,7 @@ def foo
   tr6 = T::Range[Integer].new(1, true) # error: Expected `T.nilable(Integer)` but found `TrueClass` for argument `_end`
   T.reveal_type(tr6) # error: Revealed type: `T::Range[Integer]`
 
-  tr7 = T::Range[Integer].new(nil, 42) # error: Expected `Integer` but found `NilClass` for argument `_begin`
+  tr7 = T::Range[Integer].new(nil, 42)
   T.reveal_type(tr7) # error: Revealed type: `T::Range[Integer]`
 
   tr8 = T::Range[Integer].new(nil, nil) # error: Expected `Integer` but found `NilClass` for argument `_begin`
