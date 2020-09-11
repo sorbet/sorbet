@@ -82,6 +82,14 @@ bool literal::heredoc() const {
   return heredoc_e != nullptr;
 }
 
+bool literal::squiggly_heredoc() const {
+  return heredoc() && dedent_body;
+}
+
+bool literal::support_line_continuation_via_slash() const {
+  return !words() && interpolate();
+}
+
 token_type literal::start_token_type() const {
   switch (_type) {
     case literal_type::SQUOTE_STRING:
