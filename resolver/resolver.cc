@@ -2764,7 +2764,7 @@ class ResolveMixesInClassMethodsWalk {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared inside a module, not a class", send.fun.data(ctx)->show(ctx));
             }
-            // Keep processing it anyways
+            return;
         }
 
         if (send.args.size() < 1) {
