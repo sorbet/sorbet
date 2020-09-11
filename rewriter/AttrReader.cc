@@ -66,7 +66,8 @@ bool isT(const ast::TreePtr &expr) {
 
 bool isTNilableOrUntyped(const ast::TreePtr &expr) {
     auto *send = ast::cast_tree_const<ast::Send>(expr);
-    return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) && isT(send->recv);
+    return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
+           isT(send->recv);
 }
 
 bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
