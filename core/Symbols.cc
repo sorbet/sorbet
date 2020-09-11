@@ -1228,6 +1228,7 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     result.owner = this->owner;
     result.flags = this->flags;
     result.mixins_ = this->mixins_;
+    result.mixedInClassMethods_ = this->mixedInClassMethods_;
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
