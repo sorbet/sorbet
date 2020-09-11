@@ -158,7 +158,7 @@ public:
 // For each scope we save the highest numparam used (or 0) and all the nodes in the
 // scope referencing a numparam.
 //
-// The stack as 3 states:
+// The stack has 3 states:
 //  * `top = 0`: no parameter (ordinary or numbered) in this scope
 //  * `top < 0`: ordinary parameter(s) in this scope
 //  * `top > 0`: at leat one numbered parameter in this scope (top being the highest one found)
