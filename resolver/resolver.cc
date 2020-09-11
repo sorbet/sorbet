@@ -2796,6 +2796,8 @@ class ResolveMixesInClassMethodsWalk {
                 return;
             }
 
+            // We are populating `mixedInClassMethods` with the argument to `mixes_in_class_methods`
+            // This vector will be used in `Resolver::finalizeSymbols` as well as serialization
             auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
             mixedInClassMethods.emplace_back(id->symbol);
         }

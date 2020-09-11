@@ -172,6 +172,9 @@ end
 A.foo
 ```
 
+We can also call `mixes_in_class_methods` with multiple modules or classes to
+mix in more methods.
+
 ## What's next?
 
 - [Override Checking](override-checking.md)

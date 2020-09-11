@@ -372,6 +372,8 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
         ENFORCE(sym.isClassOrModule());
 
+        // Add mixedInClassMethods() into its singleton
+        // These methods were populated earlier within `ResolveMixesInClassMethodsWalk#processMixesInClassMethods`
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             for (auto mixedInClassMethod : ancst.data(gs)->mixedInClassMethods()) {
