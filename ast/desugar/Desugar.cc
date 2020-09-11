@@ -68,6 +68,8 @@ TreePtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls) {
             if (numparamNum(dctx, decl.get()) == num) {
                 return MK::Local(lvar->loc, lvar->name);
             }
+        } else {
+            ENFORCE(false, "NumParams declaring node is not a LVar.");
         }
     }
     core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + std::to_string(num));
