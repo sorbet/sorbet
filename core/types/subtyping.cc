@@ -44,36 +44,73 @@ const TypePtr underlying(const TypePtr &t1) {
     return t1;
 }
 
+void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &type) {
+    auto *o = cast_type<OrType>(type.get());
+    if (o == nullptr) {
+        orComponents.emplace_back(type);
+    } else {
+        fillInOrComponents(orComponents, o->left);
+        fillInOrComponents(orComponents, o->right);
+    }
+}
+
+TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter) {
+    auto *o = cast_type<OrType>(originalType.get());
+    if (o == nullptr) {
+        if (absl::c_linear_search(typeFilter, originalType.get())) {
+            return nullptr;
+        }
+        return originalType;
+    } else {
+        auto left = filterOrComponents(o->left, typeFilter);
+        auto right = filterOrComponents(o->right, typeFilter);
+        if (left == nullptr) {
+            return right;
+        }
+        if (right == nullptr) {
+            return left;
+        }
+        if (left == o->left && right == o->right) {
+            return originalType;
+        }
+        return OrType::make_shared(left, right);
+    }
+}
+
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    InlinedVector<TypePtr, 4> originalOrComponents;
+    InlinedVector<Type *, 4> typesConsumed;
     auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    TypePtr n1 = Types::any(gs, o1->left, t2);
-    if (n1.get() == o1->left.get()) {
-        categoryCounterInc("lubDistributeOr.outcome", "t1");
-        return t1;
+    fillInOrComponents(originalOrComponents, o1->left);
+    fillInOrComponents(originalOrComponents, o1->right);
+
+    for (auto &component : originalOrComponents) {
+        auto lubbed = Types::any(gs, component, t2);
+        if (lubbed.get() == component.get()) {
+            // lubbed == component, so t2 <: component and t2 <: t1
+            categoryCounterInc("lubDistributeOr.outcome", "t1");
+            return t1;
+        } else if (lubbed.get() == t2.get()) {
+            // lubbed == t2, so component <: t2
+            // Thus, we don't need to include component in the final OrType; it's subsumed by t2.
+            typesConsumed.emplace_back(component.get());
+        }
     }
-    TypePtr n2 = Types::any(gs, o1->right, t2);
-    if (n1.get() == t2.get()) {
-        categoryCounterInc("lubDistributeOr.outcome", "n2'");
-        return n2;
+    if (typesConsumed.empty()) {
+        // t1 has no components that overlap with t2
+        categoryCounterInc("lubDistributeOr.outcome", "worst");
+        return OrType::make_shared(t1, underlying(t2));
     }
-    if (n2.get() == o1->right.get()) {
-        categoryCounterInc("lubDistributeOr.outcome", "t1'");
-        return t1;
+    // lub back everything except typesConsumed
+    auto remainingTypes = filterOrComponents(t1, typesConsumed);
+    if (remainingTypes == nullptr) {
+        categoryCounterInc("lubDistributeOr.outcome", "t2");
+        // t1 <: t2
+        return t2;
     }
-    if (n2.get() == t2.get()) {
-        categoryCounterInc("lubDistributeOr.outcome", "n1'");
-        return n1;
-    }
-    if (Types::isSubType(gs, n1, n2)) {
-        categoryCounterInc("lubDistributeOr.outcome", "n2''");
-        return n2;
-    } else if (Types::isSubType(gs, n2, n1)) {
-        categoryCounterInc("lubDistributeOr.outcome", "n1'''");
-        return n1;
-    }
-    categoryCounterInc("lubDistributeOr.outcome", "worst");
-    return OrType::make_shared(t1, underlying(t2)); // order matters for perf
+    categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
+    return OrType::make_shared(move(remainingTypes), underlying(t2));
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -221,7 +258,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
         int j = 0;
-        bool changed = false;
+        bool changedFromT2 = false;
+        // If klasses are equal, then it's possible that t1s <: t2s.
+        bool changedFromT1 = a1->klass != a2->klass;
         for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {
             int i = 0;
             while (indexes[j] != a1->klass.data(gs)->typeMembers()[i]) {
@@ -243,13 +282,16 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             } else if (idx.data(gs)->isContravariant()) {
                 newTargs.emplace_back(Types::all(gs, a1->targs[i], a2->targs[j]));
             }
-            changed = changed || newTargs.back() != a2->targs[j];
+            changedFromT2 = changedFromT2 || newTargs.back() != a2->targs[j];
+            changedFromT1 = changedFromT1 || newTargs.back() != a1->targs[i];
             j++;
         }
-        if (changed) {
-            return make_type<AppliedType>(a2->klass, newTargs);
-        } else {
+        if (!changedFromT2) {
             return t2s;
+        } else if (!changedFromT1) {
+            return t1s;
+        } else {
+            return make_type<AppliedType>(a2->klass, newTargs);
         }
     }
 
