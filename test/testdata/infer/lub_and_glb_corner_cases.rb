@@ -68,7 +68,7 @@ module Main
   def generic_class_nilable_array_tuple_lub
     a = T.let(nil, T.nilable(T::Array[Float]))
     b = T.let(nil, T.nilable(T::Array[Integer]))
-    T.reveal_type([a, b]) # error: Revealed type: `[T.nilable(T::Array[Float]), T.nilable(T::Array[Integer])]`
+    T.reveal_type([a, b]) # error: Revealed type: `[T.nilable(T::Array[Float]), T.nilable(T::Array[Integer])] (2-tuple)`
     # This reproduces a bug in Sorbet. In the buggy version, the above T.reveal_type passes,
     # but the below statement would not error.
     [a, b].each(&:lazy)
