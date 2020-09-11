@@ -2767,35 +2767,38 @@ class ResolveMixesInClassMethodsWalk {
             // Keep processing it anyways
         }
 
-        if (send.args.size() != 1) {
+        if (send.args.size() < 1) {
             // The arity mismatch error will be emitted later by infer.
             return;
         }
-        auto &front = send.args.front();
-        auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                            send.fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->symbol.data(ctx)->isClassOrModuleClass()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                            id->symbol.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->symbol == ctx.owner) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send.fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
 
-        auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
-        mixedInClassMethods.emplace_back(id->symbol);
+        for (auto &arg : send.args) {
+            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+
+            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClassOrModule()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
+                                send.fun.data(ctx)->show(ctx));
+                }
+                return;
+            }
+            if (id->symbol.data(ctx)->isClassOrModuleClass()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
+                                id->symbol.data(ctx)->show(ctx));
+                }
+                return;
+            }
+            if (id->symbol == ctx.owner) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Must not pass your self to `{}`", send.fun.data(ctx)->show(ctx));
+                }
+                return;
+            }
+
+            auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
+            mixedInClassMethods.emplace_back(id->symbol);
+        }
     }
 
 public:
