@@ -3363,6 +3363,7 @@ end
 class Net::HTTPServerException < Net::ProtoServerError
   include ::Net::HTTPExceptions
 end
+Net::HTTPClientException = Net::HTTPServerException
 
 class Net::HTTPServiceUnavailable < Net::HTTPServerError
   HAS_BODY = ::T.unsafe(nil)
