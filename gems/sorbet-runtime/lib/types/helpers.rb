@@ -33,7 +33,7 @@ module T::Helpers
   #  end
   #
   # Except that it is statically analyzed by sorbet.
-  def mixes_in_class_methods(mod)
-    Private::Mixins.declare_mixes_in_class_methods(self, mod)
+  def mixes_in_class_methods(mod, *mods)
+    Private::Mixins.declare_mixes_in_class_methods(self, Array(mod).concat(mods))
   end
 end

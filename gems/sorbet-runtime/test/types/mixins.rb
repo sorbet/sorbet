@@ -18,6 +18,67 @@ module Opus::Types::Test
       klass.mixin_class_method
     end
 
+    it 'mixes in class methods with multiple arguments' do
+      mixin = Module.new do
+        extend T::Helpers
+        mixes_in_class_methods(Module.new do
+                                 def mixin_class_method_1; end
+                               end,
+                               Module.new do
+                                 def mixin_class_method_2; end
+                               end)
+        mixes_in_class_methods(Module.new do
+                                 def mixin_class_method_3; end
+                               end)
+      end
+
+      klass = Class.new do
+        include mixin
+      end
+
+      klass.mixin_class_method_1
+      klass.mixin_class_method_2
+      klass.mixin_class_method_3
+    end
+
+    it 'correctly modifies expected ancestor chain ordering when called with multiple arguments' do
+      mixin = Module.new do
+        extend T::Helpers
+        mixes_in_class_methods(Module.new do
+                                 def mixin_class_method; 1; end
+                               end,
+                               Module.new do
+                                 def mixin_class_method; 2; end
+                               end)
+      end
+
+      klass = Class.new { include mixin }
+      result = klass.mixin_class_method
+      assert_equal(2, result)
+    end
+
+    it 'correctly modifies ancestor chain ordering when called multiple times with multiple arguments' do
+      mixin = Module.new do
+        extend T::Helpers
+        mixes_in_class_methods(Module.new do
+                                 def mixin_class_method; 1; end
+                               end,
+                               Module.new do
+                                 def mixin_class_method; 2; end
+                               end)
+        mixes_in_class_methods(Module.new do
+                                def mixin_class_method; 3; end
+                               end,
+                               Module.new do
+                                def mixin_class_method; 4; end
+                               end)
+      end
+
+      klass = Class.new { include mixin }
+      result = klass.mixin_class_method
+      assert_equal(2, result)
+    end
+
     it 'composes with a self.included' do
       mixin = Module.new do
         extend T::Helpers
@@ -51,20 +112,6 @@ module Opus::Types::Test
 
       assert_includes(ex.message,
                       "mixes_in_class_methods cannot be used on a Class")
-    end
-
-    it 'cannot be used twice' do
-      ex = assert_raises(RuntimeError) do
-        Module.new do
-          extend T::Helpers
-
-          mixes_in_class_methods(Module.new {})
-          mixes_in_class_methods(Module.new {})
-        end
-      end
-
-      assert_includes(ex.message,
-                      "mixes_in_class_methods can only be used once")
     end
   end
 end
