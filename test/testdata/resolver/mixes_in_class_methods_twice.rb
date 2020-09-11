@@ -10,6 +10,7 @@
 # actually fine. But if the class is different, that's an error.
 
 module A
+  extend T::Helpers
   module ClassMethods1; end
   module ClassMethods2; end
   mixes_in_class_methods(ClassMethods1)
@@ -17,6 +18,7 @@ module A
 end
 
 module B
+  extend T::Helpers
   module ClassMethods; end
   mixes_in_class_methods(ClassMethods)
   mixes_in_class_methods(ClassMethods) # explicitly not an error

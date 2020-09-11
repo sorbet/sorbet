@@ -75,7 +75,19 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: Did you mean: `Kernel#select`?
     2135 |  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 8
+
+autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.class_of(S7)` https://srb.help/7003
+    30 |  mixes_in_class_methods(S1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:30: Inserted `  extend T::Helpers
+`
+    30 |  mixes_in_class_methods(S1)
+        ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1371: Did you mean: `Module#public_class_method`?
+    1371 |  def public_class_method(*arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 9
 
 --------------------------------------------------------------------------
 
@@ -111,4 +123,9 @@ class S6
   extend T::Helpers
   abstract!
   sealed!
+end
+
+module S7
+  extend T::Helpers
+  mixes_in_class_methods(S1)
 end
