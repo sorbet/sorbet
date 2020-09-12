@@ -8,7 +8,6 @@ sed -i'.bak' 's/define double @sorbet_/define available_externally double @sorbe
 sed -i'.bak' 's/define i64 @sorbet_/define available_externally i64 @sorbet_/g' "$payload"
 sed -i'.bak' 's/define i32 @sorbet_/define available_externally i32 @sorbet_/g' "$payload"
 sed -i'.bak' 's/define nonnull i64\* @sorbet_/define available_externally nonnull i64\* @sorbet_/g' "$payload"
-sed -i'.bak' 's/define %struct\.sorbet_Closure\* @sorbet_/define available_externally %struct\.sorbet_Closure\* @sorbet_/g' "$payload"
 
 sed -i'.bak' 's/define i8\* @sorbet_/define available_externally i8\* @sorbet_/g' "$payload"
 
