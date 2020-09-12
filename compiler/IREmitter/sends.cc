@@ -30,80 +30,6 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
 };
 
-llvm::Value *tryFinalCall(MethodCallContext &mcctx) {
-    auto &cs = mcctx.cs;
-    auto *send = mcctx.send;
-    if (mcctx.blk == nullptr) {
-        auto &recvType = send->recv.type;
-        core::SymbolRef recvClass = core::Symbols::noSymbol();
-        if (auto ct = core::cast_type<core::ClassType>(recvType.get())) {
-            recvClass = ct->symbol;
-        } else if (auto at = core::cast_type<core::AppliedType>(recvType.get())) {
-            recvClass = at->klass;
-        }
-
-        if (recvClass.exists()) {
-            auto funSym = recvClass.data(cs)->findMember(cs, send->fun);
-            if (funSym.exists() && funSym.data(cs)->isFinalMethod()) {
-                auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
-                if (llvmFunc == nullptr) {
-                    // here we create a dymmy _weak_ forwarder for the function.
-                    // if the target function is compiled in the same llvm module, it will take
-                    // priority as we wipe method bodies first.
-                    // If it's compiled in a different module, runtime linker will chose the
-                    // non-weak symbol.
-                    // If it will never be compiled, the forwarder will stay
-                    llvmFunc = IREmitterHelpers::getOrCreateFunctionWeak(cs, funSym);
-                    llvm::IRBuilder funcBuilder(cs);
-                    auto bb1 = llvm::BasicBlock::Create(cs, "fwd2interpreted", llvmFunc);
-                    auto bb2 = llvm::BasicBlock::Create(cs, "fwd", llvmFunc);
-                    funcBuilder.SetInsertPoint(bb2);
-
-                    auto selfVar = llvmFunc->arg_begin() + 2;
-                    auto argsCount = llvmFunc->arg_begin();
-                    auto argsArray = llvmFunc->arg_begin() + 1;
-                    auto cs2 = cs.withFunctionEntry(bb1);
-                    auto rt = IREmitterHelpers::callViaRubyVMSimple(cs2, funcBuilder, mcctx.irctx, selfVar, argsArray,
-                                                                    argsCount, send->fun.data(cs)->shortName(cs));
-                    funcBuilder.CreateRet(rt);
-                    funcBuilder.SetInsertPoint(bb1);
-                    funcBuilder.CreateBr(bb2);
-                    ENFORCE(!llvm::verifyFunction(*llvmFunc, &llvm::dbgs()));
-                }
-                auto methodName = send->fun.data(cs)->shortName(cs);
-                llvm::StringRef methodNameRef(methodName.data(), methodName.size());
-                auto &builder = builderCast(mcctx.build);
-                auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
-
-                auto typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(recvClass));
-
-                auto afterSend = llvm::BasicBlock::Create(cs, llvm::Twine("afterCallFinal_") + methodNameRef,
-                                                          builder.GetInsertBlock()->getParent());
-                auto slowPath = llvm::BasicBlock::Create(cs, llvm::Twine("slowCallFinal_") + methodNameRef,
-                                                         builder.GetInsertBlock()->getParent());
-                auto fastPath = llvm::BasicBlock::Create(cs, llvm::Twine("fastCallFinal_") + methodNameRef,
-                                                         builder.GetInsertBlock()->getParent());
-                builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, slowPath);
-                builder.SetInsertPoint(fastPath);
-                auto fastPathRes = IREmitterHelpers::emitMethodCallDirrect(mcctx, funSym);
-                auto fastPathEnd = builder.GetInsertBlock();
-                builder.CreateBr(afterSend);
-                builder.SetInsertPoint(slowPath);
-                auto slowPathRes = IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-                auto slowPathEnd = builder.GetInsertBlock();
-                builder.CreateBr(afterSend);
-                builder.SetInsertPoint(afterSend);
-                auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("finalCallPhi_") + methodNameRef);
-                phi->addIncoming(fastPathRes, fastPathEnd);
-                phi->addIncoming(slowPathRes, slowPathEnd);
-                return phi;
-            }
-        }
-    }
-
-    return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-}
-
 llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
     for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
         if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun) &&
@@ -111,7 +37,7 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
             return nameBasedIntrinsic->makeCall(mcctx);
         }
     }
-    return tryFinalCall(mcctx);
+    return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
 }
 
 llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
