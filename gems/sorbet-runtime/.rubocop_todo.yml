@@ -523,14 +523,6 @@ Style/HashEachMethods:
   Exclude:
     - 'lib/types/props/has_lazily_specialized_methods.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
-Style/HashSyntax:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-
 # Offense count: 2
 Style/IdenticalConditionalBranches:
   Exclude:
