@@ -362,12 +362,6 @@ Naming/PredicateName:
     - 'lib/types/utils.rb'
 
 # Offense count: 1
-# Configuration parameters: MinSize.
-Performance/CollectionLiteralInLoop:
-  Exclude:
-    - 'test/types/builder_syntax.rb'
-
-# Offense count: 1
 # Cop supports --auto-correct.
 Performance/RegexpMatch:
   Exclude:

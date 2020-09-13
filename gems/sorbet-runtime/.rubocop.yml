@@ -43,5 +43,10 @@ Naming/FileName:
 Lint/MissingSuper:
   Exclude:
     # Don't force type definitions to call `super` in initialize
-    - 'lib/types/types/**'
-    - 'lib/types/private/types/**'
+    - 'lib/types/types/**/*'
+    - 'lib/types/private/types/**/*'
+
+Performance/CollectionLiteralInLoop:
+  Exclude:
+    # Ok to prioritize brevity over perf in tests
+    - 'test/**/*'
