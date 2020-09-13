@@ -819,14 +819,6 @@ Style/TrailingCommaInArguments:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInHashLiteral:
-  Exclude:
-    - 'sorbet-runtime.gemspec'
-
-# Offense count: 1
-# Cop supports --auto-correct.
 # Configuration parameters: AllowNamedUnderscoreVariables.
 Style/TrailingUnderscoreVariable:
   Exclude:
