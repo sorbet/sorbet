@@ -31,6 +31,10 @@ Style/TrivialAccessors:
 Lint/UnusedMethodArgument:
   Enabled: false
 
+# Prone to false positives when we care about which class owns a method
+Lint/UselessMethodDefinition:
+  Enabled: false
+
 Naming/FileName:
   Exclude:
     # Filename deliberately matches gem name
