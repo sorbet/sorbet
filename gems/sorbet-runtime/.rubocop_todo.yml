@@ -269,13 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 5
-Lint/UselessAssignment:
-  Exclude:
-    - 'test/types/final_method.rb'
-    - 'test/types/method_modes.rb'
-    - 'test/types/struct.rb'
-
 # Offense count: 12
 # Cop supports --auto-correct.
 # Configuration parameters: AllowComments.
