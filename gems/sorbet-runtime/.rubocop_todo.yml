@@ -269,13 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 1
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Lint/SafeNavigationChain:
-  Exclude:
-    - 'lib/types/private/sealed.rb'
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
