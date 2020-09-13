@@ -269,13 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-Lint/BooleanSymbol:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-    - 'test/types/props/decorator.rb'
-
 # Offense count: 21
 Lint/MissingSuper:
   Enabled: false
