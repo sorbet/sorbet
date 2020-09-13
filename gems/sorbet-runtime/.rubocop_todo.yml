@@ -269,12 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 2
-Lint/BinaryOperatorWithIdenticalOperands:
-  Exclude:
-    - 'test/types/method_validation.rb'
-    - 'test/types/types.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 Lint/BooleanSymbol:

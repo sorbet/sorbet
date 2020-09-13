@@ -815,7 +815,7 @@ module Opus::Types::Test
       it 'delegates equality' do
         assert(T.any(Integer, String) == make_type_alias {T.any(Integer, String)})
         assert(make_type_alias {T.any(Integer, String)} == T.any(Integer, String))
-        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)})
+        assert(make_type_alias {T.any(Integer, String)} == make_type_alias {T.any(Integer, String)}) # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
 
         refute(make_type_alias {T.any(Integer, Float)} == make_type_alias {T.any(Integer, String)})
       end
