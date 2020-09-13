@@ -269,14 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
-Lint/UnusedBlockArgument:
-  Exclude:
-    - 'test/types/absurd.rb'
-    - 'test/types/props/private/setter_factory.rb'
-
 # Offense count: 5
 Lint/UselessAssignment:
   Exclude:
