@@ -549,15 +549,6 @@ Style/Next:
     - 'lib/types/private/methods/signature_validation.rb'
     - 'lib/types/props/decorator.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: IncludeSemanticChanges.
-Style/NonNilCheck:
-  Exclude:
-    - 'lib/types/configuration.rb'
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/private/sealed.rb'
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IgnoredMethods.

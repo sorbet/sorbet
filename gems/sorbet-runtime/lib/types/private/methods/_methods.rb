@@ -427,7 +427,7 @@ module T::Private::Methods
   end
 
   def self.set_final_checks_on_hooks(enable)
-    is_enabled = @old_hooks != nil
+    is_enabled = !@old_hooks.nil?
     if enable == is_enabled
       return
     end
