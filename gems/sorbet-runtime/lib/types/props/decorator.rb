@@ -153,12 +153,10 @@ class T::Props::Decorator
     val = instance.instance_variable_get(rules[:accessor_key])
     if !val.nil?
       val
+    elsif (d = rules[:ifunset])
+      T::Props::Utils.deep_clone_object(d)
     else
-      if (d = rules[:ifunset])
-        T::Props::Utils.deep_clone_object(d)
-      else
-        nil
-      end
+      nil
     end
   end
 

@@ -497,13 +497,6 @@ Style/IdenticalConditionalBranches:
   Exclude:
     - 'lib/types/props/private/setter_factory.rb'
 
-# Offense count: 2
-# Configuration parameters: AllowIfModifier.
-Style/IfInsideElse:
-  Exclude:
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/serde_transform.rb'
-
 # Offense count: 140
 # Cop supports --auto-correct.
 Style/IfUnlessModifier:
