@@ -673,13 +673,6 @@ Style/RedundantBegin:
     - 'test/types/edge_cases.rb'
     - 'test/types/method_validation.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/RedundantParentheses:
-  Exclude:
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/serializable.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: AllowMultipleReturnValues.

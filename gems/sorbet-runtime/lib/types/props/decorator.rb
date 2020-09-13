@@ -488,7 +488,7 @@ class T::Props::Decorator
     .void
   end
   private def handle_foreign_hint_only_option(prop_name, prop_cls, foreign_hint_only)
-    if ![String, Array].include?(prop_cls) && !(prop_cls.is_a?(T::Props::CustomType))
+    if ![String, Array].include?(prop_cls) && !prop_cls.is_a?(T::Props::CustomType)
       raise ArgumentError.new(
         "`foreign_hint_only` can only be used with String or Array prop types"
       )
