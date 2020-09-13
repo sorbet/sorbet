@@ -517,12 +517,6 @@ Style/FrozenStringLiteralComment:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/HashEachMethods:
-  Exclude:
-    - 'lib/types/props/has_lazily_specialized_methods.rb'
-
 # Offense count: 2
 Style/IdenticalConditionalBranches:
   Exclude:
