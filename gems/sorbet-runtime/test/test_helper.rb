@@ -32,7 +32,7 @@ module Chalk; end
 module Chalk::Tools; end
 module Chalk::Tools::RedactionUtils
   def self.redact_with_directive(value, opts = [])
-    opts = [opts] unless opts.is_a?(Array)
+    opts = Array(opts)
     case opts[0]
     when :redact_digits
       value.gsub(/\d/, '*')

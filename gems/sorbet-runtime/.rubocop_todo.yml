@@ -402,12 +402,6 @@ Style/Alias:
     - 'lib/types/types/base.rb'
     - 'test/types/edge_cases.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/ArrayCoercion:
-  Exclude:
-    - 'test/test_helper.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Style/BisectedAttrAccessor:
