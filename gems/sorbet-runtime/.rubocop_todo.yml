@@ -531,12 +531,6 @@ Style/HashSyntax:
   Exclude:
     - 'lib/types/props/generated_code_validation.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/HashTransformValues:
-  Exclude:
-    - 'lib/types/types/fixed_hash.rb'
-
 # Offense count: 2
 Style/IdenticalConditionalBranches:
   Exclude:
