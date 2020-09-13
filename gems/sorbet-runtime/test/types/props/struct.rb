@@ -53,7 +53,7 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
   end
 
   it 'uses the original value when value is invalid in a soft error environment' do
-    T::Configuration.call_validation_error_handler = Proc.new do
+    T::Configuration.call_validation_error_handler = proc do
       # no raise
     end
 

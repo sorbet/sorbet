@@ -655,12 +655,6 @@ Style/PercentLiteralDelimiters:
     - 'lib/types/props/decorator.rb'
     - 'lib/types/props/generated_code_validation.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/Proc:
-  Exclude:
-    - 'test/types/props/struct.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 Style/RedundantBegin:
