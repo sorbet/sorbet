@@ -3,3 +3,12 @@ require: rubocop-performance
 
 AllCops:
   NewCops: enable
+
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space

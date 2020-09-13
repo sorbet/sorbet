@@ -99,13 +99,13 @@ class T::InterfaceWrapper
 
   # Prefixed because we're polluting the namespace of the interface we're wrapping, and we don't
   # want anyone else (besides dynamic_cast) calling it.
-  def __target_obj_DO_NOT_USE
+  def __target_obj_DO_NOT_USE # rubocop:disable Naming/MethodName
     @target_obj
   end
 
   # Prefixed because we're polluting the namespace of the interface we're wrapping, and we don't
   # want anyone else (besides wrapped_dynamic_cast) calling it.
-  def __interface_mod_DO_NOT_USE
+  def __interface_mod_DO_NOT_USE # rubocop:disable Naming/MethodName
     @interface_mod
   end
 
