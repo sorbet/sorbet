@@ -438,11 +438,6 @@ Style/CaseLikeIf:
 Style/ClassAndModuleChildren:
   Enabled: false
 
-# Offense count: 1
-Style/ClassVars:
-  Exclude:
-    - 'test/types/props/optional.rb'
-
 # Offense count: 4
 # Cop supports --auto-correct.
 # Configuration parameters: Keywords.
