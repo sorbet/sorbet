@@ -4,11 +4,28 @@ require: rubocop-performance
 AllCops:
   NewCops: enable
 
+# Stripe in-house style
 Style/RaiseArgs:
   EnforcedStyle: compact
 
+# Stripe in-house style
 Layout/SpaceAroundEqualsInParameterDefault:
   EnforcedStyle: no_space
 
+# Stripe in-house style
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
+
+# Stripe in-house style
+Layout/SpaceInsideBlockBraces:
+  EnforcedStyle: no_space
+  SpaceBeforeBlockParameters: false
+
+# This doesn't play very well with implementations of Sorbet abstract methods
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+Naming/FileName:
+  Exclude:
+    # Filename deliberately matches gem name
+    - 'lib/sorbet-runtime.rb'
