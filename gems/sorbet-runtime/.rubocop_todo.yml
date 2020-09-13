@@ -554,13 +554,6 @@ Style/IfInsideElse:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: InverseMethods, InverseBlocks.
-Style/InverseMethods:
-  Exclude:
-    - 'lib/types/configuration.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Style/KeywordParametersOrder:
