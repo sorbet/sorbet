@@ -702,12 +702,6 @@ Style/YodaCondition:
     - 'lib/types/props/type_validation.rb'
     - 'test/types/enum.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/ZeroLengthPredicate:
-  Exclude:
-    - 'lib/types/private/methods/call_validation.rb'
-
 # Offense count: 82
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
