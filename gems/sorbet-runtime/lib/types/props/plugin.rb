@@ -22,7 +22,7 @@ module T::Props::Plugin
       if plugin.const_defined?('ClassMethods')
         # FIXME: This will break preloading, selective test execution, etc if `mod::ClassMethods`
         # is ever defined in a separate file from `mod`.
-        target.extend(plugin::ClassMethods) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+        target.extend(plugin::ClassMethods)
       end
     end
 
@@ -30,7 +30,7 @@ module T::Props::Plugin
       if plugin.const_defined?('DecoratorMethods')
         # FIXME: This will break preloading, selective test execution, etc if `mod::DecoratorMethods`
         # is ever defined in a separate file from `mod`.
-        target.extend(plugin::DecoratorMethods) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+        target.extend(plugin::DecoratorMethods)
       end
     end
   end

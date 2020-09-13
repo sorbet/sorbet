@@ -31,8 +31,8 @@ module T::Types
       obj.is_a?(Hash)
     end
 
-    def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
-      Hash.new(*T.unsafe(args), &blk) # rubocop:disable PrisonGuard/RestrictHashDefaults
+    def new(*args, &blk)
+      Hash.new(*T.unsafe(args), &blk)
     end
 
     class Untyped < TypedHash

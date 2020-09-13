@@ -83,11 +83,11 @@ class T::InterfaceWrapper
     end
   end
 
-  def kind_of?(other) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def kind_of?(other)
     is_a?(other)
   end
 
-  def is_a?(other) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def is_a?(other)
     if !other.is_a?(Module)
       raise TypeError.new("class or module required")
     end

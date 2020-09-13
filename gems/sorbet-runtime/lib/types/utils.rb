@@ -23,13 +23,13 @@ module T::Utils
     elsif val.is_a?(Module)
       T::Types::Simple::Private::Pool.type_for_module(val)
     elsif val.is_a?(::Array)
-      T::Types::FixedArray.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      T::Types::FixedArray.new(val)
     elsif val.is_a?(::Hash)
-      T::Types::FixedHash.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      T::Types::FixedHash.new(val)
     elsif val.is_a?(T::Private::Methods::DeclBuilder)
       T::Private::Methods.finalize_proc(val.decl)
     elsif val.is_a?(::T::Enum)
-      T::Types::TEnum.new(val) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+      T::Types::TEnum.new(val)
     elsif val.is_a?(::String)
       raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
             "class/module, or an array. Got a String with value `#{val}`."
@@ -109,10 +109,10 @@ module T::Utils
 
   # Returns the arity of a method, unwrapping the sig if needed
   def self.arity(method)
-    arity = method.arity # rubocop:disable PrisonGuard/NoArity
+    arity = method.arity
     return arity if arity != -1 || method.is_a?(Proc)
     sig = T::Private::Methods.signature_for_method(method)
-    sig ? sig.method.arity : arity # rubocop:disable PrisonGuard/NoArity
+    sig ? sig.method.arity : arity
   end
 
   # Elide the middle of a string as needed and replace it with an ellipsis.

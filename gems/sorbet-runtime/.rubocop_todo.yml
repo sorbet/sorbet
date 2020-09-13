@@ -290,11 +290,6 @@ Lint/BooleanSymbol:
 Lint/MissingSuper:
   Enabled: false
 
-# Offense count: 40
-# Cop supports --auto-correct.
-Lint/RedundantCopDisableDirective:
-  Enabled: false
-
 # Offense count: 1
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: present?, blank?, presence, try, try!

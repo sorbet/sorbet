@@ -121,8 +121,8 @@ module T::Props::Serializable
   private def with_existing_hash(changed_props, existing_hash:)
     serialized = existing_hash
     new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
-    old_extra = self.instance_variable_get(:@_extra_props) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
-    new_extra = new_val.instance_variable_get(:@_extra_props) # rubocop:disable PrisonGuard/NoLurkyInstanceVariableAccess
+    old_extra = self.instance_variable_get(:@_extra_props)
+    new_extra = new_val.instance_variable_get(:@_extra_props)
     if old_extra != new_extra
       difference =
         if old_extra

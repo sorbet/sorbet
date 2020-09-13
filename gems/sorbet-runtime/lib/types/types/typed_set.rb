@@ -24,7 +24,7 @@ module T::Types
       obj.is_a?(Set)
     end
 
-    def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+    def new(*args)
       Set.new(*T.unsafe(args))
     end
 

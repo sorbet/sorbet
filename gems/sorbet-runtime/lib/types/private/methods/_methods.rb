@@ -72,7 +72,7 @@ module T::Private::Methods
       decl.params = {}
     end
 
-    T::Types::Proc.new(decl.params, decl.returns) # rubocop:disable PrisonGuard/UseOpusTypesShortcut
+    T::Types::Proc.new(decl.params, decl.returns)
   end
 
   # See docs at T::Utils.register_forwarder.
@@ -481,7 +481,7 @@ module T::Private::Methods
 
   private_class_method def self.key_to_method(key)
     id, name = key.split("#")
-    obj = ObjectSpace._id2ref(id.to_i) # rubocop:disable PrisonGuard/NoDynamicConstAccess
+    obj = ObjectSpace._id2ref(id.to_i)
     obj.instance_method(name)
   end
 end
