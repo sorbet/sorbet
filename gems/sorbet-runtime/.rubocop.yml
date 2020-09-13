@@ -4,22 +4,28 @@ require: rubocop-performance
 AllCops:
   NewCops: enable
 
-# Stripe in-house style
+# Stripe in-house styles that are prevalent in the codebase already.
+#
+# Generally, prefer not to add things here; unless there's a specific reason
+# to disable a cop (like those with their own comments below), we'd rather stick
+# to the community defaults.
 Style/RaiseArgs:
   EnforcedStyle: compact
-
-# Stripe in-house style
 Layout/SpaceAroundEqualsInParameterDefault:
   EnforcedStyle: no_space
-
-# Stripe in-house style
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
-
-# Stripe in-house style
 Layout/SpaceInsideBlockBraces:
   EnforcedStyle: no_space
   SpaceBeforeBlockParameters: false
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: start_of_line
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrivialAccessors:
+  IgnoreClassMethods: true
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
