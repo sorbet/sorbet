@@ -673,14 +673,6 @@ Style/RedundantBegin:
     - 'test/types/edge_cases.rb'
     - 'test/types/method_validation.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'lib/types/non_forcing_constants.rb'
-    - 'lib/types/types/typed_enumerable.rb'
-
 # Offense count: 44
 # Cop supports --auto-correct.
 Style/RedundantSelf:
