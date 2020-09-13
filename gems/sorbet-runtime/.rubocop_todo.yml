@@ -269,10 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 21
-Lint/MissingSuper:
-  Enabled: false
-
 # Offense count: 1
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: present?, blank?, presence, try, try!
