@@ -499,12 +499,6 @@ Style/EmptyMethod:
   Exclude:
     - 'test/test_helper.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/EvenOdd:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-
 # Offense count: 17
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

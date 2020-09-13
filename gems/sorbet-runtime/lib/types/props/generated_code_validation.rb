@@ -38,7 +38,7 @@ module T::Props
       assert_equal(s(:lvar, :found), ret)
 
       prop_clauses.each_with_index do |clause, i|
-        if i % 2 == 0
+        if i.even?
           validate_deserialize_hash_read(clause)
         else
           validate_deserialize_ivar_set(clause)
