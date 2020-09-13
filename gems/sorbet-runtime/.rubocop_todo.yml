@@ -733,14 +733,6 @@ Style/RescueStandardError:
     - 'lib/types/props/serializable.rb'
     - 'lib/types/types/typed_enumerable.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Exclude:
-    - 'lib/types/utils.rb'
-
 # Offense count: 17
 # Cop supports --auto-correct.
 # Configuration parameters: AllowAsExpressionSeparator.
