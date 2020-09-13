@@ -570,12 +570,6 @@ Style/KeywordParametersOrder:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-Style/LineEndConcatenation:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
 # Configuration parameters: IgnoredMethods.
 Style/MethodCallWithoutArgsParentheses:
   Exclude:
