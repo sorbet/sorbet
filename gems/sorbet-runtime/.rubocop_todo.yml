@@ -509,13 +509,6 @@ Style/KeywordParametersOrder:
     - 'lib/types/private/methods/signature.rb'
     - 'test/types/method_validation.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-Style/MethodCallWithoutArgsParentheses:
-  Exclude:
-    - 'bench/setters.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
