@@ -581,12 +581,6 @@ Style/MethodCallWithoutArgsParentheses:
   Exclude:
     - 'bench/setters.rb'
 
-# Offense count: 2
-Style/MultipleComparison:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/private/methods/signature_validation.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

@@ -35,6 +35,10 @@ Lint/UnusedMethodArgument:
 Lint/UselessMethodDefinition:
   Enabled: false
 
+# This can be bad for performance
+Style/MultipleComparison:
+  Enabled: false
+
 Naming/FileName:
   Exclude:
     # Filename deliberately matches gem name
