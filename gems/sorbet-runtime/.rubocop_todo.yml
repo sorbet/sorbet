@@ -491,14 +491,6 @@ Style/EmptyElse:
     - 'lib/types/props/type_validation.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: compact, expanded
-Style/EmptyMethod:
-  Exclude:
-    - 'test/test_helper.rb'
-
 # Offense count: 17
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
