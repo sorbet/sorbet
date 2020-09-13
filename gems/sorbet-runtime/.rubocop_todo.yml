@@ -673,13 +673,6 @@ Style/RedundantBegin:
     - 'test/types/edge_cases.rb'
     - 'test/types/method_validation.rb'
 
-# Offense count: 15
-# Cop supports --auto-correct.
-Style/RedundantFileExtensionInRequire:
-  Exclude:
-    - 'Rakefile'
-    - 'test/types/sealed_module.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Style/RedundantParentheses:

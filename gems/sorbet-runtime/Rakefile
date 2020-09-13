@@ -18,7 +18,7 @@ RuboCop::RakeTask.new(:rubocop) do |t|
 end
 
 begin
-  require './bench/tasks.rb'
+  require './bench/tasks'
 rescue LoadError
   # Expected when using packaged gem
 end
