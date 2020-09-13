@@ -236,7 +236,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
     it 'disallows non-proc arguments' do
       T::Configuration.expects(:soft_assert_handler).with do |msg, _|
-        msg =~ /Please use a Proc that returns a model class instead/
+        msg.include?('Please use a Proc that returns a model class instead')
       end.times(3)
 
       Class.new(TestForeignProps) do
