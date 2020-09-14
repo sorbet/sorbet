@@ -109,5 +109,7 @@ rust_repositories(
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
+
 load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
+
 raze_fetch_remote_crates()

@@ -41,3 +41,8 @@ additional_flags = [
 additional_flags = [
   "--cfg=use_proc_macro",
 ]
+
+[raze.crates.log.'0.4.11']
+additional_flags = [
+  "--cfg=atomic_cas",
+]

@@ -38,6 +38,7 @@ rust_library(
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
+        "--cfg=atomic_cas",
     ],
     version = "0.4.11",
     tags = ["cargo-raze"],
