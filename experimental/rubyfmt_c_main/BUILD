@@ -10,8 +10,8 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "@ruby_2_6//:rubyfmt-static-deps",
         "@rubyfmt//:librubyfmt",
         "@rubyfmt//:rubyfmt_macro_wrappers",
-        "@ruby_2_6//:rubyfmt-static-deps",
     ],
 )

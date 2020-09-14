@@ -4,19 +4,19 @@ cargo-raze crate workspace functions
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 
 def _new_http_archive(name, **kwargs):
     if not native.existing_rule(name):
-        http_archive(name=name, **kwargs)
+        http_archive(name = name, **kwargs)
 
 def _new_git_repository(name, **kwargs):
     if not native.existing_rule(name):
-        new_git_repository(name=name, **kwargs)
+        new_git_repository(name = name, **kwargs)
 
 def raze_fetch_remote_crates():
-
     _new_http_archive(
         name = "raze__addr2line__0_13_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/addr2line/addr2line-0.13.0.crate",
@@ -280,4 +280,3 @@ def raze_fetch_remote_crates():
         strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
         build_file = Label("//third_party/cargo/remote:winapi-x86_64-pc-windows-gnu-0.4.0.BUILD"),
     )
-
