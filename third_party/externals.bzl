@@ -143,6 +143,14 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "bazel-compilation-database-0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
     )
 
+    http_archive(
+            name = "rubyfmt",
+            strip_prefix = "rubyfmt-3051835cc28db04e9d9caf0c8430407ca0347e83",
+            urls = _github_public_urls("penelopezone/rubyfmt/archive/3051835cc28db04e9d9caf0c8430407ca0347e83.zip"),
+            sha256 = "1e0bc012fe7a52cead7f77d86e939c76e1b25dc1067e10908e33195c1e709203",
+            build_file = "//third_party/rubyfmt:rubyfmt.BUILD",
+            )
+
     # NOTE: using this branch:
     # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     http_archive(
