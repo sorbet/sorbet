@@ -37,3 +37,9 @@ sed -i'.bak' '/^\^/d' "$payload"
 # remove free-form atts
 sed -i'.bak' 's/".*"=".*"//g' "$payload"
 sed -i'.bak' 's/{  }/{ "addedToSilenceEmptyAttrsError" }/g' "$payload"
+
+
+# NOTE: sorbet_getConstantEpoch should not be available_externally, as it is added during the lowerings pass much later
+# in the pipeline. As a result, marking it availble_externally causes the implementation to disappear, earlier, and
+# inline is broken at the point where it's introduced.
+sed -i'.bak' 's/define available_externally i64 @sorbet_getConstantEpoch/define internal i64 @sorbet_getConstantEpoch/g' "$payload"

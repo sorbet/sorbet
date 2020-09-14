@@ -68,9 +68,9 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.st_table_entry = type opaque
 %struct.anon.19 = type { i64, i64, i64, i64 }
 %struct.FunctionInlineCache = type { %struct.rb_callable_method_entry_struct*, i64, i64 }
-%struct.RArray = type { %struct.RBasic, %union.anon.27 }
-%union.anon.27 = type { %struct.anon.28 }
-%struct.anon.28 = type { i64, %union.anon.0, i64* }
+%struct.RArray = type { %struct.RBasic, %union.anon.26 }
+%union.anon.26 = type { %struct.anon.27 }
+%struct.anon.27 = type { i64, %union.anon.0, i64* }
 
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.1 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1

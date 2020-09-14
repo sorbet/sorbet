@@ -1568,12 +1568,13 @@ rb_serial_t sorbet_getConstantEpoch() {
     return ruby_vm_global_constant_state;
 }
 
-SORBET_INLINE
-rb_serial_t sorbet_getMethodEpoch() {
+// Marked `static inline` because this is expected to only exist in the ruby vm
+static inline rb_serial_t sorbet_getMethodEpoch() {
     return ruby_vm_global_method_state;
 }
 
-rb_serial_t sorbet_getClassSerial(VALUE obj) {
+// Marked `static inline` because this is expected to only exist in the ruby vm
+static inline rb_serial_t sorbet_getClassSerial(VALUE obj) {
     return RCLASS_SERIAL(rb_class_of(obj));
 }
 
@@ -1587,7 +1588,8 @@ struct FunctionInlineCache {
     rb_serial_t class_serial;
 };
 
-void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
+// Marked `static inline` because this is expected to only exist in the ruby vm
+static inline void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
     // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
     const rb_callable_method_entry_t *me;
     me = rb_callable_method_entry(CLASS_OF(recv), mid);
@@ -1632,12 +1634,14 @@ struct sorbet_iterMethodArg {
     struct FunctionInlineCache *cache;
 };
 
+// This function doesn't benefit from inlining, as it's always indirectly used through rb_iterate. In the future, if we
+// end up with an inlined version of rb_iterate, it would be good to inline this.
 static VALUE sorbet_iterMethod(VALUE obj) {
     struct sorbet_iterMethodArg *arg = (struct sorbet_iterMethodArg *)obj;
     return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->cache);
 }
 
-SORBET_ATTRIBUTE(noinline)
+SORBET_INLINE
 VALUE sorbet_callFuncBlockWithCache(VALUE recv, ID func, int argc,
                                     SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, BlockFFIType blockImpl,
                                     VALUE closure, struct FunctionInlineCache *cache) {
