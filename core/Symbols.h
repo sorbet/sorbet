@@ -693,8 +693,6 @@ private:
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
-    InlinedVector<SymbolRef, 4> mixedInClassMethods_;
-
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 

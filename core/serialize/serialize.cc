@@ -544,10 +544,6 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         for (ClassOrModuleRef s : what.mixins_) {
             p.putU4(s.id());
         }
-        p.putU4(what.mixedInClassMethods_.size());
-        for (SymbolRef s : what.mixedInClassMethods_) {
-            p.putU4(s.rawId());
-        }
     }
     p.putU4(what.typeParams.size());
     for (SymbolRef s : what.typeParams) {
@@ -590,11 +586,6 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
         result.mixins_.reserve(mixinsSize);
         for (int i = 0; i < mixinsSize; i++) {
             result.mixins_.emplace_back(ClassOrModuleRef::fromRaw(p.getU4()));
-        }
-        int mixedInClassMethodsSize = p.getU4();
-        result.mixedInClassMethods_.reserve(mixedInClassMethodsSize);
-        for (int i = 0; i < mixedInClassMethodsSize; i++) {
-            result.mixedInClassMethods_.emplace_back(SymbolRef::fromRaw(p.getU4()));
         }
     }
     int typeParamsSize = p.getU4();

@@ -372,17 +372,16 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
         ENFORCE(sym.isClassOrModule());
 
-        // Add mixedInClassMethods() into its singleton
-        // These methods were populated earlier within `ResolveMixesInClassMethodsWalk#processMixesInClassMethods`
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
-            for (auto mixedInClassMethod : ancst.data(gs)->mixedInClassMethods()) {
+            for (auto &mixedInClassMethod :
+                 ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods()).data(gs)->arguments()) {
                 ENFORCE(ancst.data(gs)->isClassOrModule());
 
                 if (!singleton.exists()) {
                     singleton = sym.data(gs)->singletonClass(gs);
                 }
-                singleton.data(gs)->addMixin(mixedInClassMethod);
+                singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
             }
             if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
                 // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it

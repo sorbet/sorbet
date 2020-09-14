@@ -2796,10 +2796,21 @@ class ResolveMixesInClassMethodsWalk {
                 return;
             }
 
-            // We are populating `mixedInClassMethods` with the argument to `mixes_in_class_methods`
-            // This vector will be used in `Resolver::finalizeSymbols` as well as serialization
-            auto &mixedInClassMethods = ctx.owner.data(ctx)->mixedInClassMethods();
-            mixedInClassMethods.emplace_back(id->symbol);
+            // Get the fake property holding the mixes
+            auto mixData = id->symbol.data(ctx)->findMember(ctx.state, core::Names::mixedInClassMethods());
+            auto loc = core::Loc(id->symbol.data(ctx)->loc().file(), send.loc);
+            if (!mixData.exists()) {
+                // We never stored a mixin in this symbol
+                // Create the fake property that will hold the mixed in modules
+                mixData = ctx.state.enterMethodSymbol(loc, id->symbol.data(ctx)->ref(ctx.state),
+                                                      core::Names::mixedInClassMethods());
+            }
+
+            // Add an argument to the fake property to store the referenced module
+            auto argName = ctx.state.enterNameUTF8(fmt::format("arg{}", mixData.data(ctx.state)->arguments().size()));
+            auto &argInfo =
+                ctx.state.enterMethodArgumentSymbol(loc, mixData, argName); // we don't really care about the name
+            argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
         }
     }
 
