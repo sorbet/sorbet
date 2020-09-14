@@ -57,6 +57,13 @@ class T::Enum
     @values
   end
 
+  # This exists for compatibility with the interface of `Hash` & mostly to support
+  # the HashEachMethods Rubocop.
+  sig {returns(T::Enumerator[T.attached_class])}
+  def self.each_value
+    values.each
+  end
+
   # Convert from serialized value to enum instance
   #
   # Note: It would have been nice to make this method final before people started overriding it.
