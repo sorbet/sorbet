@@ -31,6 +31,7 @@ rust_library(
     crate_type = "lib",
     deps = [
         "@raze__libc__0_2_77//:libc",
+        "@jemalloc//:jemalloc_impl",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

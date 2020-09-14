@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
 
 rust_library(
@@ -28,11 +30,17 @@ rust_library(
     deps = [
         "@com_stripe_ruby_typer//third_party/cargo:backtrace",
         "@com_stripe_ruby_typer//third_party/cargo:bytecount",
-        "@com_stripe_ruby_typer//third_party/cargo:jemallocator",
         "@com_stripe_ruby_typer//third_party/cargo:libc",
         "@com_stripe_ruby_typer//third_party/cargo:log",
         "@com_stripe_ruby_typer//third_party/cargo:serde",
         "@com_stripe_ruby_typer//third_party/cargo:serde_json",
         "@com_stripe_ruby_typer//third_party/cargo:simplelog",
     ],
+)
+
+cc_library(
+    name = "rubyfmt_macro_wrappers",
+    srcs = ["librubyfmt/src/rubyfmt.c"],
+    linkstatic = True,
+    deps = ["@ruby_2_6//:headers"],
 )

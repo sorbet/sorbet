@@ -82,14 +82,6 @@ def raze_fetch_remote_crates():
     )
 
     _new_http_archive(
-        name = "raze__fs_extra__1_2_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/fs_extra/fs_extra-1.2.0.crate",
-        type = "tar.gz",
-        strip_prefix = "fs_extra-1.2.0",
-        build_file = Label("//third_party/cargo/remote:fs_extra-1.2.0.BUILD"),
-    )
-
-    _new_http_archive(
         name = "raze__gimli__0_22_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/gimli/gimli-0.22.0.crate",
         type = "tar.gz",
@@ -103,22 +95,6 @@ def raze_fetch_remote_crates():
         type = "tar.gz",
         strip_prefix = "itoa-0.4.6",
         build_file = Label("//third_party/cargo/remote:itoa-0.4.6.BUILD"),
-    )
-
-    _new_http_archive(
-        name = "raze__jemalloc_sys__0_3_2",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/jemalloc-sys/jemalloc-sys-0.3.2.crate",
-        type = "tar.gz",
-        strip_prefix = "jemalloc-sys-0.3.2",
-        build_file = Label("//third_party/cargo/remote:jemalloc-sys-0.3.2.BUILD"),
-    )
-
-    _new_http_archive(
-        name = "raze__jemallocator__0_3_2",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/jemallocator/jemallocator-0.3.2.crate",
-        type = "tar.gz",
-        strip_prefix = "jemallocator-0.3.2",
-        build_file = Label("//third_party/cargo/remote:jemallocator-0.3.2.BUILD"),
     )
 
     _new_http_archive(

@@ -25,11 +25,6 @@ alias(
     tags = ["cargo-raze"],
 )
 alias(
-    name = "jemallocator",
-    actual = "@raze__jemallocator__0_3_2//:jemallocator",
-    tags = ["cargo-raze"],
-)
-alias(
     name = "libc",
     actual = "@raze__libc__0_2_77//:libc",
     tags = ["cargo-raze"],

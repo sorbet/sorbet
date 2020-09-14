@@ -147,7 +147,7 @@ package(default_visibility = ["//visibility:public"])
     new_git_repository(
         name = "rubyfmt",
         remote = "https://github.com/penelopezone/rubyfmt",
-        commit = "4869fd64be6e7dbeb0fb68684afb856eae450cf6",
+        commit = "f64f80ce80a5027106f689e76e6400abaa87d90f",
         init_submodules = True,
         build_file = "//third_party/rubyfmt:rubyfmt.BUILD",
     )
