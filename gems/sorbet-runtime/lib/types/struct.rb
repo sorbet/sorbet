@@ -5,6 +5,7 @@ class T::InexactStruct
   include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
+  include T::Props::HashAccessible
 end
 
 class T::Struct < T::InexactStruct

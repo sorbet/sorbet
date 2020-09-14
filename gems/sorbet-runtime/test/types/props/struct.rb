@@ -18,6 +18,14 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     prop :hash_field2, T.nilable({a: Integer, b: Integer})
   end
 
+  class StructWithSquareBracketMethod < T::Struct
+    prop :name, String
+
+    def [](name)
+      "different name"
+    end
+  end
+
   it 'errors if you try to set a "class" prop' do
     assert_raises(ArgumentError) do
       MyStruct.prop :class, String
@@ -75,6 +83,27 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     assert_equal('object_id', doc.object_id)
     assert_equal('object_id', doc.class.decorator.prop_get(doc, :object_id))
   end
+
+  it 'it can use #[](property_name) method to access a prop' do
+    doc = StructWithPredefinedHash.new(hash_field1: { a: 1, b: 2})
+
+    assert_equal({ a: 1, b: 2}, doc[:hash_field1])
+  end
+
+  it 'does raise a NameError if #[](property_name) is not a property' do
+    doc = StructWithPredefinedHash.new(hash_field1: { a: 1, b: 2})
+
+    assert_raises(NameError) do
+      doc[:not_existent]
+    end
+  end
+
+  it 'does not overwrite #[]=(property_name) method' do
+    doc = StructWithSquareBracketMethod.new(name: 'name')
+
+    assert_equal('different name', doc[:name])
+  end
+  
 
   class SubStruct < T::Struct
     prop :bar1, String
