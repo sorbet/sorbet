@@ -325,6 +325,7 @@ public:
 
 static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br", Intrinsics::HandleBlock::Unhandled},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq", Intrinsics::HandleBlock::Unhandled},

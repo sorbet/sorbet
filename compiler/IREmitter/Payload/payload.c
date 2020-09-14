@@ -1294,6 +1294,32 @@ VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const
     return sorbet_rb_array_square_br_slowpath(recv, fun, argc, argv, blk, closure);
 }
 
+// This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
+// where a range is used as the key, we defer back to the VM.
+// https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005
+VALUE sorbet_rb_array_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                   VALUE closure) {
+    long offset, beg, len;
+
+    if (UNLIKELY(argc == 3)) {
+        goto range;
+    }
+    rb_check_arity(argc, 2, 2);
+    rb_check_frozen(recv);
+    if (LIKELY(FIXNUM_P(argv[0]))) {
+        offset = FIX2LONG(argv[0]);
+        goto fixnum;
+    }
+    if (UNLIKELY(rb_range_beg_len(argv[0], &beg, &len, RARRAY_LEN(recv), 1))) {
+    range:
+        return rb_funcallv(recv, fun, argc, argv);
+    }
+    offset = NUM2LONG(argv[0]);
+fixnum:
+    rb_ary_store(recv, offset, argv[1]);
+    return argv[1];
+}
+
 VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
     rb_check_arity(argc, 0, 0);
