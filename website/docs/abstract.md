@@ -173,7 +173,11 @@ A.foo
 ```
 
 We can also call `mixes_in_class_methods` with multiple modules or classes to
-mix in more methods.
+mix in more methods. Some Ruby modules mixin more than one module as class
+methods when they are included, and some modules mixin class methods but also
+include other modules that mixin in their own class modules. In these cases, you
+will need to declare multiple modules in the mixes_in_class_methods call or
+make multiple mixes_in_class_methods calls.
 
 ## What's next?
 
