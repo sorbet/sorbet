@@ -2408,6 +2408,27 @@ private:
             method.data(ctx)->setReBind(sig.bind);
         }
 
+        auto methodInfo = method.data(ctx);
+
+        // Is this a signature for a method defined with argument forwarding syntax?
+        if (methodInfo->arguments().size() == 3) {
+            // To match, the definition must have been desugared in exaclty 3 parameters named
+            // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
+            auto l1 = getArgLocal(ctx, methodInfo->arguments()[0], mdef, 0, isOverloaded)->localVariable;
+            auto l2 = getArgLocal(ctx, methodInfo->arguments()[1], mdef, 1, isOverloaded)->localVariable;
+            auto l3 = getArgLocal(ctx, methodInfo->arguments()[2], mdef, 2, isOverloaded)->localVariable;
+            if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
+                l3._name == core::Names::fwdBlock()) {
+                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Unsupported `{}` for argument forwarding syntax. "
+                                "Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
+                                "sig", method.data(ctx)->show(ctx));
+                    e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
+                }
+                return;
+            }
+        }
+
         // Get the parameters order from the signature
         vector<ParsedSig::ArgSpec> sigParams;
         for (auto &spec : sig.argTypes) {
@@ -2417,7 +2438,6 @@ private:
         vector<ast::Local const *> defParams; // Parameters order from the method declaration
         bool seenOptional = false;
 
-        auto methodInfo = method.data(ctx);
         methodInfo->resultType = sig.returns;
         int i = -1;
         for (auto &arg : methodInfo->arguments()) {
