@@ -1,6 +1,7 @@
 # typed: true
 module Mixin
   extend T::Sig
+  extend T::Helpers
 
   module ClassMethods1
     def mixin_class_method_1

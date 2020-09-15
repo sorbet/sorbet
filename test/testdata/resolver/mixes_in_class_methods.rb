@@ -25,7 +25,7 @@ Test.new.mixin_method
 module Bad1
   extend T::Sig
   extend T::Helpers
-  mixes_in_class_methods # error: Not enough arguments provided for method `T::Helpers#mixes_in_class_methods`. Expected: `1`, got: `0`
+  mixes_in_class_methods # error: Not enough arguments provided for method `T::Helpers#mixes_in_class_methods`. Expected: `1+`, got: `0`
 end
 
 class Bad2
