@@ -4,6 +4,8 @@
 # Use as a mixin with extend (`extend T::Helpers`).
 # Docs at https://confluence.corp.stripe.com/display/PRODINFRA/Ruby+Types
 module T::Helpers
+  include Kernel
+
   Private = T::Private
 
   ### Class/Module Helpers ###

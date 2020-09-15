@@ -2772,7 +2772,7 @@ class ResolveMixesInClassMethodsWalk {
             return;
         }
 
-        auto index = 0;
+        auto argumentNumber = 0;
         for (auto &arg : send.args) {
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
@@ -2799,23 +2799,18 @@ class ResolveMixesInClassMethodsWalk {
 
             // Get the fake property holding the mixes
             auto mixData = id->symbol.data(ctx)->findMember(ctx.state, core::Names::classMethods());
-            auto loc = core::Loc(id->symbol.data(ctx)->loc().file(), send.loc);
+            auto loc = core::Loc(ctx.owner.data(ctx)->loc().file(), send.loc);
             if (!mixData.exists()) {
                 // We never stored a mixin in this symbol
                 // Create the fake property that will hold the mixed in modules
-                mixData =
-                    ctx.state.enterMethodSymbol(loc, id->symbol.data(ctx)->ref(ctx.state), core::Names::classMethods());
+                mixData = ctx.state.enterMethodSymbol(loc, ctx.owner, core::Names::classMethods());
             }
 
             // Add an argument to the fake property to store the referenced module
-            auto argName = ctx.state.enterNameUTF8(fmt::format("arg{}", index));
-            auto &argInfo =
-                ctx.state.enterMethodArgumentSymbol(loc, mixData, argName); // we don't really care about the name
-            std::cout << "Resolver argName: " << argName.show(ctx) << std::endl;
-            std::cout << "Resolver arginfo already rebind: " << argInfo.rebind.show(ctx) << std::endl;
-            std::cout << "Resolver rebinding: " << id->symbol.show(ctx) << std::endl;
+            auto argName = ctx.state.enterNameUTF8(fmt::format("arg{}", argumentNumber)); // name has to be distinct
+            auto &argInfo = ctx.state.enterMethodArgumentSymbol(loc, mixData, argName);
             argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
-            index++;
+            argumentNumber++;
         }
     }
 

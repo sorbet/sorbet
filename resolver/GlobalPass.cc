@@ -381,12 +381,11 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             }
 
             for (auto &mixedInClassMethod : mixedInClassMethods.data(gs)->arguments()) {
-                // ENFORCE(mixedInClassMethod.rebind.data(gs).isSymbol);
-                // std::cout << "GlobalPass rebind: " << mixedInClassMethod.rebind.data(gs)->toString(gs) << std::endl;
+                ENFORCE(mixedInClassMethod.rebind.data(gs)->isClassOrModule());
                 if (!singleton.exists()) {
                     singleton = sym.data(gs)->singletonClass(gs);
                 }
-                // singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
+                singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
             }
             if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
                 // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
