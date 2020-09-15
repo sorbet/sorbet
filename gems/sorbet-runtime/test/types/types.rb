@@ -1307,21 +1307,17 @@ module Opus::Types::Test
 
       describe 'type variables' do
         it 'type members are subtypes of everything' do
-          # rubocop:disable PrisonGuard/UseOpusTypesShortcut
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)
           assert_subtype(T::Types::TypeMember.new(:in), String)
           assert_subtype(T::Types::TypeMember.new(:in),
                          T::Types::TypeMember.new(:out))
-          # rubocop:enable PrisonGuard/UseOpusTypesShortcut
         end
 
         it 'type parameters are subtypes of everything' do
-          # rubocop:disable PrisonGuard/UseOpusTypesShortcut
           assert_subtype(T::Types::TypeParameter.new(:T), T.untyped)
           assert_subtype(T::Types::TypeParameter.new(:T), String)
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
-          # rubocop:enable PrisonGuard/UseOpusTypesShortcut
         end
       end
 

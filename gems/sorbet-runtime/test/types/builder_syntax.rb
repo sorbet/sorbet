@@ -401,7 +401,7 @@ module Opus::Types::Test
           Class.new do
             extend T::Sig
             # We explicitly need to test that this ordering raises a certain error
-            sig {returns(NilClass).checked(:never).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
+            sig {returns(NilClass).checked(:never).on_failure(:soft, notify: 'me')}
             def self.foo; end; foo
           end
         end
@@ -412,7 +412,7 @@ module Opus::Types::Test
         Class.new do
           extend T::Sig
           # We explicitly need to test that this ordering does not raise an error
-          sig {returns(NilClass).checked(:tests).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
+          sig {returns(NilClass).checked(:tests).on_failure(:soft, notify: 'me')}
           def self.foo; end; foo
         end
       end
@@ -421,7 +421,7 @@ module Opus::Types::Test
         Class.new do
           extend T::Sig
           # We explicitly need to test that this ordering does not raise an error
-          sig {returns(NilClass).checked(:always).on_failure(:soft, notify: 'me')} # rubocop:disable PrisonGuard/SigBuilderOrder
+          sig {returns(NilClass).checked(:always).on_failure(:soft, notify: 'me')}
           def self.foo; end; foo
         end
       end
@@ -453,7 +453,7 @@ module Opus::Types::Test
         e = assert_raises(ArgumentError) do
           Class.new do
             extend T::Sig
-            sig {void.returns(Integer)} # rubocop:disable PrisonGuard/SigBuilderOrder
+            sig {void.returns(Integer)}
             def self.foo; end; foo
           end
         end

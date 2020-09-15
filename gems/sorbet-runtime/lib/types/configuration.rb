@@ -248,7 +248,7 @@ module T::Configuration
   end
 
   private_class_method def self.log_info_handler_default(str, extra)
-    puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
+    puts "#{str}, extra: #{extra}"
   end
 
   def self.log_info_handler(str, extra)
@@ -282,7 +282,7 @@ module T::Configuration
   end
 
   private_class_method def self.soft_assert_handler_default(str, extra)
-    puts "#{str}, extra: #{extra}" # rubocop:disable PrisonGuard/NoBarePuts
+    puts "#{str}, extra: #{extra}"
   end
 
   def self.soft_assert_handler(str, extra)

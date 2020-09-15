@@ -6,8 +6,15 @@
 require "./lib/sorbet-runtime"
 T::Configuration.default_checked_level = :always
 
+task default: [:test, :rubocop]
+
 task :test do
   Dir.glob('./test/**/*.rb').reject {|path| path.match(/^.\/test\/types\/fixtures\//)}.each(&method(:require))
+end
+
+require 'rubocop/rake_task'
+RuboCop::RakeTask.new(:rubocop) do |t|
+  t.requires << 'rubocop-performance'
 end
 
 begin

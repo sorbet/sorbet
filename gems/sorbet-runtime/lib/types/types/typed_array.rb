@@ -22,7 +22,7 @@ module T::Types
       obj.is_a?(Array)
     end
 
-    def new(*args) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+    def new(*args)
       Array.new(*T.unsafe(args))
     end
 
