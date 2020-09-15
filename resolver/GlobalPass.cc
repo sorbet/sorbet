@@ -375,7 +375,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             ENFORCE(ancst.data(gs)->isClassOrModule());
-            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::classMethods());
+            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
             if (!mixedInClassMethods.exists()) {
                 continue;
             }

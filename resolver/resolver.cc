@@ -2798,12 +2798,12 @@ class ResolveMixesInClassMethodsWalk {
             }
 
             // Get the fake property holding the mixes
-            auto mixData = id->symbol.data(ctx)->findMember(ctx.state, core::Names::classMethods());
+            auto mixData = id->symbol.data(ctx)->findMember(ctx.state, core::Names::mixedInClassMethods());
             auto loc = core::Loc(ctx.owner.data(ctx)->loc().file(), send.loc);
             if (!mixData.exists()) {
                 // We never stored a mixin in this symbol
                 // Create the fake property that will hold the mixed in modules
-                mixData = ctx.state.enterMethodSymbol(loc, ctx.owner, core::Names::classMethods());
+                mixData = ctx.state.enterMethodSymbol(loc, ctx.owner, core::Names::mixedInClassMethods());
             }
 
             // Add an argument to the fake property to store the referenced module
