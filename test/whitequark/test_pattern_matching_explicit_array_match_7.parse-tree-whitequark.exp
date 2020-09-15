@@ -3,6 +3,6 @@ s(:case_match,
   s(:in_pattern,
     s(:array_pattern,
       s(:match_var, :x),
-      s(:match_rest),
+      s(:match_rest, nil),
       s(:match_var, :y)), nil,
     s(:true)), nil)

@@ -2,6 +2,6 @@ s(:case_match,
   s(:lvar, :foo),
   s(:in_pattern,
     s(:array_pattern,
-      s(:match_rest),
+      s(:match_rest, nil),
       s(:match_var, :x)), nil,
     s(:true)), nil)

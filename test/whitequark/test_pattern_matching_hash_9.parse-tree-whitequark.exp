@@ -6,5 +6,5 @@ s(:case_match,
         s(:sym, :a),
         s(:int, "1")),
       s(:match_var, :_a),
-      s(:match_rest)), nil,
+      s(:match_rest, nil)), nil,
     s(:true)), nil)

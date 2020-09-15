@@ -4,5 +4,5 @@ s(:case_match,
     s(:array_pattern,
       s(:match_var, :x),
       s(:match_var, :y),
-      s(:match_rest)), nil,
+      s(:match_rest, nil)), nil,
     s(:true)), nil)
