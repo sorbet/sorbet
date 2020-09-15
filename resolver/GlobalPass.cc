@@ -374,18 +374,19 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
-            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            ENFORCE(ancst.data(gs)->isClassOrModule());
+            auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::classMethods());
             if (!mixedInClassMethods.exists()) {
                 continue;
             }
 
             for (auto &mixedInClassMethod : mixedInClassMethods.data(gs)->arguments()) {
-                ENFORCE(ancst.data(gs)->isClassOrModule());
-
+                // ENFORCE(mixedInClassMethod.rebind.data(gs).isSymbol);
+                // std::cout << "GlobalPass rebind: " << mixedInClassMethod.rebind.data(gs)->toString(gs) << std::endl;
                 if (!singleton.exists()) {
                     singleton = sym.data(gs)->singletonClass(gs);
                 }
-                singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
+                // singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
             }
             if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
                 // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
