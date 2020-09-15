@@ -4,8 +4,6 @@
 # Use as a mixin with extend (`extend T::Helpers`).
 # Docs at https://confluence.corp.stripe.com/display/PRODINFRA/Ruby+Types
 module T::Helpers
-  include Kernel
-
   Private = T::Private
 
   ### Class/Module Helpers ###
@@ -36,6 +34,6 @@ module T::Helpers
   #
   # Except that it is statically analyzed by sorbet.
   def mixes_in_class_methods(mod, *mods)
-    Private::Mixins.declare_mixes_in_class_methods(self, Array(mod).concat(mods))
+    Private::Mixins.declare_mixes_in_class_methods(self, [mod].concat(mods))
   end
 end

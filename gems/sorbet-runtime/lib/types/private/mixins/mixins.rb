@@ -17,7 +17,7 @@ module T::Private
       end
 
       if Abstract::Data.key?(mixin, :class_methods_mixins)
-        class_methods.concat(Abstract::Data.get(mixin, :class_methods_mixins))
+        class_methods = Abstract::Data.get(mixin, :class_methods_mixins) + class_methods
       end
 
       mixin.singleton_class.include(MixesInClassMethods)

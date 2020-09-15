@@ -76,7 +76,7 @@ module Opus::Types::Test
 
       klass = Class.new { include mixin }
       result = klass.mixin_class_method
-      assert_equal(2, result)
+      assert_equal(4, result)
     end
 
     it 'composes with a self.included' do
