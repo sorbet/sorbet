@@ -112,7 +112,7 @@ public:
         return toStringWithTabs(gs);
     }
     std::string showRaw(const GlobalState &gs) const;
-    std::string filePosToString(const GlobalState &gs) const;
+    std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
     std::string source(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
