@@ -681,6 +681,8 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
+        << '\n';
     out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  virtual std::string nodeName();" << '\n';
 
@@ -804,6 +806,74 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Loc:
                 // quiet the compiler; we skip Loc fields above
                 abort();
+            case FieldType::Bool:
+                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                break;
+        }
+    }
+    out << "    printTabs(buf, tabs);" << '\n';
+    out << "    fmt::format_to(buf,  \"}}\");\n";
+    out << "    return to_string(buf);\n";
+    out << "  }" << '\n';
+    out << '\n';
+
+    // toJSONWithLocs
+    out << "  std::string " << node.name
+        << "::toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) {" << '\n'
+        << "    fmt::memory_buffer buf;" << '\n';
+    out << "    fmt::format_to(buf,  \"{{\\n\");\n";
+    out << "    printTabs(buf, tabs + 1);" << '\n';
+    maybeComma = "";
+    if (!node.fields.empty()) {
+        maybeComma = ",";
+    }
+    out << R"(    fmt::format_to(buf,  "\"type\" : \")" << node.name << "\\\"" << maybeComma << "\\n\");\n";
+    i = -1;
+    // Generate fields
+    for (auto &arg : node.fields) {
+        i++;
+        maybeComma = "";
+        if (i < node.fields.size() - 1) {
+            maybeComma = ",";
+        }
+        out << "    printTabs(buf, tabs + 1);" << '\n';
+        switch (arg.type) {
+            case FieldType::Name:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
+                    << "\\n\", JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                break;
+            case FieldType::Node:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
+                out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
+                out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
+                break;
+            case FieldType::NodeVec:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
+                out << "    int i = -1;" << '\n';
+                out << "    for (auto &&a: " << arg.name << ") { \n";
+                out << "      i++;\n";
+                out << "      printTabs(buf, tabs + 2);\n";
+                out << "      printNodeJSONWithLocs(buf, a, gs, file, tabs + 2);\n";
+                out << "      if (i + 1 < " << arg.name << ".size()) {\n";
+                out << "        fmt::format_to(buf,  \",\");" << '\n';
+                out << "      }" << '\n';
+                out << "      fmt::format_to(buf,  \"\\n\");\n";
+                out << "    }" << '\n';
+                out << "    printTabs(buf, tabs + 1);\n";
+                out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
+                break;
+            case FieldType::String:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma << "\\n\", "
+                    << arg.name << ");\n";
+                break;
+            case FieldType::Uint:
+                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
+                    << arg.name << ");\n";
+                break;
+            case FieldType::Loc:
+                out << "      bool showFull = true;";
+                out << R"(    fmt::format_to(buf,  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+                    << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
                 out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "

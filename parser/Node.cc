@@ -35,6 +35,15 @@ void Node::printNodeJSON(fmt::memory_buffer &to, const unique_ptr<Node> &node, c
     }
 }
 
+void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
+                                 core::FileRef file, int tabs) const {
+    if (node) {
+        fmt::format_to(to, "{}", node->toJSONWithLocs(gs, file, tabs));
+    } else {
+        fmt::format_to(to, "null");
+    }
+}
+
 void Node::printNodeWhitequark(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
                                int tabs) const {
     if (node) {
