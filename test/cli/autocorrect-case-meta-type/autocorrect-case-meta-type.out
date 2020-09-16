@@ -1,0 +1,48 @@
+autocorrect-case-meta-type.rb:9: Call to method `===` on `T::Array[Integer]` mistakes a type for a value https://srb.help/7030
+     9 |  when T::Array[Integer]
+               ^^^^^^^^^^^^^^^^^
+  It looks like you're trying to pattern match on a generic
+  Autocorrect: Done
+    autocorrect-case-meta-type.rb:9: Replaced with `Array`
+     9 |  when T::Array[Integer]
+               ^^^^^^^^^^^^^^^^^
+
+autocorrect-case-meta-type.rb:12: Control flow could reach `T.absurd` because the type `T::Array[Integer]` wasn't handled https://srb.help/7026
+    12 |    T.absurd(input)
+            ^^^^^^^^^^^^^^^
+  Originating from:
+    autocorrect-case-meta-type.rb:5:
+     5 |def get_value(input)
+                      ^^^^^
+    autocorrect-case-meta-type.rb:7:
+     7 |  when Integer
+               ^^^^^^^
+
+autocorrect-case-meta-type.rb:16: Call to method `===` on `T::Array[Integer]` mistakes a type for a value https://srb.help/7030
+    16 |T::Array[Integer].===(0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  It looks like you're trying to pattern match on a generic
+  Autocorrect: Done
+    autocorrect-case-meta-type.rb:16: Replaced with `Array`
+    16 |T::Array[Integer].===(0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+sig {params(input: T.any(Integer, T::Array[Integer])).returns(Integer)}
+def get_value(input)
+  case input
+  when Integer
+    input
+  when Array
+    input.first || 0
+  else
+    T.absurd(input)
+  end
+end
+
+Array
