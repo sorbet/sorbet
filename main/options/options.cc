@@ -724,8 +724,11 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+<<<<<<< HEAD
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+=======
+>>>>>>> c3b20a977... Rename constants
         opts.lspRenameEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-rename"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
