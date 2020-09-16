@@ -1,0 +1,132 @@
+{
+  "type" : "Module",
+  "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs1.rb:3:1-3:9",
+  "name" : {
+    "type" : "Const",
+    "scope" : null,
+    "name" : "A"
+  },
+  "body" : {
+    "type" : "Module",
+    "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs1.rb:4:3-4:11",
+    "name" : {
+      "type" : "Const",
+      "scope" : null,
+      "name" : "B"
+    },
+    "body" : {
+      "type" : "DefMethod",
+      "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs1.rb:5:5-5:12",
+      "name" : "foo",
+      "args" : null,
+      "body" : {
+        "type" : "String",
+        "val" : "foo"
+      }
+    }
+  }
+}
+{
+  "type" : "Class",
+  "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs2.rb:3:1-3:8",
+  "name" : {
+    "type" : "Const",
+    "scope" : null,
+    "name" : "C"
+  },
+  "superclass" : null,
+  "body" : {
+    "type" : "Begin",
+    "stmts" : [
+      {
+        "type" : "Send",
+        "receiver" : null,
+        "method" : "include",
+        "args" : [
+          {
+            "type" : "Const",
+            "scope" : null,
+            "name" : "A"
+          }
+        ]
+      },
+      {
+        "type" : "Send",
+        "receiver" : null,
+        "method" : "include",
+        "args" : [
+          {
+            "type" : "Const",
+            "scope" : null,
+            "name" : "B"
+          }
+        ]
+      },
+      {
+        "type" : "DefMethod",
+        "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs2.rb:7:3-7:10",
+        "name" : "bar",
+        "args" : null,
+        "body" : {
+          "type" : "Send",
+          "receiver" : null,
+          "method" : "foo",
+          "args" : [
+          ]
+        }
+      }
+    ]
+  }
+}
+{
+  "type" : "Class",
+  "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs3.rb:3:1-3:11",
+  "name" : {
+    "type" : "Const",
+    "scope" : null,
+    "name" : "Main"
+  },
+  "superclass" : null,
+  "body" : {
+    "type" : "DefMethod",
+    "loc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs3.rb:4:3-4:11",
+    "name" : "main",
+    "args" : null,
+    "body" : {
+      "type" : "Begin",
+      "stmts" : [
+        {
+          "type" : "Send",
+          "receiver" : {
+            "type" : "Const",
+            "scope" : null,
+            "name" : "A"
+          },
+          "method" : "new",
+          "args" : [
+          ]
+        },
+        {
+          "type" : "Send",
+          "receiver" : null,
+          "method" : "puts",
+          "args" : [
+            {
+              "type" : "Send",
+              "receiver" : {
+                "type" : "Send",
+                "receiver" : null,
+                "method" : "a",
+                "args" : [
+                ]
+              },
+              "method" : "foo",
+              "args" : [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
