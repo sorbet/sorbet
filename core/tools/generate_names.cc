@@ -280,7 +280,7 @@ NameDef names[] = {
     {"sealedSubclasses", "sealed_subclasses"},
 
     // Used to store arguments to a "mixes_in_class_methods()" call
-    {"mixedInClassMethods", "<mixes in class methods>"},
+    {"mixedInClassMethods", "<mixed in class methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
 
     {"blockTemp", "<block>"},

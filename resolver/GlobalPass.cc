@@ -379,12 +379,11 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!mixedInClassMethods.exists()) {
                 continue;
             }
-
+            if (!singleton.exists()) {
+                singleton = sym.data(gs)->singletonClass(gs);
+            }
             for (auto &mixedInClassMethod : mixedInClassMethods.data(gs)->arguments()) {
                 ENFORCE(mixedInClassMethod.rebind.data(gs)->isClassOrModule());
-                if (!singleton.exists()) {
-                    singleton = sym.data(gs)->singletonClass(gs);
-                }
                 singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
             }
             if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
