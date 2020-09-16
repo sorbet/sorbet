@@ -373,6 +373,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-rename", "Enable experimental LSP feature: Rename");
+
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -719,6 +721,7 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+        opts.lspRenameEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-rename"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
