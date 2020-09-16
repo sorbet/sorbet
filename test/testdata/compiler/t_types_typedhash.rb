@@ -2,4 +2,5 @@
 # typed: true
 # compiled: true
 
-p T::Hash[Symbol, Integer].class
+x = T.unsafe(T::Hash[Symbol, Integer])
+p x.class

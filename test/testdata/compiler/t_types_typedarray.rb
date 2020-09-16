@@ -2,4 +2,5 @@
 # typed: true
 # compiled: true
 
-p T::Array[Integer].class
+x = T.unsafe(T::Array[Integer])
+p x.class
