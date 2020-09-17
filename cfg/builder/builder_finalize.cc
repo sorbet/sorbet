@@ -1,4 +1,5 @@
 #include "cfg/builder/builder.h"
+#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Names.h"
@@ -46,7 +47,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
-                bb->bexit.cond = core::LocalVariable::unconditional();
+                bb->bexit.cond = LocalRef::unconditional();
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
                 bb->rubyBlockId == thenb->rubyBlockId) { // can be squashed togather
@@ -64,7 +65,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (thenb->bexit.cond.variable != core::LocalVariable::blockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
                     // Don't remove block headers
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
@@ -130,18 +131,14 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
     }
 }
 
-core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
-                                 UnorderedMap<core::LocalVariable, core::LocalVariable> &aliases) {
-    if (what.isSyntheticTemporary(ctx)) {
+LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, UnorderedMap<LocalRef, LocalRef> &aliases) {
+    if (what.isSyntheticTemporary(ctx, cfg)) {
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;
-        } else {
-            return what;
         }
-    } else {
-        return what;
     }
+    return what;
 }
 
 /**
@@ -149,73 +146,87 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
-    vector<UnorderedMap<core::LocalVariable, core::LocalVariable>> outAliases;
-
+    vector<UnorderedMap<LocalRef, LocalRef>> outAliases;
     outAliases.resize(cfg.maxBasicBlockId);
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         auto &bb = *it;
         if (bb == cfg.deadBlock()) {
             continue;
         }
-        UnorderedMap<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
-        if (!bb->backEdges.empty()) {
-            current = outAliases[bb->backEdges[0]->id];
-        }
+        auto &current = outAliases[bb->id];
 
-        for (BasicBlock *parent : bb->backEdges) {
-            UnorderedMap<core::LocalVariable, core::LocalVariable> other = outAliases[parent->id];
-            for (auto it = current.begin(); it != current.end(); /* nothing */) {
-                auto &el = *it;
-                auto fnd = other.find(el.first);
-                if (fnd != other.end()) {
-                    if (fnd->second != el.second) {
-                        current.erase(it++);
+        if (!bb->backEdges.empty()) {
+            // Take the intersection of all of the back edges' aliases.
+            current = outAliases[bb->backEdges[0]->id];
+            for (auto i = 1; i < bb->backEdges.size(); i++) {
+                auto *parent = bb->backEdges[i];
+                const auto &other = outAliases[parent->id];
+                for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                    auto &el = *it;
+                    auto fnd = other.find(el.first);
+                    if (fnd != other.end()) {
+                        if (fnd->second != el.second) {
+                            current.erase(it++);
+                        } else {
+                            ++it;
+                        }
                     } else {
-                        ++it;
+                        // note: this is correct but too conservative. In particular for loop headers
+                        current.erase(it++);
                     }
-                } else {
-                    current.erase(it++); // note: this is correct but to conservative. In particular for loop headers
                 }
             }
+        }
+
+        // Overapproximation of the set of variables that have aliases.
+        // Will have false positives, but no false negatives. Avoids an expensive inner loop below.
+        UnorderedSet<LocalRef> mayHaveAlias;
+        for (auto &alias : current) {
+            mayHaveAlias.insert(alias.second);
         }
 
         for (Binding &bind : bb->exprs) {
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
-                i->what = maybeDealias(ctx, i->what, current);
+                i->what = maybeDealias(ctx, cfg, i->what, current);
             }
-            /* invalidate a stale record */
-            for (auto it = current.begin(); it != current.end(); /* nothing */) {
-                if (it->second == bind.bind.variable) {
-                    current.erase(it++);
-                } else {
-                    ++it;
+            if (mayHaveAlias.contains(bind.bind.variable)) {
+                /* invalidate a stale record (uncommon) */
+                for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                    if (it->second == bind.bind.variable) {
+                        current.erase(it++);
+                    } else {
+                        ++it;
+                    }
                 }
             }
+
             /* dealias */
             if (!bind.value->isSynthetic) {
                 // we don't allow dealiasing values into synthetic instructions
                 // as otherwise it fools dead code analysis.
                 if (auto *v = cast_instruction<Ident>(bind.value.get())) {
-                    v->what = maybeDealias(ctx, v->what, current);
+                    v->what = maybeDealias(ctx, cfg, v->what, current);
                 } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                    v->recv = maybeDealias(ctx, v->recv.variable, current);
+                    v->recv = maybeDealias(ctx, cfg, v->recv.variable, current);
                     for (auto &arg : v->args) {
-                        arg = maybeDealias(ctx, arg.variable, current);
+                        arg = maybeDealias(ctx, cfg, arg.variable, current);
                     }
                 } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
-                    v->what = maybeDealias(ctx, v->what.variable, current);
+                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
                 } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                    v->what = maybeDealias(ctx, v->what.variable, current);
+                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
                 }
             }
 
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 current[bind.bind.variable] = i->what;
+                mayHaveAlias.insert(i->what);
             }
         }
-        if (bb->bexit.cond.variable != core::LocalVariable::unconditional()) {
-            bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond.variable, current);
+        if (bb->bexit.cond.variable != LocalRef::unconditional()) {
+            bb->bexit.cond = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
         }
     }
 }
@@ -235,17 +246,20 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         return;
     }
 
+    Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
             Binding &bind = *expIt;
-            if (bind.bind.variable.isAliasForGlobal(ctx)) {
+            if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
                 ++expIt;
                 continue;
             }
 
-            auto fnd = RnW.reads[it->id].find(bind.bind.variable);
-            bool wasRead = fnd != RnW.reads[it->id].end(); // read in the same block
+            bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
+
+            // TODO(jvilk): When I change the sort order of block args to be in LocalRef variable order, we can
+            // early-abort the loops below if `arg.variable > bind.bind.variable`.
             if (!wasRead) {
                 for (const auto &arg : it->bexit.thenb->args) {
                     if (arg.variable == bind.bind.variable) {
@@ -288,13 +302,12 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        for (const core::LocalVariable what : RnW.reads[bb->id]) {
-            const auto minIt = cfg.minLoops.find(what);
-            int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
+        for (auto local : RnW.reads[bb->id]) {
+            auto curMin = cfg.minLoops[local];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
-            cfg.minLoops[what] = curMin;
+            cfg.minLoops[local] = curMin;
         }
     }
     for (const auto &bb : cfg.basicBlocks) {
@@ -304,18 +317,16 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
 
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
-            const auto minIt = cfg.minLoops.find(what);
-            const auto maxIt = cfg.maxLoopWrite.find(what);
-            int curMin = minIt != cfg.minLoops.end() ? minIt->second : INT_MAX;
-            int curMax = maxIt != cfg.maxLoopWrite.end() ? maxIt->second : 0;
+            int curMin = cfg.minLoops[what.id()];
+            int curMax = cfg.maxLoopWrite[what.id()];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
             if (curMax < bb->outerLoops) {
                 curMax = bb->outerLoops;
             }
-            cfg.minLoops[what] = curMin;
-            cfg.maxLoopWrite[what] = curMax;
+            cfg.minLoops[what.id()] = curMin;
+            cfg.maxLoopWrite[what.id()] = curMax;
         }
     }
 }
@@ -333,42 +344,43 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    const vector<UnorderedSet<core::LocalVariable>> &readsByBlock = RnW.reads;
-    const vector<UnorderedSet<core::LocalVariable>> &writesByBlock = RnW.writes;
-    const vector<UnorderedSet<core::LocalVariable>> &deadByBlock = RnW.dead;
+    const vector<vector<int>> &readsByBlock = RnW.reads;
+    const vector<vector<int>> &writesByBlock = RnW.writes;
+    const vector<vector<int>> &deadByBlock = RnW.dead;
 
-    // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    vector<UnorderedSet<core::LocalVariable>> upperBounds1(cfg.maxBasicBlockId);
+    // iterate over basic blocks in reverse and found upper bounds on what could a block need.
+    vector<vector<int>> upperBounds1;
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
-        for (BasicBlock *bb : cfg.forwardsTopoSort) {
-            auto &upperBoundsForBlock = upperBounds1[bb->id];
-            upperBoundsForBlock.insert(readsByBlock[bb->id].begin(), readsByBlock[bb->id].end());
-        }
+        upperBounds1 = readsByBlock;
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
-                int sz = upperBoundsForBlock.size();
+                const auto sz = upperBoundsForBlock.size();
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    upperBoundsForBlock.insert(upperBounds1[bb->bexit.thenb->id].begin(),
-                                               upperBounds1[bb->bexit.thenb->id].end());
+                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    upperBoundsForBlock.insert(upperBounds1[bb->bexit.elseb->id].begin(),
-                                               upperBounds1[bb->bexit.elseb->id].end());
+                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
                 }
+
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
-                for (auto dead : deadByBlock[bb->id]) {
-                    // TODO(nelhage) We can't erase for variables inside loops, due
-                    // to how our "pinning" type inference works. We can remove this
-                    // inner condition when we get a better type inference
-                    // algorithm.
-                    if (bb->outerLoops <= cfg.minLoops[dead]) {
-                        upperBoundsForBlock.erase(dead);
+                const auto &deadForBlock = deadByBlock[bb->id];
+                if (!deadForBlock.empty()) {
+                    vector<int> toRemove;
+                    for (auto local : deadForBlock) {
+                        // TODO(nelhage) We can't erase for variables inside loops, due
+                        // to how our "pinning" type inference works. We can remove this
+                        // inner condition when we get a better type inference
+                        // algorithm.
+                        if (bb->outerLoops <= cfg.minLoops[local]) {
+                            toRemove.emplace_back(local);
+                        }
                     }
+                    SortedVectorHelpers::setDifferenceInplace(upperBoundsForBlock, toRemove);
                 }
 
                 changed = changed || (upperBoundsForBlock.size() != sz);
@@ -376,7 +388,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         }
     }
 
-    vector<UnorderedSet<core::LocalVariable>> upperBounds2(cfg.maxBasicBlockId);
+    vector<vector<int>> upperBounds2(cfg.maxBasicBlockId);
 
     changed = true;
     {
@@ -386,14 +398,15 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
                 BasicBlock *bb = *it;
                 auto &upperBoundsForBlock = upperBounds2[bb->id];
-                int sz = upperBoundsForBlock.size();
+                const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        upperBoundsForBlock.insert(writesByBlock[edge->id].begin(), writesByBlock[edge->id].end());
-                        upperBoundsForBlock.insert(upperBounds2[edge->id].begin(), upperBounds2[edge->id].end());
+                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, writesByBlock[edge->id]);
+                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds2[edge->id]);
                     }
                 }
-                changed = changed || (upperBounds2[bb->id].size() != sz);
+
+                changed = changed || sz != upperBoundsForBlock.size();
             }
         }
     }
@@ -401,17 +414,30 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
-            auto set2 = upperBounds2[it->id];
-
-            int set1Sz = set2.size();
-            int set2Sz = upperBounds1[it->id].size();
-            it->args.reserve(set1Sz > set2Sz ? set2Sz : set1Sz);
-            for (auto el : upperBounds1[it->id]) {
-                if (set2.find(el) != set2.end()) {
-                    it->args.emplace_back(el);
+            const auto &set1 = upperBounds1[it->id];
+            const auto &set2 = upperBounds2[it->id];
+            auto set1It = set1.begin();
+            auto set2It = set2.begin();
+            // Note: The loop enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
+            ENFORCE_NO_TIMER(it->args.empty());
+            while (set1It != set1.end() && set2It != set2.end()) {
+                const auto set1El = *set1It;
+                const auto set2El = *set2It;
+                if (set1El == set2El) {
+                    it->args.emplace_back(set1El);
+                    set1It++;
+                    set2It++;
+                } else if (set1El < set2El) {
+                    set1It++;
+                } else {
+                    set2It++;
                 }
             }
-            fast_sort(it->args, [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable < rhs.variable; });
+            // it->args is now sorted in LocalRef ID order.
+            // TODO(jvilk): Remove this sort. I've kept it for now to avoid dirtying the PR diff.
+            fast_sort(it->args, [&cfg](const auto &lhs, const auto &rhs) -> bool {
+                return lhs.variable.data(cfg) < rhs.variable.data(cfg);
+            });
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }

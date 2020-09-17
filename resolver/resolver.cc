@@ -2214,10 +2214,7 @@ class ResolveMixesInClassMethodsWalk {
         }
 
         if (send.args.size() != 1) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
-                            send.fun.data(ctx)->show(ctx), 1, send.args.size());
-            }
+            // The arity mismatch error will be emitted later by infer.
             return;
         }
         auto &front = send.args.front();
@@ -2258,7 +2255,6 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, send);
-            return ast::MK::EmptyTree();
         }
         return tree;
     }

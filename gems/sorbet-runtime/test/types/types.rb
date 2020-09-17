@@ -309,6 +309,12 @@ module Opus::Types::Test
     end
 
     describe "TypedArray" do
+      class TestEnumerable
+        include Enumerable
+
+        def each; yield "something"; end
+      end
+
       it 'fails if value is not an array' do
         type = T::Array[Integer]
         value = 3
@@ -441,6 +447,14 @@ module Opus::Types::Test
 
         allocs_when_invalid = counting_allocations {type.valid?(invalid)}
         assert_equal(0, allocs_when_invalid)
+      end
+
+      it 'gives the right error when passed an unrelated enumerable' do
+        type = T::Array[String]
+        msg = check_error_message_for_obj(type, TestEnumerable.new)
+        assert_equal(
+          "Expected type T::Array[String], got Opus::Types::Test::TypesTest::TestEnumerable",
+          msg)
       end
     end
 
@@ -1293,21 +1307,17 @@ module Opus::Types::Test
 
       describe 'type variables' do
         it 'type members are subtypes of everything' do
-          # rubocop:disable PrisonGuard/UseOpusTypesShortcut
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)
           assert_subtype(T::Types::TypeMember.new(:in), String)
           assert_subtype(T::Types::TypeMember.new(:in),
                          T::Types::TypeMember.new(:out))
-          # rubocop:enable PrisonGuard/UseOpusTypesShortcut
         end
 
         it 'type parameters are subtypes of everything' do
-          # rubocop:disable PrisonGuard/UseOpusTypesShortcut
           assert_subtype(T::Types::TypeParameter.new(:T), T.untyped)
           assert_subtype(T::Types::TypeParameter.new(:T), String)
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
-          # rubocop:enable PrisonGuard/UseOpusTypesShortcut
         end
       end
 

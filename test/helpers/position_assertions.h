@@ -102,9 +102,10 @@ public:
     const std::string symbol;
     const int version;
     const bool isDefOfSelf;
+    const bool isDefaultArgValue;
 
     DefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
-                 int version, bool isDefOfSelf);
+                 int version, bool isDefOfSelf, bool isDefaultArgValue);
 
     static void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                       LSPWrapper &wrapper, int &nextId, const Location &queryLoc,
@@ -130,11 +131,11 @@ public:
                                 const std::vector<std::shared_ptr<RangeAssertion>> &allLocs);
 
     const std::string symbol;
-    const int version;
+    const std::vector<int> versions;
     std::shared_ptr<DefAssertion> def;
 
     UsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view symbol,
-                   int version);
+                   std::vector<int> versions);
 
     std::string toString() const override;
 };

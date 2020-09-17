@@ -77,7 +77,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U b>
               }
-              default_ = EmptyTree
+              default_ = Literal{ value = 1 }
             }, Local{
               localVariable = <U c>
             }, Local{
@@ -86,7 +86,7 @@ InsSeq{
               expr = Local{
                 localVariable = <U e>
               }
-              default_ = EmptyTree
+              default_ = Literal{ value = 2 }
             }, Local{
               localVariable = <U f>
             }, Local{
@@ -200,111 +200,24 @@ InsSeq{
         }
 
         MethodDef{
-          flags = {rewriter}
-          name = <DA <U take_arguments> $1><<DA <U take_arguments> $1>>
-          args = [Local{
-              localVariable = <U a>
-            }, OptionalArg{
-              expr = Local{
-                localVariable = <U b>
-              }
-              default_ = EmptyTree
-            }, Local{
-              localVariable = <U c>
-            }, Local{
-              localVariable = <U d>
-            }, OptionalArg{
-              expr = Local{
-                localVariable = <U e>
-              }
-              default_ = EmptyTree
-            }, Local{
-              localVariable = <U f>
-            }, Local{
-              localVariable = <U g>
-            }]
-          rhs = Literal{ value = 1 }
-        }
-
-        MethodDef{
-          flags = {rewriter}
-          name = <DA <U take_arguments> $2><<DA <U take_arguments> $2>>
-          args = [Local{
-              localVariable = <U a>
-            }, OptionalArg{
-              expr = Local{
-                localVariable = <U b>
-              }
-              default_ = EmptyTree
-            }, Local{
-              localVariable = <U c>
-            }, Local{
-              localVariable = <U d>
-            }, OptionalArg{
-              expr = Local{
-                localVariable = <U e>
-              }
-              default_ = EmptyTree
-            }, Local{
-              localVariable = <U f>
-            }, Local{
-              localVariable = <U g>
-            }]
-          rhs = Literal{ value = 2 }
-        }
-
-        MethodDef{
           flags = {self}
           name = <U <static-init>><<U <static-init>>>
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = InsSeq{
-            stats = [
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments" }
-                ]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet::Private::Static
+            }
+            fun = <U keep_def>
+            block = nullptr
+            args = [
+              Local{
+                localVariable = <U <self>>
               }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments<defaultArg>1" }
-                ]
-              }
-              Send{
-                recv = ConstantLit{
-                  orig = nullptr
-                  symbol = ::Sorbet::Private::Static
-                }
-                fun = <U keep_def>
-                block = nullptr
-                args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
-                  Literal{ value = :"take_arguments<defaultArg>2" }
-                ]
-              }
-            ],
-            expr = EmptyTree
+              Literal{ value = :"take_arguments" }
+            ]
           }
         }
       ]

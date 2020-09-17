@@ -1272,6 +1272,8 @@ class Date
   def self.jisx0301(*arg0); end
 end
 
+class Date::Error < ArgumentError; end
+
 class Date::Infinity < Numeric
   sig {returns(Date::Infinity)}
   def +@(); end

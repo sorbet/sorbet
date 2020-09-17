@@ -51,11 +51,21 @@ public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
 
+    // Empirically determined to be the smallest powers of two larger than the
+    // values required by the payload. Enforced in payload.cc.
+    static constexpr unsigned int PAYLOAD_MAX_NAME_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_CLASS_AND_MODULE_COUNT = 8192;
+    static constexpr unsigned int PAYLOAD_MAX_METHOD_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_FIELD_COUNT = 4096;
+    static constexpr unsigned int PAYLOAD_MAX_TYPE_ARGUMENT_COUNT = 256;
+    static constexpr unsigned int PAYLOAD_MAX_TYPE_MEMBER_COUNT = 4096;
+
     void initEmpty();
     void installIntrinsics();
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
-    void preallocateTables(u4 symbolSize, u4 nameSize);
+    void preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
+                           u4 typeMembersSize, u4 nameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -120,8 +130,13 @@ public:
     spdlog::logger &tracer() const;
     unsigned int namesUsed() const;
 
-    unsigned int symbolsUsed() const;
+    unsigned int classAndModulesUsed() const;
+    unsigned int methodsUsed() const;
+    unsigned int fieldsUsed() const;
+    unsigned int typeArgumentsUsed() const;
+    unsigned int typeMembersUsed() const;
     unsigned int filesUsed() const;
+    unsigned int symbolsUsedTotal() const;
 
     void sanityCheck() const;
     void markAsPayload();
@@ -234,7 +249,11 @@ private:
     u2 stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
     UnorderedMap<std::string, FileRef> fileRefByPath;
-    std::vector<Symbol> symbols;
+    std::vector<Symbol> classAndModules;
+    std::vector<Symbol> methods;
+    std::vector<Symbol> fields;
+    std::vector<Symbol> typeMembers;
+    std::vector<Symbol> typeArguments;
     std::vector<std::pair<unsigned int, unsigned int>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
@@ -255,8 +274,8 @@ private:
 
     void expandNames(u4 newSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo()._id, bool isModule = false);
-    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
+    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().classOrModuleIndex(),
+                              bool isModule = false);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;

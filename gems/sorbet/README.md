@@ -117,8 +117,6 @@ bazel test //gems/sorbet/test/snapshot:test_ruby_2_6/partial/local_rvm_gemset_ge
 
 ## Writing tests
 
-It's currently only possible to test `srb init`, not any other subcommand.
-
 We use two kinds of tests to test `srb init`: total snapshot tests and partial
 snapshot tests. The anatomy of a snapshot test looks like this:
 
@@ -139,15 +137,42 @@ test/snapshot/(total|partial)/<testname>/
 └── src/
     ├── Gemfile
     ├── Gemfile.lock
+    ├── test.sh (optional)
     └── ···
 ```
 
 So a snapshot test consists of a `src/` folder declaring a small Ruby project,
-with a `Gemfile`, `Gemfile.lock`, and zero or more Ruby files. The test then
-also has an `expected` folder, which can be used to snapshot
+with a `Gemfile`, `Gemfile.lock`, zero or more Ruby files as well as optional
+`test.sh` script.
 
-- the stdout of running `srb init` (`out.log`)
-- the stderr of running `srb init` (`err.log`)
+By default, the test framework only checks the result of `srb init`.
+The `test.sh` script can be used to change that behavior and list the commands
+that must be ran in the context of the test.
+
+For example, to test the behavior of `srb init` then `srb tc`, the `test.sh`
+script will look like this:
+
+```bash
+#!/bin/bash
+bundle exec "$1" init
+bundle exec "$1" tc
+```
+
+Where `$1` is the path to `srb` provided by the test framework.
+
+The test framework *always* expects the `test.sh` script to finish without error.
+If you want to check the output of a command *expected* to fail, you can use bash
+to control what the script should return:
+
+```bash
+#!/bin/bash
+bundle exec "$1" tc || exit 0 # we expect this command to fail
+```
+
+The test then also has an `expected` folder, which can be used to snapshot:
+
+- the stdout of running `srb init` or `test.sh` (`out.log`)
+- the stderr of running `srb init` or `test.sh` (`err.log`)
 - resulting `sorbet/` folder for this project
 
 The difference between a total snapshot test and a partial snapshot test deals
@@ -158,11 +183,11 @@ with the `expected/` folder:
   `expected/` folder.
 
 - For a partial test, only the files explicitly mentioned in the `expected/`
-  folder must match. The actual output of `srb init` might contain more than is
+  folder must match. The actual output of the test might contain more than is
   snapshotted.
 
   Note that the entire `expected/` folder is optional for a partial test. Such a
-  test will merely assert that `srb init` runs to termination without error.
+  test will merely assert that the test runs to termination without error.
 
 We **prefer partial tests** because they're more specific and more robust to
 changes in implementation details. Use total tests only when you must test the

@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params({:"bar" => <emptyTree>::<C Integer>, :"foo" => <emptyTree>::<C Integer>}).void()
     end
 
-    def initialize<<C <todo sym>>>(bar:, foo: = <emptyTree>, &<blk>)
+    def initialize<<C <todo sym>>>(bar:, foo: = 3, &<blk>)
       begin
         @foo = ::T.let(foo, <emptyTree>::<C Integer>)
         @bar = ::T.let(bar, <emptyTree>::<C Integer>)
@@ -57,15 +57,5 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"bar=")
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"bar" => <emptyTree>::<C Integer>, :"foo" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
-    end
-
-    def initialize<defaultArg>1<<C <todo sym>>>(bar:, foo: = <emptyTree>, &<blk>)
-      3
-    end
-
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize<defaultArg>1")
   end
 end

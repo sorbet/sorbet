@@ -1,0 +1,131 @@
+autocorrect-helpers.rb:4: Method `interface!` does not exist on `T.class_of(S1)` https://srb.help/7003
+     4 |  interface!
+          ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:4: Inserted `  extend T::Helpers
+`
+     4 |  interface!
+        ^
+
+autocorrect-helpers.rb:8: Method `abstract!` does not exist on `T.class_of(S2)` https://srb.help/7003
+     8 |  abstract!
+          ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:8: Inserted `  extend T::Helpers
+`
+     8 |  abstract!
+        ^
+
+autocorrect-helpers.rb:12: Method `final!` does not exist on `T.class_of(S3)` https://srb.help/7003
+    12 |  final!
+          ^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:12: Inserted `  extend T::Helpers
+`
+    12 |  final!
+        ^
+
+autocorrect-helpers.rb:16: Method `sealed!` does not exist on `T.class_of(S4)` https://srb.help/7003
+    16 |  sealed!
+          ^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:16: Inserted `  extend T::Helpers
+`
+    16 |  sealed!
+        ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: Did you mean: `Kernel#select`?
+    2135 |  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-helpers.rb:20: Method `interface!` does not exist on `T.class_of(S5)` https://srb.help/7003
+    20 |  interface!
+          ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:20: Inserted `  extend T::Helpers
+`
+    20 |  interface!
+        ^
+
+autocorrect-helpers.rb:21: Method `final!` does not exist on `T.class_of(S5)` https://srb.help/7003
+    21 |  final!
+          ^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:20: Inserted `  extend T::Helpers
+`
+    20 |  interface!
+        ^
+
+autocorrect-helpers.rb:25: Method `abstract!` does not exist on `T.class_of(S6)` https://srb.help/7003
+    25 |  abstract!
+          ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:25: Inserted `  extend T::Helpers
+`
+    25 |  abstract!
+        ^
+
+autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` https://srb.help/7003
+    26 |  sealed!
+          ^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:25: Inserted `  extend T::Helpers
+`
+    25 |  abstract!
+        ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: Did you mean: `Kernel#select`?
+    2135 |  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.class_of(S7)` https://srb.help/7003
+    30 |  mixes_in_class_methods(S1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-helpers.rb:30: Inserted `  extend T::Helpers
+`
+    30 |  mixes_in_class_methods(S1)
+        ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1371: Did you mean: `Module#public_class_method`?
+    1371 |  def public_class_method(*arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 9
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+module S1
+  extend T::Helpers
+  interface!
+end
+
+class S2
+  extend T::Helpers
+  abstract!
+end
+
+class S3
+  extend T::Helpers
+  final!
+end
+
+class S4
+  extend T::Helpers
+  sealed!
+end
+
+module S5
+  extend T::Helpers
+  interface!
+  final!
+end
+
+class S6
+  extend T::Helpers
+  abstract!
+  sealed!
+end
+
+module S7
+  extend T::Helpers
+  mixes_in_class_methods(S1)
+end

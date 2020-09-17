@@ -99,6 +99,12 @@ TypePtr Types::arrayOfUntyped() {
     return res;
 }
 
+TypePtr Types::rangeOfUntyped() {
+    static vector<TypePtr> targs{Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Range(), targs);
+    return res;
+}
+
 TypePtr Types::hashOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
     static auto res = make_type<AppliedType>(Symbols::Hash(), targs);
@@ -274,6 +280,11 @@ TypePtr Types::arrayOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Array(), targs);
 }
 
+TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
+    vector<TypePtr> targs{move(elem)};
+    return make_type<AppliedType>(Symbols::Range(), targs);
+}
+
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
     vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(gs, tupleArgs)};
@@ -307,6 +318,11 @@ void ProxyType::_sanityCheck(const GlobalState &gs) {
 bool Type::isUntyped() const {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == Symbols::untyped();
+}
+
+bool Type::isNilClass() const {
+    auto *t = cast_type<ClassType>(this);
+    return t != nullptr && t->symbol == Symbols::NilClass();
 }
 
 core::SymbolRef Type::untypedBlame() const {
@@ -673,7 +689,8 @@ void AppliedType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->klass.data(gs)->typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
-                this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
+                this->klass.classOrModuleIndex() >= Symbols::Proc0().classOrModuleIndex() &&
+                    this->klass.classOrModuleIndex() <= Symbols::last_proc().classOrModuleIndex(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ->sanityCheck(gs);

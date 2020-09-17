@@ -374,17 +374,28 @@ module Enumerable
   # (1..100).find    { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
   # ```
   sig do
-    params(
-        ifnone: Proc,
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      )
+      .returns(T.any(T.type_parameter(:U), Elem))
+  end
+  sig do
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator[T.any(T.type_parameter(:U), Elem)])
+  end
+  sig do
+    params(
+      blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T.nilable(Elem))
   end
   sig do
-    params(
-        ifnone: Proc,
-    )
-    .returns(T::Enumerator[Elem])
+    returns(T::Enumerator[Elem])
   end
   def detect(ifnone=T.unsafe(nil), &blk); end
 

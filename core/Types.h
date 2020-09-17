@@ -111,6 +111,7 @@ public:
     static TypePtr Boolean();
     static TypePtr Object();
     static TypePtr arrayOfUntyped();
+    static TypePtr rangeOfUntyped();
     static TypePtr hashOfUntyped();
     static TypePtr procClass();
     static TypePtr classClass();
@@ -154,6 +155,7 @@ public:
 
     static TypePtr lubAll(const GlobalState &gs, std::vector<TypePtr> &elements);
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
@@ -217,6 +219,7 @@ public:
     }
 
     bool isUntyped() const;
+    bool isNilClass() const;
     core::SymbolRef untypedBlame() const;
     bool isBottom() const;
     virtual bool hasUntyped();
@@ -475,6 +478,7 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef

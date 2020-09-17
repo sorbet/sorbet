@@ -1,0 +1,2 @@
+s(:array,
+  s(:sym, :a\nb))

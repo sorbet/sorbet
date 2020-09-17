@@ -166,7 +166,11 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
-    u4 reserveSymbolTableCapacity = 0;
+    u4 reserveClassTableCapacity = 0;
+    u4 reserveMethodTableCapacity = 0;
+    u4 reserveFieldTableCapacity = 0;
+    u4 reserveTypeArgumentTableCapacity = 0;
+    u4 reserveTypeMemberTableCapacity = 0;
     u4 reserveNameTableCapacity = 0;
 
     std::string statsdHost;

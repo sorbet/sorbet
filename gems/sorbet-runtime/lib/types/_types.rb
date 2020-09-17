@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # This is where we define the shortcuts, so we can't use them here
-# rubocop:disable PrisonGuard/UseOpusTypesShortcut
 
 #  _____
 # |_   _|   _ _ __   ___  ___
@@ -285,4 +284,3 @@ module T
     end
   end
 end
-# rubocop:enable PrisonGuard/UseOpusTypesShortcut

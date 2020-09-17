@@ -387,7 +387,12 @@ TEST_CASE("LSPTest") {
                 auto &entry = defUsageMap[defAssertion->symbol];
                 auto &defMap = entry.first;
                 defMap[defAssertion->version].emplace_back(defAssertion);
-                entry.second.emplace_back(defAssertion);
+
+                // If this is a definition that corresponds to an argument default, don't add it to the list of
+                // assertions to be explicitly checked -- it's only present for validating usage queries.
+                if (!defAssertion->isDefaultArgValue) {
+                    entry.second.emplace_back(defAssertion);
+                }
             } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
                 auto &entry = defUsageMap[usageAssertion->symbol];
                 entry.second.emplace_back(usageAssertion);
@@ -416,44 +421,57 @@ TEST_CASE("LSPTest") {
 
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
-                int version = -1;
+                vector<int> versions;
                 if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
-                    version = defAssertion->version;
-                    symbol = defAssertion->symbol;
                     // Some definition locations are not the definition of themselves.
-                    if (!defAssertion->isDefOfSelf) {
+                    if (!defAssertion->isDefOfSelf || defAssertion->isDefaultArgValue) {
                         continue;
                     }
+                    versions.push_back(defAssertion->version);
+                    symbol = defAssertion->symbol;
                 } else if (auto usageAssertion = dynamic_pointer_cast<UsageAssertion>(assertion)) {
-                    version = usageAssertion->version;
+                    versions = usageAssertion->versions;
                     symbol = usageAssertion->symbol;
                 }
 
-                auto entry = defAssertions.find(version);
-                if (entry != defAssertions.end()) {
-                    auto &defs = entry->second;
-                    auto queryLoc = assertion->getLocation(config);
-                    // Check that a definition request at this location returns defs.
-                    DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
-                    // Check that a reference request at this location returns entryAssertions.
-                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
-                                          entryAssertions);
-                    // Check that a highlight request at this location returns all of the entryAssertions for the same
-                    // file as the request.
-                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
-                    for (auto &e : entryAssertions) {
-                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
-                            filteredEntryAssertions.push_back(e);
-                        }
+                vector<shared_ptr<DefAssertion>> defs;
+                for (auto version : versions) {
+                    auto entry = defAssertions.find(version);
+                    if (entry != defAssertions.end()) {
+                        defs.insert(defs.end(), entry->second.begin(), entry->second.end());
+                    } else {
+                        ADD_FAIL_CHECK_AT(
+                            assertion->filename.c_str(), assertion->range->start->line + 1,
+                            fmt::format("Found usage comment for label {0} version {1} without matching def "
+                                        "comment. Please add a `# "
+                                        "^^ def: {0} {1}` assertion that points to the definition of the "
+                                        "pointed-to thing being used.",
+                                        symbol, version));
                     }
-                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
-                                                    filteredEntryAssertions);
-                } else {
-                    FAIL_CHECK(fmt::format(
-                        "Found usage comment for label {0} version {1} without matching def comment. Please add a `# "
-                        "^^ def: {0} {1}` assertion that points to the definition of the pointed-to thing being used.",
-                        symbol, version));
                 }
+
+                // if there were versions that weren't present in the defAssertions map, an error will have been raised,
+                // but the test will proceed to this point.
+                if (defs.empty()) {
+                    ADD_FAIL_AT(assertion->filename.c_str(), assertion->range->start->line + 1,
+                                fmt::format("Found no def comments for usage comment `{}`", symbol));
+                }
+
+                auto queryLoc = assertion->getLocation(config);
+                // Check that a definition request at this location returns defs.
+                DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
+                // Check that a reference request at this location returns entryAssertions.
+                UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, entryAssertions);
+                // Check that a highlight request at this location returns all of the entryAssertions for the same
+                // file as the request.
+                vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                for (auto &e : entryAssertions) {
+                    if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
+                        filteredEntryAssertions.push_back(e);
+                    }
+                }
+                UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                filteredEntryAssertions);
             }
         }
 

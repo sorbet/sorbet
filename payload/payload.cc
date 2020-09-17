@@ -42,6 +42,31 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
+    ENFORCE(gs->namesUsed() < core::GlobalState::PAYLOAD_MAX_NAME_COUNT,
+            "Payload defined `{}` names, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_NAME_COUNT` in `GlobalState`.",
+            gs->namesUsed(), core::GlobalState::PAYLOAD_MAX_NAME_COUNT);
+    ENFORCE(gs->fieldsUsed() < core::GlobalState::PAYLOAD_MAX_FIELD_COUNT,
+            "Payload defined `{}` fields, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_FIELD_COUNT` in `GlobalState`.",
+            gs->fieldsUsed(), core::GlobalState::PAYLOAD_MAX_FIELD_COUNT);
+    ENFORCE(gs->methodsUsed() < core::GlobalState::PAYLOAD_MAX_METHOD_COUNT,
+            "Payload defined `{}` methods, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_METHOD_COUNT` in `GlobalState`.",
+            gs->methodsUsed(), core::GlobalState::PAYLOAD_MAX_METHOD_COUNT);
+    ENFORCE(gs->classAndModulesUsed() < core::GlobalState::PAYLOAD_MAX_CLASS_AND_MODULE_COUNT,
+            "Payload defined `{}` classes and modules, which is greater than the expected maximum of `{}`. Consider "
+            "updating `PAYLOAD_MAX_CLASS_AND_MODULE_COUNT` in `GlobalState`.",
+            gs->classAndModulesUsed(), core::GlobalState::PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
+    ENFORCE(gs->typeMembersUsed() < core::GlobalState::PAYLOAD_MAX_TYPE_MEMBER_COUNT,
+            "Payload defined `{}` type members, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_TYPE_MEMBER_COUNT` in `GlobalState`.",
+            gs->typeMembersUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_MEMBER_COUNT);
+    ENFORCE(
+        gs->typeArgumentsUsed() < core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT,
+        "Payload defined `{}` type arguments, which is greater than the expected maximum of `{}`. Consider updating "
+        "`PAYLOAD_MAX_TYPE_ARGUMENT_COUNT` in `GlobalState`.",
+        gs->typeArgumentsUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
 }
 
 namespace {

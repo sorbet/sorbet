@@ -75,7 +75,8 @@ TEST_CASE("namer tests") {
     }
 
     SUBCASE("Idempotent") { // NOLINT
-        auto baseSymbols = gs.symbolsUsed();
+        auto baseSymbols = gs.symbolsUsedTotal();
+        auto baseMethods = gs.methodsUsed();
         auto baseNames = gs.namesUsed();
 
         auto tree = hello_world(gs);
@@ -91,14 +92,16 @@ TEST_CASE("namer tests") {
         auto staticInit = 1;
         auto extraSymbols = helloWorldMethod + staticInit;
 
-        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
+        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsedTotal());
+        REQUIRE_EQ(baseMethods + extraSymbols, gs.methodsUsed());
         REQUIRE_EQ(baseNames + 2, gs.namesUsed());
 
         // Run it again and get the same numbers
         auto localTree = sorbet::local_vars::LocalVars::run(gs, move(treeCopy));
         runNamer(gs, move(localTree));
 
-        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsed());
+        REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsedTotal());
+        REQUIRE_EQ(baseMethods + extraSymbols, gs.methodsUsed());
         REQUIRE_EQ(baseNames + 2, gs.namesUsed());
     }
 

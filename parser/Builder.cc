@@ -148,6 +148,44 @@ public:
             auto name = id->name.data(gs_);
             ENFORCE(name->kind == core::NameKind::UTF8);
             auto name_str = name->show(gs_);
+            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+                if (driver_->numparam_stack.seen_ordinary_params()) {
+                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                }
+
+                auto raw_context = driver_->lex.context.stackCopy();
+                auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
+
+                // ignore current block scope
+                raw_context.pop_back();
+                raw_numparam_stack.pop_back();
+
+                for (auto outer_scope : raw_context) {
+                    if (outer_scope == ruby_parser::Context::State::BLOCK ||
+                        outer_scope == ruby_parser::Context::State::LAMBDA) {
+                        auto outer_scope_has_numparams = raw_numparam_stack.back().max > 0;
+                        raw_numparam_stack.pop_back();
+
+                        if (outer_scope_has_numparams) {
+                            error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
+                        } else {
+                            // for now it's ok, but an outer scope can also be a block
+                            // with numparams, so we need to continue
+                        }
+                    } else {
+                        // found an outer scope that can't have numparams
+                        // like def/class/etc
+                        break;
+                    }
+                }
+
+                driver_->lex.declare(name_str);
+                auto intro = make_unique<LVar>(node->loc, id->name);
+                auto decls = driver_->alloc.node_list();
+                decls->emplace_back(toForeign(std::move(intro)));
+                driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
+            }
+
             if (driver_->lex.is_declared(name_str)) {
                 checkCircularArgumentReferences(node.get(), name_str);
                 return make_unique<LVar>(node->loc, id->name);
@@ -199,7 +237,11 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.data(gs_);
-            driver_->lex.declare(name->show(gs_));
+            auto name_str = name->show(gs_);
+            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+                error(ruby_parser::dclass::CantAssignToNumparam, id->loc, name_str);
+            }
+            driver_->lex.declare(name_str);
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
@@ -354,9 +396,18 @@ public:
             }
         }
 
+        bool isNumblock = false;
+        if (auto *numparams = parser::cast_node<NumParams>(args.get())) {
+            isNumblock = true;
+        }
+
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
+            if (isNumblock) {
+                return make_unique<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
+                                             std::move(body));
+            }
             return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
                                       std::move(body));
         }
@@ -373,7 +424,12 @@ public:
 
         auto &send = exprs->front();
         core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
-        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        unique_ptr<Node> block;
+        if (isNumblock) {
+            block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body));
+        } else {
+            block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        }
         exprs->front().swap(block);
         return methodCall;
     }
@@ -723,6 +779,10 @@ public:
                                      std::move(value));
     }
 
+    unique_ptr<Node> kwnilarg(const token *dstar, const token *nil) {
+        return make_unique<Kwnilarg>(tokLoc(dstar).join(tokLoc(nil)));
+    }
+
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
         core::LocOffsets loc = tokLoc(dstar);
         core::NameRef nm;
@@ -832,6 +892,17 @@ public:
         return make_unique<NthRef>(tokLoc(tok), atoi(tok->string().c_str()));
     }
 
+    unique_ptr<Node> numparams(sorbet::parser::NodeVec declaringNodes) {
+        ENFORCE(!declaringNodes.empty(), "NumParams node created without declaring node.");
+        // During desugar we will create implicit arguments for the block based on on the highest
+        // numparam used in it's body.
+        // We will use the first node declaring a numbered parameter for the location of the implicit arg.
+        // In the meantime, we need a loc for the NumParams node to pass the sanity check at the end of the
+        // parsing phase so we arbitrary pick the first one from the node list (we know there is at least one).
+        auto dummyLoc = declaringNodes.at(0)->loc;
+        return make_unique<NumParams>(dummyLoc, std::move(declaringNodes));
+    }
+
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
         if (parser::isa_node<Backref>(lhs.get()) || parser::isa_node<NthRef>(lhs.get())) {
             error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
@@ -882,12 +953,12 @@ public:
     }
 
     unique_ptr<Node> range_exclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        core::LocOffsets loc = lhs->loc.join(tokLoc(oper)).join(maybe_loc(rhs));
+        core::LocOffsets loc = maybe_loc(lhs).join(tokLoc(oper)).join(maybe_loc(rhs));
         return make_unique<ERange>(loc, std::move(lhs), std::move(rhs));
     }
 
     unique_ptr<Node> range_inclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        core::LocOffsets loc = lhs->loc.join(tokLoc(oper)).join(maybe_loc(rhs));
+        core::LocOffsets loc = maybe_loc(lhs).join(tokLoc(oper)).join(maybe_loc(rhs));
         return make_unique<IRange>(loc, std::move(lhs), std::move(rhs));
     }
 
@@ -1208,6 +1279,10 @@ public:
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
                parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
                parser::isa_node<Hash>(&node);
+    }
+
+    bool isNumberedParameterName(std::string_view name) {
+        return name.length() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9';
     }
 };
 
@@ -1547,6 +1622,11 @@ ForeignPtr kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) {
     return build->toForeign(build->kwoptarg(name, build->cast_node(value)));
 }
 
+ForeignPtr kwnilarg(SelfPtr builder, const token *dstar, const token *nil) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->kwnilarg(dstar, nil));
+}
+
 ForeignPtr kwrestarg(SelfPtr builder, const token *dstar, const token *name) {
     auto build = cast_builder(builder);
     return build->toForeign(build->kwrestarg(dstar, name));
@@ -1627,6 +1707,18 @@ ForeignPtr not_op(SelfPtr builder, const token *not_, const token *begin, Foreig
 ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->nth_ref(tok));
+}
+
+ForeignPtr numparams(SelfPtr builder, const node_list *declaringNodes) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->numparams(build->convertNodeList(declaringNodes)));
+}
+
+ForeignPtr numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
+                    const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(
+        build->block(build->cast_node(methodCall), begin, build->cast_node(args), build->cast_node(body), end));
 }
 
 ForeignPtr op_assign(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs) {
@@ -1879,6 +1971,7 @@ struct ruby_parser::builder Builder::interface = {
     keywordZsuper,
     kwarg,
     kwoptarg,
+    kwnilarg,
     kwrestarg,
     kwsplat,
     line_literal,
@@ -1895,6 +1988,8 @@ struct ruby_parser::builder Builder::interface = {
     nil,
     not_op,
     nth_ref,
+    numparams,
+    numblock,
     op_assign,
     optarg_,
     pair,

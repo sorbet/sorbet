@@ -83,11 +83,11 @@ class T::InterfaceWrapper
     end
   end
 
-  def kind_of?(other) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def kind_of?(other)
     is_a?(other)
   end
 
-  def is_a?(other) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+  def is_a?(other)
     if !other.is_a?(Module)
       raise TypeError.new("class or module required")
     end
@@ -99,13 +99,13 @@ class T::InterfaceWrapper
 
   # Prefixed because we're polluting the namespace of the interface we're wrapping, and we don't
   # want anyone else (besides dynamic_cast) calling it.
-  def __target_obj_DO_NOT_USE
+  def __target_obj_DO_NOT_USE # rubocop:disable Naming/MethodName
     @target_obj
   end
 
   # Prefixed because we're polluting the namespace of the interface we're wrapping, and we don't
   # want anyone else (besides wrapped_dynamic_cast) calling it.
-  def __interface_mod_DO_NOT_USE
+  def __interface_mod_DO_NOT_USE # rubocop:disable Naming/MethodName
     @interface_mod
   end
 

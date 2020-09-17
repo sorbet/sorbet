@@ -16,10 +16,12 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 1.7'
   s.add_development_dependency 'rake'
+  s.add_development_dependency 'rubocop', '~> 0.90.0'
+  s.add_development_dependency 'rubocop-performance', '~> 1.8.0'
   # for reproducing race conditions in tests
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
   # for validating generated code
-  s.add_development_dependency 'parser', '~> 2.7'
+  s.add_development_dependency 'parser', '~> 2.7.1'
 end
