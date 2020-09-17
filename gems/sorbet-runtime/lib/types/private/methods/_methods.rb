@@ -23,6 +23,9 @@ module T::Private::Methods
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
   @old_hooks = nil
+  # this boolean flag indicates if new method additions will be processed or not. user code can
+  # disable further method additions from being processed by flipping this to false.
+  @method_hooks_disabled = false
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -171,7 +174,7 @@ module T::Private::Methods
 
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
-    if T::Private::DeclState.current.skip_on_method_added
+    if @method_hooks_disabled || T::Private::DeclState.current.skip_on_method_added
       return
     end
 
@@ -468,6 +471,10 @@ module T::Private::Methods
       mod.extend(MethodHooks)
     end
     mod.extend(SingletonMethodHooks)
+  end
+
+  def self.disable_all_method_hooks
+    @method_hooks_disabled = true
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.

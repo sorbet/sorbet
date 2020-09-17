@@ -81,6 +81,11 @@ module T::Utils
     T::Private::Methods.run_all_sig_blocks
   end
 
+  # Stop searching for sigs. All method added hooks will be disabled.
+  def self.disable_method_hooks
+    T::Private::Methods.disable_all_method_hooks
+  end
+
   # Return the underlying type for a type alias. Otherwise returns type.
   def self.resolve_alias(type)
     case type
