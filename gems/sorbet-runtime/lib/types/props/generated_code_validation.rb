@@ -170,7 +170,7 @@ module T::Props
 
     private_class_method def self.validate_deserialize_handle_nil(node)
       case node.type
-      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :const
+      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :const # rubocop:disable Lint/BooleanSymbol
         # Primitives and constants are safe
       when :send
         receiver, method, arg = node.children
@@ -209,7 +209,7 @@ module T::Props
       when :const
         # This is ok, because we'll have validated what method has been called
         # if applicable
-      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :self
+      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :self # rubocop:disable Lint/BooleanSymbol
         # Primitives & self are ok
       when :lvar, :arg, :ivar
         # Reading local & instance variables & arguments is ok

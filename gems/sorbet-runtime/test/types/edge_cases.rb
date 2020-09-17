@@ -684,6 +684,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       class << self
         def singleton_method_added(name)
+          super
           @called ||= []
           @called << name
         end

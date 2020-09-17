@@ -321,7 +321,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       sig(:final) {void}
       def foo; end
     end
-    m2 = Module.new do
+    Module.new do
       include m1, m1
     end
   end
@@ -332,7 +332,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       sig(:final) {void}
       def foo; end
     end
-    m2 = Module.new do
+    Module.new do
       extend m1, m1
     end
   end

@@ -494,6 +494,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     parent = Class.new do
       def initialize(foo:)
+        super()
         @foo = foo
       end
     end

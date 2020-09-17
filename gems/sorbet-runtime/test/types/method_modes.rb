@@ -103,7 +103,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         def foo; end
       end
 
-      klass = Class.new(parent) do
+      Class.new(parent) do
         extend T::Sig
         extend T::Helpers
         sig {override.returns(Object)}

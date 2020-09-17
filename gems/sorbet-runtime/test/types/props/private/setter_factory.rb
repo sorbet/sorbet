@@ -6,9 +6,9 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
     include T::Props
     include T::Props::WeakConstructor
 
-    prop :validated, T.untyped, setter_validate: -> (prop, value) { raise Error.new 'invalid' }
-    prop :nilable_validated, T.nilable(Integer), setter_validate: -> (prop, value) { raise Error.new 'invalid' }
-    prop :unvalidated, T.untyped, setter_validate: -> (prop, value) { raise Error.new 'bad prop' unless prop == :unvalidated }
+    prop :validated, T.untyped, setter_validate: -> (_prop, _value) { raise Error.new 'invalid' }
+    prop :nilable_validated, T.nilable(Integer), setter_validate: -> (_prop, _value) { raise Error.new 'invalid' }
+    prop :unvalidated, T.untyped, setter_validate: -> (prop, _value) { raise Error.new 'bad prop' unless prop == :unvalidated }
 
   end
 

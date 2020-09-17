@@ -31,7 +31,22 @@ Style/TrivialAccessors:
 Lint/UnusedMethodArgument:
   Enabled: false
 
+# Prone to false positives when we care about which class owns a method
+Lint/UselessMethodDefinition:
+  Enabled: false
+
 Naming/FileName:
   Exclude:
     # Filename deliberately matches gem name
     - 'lib/sorbet-runtime.rb'
+
+Lint/MissingSuper:
+  Exclude:
+    # Don't force type definitions to call `super` in initialize
+    - 'lib/types/types/**/*'
+    - 'lib/types/private/types/**/*'
+
+Performance/CollectionLiteralInLoop:
+  Exclude:
+    # Ok to prioritize brevity over perf in tests
+    - 'test/**/*'

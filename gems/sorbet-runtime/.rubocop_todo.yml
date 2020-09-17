@@ -269,58 +269,6 @@ Layout/TrailingEmptyLines:
     - 'bench/setters.rb'
     - 'lib/types/props/private/serializer_generator.rb'
 
-# Offense count: 2
-Lint/BinaryOperatorWithIdenticalOperands:
-  Exclude:
-    - 'test/types/method_validation.rb'
-    - 'test/types/types.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-Lint/BooleanSymbol:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-    - 'test/types/props/decorator.rb'
-
-# Offense count: 21
-Lint/MissingSuper:
-  Enabled: false
-
-# Offense count: 1
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Lint/SafeNavigationChain:
-  Exclude:
-    - 'lib/types/private/sealed.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
-Lint/UnusedBlockArgument:
-  Exclude:
-    - 'test/types/absurd.rb'
-    - 'test/types/props/private/setter_factory.rb'
-
-# Offense count: 5
-Lint/UselessAssignment:
-  Exclude:
-    - 'test/types/final_method.rb'
-    - 'test/types/method_modes.rb'
-    - 'test/types/struct.rb'
-
-# Offense count: 12
-# Cop supports --auto-correct.
-# Configuration parameters: AllowComments.
-Lint/UselessMethodDefinition:
-  Exclude:
-    - 'bench/setters.rb'
-    - 'lib/types/types/attached_class.rb'
-    - 'lib/types/types/noreturn.rb'
-    - 'lib/types/types/self_type.rb'
-    - 'lib/types/types/untyped.rb'
-    - 'test/types/edge_cases.rb'
-    - 'test/types/returns.rb'
-
 # Offense count: 70
 # Configuration parameters: IgnoredMethods.
 Metrics/AbcSize:
@@ -412,25 +360,6 @@ Naming/PredicateName:
     - 'lib/types/private/methods/call_validation.rb'
     - 'lib/types/props/optional.rb'
     - 'lib/types/utils.rb'
-
-# Offense count: 1
-# Configuration parameters: MinSize.
-Performance/CollectionLiteralInLoop:
-  Exclude:
-    - 'test/types/builder_syntax.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Performance/RegexpMatch:
-  Exclude:
-    - 'lib/types/props/decorator.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/StringInclude:
-  Exclude:
-    - 'test/types/props/_props.rb'
 
 # Offense count: 2
 # Cop supports --auto-correct.

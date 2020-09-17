@@ -14,7 +14,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     c = Class.new(T::Struct) do
       prop :arr, T::Array[String]
     end
-    err = assert_raises(TypeError) do
+    assert_raises(TypeError) do
       c.new(arr: [1, 2])
     end
   end
@@ -24,7 +24,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       prop :arr, T::Array[String]
     end
     c = c.new(arr: ["foo, bar"])
-    err = assert_raises(TypeError) do
+    assert_raises(TypeError) do
       c.arr = [1, 2]
     end
   end
