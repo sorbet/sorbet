@@ -489,8 +489,8 @@ public:
     std::string toStringFullName(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
 
-    // Not printed when showing name table
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
+    // Returns true if the symbol or any of its children are not in the name table. False otherwise.
+    bool isPrintable(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
         bool showFull = false;
@@ -605,7 +605,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    bool isHiddenFromPrintingRecursive(const GlobalState &gs) const;
+    // Not printed when showing name table
+    bool isHiddenFromPrinting(const GlobalState &gs) const;
 
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
                                     bool showRaw = false) const;
