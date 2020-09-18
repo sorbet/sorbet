@@ -980,7 +980,7 @@ class Hash < Object
     params(
         arg0: V,
     )
-    .returns(T::Array[T.any(K, V)])
+    .returns(T.nilable(T::Array[T.any(K, V)]))
   end
   def rassoc(arg0); end
 
