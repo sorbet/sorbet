@@ -9,6 +9,7 @@
 #include "ruby_parser/diagnostic.hh"
 
 #include <algorithm>
+#include <regex>
 #include <typeinfo>
 
 using ruby_parser::ForeignPtr;
@@ -218,6 +219,34 @@ public:
 
     unique_ptr<Node> array(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
         return make_unique<Array>(collectionLoc(begin, elements, end), std::move(elements));
+    }
+
+    unique_ptr<Node> array_pattern(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
+        auto trailingComma = false;
+
+        sorbet::parser::NodeVec res;
+        for (auto &elem : elements) {
+            if (auto *trailing = parser::cast_node<MatchWithTrailingComma>(elem.get())) {
+                trailingComma = true;
+                res.emplace_back(std::move(trailing->match));
+            } else {
+                trailingComma = false;
+                res.emplace_back(std::move(elem));
+            }
+        }
+
+        auto loc = collectionLoc(res);
+        if (begin != nullptr) {
+            loc = tokLoc(begin).join(loc);
+        }
+        if (end != nullptr) {
+            loc = loc.join(tokLoc(begin));
+        }
+        if (trailingComma) {
+            return make_unique<ArrayPatternWithTail>(loc, std::move(res));
+        } else {
+            return make_unique<ArrayPattern>(loc, std::move(res));
+        }
     }
 
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
@@ -504,6 +533,15 @@ public:
                                  std::move(elseBody));
     }
 
+    unique_ptr<Node> case_match(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec inBodies,
+                                const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
+        if (elseTok != nullptr && elseBody == nullptr) {
+            elseBody = empty_else(elseTok);
+        }
+        return make_unique<CaseMatch>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(inBodies),
+                                      std::move(elseBody));
+    }
+
     unique_ptr<Node> character(const token *char_) {
         return make_unique<String>(tokLoc(char_), gs_.enterNameUTF8(char_->string()));
     }
@@ -556,6 +594,11 @@ public:
 
     unique_ptr<Node> const_(const token *name) {
         return make_unique<Const>(tokLoc(name), nullptr, gs_.enterNameConstant(name->string()));
+    }
+
+    unique_ptr<Node> const_pattern(unique_ptr<Node> const_, const token *begin, unique_ptr<Node> pattern,
+                                   const token *end) {
+        return make_unique<ConstPattern>(tokLoc(begin).join(tokLoc(end)), std::move(const_), std::move(pattern));
     }
 
     unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
@@ -666,6 +709,10 @@ public:
                                  std::move(body));
     }
 
+    unique_ptr<Node> empty_else(const token *tok) {
+        return make_unique<EmptyElse>(tokLoc(tok));
+    }
+
     unique_ptr<Node> encodingLiteral(const token *tok) {
         return make_unique<EncodingLiteral>(tokLoc(tok));
     }
@@ -696,8 +743,35 @@ public:
         return make_unique<GVar>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
+    unique_ptr<Node> hash_pattern(const token *begin, sorbet::parser::NodeVec kwargs, const token *end) {
+        UnorderedMap<std::string, core::LocOffsets> map;
+        checkDuplicateArgs(kwargs, map);
+        auto loc = collectionLoc(kwargs);
+        if (begin != nullptr) {
+            loc = tokLoc(begin).join(loc);
+        }
+        if (end != nullptr) {
+            loc = loc.join(tokLoc(begin));
+        }
+        return make_unique<HashPattern>(loc, std::move(kwargs));
+    }
+
     unique_ptr<Node> ident(const token *tok) {
         return make_unique<Ident>(tokLoc(tok), gs_.enterNameUTF8(tok->string()));
+    }
+
+    unique_ptr<Node> if_guard(const token *tok, unique_ptr<Node> if_body) {
+        return make_unique<IfGuard>(tokLoc(tok).join(if_body->loc), std::move(if_body));
+    }
+
+    unique_ptr<Node> in_match(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
+        return make_unique<InMatch>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
+    }
+
+    unique_ptr<Node> in_pattern(const token *inTok, unique_ptr<Node> pattern, unique_ptr<Node> guard,
+                                const token *thenTok, unique_ptr<Node> body) {
+        return make_unique<InPattern>(tokLoc(inTok).join(maybe_loc(body)), std::move(pattern), std::move(guard),
+                                      std::move(body));
     }
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
@@ -840,6 +914,29 @@ public:
         return make_unique<While>(body->loc.join(cond->loc), std::move(cond), std::move(body));
     }
 
+    unique_ptr<Node> match_alt(unique_ptr<Node> left, const token *pipe, unique_ptr<Node> right) {
+        return make_unique<MatchAlt>(left->loc.join(right->loc), std::move(left), std::move(right));
+    }
+
+    unique_ptr<Node> match_as(unique_ptr<Node> value, const token *assoc, unique_ptr<Node> as) {
+        return make_unique<MatchAs>(value->loc.join(as->loc), std::move(value), std::move(as));
+    }
+
+    unique_ptr<Node> match_label(unique_ptr<Node> label) {
+        if (auto *pair = parser::cast_node<Pair>(label.get())) {
+            if (auto *key = parser::cast_node<Symbol>(pair->key.get())) {
+                // Label key is a symbol `sym: val`
+                return match_var_hash(label->loc, key->val.show(gs_));
+            } else if (auto *key = parser::cast_node<DSymbol>(pair->key.get())) {
+                // Label key is a quoted string `"sym": val`
+                return match_var_hash_from_str(std::move(key->nodes));
+            }
+            ENFORCE(false, "MatchLabel label key is not a Symbol nor a quoted one");
+        }
+        ENFORCE(false, "MatchLabel label is not a Pair node");
+        return nullptr;
+    }
+
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
         // TODO(nelhage): If the LHS here is a regex literal with (?<...>..)
         // groups, Ruby will autovivify the match groups as locals. If we were
@@ -849,6 +946,69 @@ public:
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
+    }
+
+    unique_ptr<Node> match_nil_pattern(const token *dstar, const token *nil) {
+        return make_unique<MatchNilPattern>(tokLoc(dstar).join(tokLoc(nil)));
+    }
+
+    unique_ptr<Node> match_pair(unique_ptr<Node> label, unique_ptr<Node> value) {
+        if (auto *pair = parser::cast_node<Pair>(label.get())) {
+            pair->value = std::move(value);
+            if (auto *key = parser::cast_node<Symbol>(pair->key.get())) {
+                checkDuplicatePatternKey(key->val.show(gs_), label->loc);
+                return label;
+            } else if (auto *key = parser::cast_node<DSymbol>(pair->key.get())) {
+                auto name_str = collapseSymbolStrings(&key->nodes, collectionLoc(key->nodes));
+                checkDuplicatePatternKey(name_str, collectionLoc(key->nodes));
+                return label;
+            }
+            ENFORCE(false, "MatchPair label key is not a Symbol nor a quoted one");
+        }
+        ENFORCE(false, "MatchPair label is not a Pair node");
+        return nullptr;
+    }
+
+    unique_ptr<Node> match_rest(const token *star, const token *name) {
+        if (name != nullptr) {
+            return make_unique<MatchRest>(tokLoc(star).join(tokLoc(name)), match_var(name));
+        } else {
+            return make_unique<MatchRest>(tokLoc(star), nullptr);
+        }
+    }
+
+    unique_ptr<Node> match_var(const token *name) {
+        return match_var_hash(tokLoc(name), name->string());
+    }
+
+    unique_ptr<Node> match_var_hash(core::LocOffsets loc, const std::string name_str) {
+        checkLVarName(name_str, loc);
+        checkDuplicatePatternVariable(name_str, loc);
+        driver_->lex.declare(name_str);
+        return make_unique<MatchVar>(loc, gs_.enterNameUTF8(name_str));
+    }
+
+    unique_ptr<Node> match_var_hash_from_str(sorbet::parser::NodeVec strings) {
+        auto loc = collectionLoc(strings);
+        if (strings.size() > 1) {
+            error(ruby_parser::dclass::PatternInterpInVarName, loc);
+        }
+        auto &node = strings.at(0);
+        if (auto *str = parser::cast_node<String>(node.get())) {
+            auto name_str = str->val.show(gs_);
+            checkLVarName(name_str, loc);
+            checkDuplicatePatternVariable(name_str, loc);
+            driver_->lex.declare(name_str);
+            return make_unique<MatchVar>(loc, gs_.enterNameUTF8(name_str));
+        }
+        // If we get here, the string contains an interpolation
+        // collapseSymbolStrings will emit an error
+        auto name_str = collapseSymbolStrings(&strings, loc);
+        return make_unique<MatchVar>(loc, gs_.enterNameUTF8(name_str));
+    }
+
+    unique_ptr<Node> match_with_trailing_comma(unique_ptr<Node> match) {
+        return make_unique<MatchWithTrailingComma>(match->loc, std::move(match));
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
@@ -925,6 +1085,14 @@ public:
                                    std::move(value));
     }
 
+    unique_ptr<Node> p_ident(const token *tok) {
+        auto name_str = tok->string();
+        if (!driver_->lex.is_declared(name_str)) {
+            error(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
+        }
+        return ident(tok);
+    }
+
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {
         return make_unique<Pair>(key->loc.join(value->loc), std::move(key), std::move(value));
     }
@@ -932,14 +1100,19 @@ public:
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
         auto keyLoc = core::LocOffsets{clamp((u4)key->start()), clamp((u4)key->end() - 1)}; // drop the trailing :
 
-        return make_unique<Pair>(tokLoc(key).join(value->loc),
+        return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->string())), std::move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                  unique_ptr<Node> value) {
         auto key = symbol_compose(begin, std::move(parts), end);
-        return make_unique<Pair>(tokLoc(begin).join(value->loc), std::move(key), std::move(value));
+        return make_unique<Pair>(tokLoc(begin).join(tokLoc(end)).join(maybe_loc(value)), std::move(key),
+                                 std::move(value));
+    }
+
+    unique_ptr<Node> pin(const token *tok, unique_ptr<Node> var) {
+        return make_unique<Pin>(tokLoc(tok).join(var->loc), std::move(var));
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
@@ -1147,6 +1320,10 @@ public:
         return make_unique<Undef>(loc, std::move(name_list));
     }
 
+    unique_ptr<Node> unless_guard(const token *tok, unique_ptr<Node> unless_body) {
+        return make_unique<UnlessGuard>(tokLoc(tok).join(unless_body->loc), std::move(unless_body));
+    }
+
     unique_ptr<Node> when(const token *when, sorbet::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
         core::LocOffsets loc = tokLoc(when);
@@ -1271,6 +1448,52 @@ public:
         }
     }
 
+    void checkDuplicatePatternVariable(std::string name, core::LocOffsets loc) {
+        ENFORCE(name.size() > 0, "Empty pattern variable name");
+        if (name[0] == '_') {
+            return;
+        }
+
+        if (driver_->pattern_variables.declared(name)) {
+            error(ruby_parser::dclass::PatternDuplicateVariable, loc, name);
+        }
+
+        driver_->pattern_variables.declare(name);
+    }
+
+    void checkDuplicatePatternKey(std::string name, core::LocOffsets loc) {
+        if (driver_->pattern_hash_keys.declared(name)) {
+            error(ruby_parser::dclass::PatternDuplicateKey, loc, name);
+        }
+
+        driver_->pattern_hash_keys.declare(name);
+    }
+
+    void checkLVarName(std::string name, core::LocOffsets loc) {
+        std::regex lvar_regex("^[a-z_][a-zA-Z0-9_]*$");
+        if (!std::regex_match(name, lvar_regex)) {
+            error(ruby_parser::dclass::PatternLVarName, loc, name);
+        }
+    }
+
+    std::string collapseSymbolStrings(sorbet::parser::NodeVec *parts, core::LocOffsets loc) {
+        std::string res;
+        for (auto &p : *parts) {
+            if (auto *s = parser::cast_node<String>(p.get())) {
+                res += s->val.show(gs_);
+            } else if (auto *d = parser::cast_node<DString>(p.get())) {
+                res += collapseSymbolStrings(&d->nodes, loc);
+            } else if (auto *d = parser::cast_node<DSymbol>(p.get())) {
+                res += collapseSymbolStrings(&d->nodes, loc);
+            } else if (auto *b = parser::cast_node<Begin>(p.get())) {
+                res += collapseSymbolStrings(&b->stmts, loc);
+            } else {
+                error(ruby_parser::dclass::PatternInterpInVarName, loc);
+            }
+        }
+        return res;
+    }
+
     bool argNameCollides(std::string name) {
         // Ignore everything beginning with underscore.
         return (name[0] != '_');
@@ -1325,6 +1548,11 @@ ForeignPtr args(SelfPtr builder, const token *begin, const node_list *args, cons
 ForeignPtr array(SelfPtr builder, const token *begin, const node_list *elements, const token *end) {
     auto build = cast_builder(builder);
     return build->toForeign(build->array(begin, build->convertNodeList(elements), end));
+}
+
+ForeignPtr array_pattern(SelfPtr builder, const token *begin, const node_list *elements, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->array_pattern(begin, build->convertNodeList(elements), end));
 }
 
 ForeignPtr assign(SelfPtr builder, ForeignPtr lhs, const token *eql, ForeignPtr rhs) {
@@ -1410,6 +1638,13 @@ ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const nod
                                          build->cast_node(elseBody), end));
 }
 
+ForeignPtr case_match(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,
+                      const token *elseTok, ForeignPtr elseBody, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->case_match(case_, build->cast_node(expr), build->convertNodeList(inBodies), elseTok,
+                                              build->cast_node(elseBody), end));
+}
+
 ForeignPtr character(SelfPtr builder, const token *char_) {
     auto build = cast_builder(builder);
     return build->toForeign(build->character(char_));
@@ -1446,6 +1681,11 @@ ForeignPtr const_(SelfPtr builder, const token *name) {
 ForeignPtr constFetch(SelfPtr builder, ForeignPtr scope, const token *colon, const token *name) {
     auto build = cast_builder(builder);
     return build->toForeign(build->constFetch(build->cast_node(scope), colon, name));
+}
+
+ForeignPtr const_pattern(SelfPtr builder, ForeignPtr const_, const token *begin, ForeignPtr pattern, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->const_pattern(build->cast_node(const_), begin, build->cast_node(pattern), end));
 }
 
 ForeignPtr constGlobal(SelfPtr builder, const token *colon, const token *name) {
@@ -1536,9 +1776,31 @@ ForeignPtr gvar(SelfPtr builder, const token *tok) {
     return build->toForeign(build->gvar(tok));
 }
 
+ForeignPtr hash_pattern(SelfPtr builder, const token *begin, const node_list *kwargs, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->hash_pattern(begin, build->convertNodeList(kwargs), end));
+}
+
+ForeignPtr if_guard(SelfPtr builder, const token *tok, ForeignPtr ifBody) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->if_guard(tok, build->cast_node(ifBody)));
+}
+
 ForeignPtr ident(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->ident(tok));
+}
+
+ForeignPtr in_match(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->in_match(build->cast_node(lhs), tok, build->cast_node(rhs)));
+}
+
+ForeignPtr in_pattern(SelfPtr builder, const token *tok, ForeignPtr pattern, ForeignPtr guard, const token *thenToken,
+                      ForeignPtr body) {
+    auto build = cast_builder(builder);
+    return build->toForeign(
+        build->in_pattern(tok, build->cast_node(pattern), build->cast_node(guard), thenToken, build->cast_node(body)));
 }
 
 ForeignPtr index(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
@@ -1676,9 +1938,49 @@ ForeignPtr loop_while_mod(SelfPtr builder, ForeignPtr body, ForeignPtr cond) {
     return build->toForeign(build->loop_while_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
+ForeignPtr match_alt(SelfPtr builder, ForeignPtr left, const token *pipe, ForeignPtr right) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_alt(build->cast_node(left), pipe, build->cast_node(right)));
+}
+
+ForeignPtr match_as(SelfPtr builder, ForeignPtr value, const token *assoc, ForeignPtr as) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_as(build->cast_node(value), assoc, build->cast_node(as)));
+}
+
+ForeignPtr match_label(SelfPtr builder, ForeignPtr label) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_label(build->cast_node(label)));
+}
+
+ForeignPtr match_nil_pattern(SelfPtr builder, const token *dstar, const token *nil) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_nil_pattern(dstar, nil));
+}
+
 ForeignPtr match_op(SelfPtr builder, ForeignPtr receiver, const token *oper, ForeignPtr arg) {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_op(build->cast_node(receiver), oper, build->cast_node(arg)));
+}
+
+ForeignPtr match_pair(SelfPtr builder, ForeignPtr label, ForeignPtr value) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_pair(build->cast_node(label), build->cast_node(value)));
+}
+
+ForeignPtr match_rest(SelfPtr builder, const token *star, const token *name) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_rest(star, name));
+}
+
+ForeignPtr match_var(SelfPtr builder, const token *name) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_var(name));
+}
+
+ForeignPtr match_with_trailing_comma(SelfPtr builder, ForeignPtr match) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_with_trailing_comma(build->cast_node(match)));
 }
 
 ForeignPtr multi_assign(SelfPtr builder, ForeignPtr mlhs, ForeignPtr rhs) {
@@ -1733,6 +2035,11 @@ ForeignPtr optarg_(SelfPtr builder, const token *name, const token *eql, Foreign
     return build->toForeign(build->optarg_(name, eql, build->cast_node(value)));
 }
 
+ForeignPtr p_ident(SelfPtr builder, const token *tok) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->p_ident(tok));
+}
+
 ForeignPtr pair(SelfPtr builder, ForeignPtr key, const token *assoc, ForeignPtr value) {
     auto build = cast_builder(builder);
     return build->toForeign(build->pair(build->cast_node(key), assoc, build->cast_node(value)));
@@ -1747,6 +2054,11 @@ ForeignPtr pair_quoted(SelfPtr builder, const token *begin, const node_list *par
                        ForeignPtr value) {
     auto build = cast_builder(builder);
     return build->toForeign(build->pair_quoted(begin, build->convertNodeList(parts), end, build->cast_node(value)));
+}
+
+ForeignPtr pin(SelfPtr builder, const token *tok, ForeignPtr var) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->pin(tok, build->cast_node(var)));
 }
 
 ForeignPtr postexe(SelfPtr builder, const token *begin, ForeignPtr node, const token *rbrace) {
@@ -1885,6 +2197,11 @@ ForeignPtr undefMethod(SelfPtr builder, const token *undef, const node_list *nam
     return build->toForeign(build->undefMethod(undef, build->convertNodeList(name_list)));
 }
 
+ForeignPtr unless_guard(SelfPtr builder, const token *unlessGuard, ForeignPtr unlessBody) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->unless_guard(unlessGuard, build->cast_node(unlessBody)));
+}
+
 ForeignPtr when(SelfPtr builder, const token *when, const node_list *patterns, const token *then, ForeignPtr body) {
     auto build = cast_builder(builder);
     return build->toForeign(build->when(when, build->convertNodeList(patterns), then, build->cast_node(body)));
@@ -1919,6 +2236,7 @@ struct ruby_parser::builder Builder::interface = {
     arg,
     args,
     array,
+    array_pattern,
     assign,
     assignable,
     associate,
@@ -1934,12 +2252,14 @@ struct ruby_parser::builder Builder::interface = {
     callLambda,
     call_method,
     case_,
+    case_match,
     character,
     complex,
     compstmt,
     condition,
     conditionMod,
     const_,
+    const_pattern,
     constFetch,
     constGlobal,
     constOpAssignable,
@@ -1957,7 +2277,11 @@ struct ruby_parser::builder Builder::interface = {
     floatComplex,
     for_,
     gvar,
+    hash_pattern,
     ident,
+    if_guard,
+    in_match,
+    in_pattern,
     index,
     indexAsgn,
     integer,
@@ -1983,7 +2307,15 @@ struct ruby_parser::builder Builder::interface = {
     loopUntil_mod,
     loop_while,
     loop_while_mod,
+    match_alt,
+    match_as,
+    match_label,
+    match_nil_pattern,
     match_op,
+    match_pair,
+    match_rest,
+    match_var,
+    match_with_trailing_comma,
     multi_assign,
     multi_lhs,
     multi_lhs1,
@@ -1994,9 +2326,11 @@ struct ruby_parser::builder Builder::interface = {
     numblock,
     op_assign,
     optarg_,
+    p_ident,
     pair,
     pair_keyword,
     pair_quoted,
+    pin,
     postexe,
     preexe,
     procarg0,
@@ -2023,6 +2357,7 @@ struct ruby_parser::builder Builder::interface = {
     true_,
     unary_op,
     undefMethod,
+    unless_guard,
     when,
     word,
     words_compose,
