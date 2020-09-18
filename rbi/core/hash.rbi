@@ -978,7 +978,7 @@ class Hash < Object
   # ```
   sig do
     params(
-        arg0: K,
+        arg0: V,
     )
     .returns(T::Array[T.any(K, V)])
   end
