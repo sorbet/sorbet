@@ -180,6 +180,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
+    int moduleCount = 0;
     for (int i = 0; i < gs.methodsUsed(); ++i) {
         auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::Method, i);
         ENFORCE(ref.data(gs)->isMethod());
@@ -191,13 +192,17 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
         ENFORCE(ref.data(gs)->isClassOrModule());
-        auto loc = ref.data(gs)->loc();
-        if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
-            classCount++;
-        }
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
+        }
+        auto loc = ref.data(gs)->loc();
+        if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
+            if (ref.data(gs)->isClassOrModuleClass()) {
+                classCount++;
+            } else {
+                moduleCount++;
+            }
         }
         if (ref.data(gs)->superClass().exists() && ref.data(gs)->superClass() != core::Symbols::todo()) {
             continue;
@@ -236,6 +241,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         }
     }
 
+    prodCounterAdd("types.input.modules.total", moduleCount);
     prodCounterAdd("types.input.classes.total", classCount);
     prodCounterAdd("types.input.methods.total", methodCount);
 }
