@@ -526,16 +526,12 @@ class StringScanner < Object
   # p s.scan(/\w+/)   # -> "test"
   # p s.scan(/\w+/)   # -> nil
   # p s.scan(/\s+/)   # -> " "
-  # p s.scan(/\w+/)   # -> "string"
+  # p s.scan("str")   # -> "str"
+  # p s.scan(/\w+/)   # -> "ing"
   # p s.scan(/./)     # -> nil
   # ```
-  sig do
-    params(
-        arg0: Regexp,
-    )
-    .returns(String)
-  end
-  def scan(arg0); end
+  sig {params(pattern: T.any(Regexp, String)).returns(T.nilable(String))}
+  def scan(pattern); end
 
   # Tests whether the given `pattern` is matched from the current scan pointer.
   # Advances the scan pointer if `advance_pointer_p` is true. Returns the
