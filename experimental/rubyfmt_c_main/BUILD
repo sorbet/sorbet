@@ -6,7 +6,11 @@ cc_binary(
     ],
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
-        "//conditions:default": ["-lcrypt", "-lgmp", "-lrt"],
+        "//conditions:default": [
+            "-lcrypt",
+            "-lgmp",
+            "-lrt",
+        ],
     }),
     visibility = ["//visibility:public"],
     deps = [
