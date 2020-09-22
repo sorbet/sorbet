@@ -10,5 +10,8 @@ class Bar
   delegate :foo, to: :foo
 end
 
+module Baz
+end
+
 Foo.new.foo
 Bar.new.foo
