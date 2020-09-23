@@ -924,7 +924,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     SymbolData singletonInfo = singleton.data(gs);
 
-    counterInc("singleton_classes");
+    prodCounterInc("singleton_classes");
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
