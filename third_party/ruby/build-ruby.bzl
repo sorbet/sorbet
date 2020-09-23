@@ -473,7 +473,6 @@ def _rubyfmt_static_deps_impl(ctx):
     build = []
 
     for file in libs:
-        print(file)
         library_to_link = cc_common.create_library_to_link(
             cc_toolchain = cc_toolchain,
             actions = ctx.actions,
