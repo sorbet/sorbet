@@ -2515,8 +2515,6 @@ end
 class Gem::Resolver::CurrentSet
 end
 
-Gem::Resolver::DependencyConflict = Gem::Resolver::Conflict
-
 class Gem::Resolver::DependencyRequest
   def pretty_print(q); end
 end
