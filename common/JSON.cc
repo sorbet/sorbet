@@ -37,7 +37,7 @@ string JSON::escape(string from) {
                 special = "\\t"sv;
                 break;
             default:
-                if (ch <= 0x1f) {
+                if (0x00 <= ch && ch <= 0x1f) {
                     string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
                     firstUnusedChar = currentChar + 1;
                     fmt::format_to(buf, "{}\\u{:04x}", toAdd, ch);
