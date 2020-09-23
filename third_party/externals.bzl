@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -292,6 +293,26 @@ package(default_visibility = ["//visibility:public"])
         path = "/usr",
         build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
     )
+
+    http_archive(
+        name = "io_bazel_rules_rust",
+        strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
+        urls = [
+            # Master branch as of 2019-10-07
+            "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
+        ],
+    )
+
+    http_archive(
+        name = "bazel_skylib",
+        sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
+        strip_prefix = "bazel-skylib-1.0.0",
+        url = "https://github.com/bazelbuild/bazel-skylib/archive/1.0.0.tar.gz",
+    )
+
+    raze_fetch_remote_crates()
+
+
 
 def _github_public_urls(path):
     """

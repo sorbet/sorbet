@@ -83,22 +83,6 @@ BAZEL_INSTALLER_VERSION_darwin_SHA = "b168b9c4186916cd07922b1155bca14eecc8127296
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-http_archive(
-    name = "io_bazel_rules_rust",
-    strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
-    urls = [
-        # Master branch as of 2019-10-07
-        "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
-    ],
-)
-
-http_archive(
-    name = "bazel_skylib",
-    sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
-    strip_prefix = "bazel-skylib-1.0.0",
-    url = "https://github.com/bazelbuild/bazel-skylib/archive/1.0.0.tar.gz",
-)
-
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories(
@@ -109,7 +93,3 @@ rust_repositories(
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
-
-load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
-
-raze_fetch_remote_crates()
