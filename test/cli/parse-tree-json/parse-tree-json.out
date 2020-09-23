@@ -85,7 +85,7 @@
         },
         {
           "type" : "String",
-          "val" : "👋 a string"
+          "val" : "👋 a string \u0000 \u001b with control chars and emojis"
         },
         {
           "type" : "GVar",
