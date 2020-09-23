@@ -9,6 +9,7 @@ cc_binary(
         "//conditions:default": [
             "-lcrypt",
             "-lrt",
+            "-lz",
         ],
     }),
     visibility = ["//visibility:public"],
