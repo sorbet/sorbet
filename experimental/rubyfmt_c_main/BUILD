@@ -8,7 +8,6 @@ cc_binary(
         "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
         "//conditions:default": [
             "-lcrypt",
-            "-lgmp",
             "-lrt",
         ],
     }),
