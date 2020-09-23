@@ -144,12 +144,11 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "bazel-compilation-database-0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
     )
 
-    new_git_repository(
+    http_archive(
         name = "rubyfmt",
-        remote = "https://github.com/penelopezone/rubyfmt",
-        commit = "f64f80ce80a5027106f689e76e6400abaa87d90f",
-        init_submodules = True,
+        urls = ["https://github.com/penelopezone/rubyfmt/releases/download/v0.4.0/rubyfmt-v0.4.0-sources.tar.gz"],
         build_file = "//third_party/rubyfmt:rubyfmt.BUILD",
+        strip_prefix = "tmp/rubyfmt_source",
     )
 
     # NOTE: using this branch:
