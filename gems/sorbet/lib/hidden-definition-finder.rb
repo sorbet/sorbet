@@ -105,7 +105,8 @@ class Sorbet::Private::HiddenMethodFinder
       [
         File.realpath("#{__dir__}/../bin/srb"),
         'tc',
-        '--print=symbol-table-full-json',
+        '--print=symbol-tabl-json',
+        '--print-full',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
@@ -125,7 +126,8 @@ class Sorbet::Private::HiddenMethodFinder
         'tc',
         # Make sure we don't load a sorbet/config in your cwd
         '--no-config',
-        '--print=symbol-table-full-json',
+        '--print=symbol-table-json',
+        '--print-full',
         # The hidden-definition serializer is not smart enough to put T::Enum
         # constants it discovers inside an `enums do` block. We probably want
         # to come up with a better long term solution here.
