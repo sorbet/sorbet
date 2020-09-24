@@ -29,6 +29,7 @@ T.assert_type!(
 )
 
 {a: 1}.merge({b: 2}, {c: 3})
+{a: 1}.merge!({b: 2}, {c: 3})
 
 
 h1 = T::Hash[Integer, String].new
