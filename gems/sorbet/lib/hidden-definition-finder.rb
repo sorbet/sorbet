@@ -105,7 +105,7 @@ class Sorbet::Private::HiddenMethodFinder
       [
         File.realpath("#{__dir__}/../bin/srb"),
         'tc',
-        '--print=symbol-tabl-json',
+        '--print=symbol-table-json',
         '--print-full',
         '--stdout-hup-hack',
         '--silence-dev-message',
