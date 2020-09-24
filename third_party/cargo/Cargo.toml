@@ -20,7 +20,7 @@ syn = { version = "=1.0.17", features = ["full"] }
 quote = "=1.0.3"
 proc-macro2 = "=1.0.10"
 [build-dependencies]
-cc = "1.0"
+cc = "=1.0.59"
 
 [raze]
 # The WORKSPACE relative path to the Cargo.toml working directory.

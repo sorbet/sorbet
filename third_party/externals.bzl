@@ -296,6 +296,7 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "io_bazel_rules_rust",
+        sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
         strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
         urls = [
             # Master branch as of 2019-10-07
