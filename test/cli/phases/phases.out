@@ -9,6 +9,9 @@ Integer {
   "val" : "1"
 }
 --- parse-tree-json end ---
+--- parse-tree-whitequark start ---
+s(:int, "1")
+--- parse-tree-whitequark end ---
 --- desugar-tree start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
   1
