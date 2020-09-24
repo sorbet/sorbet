@@ -26,6 +26,9 @@ struct PrintOptions {
     PrinterConfig Printers::*config;
     bool supportsCaching = false;
     bool supportsFlush = true; // If false, printer is responsible for flushing its own output.
+
+    // Can this printer be used with the `--print-full` option?
+    bool supportsFull = false;
 };
 
 const vector<PrintOptions> print_options({
@@ -48,16 +51,11 @@ const vector<PrintOptions> print_options({
     {"ast-raw", &Printers::ASTRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
-    {"symbol-table", &Printers::SymbolTable, true},
-    {"symbol-table-raw", &Printers::SymbolTableRaw, true},
-    {"symbol-table-json", &Printers::SymbolTableJson, true},
-    {"symbol-table-proto", &Printers::SymbolTableProto, true},
-    {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false},
-    {"symbol-table-full", &Printers::SymbolTableFull, true},
-    {"symbol-table-full-raw", &Printers::SymbolTableFullRaw, true},
-    {"symbol-table-full-json", &Printers::SymbolTableFullJson, true},
-    {"symbol-table-full-proto", &Printers::SymbolTableFullProto, true},
-    {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
+    {"symbol-table", &Printers::SymbolTable, true, true, true},
+    {"symbol-table-raw", &Printers::SymbolTableRaw, true, true, true},
+    {"symbol-table-json", &Printers::SymbolTableJson, true, true, true},
+    {"symbol-table-proto", &Printers::SymbolTableProto, true, true, true},
+    {"symbol-table-messagepack", &Printers::SymbolTableMessagePack, true, false, true},
     {"file-table-json", &Printers::FileTableJson, true},
     {"file-table-proto", &Printers::FileTableProto, true},
     {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
@@ -117,11 +115,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         SymbolTableProto,
         SymbolTableMessagePack,
         SymbolTableJson,
-        SymbolTableFull,
-        SymbolTableFullProto,
-        SymbolTableFullMessagePack,
-        SymbolTableFullJson,
-        SymbolTableFullRaw,
         FileTableJson,
         FileTableProto,
         FileTableMessagePack,
@@ -428,6 +421,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("print-full", "print full content (used with --print)", cxxopts::value<bool>());
     options.add_options("dev")("autogen-subclasses-parent",
                                "Parent classes for which generate a list of subclasses. "
                                "This option must be used in conjunction with -p autogen-subclasses",
@@ -513,8 +507,13 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
 bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog::logger> logger) {
     if (raw.count("print") == 0) {
+        if (raw.count("print-full") > 0) {
+            logger->error("--print-full must be used together with --print");
+            throw EarlyReturnWithCode(1);
+        }
         return true;
     }
+
     vector<string> printOpts = raw["print"].as<vector<string>>();
     for (auto opt : printOpts) {
         string outPath;
@@ -539,6 +538,13 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                         logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
+                }
+                if (raw.count("print-full") > 0) {
+                    if (!known.supportsFull) {
+                        logger->error("--print={} does not support --print-full", opt);
+                        throw EarlyReturnWithCode(1);
+                    }
+                    opts.printFull = true;
                 }
                 if (opt == "autogen-autoloader" && outPath.empty()) {
                     logger->error("--print={} requires an output path to be specified", opt);
@@ -851,6 +857,7 @@ void readOptions(Options &opts,
         opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<u4>();
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<u4>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<u4>();
+
         if (raw.count("autogen-version") > 0) {
             if (!opts.print.AutogenMsgPack.enabled) {
                 logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");

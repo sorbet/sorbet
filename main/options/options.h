@@ -68,11 +68,6 @@ struct Printers {
     PrinterConfig SymbolTableProto;
     PrinterConfig SymbolTableMessagePack;
     PrinterConfig SymbolTableJson;
-    PrinterConfig SymbolTableFull;
-    PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullProto;
-    PrinterConfig SymbolTableFullMessagePack;
-    PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
     PrinterConfig FileTableProto;
     PrinterConfig FileTableMessagePack;
@@ -118,6 +113,8 @@ struct AutoloaderConfig {
 
 struct Options {
     Printers print;
+    bool printFull = false;
+
     AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
