@@ -167,13 +167,12 @@ Usage:
                                 flatten-tree-raw, ast, ast-raw, cfg, cfg-raw,
                                 symbol-table, symbol-table-raw, symbol-table-json,
                                 symbol-table-proto, symbol-table-messagepack,
-                                symbol-table-full, symbol-table-full-raw,
-                                symbol-table-full-json, symbol-table-full-proto,
-                                symbol-table-full-messagepack, file-table-json,
-                                file-table-proto, file-table-messagepack,
-                                missing-constants, plugin-generated-code,
-                                autogen, autogen-msgpack, autogen-classlist,
-                                autogen-autoloader, autogen-subclasses, package-tree]
+                                file-table-json, file-table-proto,
+                                file-table-messagepack, missing-constants,
+                                plugin-generated-code, autogen, autogen-msgpack,
+                                autogen-classlist, autogen-autoloader,
+                                autogen-subclasses, package-tree]
+      --print-full              print full content (used with --print)
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
