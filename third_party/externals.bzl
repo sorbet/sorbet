@@ -312,8 +312,6 @@ package(default_visibility = ["//visibility:public"])
 
     raze_fetch_remote_crates()
 
-
-
 def _github_public_urls(path):
     """
     Produce a url list that works both with github, and stripe's internal artifact cache.
