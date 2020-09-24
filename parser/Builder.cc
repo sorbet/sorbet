@@ -264,7 +264,9 @@ public:
     }
 
     unique_ptr<Node> associate(const token *begin, sorbet::parser::NodeVec pairs, const token *end) {
-        return make_unique<Hash>(collectionLoc(begin, pairs, end), std::move(pairs));
+        ENFORCE((begin == nullptr && end == nullptr) || (begin != nullptr && end != nullptr));
+        auto isKwargs = begin == nullptr && end == nullptr;
+        return make_unique<Hash>(collectionLoc(begin, pairs, end), isKwargs, std::move(pairs));
     }
 
     unique_ptr<Node> attrAsgn(unique_ptr<Node> receiver, const token *dot, const token *selector, bool masgn) {

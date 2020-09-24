@@ -321,6 +321,7 @@ Begin {
       body = NULL
     }
     Hash {
+      kwargs = false
       pairs = [
         Kwsplat {
           expr = LVar {
@@ -429,6 +430,7 @@ Begin {
       body = NULL
     }
     Hash {
+      kwargs = false
       pairs = [
         Pair {
           key = LVar {
