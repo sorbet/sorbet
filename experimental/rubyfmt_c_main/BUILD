@@ -10,6 +10,7 @@ cc_binary(
             "-lcrypt",
             "-lrt",
             "-lz",
+            "-lgmp",
         ],
     }),
     visibility = ["//visibility:public"],
