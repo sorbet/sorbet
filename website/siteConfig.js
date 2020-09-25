@@ -50,6 +50,11 @@ const users = [
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',
   },
+  {
+    caption: 'PhishSafety',
+    image: 'img/phishsafety-logo.png',
+    infoLink: 'https://phishsafety.com',
+  },
 ];
 
 const siteConfig = {
