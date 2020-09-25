@@ -26,12 +26,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 
 bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest,
                            cfg::LocalRef var) {
-    for (auto &test : typeTest) {
-        if (test.first == var) {
-            return true;
-        }
-    }
-    return false;
+    return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 } // namespace
 
@@ -216,7 +211,7 @@ KnowledgeFact &KnowledgeRef::mutate() {
 }
 
 void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
-    if (typeTestReferencesVar((*this)->yesTypeTests, var) || typeTestReferencesVar((*this)->noTypeTests, var)) {
+    if (typeTestReferencesVar(knowledge->yesTypeTests, var) || typeTestReferencesVar(knowledge->noTypeTests, var)) {
         auto &typeTests = this->mutate();
         typeTests.yesTypeTests.erase(remove_if(typeTests.yesTypeTests.begin(), typeTests.yesTypeTests.end(),
                                                [&](auto const &c) -> bool { return c.first == var; }),
