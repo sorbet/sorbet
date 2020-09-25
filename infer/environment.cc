@@ -11,6 +11,7 @@ using namespace std;
 
 namespace sorbet::infer {
 
+namespace {
 core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isUntyped()) {
@@ -22,6 +23,17 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
     }
     return tp;
 }
+
+bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest,
+                           cfg::LocalRef var) {
+    for (auto &test : typeTest) {
+        if (test.first == var) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     used_vars.resize(cfg->numLocalVariables());
@@ -203,6 +215,18 @@ KnowledgeFact &KnowledgeRef::mutate() {
     return *knowledge.get();
 }
 
+void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
+    if (typeTestReferencesVar((*this)->yesTypeTests, var) || typeTestReferencesVar((*this)->noTypeTests, var)) {
+        auto &truthy = this->mutate();
+        truthy.yesTypeTests.erase(remove_if(truthy.yesTypeTests.begin(), truthy.yesTypeTests.end(),
+                                            [&](auto const &c) -> bool { return c.first == var; }),
+                                  truthy.yesTypeTests.end());
+        truthy.noTypeTests.erase(remove_if(truthy.noTypeTests.begin(), truthy.noTypeTests.end(),
+                                           [&](auto const &c) -> bool { return c.first == var; }),
+                                 truthy.noTypeTests.end());
+    }
+}
+
 string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
     fmt::memory_buffer buf;
     if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
@@ -212,6 +236,11 @@ string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cf
         fmt::format_to(buf, "  Being falsy entails:\n{}", falsy->toString(gs, cfg));
     }
     return to_string(buf);
+}
+
+void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
+    this->truthy.removeReferencesToVar(var);
+    this->falsy.removeReferencesToVar(var);
 }
 
 void TestedKnowledge::sanityCheck() const {
@@ -314,20 +343,7 @@ void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, Kn
     for (auto &el : vars) {
         auto &k = el.second.knowledge;
         if (knowledgeFilter.isNeeded(el.first)) {
-            auto &truthy = k.truthy.mutate();
-            auto &falsy = k.falsy.mutate();
-            truthy.yesTypeTests.erase(remove_if(truthy.yesTypeTests.begin(), truthy.yesTypeTests.end(),
-                                                [&](auto const &c) -> bool { return c.first == reassigned; }),
-                                      truthy.yesTypeTests.end());
-            falsy.yesTypeTests.erase(remove_if(falsy.yesTypeTests.begin(), falsy.yesTypeTests.end(),
-                                               [&](auto const &c) -> bool { return c.first == reassigned; }),
-                                     falsy.yesTypeTests.end());
-            truthy.noTypeTests.erase(remove_if(truthy.noTypeTests.begin(), truthy.noTypeTests.end(),
-                                               [&](auto const &c) -> bool { return c.first == reassigned; }),
-                                     truthy.noTypeTests.end());
-            falsy.noTypeTests.erase(remove_if(falsy.noTypeTests.begin(), falsy.noTypeTests.end(),
-                                              [&](auto const &c) -> bool { return c.first == reassigned; }),
-                                    falsy.noTypeTests.end());
+            k.removeReferencesToVar(reassigned);
             k.sanityCheck();
         }
     }
