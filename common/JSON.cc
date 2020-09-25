@@ -41,7 +41,6 @@ string JSON::escape(string from) {
                     string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
                     firstUnusedChar = currentChar + 1;
                     fmt::format_to(buf, "{}\\u{:04x}", toAdd, ch);
-                    break;
                 }
                 continue;
         }
