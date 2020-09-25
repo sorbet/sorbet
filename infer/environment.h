@@ -71,6 +71,7 @@ public:
     const KnowledgeFact *operator->() const;
 
     KnowledgeFact &mutate();
+    void removeReferencesToVar(cfg::LocalRef ref);
 
 private:
     std::shared_ptr<KnowledgeFact> knowledge;
@@ -89,6 +90,7 @@ public:
 
     static TestedKnowledge empty; // optimization
 
+    void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
 };
 
