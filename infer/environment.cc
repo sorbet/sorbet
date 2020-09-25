@@ -217,13 +217,13 @@ KnowledgeFact &KnowledgeRef::mutate() {
 
 void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
     if (typeTestReferencesVar((*this)->yesTypeTests, var) || typeTestReferencesVar((*this)->noTypeTests, var)) {
-        auto &truthy = this->mutate();
-        truthy.yesTypeTests.erase(remove_if(truthy.yesTypeTests.begin(), truthy.yesTypeTests.end(),
-                                            [&](auto const &c) -> bool { return c.first == var; }),
-                                  truthy.yesTypeTests.end());
-        truthy.noTypeTests.erase(remove_if(truthy.noTypeTests.begin(), truthy.noTypeTests.end(),
-                                           [&](auto const &c) -> bool { return c.first == var; }),
-                                 truthy.noTypeTests.end());
+        auto &typeTests = this->mutate();
+        typeTests.yesTypeTests.erase(remove_if(typeTests.yesTypeTests.begin(), typeTests.yesTypeTests.end(),
+                                               [&](auto const &c) -> bool { return c.first == var; }),
+                                     typeTests.yesTypeTests.end());
+        typeTests.noTypeTests.erase(remove_if(typeTests.noTypeTests.begin(), typeTests.noTypeTests.end(),
+                                              [&](auto const &c) -> bool { return c.first == var; }),
+                                    typeTests.noTypeTests.end());
     }
 }
 
