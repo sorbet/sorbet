@@ -168,6 +168,11 @@ class Index extends React.Component {
                   link: 'https://github.com/teamsimplepay/pronto-sorbet',
                   description: 'Run Sorbet as a Pronto runner.',
                 },
+                {
+                  title: 'spoom',
+                  link: 'https://github.com/Shopify/spoom',
+                  description: 'Useful tools for Sorbet enthusiasts',
+                },
               ]}
             />
             <p>
