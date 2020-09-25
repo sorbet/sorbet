@@ -31,7 +31,10 @@ module T::Private::Sealed
     end
 
     def sealed_subclasses
-      @sorbet_sealed_module_all_subclasses
+      # this will freeze the set so that you can never get into a
+      # state where you use the subclasses list and then something
+      # else will add to it
+      @sorbet_sealed_module_all_subclasses.freeze
     end
   end
 
