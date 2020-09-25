@@ -1002,6 +1002,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
             return original;
         }
         default:
+            auto loc = core::Loc(args.locs.file, args.locs.call);
+            if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
+                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
+                            this->wrapped->show(gs));
+                if (args.name == core::Names::tripleEq()) {
+                    if (auto appliedType = cast_type<AppliedType>(this->wrapped.get())) {
+                        e.addErrorSection(
+                            ErrorSection("It looks like you're trying to pattern match on a generic", {}));
+                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
+                    }
+                }
+            }
             return ProxyType::dispatchCall(gs, args);
     }
 }
