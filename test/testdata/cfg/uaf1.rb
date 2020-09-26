@@ -6,7 +6,7 @@ class A
         1
       rescue StandardError => se
         2
-     end
+      end
     end
   end
 end
