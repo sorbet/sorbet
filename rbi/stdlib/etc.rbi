@@ -533,7 +533,7 @@ module Etc
   # #    :machine=>"i686"}
   # ```
   sig do
-    returns(String)
+    returns(T::Hash[Symbol, String])
   end
   def self.uname; end
 end
