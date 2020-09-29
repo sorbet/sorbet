@@ -417,10 +417,17 @@ class Pathname < Object
     params(
         arg0: String,
         offset: Integer,
+        external_encoding: String,
+        internal_encoding: String,
+        encoding: String,
+        textmode: BasicObject,
+        binmode: BasicObject,
+        autoclose: BasicObject,
+        mode: String,
     )
     .returns(Integer)
   end
-  def binwrite(arg0, offset=T.unsafe(nil)); end
+  def binwrite(arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   # Returns the birth time for the file. If the platform doesn't have birthtime,
   # raises
