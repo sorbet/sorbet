@@ -100,6 +100,16 @@ else T.absurd(x)                     # error: Missing case for `Failed`
 end
 ```
 
+As an extra convenience, a sealed class or module will also have a method called
+`sealed_subclasses` that returns the complete set of sealed subclasses. This can
+be used to dynamically iterate over all the subclasses:
+
+```ruby
+ChargeAttemptResult.sealed_subclasses.each do |klass|
+  puts "Charge attempt can be #{klass.name}"
+end
+```
+
 Sealed classes are a powerful feature. They let us declare intentional,
 definition-side interfaces, without sacrificing flow-sensitive typing or
 exhaustiveness.
