@@ -1917,7 +1917,17 @@ private:
         optional<core::LocOffsets> packageLoc;
         if (send.args.size() == 3) {
             // this means we got the third package arg
-            auto *packageNode = ast::cast_tree_const<ast::Literal>(send.args[2]);
+            auto *kwargs = ast::cast_tree_const<ast::Hash>(send.args[2]);
+            if (!kwargs || kwargs->keys.size() != 1) {
+                // Infer will report an error
+                return;
+            }
+            auto *key = ast::cast_tree_const<ast::Literal>(kwargs->keys.front());
+            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
+                return;
+            }
+
+            auto *packageNode = ast::cast_tree_const<ast::Literal>(kwargs->values.front());
             packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
             if (packageNode == nullptr) {
                 if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {
