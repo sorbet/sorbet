@@ -1,0 +1,190 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C Project>::<C Foo>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C Bar>)
+
+    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C BarMethods>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C <PackageMethods>><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package>::<C BarMethods>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>
+
+      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C <PackageMethods>>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+      end
+
+      def initialize<<C <todo sym>>>(value, &<blk>)
+        @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C BarMethods><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
+      end
+
+      def build_foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C T>::<C Boolean>)
+      end
+
+      def check_bar<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>.check_is_bar(<emptyTree>::<C Bar>.new(5))
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"build_foo")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"check_bar")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C BarMethods><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
+      end
+
+      def build_foo<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Bar>)
+      end
+
+      def build_bar<<C <todo sym>>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>.build_bar()
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"build_foo")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"build_bar")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C Foo>)
+
+    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C FooMethods>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C <PackageMethods>><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package>::<C FooMethods>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+      <self>.import(<emptyTree>::<C Project>::<C Bar>)
+
+      <self>.export(<emptyTree>::<C Foo>)
+
+      <self>.export_methods(<emptyTree>::<C FooMethods>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+      end
+
+      def initialize<<C <todo sym>>>(value, &<blk>)
+        @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C FooMethods><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
+      end
+
+      def bad_check_is_bar<<C <todo sym>>>(arg, &<blk>)
+        if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "::Bar")
+          true
+        else
+          false
+        end
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
+      end
+
+      def check_is_bar<<C <todo sym>>>(arg, &<blk>)
+        if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "Quux", "Project::Bar")
+          true
+        else
+          false
+        end
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
+      end
+
+      def check_is_bar<<C <todo sym>>>(arg, &<blk>)
+        if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "Bar", "Project::Bar")
+          true
+        else
+          false
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"bad_check_is_bar")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"check_is_bar")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"check_is_bar")
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C FooMethods><<C <todo sym>>> < ()
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+    end
+  end
+end
