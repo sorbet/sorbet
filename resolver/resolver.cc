@@ -1886,7 +1886,7 @@ private:
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
-        if (send.args.size() != 2) {
+        if (send.args.size() != 2 && send.args.size() != 3) {
             return;
         }
 
@@ -1913,6 +1913,28 @@ private:
             return;
         }
 
+        core::LiteralType *package = nullptr;
+        optional<core::LocOffsets> packageLoc;
+        if (send.args.size() == 3) {
+            // this means we got the third package arg
+            auto *packageNode = ast::cast_tree_const<ast::Literal>(send.args[2]);
+            packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
+            if (packageNode == nullptr) {
+                if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {
+                    e.setHeader("`{}` only accepts string literals", method);
+                }
+                return;
+            }
+
+            package = core::cast_type<core::LiteralType>(packageNode->value.get());
+            if (package == nullptr) {
+                // Infer will report a type error
+                return;
+            }
+        }
+        // if we got two args, then package should be null, and if we got three args, then package should be non-null
+        ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
+
         auto name = core::NameRef(ctx.state, literal->value);
         auto shortName = name.data(ctx)->shortName(ctx);
         if (shortName.empty()) {
@@ -1927,40 +1949,65 @@ private:
         for (auto part : parts) {
             if (!current.exists()) {
                 // First iteration
-                if (part != "") {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        e.setHeader(
-                            "The string given to `{}` must be an absolute constant reference that starts with `{}`",
-                            method, "::");
+                if (!package) {
+                    if (part != "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader(
+                                "The string given to `{}` must be an absolute constant reference that starts with `{}`",
+                                method, "::");
+                        }
+                        return;
                     }
-                    return;
-                }
+                    current = core::Symbols::root();
+                    continue;
+                } else if (package) {
+                    if (part == "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
+                                        "package name is also provided",
+                                        method);
+                        }
+                        return;
+                    }
 
-                current = core::Symbols::root();
-            } else {
-                auto member = ctx.state.lookupNameConstant(part);
-                if (!member.exists()) {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        auto prettyCurrent =
-                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    auto rootName = core::NameRef(ctx.state, package->value).getMangledPackageName(ctx.state);
+                    // if the mangled name doesn't exist, then this means probably there's no package named this
+                    if (!rootName.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package: `{}`", rootName.toString(ctx));
+                        }
+                        return;
                     }
-                    return;
-                }
-
-                auto newCurrent = current.data(ctx)->findMember(ctx, member);
-                if (!newCurrent.exists()) {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        auto prettyCurrent =
-                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, rootName);
+                    if (!current.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package `{}`", rootName.toString(ctx));
+                        }
+                        return;
                     }
-                    return;
                 }
-                current = newCurrent;
             }
+
+            auto member = ctx.state.lookupNameConstant(part);
+            if (!member.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+
+            auto newCurrent = current.data(ctx)->findMember(ctx, member);
+            if (!newCurrent.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+            current = newCurrent;
         }
 
         ENFORCE(current.exists(), "Loop invariant violated");
