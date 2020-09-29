@@ -1941,7 +1941,6 @@ private:
                 // Infer will report a type error
                 return;
             }
-
         }
         // if we got two args, then package should be null, and if we got three args, then package should be non-null
         ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
