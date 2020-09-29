@@ -30,7 +30,7 @@ what this announcement means for Ruby, and for Sorbet.
 As [Matz announced at RubyConf 2019][rubyconf-2019], Ruby 3 plans to ship type
 annotations for the standard library in a particular format. We've been meeting
 with Matz and the Ruby core team to provide input on our experience and learn
-from them how they're thinking about types so that Sorbet wil be ready. We're
+from them how they're thinking about types so that Sorbet will be ready. We're
 [committed][faq-migration] to supporting Ruby 3's type syntax.
 
 [rubyconf-2019]: https://youtu.be/2g9R7PUCEXo?t=2076
