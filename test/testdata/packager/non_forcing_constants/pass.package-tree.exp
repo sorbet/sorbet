@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def check_bar<<C <todo sym>>>(&<blk>)
-        <emptyTree>::<C Project>::<C Foo>.check_is_bar(<emptyTree>::<C Bar>.new(5))
+        <emptyTree>::<C Project>::<C Foo>.good_check_is_bar(<emptyTree>::<C Bar>.new(5))
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -139,7 +139,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
       end
 
-      def bad_check_is_bar<<C <todo sym>>>(arg, &<blk>)
+      def global_check_is_bar<<C <todo sym>>>(arg, &<blk>)
         if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "::Bar")
           true
         else
@@ -151,7 +151,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
       end
 
-      def check_is_bar<<C <todo sym>>>(arg, &<blk>)
+      def bad_check_for_global_bar<<C <todo sym>>>(arg, &<blk>)
+        if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "::Bar", "Project::Bar")
+          true
+        else
+          false
+        end
+      end
+
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
+      end
+
+      def check_for_non_existing_bar<<C <todo sym>>>(arg, &<blk>)
         if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "Quux", "Project::Bar")
           true
         else
@@ -163,7 +175,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params({:"arg" => <emptyTree>::<C T>.untyped()}).returns(<emptyTree>::<C T>::<C Boolean>)
       end
 
-      def check_is_bar<<C <todo sym>>>(arg, &<blk>)
+      def good_check_is_bar<<C <todo sym>>>(arg, &<blk>)
         if <emptyTree>::<C T>::<C NonForcingConstants>.non_forcing_is_a?(arg, "Bar", "Project::Bar")
           true
         else
@@ -173,11 +185,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"bad_check_is_bar")
+      ::Sorbet::Private::Static.keep_def(<self>, :"global_check_is_bar")
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"check_is_bar")
+      ::Sorbet::Private::Static.keep_def(<self>, :"bad_check_for_global_bar")
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"check_is_bar")
+      ::Sorbet::Private::Static.keep_def(<self>, :"check_for_non_existing_bar")
+
+      ::Sorbet::Private::Static.keep_def(<self>, :"good_check_is_bar")
     end
   end
 end
