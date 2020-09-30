@@ -293,7 +293,7 @@ NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     return gs.enterNameUTF8(nameEq);
 }
 
-NameRef NameRef::getMangledPackageName(const GlobalState &gs) const {
+NameRef NameRef::lookupMangledPackageName(const GlobalState &gs) const {
     auto name = this->data(gs);
     ENFORCE(name->kind == NameKind::UTF8, "manglePackageName over non-utf8 name");
     auto parts = absl::StrSplit(name->raw.utf8, "::");

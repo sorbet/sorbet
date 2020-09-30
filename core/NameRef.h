@@ -94,7 +94,7 @@ public:
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 
-    NameRef getMangledPackageName(const GlobalState &gs) const;
+    NameRef lookupMangledPackageName(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;

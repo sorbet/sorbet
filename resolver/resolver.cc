@@ -1980,7 +1980,7 @@ private:
                         return;
                     }
 
-                    auto rootName = core::NameRef(ctx.state, package->value).getMangledPackageName(ctx.state);
+                    auto rootName = core::NameRef(ctx.state, package->value).lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!rootName.exists()) {
                         if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
