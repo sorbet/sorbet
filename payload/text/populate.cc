@@ -6,7 +6,7 @@
 using namespace std;
 
 namespace sorbet::rbi {
-void polulateRBIsInto(unique_ptr<core::GlobalState> &gs) {
+void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     gs->initEmpty();
     gs->ensureCleanStrings = true;
 

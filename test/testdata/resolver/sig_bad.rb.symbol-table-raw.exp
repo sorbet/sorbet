@@ -26,6 +26,12 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
     method <S <C <U A>> $1><U unsupported> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=13:3 end=13:23}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
+  module <C <U T>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi start=removed end=removed}
+    module <C <U T>><C <U Private>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/tprivate.rbi start=removed end=removed}
+      module <C <U T>><C <U Private>><C <U Methods>> < <C <U Sorbet>><C <U Private>><C <U Static>><C <U ImplicitModuleSuperclass>> () @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/tprivate.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/builder.rbi start=removed end=removed})
+        class <C <U T>><C <U Private>><C <U Methods>><C <U DeclBuilder>> < <C <U Object>> () @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/builder.rbi start=removed end=removed}, Loc {file=test/testdata/resolver/sig_bad.rb start=5:1 end=5:39})
+          method <C <U T>><C <U Private>><C <U Methods>><C <U DeclBuilder>><U unsupported> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=6:3 end=6:18}
+            argument <blk><block> @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:1 end=2:9}
   class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:7 end=2:9}
     type-member(+) <S <C <U T1>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U T1>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=T1) @ Loc {file=test/testdata/resolver/sig_bad.rb start=2:7 end=2:9}
