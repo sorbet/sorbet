@@ -320,7 +320,7 @@ module Etc
   # Etc.getlogin -> 'guest'
   # ```
   sig do
-    returns(String)
+    returns(T.nilable(String))
   end
   def self.getlogin; end
 
