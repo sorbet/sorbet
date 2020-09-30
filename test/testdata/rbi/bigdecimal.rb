@@ -14,3 +14,20 @@ BigDecimal('0.5').round(1)
 BigDecimal('0.5').round(1, BigDecimal::ROUND_HALF_EVEN)
 BigDecimal('0.5').round(1, :up)
 BigDecimal('0.5').round(1, 'up') # error: Expected `T.any(Integer, Symbol)` but found `String("up")` for argument `mode`
+
+x = T.let(3, T.any(Integer, Float, Rational, BigDecimal))
+BigDecimal(2) * x
+BigDecimal(2) ** x
+BigDecimal(2) + x
+BigDecimal(2) - x
+BigDecimal(2) / x
+BigDecimal(2) < x
+BigDecimal(2) <= x
+BigDecimal(2) <=> x
+BigDecimal(2) > x
+BigDecimal(2) >= x
+BigDecimal(2).div(x)
+BigDecimal(2).fdiv(x)
+BigDecimal(2).modulo(x)
+BigDecimal(2).power(x)
+BigDecimal(2).quo(x)

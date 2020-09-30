@@ -423,25 +423,7 @@ class BigDecimal < Numeric
   #     [`BigDecimal.mode`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-mode).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -451,6 +433,12 @@ class BigDecimal < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def *(arg0); end
 
   # Returns the value raised to the power of n.
@@ -459,25 +447,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#power`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-power).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -498,25 +468,7 @@ class BigDecimal < Numeric
   #     [`BigDecimal.mode`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-c-mode).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -525,6 +477,12 @@ class BigDecimal < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def +(arg0); end
 
@@ -555,25 +513,7 @@ class BigDecimal < Numeric
   # platform. So, it's return value is platform dependent.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -582,6 +522,12 @@ class BigDecimal < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def -(arg0); end
 
@@ -599,25 +545,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#div`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-div).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -627,6 +555,12 @@ class BigDecimal < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def /(arg0); end
 
   # Returns true if a is less than b.
@@ -635,25 +569,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#coerce`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-coerce)).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -665,25 +581,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#coerce`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-coerce)).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -692,25 +590,7 @@ class BigDecimal < Numeric
   # The comparison operator. a <=> b is 0 if a == b, 1 if a > b, -1 if a < b.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(Integer)
   end
@@ -758,25 +638,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#coerce`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-coerce)).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -788,25 +650,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#coerce`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-coerce))
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(T::Boolean)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(T::Boolean)
   end
@@ -964,25 +808,7 @@ class BigDecimal < Numeric
   # ```
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(Integer)
   end
@@ -1054,19 +880,7 @@ class BigDecimal < Numeric
 
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(Float)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(Float)
-  end
-  sig do
-    params(
-        arg0: Rational,
+        arg0: T.any(Integer, Float, Rational),
     )
     .returns(Float)
   end
@@ -1075,6 +889,12 @@ class BigDecimal < Numeric
         arg0: BigDecimal,
     )
     .returns(BigDecimal)
+  end
+  sig do
+    params(
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
+    )
+    .returns(T.any(Float, BigDecimal))
   end
   sig do
     params(
@@ -1162,7 +982,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#divmod`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-divmod).
   sig do
     params(
-        arg0: Numeric,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -1212,25 +1032,7 @@ class BigDecimal < Numeric
   # Also available as the operator \*\*.
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -1256,25 +1058,7 @@ class BigDecimal < Numeric
   # [`BigDecimal#div`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-div).
   sig do
     params(
-        arg0: Integer,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Float,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: Rational,
-    )
-    .returns(BigDecimal)
-  end
-  sig do
-    params(
-        arg0: BigDecimal,
+        arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
     .returns(BigDecimal)
   end
@@ -1283,6 +1067,12 @@ class BigDecimal < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def quo(arg0); end
 
