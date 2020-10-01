@@ -225,7 +225,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
-                ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
+                auto singleton = attached.data(gs)->superClass().data(gs)->singletonClass(gs);
+                ref.data(gs)->setSuperClass(singleton);
             }
         } else {
             if (ref.data(gs)->isClassOrModuleClass()) {
