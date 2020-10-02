@@ -89,6 +89,10 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         auto result =
             make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
         if (!hideSymbol(gs, sym->owner)) {
+            // VSCode does its own internal ranking based on comparing the query string against the result name.
+            // Therefore have the name be the full path if it makes sense (e.g. Foo::Bar instead of Bar) so fully
+            // qualified symbol search works.
+            result->name = sym->showFullName(gs);
             result->containerName = sym->owner.data(gs)->showFullName(gs);
         }
         results.emplace_back(move(result));
