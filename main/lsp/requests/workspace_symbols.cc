@@ -91,8 +91,9 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         if (!hideSymbol(gs, sym->owner)) {
             // VSCode does its own internal ranking based on comparing the query string against the result name.
             // Therefore have the name be the full path if it makes sense (e.g. Foo::Bar instead of Bar) so fully
-            // qualified symbol search works.
-            result->name = sym->showFullName(gs);
+            // qualified symbol search works. Remove leading :: for readability
+            auto fully_qualified_name = sym->showFullName(gs);
+            result->name = fully_qualified_name.erase(0, fully_qualified_name.find_first_not_of(":"));
             result->containerName = sym->owner.data(gs)->showFullName(gs);
         }
         results.emplace_back(move(result));
