@@ -32,10 +32,15 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
     for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
-        if (absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun) &&
-            ((mcctx.blk == nullptr) || nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
-            return nameBasedIntrinsic->makeCall(mcctx);
+        if (!absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun)) {
+            continue;
         }
+
+        if (mcctx.blk != nullptr && nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+            continue;
+        }
+
+        return nameBasedIntrinsic->makeCall(mcctx);
     }
     return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
 }
@@ -54,44 +59,49 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     builder.SetInsertPoint(rememberStart);
     if (!remainingType->isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
-            if (absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), send->fun) &&
-                (mcctx.blk == nullptr || symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Handled)) {
-                auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
-                for (auto &c : potentialClasses) {
-                    auto leftType = core::Types::dropSubtypesOf(cs, remainingType, c);
+            if (!absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), send->fun)) {
+                continue;
+            }
 
-                    if (leftType != remainingType) {
-                        remainingType = leftType;
+            if (mcctx.blk != nullptr && symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+                continue;
+            }
 
-                        auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
-                        llvm::StringRef clazNameRef(clazName.data(), clazName.size());
+            auto potentialClasses = symbolBasedIntrinsic->applicableClasses(cs);
+            for (auto &c : potentialClasses) {
+                auto leftType = core::Types::dropSubtypesOf(cs, remainingType, c);
 
-                        auto alternative = llvm::BasicBlock::Create(
-                            cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
-                            builder.GetInsertBlock()->getParent());
-                        auto fastPath = llvm::BasicBlock::Create(
-                            cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
-                            builder.GetInsertBlock()->getParent());
-
-                        llvm::Value *typeTest;
-                        if (symbolBasedIntrinsic->skipReceiverTypeTest()) {
-                            typeTest = builder.getInt1(true);
-                        } else {
-                            auto recv =
-                                Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
-                            typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
-                        }
-
-                        builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath,
-                                             alternative);
-                        builder.SetInsertPoint(fastPath);
-                        auto fastPathRes = symbolBasedIntrinsic->makeCall(mcctx);
-                        auto fastPathEnd = builder.GetInsertBlock();
-                        builder.CreateBr(afterSend);
-                        phi->addIncoming(fastPathRes, fastPathEnd);
-                        builder.SetInsertPoint(alternative);
-                    }
+                if (leftType == remainingType) {
+                    continue;
                 }
+
+                remainingType = leftType;
+
+                auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
+                llvm::StringRef clazNameRef(clazName.data(), clazName.size());
+
+                auto alternative = llvm::BasicBlock::Create(
+                    cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                    builder.GetInsertBlock()->getParent());
+                auto fastPath = llvm::BasicBlock::Create(
+                    cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                    builder.GetInsertBlock()->getParent());
+
+                llvm::Value *typeTest;
+                if (symbolBasedIntrinsic->skipReceiverTypeTest()) {
+                    typeTest = builder.getInt1(true);
+                } else {
+                    auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+                    typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
+                }
+
+                builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
+                builder.SetInsertPoint(fastPath);
+                auto fastPathRes = symbolBasedIntrinsic->makeCall(mcctx);
+                auto fastPathEnd = builder.GetInsertBlock();
+                builder.CreateBr(afterSend);
+                phi->addIncoming(fastPathRes, fastPathEnd);
+                builder.SetInsertPoint(alternative);
             }
         }
     }
