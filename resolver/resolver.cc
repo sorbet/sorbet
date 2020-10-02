@@ -1980,18 +1980,19 @@ private:
                         return;
                     }
 
-                    auto rootName = core::NameRef(ctx.state, package->value).lookupMangledPackageName(ctx.state);
+                    auto packageName = core::NameRef(ctx.state, package->value);
+                    auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
-                    if (!rootName.exists()) {
+                    if (!mangledName.exists()) {
                         if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package: `{}`", rootName.toString(ctx));
+                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
                         }
                         return;
                     }
-                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, rootName);
+                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
                     if (!current.exists()) {
                         if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package `{}`", rootName.toString(ctx));
+                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
                         }
                         return;
                     }

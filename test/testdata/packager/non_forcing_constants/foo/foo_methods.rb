@@ -49,6 +49,15 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
+  def bad_non_existent_package(arg)
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Quux") # error: Unable to find package
+      true
+    else
+      false
+    end
+  end
+
+  sig {params(arg: T.untyped).returns(T::Boolean)}
   def check_for_non_existing_bar(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "Quux", package: "Project::Bar") # error: Unable to resolve constant `::<PackageRegistry>::Project_Bar_Package::Quux`
       true
