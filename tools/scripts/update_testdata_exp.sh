@@ -21,6 +21,8 @@ passes=(
   desugar-tree-raw
   rewrite-tree
   rewrite-tree-raw
+  index-tree
+  index-tree-raw
   symbol-table
   symbol-table-raw
   name-tree
