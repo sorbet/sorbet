@@ -1970,7 +1970,7 @@ private:
                     }
                     current = core::Symbols::root();
                     continue;
-                } else if (package) {
+                } else {
                     if (part == "") {
                         if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                             e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
