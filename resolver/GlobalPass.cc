@@ -271,6 +271,7 @@ int maybeAddMixin(core::GlobalState &gs, core::ClassOrModuleRef forSym,
         }
         return pos;
     } else {
+        // cout << "Adding to mixinList" << endl;
         mixinList.insert(mixinList.begin() + pos, mixin);
         return pos + 1;
     }
@@ -287,8 +288,23 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
         }
+<<<<<<< HEAD
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
+=======
+        InlinedVector<core::SymbolRef, 4> currentMixins = data->mixins();
+        InlinedVector<core::SymbolRef, 4> newMixins;
+        // cout << "Mixins ofClass: " << ofClass.show(gs) << " size: " << currentMixins.size() << endl;
+        // if (currentMixins.size() == 2) {
+        //     cout << "Listing those mixins: " << currentMixins[0].show(gs) << currentMixins[1].show(gs) << endl;
+        // }
+        // if (currentMixins.size() == 1) {
+        //     cout << "Listing those mixins: " << currentMixins[0].show(gs) << endl;
+        // }
+        // if (currentMixins.size() == 0) {
+        //     cout << endl;
+        // }
+>>>>>>> bd73d18cc (wip)
         for (auto mixin : currentMixins) {
             if (mixin == data->superClass()) {
                 continue;
@@ -298,16 +314,29 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 newMixins.emplace_back(mixin);
                 continue;
             }
+<<<<<<< HEAD
+=======
+            ENFORCE_NO_TIMER(mixin.data(gs)->isClassOrModule());
+            // cout << endl;
+            // cout << "Recursive call ";
+            // cout << "ofClass: " << ofClass.show(gs) << " mixin: " << mixin.show(gs) << endl;
+>>>>>>> bd73d18cc (wip)
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
                 // insert all transitive parents of class to bring methods back.
                 auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
+                // cout << endl << "Inserting newMixins" << endl;
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
             } else {
                 int pos = 0;
+                // cout << endl;
+                // cout << "ofClass: " << ofClass.show(gs) << ", newMixins size: " << newMixins.size()
+                //  << ", mixin: " << mixin.show(gs) << ", superClass: " << data->superClass().show(gs) << endl;
+                // cout << "mixinLinearization size: " << mixinLinearization.mixins.size() << endl;
                 pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass(), pos);
                 for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
+                    // cout << "mixinLinearizationComponent: " << mixinLinearizationComponent.show(gs) << endl;
                     pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass(), pos);
                 }
             }
@@ -320,6 +349,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                         ofClass.data(gs)->showFullName(gs), oldMixin.data(gs)->showFullName(gs));
             }
         }
+        // cout << "--------------------------------------------------" << endl;
     }
     ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
     return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
