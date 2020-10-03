@@ -18,6 +18,7 @@
 namespace sorbet::infer {
 
 class Environment;
+struct KnowledgeFact;
 
 // storing all the knowledge is slow
 // it only makes sense for us to store it if we are going to use it
@@ -34,34 +35,10 @@ public:
     bool isNeeded(cfg::LocalRef var);
 };
 
-class KnowledgeRef;
-/**
- * Encode things that we know hold and don't hold
- */
-struct KnowledgeFact {
-    bool isDead = false;
-    /* the following type tests are known to be true */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
-    /* the following type tests are known to be false */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
-
-    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(core::Context ctx, const KnowledgeFact &other);
-
-    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
-     */
-    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
-                              cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
-
-    void sanityCheck() const;
-
-    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
-};
-
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
 class KnowledgeRef {
 public:
-    KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+    KnowledgeRef();
     KnowledgeRef(const KnowledgeRef &) = default;
     KnowledgeRef &operator=(const KnowledgeRef &) = default;
     KnowledgeRef(KnowledgeRef &&) = default;
@@ -92,6 +69,7 @@ public:
 
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
+    void emitKnowledgeSizeMetric() const;
 };
 
 class Environment {

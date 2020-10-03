@@ -30,6 +30,29 @@ bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::Ty
 }
 } // namespace
 
+/**
+ * Encode things that we know hold and don't hold
+ */
+struct KnowledgeFact {
+    bool isDead = false;
+    /* the following type tests are known to be true */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
+    /* the following type tests are known to be false */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
+
+    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
+    void min(core::Context ctx, const KnowledgeFact &other);
+
+    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
+     */
+    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
+                              cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
+
+    void sanityCheck() const;
+
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+};
+
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     used_vars.resize(cfg->numLocalVariables());
     for (auto &bb : cfg->basicBlocks) {
@@ -194,6 +217,8 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
+KnowledgeRef::KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();
 }
@@ -236,6 +261,13 @@ string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cf
 void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
     this->truthy.removeReferencesToVar(var);
     this->falsy.removeReferencesToVar(var);
+}
+
+void TestedKnowledge::emitKnowledgeSizeMetric() const {
+    histogramInc("infer.knowledge.truthy.yes.size", truthy->yesTypeTests.size());
+    histogramInc("infer.knowledge.truthy.no.size", truthy->noTypeTests.size());
+    histogramInc("infer.knowledge.falsy.yes.size", falsy->yesTypeTests.size());
+    histogramInc("infer.knowledge.falsy.no.size", falsy->noTypeTests.size());
 }
 
 void TestedKnowledge::sanityCheck() const {
