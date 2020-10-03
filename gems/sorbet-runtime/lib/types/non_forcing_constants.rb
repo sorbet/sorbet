@@ -6,6 +6,9 @@ module T::NonForcingConstants
   # shows up in the hover/completion documentation via LSP.
   T::Sig::WithoutRuntime.sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass, package: nil)
+    # TODO(gdritter): once we have a runtime implementation of
+    # packages, we'll need to actually handle the `package` argument
+    # here.
     method_name = "T::NonForcingConstants.non_forcing_is_a?"
     if klass.empty?
       raise ArgumentError.new("The string given to `#{method_name}` must not be empty")
