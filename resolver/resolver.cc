@@ -1972,6 +1972,8 @@ private:
                     continue;
                 } else {
                     if (part == "") {
+                        // This means that the string began with `::`, hence splitting by `::` gives you an empty string
+                        // before all the rest
                         if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                             e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
                                         "package name is also provided",
