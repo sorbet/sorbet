@@ -1954,6 +1954,9 @@ private:
             return;
         }
 
+        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
+        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
+        // did or did not begin with `::`.
         auto parts = absl::StrSplit(shortName, "::");
         core::SymbolRef current;
         for (auto part : parts) {
@@ -1972,8 +1975,6 @@ private:
                     continue;
                 } else {
                     if (part == "") {
-                        // This means that the string began with `::`, hence splitting by `::` gives you an empty string
-                        // before all the rest
                         if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                             e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
                                         "package name is also provided",
