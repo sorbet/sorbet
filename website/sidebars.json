@@ -39,6 +39,7 @@
       "sealed",
       "class-of",
       "stdlib-generics",
+      "user-defined-generics",
       "self-type",
       "noreturn",
       "attached-class",
