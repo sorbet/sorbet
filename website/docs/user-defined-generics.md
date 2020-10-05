@@ -80,7 +80,7 @@ type members, then the type members must be re-declared in the child type.
 
 There are two ways to re-declare a type member:
 
-- **As a normal type member:** it must still be specified as a type parameter
+- **As a variant type member:** it must still be specified as a type parameter
   when using the type (or left unspecified to use `T.untyped`), and will need to
   be re-declared again in any child types.
 
@@ -150,12 +150,12 @@ T.let(A[Object].new, I[Object])       # OK
 T.let(A[Object].new, I[Integer])      # error
 
 # === Covariant (type_member(:out))
-T.let(A[Object].new, I[BasicObject])  # OK - Object is more derived than BasicObject
+T.let(A[Object].new, I[BasicObject])  # OK - Object is a subtype of BasicObject
 T.let(A[Object].new, I[Object])       # OK
 T.let(A[Object].new, I[Integer])      # error
 
 # === Contravariant (type_member(:in))
 T.let(A[Object].new, I[BasicObject])  # error
 T.let(A[Object].new, I[Object])       # OK
-T.let(A[Object].new, I[Integer])      # OK - Object is less derived than Integer
+T.let(A[Object].new, I[Integer])      # OK - Object is a supertype of Integer
 ```
