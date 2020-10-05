@@ -1,7 +1,16 @@
 # typed: true
 
+module Qux
+  extend T::Helpers
+  module ClassMethods
+    def qux; end
+  end
+  mixes_in_class_methods(ClassMethods)
+end
+
 module Foo
   extend T::Helpers
+  include Qux
   module ClassMethods
     def foo; end
   end
@@ -23,8 +32,9 @@ class Baz
   include Bar
 end
 
-Baz.bar  # should work
-Baz.foo  # should work
+Baz.bar
+Baz.foo
+Baz.qux
 Baz.new.a
 
 
