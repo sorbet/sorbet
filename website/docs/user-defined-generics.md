@@ -89,25 +89,26 @@ There are two ways to re-declare a type member:
   the type member, and this re-declaration must be fixed.
 
 ```ruby
-# Used like: Base[A, B]
 class Base
   extend T::Generic
   A = type_member
   B = type_member
 end
+base = Base[Integer, String].new
 
-# Usage is the same: Subtype[A, B]
 class Subtype < Base
   A = type_member
   B = type_member
 end
+subtype = Subtype[Integer, String].new
 
-# B has been fixed, so now only A can be specified: PartiallyFixedSubtype[A]
+# B has been fixed, so now only A can be specified
 # Any signatures which use B will treat B as String
 class PartiallyFixedSubtype < Subtype
   A = type_member
   B = type_member(fixed: String)
 end
+partially_fixed_subtype = PartiallyFixedSubtype[Integer].new
 
 # Both types are fixed, so FullyFixedSubtype takes no type parameters
 # A will be treated as Integer, and B as String
@@ -116,6 +117,7 @@ class FullyFixedSubtype < PartiallyFixedSubtype
   A = type_member(fixed: Integer)
   B = type_member(fixed: String)
 end
+fully_fixed_subtype = FullyFixedSubtype.new
 ```
 
 ## Variance
