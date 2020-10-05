@@ -92,8 +92,8 @@ class Class < Module
   # Calls `allocate` to create a new object of *class*'s class, then invokes
   # that object's `initialize` method, passing it *args*. This is the method
   # that ends up getting called whenever an object is constructed using .new.
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def new(*args); end
+  sig {params(args: T.untyped, kwargs: T.untyped).returns(T.untyped)}
+  def new(*args, **kwargs); end
 
   # Callback invoked whenever a subclass of the current class is created.
   #

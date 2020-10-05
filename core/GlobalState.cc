@@ -551,12 +551,18 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
+    // Synthesize <Magic>.<self-new>(arg: *T.untyped, kwargs: **T.untyped) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::selfNew());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.type = Types::untyped(*this, method);
         arg.flags.isRepeated = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+        arg.type = Types::untyped(*this, method);
+        arg.flags.isRepeated = true;
+        arg.flags.isKeyword = true;
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
     {
@@ -627,8 +633,9 @@ void GlobalState::initEmpty() {
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isDefault = true;
-        arg.type = Types::hashOfUntyped();
+        arg.flags.isKeyword = true;
+        arg.flags.isRepeated = true;
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
     {
