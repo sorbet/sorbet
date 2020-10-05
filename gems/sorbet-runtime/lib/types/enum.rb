@@ -59,9 +59,13 @@ class T::Enum
 
   # This exists for compatibility with the interface of `Hash` & mostly to support
   # the HashEachMethods Rubocop.
-  sig {returns(T::Enumerator[T.attached_class])}
-  def self.each_value
-    values.each
+  sig {params(blk: T.nilable(T.proc.params(arg0: T.attached_class).void)).returns(T.any(T::Enumerator[T.attached_class], T::Array[T.attached_class]))}
+  def self.each_value(&blk)
+    if blk
+      values.each(&blk)
+    else
+      values.each
+    end
   end
 
   # Convert from serialized value to enum instance
