@@ -7,9 +7,9 @@ sidebar_label: User Defined Generics
 You can define your own generic types, in addition to Sorbet's included
 [standard library generics](stdlib-generics.md) like `T::Array`.
 
-This is done by extending `T::Generic` in your class or module, and then 
-creating `type_member` constants for each type parameter that your type needs
-to have.
+This is done by extending `T::Generic` in your class or module, and then
+creating `type_member` constants for each type parameter that your type needs to
+have.
 
 Here's an example of creating a generic `Box` type, which has one type parameter
 and holds a value of that type:
