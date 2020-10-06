@@ -90,29 +90,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
-  describe 'each_value' do
-    it 'yields values given block' do
-      result = []
-      CardSuit.each_value do |val|
-        result << val
-      end
-
-      assert_equal(
-        [CardSuit::CLUB, CardSuit::SPADE, CardSuit::DIAMOND, CardSuit::HEART],
-        result,
-      )
-    end
-
-    it 'returns values given no block' do
-      result = CardSuit.each_value.to_a
-
-      assert_equal(
-        [CardSuit::CLUB, CardSuit::SPADE, CardSuit::DIAMOND, CardSuit::HEART],
-        result,
-      )
-    end
-  end
-
   describe 'from_serialized' do
     it 'returns the corresponding enum instance' do
       club = CardSuit.from_serialized('club')
