@@ -370,13 +370,13 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
         ENFORCE(ref.data(gs)->isClassOrModule());
         auto mixins = computeClassLinearization(gs, ref).mixins;
 
-        // During the loop for Baz (ancst == Bar), check for Bar's mixins as well to see if any of them have a
-        // classMethods member. Add that member to the singletonClass of Baz.
+        // Iterate over mixins of the class as long as they are calling `mixes_in_class_methods()`
+        // Supports recursive `mixes_in_class_methods`
         core::SymbolRef singleton;
         for (auto mod : mixins) {
             auto mixedInClassMethod = mod.data(gs)->findMember(gs, core::Names::classMethods());
             if (!mixedInClassMethod.exists()) {
-                continue;
+                break;
             }
             if (!singleton.exists()) {
                 singleton = ref.data(gs)->singletonClass(gs);
