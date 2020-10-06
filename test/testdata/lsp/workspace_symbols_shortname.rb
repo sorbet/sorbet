@@ -15,12 +15,12 @@ end
 module Attrs
   class Reader
     attr_reader :bar
-    #            ^^^ symbol-search: "bar", name="bar"
+    #            ^^^ symbol-search: "bar", name="Attrs::Reader#bar"
   end
 
   class Writer
     attr_writer :bar
-    #            ^^^ symbol-search: "bar", name="bar="
+    #            ^^^ symbol-search: "bar", name="Attrs::Writer#bar="
   end
 end
 
