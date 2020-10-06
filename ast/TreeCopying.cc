@@ -31,7 +31,8 @@ TreePtr deepCopy(const Expression *avoid, const Tag tag, const Expression *tree,
 
         case Tag::Send: {
             auto *exp = reinterpret_cast<const Send *>(tree);
-            return make_tree<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, deepCopyVec(avoid, exp->args),
+            return make_tree<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, exp->numPosArgs,
+                                   deepCopyVec(avoid, exp->args),
                                    exp->block == nullptr ? nullptr : deepCopy(avoid, exp->block), exp->flags);
         }
 

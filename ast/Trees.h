@@ -699,14 +699,17 @@ public:
 
     Flags flags;
 
+    u1 numPosArgs;
+
     TreePtr recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
     using ARGS_store = InlinedVector<TreePtr, EXPECTED_ARGS_COUNT>;
     ARGS_store args;
+
     TreePtr block; // null if no block passed
 
-    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, ARGS_store args, TreePtr block = nullptr,
+    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u1 numPosArgs, ARGS_store args, TreePtr block = nullptr,
          Flags flags = {});
 
     TreePtr deepCopy() const;
@@ -714,6 +717,23 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+    std::pair<int, int> kwArgsRange() const {
+        auto res = std::make_pair<int, int>(numPosArgs, args.size());
+        if (hasKwSplat()) {
+            res.second = res.second - 1;
+        }
+        return res;
+    }
+
+    // True when there are keyword args, but false when there is just a keyword splat.
+    bool hasKwArgs() const {
+        return ((args.size() - numPosArgs) & ~0x1);
+    }
+
+    bool hasKwSplat() const {
+        return (args.size() - numPosArgs) & 0x1;
+    }
 
 private:
     virtual void _sanityCheck();

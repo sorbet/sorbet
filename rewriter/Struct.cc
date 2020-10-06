@@ -5,6 +5,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "rewriter/Util.h"
 #include "rewriter/rewriter.h"
 
 using namespace std;
@@ -16,13 +17,6 @@ namespace {
 bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
     if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
-    }
-    return false;
-}
-
-bool isLiteralTrue(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
-        return lit->isTrue(gs);
     }
     return false;
 }
@@ -59,28 +53,41 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     auto loc = asgn->loc;
 
     ast::MethodDef::ARGS_store newArgs;
-    ast::Hash::ENTRY_store sigKeys;
-    ast::Hash::ENTRY_store sigValues;
+    ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 
     bool keywordInit = false;
-    if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
-        if (send->args.size() == 1) {
+    if (send->hasKwArgs()) {
+        if (send->numPosArgs == 0) {
             // leave bad usages like `Struct.new(keyword_init: true)` untouched so we error later
             return empty;
         }
-        if (hash->keys.size() != 1) {
+        if (send->hasKwSplat()) {
             return empty;
         }
-        auto &key = hash->keys.front();
-        auto &value = hash->values.front();
-        if (isKeywordInitKey(ctx, key) && isLiteralTrue(ctx, value)) {
-            keywordInit = true;
+        auto [posEnd, kwEnd] = send->kwArgsRange();
+        if (kwEnd - posEnd != 2) {
+            return empty;
+        }
+
+        auto &key = send->args[posEnd];
+        if (!isKeywordInitKey(ctx, key)) {
+            return empty;
+        }
+
+        auto &value = send->args[posEnd + 1];
+        if (auto *lit = ast::cast_tree<ast::Literal>(value)) {
+            if (lit->isTrue(ctx)) {
+                keywordInit = true;
+            } else if (!lit->isFalse(ctx)) {
+                return empty;
+            }
+        } else {
+            return empty;
         }
     }
 
-    const auto n = keywordInit ? send->args.size() - 1 : send->args.size();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < send->numPosArgs; i++) {
         auto *sym = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!sym || !sym->isSymbol(ctx)) {
             return empty;
@@ -91,8 +98,8 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
             symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
         }
 
-        sigKeys.emplace_back(ast::MK::Symbol(symLoc, name));
-        sigValues.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
+        sigArgs.emplace_back(ast::MK::Symbol(symLoc, name));
+        sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
         auto argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
             argName = ast::MK::KeywordArg(symLoc, move(argName));
@@ -106,10 +113,14 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     }
 
     // Elem = type_member(fixed: T.untyped)
-    body.emplace_back(ast::MK::Assign(
-        loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
-        ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::typeMember(),
-                       ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)))));
+    {
+        ast::Send::ARGS_store typeMemberArgs;
+        typeMemberArgs.emplace_back(ast::MK::Symbol(loc, core::Names::fixed()));
+        typeMemberArgs.emplace_back(ast::MK::Untyped(loc));
+        body.emplace_back(ast::MK::Assign(
+            loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+            ast::MK::Send(loc, ast::MK::Self(loc), core::Names::typeMember(), 0, std::move(typeMemberArgs))));
+    }
 
     if (send->block != nullptr) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
@@ -127,7 +138,7 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
     }
 
-    body.emplace_back(ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues))));
+    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
     body.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
                                                std::move(newArgs), ast::MK::RaiseUnimplemented(loc)));
 

@@ -22,7 +22,7 @@ class T::Private::Methods::DeclBuilder
   def bind(claz); end
 
   sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
-  def params(params); end
+  def params(params={}); end
 
   sig {params(type: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def returns(type); end

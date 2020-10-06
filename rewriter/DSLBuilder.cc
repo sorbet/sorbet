@@ -56,11 +56,8 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
         return empty;
     }
 
-    ast::Hash *opts = nullptr;
-    if (send->args.size() > 2) {
-        opts = ast::cast_tree<ast::Hash>(send->args[2]);
-    }
-    if (opts != nullptr) {
+    ast::TreePtr optsTree = ASTUtil::mkKwArgsHash(send);
+    if (auto *opts = ast::cast_tree<ast::Hash>(optsTree)) {
         if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }

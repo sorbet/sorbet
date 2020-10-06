@@ -250,15 +250,8 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         break;
                     }
 
-                    if (send->args.size() > 1) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
-                                        "0-1", send->args.size());
-                        }
-                    }
-
-                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
-                    if (hash == nullptr) {
+                    // `params` only accepts keyword args
+                    if (send->numPosArgs != 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             auto paramsStr = send->fun.show(ctx);
                             e.setHeader("`{}` expects keyword arguments", paramsStr);
@@ -268,10 +261,15 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                         break;
                     }
 
-                    int i = 0;
-                    for (auto &key : hash->keys) {
-                        auto &value = hash->values[i++];
-                        auto lit = ast::cast_tree<ast::Literal>(key);
+                    if (send->hasKwSplat()) {
+                        // TODO(trevor) add an error for this
+                    }
+
+                    auto [start, end] = send->kwArgsRange();
+                    for (auto i = start; i < end; i += 2) {
+                        auto &key = send->args[i];
+                        auto &value = send->args[i + 1];
+                        auto *lit = ast::cast_tree<ast::Literal>(key);
                         if (lit && lit->isSymbol(ctx)) {
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
@@ -291,26 +289,19 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::override_()._id: {
                     sig.seen.override_ = true;
 
-                    if (send->args.size() > 1) {
+                    if (send->numPosArgs > 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
-                                        "0-1", send->args.size());
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                         }
+                        break;
                     }
 
-                    if (send->args.size() == 1) {
-                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
-                        if (hash == nullptr) {
-                            if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                                auto paramsStr = send->fun.show(ctx);
-                                e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
-                            }
-                            break;
-                        }
-
-                        int i = 0;
-                        for (auto &key : hash->keys) {
-                            auto &value = hash->values[i++];
+                    if (!send->args.empty()) {
+                        auto [posEnd, kwEnd] = send->kwArgsRange();
+                        for (auto i = posEnd; i < kwEnd; i += 2) {
+                            auto &key = send->args[i];
+                            auto &value = send->args[i + 1];
                             auto lit = ast::cast_tree<ast::Literal>(key);
                             if (lit && lit->isSymbol(ctx)) {
                                 if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
@@ -415,7 +406,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                                    TypeSyntaxArgs args) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            if (send->args.size() != 1) {
+            if (send->numPosArgs != 1 || send->hasKwArgs()) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
             return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send->args[0], sig, args),
@@ -909,7 +900,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 recvi->loc,
                 argLocs,
             };
-            core::DispatchArgs dispatchArgs{core::Names::squareBrackets(), locs, targs, ctype, ctype, ctype, nullptr};
+            core::DispatchArgs dispatchArgs{
+                core::Names::squareBrackets(), locs, s->numPosArgs, targs, ctype, ctype, ctype, nullptr};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out->isUntyped()) {

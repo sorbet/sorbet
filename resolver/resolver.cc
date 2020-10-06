@@ -1016,26 +1016,21 @@ class ResolveTypeMembersWalk {
 
         // When no args are supplied, this implies that the upper and lower
         // bounds of the type parameter are top and bottom.
-        ast::Hash *hash = nullptr;
-        if (rhs->args.size() == 1) {
-            hash = ast::cast_tree<ast::Hash>(rhs->args[0]);
-        } else if (rhs->args.size() == 2) {
-            hash = ast::cast_tree<ast::Hash>(rhs->args[1]);
-        }
+        auto [posEnd, kwEnd] = rhs->kwArgsRange();
+        if (kwEnd - posEnd > 0) {
+            for (auto i = posEnd; i < kwEnd; i += 2) {
+                auto &keyExpr = rhs->args[i];
 
-        if (hash) {
-            int i = -1;
-            for (auto &keyExpr : hash->keys) {
-                i++;
                 auto lit = ast::cast_tree<ast::Literal>(keyExpr);
                 if (lit && lit->isSymbol(ctx)) {
+                    auto &value = rhs->args[i + 1];
+
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
                     auto allowTypeMember = false;
-                    core::TypePtr resTy =
-                        TypeSyntax::getResultType(ctx, hash->values[i], emptySig,
-                                                  TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+                    core::TypePtr resTy = TypeSyntax::getResultType(
+                        ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
                     switch (lit->asSymbol(ctx)._id) {
                         case core::Names::fixed()._id:
@@ -1713,10 +1708,9 @@ private:
                     // behavior of the runtime.
                     ast::Send::ARGS_store args;
 
-                    ast::Hash::ENTRY_store keywordArgKeys;
-                    ast::Hash::ENTRY_store keywordArgVals;
-
                     auto argIdx = -1;
+                    auto numPosArgs = 0;
+                    bool seenKwArgs = false;
                     for (auto &arg : mdef->args) {
                         ++argIdx;
 
@@ -1729,25 +1723,24 @@ private:
 
                         auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
                         if (info.flags.isKeyword) {
-                            keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                            keywordArgVals.emplace_back(local->deepCopy());
+                            args.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                            args.emplace_back(local->deepCopy());
                         } else if (info.flags.isRepeated || info.flags.isBlock) {
                             // Explicitly skip for now.
                             // Involves synthesizing a call to callWithSplat, callWithBlock, or
                             // callWithSplatAndBlock
                         } else {
-                            ENFORCE(keywordArgKeys.empty());
                             args.emplace_back(local->deepCopy());
+                        }
+
+                        if (!seenKwArgs && !info.flags.isBlock) {
+                            ++numPosArgs;
                         }
                     }
 
-                    if (!keywordArgKeys.empty()) {
-                        args.emplace_back(
-                            ast::MK::Hash(mdef->loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
-                    }
-
                     auto self = ast::MK::Self(mdef->loc);
-                    mdef->rhs = ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), std::move(args));
+                    mdef->rhs =
+                        ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
                 } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
                     if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");

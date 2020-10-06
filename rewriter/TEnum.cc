@@ -143,13 +143,17 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
         args.emplace_back(std::move(arg));
     }
 
+    // there are no keyword args passed to the enum constructor
+    auto numPosArgs = args.size();
+
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         stat->loc, std::move(asgn->lhs),
-        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
-                       ast::MK::Send(stat->loc, classCnst.deepCopy(), core::Names::new_(), std::move(args), flags),
-                       std::move(classCnst)));
+        ast::MK::Send2(
+            stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
+            ast::MK::Send(stat->loc, classCnst.deepCopy(), core::Names::new_(), numPosArgs, std::move(args), flags),
+            std::move(classCnst)));
     vector<ast::TreePtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));

@@ -89,7 +89,8 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         snd->receiverLoc,
         snd->argLocs,
     };
-    core::DispatchArgs dispatchArgs{snd->fun, locs, args, snd->recv.type, snd->recv.type, snd->recv.type, snd->link};
+    core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs, args,
+                                    snd->recv.type, snd->recv.type, snd->recv.type,  snd->link};
     auto dispatchInfo = snd->recv.type->dispatchCall(ctx, dispatchArgs);
 
     int i = -1;

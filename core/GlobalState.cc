@@ -623,12 +623,12 @@ void GlobalState::initEmpty() {
     }
     method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
 
-    // Synthesize <DeclBuilderForProcs>.<params>(args: Hash) => DeclBuilderForProcs
+    // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isDefault = true;
-        arg.type = Types::hashOfUntyped();
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
     {

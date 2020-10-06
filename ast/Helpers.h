@@ -28,33 +28,33 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
-    static TreePtr Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, Send::ARGS_store args,
+    static TreePtr Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u1 numPosArgs, Send::ARGS_store args,
                         Send::Flags flags = {}, TreePtr blk = nullptr) {
-        auto send = make_tree<ast::Send>(loc, std::move(recv), fun, std::move(args), std::move(blk), flags);
+        auto send = make_tree<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
         return send;
     }
 
     static TreePtr Send0(core::LocOffsets loc, TreePtr recv, core::NameRef fun) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 0, std::move(nargs));
     }
 
     static TreePtr Send0Block(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr blk) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, std::move(nargs), {}, std::move(blk));
+        return Send(loc, std::move(recv), fun, 0, std::move(nargs), {}, std::move(blk));
     }
 
     static TreePtr Send1(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1) {
         Send::ARGS_store nargs;
         nargs.emplace_back(std::move(arg1));
-        return Send(loc, std::move(recv), fun, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 1, std::move(nargs));
     }
 
     static TreePtr Send2(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1, TreePtr arg2) {
         Send::ARGS_store nargs;
         nargs.emplace_back(std::move(arg1));
         nargs.emplace_back(std::move(arg2));
-        return Send(loc, std::move(recv), fun, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 2, std::move(nargs));
     }
 
     static TreePtr Send3(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1, TreePtr arg2,
@@ -63,7 +63,7 @@ public:
         nargs.emplace_back(std::move(arg1));
         nargs.emplace_back(std::move(arg2));
         nargs.emplace_back(std::move(arg3));
-        return Send(loc, std::move(recv), fun, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 3, std::move(nargs));
     }
 
     static TreePtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
@@ -133,6 +133,7 @@ public:
             // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
             // x.y=(rhs)
             s->args.emplace_back(std::move(rhs));
+            s->numPosArgs++;
             return lhs;
         } else if (auto *seq = cast_tree<ast::InsSeq>(lhs)) {
             // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
@@ -287,8 +288,10 @@ public:
         return Hash(loc, std::move(keys), std::move(values));
     }
 
-    static TreePtr Sig(core::LocOffsets loc, TreePtr hash, TreePtr ret) {
-        auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
+    static TreePtr Sig(core::LocOffsets loc, Send::ARGS_store args, TreePtr ret) {
+        ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
+
+        auto params = Send(loc, Self(loc), core::Names::params(), 0, std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
@@ -298,8 +301,10 @@ public:
         return sig;
     }
 
-    static TreePtr SigVoid(core::LocOffsets loc, TreePtr hash) {
-        auto params = Send1(loc, Self(loc), core::Names::params(), std::move(hash));
+    static TreePtr SigVoid(core::LocOffsets loc, Send::ARGS_store args) {
+        ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
+
+        auto params = Send(loc, Self(loc), core::Names::params(), 0, std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_());
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
@@ -320,7 +325,10 @@ public:
     }
 
     static TreePtr Sig1(core::LocOffsets loc, TreePtr key, TreePtr value, TreePtr ret) {
-        return Sig(loc, Hash1(loc, std::move(key), std::move(value)), std::move(ret));
+        Send::ARGS_store args;
+        args.emplace_back(std::move(key));
+        args.emplace_back(std::move(value));
+        return Sig(loc, std::move(args), std::move(ret));
     }
 
     static TreePtr T(core::LocOffsets loc) {
@@ -363,10 +371,11 @@ public:
         return Send1(loc, Self(loc), core::Names::super(), make_tree<ast::ZSuperArgs>(loc));
     }
 
-    static TreePtr SelfNew(core::LocOffsets loc, ast::Send::ARGS_store args, Send::Flags flags = {},
+    static TreePtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args, Send::Flags flags = {},
                            TreePtr block = nullptr) {
         auto magic = Constant(loc, core::Symbols::Magic());
-        return Send(loc, std::move(magic), core::Names::selfNew(), std::move(args), flags, std::move(block));
+        return Send(loc, std::move(magic), core::Names::selfNew(), numPosArgs, std::move(args), flags,
+                    std::move(block));
     }
 
     static TreePtr DefineTopClassOrModule(core::LocOffsets loc, core::SymbolRef klass) {
@@ -377,7 +386,7 @@ public:
         flags.isRewriterSynthesized = true;
         // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
         return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, std::move(magic),
-                    core::Names::defineTopClassOrModule(), std::move(args), flags);
+                    core::Names::defineTopClassOrModule(), 1, std::move(args), flags);
     }
 
     static TreePtr RaiseUnimplemented(core::LocOffsets loc) {

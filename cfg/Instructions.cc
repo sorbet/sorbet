@@ -69,10 +69,11 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
-Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, const InlinedVector<LocalRef, 2> &args,
-           InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
-      link(move(link)) {
+Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u1 numPosArgs,
+           const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk,
+           const shared_ptr<core::SendAndBlockLink> &link)
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), numPosArgs{numPosArgs}, argLocs(std::move(argLocs)),
+      isPrivateOk(isPrivateOk), link(move(link)) {
     this->args.resize(args.size());
     int i = 0;
     for (const auto &e : args) {

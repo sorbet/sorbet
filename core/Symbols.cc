@@ -815,6 +815,11 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
+    // Make sure that we get nice erorr messages for things involving the proc sig builders.
+    if (this->name == core::Names::Constants::DeclBuilderForProcs()) {
+        return "T.proc";
+    }
+
     if (!this->owner.exists() || this->owner == Symbols::root()) {
         return this->name.data(gs)->show(gs);
     }
