@@ -164,3 +164,36 @@ T.let(A[Object].new, I[BasicObject])  # error
 T.let(A[Object].new, I[Object])       # OK
 T.let(A[Object].new, I[Integer])      # OK - Object is a supertype of Integer
 ```
+
+Making a type parameter covariant or contravariant places restrictions on where
+it can appear inside the module's method signatures:
+
+```ruby
+module I
+  extend T::Sig
+  extend T::Generic
+
+  Var = type_member
+  In = type_member(:in)
+  Out = type_member(:out)
+
+  # OK - variant type parameters can be used anywhere in a sig
+  sig { params(x: Var).returns(Var) }
+  def ok_var(x); Var.new; end
+
+  # OK - contravariant (:in) type parameters can be parameters 
+  #      covariant (:out) type parameters can be return types
+  sig { params(x: In).returns(Out) }
+  def ok_in_out(x); Out.new; end
+
+  # error - "type_member In was defined as :in but is used in an :out context"
+  #         cannot use contravariant (:in) type parameter as a return type
+  sig { params(x: In).returns(In) }
+  def error_returning_in(x); In.new; end
+
+  # error - "type_member In was defined as :in but is used in an :out context"
+  #         cannot use covariant (:out) type parameter as a function parameter type
+  sig { params(x: Out).returns(Out) }
+  def error_taking_out(x); Out.new; end
+end
+```
