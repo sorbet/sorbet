@@ -48,6 +48,8 @@ class Pair
   extend T::Sig
   extend T::Generic
 
+  # The order here is important.
+  # The first use of `type_member` is the first type parameter, and so on.
   K = type_member
   V = type_member
 
@@ -64,6 +66,7 @@ class Pair
   attr_accessor :value
 end
 
+#      Pair[   K  ,    V   ]
 pair = Pair[String, Integer].new("foo", 2)
 T.reveal_type(pair) # Pair[String, Integer]
 T.reveal_type(pair.key) # String
