@@ -370,8 +370,9 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
         ENFORCE(ref.data(gs)->isClassOrModule());
         auto mixins = computeClassLinearization(gs, ref).mixins;
 
-        // Iterate over mixins of the class as long as they are calling `mixes_in_class_methods()`
-        // Supports recursive `mixes_in_class_methods`
+        // Iterate over mixins of the class as long as they are calling `Magic.mixes_in_class_methods()`
+        // Provides recursive `mixes_in_class_methods` support
+        // TODO: Check receiver is Magic
         core::SymbolRef singleton;
         for (auto mod : mixins) {
             auto mixedInClassMethod = mod.data(gs)->findMember(gs, core::Names::classMethods());
@@ -382,7 +383,9 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
                 singleton = ref.data(gs)->singletonClass(gs);
             }
 
-            singleton.data(gs)->addMixin(mixedInClassMethod);
+            if (!singleton.data(gs)->addMixin(gs, mixedInClassMethod)) {
+                ENFORCE(false);
+            }
         }
     }
 }
