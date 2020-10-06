@@ -20,4 +20,4 @@ T.self_type.to_s
 T.class_of(Integer).foo
 
 # This one is weird and kind of tricky to change: https://github.com/sorbet/sorbet/issues/3427
-puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(<DeclBuilderForProcs>)`
+puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(T.proc)`

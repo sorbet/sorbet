@@ -16,14 +16,14 @@ class Foo
   end
 
   ADDRESS_TYPE = T.type_alias do
-    T.nilable(
+    T.nilable({
       line1: T.nilable(String),
       line2: T.nilable(String),
       city: T.nilable(String),
       state: T.nilable(String),
       postal_code: T.nilable(String),
       country: T.nilable(String),
-    )
+    })
   end
 
   sig {returns(ADDRESS_TYPE)}
