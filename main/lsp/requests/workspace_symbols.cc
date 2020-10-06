@@ -86,15 +86,20 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         if (location == nullptr) {
             continue;
         }
+        // VSCode does its own internal ranking based on comparing the query string against the result name.
+        // Therefore have the name be the fully qualified name if it makes sense (e.g. Foo::Bar instead of Bar)
         auto result =
-            make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
-        if (!hideSymbol(gs, sym->owner)) {
-            // VSCode does its own internal ranking based on comparing the query string against the result name.
-            // Therefore have the name be the full path if it makes sense (e.g. Foo::Bar instead of Bar) so fully
-            // qualified symbol search works. Remove leading :: for readability
-            auto fully_qualified_name = sym->showFullName(gs);
-            result->name = fully_qualified_name.erase(0, fully_qualified_name.find_first_not_of(":"));
-            result->containerName = sym->owner.data(gs)->showFullName(gs);
+            make_unique<SymbolInformation>(sym->show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
+        auto container = sym->owner;
+        if (container != core::Symbols::root()) {
+            // There's an unfortuante world where show() is pretty much always better printing in that it handles
+            // class methods and strips leading ::. Unfortuantely, it does not print well for packages leaving us
+            // with this branching. Ideally we can unify show and showFullName to both have good human-readable output
+            if (container.data(gs)->owner == core::Symbols::PackageRegistry()) {
+                result->containerName = container.data(gs)->showFullName(gs);
+            } else {
+                result->containerName = container.show(gs);
+            }
         }
         results.emplace_back(move(result));
     }
@@ -239,8 +244,6 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
         {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
-        {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
-        {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
 
     // First pass: prefix-only matches on namespace
