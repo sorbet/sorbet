@@ -108,7 +108,7 @@ to connect the `yield` call to the `blk` parameter automatically.
 
 Many Ruby constructs accept a block argument in one context, but then execute it
 in a different context entirely. This means that inside the block, certain
-methods will definitely exist that definitely don't exist immediately above the
+methods may exist that don't exist immediately above the
 block.
 
 In particular, this is precisely how Sorbet's `sig` pattern works:
@@ -124,7 +124,7 @@ end
 ```
 
 This also happens a lot with certain Rails APIs, etc. Sorbet has direct support
-for this sort of pattern using an extra argument `T.proc` called `.bind`:
+for this sort of pattern using an extra argument on `T.proc` called `.bind`:
 
 ```ruby
 # (0) We're simplifying how `sig` specifically works a bit here,
@@ -169,7 +169,7 @@ puts(upcased) # => "HELLO"
 In Ruby there's several ways to create a Proc: `proc` and `Proc.new`. Sorbet
 handles them differently because of how parameter arity works internally.
 Basically, you can use `T.proc` as the type for a `proc` (or `lambda {}` or
-`-> {}`), but you create your Proc using `Proc.new`, then the type is a `Proc`.
+`-> {}`), but if you create your Proc using `Proc.new`, then the type is a `Proc`.
 
 The main downside of the `Proc.new` approach is that you can't set argument
 types on it.
@@ -194,5 +194,5 @@ end
 ```
 
 In general, you're better off avoiding `Proc.new` if you can. There's a
-[rubocop rule](https://www.rubocop.org/en/stable/cops_style/#styleproc) you can
+[rubocop rule](https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc) you can
 use to enforce this.
