@@ -1879,7 +1879,13 @@ private:
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
-        if (send.args.size() != 2 && send.args.size() != 3) {
+        if (send.numPosArgs != 2) {
+            return;
+        }
+
+        auto [posEnd, kwEnd] = send.kwArgsRange();
+        auto numKwArgs = (kwEnd - posEnd) >> 1;
+        if (numKwArgs > 1) {
             return;
         }
 
@@ -1908,22 +1914,17 @@ private:
 
         core::LiteralType *package = nullptr;
         optional<core::LocOffsets> packageLoc;
-        if (send.args.size() == 3) {
+        if (send.hasKwArgs()) {
             // this means we got the third package arg
-            auto *kwargs = ast::cast_tree<ast::Hash>(send.args[2]);
-            if (!kwargs || kwargs->keys.size() != 1) {
-                // Infer will report an error
-                return;
-            }
-            auto *key = ast::cast_tree<ast::Literal>(kwargs->keys.front());
+            auto *key = ast::cast_tree<ast::Literal>(send.args[posEnd]);
             if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
-            auto *packageNode = ast::cast_tree<ast::Literal>(kwargs->values.front());
-            packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
+            auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
+            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1]->loc};
             if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(send.args[posEnd + 1]->loc, core::errors::Resolver::LazyResolve)) {
                     e.setHeader("`{}` only accepts string literals", method);
                 }
                 return;
@@ -1935,8 +1936,9 @@ private:
                 return;
             }
         }
-        // if we got two args, then package should be null, and if we got three args, then package should be non-null
-        ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
+        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
+        // non-null
+        ENFORCE((!send.hasKwArgs() && !package) || (send.hasKwArgs() && package));
 
         auto name = core::NameRef(ctx.state, literal->value);
         auto shortName = name.data(ctx)->shortName(ctx);
