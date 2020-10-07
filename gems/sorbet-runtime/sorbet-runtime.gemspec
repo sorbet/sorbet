@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-byebug'
   # for validating generated code
   s.add_development_dependency 'parser', '~> 2.7.1'
+  # for running ruby subprocesses
+  s.add_development_dependency 'subprocess', '~> 1.5.3'
 end
