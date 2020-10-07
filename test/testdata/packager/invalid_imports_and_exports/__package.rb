@@ -35,6 +35,6 @@ class A < PackageSpec
                     # ^^^^^^^ error: Argument to `export_methods` must be a constant
                              # ^^^^^^ error: Argument to `export_methods` must be a constant
                              # ^^^^^^ error: Not enough arguments
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `AClass`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `ASecondClass`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `A::AClass`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `A::ASecondClass`
 end
