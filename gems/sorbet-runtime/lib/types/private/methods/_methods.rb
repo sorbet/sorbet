@@ -311,8 +311,12 @@ module T::Private::Methods
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration, loc)
     begin
-      # We allow `sig` in the current module's context (normal case) and inside `class << self`
-      if hook_mod != current_declaration.mod && hook_mod.singleton_class != current_declaration.mod
+      # We allow `sig` in the current module's context (normal case) and
+      if hook_mod != current_declaration.mod &&
+          # inside `class << self`, and
+          hook_mod.singleton_class != current_declaration.mod &&
+          # on `self` at the top level of a file
+          current_declaration.mod != TOP_SELF
         raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
               "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
               "to `sig` is immediately followed by a method definition on the same " \
@@ -462,6 +466,20 @@ module T::Private::Methods
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
 
+    if mod == TOP_SELF
+      # self at the top-level of a file is weirdly special in Ruby
+      # The Ruby VM on startup creates an `Object.new` and stashes it.
+      # Unlike when we're using sig inside a module, `self` is actually a
+      # normal object, not an instance of Module.
+      #
+      # Thus we can't ask things like mod.singleton_class? (since that's
+      # defined only on Module, not on Object) and even if we could, the places
+      # where we need to install the hooks are special.
+      mod.extend(SingletonMethodHooks) # def self.foo; end (at top level)
+      Object.extend(MethodHooks)       # def foo; end      (at top level)
+      return
+    end
+
     if mod.singleton_class?
       mod.include(SingletonMethodHooks)
     else
@@ -485,3 +503,8 @@ module T::Private::Methods
     obj.instance_method(name)
   end
 end
+
+# This has to be here, and can't be nested inside `T::Private::Methods`,
+# because the value of `self` depends on lexical (nesting) scope, and we
+# specifically need a reference to the file-level self, i.e. `main:Object`
+T::Private::Methods::TOP_SELF = self
