@@ -92,14 +92,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
             make_unique<SymbolInformation>(sym->show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
         auto container = sym->owner;
         if (container != core::Symbols::root()) {
-            // There's an unfortuante world where show() is pretty much always better printing in that it handles
-            // class methods and strips leading ::. Unfortuantely, it does not print well for packages leaving us
-            // with this branching. Ideally we can unify show and showFullName to both have good human-readable output
-            if (container.data(gs)->owner == core::Symbols::PackageRegistry()) {
-                result->containerName = container.data(gs)->showFullName(gs);
-            } else {
-                result->containerName = container.show(gs);
-            }
+            result->containerName = container.show(gs);
         }
         results.emplace_back(move(result));
     }

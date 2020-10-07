@@ -59,7 +59,7 @@ module FooMethods
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def check_for_non_existing_bar(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Quux", package: "Project::Bar") # error: Unable to resolve constant `::<PackageRegistry>::Project_Bar_Package::Quux`
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "Quux", package: "Project::Bar") # error: Unable to resolve constant `::Project::Bar::Quux`
       true
     else
       false
