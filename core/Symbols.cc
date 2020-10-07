@@ -849,9 +849,6 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (!this->owner.exists() || this->owner == Symbols::root()) {
-        // <PackageRegistry> is an internal detail of --stripe-packages. It only owns synthetic modules that encapsulate
-        // package namespaces; they should not be shown to the user. Another way to think about this:
-        // if --stripe-packages hadn't been specified, these constants would have been owned by <root>.
         return this->name.data(gs)->show(gs);
     }
 
