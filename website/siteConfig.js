@@ -50,6 +50,11 @@ const users = [
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',
   },
+  {
+    caption: 'Workforce.com',
+    image: 'img/workforce-logo.png',
+    infoLink: 'https://www.workforce.com'
+  },
 ];
 
 const siteConfig = {
