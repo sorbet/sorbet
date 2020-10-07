@@ -53,7 +53,7 @@ const users = [
   {
     caption: 'Workforce.com',
     image: 'img/workforce-logo.png',
-    infoLink: 'https://www.workforce.com'
+    infoLink: 'https://www.workforce.com/'
   },
 ];
 
