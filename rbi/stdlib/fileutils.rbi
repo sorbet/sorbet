@@ -227,7 +227,7 @@ module FileUtils
   # ```
   sig do
     params(
-      list: T.any(String, T::Array[String]),
+      list: T.any(String, Pathname, T::Array[String]),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       mtime: T.nilable(Time),

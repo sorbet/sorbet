@@ -11,6 +11,7 @@ require 'mocha/minitest'
 require 'pathname'
 require 'tempfile'
 require 'json'
+require 'subprocess'
 
 require_relative '../lib/sorbet-runtime'
 
