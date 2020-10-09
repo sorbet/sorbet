@@ -2223,8 +2223,7 @@ public:
 
         auto keys = shape->keys;
         auto values = shape->values;
-        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const TypePtr &value) {
-            auto *key = cast_type<LiteralType>(keyType.get());
+        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType *key, const TypePtr &value) {
             auto fnd =
                 absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit.get())); });
             if (fnd == keys.end()) {
@@ -2237,13 +2236,20 @@ public:
 
         // inlined keyword arguments first
         for (auto i = 0; i < numKwargs; i += 2) {
-            addShapeEntry(args.args[i]->type, args.args[i + 1]->type);
+            auto &keyType = args.args[i]->type;
+            auto *key = cast_type<LiteralType>(keyType.get());
+            if (!key || key->literalKind != LiteralType::LiteralTypeKind::Symbol) {
+                return;
+            }
+
+            addShapeEntry(keyType, key, args.args[i + 1]->type);
         }
 
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                addShapeEntry(keyType, kwsplat->values[&keyType - &kwsplat->keys.front()]);
+                auto *key = cast_type<LiteralType>(keyType.get());
+                addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
 
