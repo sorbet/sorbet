@@ -735,37 +735,44 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
 
         // merge in the keyword splat argument if it's present
         if (hasKwsplat) {
-            auto &kwSplatArg = *(aend - 1);
-            auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
+            if (hasKwargs) {
+                auto &kwSplatArg = *(aend - 1);
+                auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
-            if (auto *hash = cast_type<ShapeType>(kwSplatType.get())) {
-                absl::c_copy(hash->keys, back_inserter(keys));
-                absl::c_copy(hash->values, back_inserter(values));
-                kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
-                --aend;
-            } else {
-                if (kwSplatType->isUntyped()) {
-                    // Allow an untyped arg to satisfy all kwargs
+                if (auto *hash = cast_type<ShapeType>(kwSplatType.get())) {
+                    absl::c_copy(hash->keys, back_inserter(keys));
+                    absl::c_copy(hash->values, back_inserter(values));
+                    kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
                     --aend;
-                    kwargs = Types::untypedUntracked();
-                } else if (kwSplatType->derivesFrom(gs, Symbols::Hash())) {
-                    --aend;
-                    if (auto e =
-                            gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
-                        e.setHeader(
-                            "Passing a hash where the specific keys are unknown to a method taking keyword arguments");
-                        e.addErrorSection(ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
-                                                       kwSplatArg->origins2Explanations(gs)));
-                        result.main.errors.emplace_back(e.build());
+                } else {
+                    if (kwSplatType->isUntyped()) {
+                        // Allow an untyped arg to satisfy all kwargs
+                        --aend;
+                        kwargs = Types::untypedUntracked();
+                    } else if (kwSplatType->derivesFrom(gs, Symbols::Hash())) {
+                        --aend;
+                        if (auto e =
+                                gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
+                            e.setHeader(
+                                "Passing a hash where the specific keys are unknown to a method taking keyword arguments");
+                            e.addErrorSection(ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
+                                                           kwSplatArg->origins2Explanations(gs)));
+                            result.main.errors.emplace_back(e.build());
+                        }
+                        kwargs = Types::untypedUntracked();
                     }
-                    kwargs = Types::untypedUntracked();
                 }
-            }
 
-            // Check to see if the keyword splat was a valid kwargs hash, and consume a positional argument if it was
-            // implicit.
-            if (implicitKwsplat && kwargs != nullptr) {
-                --posArgs;
+                // Check to see if the keyword splat was a valid kwargs hash, and consume a positional argument if it was
+                // implicit.
+                if (implicitKwsplat && kwargs != nullptr) {
+                    --posArgs;
+                }
+            } else {
+                // This function doesn't take keyword arguments, so consume the kwsplat and mark all the keyword args as
+                // an untyped hash.
+                kwargs = Types::hashOfUntyped();
+                --aend;
             }
         } else {
             kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
@@ -794,7 +801,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 // Clear out the kwargs hash so that no keyword argument processing is triggered below, and also mark
                 // the keyword args as consumed.
                 kwargs = nullptr;
-                ait += nonPosArgs;
+                ait += numKwargs;
                 posArgs++;
             }
         }
@@ -2182,13 +2189,14 @@ public:
         auto *shape = cast_type<ShapeType>(args.thisType.get());
         ENFORCE(shape);
 
-        if (args.args.empty()) {
+        if (args.args.empty() || args.block != nullptr) {
             return;
         }
 
         // detect a kwsplat argument, or single positional hash argument
-        auto numKwargs = (args.args.size() - args.numPosArgs) & ~0x1;
-        bool hasKwsplat = (args.args.size() - args.numPosArgs) & 0x1;
+        auto nonPosArgs = (args.args.size() - args.numPosArgs);
+        auto numKwargs = nonPosArgs & ~0x1;
+        bool hasKwsplat = nonPosArgs & 0x1;
         ShapeType *kwsplat = nullptr;
         if (hasKwsplat || (numKwargs == 0 && args.args.size() == 1)) {
             kwsplat = cast_type<ShapeType>(args.args.back()->type.get());
