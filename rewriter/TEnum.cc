@@ -143,8 +143,8 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
         args.emplace_back(std::move(arg));
     }
 
-    // there are no keyword args passed to the enum constructor
-    auto numPosArgs = args.size();
+    // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
+    auto numPosArgs = rhs->numPosArgs - 1;
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
