@@ -257,6 +257,16 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                             e.setHeader("`{}` expects keyword arguments", paramsStr);
                             e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
                                 "All parameters must be given names in `{}` even if they are positional", paramsStr)));
+
+                            // when the first argument is a hash, emit an autocorrect to remove the braces
+                            if (send->numPosArgs == 1) {
+                                if (auto *hash = ast::cast_tree<ast::Hash>(send->args.front())) {
+                                    auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
+                                    auto source = loc.source(ctx);
+                                    e.replaceWith("Remove braces from keyword args", loc, "{}",
+                                                  source.substr(1, source.size() - 2));
+                                }
+                            }
                         }
                         break;
                     }

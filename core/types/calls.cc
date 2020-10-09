@@ -753,8 +753,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                         --aend;
                         if (auto e =
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
-                            e.setHeader(
-                                "Passing a hash where the specific keys are unknown to a method taking keyword arguments");
+                            e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
+                                        "arguments");
                             e.addErrorSection(ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
                                                            kwSplatArg->origins2Explanations(gs)));
                             result.main.errors.emplace_back(e.build());
@@ -763,8 +763,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     }
                 }
 
-                // Check to see if the keyword splat was a valid kwargs hash, and consume a positional argument if it was
-                // implicit.
+                // Check to see if the keyword splat was a valid kwargs hash, and consume a positional argument if it
+                // was implicit.
                 if (implicitKwsplat && kwargs != nullptr) {
                     --posArgs;
                 }
@@ -1332,11 +1332,27 @@ public:
             return;
         }
 
-        if (args.args.size() != arity) {
+        // This is something like Generic[T1,...,foo: bar...]
+        auto numKwArgs = args.args.size() - args.numPosArgs;
+        if (numKwArgs > 0) {
+            auto begin = args.locs.args[args.numPosArgs].beginPos();
+            auto end = args.locs.args.back().endPos();
+            core::Loc kwargsLoc{args.locs.file, begin, end};
+
+            if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
+                e.setHeader("Keyword arguments given to `{}`", attachedClass.data(gs)->show(gs));
+                // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
+                if (numKwArgs % 2 == 0) {
+                    e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs));
+                }
+            }
+        }
+
+        if (args.numPosArgs != arity) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            attachedClass.data(gs)->show(gs), arity, args.args.size());
+                            attachedClass.data(gs)->show(gs), arity, args.numPosArgs);
             }
         }
 
