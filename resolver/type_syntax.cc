@@ -332,10 +332,24 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     break;
                 case core::Names::returns()._id: {
                     sig.seen.returns = true;
-                    if (send->args.size() != 1) {
+                    if (send->numPosArgs != send->args.size()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
+                            if (!send->hasKwSplat()) {
+                                auto start = send->args[send->numPosArgs]->loc;
+                                auto end = send->args.back()->loc;
+                                core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
+                                e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
+                                              argsLoc.source(ctx));
+                            }
+                        }
+                        break;
+                    }
+
+                    if (send->numPosArgs != 1) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
-                                        send->args.size());
+                                        send->numPosArgs);
                         }
                         break;
                     }
