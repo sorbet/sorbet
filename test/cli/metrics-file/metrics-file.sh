@@ -27,6 +27,7 @@ grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.false\"" metrics4.json
 grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.true\"" metrics4.json
 grep -A1 "\"ruby_typer.unknown..types.input.modules.total\"" metrics4.json
 grep -A1 "\"ruby_typer.unknown..types.input.classes.total\"" metrics4.json
+grep -A1 "\"ruby_typer.unknown..types.input.singleton_classes.total\"" metrics4.json
 grep -A1 "\"ruby_typer.unknown..types.input.methods.total\"" metrics4.json
 
 echo ------------------------------
