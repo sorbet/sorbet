@@ -426,7 +426,7 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
 struct OpAsgnScaffolding {
     core::NameRef temporaryName;
     InsSeq::STATS_store statementBody;
-    u1 numPosArgs;
+    u2 numPosArgs;
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
 };

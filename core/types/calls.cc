@@ -1435,7 +1435,7 @@ public:
         }
         CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
-        u1 numPosArgs = args.numPosArgs - 1;
+        u2 numPosArgs = args.numPosArgs - 1;
         auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
         for (auto arg = args.args.begin() + 1; arg != args.args.end(); ++arg) {
             dispatchArgsArgs.emplace_back(*arg);
@@ -1655,7 +1655,7 @@ public:
             return;
         }
 
-        u1 numPosArgs = posTuple->elems.size();
+        u2 numPosArgs = posTuple->elems.size();
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs = Magic_callWithSplat::generateSendArgs(
@@ -1870,7 +1870,7 @@ public:
         }
         NameRef fn(gs, (u4)lit->value);
 
-        u1 numPosArgs = args.numPosArgs - 3;
+        u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         for (int i = 3; i < args.args.size(); i++) {
@@ -1940,7 +1940,7 @@ public:
             return;
         }
 
-        u1 numPosArgs = posTuple->elems.size();
+        u2 numPosArgs = posTuple->elems.size();
 
         auto kwType = args.args[3]->type.get();
         auto *kwTuple = cast_type<TupleType>(kwType);
@@ -2018,7 +2018,7 @@ public:
         auto selfTy = args.args[0]->type;
         SymbolRef self = unwrapSymbol(selfTy.get());
 
-        u1 numPosArgs = args.numPosArgs - 1;
+        u2 numPosArgs = args.numPosArgs - 1;
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;

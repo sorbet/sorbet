@@ -28,7 +28,7 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
-    static TreePtr Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u1 numPosArgs, Send::ARGS_store args,
+    static TreePtr Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
                         Send::Flags flags = {}, TreePtr blk = nullptr) {
         auto send = make_tree<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
         return send;

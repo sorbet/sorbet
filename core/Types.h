@@ -704,7 +704,7 @@ struct DispatchArgs {
 
     NameRef name;
     const CallLocs &locs;
-    u1 numPosArgs;
+    u2 numPosArgs;
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
     const TypePtr &fullType;
