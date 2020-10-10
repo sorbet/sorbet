@@ -219,7 +219,7 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary,
+SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary, u2 numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
                         bool hasBlock) {
     counterInc("calls.overloaded_invocations");
@@ -258,10 +258,7 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
     vector<SymbolRef> leftCandidates = allCandidates;
 
     {
-        // Lets see if we can filter them out using arguments.
-        int i = -1;
-        for (auto &arg : args) {
-            i++;
+        auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 SymbolRef candidate = *it;
                 if (i >= getArity(gs, candidate)) {
@@ -271,12 +268,22 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
 
                 auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
                                                            candidate.data(gs)->owner, inClass, targs);
-                if (argType->isFullyDefined() && !Types::isSubType(gs, arg->type, argType)) {
+                if (argType->isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
                 ++it;
             }
+        };
+
+        // Lets see if we can filter them out using arguments.
+        for (auto i = 0; i < numPosArgs; ++i) {
+            checkArg(i, args[i]->type);
+        }
+
+        // If keyword args are present, interpret them as an untyped hash
+        if (numPosArgs < args.size()) {
+            checkArg(numPosArgs, Types::hashOfUntyped());
         }
     }
     if (leftCandidates.empty()) {
@@ -616,10 +623,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         return result;
     }
 
-    SymbolRef method =
-        mayBeOverloaded.data(gs)->isOverloaded()
-            ? guessOverload(gs, symbol, mayBeOverloaded, args.args, args.fullType, targs, args.block != nullptr)
-            : mayBeOverloaded;
+    SymbolRef method = mayBeOverloaded.data(gs)->isOverloaded()
+                           ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType,
+                                           targs, args.block != nullptr)
+                           : mayBeOverloaded;
 
     DispatchResult result;
     auto &component = result.main;
