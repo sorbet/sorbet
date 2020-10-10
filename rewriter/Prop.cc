@@ -153,7 +153,12 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return std::nullopt;
     }
 
-    if (send->numPosArgs >= 3) {
+    auto expectedPosArgs = 3;
+    if (send->hasKwArgs()) {
+        expectedPosArgs = 2;
+    }
+
+    if (send->numPosArgs > expectedPosArgs) {
         // Too many args, even if all optional args were provided.
         return nullopt;
     }
@@ -175,7 +180,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // ----- What's the prop's type? -----
     if (ret.type == nullptr) {
-        if (send->args.size() == 1) {
+        if (send->numPosArgs == 1) {
             // Type must have been inferred from prop method (like created_prop) or
             // been given in second argument.
             return nullopt;
@@ -194,7 +199,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     // Deep copy the rules hash so that we can destruct it at will to parse things,
     // without having to worry about whether we stole things from the tree.
     ast::TreePtr rulesTree = ASTUtil::mkKwArgsHash(send);
-    if (rulesTree == nullptr && send->args.size() >= 3) {
+    if (rulesTree == nullptr && send->numPosArgs >= expectedPosArgs) {
         // No rules, but 3 args including name and type. Also not a T::Props
         return std::nullopt;
     }
@@ -433,14 +438,27 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
         auto true_ = ast::MK::True(send->loc);
 
         auto *copy = ast::cast_tree<ast::Send>(result);
-        auto pos = copy->args.end();
-        if (copy->hasKwSplat()) {
-            pos--;
-        }
+        if (copy->hasKwArgs() || copy->args.empty()) {
+            // append to the inline keyword arguments of the send
+            auto pos = copy->args.end();
+            if (copy->hasKwSplat()) {
+                pos--;
+            }
 
-        pos = copy->args.insert(pos, std::move(withoutAccessors));
-        pos += 1;
-        copy->args.insert(pos, std::move(true_));
+            pos = copy->args.insert(pos, move(withoutAccessors));
+            pos++;
+            copy->args.insert(pos, move(true_));
+        } else {
+            if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
+                hash->keys.emplace_back(move(withoutAccessors));
+                hash->values.emplace_back(move(true_));
+            } else {
+                auto pos = copy->args.end();
+                pos = copy->args.insert(pos, move(withoutAccessors));
+                pos++;
+                copy->args.insert(pos, move(true_));
+            }
+        }
 
         return result;
     }

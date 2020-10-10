@@ -172,7 +172,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
 }
 
 ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
-    if (!send->hasKwArgs()) {
+    if (send->args.empty()) {
         return nullptr;
     }
 
@@ -185,7 +185,23 @@ ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
         values.emplace_back(send->args[i + 1].deepCopy());
     }
 
-    return ast::MK::Hash(send->loc, std::move(keys), std::move(values));
+    // handle a double-splat or a hash literal as the last argument
+    bool explicitEmptyHash = false;
+    if (send->hasKwSplat() || !send->hasKwArgs()) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
+            explicitEmptyHash = hash->keys.empty();
+            for (auto i = 0; i < hash->keys.size(); ++i) {
+                keys.emplace_back(hash->keys[i].deepCopy());
+                values.emplace_back(hash->values[i].deepCopy());
+            }
+        }
+    }
+
+    if (!keys.empty() || explicitEmptyHash) {
+        return ast::MK::Hash(send->loc, std::move(keys), std::move(values));
+    } else {
+        return nullptr;
+    }
 }
 
 ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs) {
