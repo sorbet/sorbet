@@ -411,18 +411,18 @@ public:
         return (flags & Symbol::Flags::METHOD_FINAL) != 0;
     }
 
-    inline void setPublic() {
+    inline void setMethodPublic() {
         ENFORCE(isMethod());
         flags &= ~Symbol::Flags::METHOD_PRIVATE;
         flags &= ~Symbol::Flags::METHOD_PROTECTED;
     }
 
-    inline void setProtected() {
+    inline void setMethodProtected() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_PROTECTED;
     }
 
-    inline void setPrivate() {
+    inline void setMethodPrivate() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
