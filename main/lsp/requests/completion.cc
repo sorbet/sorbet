@@ -817,7 +817,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
             auto similarMethod = similarMethods[0];
 
-            if (similarMethod.method.data(gs)->isPrivate() && !sendResp->isPrivateOk) {
+            if (similarMethod.method.data(gs)->isMethodPrivate() && !sendResp->isPrivateOk) {
                 continue;
             }
 

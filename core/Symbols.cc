@@ -669,9 +669,9 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
     if (this->isClassOrModule() || this->isMethod()) {
         if (this->isMethod()) {
-            if (this->isPrivate()) {
+            if (this->isMethodPrivate()) {
                 fmt::format_to(buf, " : private");
-            } else if (this->isProtected()) {
+            } else if (this->isMethodProtected()) {
                 fmt::format_to(buf, " : protected");
             }
         }

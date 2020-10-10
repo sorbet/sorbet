@@ -249,17 +249,17 @@ public:
         Exception::raise("Should not happen");
     }
 
-    inline bool isPublic() const {
+    inline bool isMethodPublic() const {
         ENFORCE_NO_TIMER(isMethod());
-        return !isProtected() && !isPrivate();
+        return !isMethodProtected() && !isMethodPrivate();
     }
 
-    inline bool isProtected() const {
+    inline bool isMethodProtected() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PROTECTED) != 0;
     }
 
-    inline bool isPrivate() const {
+    inline bool isMethodPrivate() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
