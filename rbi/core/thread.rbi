@@ -448,8 +448,9 @@ class Thread < Object
   # tick...
   # tick...
   # ```
-  sig {params(limit: T.untyped).returns(Thread)}
-  def join(*limit); end
+  sig {params(limit: NilClass).returns(Thread)}
+  sig {params(limit: Numeric).returns(T.nilable(Thread))}
+  def join(limit=nil); end
 
   # Returns `true` if the given string (or symbol) exists as a fiber-local
   # variable.
