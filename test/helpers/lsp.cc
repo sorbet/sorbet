@@ -282,6 +282,31 @@ optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const Noti
     return (*publishDiagnosticParams).get();
 }
 
+unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                               string_view filename, std::string newName) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
+    auto pos = make_unique<RenameParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy(), newName);
+    auto id = nextId++;
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentRename, move(pos)));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
+    if (responses.size() != 1) {
+        FAIL_CHECK("Expected to get 1 response");
+        return nullptr;
+    }
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        FAIL_CHECK("Expected response to actually be a response.");
+    }
+    auto &response = responseMsg->asResponse();
+    if (!response.result.has_value()) {
+        FAIL_CHECK("Expected result to have a value.");
+    }
+
+    return move(
+        get<unique_ptr<WorkspaceEdit>>(get<variant<JSONNullObject, unique_ptr<WorkspaceEdit>>>(*response.result)));
+}
+
 unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
                                                     string_view filename) {
     auto uri = filePathToUri(lspWrapper.config(), filename);

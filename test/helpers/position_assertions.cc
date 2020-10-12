@@ -47,6 +47,7 @@ const UnorderedMap<
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
+        {"apply-rename", ApplyRenameAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -1216,6 +1217,95 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
 
 string ApplyCompletionAssertion::toString() const {
     return fmt::format("apply-completion: [{}] item: {}", version, index);
+}
+
+shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                            int assertionLine, string_view assertionContents,
+                                                            string_view assertionType) {
+    static const regex newNameRegex(R"(^\[(\w+)\]\s+newName:\s+(\w+)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, newNameRegex)) {
+        auto version = matches[1].str();
+        auto newName = matches[2].str();
+        return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName);
+    }
+
+    ADD_FAIL_CHECK_AT(
+        string(filename).c_str(), assertionLine + 1,
+        fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] <index>'. Found '{}'",
+                    assertionContents));
+
+    return nullptr;
+}
+
+ApplyRenameAssertion::ApplyRenameAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                           string_view version, string newName)
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName) {}
+
+void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                    LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ApplyRenameAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
+        }
+    }
+}
+
+void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                 LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+    auto renameList = doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName);
+    {
+        INFO("doTextDocumentRename failed; see error above.");
+        REQUIRE_NE(renameList, nullptr);
+    }
+
+    auto &documentChanges = renameList->documentChanges;
+    REQUIRE_FALSE(this->newName.empty());
+
+    auto &renameItem = documentChanges->at(0);
+
+    auto it = sourceFileContents.find(this->filename);
+    {
+        INFO(fmt::format("Unable to find source file `{}`", this->filename));
+        REQUIRE_NE(it, sourceFileContents.end());
+    }
+    auto &file = it->second;
+
+    auto expectedUpdatedFilePath =
+        fmt::format("{}.{}.rbedited", this->filename.substr(0, this->filename.size() - strlen(".rb")), this->version);
+
+    string expectedEditedFileContents;
+    try {
+        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    } catch (FileNotFoundException e) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
+                          fmt::format("Missing {} which should contain test file after applying code actions.",
+                                      expectedUpdatedFilePath));
+        return;
+    }
+
+    auto &edits = renameItem->edits;
+    REQUIRE_FALSE(edits.empty());
+
+    auto actualEditedFileContents = string(file->source());
+    // Apply the edits in the reverse order so that the indices don't change.
+    reverse(edits.begin(), edits.end());
+    for (auto &edit : edits) {
+        actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *edit->range, edit->newText);
+    }
+    {
+        INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
+                         "contents post-edit",
+                         expectedUpdatedFilePath));
+        CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+    }
+}
+
+string ApplyRenameAssertion::toString() const {
+    return fmt::format("apply-rename: [{}] item: {}", version, index);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
