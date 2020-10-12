@@ -51,8 +51,12 @@ public:
         DocumentSymbol = 6,
         SignatureHelp = 7,
         DocumentHighlight = 9,
+<<<<<<< HEAD
         DocumentFormat = 10,
         Rename = 11,
+=======
+        Rename = 10,
+>>>>>>> f4f4f0295... add rename experiment and enable for tests
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
