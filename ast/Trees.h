@@ -726,11 +726,12 @@ public:
         return res;
     }
 
-    // True when there are keyword args, but false when there is just a keyword splat.
+    // True when there are either keyword args, or a keyword splat.
     bool hasKwArgs() const {
-        return ((args.size() - numPosArgs) & ~0x1);
+        return args.size() > numPosArgs;
     }
 
+    // True when there is a keyword args splat present. hasKwSplat -> hasKwArgs, but not the other way around.
     bool hasKwSplat() const {
         return (args.size() - numPosArgs) & 0x1;
     }
