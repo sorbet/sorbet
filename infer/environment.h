@@ -95,6 +95,7 @@ public:
 
     void replaceTruthy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
     void replaceFalsy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
+    void replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 

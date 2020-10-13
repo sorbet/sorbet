@@ -240,7 +240,7 @@ void KnowledgeRef::addToYesTypeTests(cfg::LocalRef from, TypeTestReverseIndex &i
 
 void KnowledgeRef::addToNoTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref,
                                     core::TypePtr type) {
-    index[ref].emplace_back(ref);
+    index[ref].emplace_back(from);
     this->mutate().noTypeTests.emplace_back(ref, type);
 }
 
@@ -297,6 +297,13 @@ void TestedKnowledge::replaceFalsy(cfg::LocalRef from, TypeTestReverseIndex &ind
     }
 
     _falsy = newFalsy;
+}
+
+void TestedKnowledge::replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge) {
+    this->seenTruthyOption = knowledge.seenTruthyOption;
+    this->seenFalsyOption = knowledge.seenFalsyOption;
+    replaceFalsy(of, index, knowledge.falsy());
+    replaceTruthy(of, index, knowledge.truthy());
 }
 
 void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
@@ -398,10 +405,7 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
         }
 
         // Copy properties from fromKnowledge to toKnowledge
-        toKnowledge.replaceTruthy(to, typeTestsWithVar, fromKnowledge.truthy());
-        toKnowledge.replaceFalsy(to, typeTestsWithVar, fromKnowledge.falsy());
-        toKnowledge.seenTruthyOption = fromKnowledge.seenTruthyOption;
-        toKnowledge.seenFalsyOption = fromKnowledge.seenFalsyOption;
+        toKnowledge.replace(to, typeTestsWithVar, fromKnowledge);
 
         toKnowledge.truthy().addToNoTypeTests(to, typeTestsWithVar, from, core::Types::falsyTypes());
         toKnowledge.falsy().addToYesTypeTests(to, typeTestsWithVar, from, core::Types::falsyTypes());
@@ -823,7 +827,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     for (auto &pair : vars) {
         auto var = pair.first;
         pair.second.typeAndOrigins = other.getTypeAndOrigin(ctx, var);
-        pair.second.knowledge = other.getKnowledge(var, false);
+        pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
         pair.second.knownTruthy = other.getKnownTruthy(var);
     }
 
