@@ -17,7 +17,20 @@
 
 namespace sorbet::infer {
 
-using TypeTestReverseIndex = UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>>;
+class TypeTestReverseIndex final {
+    UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>> index;
+    const InlinedVector<cfg::LocalRef, 1> empty;
+
+public:
+    TypeTestReverseIndex() = default;
+    TypeTestReverseIndex(const TypeTestReverseIndex &rhs) = delete;
+    TypeTestReverseIndex(TypeTestReverseIndex &&rhs) = default;
+
+    void addToIndex(cfg::LocalRef from, cfg::LocalRef to);
+    const InlinedVector<cfg::LocalRef, 1> &get(cfg::LocalRef from) const;
+    void replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list);
+    void cloneFrom(const TypeTestReverseIndex &index);
+};
 
 class Environment;
 struct KnowledgeFact;

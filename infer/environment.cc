@@ -30,6 +30,31 @@ bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::Ty
 }
 } // namespace
 
+void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
+    auto &list = index[from];
+    auto it =
+        lower_bound(list.begin(), list.end(), to, [](const auto &a, const auto &b) -> bool { return a.id() < b.id(); });
+    if (it == list.end() || *it != to) {
+        list.insert(it, to);
+    }
+}
+
+const InlinedVector<cfg::LocalRef, 1> &TypeTestReverseIndex::get(cfg::LocalRef from) const {
+    auto it = index.find(from);
+    if (it == index.end()) {
+        return empty;
+    }
+    return it->second;
+}
+
+void TypeTestReverseIndex::replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list) {
+    index[from] = std::move(list);
+}
+
+void TypeTestReverseIndex::cloneFrom(const TypeTestReverseIndex &index) {
+    this->index = index.index;
+}
+
 /**
  * Encode things that we know hold and don't hold.
  */
@@ -236,12 +261,12 @@ KnowledgeFact &KnowledgeRef::mutate() {
 
 void KnowledgeRef::addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref,
                                   core::TypePtr type) {
-    index[ref].emplace_back(of);
+    index.addToIndex(ref, of);
     this->mutate().yesTypeTests.emplace_back(ref, type);
 }
 
 void KnowledgeRef::addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type) {
-    index[ref].emplace_back(of);
+    index.addToIndex(ref, of);
     this->mutate().noTypeTests.emplace_back(ref, type);
 }
 
@@ -280,11 +305,11 @@ string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cf
 void TestedKnowledge::replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy) {
     // Note: No need to remove old items from Environment::typeTestsWithVar since it is an overapproximation
     for (auto &entry : newTruthy->yesTypeTests) {
-        index[entry.first].emplace_back(of);
+        index.addToIndex(entry.first, of);
     }
 
     for (auto &entry : newTruthy->noTypeTests) {
-        index[entry.first].emplace_back(of);
+        index.addToIndex(entry.first, of);
     }
 
     _truthy = newTruthy;
@@ -293,11 +318,11 @@ void TestedKnowledge::replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &inde
 void TestedKnowledge::replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy) {
     // Note: No need to remove old items from Environment::typeTestsWithVar since it is an overapproximation
     for (auto &entry : newFalsy->yesTypeTests) {
-        index[entry.first].emplace_back(of);
+        index.addToIndex(entry.first, of);
     }
 
     for (auto &entry : newFalsy->noTypeTests) {
-        index[entry.first].emplace_back(of);
+        index.addToIndex(entry.first, of);
     }
 
     _falsy = newFalsy;
@@ -421,20 +446,19 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
 }
 
 void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter) {
-    auto typeTestFnd = typeTestsWithVar.find(reassigned);
-    if (typeTestFnd != typeTestsWithVar.end()) {
-        // TODO: Worth deduping before iterating?
-        for (auto it = typeTestFnd->second.begin(); it != typeTestFnd->second.end();) {
-            auto var = *it;
+    auto &typesWithReassigned = typeTestsWithVar.get(reassigned);
+    if (!typesWithReassigned.empty()) {
+        InlinedVector<cfg::LocalRef, 1> replacement;
+        for (auto &var : typesWithReassigned) {
             if (knowledgeFilter.isNeeded(var)) {
                 auto &k = getKnowledge(var);
                 k.removeReferencesToVar(reassigned);
                 k.sanityCheck();
-                it = typeTestFnd->second.erase(it);
             } else {
-                it++;
+                replacement.emplace_back(var);
             }
         }
+        typeTestsWithVar.replace(reassigned, std::move(replacement));
     }
 
     auto fnd = vars.find(reassigned);
@@ -1356,7 +1380,7 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->vars = rhs.vars;
     this->bb = rhs.bb;
     this->pinnedTypes = rhs.pinnedTypes;
-    this->typeTestsWithVar = rhs.typeTestsWithVar;
+    this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
