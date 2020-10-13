@@ -43,11 +43,6 @@ struct KnowledgeFact {
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, const KnowledgeFact &other);
 
-    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
-     */
-    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
-                              cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
-
     void sanityCheck() const;
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
@@ -101,14 +96,14 @@ bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
     return used_vars[var.id()];
 }
 
-KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
-                                  cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded) {
-    if (what->yesTypeTests.empty() && !isNeeded) {
-        return what;
+KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat,
+                                 cfg::BasicBlock *bb, bool isNeeded) const {
+    if (knowledge->yesTypeTests.empty() && !isNeeded) {
+        return *this;
     }
-    KnowledgeRef copy = what;
+    KnowledgeRef copy = *this;
     if (env.isDead) {
-        copy.mutate().isDead = true;
+        copy.markDead();
         return copy;
     }
     bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
@@ -146,6 +141,8 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
 
             auto type = state.typeAndOrigins.type;
             if (isNeeded && !type->isUntyped() && !core::isa_type<core::MetaType>(type.get())) {
+                // Direct mutation of `yesTypeTests` rather than going through `addToYesTypeTests`.
+                // This is fine since `copy` is unmoored from a particular environment.
                 copy.mutate().yesTypeTests.emplace_back(local, type);
             }
         } else {
@@ -153,7 +150,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
             auto &typeAndOrigin = state.typeAndOrigins;
             auto combinedType = core::Types::all(ctx, typeAndOrigin.type, second);
             if (combinedType->isBottom()) {
-                copy.mutate().isDead = true;
+                copy.markDead();
                 break;
             }
         }
@@ -235,6 +232,26 @@ KnowledgeFact &KnowledgeRef::mutate() {
     return *knowledge.get();
 }
 
+void KnowledgeRef::addToYesTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref,
+                                     core::TypePtr type) {
+    index[ref].emplace_back(from);
+    this->mutate().yesTypeTests.emplace_back(ref, type);
+}
+
+void KnowledgeRef::addToNoTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref,
+                                    core::TypePtr type) {
+    index[ref].emplace_back(ref);
+    this->mutate().noTypeTests.emplace_back(ref, type);
+}
+
+void KnowledgeRef::markDead() {
+    this->mutate().isDead = true;
+}
+
+void KnowledgeRef::min(core::Context ctx, const KnowledgeFact &other) {
+    this->mutate().min(ctx, other);
+}
+
 void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
     if (typeTestReferencesVar(knowledge->yesTypeTests, var) || typeTestReferencesVar(knowledge->noTypeTests, var)) {
         auto &typeTests = this->mutate();
@@ -249,37 +266,61 @@ void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
 
 string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
     fmt::memory_buffer buf;
-    if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being truthy entails:\n{}", truthy->toString(gs, cfg));
+    if (!_truthy->noTypeTests.empty() || !_truthy->yesTypeTests.empty()) {
+        fmt::format_to(buf, "  Being truthy entails:\n{}", _truthy->toString(gs, cfg));
     }
-    if (!falsy->noTypeTests.empty() || !falsy->yesTypeTests.empty()) {
-        fmt::format_to(buf, "  Being falsy entails:\n{}", falsy->toString(gs, cfg));
+    if (!_falsy->noTypeTests.empty() || !_falsy->yesTypeTests.empty()) {
+        fmt::format_to(buf, "  Being falsy entails:\n{}", _falsy->toString(gs, cfg));
     }
     return to_string(buf);
 }
 
+void TestedKnowledge::replaceTruthy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy) {
+    for (auto &entry : newTruthy->yesTypeTests) {
+        index[entry.first].emplace_back(from);
+    }
+
+    for (auto &entry : newTruthy->noTypeTests) {
+        index[entry.first].emplace_back(from);
+    }
+
+    _truthy = newTruthy;
+}
+
+void TestedKnowledge::replaceFalsy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy) {
+    for (auto &entry : newFalsy->yesTypeTests) {
+        index[entry.first].emplace_back(from);
+    }
+
+    for (auto &entry : newFalsy->noTypeTests) {
+        index[entry.first].emplace_back(from);
+    }
+
+    _falsy = newFalsy;
+}
+
 void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
-    this->truthy.removeReferencesToVar(var);
-    this->falsy.removeReferencesToVar(var);
+    this->_truthy.removeReferencesToVar(var);
+    this->_falsy.removeReferencesToVar(var);
 }
 
 void TestedKnowledge::emitKnowledgeSizeMetric() const {
-    histogramInc("infer.knowledge.truthy.yes.size", truthy->yesTypeTests.size());
-    histogramInc("infer.knowledge.truthy.no.size", truthy->noTypeTests.size());
-    histogramInc("infer.knowledge.falsy.yes.size", falsy->yesTypeTests.size());
-    histogramInc("infer.knowledge.falsy.no.size", falsy->noTypeTests.size());
+    histogramInc("infer.knowledge.truthy.yes.size", _truthy->yesTypeTests.size());
+    histogramInc("infer.knowledge.truthy.no.size", _truthy->noTypeTests.size());
+    histogramInc("infer.knowledge.falsy.yes.size", _falsy->yesTypeTests.size());
+    histogramInc("infer.knowledge.falsy.no.size", _falsy->noTypeTests.size());
 }
 
 void TestedKnowledge::sanityCheck() const {
     if (!debug_mode) {
         return;
     }
-    truthy->sanityCheck();
-    falsy->sanityCheck();
-    ENFORCE(TestedKnowledge::empty.falsy->yesTypeTests.empty());
-    ENFORCE(TestedKnowledge::empty.falsy->noTypeTests.empty());
-    ENFORCE(TestedKnowledge::empty.truthy->noTypeTests.empty());
-    ENFORCE(TestedKnowledge::empty.truthy->yesTypeTests.empty());
+    _truthy->sanityCheck();
+    _falsy->sanityCheck();
+    ENFORCE(TestedKnowledge::empty._falsy->yesTypeTests.empty());
+    ENFORCE(TestedKnowledge::empty._falsy->noTypeTests.empty());
+    ENFORCE(TestedKnowledge::empty._truthy->noTypeTests.empty());
+    ENFORCE(TestedKnowledge::empty._truthy->yesTypeTests.empty());
 }
 
 string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
@@ -356,24 +397,38 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
             toState.typeAndOrigins.type = core::Types::nilClass();
         }
 
-        toKnowledge = fromKnowledge;
-        toKnowledge.truthy.mutate().noTypeTests.emplace_back(from, core::Types::falsyTypes());
-        toKnowledge.falsy.mutate().yesTypeTests.emplace_back(from, core::Types::falsyTypes());
-        fromKnowledge.truthy.mutate().noTypeTests.emplace_back(to, core::Types::falsyTypes());
-        fromKnowledge.falsy.mutate().yesTypeTests.emplace_back(to, core::Types::falsyTypes());
+        // Copy properties from fromKnowledge to toKnowledge
+        toKnowledge.replaceTruthy(to, typeTestsWithVar, fromKnowledge.truthy());
+        toKnowledge.replaceFalsy(to, typeTestsWithVar, fromKnowledge.falsy());
+        toKnowledge.seenTruthyOption = fromKnowledge.seenTruthyOption;
+        toKnowledge.seenFalsyOption = fromKnowledge.seenFalsyOption;
+
+        toKnowledge.truthy().addToNoTypeTests(to, typeTestsWithVar, from, core::Types::falsyTypes());
+        toKnowledge.falsy().addToYesTypeTests(to, typeTestsWithVar, from, core::Types::falsyTypes());
+        fromKnowledge.truthy().addToNoTypeTests(from, typeTestsWithVar, to, core::Types::falsyTypes());
+        fromKnowledge.falsy().addToYesTypeTests(from, typeTestsWithVar, to, core::Types::falsyTypes());
         fromKnowledge.sanityCheck();
         toKnowledge.sanityCheck();
     }
 }
 
 void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter) {
-    for (auto &el : vars) {
-        auto &k = el.second.knowledge;
-        if (knowledgeFilter.isNeeded(el.first)) {
-            k.removeReferencesToVar(reassigned);
-            k.sanityCheck();
+    auto typeTestFnd = typeTestsWithVar.find(reassigned);
+    if (typeTestFnd != typeTestsWithVar.end()) {
+        // TODO: Worth deduping before iterating?
+        for (auto it = typeTestFnd->second.begin(); it != typeTestFnd->second.end();) {
+            auto var = *it;
+            if (knowledgeFilter.isNeeded(var)) {
+                auto &k = getKnowledge(var);
+                k.removeReferencesToVar(reassigned);
+                k.sanityCheck();
+                it = typeTestFnd->second.erase(it);
+            } else {
+                it++;
+            }
         }
     }
+
     auto fnd = vars.find(reassigned);
     ENFORCE(fnd != vars.end());
     fnd->second.knownTruthy = false;
@@ -414,13 +469,15 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &whoKnows = getKnowledge(local);
         auto fnd = vars.find(send->recv.variable);
         if (fnd != vars.end()) {
-            whoKnows.truthy = fnd->second.knowledge.falsy;
-            whoKnows.falsy = fnd->second.knowledge.truthy;
-            fnd->second.knowledge.truthy.mutate().yesTypeTests.emplace_back(local, core::Types::falsyTypes());
-            fnd->second.knowledge.falsy.mutate().noTypeTests.emplace_back(local, core::Types::falsyTypes());
+            whoKnows.replaceTruthy(fnd->first, typeTestsWithVar, fnd->second.knowledge.falsy());
+            whoKnows.replaceFalsy(fnd->first, typeTestsWithVar, fnd->second.knowledge.truthy());
+            fnd->second.knowledge.truthy().addToYesTypeTests(fnd->first, typeTestsWithVar, local,
+                                                             core::Types::falsyTypes());
+            fnd->second.knowledge.falsy().addToNoTypeTests(fnd->first, typeTestsWithVar, local,
+                                                           core::Types::falsyTypes());
         }
-        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, core::Types::falsyTypes());
-        whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, core::Types::falsyTypes());
+        whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
 
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::nil_p()) {
@@ -428,8 +485,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, core::Types::nilClass());
-        whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, core::Types::nilClass());
+        whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
+        whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::blank_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
@@ -442,7 +499,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
-            whoKnows.falsy.mutate().yesTypeTests.emplace_back(send->recv.variable, knowledgeTypeWithoutFalsy);
+            whoKnows.falsy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
     } else if (send->fun == core::Names::present_p()) {
@@ -456,7 +513,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
-            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, knowledgeTypeWithoutFalsy);
+            whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable,
+                                                knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
     }
@@ -475,8 +533,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, ty);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, ty);
+                whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, ty);
+                whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->recv.variable, ty);
             }
             whoKnows.sanityCheck();
         }
@@ -488,29 +546,29 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
 
-        auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy : whoKnows.falsy;
-        auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy : whoKnows.truthy;
+        auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy() : whoKnows.falsy();
+        auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy() : whoKnows.truthy();
 
         ENFORCE(argType.get() != nullptr);
         ENFORCE(recvType.get() != nullptr);
         if (!argType->isUntyped()) {
-            truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, argType);
+            truthy.addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, argType);
         }
         if (!recvType->isUntyped()) {
-            truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, recvType);
+            truthy.addToYesTypeTests(local, typeTestsWithVar, send->args[0].variable, recvType);
         }
         if (auto s = core::cast_type<core::ClassType>(argType.get())) {
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s->symbol)) {
-                falsy.mutate().noTypeTests.emplace_back(send->recv.variable, argType);
+                falsy.addToNoTypeTests(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
         if (auto s = core::cast_type<core::ClassType>(recvType.get())) {
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s->symbol)) {
-                falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, recvType);
+                falsy.addToNoTypeTests(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
         whoKnows.sanityCheck();
@@ -526,8 +584,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         if (representedClass.exists()) {
             auto representedType = representedClass.data(ctx)->externalType(ctx);
             if (!representedType->isUntyped()) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, representedType);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, representedType);
+                whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->args[0].variable, representedType);
+                whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->args[0].variable, representedType);
             }
         }
 
@@ -536,8 +594,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s->symbol)) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, recvType);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, recvType);
+                whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->args[0].variable, recvType);
+                whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
         whoKnows.sanityCheck();
@@ -561,8 +619,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         auto &whoKnows = getKnowledge(local);
-        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, argType);
-        whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, argType);
+        whoKnows.truthy().addToYesTypeTests(local, typeTestsWithVar, send->recv.variable, argType);
+        whoKnows.falsy().addToNoTypeTests(local, typeTestsWithVar, send->recv.variable, argType);
         whoKnows.sanityCheck();
     }
 }
@@ -586,7 +644,7 @@ const Environment &Environment::withCond(core::Context ctx, const Environment &e
 
 void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
                                   const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
-    auto &thisKnowledge = getKnowledge(cond, false);
+    const auto &thisKnowledge = getKnowledge(cond, false);
     thisKnowledge.sanityCheck();
     if (!isTrue) {
         if (getKnownTruthy(cond)) {
@@ -623,7 +681,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         return;
     }
 
-    auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy : thisKnowledge.falsy;
+    auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy() : thisKnowledge.falsy();
     auto &yesTests = knowledgeToChoose->yesTypeTests;
     auto &noTests = knowledgeToChoose->noTypeTests;
 
@@ -691,28 +749,30 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
 
         if (canBeTruthy) {
             auto &thisKnowledge = getKnowledge(var);
-            auto otherTruthy = KnowledgeFact::under(ctx, other.getKnowledge(var, false).truthy, other, loc, inWhat, bb,
-                                                    knowledgeFilter.isNeeded(var));
+            auto otherTruthy = other.getKnowledge(var, false)
+                                   .truthy()
+                                   .under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
-                    thisKnowledge.truthy = otherTruthy;
+                    thisKnowledge.replaceTruthy(var, typeTestsWithVar, otherTruthy);
                 } else {
-                    thisKnowledge.truthy.mutate().min(ctx, *otherTruthy);
+                    thisKnowledge.truthy().min(ctx, *otherTruthy);
                 }
             }
         }
 
         if (canBeFalsy) {
             auto &thisKnowledge = getKnowledge(var);
-            auto otherFalsy = KnowledgeFact::under(ctx, other.getKnowledge(var, false).falsy, other, loc, inWhat, bb,
-                                                   knowledgeFilter.isNeeded(var));
+            auto otherFalsy = other.getKnowledge(var, false)
+                                  .falsy()
+                                  .under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
-                    thisKnowledge.falsy = otherFalsy;
+                    thisKnowledge.replaceFalsy(var, typeTestsWithVar, otherFalsy);
                 } else {
-                    thisKnowledge.falsy.mutate().min(ctx, *otherFalsy);
+                    thisKnowledge.falsy().min(ctx, *otherFalsy);
                 }
             }
         }
@@ -1290,6 +1350,7 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->vars = rhs.vars;
     this->bb = rhs.bb;
     this->pinnedTypes = rhs.pinnedTypes;
+    this->typeTestsWithVar = rhs.typeTestsWithVar;
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {

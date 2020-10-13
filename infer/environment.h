@@ -17,6 +17,8 @@
 
 namespace sorbet::infer {
 
+using TypeTestReverseIndex = UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>>;
+
 class Environment;
 struct KnowledgeFact;
 
@@ -47,10 +49,21 @@ public:
     const KnowledgeFact &operator*() const;
     const KnowledgeFact *operator->() const;
 
-    KnowledgeFact &mutate();
+    void addToYesTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addToNoTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void markDead();
+    void min(core::Context ctx, const KnowledgeFact &other);
+
+    /**
+     * Computes all possible implications of this knowledge holding as an exit from environment env in block bb
+     */
+    KnowledgeRef under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+                       bool isNeeded) const;
+
     void removeReferencesToVar(cfg::LocalRef ref);
 
 private:
+    KnowledgeFact &mutate();
     std::shared_ptr<KnowledgeFact> knowledge;
 };
 
@@ -58,10 +71,30 @@ private:
  * the other holds knowledge which is true if the same variable is falsy->
  */
 class TestedKnowledge {
+    // Hide to prevent direct assignment so that all mutations go thru methods that keep TypeTestReverseIndex updated.
+    KnowledgeRef _truthy, _falsy;
+
 public:
-    KnowledgeRef truthy, falsy;
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
+
+    const KnowledgeRef &truthy() const {
+        return _truthy;
+    }
+
+    const KnowledgeRef &falsy() const {
+        return _falsy;
+    }
+
+    KnowledgeRef &truthy() {
+        return _truthy;
+    }
+    KnowledgeRef &falsy() {
+        return _falsy;
+    }
+
+    void replaceTruthy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
+    void replaceFalsy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
@@ -111,6 +144,9 @@ public:
     UnorderedMap<cfg::LocalRef, VariableState> vars;
 
     UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
+
+    // Map from LocalRef to LocalRefs that may contain it in type tests (overapproximation).
+    TypeTestReverseIndex typeTestsWithVar;
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
