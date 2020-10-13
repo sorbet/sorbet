@@ -48,7 +48,7 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
     for (auto &location : references) {
         // Get text at location.
         auto fref = config.uri2FileRef(gs, location->uri);
-        if (fref.data(gs).isPayload()) {
+        if (fref.data(gs).isPayload() || fref.data(gs).isRBI()) {
             // We don't support renaming things in payload files.
             return JSONNullObject();
         }
