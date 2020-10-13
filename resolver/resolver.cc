@@ -1710,7 +1710,6 @@ private:
 
                     auto argIdx = -1;
                     auto numPosArgs = 0;
-                    bool seenKwArgs = false;
                     for (auto &arg : mdef->args) {
                         ++argIdx;
 
@@ -1731,9 +1730,6 @@ private:
                             // callWithSplatAndBlock
                         } else {
                             args.emplace_back(local->deepCopy());
-                        }
-
-                        if (!seenKwArgs && !info.flags.isBlock) {
                             ++numPosArgs;
                         }
                     }
