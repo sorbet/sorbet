@@ -966,10 +966,10 @@ class SymbolDefiner {
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
-            symbol.data(ctx)->setPrivate();
+            symbol.data(ctx)->setMethodPrivate();
         } else {
             // All other methods default to public (their visibility might be changed later)
-            symbol.data(ctx)->setPublic();
+            symbol.data(ctx)->setMethodPublic();
         }
         return symbol;
     }
@@ -986,13 +986,13 @@ class SymbolDefiner {
             switch (mod.name._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
-                    method.data(ctx)->setPrivate();
+                    method.data(ctx)->setMethodPrivate();
                     break;
                 case core::Names::protected_()._id:
-                    method.data(ctx)->setProtected();
+                    method.data(ctx)->setMethodProtected();
                     break;
                 case core::Names::public_()._id:
-                    method.data(ctx)->setPublic();
+                    method.data(ctx)->setMethodPublic();
                     break;
                 default:
                     break;

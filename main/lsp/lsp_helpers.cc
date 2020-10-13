@@ -142,9 +142,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     auto methodData = method.data(gs);
 
     string visibility = "";
-    if (methodData->isPrivate()) {
+    if (methodData->isMethodPrivate()) {
         visibility = "private ";
-    } else if (methodData->isProtected()) {
+    } else if (methodData->isMethodProtected()) {
         visibility = "protected ";
     }
 

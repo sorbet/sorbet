@@ -259,13 +259,13 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isPrivate()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodPrivate()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
         }
     }
 
-    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isProtected()) {
+    if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodProtected()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
         }
