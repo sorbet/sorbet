@@ -25,7 +25,7 @@ unique_ptr<WorkspaceEdit> RenameTask::getRenameEdits(LSPTypecheckerDelegate &typ
         // Get text at location.
         // TODO: Not payload files...?
         auto fref = config.uri2FileRef(gs, location->uri);
-        if (fref.data(gs).isPayload()) {
+        if (fref.data(gs).isPayload() || fref.data(gs).isRBI()) {
             // We don't support renaming things in payload files.
             // TODO: Error?
             continue;
