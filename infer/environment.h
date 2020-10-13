@@ -18,6 +18,7 @@
 namespace sorbet::infer {
 
 class TypeTestReverseIndex final {
+    // Note: vectors are sorted and are treated as sets.
     UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>> index;
     const InlinedVector<cfg::LocalRef, 1> empty;
 
