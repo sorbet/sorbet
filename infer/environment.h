@@ -39,6 +39,11 @@ public:
 
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
 class KnowledgeRef {
+    // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
+    // updated.
+    KnowledgeFact &mutate();
+    std::shared_ptr<KnowledgeFact> knowledge;
+
 public:
     KnowledgeRef();
     KnowledgeRef(const KnowledgeRef &) = default;
@@ -49,8 +54,8 @@ public:
     const KnowledgeFact &operator*() const;
     const KnowledgeFact *operator->() const;
 
-    void addToYesTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
-    void addToNoTypeTests(cfg::LocalRef from, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
     void markDead();
     void min(core::Context ctx, const KnowledgeFact &other);
 
@@ -61,10 +66,6 @@ public:
                        bool isNeeded) const;
 
     void removeReferencesToVar(cfg::LocalRef ref);
-
-private:
-    KnowledgeFact &mutate();
-    std::shared_ptr<KnowledgeFact> knowledge;
 };
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
@@ -93,8 +94,8 @@ public:
         return _falsy;
     }
 
-    void replaceTruthy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
-    void replaceFalsy(cfg::LocalRef from, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
+    void replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
+    void replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
     void replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
@@ -146,7 +147,7 @@ public:
 
     UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
 
-    // Map from LocalRef to LocalRefs that may contain it in type tests (overapproximation).
+    // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
     TypeTestReverseIndex typeTestsWithVar;
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
