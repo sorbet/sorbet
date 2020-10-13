@@ -31,7 +31,7 @@ module T::Private::Methods
       )
     end
 
-    def params(params)
+    def params(**params)
       check_live!
       if !decl.params.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .params twice")

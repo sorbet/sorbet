@@ -247,6 +247,19 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     sig.seen.params = true;
 
                     if (send->args.empty()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` must be given arguments", paramsStr);
+
+                            core::Loc loc{ctx.file, send->loc};
+                            auto orig = loc.source(ctx);
+                            auto dot = orig.rfind(".");
+                            if (orig.rfind(".") == string::npos) {
+                                e.replaceWith("Remove this use of `params`", loc, "");
+                            } else {
+                                e.replaceWith("Remove this use of `params`", loc, "{}", orig.substr(0, dot));
+                            }
+                        }
                         break;
                     }
 

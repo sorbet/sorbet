@@ -233,7 +233,7 @@ class BasicObject
   sig do
     type_parameters(:U)
     .params(
-        blk: T.proc.bind(T.untyped).params().returns(T.type_parameter(:U)),
+        blk: T.proc.bind(T.untyped).returns(T.type_parameter(:U)),
     )
     .returns(T.type_parameter(:U))
   end

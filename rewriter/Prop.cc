@@ -282,7 +282,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
     auto ivarName = name.addAt(ctx);
 
-    nodes.emplace_back(ast::MK::Sig(loc, {}, ASTUtil::dupType(getType)));
+    nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType)));
 
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,

@@ -1242,7 +1242,7 @@ module Process::GID
   sig {returns(Integer)}
   sig do
     type_parameters(:T).params(
-        blk: T.proc.params().returns(T.type_parameter(:T)),
+        blk: T.proc.returns(T.type_parameter(:T)),
     )
     .returns(T.type_parameter(:T))
   end
@@ -1663,7 +1663,7 @@ module Process::UID
   sig {returns(Integer)}
   sig do
     type_parameters(:T).params(
-        blk: T.proc.params().returns(T.type_parameter(:T)),
+        blk: T.proc.returns(T.type_parameter(:T)),
     )
     .returns(T.type_parameter(:T))
   end
