@@ -86,17 +86,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
         Environment &current = outEnvironments[bb->id];
-        current.vars.reserve(bb->args.size());
-        for (cfg::VariableUseSite &arg : bb->args) {
-            current.vars[arg.variable].typeAndOrigins.type = nullptr;
-        }
+        current.initializeBasicBlockArgs(*bb);
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 current.populateFrom(ctx, envAsSeenFromBranch);
             } else {
                 current.isDead = true;
@@ -110,7 +107,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,
@@ -120,15 +117,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
-
-        for (auto &uninitialized : current.vars) {
-            if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
-                uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
-                uninitialized.second.typeAndOrigins.origins.emplace_back(cfg->symbol.data(ctx)->loc());
-            } else {
-                uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
-            }
-        }
+        current.setUninitializedVarsToNil(ctx, cfg->symbol.data(ctx)->loc());
 
         for (auto &blockArg : bb->args) {
             current.getAndFillTypeAndOrigin(ctx, blockArg);
@@ -200,8 +189,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
-        histogramInc("infer.environment.size", current.vars.size());
-        for (auto &pair : current.vars) {
+        histogramInc("infer.environment.size", current.vars().size());
+        for (auto &pair : current.vars()) {
             pair.second.knowledge.emitKnowledgeSizeMetric();
         }
     }
