@@ -652,6 +652,44 @@ class Project::Foo
 end
 ```
 
+#### Testing rename constant
+
+To write a test for renaming constants, you need to make two files:
+
+```ruby
+# -- test/testdata/lsp/refactor/mytest.rb --
+
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  class Foo
+  end
+end
+
+foo = Foo.new
+#     ^ apply-rename: [A] newName: Bar
+```
+
+The `apply-rename` assertion here means "make sure the file `mytest.A.rbedited`
+contains the result of renaming the class `Foo` to `Bar`." Your `mytest.A.rbedited`
+file should look like this:
+
+```ruby
+# -- test/testdata/lsp/refactor/mytest.A.rbedited --
+
+# typed: true
+# frozen_string_literal: true
+
+class Bar
+  class Foo
+  end
+end
+
+foo = Bar.new
+#     ^ apply-rename: [A] newName: Bar
+```
+
 #### Testing incremental type checking
 
 In LSP mode, Sorbet runs file updates on a *fast path* or a *slow path*. It checks the structure of the
