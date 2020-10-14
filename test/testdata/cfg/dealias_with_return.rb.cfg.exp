@@ -30,7 +30,7 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_6" [
-        label = "block[id=6, rubyBlockId=3](<gotoDeadTemp>$11: T.nilable(TrueClass), a: T.nilable(Integer))\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
+        label = "block[id=6, rubyBlockId=3](a: T.nilable(Integer), <gotoDeadTemp>$11: T.nilable(TrueClass))\l<gotoDeadTemp>$11: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#a_6" -> "bb::Object#a_1" [style="bold"];

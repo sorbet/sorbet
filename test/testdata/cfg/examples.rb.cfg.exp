@@ -188,7 +188,7 @@ subgraph "cluster_::Examples#variables" {
 
     "bb::Examples#variables_6" -> "bb::Examples#variables_7" [style="bold"];
     "bb::Examples#variables_7" [
-        label = "block[id=7, rubyBlockId=0](b: Integer(2), a: Integer(1))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](a: Integer(1), b: Integer(2))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];
@@ -223,7 +223,7 @@ subgraph "cluster_::Examples#variables_and_loop" {
 
     "bb::Examples#variables_and_loop_3" -> "bb::Examples#variables_and_loop_5" [style="bold"];
     "bb::Examples#variables_and_loop_5" [
-        label = "block[id=5, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\l<whileTemp>$6: TrueClass = true\l<whileTemp>$6: TrueClass\l"
+        label = "block[id=5, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\l<whileTemp>$6: TrueClass = true\l<whileTemp>$6: TrueClass\l"
     ];
 
     "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_8" [style="bold"];
@@ -235,19 +235,19 @@ subgraph "cluster_::Examples#variables_and_loop" {
 
     "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_1" [style="bold"];
     "bb::Examples#variables_and_loop_8" [
-        label = "block[id=8, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\lcond: T.untyped\l"
+        label = "block[id=8, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lcond: T.untyped\l"
     ];
 
     "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_9" [style="bold"];
     "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_10" [style="tapered"];
 
     "bb::Examples#variables_and_loop_9" [
-        label = "block[id=9, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_9" -> "bb::Examples#variables_and_loop_5" [style="bold"];
     "bb::Examples#variables_and_loop_10" [
-        label = "block[id=10, rubyBlockId=0](b: NilClass, cond: T.nilable(FalseClass))\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=0](cond: T.nilable(FalseClass), b: NilClass)\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_10" -> "bb::Examples#variables_and_loop_5" [style="bold"];
@@ -270,7 +270,7 @@ subgraph "cluster_::Examples#variables_loop_if" {
 
     "bb::Examples#variables_loop_if_1" -> "bb::Examples#variables_loop_if_1" [style="bold"];
     "bb::Examples#variables_loop_if_2" [
-        label = "block[id=2, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
+        label = "block[id=2, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
 
     "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_5" [style="bold"];
@@ -282,19 +282,19 @@ subgraph "cluster_::Examples#variables_loop_if" {
 
     "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_1" [style="bold"];
     "bb::Examples#variables_loop_if_5" [
-        label = "block[id=5, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\lcond: T.untyped\l"
+        label = "block[id=5, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lcond: T.untyped\l"
     ];
 
     "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_6" [style="bold"];
     "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_7" [style="tapered"];
 
     "bb::Examples#variables_loop_if_6" [
-        label = "block[id=6, rubyBlockId=0](b: NilClass, cond: T.untyped)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
+        label = "block[id=6, rubyBlockId=0](cond: T.untyped, b: NilClass)\louterLoops: 1\lb: T.untyped = 1\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_6" -> "bb::Examples#variables_loop_if_2" [style="bold"];
     "bb::Examples#variables_loop_if_7" [
-        label = "block[id=7, rubyBlockId=0](b: NilClass, cond: T.nilable(FalseClass))\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](cond: T.nilable(FalseClass), b: NilClass)\louterLoops: 1\lb: T.untyped = 2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_7" -> "bb::Examples#variables_loop_if_2" [style="bold"];

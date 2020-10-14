@@ -258,22 +258,22 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 
             bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
 
-            // TODO(jvilk): When I change the sort order of block args to be in LocalRef variable order, we can
-            // early-abort the loops below if `arg.variable > bind.bind.variable`.
             if (!wasRead) {
-                for (const auto &arg : it->bexit.thenb->args) {
-                    if (arg.variable == bind.bind.variable) {
-                        wasRead = true;
-                        break;
-                    }
+                // args are in LocalRef variable order
+                auto argIt = absl::c_lower_bound(it->bexit.thenb->args, bind.bind, [](auto &a, auto &b) -> bool {
+                    return a.variable.id() < b.variable.id();
+                });
+                if (argIt != it->bexit.thenb->args.end() && argIt->variable == bind.bind.variable) {
+                    wasRead = true;
                 }
             }
             if (!wasRead) {
-                for (const auto &arg : it->bexit.elseb->args) {
-                    if (arg.variable == bind.bind.variable) {
-                        wasRead = true;
-                        break;
-                    }
+                // args are in LocalRef variable order
+                auto argIt = absl::c_lower_bound(it->bexit.elseb->args, bind.bind, [](auto &a, auto &b) -> bool {
+                    return a.variable.id() < b.variable.id();
+                });
+                if (argIt != it->bexit.elseb->args.end() && argIt->variable == bind.bind.variable) {
+                    wasRead = true;
                 }
             }
             if (!wasRead) {
@@ -434,10 +434,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 }
             }
             // it->args is now sorted in LocalRef ID order.
-            // TODO(jvilk): Remove this sort. I've kept it for now to avoid dirtying the PR diff.
-            fast_sort(it->args, [&cfg](const auto &lhs, const auto &rhs) -> bool {
-                return lhs.variable.data(cfg) < rhs.variable.data(cfg);
-            });
+            ENFORCE(absl::c_is_sorted(it->args,
+                                      [](auto &a, auto &b) -> bool { return a.variable.id() < b.variable.id(); }));
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }
