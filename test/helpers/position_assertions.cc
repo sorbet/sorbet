@@ -205,16 +205,6 @@ string updatedFilePath(string filename, string version) {
 
     return fmt::format("{}{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
 }
-<<<<<<< HEAD
-=======
-
-string updatedFilePath(string filename, string version) {
-    size_t index = filename.rfind('.', filename.length());
-    string fileExtension = filename.substr(index, filename.size() - 1);
-
-    return fmt::format("{}.{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
-}
->>>>>>> 8cb74132f... Add tests for .rbi files
 } // namespace
 
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
@@ -1308,7 +1298,6 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         REQUIRE_NE(it, sourceFileContents.end());
     }
 
-<<<<<<< HEAD
     size_t index = this->filename.rfind("/", this->filename.length());
     auto testDataPath = this->filename.substr(0, index);
     // map of all .rb and .rbi files before rename
@@ -1328,18 +1317,6 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         } else {
             sourceFiles[filePath] = FileOps::read(filePath);
         }
-=======
-    auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
-
-    string expectedEditedFileContents;
-    try {
-        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
-    } catch (FileNotFoundException e) {
-        ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
-                          fmt::format("Missing {} which should contain test file after applying code actions.",
-                                      expectedUpdatedFilePath));
-        return;
->>>>>>> 8cb74132f... Add tests for .rbi files
     }
 
     for (auto &renameItem : renameItems) {
