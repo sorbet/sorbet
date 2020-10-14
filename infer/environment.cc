@@ -24,13 +24,12 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
     return tp;
 }
 
-bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest,
-                           cfg::LocalRef var) {
+bool typeTestReferencesVar(const InlinedVector<std::pair<LocalRefRef, core::TypePtr>, 1> &typeTest, LocalRefRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 } // namespace
 
-void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
+void TypeTestReverseIndex::addToIndex(LocalRefRef from, LocalRefRef to) {
     auto &list = index[from];
     // Maintain invariant: lists are sorted sets (no duplicate entries)
     // lower_bound returns the first location that is >= to's ID, which is where `to` should be inserted if *it != to
@@ -41,7 +40,7 @@ void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
     }
 }
 
-const InlinedVector<cfg::LocalRef, 1> &TypeTestReverseIndex::get(cfg::LocalRef from) const {
+const InlinedVector<LocalRefRef, 1> &TypeTestReverseIndex::get(LocalRefRef from) const {
     auto it = index.find(from);
     if (it == index.end()) {
         return empty;
@@ -49,7 +48,7 @@ const InlinedVector<cfg::LocalRef, 1> &TypeTestReverseIndex::get(cfg::LocalRef f
     return it->second;
 }
 
-void TypeTestReverseIndex::replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list) {
+void TypeTestReverseIndex::replace(LocalRefRef from, InlinedVector<LocalRefRef, 1> &&list) {
     index[from] = std::move(list);
 }
 
@@ -134,10 +133,10 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core
         return copy;
     }
     bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
-    for (auto &pair : env.vars()) {
-        auto local = pair.first;
-        auto &state = pair.second;
-        if (enteringLoop && bb->outerLoops <= local.maxLoopWrite(inWhat)) {
+    int i = 0;
+    for (auto &state : env.varState()) {
+        auto local = LocalRefRef(i++);
+        if (enteringLoop && bb->outerLoops <= local.data(env).maxLoopWrite(inWhat)) {
             continue;
         }
         auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
@@ -261,8 +260,7 @@ KnowledgeFact &KnowledgeRef::mutate() {
     return *knowledge.get();
 }
 
-void KnowledgeRef::addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref,
-                                  core::TypePtr type) {
+void KnowledgeRef::addYesTypeTest(LocalRefRef of, TypeTestReverseIndex &index, LocalRefRef ref, core::TypePtr type) {
     index.addToIndex(ref, of);
     this->mutate().yesTypeTests.emplace_back(ref, type);
 }
