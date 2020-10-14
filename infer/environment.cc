@@ -265,7 +265,7 @@ void KnowledgeRef::addYesTypeTest(LocalRefRef of, TypeTestReverseIndex &index, L
     this->mutate().yesTypeTests.emplace_back(ref, type);
 }
 
-void KnowledgeRef::addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type) {
+void KnowledgeRef::addNoTypeTest(LocalRefRef of, TypeTestReverseIndex &index, LocalRefRef ref, core::TypePtr type) {
     index.addToIndex(ref, of);
     this->mutate().noTypeTests.emplace_back(ref, type);
 }
@@ -278,7 +278,7 @@ void KnowledgeRef::min(core::Context ctx, const KnowledgeFact &other) {
     this->mutate().min(ctx, other);
 }
 
-void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
+void KnowledgeRef::removeReferencesToVar(LocalRefRef var) {
     if (typeTestReferencesVar(knowledge->yesTypeTests, var) || typeTestReferencesVar(knowledge->noTypeTests, var)) {
         auto &typeTests = this->mutate();
         // No requirement to update Environment::typeTestsWithVar, which is an overapproximation.
@@ -302,7 +302,7 @@ string TestedKnowledge::toString(const core::GlobalState &gs, const cfg::CFG &cf
     return to_string(buf);
 }
 
-void TestedKnowledge::replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy) {
+void TestedKnowledge::replaceTruthy(LocalRefRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy) {
     // Note: No need to remove old items from Environment::typeTestsWithVar since it is an overapproximation
     for (auto &entry : newTruthy->yesTypeTests) {
         index.addToIndex(entry.first, of);
@@ -315,7 +315,7 @@ void TestedKnowledge::replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &inde
     _truthy = newTruthy;
 }
 
-void TestedKnowledge::replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy) {
+void TestedKnowledge::replaceFalsy(LocalRefRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy) {
     // Note: No need to remove old items from Environment::typeTestsWithVar since it is an overapproximation
     for (auto &entry : newFalsy->yesTypeTests) {
         index.addToIndex(entry.first, of);
@@ -328,14 +328,14 @@ void TestedKnowledge::replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index
     _falsy = newFalsy;
 }
 
-void TestedKnowledge::replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge) {
+void TestedKnowledge::replace(LocalRefRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge) {
     this->seenTruthyOption = knowledge.seenTruthyOption;
     this->seenFalsyOption = knowledge.seenFalsyOption;
     replaceFalsy(of, index, knowledge.falsy());
     replaceTruthy(of, index, knowledge.truthy());
 }
 
-void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
+void TestedKnowledge::removeReferencesToVar(LocalRefRef var) {
     this->_truthy.removeReferencesToVar(var);
     this->_falsy.removeReferencesToVar(var);
 }
@@ -364,9 +364,10 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
     if (isDead) {
         fmt::format_to(buf, "dead={:d}\n", isDead);
     }
-    vector<pair<cfg::LocalRef, VariableState>> sorted;
-    for (const auto &pair : _vars) {
-        sorted.emplace_back(pair);
+    vector<pair<LocalRefRef, VariableState>> sorted;
+    int i = 0;
+    for (const auto &state : _varState) {
+        sorted.emplace_back(i++, state);
     }
     fast_sort(sorted, [&cfg](const auto &lhs, const auto &rhs) -> bool {
         return lhs.first.data(cfg)._name.id() < rhs.first.data(cfg)._name.id() ||
@@ -379,28 +380,31 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         if (var.data(cfg)._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs, cfg), state.typeAndOrigins.type->toStringWithTabs(gs, 0),
-                       state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(gs, cfg));
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.data(*this).showRaw(gs, cfg),
+                       state.typeAndOrigins.type->toStringWithTabs(gs, 0), state.knownTruthy ? " (and truthy)\n" : "",
+                       state.knowledge.toString(gs, cfg));
     }
     return to_string(buf);
 }
 
 bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto fnd = definedVars.find(symbol);
+    if (fnd == definedVars.end()) {
         return false;
     }
+    const auto &state = _varState[fnd->second.id()];
     // We don't distinguish between nullptr and "not set"
-    return fnd->second.typeAndOrigins.type.get() != nullptr;
+    return state.typeAndOrigins.type.get() != nullptr;
 }
 
 const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto fnd = definedVars.find(symbol);
+    if (fnd == definedVars.end()) {
         return uninitialized;
     }
-    ENFORCE(fnd->second.typeAndOrigins.type.get() != nullptr);
-    return fnd->second.typeAndOrigins;
+    const auto &state = _varState[fnd->second.id()];
+    ENFORCE(state.typeAndOrigins.type.get() != nullptr);
+    return state.typeAndOrigins;
 }
 
 const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context ctx,
@@ -411,18 +415,19 @@ const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context c
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = _vars.find(var);
-    if (fnd == _vars.end()) {
+    auto fnd = definedVars.find(var);
+    if (fnd == definedVars.end()) {
         return false;
     }
-    return fnd->second.knownTruthy;
+    const auto &state = _varState[fnd->second.id()];
+    return state.knownTruthy;
 }
 
-void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
+void Environment::propagateKnowledge(core::Context ctx, LocalRefRef to, LocalRefRef from,
                                      KnowledgeFilter &knowledgeFilter) {
     if (knowledgeFilter.isNeeded(to) && knowledgeFilter.isNeeded(from)) {
-        auto &fromState = _vars[from];
-        auto &toState = _vars[to];
+        auto &fromState = _varState[from.id()];
+        auto &toState = _varState[to.id()];
         toState.knownTruthy = fromState.knownTruthy;
         auto &toKnowledge = toState.knowledge;
         auto &fromKnowledge = fromState.knowledge;
@@ -445,10 +450,10 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
     }
 }
 
-void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter) {
+void Environment::clearKnowledge(core::Context ctx, LocalRefRef reassigned, KnowledgeFilter &knowledgeFilter) {
     auto &typesWithReassigned = typeTestsWithVar.get(reassigned);
     if (!typesWithReassigned.empty()) {
-        InlinedVector<cfg::LocalRef, 1> replacement;
+        InlinedVector<LocalRefRef, 1> replacement;
         for (auto &var : typesWithReassigned) {
             if (knowledgeFilter.isNeeded(var)) {
                 auto &k = getKnowledge(var);
@@ -461,9 +466,9 @@ void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, Kn
         typeTestsWithVar.replace(reassigned, std::move(replacement));
     }
 
-    auto fnd = _vars.find(reassigned);
-    ENFORCE(fnd != _vars.end());
-    fnd->second.knownTruthy = false;
+    ENFORCE_NO_TIMER(reassigned.id() < _varState.size());
+    auto &state = _varState[reassigned.id()];
+    state.knownTruthy = false;
 }
 
 namespace {

@@ -193,19 +193,19 @@ class Environment {
     void enterLocalInternal(cfg::LocalRef ref, LocalRefRef &refRef);
     LocalRefRef enterLocal(cfg::LocalRef ref);
 
-    bool hasType(core::Context ctx, LocalRefRef symbol) const;
+    bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
 
-    TestedKnowledge &getKnowledge(LocalRefRef symbol, bool shouldFail = true) {
-        return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
+    TestedKnowledge &getKnowledge(LocalRefRef symbol) {
+        return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, true));
     }
 
     const TestedKnowledge &getKnowledge(LocalRefRef symbol, bool shouldFail = true) const;
 
-    bool getKnownTruthy(LocalRefRef var) const;
+    bool getKnownTruthy(cfg::LocalRef var) const;
 
     // NB: you can't call this function on vars in the first basic block since
     // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, LocalRefRef symbol) const;
+    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
 
     /* propagate knowledge on `to = from` */
     void propagateKnowledge(core::Context ctx, LocalRefRef to, LocalRefRef from, KnowledgeFilter &knowledgeFilter);
