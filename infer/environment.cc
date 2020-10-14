@@ -136,7 +136,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core
         return copy;
     }
     bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
-    for (auto &pair : env.vars) {
+    for (auto &pair : env.vars()) {
         auto local = pair.first;
         auto &state = pair.second;
         if (enteringLoop && bb->outerLoops <= local.maxLoopWrite(inWhat)) {
@@ -369,7 +369,7 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         fmt::format_to(buf, "dead={:d}\n", isDead);
     }
     vector<pair<cfg::LocalRef, VariableState>> sorted;
-    for (const auto &pair : vars) {
+    for (const auto &pair : _vars) {
         sorted.emplace_back(pair);
     }
     fast_sort(sorted, [&cfg](const auto &lhs, const auto &rhs) -> bool {
@@ -390,8 +390,8 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
 }
 
 bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
-    auto fnd = vars.find(symbol);
-    if (fnd == vars.end()) {
+    auto fnd = _vars.find(symbol);
+    if (fnd == _vars.end()) {
         return false;
     }
     // We don't distinguish between nullptr and "not set"
@@ -399,8 +399,8 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
 }
 
 const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
-    auto fnd = vars.find(symbol);
-    if (fnd == vars.end()) {
+    auto fnd = _vars.find(symbol);
+    if (fnd == _vars.end()) {
         return uninitialized;
     }
     ENFORCE(fnd->second.typeAndOrigins.type.get() != nullptr);
@@ -415,8 +415,8 @@ const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context c
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = vars.find(var);
-    if (fnd == vars.end()) {
+    auto fnd = _vars.find(var);
+    if (fnd == _vars.end()) {
         return false;
     }
     return fnd->second.knownTruthy;
@@ -425,8 +425,8 @@ bool Environment::getKnownTruthy(cfg::LocalRef var) const {
 void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
                                      KnowledgeFilter &knowledgeFilter) {
     if (knowledgeFilter.isNeeded(to) && knowledgeFilter.isNeeded(from)) {
-        auto &fromState = vars[from];
-        auto &toState = vars[to];
+        auto &fromState = _vars[from];
+        auto &toState = _vars[to];
         toState.knownTruthy = fromState.knownTruthy;
         auto &toKnowledge = toState.knowledge;
         auto &fromKnowledge = fromState.knowledge;
@@ -465,8 +465,8 @@ void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, Kn
         typeTestsWithVar.replace(reassigned, std::move(replacement));
     }
 
-    auto fnd = vars.find(reassigned);
-    ENFORCE(fnd != vars.end());
+    auto fnd = _vars.find(reassigned);
+    ENFORCE(fnd != _vars.end());
     fnd->second.knownTruthy = false;
 }
 
@@ -503,8 +503,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        auto fnd = vars.find(send->recv.variable);
-        if (fnd != vars.end()) {
+        auto fnd = _vars.find(send->recv.variable);
+        if (fnd != _vars.end()) {
             whoKnows.replaceTruthy(fnd->first, typeTestsWithVar, fnd->second.knowledge.falsy());
             whoKnows.replaceFalsy(fnd->first, typeTestsWithVar, fnd->second.knowledge.truthy());
             fnd->second.knowledge.truthy().addYesTypeTest(fnd->first, typeTestsWithVar, local,
@@ -661,7 +661,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
 void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins) {
     ENFORCE(typeAndOrigins.type.get() != nullptr);
-    vars[symbol].typeAndOrigins = typeAndOrigins;
+    _vars[symbol].typeAndOrigins = typeAndOrigins;
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
@@ -708,7 +708,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             return;
         }
         setTypeAndOrigin(cond, tp);
-        vars[cond].knownTruthy = true;
+        _vars[cond].knownTruthy = true;
     }
 
     if (isDead) {
@@ -757,7 +757,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
 void Environment::mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat,
                             cfg::BasicBlock *bb, KnowledgeFilter &knowledgeFilter) {
     this->isDead |= other.isDead;
-    for (auto &pair : vars) {
+    for (auto &pair : _vars) {
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
         auto &thisTO = pair.second.typeAndOrigins;
@@ -819,7 +819,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         return;
     }
 
-    for (auto &pair : vars) {
+    for (auto &pair : _vars) {
         auto var = pair.first;
         core::TypeAndOrigins tp;
 
@@ -854,7 +854,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
 
 void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
-    for (auto &pair : vars) {
+    for (auto &pair : _vars) {
         auto var = pair.first;
         pair.second.typeAndOrigins = other.getTypeAndOrigin(ctx, var);
         pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
@@ -1381,15 +1381,15 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
 void Environment::cloneFrom(const Environment &rhs) {
     this->isDead = rhs.isDead;
-    this->vars = rhs.vars;
+    this->_vars = rhs._vars;
     this->bb = rhs.bb;
     this->pinnedTypes = rhs.pinnedTypes;
     this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
-    auto fnd = vars.find(symbol);
-    if (fnd == vars.end()) {
+    auto fnd = _vars.find(symbol);
+    if (fnd == _vars.end()) {
         ENFORCE(!shouldFail, "Missing knowledge?");
         return TestedKnowledge::empty;
     }
@@ -1397,6 +1397,25 @@ const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shou
     return fnd->second.knowledge;
 }
 
+void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
+    _vars.reserve(bb.args.size());
+    for (const cfg::VariableUseSite &arg : bb.args) {
+        _vars[arg.variable].typeAndOrigins.type = nullptr;
+    }
+}
+
+void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin) {
+    for (auto &uninitialized : _vars) {
+        if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
+            uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
+            uninitialized.second.typeAndOrigins.origins.emplace_back(origin);
+        } else {
+            uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
+        }
+    }
+}
+
+namespace {
 core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
     // I'd love to have this, but keepForIDE intentionally has Loc::none() and
     // sometimes ends up here...
@@ -1406,6 +1425,7 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
     ret.origins.emplace_back(loc);
     return ret;
 }
+} // namespace
 
 Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)) {}
 
