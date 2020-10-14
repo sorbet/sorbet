@@ -57,6 +57,8 @@ void TypeTestReverseIndex::cloneFrom(const TypeTestReverseIndex &index) {
     this->index = index.index;
 }
 
+const InlinedVector<cfg::LocalRef, 1> TypeTestReverseIndex::empty;
+
 /**
  * Encode things that we know hold and don't hold.
  */
