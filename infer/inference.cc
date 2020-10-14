@@ -202,11 +202,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         histogramInc("infer.environment.size", current.vars.size());
         for (auto &pair : current.vars) {
-            auto &k = pair.second.knowledge;
-            histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
-            histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
-            histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());
-            histogramInc("infer.knowledge.falsy.no.size", k.falsy->noTypeTests.size());
+            pair.second.knowledge.emitKnowledgeSizeMetric();
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {

@@ -17,7 +17,27 @@
 
 namespace sorbet::infer {
 
+class TypeTestReverseIndex final {
+    // Note: vectors are sorted and are treated as sets.
+    UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>> index;
+    static const InlinedVector<cfg::LocalRef, 1> empty;
+
+public:
+    TypeTestReverseIndex() = default;
+    TypeTestReverseIndex(const TypeTestReverseIndex &rhs) = delete;
+    TypeTestReverseIndex(TypeTestReverseIndex &&rhs) = default;
+
+    TypeTestReverseIndex &operator=(const TypeTestReverseIndex &rhs) = delete;
+    TypeTestReverseIndex &operator=(TypeTestReverseIndex &&rhs) = delete;
+
+    void addToIndex(cfg::LocalRef from, cfg::LocalRef to);
+    const InlinedVector<cfg::LocalRef, 1> &get(cfg::LocalRef from) const;
+    void replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list);
+    void cloneFrom(const TypeTestReverseIndex &index);
+};
+
 class Environment;
+struct KnowledgeFact;
 
 // storing all the knowledge is slow
 // it only makes sense for us to store it if we are going to use it
@@ -34,34 +54,15 @@ public:
     bool isNeeded(cfg::LocalRef var);
 };
 
-class KnowledgeRef;
-/**
- * Encode things that we know hold and don't hold
- */
-struct KnowledgeFact {
-    bool isDead = false;
-    /* the following type tests are known to be true */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
-    /* the following type tests are known to be false */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
-
-    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(core::Context ctx, const KnowledgeFact &other);
-
-    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
-     */
-    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
-                              cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
-
-    void sanityCheck() const;
-
-    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
-};
-
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
 class KnowledgeRef {
+    // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
+    // updated.
+    KnowledgeFact &mutate();
+    std::shared_ptr<KnowledgeFact> knowledge;
+
 public:
-    KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+    KnowledgeRef();
     KnowledgeRef(const KnowledgeRef &) = default;
     KnowledgeRef &operator=(const KnowledgeRef &) = default;
     KnowledgeRef(KnowledgeRef &&) = default;
@@ -70,21 +71,49 @@ public:
     const KnowledgeFact &operator*() const;
     const KnowledgeFact *operator->() const;
 
-    KnowledgeFact &mutate();
-    void removeReferencesToVar(cfg::LocalRef ref);
+    void addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void markDead();
+    void min(core::Context ctx, const KnowledgeFact &other);
 
-private:
-    std::shared_ptr<KnowledgeFact> knowledge;
+    /**
+     * Computes all possible implications of this knowledge holding as an exit from environment env in block bb
+     */
+    KnowledgeRef under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+                       bool isNeeded) const;
+
+    void removeReferencesToVar(cfg::LocalRef ref);
 };
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
  * the other holds knowledge which is true if the same variable is falsy->
  */
 class TestedKnowledge {
+    // Hide to prevent direct assignment so that all mutations go thru methods that keep TypeTestReverseIndex updated.
+    KnowledgeRef _truthy, _falsy;
+
 public:
-    KnowledgeRef truthy, falsy;
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
+
+    const KnowledgeRef &truthy() const {
+        return _truthy;
+    }
+
+    const KnowledgeRef &falsy() const {
+        return _falsy;
+    }
+
+    KnowledgeRef &truthy() {
+        return _truthy;
+    }
+    KnowledgeRef &falsy() {
+        return _falsy;
+    }
+
+    void replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
+    void replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
+    void replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
@@ -92,6 +121,7 @@ public:
 
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
+    void emitKnowledgeSizeMetric() const;
 };
 
 class Environment {
@@ -133,6 +163,9 @@ public:
     UnorderedMap<cfg::LocalRef, VariableState> vars;
 
     UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
+
+    // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
+    TypeTestReverseIndex typeTestsWithVar;
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
