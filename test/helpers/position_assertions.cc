@@ -1295,6 +1295,8 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
     REQUIRE_FALSE(edits.empty());
 
     auto actualEditedFileContents = string(file->source());
+    // First, sort the edits by increasing starting location
+    fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
     // Apply the edits in the reverse order so that the indices don't change.
     reverse(edits.begin(), edits.end());
     for (auto &edit : edits) {
