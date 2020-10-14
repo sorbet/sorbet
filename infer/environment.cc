@@ -35,8 +35,7 @@ void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
     // Maintain invariant: lists are sorted sets (no duplicate entries)
     // lower_bound returns the first location that is >= to's ID, which is where `to` should be inserted if *it != to
     // (uses binary search, O(log n))
-    auto it =
-        lower_bound(list.begin(), list.end(), to, [](const auto &a, const auto &b) -> bool { return a.id() < b.id(); });
+    auto it = absl::c_lower_bound(list, to, [](const auto &a, const auto &b) -> bool { return a.id() < b.id(); });
     if (it == list.end() || *it != to) {
         list.insert(it, to);
     }

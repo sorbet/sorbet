@@ -27,6 +27,9 @@ public:
     TypeTestReverseIndex(const TypeTestReverseIndex &rhs) = delete;
     TypeTestReverseIndex(TypeTestReverseIndex &&rhs) = default;
 
+    TypeTestReverseIndex &operator=(const TypeTestReverseIndex &rhs) = delete;
+    TypeTestReverseIndex &operator=(TypeTestReverseIndex &&rhs) = delete;
+
     void addToIndex(cfg::LocalRef from, cfg::LocalRef to);
     const InlinedVector<cfg::LocalRef, 1> &get(cfg::LocalRef from) const;
     void replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list);
