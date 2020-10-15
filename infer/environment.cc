@@ -505,8 +505,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
-            whoKnows.replaceTruthy(fnd->first, typeTestsWithVar, fnd->second.knowledge.falsy());
-            whoKnows.replaceFalsy(fnd->first, typeTestsWithVar, fnd->second.knowledge.truthy());
+            whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
+            whoKnows.replaceFalsy(local, typeTestsWithVar, fnd->second.knowledge.truthy());
             fnd->second.knowledge.truthy().addYesTypeTest(fnd->first, typeTestsWithVar, local,
                                                           core::Types::falsyTypes());
             fnd->second.knowledge.falsy().addNoTypeTest(fnd->first, typeTestsWithVar, local, core::Types::falsyTypes());
