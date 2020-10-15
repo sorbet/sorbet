@@ -507,6 +507,10 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     // 0-sized Loc, since `self.` doesn't appear in the original file.
                     rec = MK::Self(loc.copyWithZeroLength());
                     flags.isPrivateOk = true;
+                } else if (rec.get()->isSelfReference()) {
+                    // In Ruby 2.7 `self.foo()` is also allowed for private method calls,
+                    // not only `foo()`. This pre-emptively allow the new syntax.
+                    flags.isPrivateOk = true;
                 }
                 if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
                     // If we have a splat anywhere in the argument list, desugar
@@ -537,17 +541,17 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     TreePtr res;
                     if (block == nullptr) {
                         res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                       std::move(sendargs), {});
+                                       std::move(sendargs), flags);
                     } else {
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                           std::move(sendargs), {}, symbol2Proc(dctx, std::move(convertedBlock)));
+                                           std::move(sendargs), flags, symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::callWithSplatAndBlock(), std::move(sendargs), {});
+                                           core::Names::callWithSplatAndBlock(), std::move(sendargs), flags);
                         }
                     }
                     result = std::move(res);
@@ -585,7 +589,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                             }
 
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithBlock(),
-                                           std::move(sendargs), {});
+                                           std::move(sendargs), flags);
                         }
                     }
 
@@ -1712,6 +1716,9 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 }
                 auto res =
                     MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), std::move(args));
+                // It wasn't a Send to begin with--there's no way this could result in a private
+                // method call error.
+                ast::cast_tree_nonnull<ast::Send>(res).flags.isPrivateOk = true;
                 result = std::move(res);
             },
             [&](parser::Backref *backref) {

@@ -957,6 +957,25 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     for (auto &err : it->main.errors) {
                         ctx.state._error(std::move(err));
                     }
+
+                    // Sometimes we hit a method here where the method symbol is Symbols::noSymbol().
+                    //
+                    // The primary cases for that is:
+                    //  - When the receiver is untyped
+                    //  - When the receiver is a void type
+                    //  - Calling super
+                    //  - Calling initialize on an object that doesn't define initialize
+                    //  - When a method doesn't exist.
+                    //
+                    // In all of these cases, we bail out and skip the non-private checking.
+                    if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() &&
+                        !send->isPrivateOk) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
+                            e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
+                        }
+                    }
+
                     lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
                     it = it->secondary.get();
                 }

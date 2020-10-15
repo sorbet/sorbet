@@ -1,0 +1,37 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
+    method ::Object#foo : private (<blk>) @ test/testdata/infer/private_methods.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::Test < ::Object () @ test/testdata/infer/private_methods.rb:5
+    method ::Test#block_call : private (blk) @ test/testdata/infer/private_methods.rb:22
+      argument blk<block> @ Loc {file=test/testdata/infer/private_methods.rb start=22:27 end=22:30}
+    method ::Test#calling_private (<blk>) @ test/testdata/infer/private_methods.rb:25
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+    method ::Test#splat_and_block_call : private (foo, bar, blk) @ test/testdata/infer/private_methods.rb:19
+      argument foo<> @ Loc {file=test/testdata/infer/private_methods.rb start=19:36 end=19:39}
+      argument bar<> @ Loc {file=test/testdata/infer/private_methods.rb start=19:41 end=19:44}
+      argument blk<block> @ Loc {file=test/testdata/infer/private_methods.rb start=19:47 end=19:50}
+    method ::Test#splat_call : private (args, <blk>) @ test/testdata/infer/private_methods.rb:15
+      argument args<repeated> @ Loc {file=test/testdata/infer/private_methods.rb start=15:27 end=15:31}
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+    method ::Test#subsequent_visibility (<blk>) @ test/testdata/infer/private_methods.rb:33
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+    method ::Test#using_symbol : private (<blk>) @ test/testdata/infer/private_methods.rb:6
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+    method ::Test#using_symbol_returned_by_def : private (<blk>) @ test/testdata/infer/private_methods.rb:11
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::<Class:Test>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_methods.rb:5
+    type-member(+) ::<Class:Test>::<AttachedClass> -> T.attached_class (of Test) @ test/testdata/infer/private_methods.rb:5
+    method ::<Class:Test>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:5
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::TestChild < ::Test () @ test/testdata/infer/private_methods.rb:38
+    method ::TestChild#calling_private_in_parent (<blk>) @ test/testdata/infer/private_methods.rb:39
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::<Class:TestChild>[<AttachedClass>] < ::<Class:Test> () @ test/testdata/infer/private_methods.rb:38
+    type-member(+) ::<Class:TestChild>::<AttachedClass> -> T.attached_class (of TestChild) @ test/testdata/infer/private_methods.rb:38
+    method ::<Class:TestChild>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:38
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+
