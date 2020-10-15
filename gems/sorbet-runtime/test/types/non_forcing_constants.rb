@@ -5,6 +5,8 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
   class MyClass
   end
 
+  class MyClassChild < MyClass; end
+
   MyField = 0
 
   autoload :RaisesIfLoaded, "#{__dir__}/fixtures/always_raise.rb"
@@ -88,6 +90,38 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
         T::NonForcingConstants.non_forcing_is_a?(nil, '::Opus::Types::Test::NonForcingConstantsTest::MyField::DoesntExist')
       end
       assert_match(/is not a class or module/, exn.message)
+    end
+  end
+
+  describe "T::NonForcingConstants.non_forcing_inherits_from?" do
+    it "empty string" do
+      exn = assert_raises(ArgumentError) do
+        T::NonForcingConstants.non_forcing_inherits_from?(NilClass, '')
+      end
+      assert_match(/must not be empty/, exn.message)
+    end
+
+    it "checks ancestry when exists" do
+      assert_equal(true, T::NonForcingConstants.non_forcing_inherits_from?(Integer, '::Numeric'))
+      assert_equal(false, T::NonForcingConstants.non_forcing_inherits_from?(NilClass, '::Numeric'))
+      assert_equal(true, T::NonForcingConstants.non_forcing_inherits_from?(MyClassChild, '::Opus::Types::Test::NonForcingConstantsTest::MyClass'))
+      assert_equal(false, T::NonForcingConstants.non_forcing_inherits_from?(MyClassChild, '::Opus::Types::Test::NonForcingConstantsTest::MyClassChild'))
+    end
+
+    it "when klass doesn't exist" do
+      assert_equal(false, T::NonForcingConstants.non_forcing_inherits_from?(Integer, '::Doesnt::Exist'))
+    end
+
+    it "doesn't force autoloads" do
+      res = T::NonForcingConstants.non_forcing_is_a?(Integer, '::Opus::Types::Test::NonForcingConstantsTest::RaisesIfLoaded')
+      assert_equal(false, res)
+    end
+
+    it "rejects non Module/Class values" do
+      exn = assert_raises(ArgumentError) do
+        T::NonForcingConstants.non_forcing_inherits_from?(1, '::Numeric')
+      end
+      assert_match(/must be a Module or Class/, exn.message)
     end
   end
 end

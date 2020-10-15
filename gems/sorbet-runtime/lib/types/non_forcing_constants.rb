@@ -6,14 +6,30 @@ module T::NonForcingConstants
   # shows up in the hover/completion documentation via LSP.
   T::Sig::WithoutRuntime.sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass, package: nil)
+    method_name = "T::NonForcingConstants.non_forcing_is_a?"
+    found_klass = non_forcing_lookup(klass, method_name)
+    !!(found_klass && found_klass.===(val))
+  end
+
+  T::Sig::WithoutRuntime.sig {params(val: Module, klass: String, package: T.nilable(String)).returns(T::Boolean)}
+  def self.non_forcing_inherits_from?(val, klass, package: nil)
+    method_name = "T::NonForcingConstants.non_forcing_inherits_from?"
+    if !val.is_a?(T.unsafe(Module))
+      raise ArgumentError.new("The value `#{val}` provided to `#{method_name}` must be a Module or Class")
+    end
+
+    found_klass = non_forcing_lookup(klass, method_name)
+    !!(found_klass && val.<(found_klass))
+  end
+
+  T::Sig::WithoutRuntime.sig {params(klass: String, method_name: String, package: T.nilable(String)).returns(T.nilable(Module))}
+  private_class_method def self.non_forcing_lookup(klass, method_name, package: nil)
     # TODO(gdritter): once we have a runtime implementation of
     # packages, we'll need to actually handle the `package` argument
     # here.
-    method_name = "T::NonForcingConstants.non_forcing_is_a?"
     if klass.empty?
       raise ArgumentError.new("The string given to `#{method_name}` must not be empty")
     end
-
     current_klass = T.let(nil, T.nilable(Module))
     current_prefix = T.let(nil, T.nilable(String))
 
@@ -34,13 +50,13 @@ module T::NonForcingConstants
         if current_klass.autoload?(part)
           # There's an autoload registered for that constant, which means it's not
           # yet loaded. `value` can't be an instance of something not yet loaded.
-          return false
+          return nil
         end
 
         # Sorbet guarantees that the string is an absolutely resolved name.
         search_inheritance_chain = false
         if !current_klass.const_defined?(part, search_inheritance_chain)
-          return false
+          return nil
         end
 
         current_klass = current_klass.const_get(part)
@@ -51,7 +67,6 @@ module T::NonForcingConstants
         end
       end
     end
-
-    return current_klass.===(val)
+    current_klass
   end
 end
