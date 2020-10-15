@@ -1,0 +1,40 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+  class ::<Class:Object>[<AttachedClass>] < ::<Class:BasicObject> ()
+    method ::<Class:Object>#bar : private (<blk>) @ test/testdata/infer/private_class_methods.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+  class ::Test < ::Object () @ test/testdata/infer/private_class_methods.rb:6
+    module ::Test::ClassMethods < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/infer/private_class_methods.rb:23
+      method ::Test::ClassMethods#method_g : private (<blk>) @ test/testdata/infer/private_class_methods.rb:24
+        argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+      method ::Test::ClassMethods#method_h : private (<blk>) @ test/testdata/infer/private_class_methods.rb:27
+        argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+      method ::Test::ClassMethods#method_i (<blk>) @ test/testdata/infer/private_class_methods.rb:31
+        argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    class ::Test::<Class:ClassMethods>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_class_methods.rb:23
+      type-member(+) ::Test::<Class:ClassMethods>::<AttachedClass> -> T.attached_class (of Test::ClassMethods) @ test/testdata/infer/private_class_methods.rb:23
+      method ::Test::<Class:ClassMethods>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:23
+        argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+  class ::<Class:Test>[<AttachedClass>] < ::<Class:Object> (ClassMethods) @ test/testdata/infer/private_class_methods.rb:12
+    type-member(+) ::<Class:Test>::<AttachedClass> -> T.attached_class (of Test) @ test/testdata/infer/private_class_methods.rb:6
+    method ::<Class:Test>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:6
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_a (<blk>) @ test/testdata/infer/private_class_methods.rb:7
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_b : private (<blk>) @ test/testdata/infer/private_class_methods.rb:8
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_c : private (<blk>) @ test/testdata/infer/private_class_methods.rb:10
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_d : private (<blk>) @ test/testdata/infer/private_class_methods.rb:13
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_e : private (<blk>) @ test/testdata/infer/private_class_methods.rb:16
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+    method ::<Class:Test>#method_f (<blk>) @ test/testdata/infer/private_class_methods.rb:20
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+  class ::<Class:<Class:Test>>[<AttachedClass>] < ::<Class:<Class:Object>> () @ test/testdata/infer/private_class_methods.rb:12
+    type-member(+) ::<Class:<Class:Test>>::<AttachedClass> -> T.attached_class (of T.class_of(Test)) @ test/testdata/infer/private_class_methods.rb:12
+    method ::<Class:<Class:Test>>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:12
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
+

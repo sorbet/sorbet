@@ -1,5 +1,7 @@
 # typed: true
 
+def foo; end
+
 class Test
   def using_symbol
     1
@@ -41,6 +43,8 @@ class TestChild < Test
     assigned_self.using_symbol # error: Non-private call to private method `Test#using_symbol`
   end
 end
+
+Object.new.foo # error: Non-private call to private method `Object#foo`
 
 Test.new.using_symbol # error: Non-private call to private method `Test#using_symbol`
 Test.new.using_symbol_returned_by_def # error: Non-private call to private method `Test#using_symbol_returned_by_def`
