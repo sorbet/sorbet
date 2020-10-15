@@ -143,7 +143,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
         args.emplace_back(std::move(arg));
     }
 
-    ast::Send::Flags flags =  {};
+    ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         stat->loc, std::move(asgn->lhs),

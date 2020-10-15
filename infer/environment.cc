@@ -833,7 +833,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     }
 
                     // The method here should always exists() and return true for `isMethod()`.
-                    // However, when initializing a class (e.g. `Object.new`), that is not the case. This guards against that.
+                    // However, when initializing a class (e.g. `Object.new`), that is not the case. This guards against
+                    // that.
                     if (it->main.method.exists() && it->main.method.data(ctx)->isMethod() &&
                         it->main.method.data(ctx)->isMethodPrivate() && !send->isPrivateOk) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
