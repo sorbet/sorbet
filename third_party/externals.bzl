@@ -300,7 +300,7 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
 
         # Master branch as of 2019-10-07
-        urls = _github_public_urls("rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz"),
+        urls = _github_public_urls("bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz"),
     )
 
     http_archive(
