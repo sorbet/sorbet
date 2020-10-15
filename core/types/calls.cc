@@ -483,7 +483,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
                                   const Type *thisType, core::SymbolRef symbol, vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, thisType->untypedBlame()), std::move(args.selfType),
-                              Symbols::untyped());
+                              Symbols::noSymbol());
     } else if (symbol == Symbols::void_()) {
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
@@ -510,7 +510,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         // This is a hack. We want to always be able to build the error object
