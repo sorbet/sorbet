@@ -145,13 +145,6 @@ package(default_visibility = ["//visibility:public"])
         strip_prefix = "bazel-compilation-database-0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
     )
 
-    http_archive(
-        name = "rubyfmt",
-        urls = ["https://github.com/penelopezone/rubyfmt/releases/download/v0.4.0/rubyfmt-v0.4.0-sources.tar.gz"],
-        build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
-        strip_prefix = "tmp/rubyfmt_source",
-    )
-
     # NOTE: using this branch:
     # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     http_archive(
@@ -295,20 +288,26 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
+        name = "rubyfmt",
+        build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
+        strip_prefix = "tmp/rubyfmt_source",
+        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.4.0/rubyfmt-v0.4.0-sources.tar.gz"),
+    )
+
+    http_archive(
         name = "io_bazel_rules_rust",
         sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
         strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
-        urls = [
-            # Master branch as of 2019-10-07
-            "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
-        ],
+
+        # Master branch as of 2019-10-07
+        urls = _github_public_urls("rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz"),
     )
 
     http_archive(
         name = "bazel_skylib",
         sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
         strip_prefix = "bazel-skylib-1.0.0",
-        url = "https://github.com/bazelbuild/bazel-skylib/archive/1.0.0.tar.gz",
+        urls = _github_public_urls("bazelbuild/bazel-skylib/archive/1.0.0.tar.gz"),
     )
 
     raze_fetch_remote_crates()
