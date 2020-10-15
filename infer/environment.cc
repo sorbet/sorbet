@@ -839,6 +839,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         it->main.method.data(ctx)->isMethodPrivate() && !send->isPrivateOk) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
                         }
                     }
 
