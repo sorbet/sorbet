@@ -10,7 +10,7 @@ class Footer extends React.Component {
       <footer className="nav-footer" id="footer">
         <div className="wrapper">
           <p className="footer">
-            © 2019 Stripe{' · '}
+            © 2019-2020 Stripe{' · '}
             <a href={docUrl('adopting')}>Get started</a>
             {' · '}
             <a href={docUrl('overview')}>Docs</a>
