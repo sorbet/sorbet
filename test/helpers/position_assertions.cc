@@ -1293,6 +1293,7 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
     auto &renameItems = *workspaceEdits->documentChanges;
     auto it = sourceFileContents.find(this->filename);
+    auto &file = it->second;
     {
         INFO(fmt::format("Unable to find source file `{}`", this->filename));
         REQUIRE_NE(it, sourceFileContents.end());
