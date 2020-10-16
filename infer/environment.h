@@ -197,8 +197,7 @@ class Environment {
     std::vector<LocalRefRef> definedVars;
     std::vector<cfg::LocalRef> vars;
     std::vector<VariableState> _varState;
-    // TODO: Does it make sense to keep this as LocalRef?
-    UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
+    UnorderedMap<LocalRefRef, core::TypeAndOrigins> pinnedTypes;
 
     // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
     TypeTestReverseIndex typeTestsWithVar;
@@ -219,7 +218,7 @@ class Environment {
     void clearKnowledge(core::Context ctx, LocalRefRef reassigned, KnowledgeFilter &knowledgeFilter);
 
     /* Special case sources of knowledge */
-    void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
+    void updateKnowledge(core::Context ctx, LocalRefRef local, core::Loc loc, const cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter);
 
     void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc, const Environment &filter);
