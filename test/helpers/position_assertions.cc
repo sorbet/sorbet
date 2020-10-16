@@ -1271,47 +1271,58 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
     auto &renameItems = *renameList->documentChanges;
     auto it = sourceFileContents.find(this->filename);
-    auto &file = it->second;
     {
         INFO(fmt::format("Unable to find source file `{}`", this->filename));
         REQUIRE_NE(it, sourceFileContents.end());
     }
 
-    auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
-    string expectedEditedFileContents;
-    try {
-        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
-    } catch (FileNotFoundException e) {
-        ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
-                          fmt::format("Missing {} which should contain test file after applying code actions.",
-                                      expectedUpdatedFilePath));
-        return;
+    size_t index = this->filename.rfind("/", this->filename.length());
+    auto testDataPath = this->filename.substr(0, index);
+    UnorderedMap<string, string> sourceFiles;
+    // Build a map of all the .rb and .rbi files
+    for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi"}, false, {}, {})) {
+        sourceFiles[filePath] = FileOps::read(filePath);
     }
 
-    auto actualEditedFileContents = string(file->source());
+    string sourceFilePath;
+    string expectedEditedFilePath;
+    string expectedEditedFileContents;
+    string actualEditedFileContents;
     for (auto &renameItem : renameItems) {
-        auto f = updatedFilePath(renameItem->textDocument->uri, this->version);
-        if (!absl::EndsWith(f, expectedUpdatedFilePath)) {
-            continue;
-        }
+        // Get the file path from the edited document's uri so we can determine the path to the .rbedited file
+        index = renameItem->textDocument->uri.find(testDataPath, 0);
+        sourceFilePath = renameItem->textDocument->uri.substr(index, renameItem->textDocument->uri.length() - 1);
+        expectedEditedFilePath = updatedFilePath(sourceFilePath, this->version);
 
         auto &edits = renameItem->edits;
+        try {
+            expectedEditedFileContents = FileOps::read(expectedEditedFilePath);
+        } catch (FileNotFoundException e) {
+            ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
+                              fmt::format("Missing {} which should contain test file after applying code actions.",
+                                          expectedEditedFilePath));
+            return;
+        }
         REQUIRE_FALSE(edits.empty());
 
         // First, sort the edits by increasing starting location
         fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
         // Apply the edits in the reverse order so that the indices don't change.
         reverse(edits.begin(), edits.end());
-        for (auto &edit : edits) {
-            actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *edit->range, edit->newText);
-        }
-    }
 
-    {
-        INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
-                         "contents post-edit",
-                         expectedUpdatedFilePath));
-        CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+        actualEditedFileContents = string(sourceFiles[sourceFilePath]);
+        for (auto &edit : edits) {
+            auto file = core::File(string(sourceFilePath), string(actualEditedFileContents), core::File::Type::Normal);
+
+            actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText);
+        }
+
+        {
+            INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
+                             "contents post-edit of {} ",
+                             expectedEditedFilePath));
+            CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+        }
     }
 }
 
