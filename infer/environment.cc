@@ -849,13 +849,13 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= varLocalRef.maxLoopWrite(inWhat)) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !otherRef.knownTruthy(other);
+        bool canBeFalsy = !otherRef.knownTruthy(other) && core::Types::canBeFalsy(ctx, otherTO.type);
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = _varState[thisRef.id()].knowledge;
-            auto otherTruthy = otherRef.knowledge(other).truthy().under(ctx, other, loc, inWhat, bb,
-                                                                        knowledgeFilter.isNeeded(varLocalRef));
+            const auto &otherTruthy = otherRef.knowledge(other).truthy().under(ctx, other, loc, inWhat, bb,
+                                                                               knowledgeFilter.isNeeded(varLocalRef));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -868,8 +868,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
 
         if (canBeFalsy) {
             auto &thisKnowledge = _varState[thisRef.id()].knowledge;
-            auto otherFalsy = otherRef.knowledge(other).falsy().under(ctx, other, loc, inWhat, bb,
-                                                                      knowledgeFilter.isNeeded(varLocalRef));
+            const auto &otherFalsy = otherRef.knowledge(other).falsy().under(ctx, other, loc, inWhat, bb,
+                                                                             knowledgeFilter.isNeeded(varLocalRef));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
