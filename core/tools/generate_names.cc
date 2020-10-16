@@ -138,6 +138,7 @@ NameDef names[] = {
     {"revealType", "reveal_type"},
     {"absurd"},
     {"nonForcingIsA_p", "non_forcing_is_a?"},
+    {"nonForcingInheritsFrom_p", "non_forcing_inherits_from?"},
     // end T keywords
 
     // Ruby DSL methods which we understand

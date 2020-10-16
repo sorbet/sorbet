@@ -1883,9 +1883,7 @@ private:
         return true;
     }
 
-    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
-        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
-
+    void validateNonForcingIsA(core::Context ctx, const ast::Send &send, const string_view method) {
         if (send.args.size() != 2 && send.args.size() != 3) {
             return;
         }
@@ -2186,9 +2184,16 @@ public:
                     }
                     return tree;
                 }
-                case core::Names::nonForcingIsA_p()._id:
-                    validateNonForcingIsA(ctx, send);
+                case core::Names::nonForcingIsA_p()._id: {
+                    constexpr string_view is_a_method = "T::NonForcingConstants.non_forcing_is_a?";
+                    validateNonForcingIsA(ctx, send, is_a_method);
                     return tree;
+                }
+                case core::Names::nonForcingInheritsFrom_p()._id: {
+                    constexpr string_view inherits_method = "T::NonForcingConstants.non_forcing_inherits_from?";
+                    validateNonForcingIsA(ctx, send, inherits_method);
+                    return tree;
+                }
                 default:
                     return tree;
             }
