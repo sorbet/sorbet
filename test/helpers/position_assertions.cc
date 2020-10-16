@@ -1261,26 +1261,23 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
 
 void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                  LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+    REQUIRE_FALSE(this->newName.empty());
+
     auto renameList = doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName);
     {
         INFO("doTextDocumentRename failed; see error above.");
         REQUIRE_NE(renameList, nullptr);
     }
 
-    auto &documentChanges = renameList->documentChanges;
-    REQUIRE_FALSE(this->newName.empty());
-
-    auto &renameItem = documentChanges->at(0);
-
+    auto &renameItems = *renameList->documentChanges;
     auto it = sourceFileContents.find(this->filename);
+    auto &file = it->second;
     {
         INFO(fmt::format("Unable to find source file `{}`", this->filename));
         REQUIRE_NE(it, sourceFileContents.end());
     }
-    auto &file = it->second;
 
     auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
-
     string expectedEditedFileContents;
     try {
         expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
@@ -1291,17 +1288,25 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         return;
     }
 
-    auto &edits = renameItem->edits;
-    REQUIRE_FALSE(edits.empty());
-
     auto actualEditedFileContents = string(file->source());
-    // First, sort the edits by increasing starting location
-    fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
-    // Apply the edits in the reverse order so that the indices don't change.
-    reverse(edits.begin(), edits.end());
-    for (auto &edit : edits) {
-        actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *edit->range, edit->newText);
+    for (auto &renameItem : renameItems) {
+        auto f = updatedFilePath(renameItem->textDocument->uri, this->version);
+        if (!absl::EndsWith(f, expectedUpdatedFilePath)) {
+            continue;
+        }
+
+        auto &edits = renameItem->edits;
+        REQUIRE_FALSE(edits.empty());
+
+        // First, sort the edits by increasing starting location
+        fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
+        // Apply the edits in the reverse order so that the indices don't change.
+        reverse(edits.begin(), edits.end());
+        for (auto &edit : edits) {
+            actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *edit->range, edit->newText);
+        }
     }
+
     {
         INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
                          "contents post-edit",
