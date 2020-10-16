@@ -712,6 +712,7 @@ const Environment &Environment::withCond(core::Context ctx, const Environment &e
 
 void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
                                   const Environment &filter) {
+    // Note: We don't _enterLocal_ unless we are definitively setting its type and origin
     auto ref = lookupLocal(cond);
     ref.knowledge(*this).sanityCheck();
 
@@ -884,9 +885,8 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
 
         for (cfg::BasicBlock *parent : bb->backEdges) {
             auto &other = envs[parent->id];
-            auto otherRef = other.lookupLocal(var.data(*this));
-            auto otherPin = other.pinnedTypes.find(otherRef);
-            if (otherRef.exists() && otherPin != other.pinnedTypes.end()) {
+            auto otherPin = other.pinnedTypes.find(var.data(*this));
+            if (var.data(*this).exists() && otherPin != other.pinnedTypes.end()) {
                 if (tp.type != nullptr) {
                     tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
                     for (auto origin : otherPin->second.origins) {
@@ -902,7 +902,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         }
 
         if (tp.type != nullptr) {
-            pinnedTypes[var] = tp;
+            pinnedTypes[var.data(*this)] = tp;
         }
     }
 }
@@ -1108,7 +1108,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     Exception::notImplemented();
                 }
 
-                pinnedTypes[bindVarRef] = tp;
+                pinnedTypes[bind.bind.variable] = tp;
             },
             [&](cfg::SolveConstraint *i) {
                 if (i->link->result->main.constr && !i->link->result->main.constr->solve(ctx)) {
@@ -1322,7 +1322,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     }
                 }
                 if (c->cast == core::Names::let()) {
-                    pinnedTypes[bindVarRef] = tp;
+                    pinnedTypes[bind.bind.variable] = tp;
                 }
             });
 
@@ -1339,7 +1339,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
         ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
 
         if (!noLoopChecking && loopCount != bindMinLoops) {
-            auto pin = pinnedTypes.find(bindVarRef);
+            auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : bindVarRef.typeAndOrigin(*this);
 

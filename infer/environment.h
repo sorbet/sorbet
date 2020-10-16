@@ -194,12 +194,16 @@ class Environment {
         bool knownTruthy;
     };
 
+    // map from LocalRef.id => LocalRefRef
     std::vector<LocalRefRef> definedVars;
+    // map from LocalRefRef.id => LocalRef
     std::vector<cfg::LocalRef> vars;
     std::vector<VariableState> _varState;
-    UnorderedMap<LocalRefRef, core::TypeAndOrigins> pinnedTypes;
 
-    // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
+    // Note: Uses LocalRef since it may contain pinned types from other environments.
+    UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
+
+    // Map from LocalRef to LocalRefRefs that _may_ contain it in yes/no type tests (overapproximation).
     TypeTestReverseIndex typeTestsWithVar;
 
     // TODO: UnfreezeEnvironmentLocalRefs
