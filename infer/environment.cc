@@ -417,7 +417,7 @@ void Environment::enterLocalInternal(cfg::LocalRef ref, LocalRefRef &refRef) {
 }
 
 LocalRefRef Environment::enterLocal(cfg::LocalRef ref) {
-    auto &refRef = this->definedVars[ref];
+    auto &refRef = this->definedVars[ref.id()];
     if (!refRef.exists() && ref.exists()) {
         // ref is an out parameter.
         enterLocalInternal(ref, refRef);
@@ -426,11 +426,8 @@ LocalRefRef Environment::enterLocal(cfg::LocalRef ref) {
 }
 
 LocalRefRef Environment::lookupLocal(cfg::LocalRef ref) const {
-    auto fnd = this->definedVars.find(ref);
-    if (fnd != this->definedVars.end()) {
-        return fnd->second;
-    }
-    return LocalRefRef();
+    // Will be the non-existant LocalRefRef if not defined.
+    return this->definedVars[ref.id()];
 }
 
 string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) const {
@@ -1504,7 +1501,8 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 }
 } // namespace
 
-Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)) {
+Environment::Environment(const cfg::CFG &cfg, core::Loc ownerLoc)
+    : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), definedVars(cfg.numLocalVariables()) {
     // Enter the non-existant 0 ref.
     this->_varState.emplace_back();
     this->_varState[0].knowledge = TestedKnowledge::empty;

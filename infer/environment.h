@@ -194,7 +194,7 @@ class Environment {
         bool knownTruthy;
     };
 
-    UnorderedMap<cfg::LocalRef, LocalRefRef> definedVars;
+    std::vector<LocalRefRef> definedVars;
     std::vector<cfg::LocalRef> vars;
     std::vector<VariableState> _varState;
     // TODO: Does it make sense to keep this as LocalRef?
@@ -231,7 +231,7 @@ class Environment {
     void cloneFrom(const Environment &rhs);
 
 public:
-    Environment(core::Loc ownerLoc);
+    Environment(const cfg::CFG &cfg, core::Loc ownerLoc);
     Environment(const Environment &rhs) = delete;
     Environment(Environment &&rhs) = default;
 

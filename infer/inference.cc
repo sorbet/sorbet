@@ -72,7 +72,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<Environment> outEnvironments;
     outEnvironments.reserve(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->maxBasicBlockId; i++) {
-        outEnvironments.emplace_back(methodLoc);
+        outEnvironments.emplace_back(*cfg, methodLoc);
     }
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
         outEnvironments[cfg->forwardsTopoSort[i]->id].bb = cfg->forwardsTopoSort[i];
@@ -91,7 +91,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(methodLoc);
+                Environment tempEnv(*cfg, methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 current.populateFrom(ctx, envAsSeenFromBranch);
@@ -105,7 +105,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
-                Environment tempEnv(methodLoc);
+                Environment tempEnv(*cfg, methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 if (!envAsSeenFromBranch.isDead) {
