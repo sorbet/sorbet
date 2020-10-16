@@ -489,7 +489,7 @@ void Environment::propagateKnowledge(core::Context ctx, LocalRefRef to, cfg::Loc
         // Copy properties from fromKnowledge to toKnowledge
         toKnowledge.replace(to, typeTestsWithVar, fromKnowledge);
 
-        toKnowledge.truthy().addNoTypeTest(to, typeTestsWithVar, toLocalRef, core::Types::falsyTypes());
+        toKnowledge.truthy().addNoTypeTest(to, typeTestsWithVar, fromLocalRef, core::Types::falsyTypes());
         toKnowledge.falsy().addYesTypeTest(to, typeTestsWithVar, fromLocalRef, core::Types::falsyTypes());
         fromKnowledge.truthy().addNoTypeTest(from, typeTestsWithVar, toLocalRef, core::Types::falsyTypes());
         fromKnowledge.falsy().addYesTypeTest(from, typeTestsWithVar, toLocalRef, core::Types::falsyTypes());
