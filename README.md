@@ -654,7 +654,7 @@ end
 
 #### Testing rename constant
 
-To write a test for renaming constants, you need to make two files:
+To write a test for renaming constants, you need to make at least two files:
 
 ```ruby
 # -- test/testdata/lsp/refactor/mytest.rb --
@@ -671,9 +671,10 @@ foo = Foo.new
 #     ^ apply-rename: [A] newName: Bar
 ```
 
-The `apply-rename` assertion here means "make sure the file `mytest.A.rbedited`
-contains the result of renaming the class `Foo` to `Bar`." Your `mytest.A.rbedited`
-file should look like this:
+The `apply-rename` assertion here says "simulate a user starting a rename from
+the position of this caret." You'll need to add an `.rbedited` file that reflects
+what the result of the changes should look like. In this case, the file would look
+like this:
 
 ```ruby
 # -- test/testdata/lsp/refactor/mytest.A.rbedited --
@@ -689,6 +690,9 @@ end
 foo = Bar.new
 #     ^ apply-rename: [A] newName: Bar
 ```
+
+You can add more files that reference the constant you're renaming, just make sure
+to add a matching `.rbedited` file with the same version.
 
 #### Testing incremental type checking
 
