@@ -18,6 +18,7 @@
 namespace sorbet::infer {
 
 class Environment;
+class TestedKnowledge;
 class LocalRefRef final {
     int _id;
 
@@ -29,8 +30,17 @@ public:
     LocalRefRef &operator=(LocalRefRef &&) = default;
     LocalRefRef &operator=(const LocalRefRef &) = default;
 
-    core::LocalVariable data(const cfg::CFG &cfg) const;
     cfg::LocalRef data(const Environment &env) const;
+
+    const TestedKnowledge &knowledge(const Environment &env) const;
+    // NB: you can't call this function on vars in the first basic block since
+    // their type will be nullptr
+    const core::TypeAndOrigins &unsafeTypeAndOrigin(const Environment &env) const;
+    // Returns 'uninitialized' if var is untyped.
+    const core::TypeAndOrigins &typeAndOrigin(const Environment &env) const;
+    bool hasType(const Environment &env) const;
+    bool knownTruthy(const Environment &env) const;
+
     int id() const {
         return this->_id;
     }
@@ -47,7 +57,9 @@ template <typename H> H AbslHashValue(H h, const LocalRefRef &m) {
 
 class TypeTestReverseIndex final {
     // Note: vectors are sorted and are treated as sets.
-    UnorderedMap<LocalRefRef, InlinedVector<LocalRefRef, 1>> index;
+    // Note 2: Map is from LocalRef -> LocalRefRef since type tests can contain LocalRefs that aren't part of
+    // environment.
+    UnorderedMap<cfg::LocalRef, InlinedVector<LocalRefRef, 1>> index;
     const InlinedVector<LocalRefRef, 1> empty;
 
 public:
@@ -58,9 +70,9 @@ public:
     TypeTestReverseIndex &operator=(const TypeTestReverseIndex &rhs) = delete;
     TypeTestReverseIndex &operator=(TypeTestReverseIndex &&rhs) = delete;
 
-    void addToIndex(LocalRefRef from, LocalRefRef to);
-    const InlinedVector<LocalRefRef, 1> &get(LocalRefRef from) const;
-    void replace(LocalRefRef from, InlinedVector<LocalRefRef, 1> &&list);
+    void addToIndex(cfg::LocalRef from, LocalRefRef to);
+    const InlinedVector<LocalRefRef, 1> &get(cfg::LocalRef from) const;
+    void replace(cfg::LocalRef from, InlinedVector<LocalRefRef, 1> &&list);
     void cloneFrom(const TypeTestReverseIndex &index);
 };
 
@@ -69,7 +81,7 @@ struct KnowledgeFact;
 
 // storing all the knowledge is slow
 // it only makes sense for us to store it if we are going to use it
-// wallk all the instructions and collect knowledge that we may ever need
+// walk all the instructions and collect knowledge that we may ever need
 class KnowledgeFilter {
     std::vector<bool> used_vars;
 
@@ -99,8 +111,8 @@ public:
     const KnowledgeFact &operator*() const;
     const KnowledgeFact *operator->() const;
 
-    void addYesTypeTest(LocalRefRef of, TypeTestReverseIndex &index, LocalRefRef ref, core::TypePtr type);
-    void addNoTypeTest(LocalRefRef of, TypeTestReverseIndex &index, LocalRefRef ref, core::TypePtr type);
+    void addYesTypeTest(LocalRefRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addNoTypeTest(LocalRefRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
     void markDead();
     void min(core::Context ctx, const KnowledgeFact &other);
 
@@ -110,7 +122,7 @@ public:
     KnowledgeRef under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                        bool isNeeded) const;
 
-    void removeReferencesToVar(LocalRefRef ref);
+    void removeReferencesToVar(cfg::LocalRef ref);
 };
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
@@ -147,12 +159,14 @@ public:
 
     static TestedKnowledge empty; // optimization
 
-    void removeReferencesToVar(LocalRefRef ref);
+    void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
 };
 
 class Environment {
+    friend class LocalRefRef;
+
     const core::TypeAndOrigins uninitialized;
 
     /*
@@ -181,9 +195,10 @@ class Environment {
     };
 
     UnorderedMap<cfg::LocalRef, LocalRefRef> definedVars;
-    std::vector<LocalRefRef> vars;
+    std::vector<cfg::LocalRef> vars;
     std::vector<VariableState> _varState;
-    UnorderedMap<LocalRefRef, core::TypeAndOrigins> pinnedTypes;
+    // TODO: Does it make sense to keep this as LocalRef?
+    UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
 
     // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
     TypeTestReverseIndex typeTestsWithVar;
@@ -191,35 +206,23 @@ class Environment {
     // TODO: UnfreezeEnvironmentLocalRefs
 
     void enterLocalInternal(cfg::LocalRef ref, LocalRefRef &refRef);
+    // TODO: Replaces setTypeAndOrigin and updates typeAndorigins/?
     LocalRefRef enterLocal(cfg::LocalRef ref);
+    LocalRefRef lookupLocal(cfg::LocalRef ref) const;
 
-    bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
-
-    TestedKnowledge &getKnowledge(LocalRefRef symbol) {
-        return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, true));
-    }
-
-    const TestedKnowledge &getKnowledge(LocalRefRef symbol, bool shouldFail = true) const;
-
-    bool getKnownTruthy(cfg::LocalRef var) const;
-
-    // NB: you can't call this function on vars in the first basic block since
-    // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
+    void setTypeAndOrigin(LocalRefRef localRef, const core::TypeAndOrigins &typeAndOrigins);
 
     /* propagate knowledge on `to = from` */
-    void propagateKnowledge(core::Context ctx, LocalRefRef to, LocalRefRef from, KnowledgeFilter &knowledgeFilter);
+    void propagateKnowledge(core::Context ctx, LocalRefRef to, cfg::LocalRef from, KnowledgeFilter &knowledgeFilter);
 
     /* variable was reasigned. Forget everything about previous value */
     void clearKnowledge(core::Context ctx, LocalRefRef reassigned, KnowledgeFilter &knowledgeFilter);
 
     /* Special case sources of knowledge */
-    void updateKnowledge(core::Context ctx, LocalRefRef local, core::Loc loc, const cfg::Send *send,
+    void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter);
 
-    void setTypeAndOrigin(LocalRefRef symbol, const core::TypeAndOrigins &typeAndOrigins);
-
-    void assumeKnowledge(core::Context ctx, bool isTrue, LocalRefRef cond, core::Loc loc, const Environment &filter);
+    void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc, const Environment &filter);
 
     // Extract the return value type from a proc. This should potentially be a
     // method on `Type` or otherwise handled there.

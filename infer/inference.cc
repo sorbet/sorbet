@@ -93,7 +93,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             if (!outEnvironments[parent->id].isDead) {
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 current.populateFrom(ctx, envAsSeenFromBranch);
             } else {
                 current.isDead = true;
@@ -107,7 +107,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,
@@ -189,9 +189,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
-        histogramInc("infer.environment.size", current.vars().size());
-        for (auto &pair : current.vars()) {
-            pair.second.knowledge.emitKnowledgeSizeMetric();
+        histogramInc("infer.environment.size", current.varState().size());
+        for (auto &state : current.varState()) {
+            state.knowledge.emitKnowledgeSizeMetric();
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {
