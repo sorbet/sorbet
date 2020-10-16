@@ -344,11 +344,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                 return;
                             }
 
-                            if (ast::isa_tree<ast::Send>(s->args[0])) {
-                                // Providing a send is the most common way T.absurd is misused
+                            if (!ast::isa_tree<ast::Local>(s->args[0]) &&
+                                !ast::isa_tree<ast::UnresolvedIdent>(s->args[0])) {
                                 if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
-                                    e.setHeader("`{}` expects to be called on a variable, not a method call",
-                                                "T.absurd", s->args.size());
+                                    // Providing a send is the most common way T.absurd is misused, so we provide a
+                                    // little extra hint in the error message in this case.
+                                    //
+                                    // TODO(aprocter): Might be nice to caret the offending arg as a subsection of the
+                                    // main error.
+                                    if (ast::isa_tree<ast::Send>(s->args[0])) {
+                                        e.setHeader("`{}` expects to be called on a variable, not a method call",
+                                                    "T.absurd");
+                                    } else {
+                                        e.setHeader("`{}` expects to be called on a variable", "T.absurd");
+                                    }
                                 }
                                 ret = current;
                                 return;

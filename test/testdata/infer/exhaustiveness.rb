@@ -150,11 +150,7 @@ end
 
 # --- trying to subvert normal usage ------------------------------------------
 
-def only_absurd_1
-  T.absurd(T.let(T.unsafe(nil), T.noreturn)) # error: This code is unreachable
-end
-
-def only_absurd_2
+def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
   T.absurd(temp1) # error: This code is unreachable
 end
@@ -183,7 +179,7 @@ end
 
 sig {params(x: Integer).void}
 def only_keyword_arg(x)
-  T.absurd(x: nil) if x.nil? # error: Control flow could reach `T.absurd` because the type `{x: NilClass}` wasn't handled
+  T.absurd(x: nil) if x.nil? # error: `T.absurd` expects to be called on a variable
 end
 
 sig {returns(T.any(Integer, String))}
@@ -192,11 +188,21 @@ def looks_like_a_variable
 end
 
 sig {void}
-def rejects_absurd_on_non_variable
+def rejects_absurd_on_method_call_that_looks_like_a_variable
   case looks_like_a_variable
   when Integer
   when String
   else
     T.absurd(looks_like_a_variable) # error: `T.absurd` expects to be called on a variable, not a method call
   end
+end
+
+sig{void}
+def rejects_absurd_on_integer_literal
+  T.absurd(42) # error: `T.absurd` expects to be called on a variable
+end
+
+sig{void}
+def rejects_absurd_on_list_literal
+  T.absurd([2,4,6,8]) # error: `T.absurd` expects to be called on a variable
 end
