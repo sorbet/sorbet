@@ -251,7 +251,7 @@ class T::Enum
 
 
   sig {params(serialized_val: SerializedVal).void}
-  private def initialize(serialized_val=nil)
+  def initialize(serialized_val=nil)
     raise 'T::Enum is abstract' if self.class == T::Enum
     if !self.class.started_initializing?
       raise "Must instantiate all enum values of #{self.class} inside 'enums do'."
