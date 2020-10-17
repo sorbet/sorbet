@@ -246,10 +246,11 @@ module Psych
       filename: T.nilable(String),
       fallback: T.untyped,
       symbolize_names: T::Boolean,
+      freeze: T::Boolean,
     )
     .returns(T.untyped)
   end
-  def self.load(yaml, legacy_filename = T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil)); end
+  def self.load(yaml, legacy_filename = T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
 
   ###
   # Safely load the yaml string in +yaml+.  By default, only the following
@@ -308,10 +309,11 @@ module Psych
       filename: T.nilable(String),
       fallback: T.untyped,
       symbolize_names: T::Boolean,
+      freeze: T::Boolean,
     )
     .returns(T.untyped)
   end
-  def self.safe_load(yaml, legacy_permitted_classes = T.unsafe(nil), legacy_permitted_symbols = T.unsafe(nil), legacy_aliases = T.unsafe(nil), legacy_filename = T.unsafe(nil), permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil)); end
+  def self.safe_load(yaml, legacy_permitted_classes = T.unsafe(nil), legacy_permitted_symbols = T.unsafe(nil), legacy_aliases = T.unsafe(nil), legacy_filename = T.unsafe(nil), permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
 
   ###
   # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Document.
