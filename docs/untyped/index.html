@@ -136,8 +136,8 @@ T.reveal_type(a)  <span class="hljs-comment"># a has type T.untyped</span>
 <p>There might be some situations in which we might want to “forget” static type
 information and treat a value as though it were untyped. The
 <a href="/docs/troubleshooting#escape-hatches">escape hatch</a> Sorbet provides for this is
-called <code>T.unsafe</code>, which takes anything and returns returns that same things but
-as <code>T.untyped</code>.</p>
+called <code>T.unsafe</code>, which takes anything and returns that same thing but as
+<code>T.untyped</code>.</p>
 <p>There’s a reason this is named <code>T.unsafe</code>, and it is because converting things
 to <code>T.untyped</code> <strong>weakens static type guarantees</strong>, and should be done with
 caution. The value of a tool like Sorbet is that it can analyze code and produce
