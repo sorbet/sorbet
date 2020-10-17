@@ -1569,7 +1569,7 @@ module Enumerable
   # ```ruby
   # ["a", "b", "c", "b"].tally  #=> {"a"=>1, "b"=>2, "c"=>1}
   # ```
-  sig {returns(T::Hash[T.nilable(Elem), Integer])}
+  sig {returns(T::Hash[Elem, Integer])}
   def tally(); end
 
   ### Implemented in C++

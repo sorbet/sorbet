@@ -666,7 +666,7 @@ class Module < Object
     )
     .returns(T.nilable([String, Integer]))
   end
-  def const_source_location(sym, inherit=T.unsafe(nil)); end
+  def const_source_location(sym, inherit=true); end
 
   # Returns an array of the names of the constants accessible in *mod*. This
   # includes the names of constants in any included modules (example at start of
