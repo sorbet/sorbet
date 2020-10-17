@@ -5,11 +5,11 @@ def main
   try = 0
   begin
     if try < 3
-        try += 1
-        raise A.new
+      try += 1
+      raise A.new
     elsif try < 6
-        try += 1
-        raise B.new
+      try += 1
+      raise B.new
     end
   rescue A
     puts "rescue A "

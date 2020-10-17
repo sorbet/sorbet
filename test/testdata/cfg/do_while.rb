@@ -15,14 +15,14 @@ end until true
 
 x = 0
 x = begin
-  puts 2 # error: This code is unreachable
-  1
-end while false
+    puts 2 # error: This code is unreachable
+    1
+  end while false
 
 y = 0
 y = begin
-  puts 2 # error: This code is unreachable
-  1
-end until true
+    puts 2 # error: This code is unreachable
+    1
+  end until true
 
 puts x, y
