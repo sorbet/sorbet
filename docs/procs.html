@@ -140,10 +140,10 @@ Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the <code>yield</code> call to the <code>blk</code> parameter automatically.</p>
 <h2><a class="anchor" aria-hidden="true" id="modifying-the-self-type"></a><a href="#modifying-the-self-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modifying the self type</h2>
 <p>Many Ruby constructs accept a block argument in one context, but then execute it
-in a different context entirely. This means that inside the block, certain
-methods will definitely exist that definitely don’t exist immediately above the
-block.</p>
-<p>In particular, this is precisely how Sorbet’s <code>sig</code> pattern works:</p>
+in a different context entirely. This means that the methods that exist inside
+the block are not the methods that exist outside the block (like is usually the
+case).</p>
+<p>As an example, this is how Sorbet’s <code>sig</code> pattern works:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) `params` doesn't exist outside the `sig` block:</span>
 params(<span class="hljs-symbol">x:</span> Integer).void <span class="hljs-comment"># error: Method `params` does not exist</span>
 
@@ -153,7 +153,7 @@ sig <span class="hljs-keyword">do</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This also happens a lot with certain Rails APIs, etc. Sorbet has direct support
-for this sort of pattern using an extra argument <code>T.proc</code> called <code>.bind</code>:</p>
+for this sort of pattern using an extra argument on <code>T.proc</code> called <code>.bind</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (0) We're simplifying how `sig` specifically works a bit here,</span>
 <span class="hljs-comment">#     but the general ideas apply.</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">T::Sig</span></span>
@@ -191,7 +191,8 @@ puts(upcased) <span class="hljs-comment"># =&gt; "HELLO"</span>
 <p>In Ruby there’s several ways to create a Proc: <code>proc</code> and <code>Proc.new</code>. Sorbet
 handles them differently because of how parameter arity works internally.
 Basically, you can use <code>T.proc</code> as the type for a <code>proc</code> (or <code>lambda {}</code> or
-<code>-&gt; {}</code>), but you create your Proc using <code>Proc.new</code>, then the type is a <code>Proc</code>.</p>
+<code>-&gt; {}</code>), but if you create your Proc using <code>Proc.new</code>, then the type is a
+<code>Proc</code>.</p>
 <p>The main downside of the <code>Proc.new</code> approach is that you can’t set argument
 types on it.</p>
 <p>Here’s an example:</p>
@@ -211,8 +212,8 @@ sig {returns(Proc)}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In general, you’re better off avoiding <code>Proc.new</code> if you can. There’s a
-<a href="https://www.rubocop.org/en/stable/cops_style/#styleproc">rubocop rule</a> you can
-use to enforce this.</p>
+<a href="https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc">rubocop rule</a>
+you can use to enforce this.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/untyped"><span class="arrow-prev">← </span><span>T.untyped</span></a><a class="docs-next button" href="/docs/abstract"><span>Abstract Classes &amp; Interfaces</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-blocks">Optional blocks</a></li><li><a href="#annotating-methods-that-use-yield">Annotating methods that use <code>yield</code></a></li><li><a href="#modifying-the-self-type">Modifying the self type</a></li><li><a href="#procnew-vs-proc">Proc.new vs proc</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2020 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
