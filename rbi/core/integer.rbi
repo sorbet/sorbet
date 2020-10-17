@@ -703,7 +703,13 @@ class Integer < Numeric
   # [`Numeric#divmod`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-divmod).
   sig do
     params(
-        arg0: T.any(Integer, Float, Rational, BigDecimal),
+        arg0: Integer,
+    )
+    .returns([Integer, Integer])
+  end
+  sig do
+    params(
+        arg0: T.any(Float, Rational, BigDecimal),
     )
     .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   end
