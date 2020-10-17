@@ -107,11 +107,11 @@ to connect the `yield` call to the `blk` parameter automatically.
 ## Modifying the self type
 
 Many Ruby constructs accept a block argument in one context, but then execute it
-in a different context entirely. This means that inside the block, certain
-methods may exist that don't exist immediately above the
-block.
+in a different context entirely. This means that the methods that exist inside
+the block are not the methods that exist outside the block (like is usually the
+case).
 
-In particular, this is precisely how Sorbet's `sig` pattern works:
+As an example, this is how Sorbet's `sig` pattern works:
 
 ```ruby
 # (1) `params` doesn't exist outside the `sig` block:
@@ -169,7 +169,8 @@ puts(upcased) # => "HELLO"
 In Ruby there's several ways to create a Proc: `proc` and `Proc.new`. Sorbet
 handles them differently because of how parameter arity works internally.
 Basically, you can use `T.proc` as the type for a `proc` (or `lambda {}` or
-`-> {}`), but if you create your Proc using `Proc.new`, then the type is a `Proc`.
+`-> {}`), but if you create your Proc using `Proc.new`, then the type is a
+`Proc`.
 
 The main downside of the `Proc.new` approach is that you can't set argument
 types on it.
@@ -194,5 +195,5 @@ end
 ```
 
 In general, you're better off avoiding `Proc.new` if you can. There's a
-[rubocop rule](https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc) you can
-use to enforce this.
+[rubocop rule](https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc)
+you can use to enforce this.
