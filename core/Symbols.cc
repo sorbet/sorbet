@@ -1345,8 +1345,12 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 
     if (locs_.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
-        // Make this the new canonical loc.
-        locs_.emplace_back(loc);
+        if (this->loc().exists() && loc.file().data(gs).strictLevel >= this->loc().file().data(gs).strictLevel) {
+            // The new loc is stricter; make it the new canonical loc.
+            locs_.emplace_back(loc);
+        } else {
+            locs_.insert(locs_.begin(), loc);
+        }
     } else {
         // This is an RBI file; continue to use existing loc as the canonical loc.
         // Insert just before end.
