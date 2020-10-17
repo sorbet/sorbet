@@ -448,7 +448,7 @@ class Thread < Object
   # tick...
   # tick...
   # ```
-  sig {params(limit: NilClass).returns(Thread)}
+  sig {returns(Thread)}
   sig {params(limit: Numeric).returns(T.nilable(Thread))}
   def join(limit=nil); end
 
