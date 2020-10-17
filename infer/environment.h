@@ -101,6 +101,8 @@ class KnowledgeRef {
     KnowledgeFact &mutate();
     std::shared_ptr<KnowledgeFact> knowledge;
 
+    static const std::shared_ptr<KnowledgeFact> empty;
+
 public:
     KnowledgeRef();
     KnowledgeRef(const KnowledgeRef &) = default;

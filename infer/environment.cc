@@ -289,7 +289,9 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+const shared_ptr<KnowledgeFact> KnowledgeRef::empty = make_shared<KnowledgeFact>();
+
+KnowledgeRef::KnowledgeRef() : knowledge(KnowledgeRef::empty) {}
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();
@@ -1457,6 +1459,7 @@ void Environment::cloneFrom(const Environment &rhs) {
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
+    vars.reserve(bb.args.size());
     _varState.reserve(bb.args.size());
     for (const cfg::VariableUseSite &arg : bb.args) {
         auto ref = enterLocal(arg.variable);
