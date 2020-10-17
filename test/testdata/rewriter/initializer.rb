@@ -128,3 +128,31 @@ class NestedConstructor
     T.reveal_type(@x)  # error: Revealed type: `T.untyped`
   end
 end
+
+class Checked
+  extend T::Sig
+
+  sig {params(x: Integer).void.checked(:never)}
+  def initialize(x)
+    @x = x
+  end
+
+  sig {void}
+  def foo
+    T.reveal_type(@x) # error: Revealed type: `Integer`
+  end
+end
+
+class OnFailure
+  extend T::Sig
+
+  sig {params(x: Integer).void.on_failure(:soft, notify: 'sorbet')}
+  def initialize(x)
+    @x = x
+  end
+
+  sig {void}
+  def foo
+    T.reveal_type(@x) # error: Revealed type: `Integer`
+  end
+end
