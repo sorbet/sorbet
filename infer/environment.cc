@@ -803,7 +803,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             }
         }
     }
-} // namespace sorbet::infer
+}
 
 void Environment::mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat,
                             cfg::BasicBlock *bb, KnowledgeFilter &knowledgeFilter) {
@@ -875,7 +875,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
     }
 
     for (int i = 1; i < _varState.size(); i++) {
-        auto var = LocalRefRef(i++);
+        auto var = LocalRefRef(i);
         core::TypeAndOrigins tp;
 
         auto bindMinLoops = var.data(*this).minLoops(inWhat);

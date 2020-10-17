@@ -164,7 +164,7 @@ public:
     void emitKnowledgeSizeMetric() const;
 };
 
-class Environment {
+class Environment final {
     friend class LocalRefRef;
 
     const core::TypeAndOrigins uninitialized;
