@@ -1562,6 +1562,16 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def take_while(&blk); end
 
+  # Tallies the collection, i.e., counts the occurrences of each element.
+  # Returns a hash with the elements of the collection as keys and the
+  # corresponding counts as values.
+  #
+  # ```ruby
+  # ["a", "b", "c", "b"].tally  #=> {"a"=>1, "b"=>2, "c"=>1}
+  # ```
+  sig {returns(T::Hash[T.nilable(Elem), Integer])}
+  def tally(); end
+
   ### Implemented in C++
 
   # Returns the result of interpreting *enum* as a list of `[key, value]` pairs.
