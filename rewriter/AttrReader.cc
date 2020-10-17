@@ -98,8 +98,7 @@ bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSi
 ast::TreePtr dupReturnsType(core::MutableContext ctx, ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = ast::cast_tree_const<ast::Block>(sharedSig->block);
-    auto body = ast::cast_tree_const<ast::Send>(block->body);
+    auto *body = findSendReturns(ctx, ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {

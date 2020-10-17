@@ -26,6 +26,9 @@ class TestAttr
   sig {void.on_failure(:raise)}
   attr_accessor :str8 # error: This function does not have a `sig`
 
+  sig {params(str9: T.nilable(String)).returns(T.nilable(String)).checked(:never)}
+  attr_writer :str9
+
   sig {void}
   def initialize
     @str1 = T.let('', String)
@@ -36,6 +39,7 @@ class TestAttr
     @str6 = T.let('', String)
     @str7 = T.let('', String)
     @str8 = T.let('', String)
+    @str9 = ''
   end
 
 end
