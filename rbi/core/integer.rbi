@@ -1115,7 +1115,7 @@ class Integer < Numeric
     params(
         arg0: Numeric,
     )
-    .returns(Numeric)
+    .returns(Integer)
   end
   def round(arg0=T.unsafe(nil)); end
 
