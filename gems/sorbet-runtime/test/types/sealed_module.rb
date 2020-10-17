@@ -162,4 +162,42 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
     require_relative './fixtures/sealed_module/whitelist_violation__1.rb'
     require_relative './fixtures/sealed_module/whitelist_violation__2.rb'
   end
+
+  it "returns an empty set if we try to get the subclasses of a sealed-but-never-inherited parent" do
+    parent = Class.new do
+      extend T::Helpers
+      sealed!
+    end
+
+    assert_equal(Set.new, parent.sealed_subclasses)
+  end
+
+  it "can enumerate all a sealed class's subclasses" do
+    parent = Class.new do
+      extend T::Helpers
+      sealed!
+    end
+
+    a = Class.new(parent)
+    b = Class.new(parent)
+
+    assert_equal(Set[a, b], parent.sealed_subclasses)
+  end
+
+  it "can enumerate all the classes which include a sealed module" do
+    parent = Module.new do
+      extend T::Helpers
+      sealed!
+    end
+
+    a = Class.new do
+      include parent
+    end
+    b = Class.new do
+      include parent
+    end
+
+    assert_equal(Set[a, b], parent.sealed_subclasses)
+  end
+
 end

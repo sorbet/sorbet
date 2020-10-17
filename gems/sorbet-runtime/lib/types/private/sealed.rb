@@ -7,6 +7,11 @@ module T::Private::Sealed
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `inherited'$/)}
       T::Private::Sealed.validate_inheritance(this_line, self, 'inherited')
+      @sorbet_sealed_module_all_subclasses << other
+    end
+
+    def sealed_subclasses
+      @sorbet_sealed_module_all_subclasses
     end
   end
 
@@ -15,12 +20,21 @@ module T::Private::Sealed
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `included'$/)}
       T::Private::Sealed.validate_inheritance(this_line, self, 'included')
+      @sorbet_sealed_module_all_subclasses << other
     end
 
     def extended(other)
       super
       this_line = Kernel.caller.find {|line| !line.match(/in `extended'$/)}
       T::Private::Sealed.validate_inheritance(this_line, self, 'extended')
+      @sorbet_sealed_module_all_subclasses << other
+    end
+
+    def sealed_subclasses
+      # this will freeze the set so that you can never get into a
+      # state where you use the subclasses list and then something
+      # else will add to it
+      @sorbet_sealed_module_all_subclasses.freeze
     end
   end
 
@@ -39,6 +53,7 @@ module T::Private::Sealed
       raise "Couldn't determine declaration file for sealed class."
     end
     mod.instance_variable_set(:@sorbet_sealed_module_decl_file, decl_file)
+    mod.instance_variable_set(:@sorbet_sealed_module_all_subclasses, Set.new)
   end
 
   def self.sealed_module?(mod)

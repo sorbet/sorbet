@@ -188,6 +188,22 @@ def process_invoice(invoice_state)
 end
 ```
 
+## Listing sealed subclasses at runtime
+
+As an extra convenience, a sealed class or module will gain a class method
+called `sealed_subclasses` that returns the complete set of sealed subclasses.
+This can be used to dynamically iterate over all the subclasses:
+
+```ruby
+ChargeAttemptResult.sealed_subclasses.each do |klass|
+  puts "Charge attempt can be #{klass.name}"
+end
+```
+
+`sealed_subclasses` returns a `Set`. Sorbet makes **no guarantee** about the
+iteration order of elements in this set. When writing code that assumes a stable
+iteration order, take care to sort the elements first.
+
 ## What's next?
 
 - [Abstract Classes and Interfaces](abstract.md)
