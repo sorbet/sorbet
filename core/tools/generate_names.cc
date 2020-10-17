@@ -330,6 +330,7 @@ NameDef names[] = {
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
     {"lessThan", "<"},
+    {"equal_p", "equal?"},
     {"eqeq", "=="},
     {"neq", "!="},
     {"leq", "<="},

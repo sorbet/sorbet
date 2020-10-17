@@ -572,7 +572,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             }
             whoKnows.sanityCheck();
         }
-    } else if (send->fun == core::Names::eqeq() || send->fun == core::Names::neq()) {
+    } else if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() ||
+               send->fun == core::Names::neq()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -580,8 +581,9 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
 
-        auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy() : whoKnows.falsy();
-        auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy() : whoKnows.truthy();
+        auto funIsEq = send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p();
+        auto &truthy = funIsEq ? whoKnows.truthy() : whoKnows.falsy();
+        auto &falsy = funIsEq ? whoKnows.falsy() : whoKnows.truthy();
 
         ENFORCE(argType.get() != nullptr);
         ENFORCE(recvType.get() != nullptr);
