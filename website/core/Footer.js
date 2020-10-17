@@ -6,11 +6,12 @@ class Footer extends React.Component {
     const {baseUrl, docsUrl} = siteConfig;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
     const docUrl = (doc) => `${baseUrl}${docsPart}${doc}`;
+    const currentYear = new Date().getFullYear();
     return (
       <footer className="nav-footer" id="footer">
         <div className="wrapper">
           <p className="footer">
-            © 2019 Stripe{' · '}
+            © {currentYear} Stripe{' · '}
             <a href={docUrl('adopting')}>Get started</a>
             {' · '}
             <a href={docUrl('overview')}>Docs</a>
