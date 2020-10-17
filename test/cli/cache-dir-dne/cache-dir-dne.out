@@ -1,0 +1,14 @@
+mdb error: failed to create database: No such file or directory
+Backtrace:
+  #3 0x1865a66 
+  #4 0x18659ff 
+  #5 0x14437b6 sorbet::(anonymous namespace)::throw_mdb_error()
+  #6 0x14436bf sorbet::KeyValueStore::KeyValueStore()
+  #7 0xdecb64 std::__1::make_unique<>()
+  #8 0xdec653 sorbet::realmain::cache::maybeCreateKeyValueStore()
+  #9 0xa8998e sorbet::realmain::realmain()
+  #10 0xa870e2 main
+  #11 0x7f5541b16840 __libc_start_main
+  #12 0xa87029 _start
+
+terminate_handler unexpectedly returned
