@@ -96,8 +96,8 @@ end
 There might be some situations in which we might want to "forget" static type
 information and treat a value as though it were untyped. The
 [escape hatch](troubleshooting.md#escape-hatches) Sorbet provides for this is
-called `T.unsafe`, which takes anything and returns returns that same things but
-as `T.untyped`.
+called `T.unsafe`, which takes anything and returns that same thing but as
+`T.untyped`.
 
 There's a reason this is named `T.unsafe`, and it is because converting things
 to `T.untyped` **weakens static type guarantees**, and should be done with
