@@ -1193,7 +1193,16 @@ class Hash < Object
   #
   # If a block is given, the results of the block on each pair of the receiver
   # will be used as pairs.
-  def to_h; end
+  sig do
+    type_parameters(:A, :B)
+      .params(
+        blk: T.proc.params(arg0: K, arg1: V)
+              .returns([T.type_parameter(:A), T.type_parameter(:B)])
+      )
+      .returns(T::Hash[T.type_parameter(:A), T.type_parameter(:B)])
+  end
+  sig {returns(T::Hash[K, V])}
+  def to_h(&blk); end
 
   # Returns `self`.
   sig {returns(T::Hash[K, V])}
