@@ -712,10 +712,10 @@ void Environment::updateKnowledge(core::Context ctx, LocalRefRef ref, core::Loc 
     }
 }
 
-void Environment::setTypeAndOrigin(LocalRefRef symbol, const core::TypeAndOrigins &typeAndOrigins) {
+void Environment::setTypeAndOrigin(LocalRefRef symbol, core::TypeAndOrigins &&typeAndOrigins) {
     ENFORCE_NO_TIMER(symbol.exists());
     ENFORCE(typeAndOrigins.type.get() != nullptr);
-    _varState[symbol.id()].typeAndOrigins = typeAndOrigins;
+    _varState[symbol.id()].typeAndOrigins = move(typeAndOrigins);
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
@@ -758,7 +758,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             if (!ref.exists()) {
                 ref = enterLocal(cond);
             }
-            setTypeAndOrigin(ref, tp);
+            setTypeAndOrigin(ref, move(tp));
         } else {
             tp.origins.emplace_back(loc);
             tp.type = core::Types::dropSubtypesOf(
@@ -770,7 +770,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             if (!ref.exists()) {
                 ref = enterLocal(cond);
             }
-            setTypeAndOrigin(ref, tp);
+            setTypeAndOrigin(ref, move(tp));
             _varState[ref.id()].knownTruthy = true;
         }
     }
@@ -796,8 +796,9 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             tp.type = glbbed;
         }
 
-        setTypeAndOrigin(ref, tp);
-        if (tp.type->isBottom()) {
+        bool isBottom = tp.type->isBottom();
+        setTypeAndOrigin(ref, move(tp));
+        if (isBottom) {
             isDead = true;
             return;
         }
@@ -816,8 +817,9 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             if (!ref.exists()) {
                 ref = enterLocal(typeTested.first);
             }
-            setTypeAndOrigin(ref, tp);
-            if (tp.type->isBottom()) {
+            bool isBottom = tp.type->isBottom();
+            setTypeAndOrigin(ref, move(tp));
+            if (isBottom) {
                 isDead = true;
                 return;
             }
@@ -1447,7 +1449,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             }
         }
-        setTypeAndOrigin(bindVarRef, tp);
+        auto type = tp.type;
+        setTypeAndOrigin(bindVarRef, move(tp));
 
         clearKnowledge(ctx, bindVarRef, knowledgeFilter);
         if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
@@ -1456,7 +1459,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             propagateKnowledge(ctx, bindVarRef, i->what, knowledgeFilter);
         }
 
-        return move(tp.type);
+        return type;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = ctx.beginError(bind.loc, core::errors::Internal::InternalError)) {
@@ -1501,17 +1504,15 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
     // I'd love to have this, but keepForIDE intentionally has Loc::none() and
     // sometimes ends up here...
     // ENFORCE(loc.exists());
-    core::TypeAndOrigins ret;
-    ret.type = core::Types::nilClass();
-    ret.origins.emplace_back(loc);
+    core::TypeAndOrigins ret{core::Types::nilClass(), {loc}};
     return ret;
 }
 } // namespace
 
 Environment::Environment(const cfg::CFG &cfg, const KnowledgeFilter &filter, core::Loc ownerLoc)
     : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), definedVars(cfg.numLocalVariables()), filter(filter) {
-    this->_varState.reserve(16);
-    this->vars.reserve(16);
+    this->_varState.reserve(32);
+    this->vars.reserve(32);
 
     // Enter the non-existant 0 ref.
     this->_varState.emplace_back();

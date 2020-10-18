@@ -217,7 +217,7 @@ class Environment final {
     LocalRefRef enterLocal(cfg::LocalRef ref);
     LocalRefRef lookupLocal(cfg::LocalRef ref) const;
 
-    void setTypeAndOrigin(LocalRefRef localRef, const core::TypeAndOrigins &typeAndOrigins);
+    void setTypeAndOrigin(LocalRefRef localRef, core::TypeAndOrigins &&typeAndOrigins);
 
     /* propagate knowledge on `to = from` */
     void propagateKnowledge(core::Context ctx, LocalRefRef to, cfg::LocalRef from, KnowledgeFilter &knowledgeFilter);
