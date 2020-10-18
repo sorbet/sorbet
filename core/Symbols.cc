@@ -1740,7 +1740,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
         auto classType = cast_type_nonnull<ClassType>(orType->right);
         auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(gs, make_type<ClassType>(subclass), result);
+        result = Types::any(gs, subclass.data(gs)->externalType(), result);
         currentClasses = orType->left;
     }
 
@@ -1748,7 +1748,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
     auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(gs, make_type<ClassType>(subclass), result);
+    result = Types::any(gs, subclass.data(gs)->externalType(), result);
 
     return result;
 }
