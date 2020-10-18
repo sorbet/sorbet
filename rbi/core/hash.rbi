@@ -978,9 +978,9 @@ class Hash < Object
   # ```
   sig do
     params(
-        arg0: K,
+        arg0: V,
     )
-    .returns(T::Array[T.any(K, V)])
+    .returns(T.nilable([K, V]))
   end
   def rassoc(arg0); end
 
