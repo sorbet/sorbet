@@ -157,6 +157,16 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
             }
         }
     }
+
+    if (debug_mode) {
+        int count = 0;
+        for (auto used_var : used_vars) {
+            if (used_var) {
+                count++;
+            }
+        }
+        histogramInc("knowledgefilter.used_vars", count);
+    }
 }
 
 bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
