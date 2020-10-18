@@ -1510,6 +1510,9 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 
 Environment::Environment(const cfg::CFG &cfg, const KnowledgeFilter &filter, core::Loc ownerLoc)
     : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), definedVars(cfg.numLocalVariables()), filter(filter) {
+    this->_varState.reserve(16);
+    this->vars.reserve(16);
+
     // Enter the non-existant 0 ref.
     this->_varState.emplace_back();
     this->_varState[0].knowledge = TestedKnowledge::empty;
