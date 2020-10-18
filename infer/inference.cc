@@ -69,17 +69,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }
 
+    KnowledgeFilter knowledgeFilter(ctx, cfg);
     vector<Environment> outEnvironments;
     outEnvironments.reserve(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->maxBasicBlockId; i++) {
-        outEnvironments.emplace_back(*cfg, methodLoc);
+        outEnvironments.emplace_back(*cfg, knowledgeFilter, methodLoc);
     }
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
         outEnvironments[cfg->forwardsTopoSort[i]->id].bb = cfg->forwardsTopoSort[i];
     }
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
-    KnowledgeFilter knowledgeFilter(ctx, cfg);
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
@@ -91,7 +91,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(*cfg, methodLoc);
+                Environment tempEnv(*cfg, knowledgeFilter, methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 current.populateFrom(ctx, envAsSeenFromBranch);
@@ -105,7 +105,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
-                Environment tempEnv(*cfg, methodLoc);
+                Environment tempEnv(*cfg, knowledgeFilter, methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current);
                 if (!envAsSeenFromBranch.isDead) {

@@ -115,13 +115,16 @@ struct KnowledgeFact {
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
-KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
-    used_vars.resize(cfg->numLocalVariables());
+KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg)
+    : used_vars(cfg->numLocalVariables()), needed_vars(cfg->numLocalVariables()) {
     for (auto &bb : cfg->basicBlocks) {
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() &&
             bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
             used_vars[bb->bexit.cond.variable.id()] = true;
+        }
+        for (auto &expr : bb->exprs) {
+            needed_vars[expr.bind.variable.id()] = true;
         }
     }
     bool changed = true;
@@ -160,17 +163,21 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
 
     if (debug_mode) {
         int count = 0;
-        for (auto used_var : used_vars) {
-            if (used_var) {
+        for (int i = 0; i < cfg->numLocalVariables(); i++) {
+            if (used_vars[i] || needed_vars[i]) {
                 count++;
             }
         }
-        histogramInc("knowledgefilter.used_vars", count);
+        histogramInc("knowledgefilter.defined_vars", count);
     }
 }
 
-bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
+bool KnowledgeFilter::isNeeded(cfg::LocalRef var) const {
     return used_vars[var.id()];
+}
+
+bool KnowledgeFilter::shouldDefine(cfg::LocalRef var) const {
+    return needed_vars[var.id()] || isNeeded(var);
 }
 
 KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat,
@@ -419,12 +426,13 @@ void TestedKnowledge::sanityCheck() const {
 }
 
 void Environment::enterLocalInternal(cfg::LocalRef ref, LocalRefRef &refRef) {
+    ENFORCE_NO_TIMER(filter.shouldDefine(ref));
     // TODO: Enforce not frozen?
     int id = this->vars.size();
     this->vars.emplace_back(ref);
     this->_varState.emplace_back();
 
-    ENFORCE(this->vars.size() == this->_varState.size());
+    ENFORCE_NO_TIMER(this->vars.size() == this->_varState.size());
     refRef = LocalRefRef(id);
 }
 
@@ -1500,8 +1508,8 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 }
 } // namespace
 
-Environment::Environment(const cfg::CFG &cfg, core::Loc ownerLoc)
-    : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), definedVars(cfg.numLocalVariables()) {
+Environment::Environment(const cfg::CFG &cfg, const KnowledgeFilter &filter, core::Loc ownerLoc)
+    : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), definedVars(cfg.numLocalVariables()), filter(filter) {
     // Enter the non-existant 0 ref.
     this->_varState.emplace_back();
     this->_varState[0].knowledge = TestedKnowledge::empty;

@@ -84,6 +84,7 @@ struct KnowledgeFact;
 // walk all the instructions and collect knowledge that we may ever need
 class KnowledgeFilter {
     std::vector<bool> used_vars;
+    std::vector<bool> needed_vars;
 
 public:
     KnowledgeFilter(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
@@ -91,7 +92,8 @@ public:
     KnowledgeFilter(KnowledgeFilter &) = delete;
     KnowledgeFilter(KnowledgeFilter &&) = delete;
 
-    bool isNeeded(cfg::LocalRef var);
+    bool isNeeded(cfg::LocalRef var) const;
+    bool shouldDefine(cfg::LocalRef var) const;
 };
 
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
@@ -235,8 +237,10 @@ class Environment final {
 
     void cloneFrom(const Environment &rhs);
 
+    const KnowledgeFilter &filter;
+
 public:
-    Environment(const cfg::CFG &cfg, core::Loc ownerLoc);
+    Environment(const cfg::CFG &cfg, const KnowledgeFilter &filter, core::Loc ownerLoc);
     Environment(const Environment &rhs) = delete;
     Environment(Environment &&rhs) = default;
 
