@@ -1024,14 +1024,14 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
         ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
         auto subclass = classType->symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(gs, make_type<ClassType>(subclass), result);
+        result = Types::any(gs, subclass.data(gs)->externalType(gs), result);
         currentClasses = orType->left;
     }
     auto lastClassType = cast_type<ClassType>(currentClasses.get());
     ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
     auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(gs, make_type<ClassType>(subclass), result);
+    result = Types::any(gs, subclass.data(gs)->externalType(gs), result);
 
     return result;
 }
