@@ -181,16 +181,16 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
         // Overapproximation of the set of variables that have aliases.
         // Will have false positives, but no false negatives. Avoids an expensive inner loop below.
-        UnorderedSet<LocalRef> mayHaveAlias;
+        UIntSet mayHaveAlias(cfg.numLocalVariables());
         for (auto &alias : current) {
-            mayHaveAlias.insert(alias.second);
+            mayHaveAlias.add(alias.second.id());
         }
 
         for (Binding &bind : bb->exprs) {
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 i->what = maybeDealias(ctx, cfg, i->what, current);
             }
-            if (mayHaveAlias.contains(bind.bind.variable)) {
+            if (mayHaveAlias.contains(bind.bind.variable.id())) {
                 /* invalidate a stale record (uncommon) */
                 for (auto it = current.begin(); it != current.end(); /* nothing */) {
                     if (it->second == bind.bind.variable) {
@@ -222,7 +222,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 current[bind.bind.variable] = i->what;
-                mayHaveAlias.insert(i->what);
+                mayHaveAlias.add(i->what.id());
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
