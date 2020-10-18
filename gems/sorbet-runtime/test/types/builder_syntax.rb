@@ -29,6 +29,17 @@ module Opus::Types::Test
       assert_equal(true, builder.decl.finalized)
     end
 
+    it 'requires paramms be keyword args' do
+      ex = assert_raises do
+        Class.new do
+          extend T::Sig
+          sig {params(Integer).void}
+          def self.foo; end; foo
+        end
+      end
+      assert_includes(ex.message, "params expects keyword arguments")
+    end
+
     describe 'modes' do
       # @see T::Test::AbstractValidationTest
       # for error cases with abstract/override/implementation signatures
