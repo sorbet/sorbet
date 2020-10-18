@@ -1,6 +1,6 @@
 #include "cfg/builder/builder.h"
-#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
+#include "common/UIntSetForEach.h"
 #include "common/sort.h"
 #include "core/Names.h"
 
@@ -256,7 +256,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 continue;
             }
 
-            bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
+            bool wasRead = RnW.reads[it->id].contains(bind.bind.variable.id()); // read in the same block
 
             if (!wasRead) {
                 // args are in LocalRef variable order
@@ -302,13 +302,13 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        for (auto local : RnW.reads[bb->id]) {
+        RnW.reads[bb->id].forEach([&cfg, &bb](u4 local) -> void {
             auto curMin = cfg.minLoops[local];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
             cfg.minLoops[local] = curMin;
-        }
+        });
     }
     for (const auto &bb : cfg.basicBlocks) {
         if (bb.get() == cfg.deadBlock()) {
@@ -344,12 +344,12 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    const vector<vector<int>> &readsByBlock = RnW.reads;
-    const vector<vector<int>> &writesByBlock = RnW.writes;
-    const vector<vector<int>> &deadByBlock = RnW.dead;
+    const vector<UIntSet> &readsByBlock = RnW.reads;
+    const vector<UIntSet> &writesByBlock = RnW.writes;
+    const vector<UIntSet> &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<vector<int>> upperBounds1;
+    vector<UIntSet> upperBounds1;
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
@@ -358,37 +358,38 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
+
                 const auto sz = upperBoundsForBlock.size();
+
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
+                    upperBoundsForBlock.add(upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
+                    upperBoundsForBlock.add(upperBounds1[bb->bexit.elseb->id]);
                 }
 
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
                 const auto &deadForBlock = deadByBlock[bb->id];
                 if (!deadForBlock.empty()) {
-                    vector<int> toRemove;
-                    for (auto local : deadForBlock) {
+                    UIntSet toRemove(cfg.numLocalVariables());
+                    deadForBlock.forEach([&bb, &cfg, &toRemove](u4 local) -> void {
                         // TODO(nelhage) We can't erase for variables inside loops, due
                         // to how our "pinning" type inference works. We can remove this
                         // inner condition when we get a better type inference
                         // algorithm.
                         if (bb->outerLoops <= cfg.minLoops[local]) {
-                            toRemove.emplace_back(local);
+                            toRemove.add(local);
                         }
-                    }
-                    SortedVectorHelpers::setDifferenceInplace(upperBoundsForBlock, toRemove);
+                    });
+                    upperBoundsForBlock.remove(toRemove);
                 }
-
                 changed = changed || (upperBoundsForBlock.size() != sz);
             }
         }
     }
 
-    vector<vector<int>> upperBounds2(cfg.maxBasicBlockId);
+    vector<UIntSet> upperBounds2(cfg.maxBasicBlockId, UIntSet(cfg.numLocalVariables()));
 
     changed = true;
     {
@@ -401,11 +402,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, writesByBlock[edge->id]);
-                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds2[edge->id]);
+                        upperBoundsForBlock.add(writesByBlock[edge->id]);
+                        upperBoundsForBlock.add(upperBounds2[edge->id]);
                     }
                 }
-
                 changed = changed || sz != upperBoundsForBlock.size();
             }
         }
@@ -414,25 +414,11 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
-            const auto &set1 = upperBounds1[it->id];
-            const auto &set2 = upperBounds2[it->id];
-            auto set1It = set1.begin();
-            auto set2It = set2.begin();
-            // Note: The loop enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
+            auto intersection = upperBounds1[it->id];
+            intersection.intersection(upperBounds2[it->id]);
+            // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
-            while (set1It != set1.end() && set2It != set2.end()) {
-                const auto set1El = *set1It;
-                const auto set2El = *set2It;
-                if (set1El == set2El) {
-                    it->args.emplace_back(set1El);
-                    set1It++;
-                    set2It++;
-                } else if (set1El < set2El) {
-                    set1It++;
-                } else {
-                    set2It++;
-                }
-            }
+            intersection.forEach([&it](u4 local) -> void { it->args.emplace_back(local); });
             // it->args is now sorted in LocalRef ID order.
             ENFORCE(absl::c_is_sorted(it->args,
                                       [](auto &a, auto &b) -> bool { return a.variable.id() < b.variable.id(); }));

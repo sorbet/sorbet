@@ -7,18 +7,18 @@ namespace sorbet::cfg {
 class CFG;
 
 class LocalRef final {
-    int _id;
+    u4 _id;
 
 public:
     LocalRef() : _id(0){};
-    LocalRef(int id) : _id(id){};
+    LocalRef(u4 id) : _id(id){};
     LocalRef(const LocalRef &) = default;
     LocalRef(LocalRef &&) = default;
     LocalRef &operator=(LocalRef &&) = default;
     LocalRef &operator=(const LocalRef &) = default;
 
     core::LocalVariable data(const CFG &cfg) const;
-    int id() const {
+    u4 id() const {
         return this->_id;
     }
     int minLoops(const CFG &cfg) const;

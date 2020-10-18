@@ -1,8 +1,8 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
-#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
+#include "common/UIntSetForEach.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 
@@ -14,6 +14,10 @@ template class std::vector<sorbet::cfg::BasicBlock *>;
 using namespace std;
 
 namespace sorbet::cfg {
+
+CFG::ReadsAndWrites::ReadsAndWrites(u4 maxBasicBlockId, u4 numLocalVariables)
+    : reads(maxBasicBlockId, UIntSet(numLocalVariables)), writes(maxBasicBlockId, UIntSet(numLocalVariables)),
+      dead(maxBasicBlockId, UIntSet(numLocalVariables)) {}
 
 CFG::UnfreezeCFGLocalVariables::UnfreezeCFGLocalVariables(CFG &cfg) : cfg(cfg) {
     this->cfg.localVariablesFrozen = false;
@@ -87,18 +91,14 @@ CFG::CFG() {
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
-    CFG::ReadsAndWrites target;
-    target.readsSet.resize(maxBasicBlockId);
-    target.reads.resize(maxBasicBlockId);
-    target.writes.resize(maxBasicBlockId);
-    target.dead.resize(maxBasicBlockId);
+    CFG::ReadsAndWrites target(maxBasicBlockId, numLocalVariables());
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
-        UnorderedSet<int> blockWrites;
-        auto &blockReads = target.readsSet[bb->id];
-        UnorderedSet<int> blockDead;
+        auto &blockWrites = target.writes[bb->id];
+        auto &blockReads = target.reads[bb->id];
+        auto &blockDead = target.dead[bb->id];
         for (Binding &bind : bb->exprs) {
-            blockWrites.insert(bind.bind.variable.id());
+            blockWrites.add(bind.bind.variable.id());
             /*
              * When we write to an alias, we rely on the type information being
              * propagated through block arguments from the point of
@@ -107,54 +107,38 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
              */
             if (bind.bind.variable.isAliasForGlobal(ctx, *this) &&
                 cast_instruction<Alias>(bind.value.get()) == nullptr) {
-                blockReads.insert(bind.bind.variable.id());
+                blockReads.add(bind.bind.variable.id());
             }
 
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
-                blockReads.insert(v->what.id());
+                blockReads.add(v->what.id());
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                blockReads.insert(v->recv.variable.id());
+                blockReads.add(v->recv.variable.id());
                 for (auto &arg : v->args) {
-                    blockReads.insert(arg.variable.id());
+                    blockReads.add(arg.variable.id());
                 }
             } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
-                blockReads.insert(v->what.variable.id());
+                blockReads.add(v->what.variable.id());
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                blockReads.insert(v->what.variable.id());
+                blockReads.add(v->what.variable.id());
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                blockReads.insert(v->what.variable.id());
+                blockReads.add(v->what.variable.id());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                blockReads.insert(v->value.variable.id());
+                blockReads.add(v->value.variable.id());
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
-                blockReads.insert(v->fallback.id());
+                blockReads.add(v->fallback.id());
             } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
-                blockReads.insert(v->send.id());
+                blockReads.add(v->send.id());
             }
 
             if (!blockReads.contains(bind.bind.variable.id())) {
-                blockDead.insert(bind.bind.variable.id());
+                blockDead.add(bind.bind.variable.id());
             }
         }
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
-            blockReads.insert(bb->bexit.cond.variable.id());
+            blockReads.add(bb->bexit.cond.variable.id());
         }
-
-        // Convert sets to sorted vectors.
-        auto &blockReadsVector = target.reads[bb->id];
-        blockReadsVector.reserve(blockReads.size());
-        blockReadsVector.insert(blockReadsVector.end(), blockReads.begin(), blockReads.end());
-        fast_sort(blockReadsVector);
-
-        auto &blockWriteVector = target.writes[bb->id];
-        blockWriteVector.reserve(blockWrites.size());
-        blockWriteVector.insert(blockWriteVector.end(), blockWrites.begin(), blockWrites.end());
-        fast_sort(blockWriteVector);
-
-        auto &blockDeadVector = target.dead[bb->id];
-        blockDeadVector.reserve(blockDead.size());
-        blockDeadVector.insert(blockDeadVector.end(), blockDead.begin(), blockDead.end());
-        fast_sort(blockDeadVector);
     }
 
     vector<pair<int, int>> usageCounts(this->numLocalVariables());
@@ -163,35 +147,29 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
         Timer timeit(ctx.state.tracer(), "privates1");
 
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
-            const auto &blockReads = target.reads[blockId];
-            const auto &blockWrites = target.writes[blockId];
-            vector<int> blockReadsAndWrites;
-            // Assumption: Most items in blockWrites are in blockReads, so this is a conservative preallocation. It
-            // should strictly avoid allocation work that would normally happen as part of the union.
-            blockReadsAndWrites.reserve(max(blockReads.size(), blockWrites.size()));
-            set_union(blockReads.begin(), blockReads.end(), blockWrites.begin(), blockWrites.end(),
-                      back_inserter(blockReadsAndWrites));
-            for (auto local : blockReadsAndWrites) {
+            UIntSet blockReadsAndWrites = target.reads[blockId];
+            blockReadsAndWrites.add(target.writes[blockId]);
+            blockReadsAndWrites.forEach([&usageCounts, blockId](u4 local) -> void {
                 if (usageCounts[local].first == 0) {
                     usageCounts[local].second = blockId;
                 }
                 usageCounts[local].first += 1;
-            }
+            });
         }
     }
     {
         Timer timeit(ctx.state.tracer(), "privates2");
         auto local = 0;
-        vector<vector<int>> writesToRemove(maxBasicBlockId);
+        vector<UIntSet> writesToRemove(maxBasicBlockId, UIntSet(numLocalVariables()));
         for (const auto &usages : usageCounts) {
             if (usages.first == 1) {
-                writesToRemove[usages.second].emplace_back(local);
+                writesToRemove[usages.second].add(local);
             }
             local++;
         }
         auto blockId = 0;
         for (const auto &blockWritesToRemove : writesToRemove) {
-            SortedVectorHelpers::setDifferenceInplace(target.writes[blockId], blockWritesToRemove);
+            target.writes[blockId].remove(blockWritesToRemove);
             blockId++;
         }
     }

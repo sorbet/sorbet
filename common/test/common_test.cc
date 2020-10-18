@@ -2,6 +2,7 @@
 // violates our requirements, thus has to go first
 #include "common/FileOps.h"
 #include "common/Levenstein.h"
+#include "common/UIntSet.h"
 #include "common/common.h"
 
 namespace sorbet::common {
