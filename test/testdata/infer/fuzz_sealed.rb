@@ -10,7 +10,7 @@ sig {params(x: Boolean).void}
 def foo(x)
   case x
   when TrueClass
-    T.reveal_type(x)
+    T.reveal_type(x) # error: Revealed type: `T.all(Boolean, TrueClass)`
   else
     T.absurd(x)
   end
