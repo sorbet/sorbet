@@ -12,6 +12,13 @@ void UIntSet::add(u4 item) {
     _members[memberIndex] |= mask;
 }
 
+void UIntSet::remove(u4 item) {
+    u4 memberIndex = item >> 5;
+    ENFORCE_NO_TIMER(memberIndex < _members.size());
+    u4 mask = 1 << (item & 0x1F);
+    _members[memberIndex] &= ~mask;
+}
+
 bool UIntSet::contains(u4 item) const {
     u4 memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());

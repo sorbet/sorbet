@@ -15,6 +15,9 @@ public:
     // Add number to set.
     void add(u4 item);
 
+    // Remove number from set.
+    void remove(u4 item);
+
     // Returns true if the set contains the given item.
     bool contains(u4 item) const;
 
