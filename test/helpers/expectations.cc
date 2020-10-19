@@ -112,8 +112,8 @@ void populateSourceFileContents(Expectations &exp) {
     for (auto &file : exp.sourceFiles) {
         string filename = exp.folder + file;
         string fileContents = FileOps::read(filename);
-        exp.sourceFileContents[filename] =
-            make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
+        auto &slot = exp.sourceFileContents[filename];
+        slot = make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
     }
 }
 

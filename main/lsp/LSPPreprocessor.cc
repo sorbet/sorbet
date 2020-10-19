@@ -340,8 +340,8 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> 
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = getFileType(localPath, config->opts);
-            edit->updates.push_back(
-                make_shared<core::File>(move(localPath), readFile(localPath, *config->opts.fs), fileType, v));
+            auto contents = readFile(localPath, *config->opts.fs);
+            edit->updates.push_back(make_shared<core::File>(move(localPath), move(contents), fileType, v));
         }
     }
     return edit;
@@ -357,8 +357,8 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> query
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             auto fileType = getFileType(localPath, config->opts);
-            edit->updates.push_back(
-                make_shared<core::File>(move(localPath), readFile(localPath, *config->opts.fs), fileType, v));
+            auto contents = readFile(localPath, *config->opts.fs);
+            edit->updates.push_back(make_shared<core::File>(move(localPath), move(contents), fileType, v));
         }
     }
     return edit;
