@@ -241,7 +241,9 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
         }
     }
 }
-void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
+                                   vector<UIntSet> &&blockArgs) {
+    ENFORCE_NO_TIMER(blockArgs.size() == cfg.maxBasicBlockId);
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
     }
@@ -256,26 +258,10 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 continue;
             }
 
-            bool wasRead = RnW.reads[it->id].contains(bind.bind.variable.id()); // read in the same block
+            bool wasRead = RnW.reads[it->id].contains(bind.bind.variable.id()) || // read in the same block
+                           blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
+                           blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
 
-            if (!wasRead) {
-                // args are in LocalRef variable order
-                auto argIt = absl::c_lower_bound(it->bexit.thenb->args, bind.bind, [](auto &a, auto &b) -> bool {
-                    return a.variable.id() < b.variable.id();
-                });
-                if (argIt != it->bexit.thenb->args.end() && argIt->variable == bind.bind.variable) {
-                    wasRead = true;
-                }
-            }
-            if (!wasRead) {
-                // args are in LocalRef variable order
-                auto argIt = absl::c_lower_bound(it->bexit.elseb->args, bind.bind, [](auto &a, auto &b) -> bool {
-                    return a.variable.id() < b.variable.id();
-                });
-                if (argIt != it->bexit.elseb->args.end() && argIt->variable == bind.bind.variable) {
-                    wasRead = true;
-                }
-            }
             if (!wasRead) {
                 // These are all instructions with no side effects, which can be
                 // deleted if the assignment is dead. It would be slightly
@@ -294,7 +280,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
             }
         }
     }
-}
+} // namespace sorbet::cfg
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (const auto &bb : cfg.basicBlocks) {
@@ -331,7 +317,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
-void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -414,7 +400,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
-            auto intersection = upperBounds1[it->id];
+            // Intentionally mutate upperBounds1 here for return value.
+            auto &intersection = upperBounds1[it->id];
             intersection.intersection(upperBounds2[it->id]);
             // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
@@ -425,6 +412,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }
+    // upperBounds1 now contains the intersection of upperBounds2 and 1.
+    return upperBounds1;
 }
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
