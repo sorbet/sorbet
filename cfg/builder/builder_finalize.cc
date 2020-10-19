@@ -280,7 +280,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
             }
         }
     }
-} // namespace sorbet::cfg
+}
 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (const auto &bb : cfg.basicBlocks) {
