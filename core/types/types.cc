@@ -803,7 +803,7 @@ bool ShapeType::hasUntyped() {
     return false;
 };
 SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
-    : argFlags(argFlags), fun(fun), rubyBlockId(rubyBlockId) {}
+    : argFlags(move(argFlags)), fun(fun), rubyBlockId(rubyBlockId) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
