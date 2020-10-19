@@ -31,7 +31,7 @@ public:
     void remove(const UIntSet &set);
 
     // Mutates the set to contain the intersection of this set and the passed-in set.
-    void intersection(const UIntSet &set);
+    void intersect(const UIntSet &set);
 
     // Returns true if the set is empty.
     bool empty() const;

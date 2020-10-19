@@ -126,7 +126,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites(ctx);
     computeMinMaxLoops(ctx, RnW, *res);
     auto blockArgs = fillInBlockArguments(ctx, RnW, *res);
-    removeDeadAssigns(ctx, RnW, *res, move(blockArgs)); // requires block arguments to be filled
+    removeDeadAssigns(ctx, RnW, *res, blockArgs); // requires block arguments to be filled
     simplify(ctx, *res);
     histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);

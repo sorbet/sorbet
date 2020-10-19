@@ -49,7 +49,7 @@ bool UIntSet::empty() const {
     return true;
 }
 
-void UIntSet::intersection(const UIntSet &set) {
+void UIntSet::intersect(const UIntSet &set) {
     ENFORCE_NO_TIMER(_members.size() == set._members.size());
     for (int i = 0; i < _members.size(); i++) {
         _members[i] &= set._members[i];

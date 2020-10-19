@@ -242,7 +242,7 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
     }
 }
 void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
-                                   vector<UIntSet> &&blockArgs) {
+                                   const vector<UIntSet> &blockArgs) {
     ENFORCE_NO_TIMER(blockArgs.size() == cfg.maxBasicBlockId);
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
@@ -288,7 +288,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        RnW.reads[bb->id].forEach([&cfg, &bb](u4 local) -> void {
+        RnW.reads[bb->id].forEach([&cfg, &bb](u4 local) {
             auto curMin = cfg.minLoops[local];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
@@ -330,9 +330,9 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    const vector<UIntSet> &readsByBlock = RnW.reads;
-    const vector<UIntSet> &writesByBlock = RnW.writes;
-    const vector<UIntSet> &deadByBlock = RnW.dead;
+    const auto &readsByBlock = RnW.reads;
+    const auto &writesByBlock = RnW.writes;
+    const auto &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
     vector<UIntSet> upperBounds1;
@@ -402,7 +402,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
         for (auto &it : cfg.basicBlocks) {
             // Intentionally mutate upperBounds1 here for return value.
             auto &intersection = upperBounds1[it->id];
-            intersection.intersection(upperBounds2[it->id]);
+            intersection.intersect(upperBounds2[it->id]);
             // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
             intersection.forEach([&it](u4 local) -> void { it->args.emplace_back(local); });

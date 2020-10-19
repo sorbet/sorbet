@@ -162,7 +162,7 @@ TEST_SUITE("UIntSet") {
         // a intersection a
         {
             UIntSet c = a;
-            c.intersection(a);
+            c.intersect(a);
             CHECK_EQ(6, c.size());
             CHECK(c.contains(0));
             CHECK(c.contains(1));
@@ -174,7 +174,7 @@ TEST_SUITE("UIntSet") {
         // a intersection b
         {
             UIntSet c = a;
-            c.intersection(b);
+            c.intersect(b);
             CHECK_EQ(2, c.size());
             CHECK(c.contains(0));
             CHECK(c.contains(64));
@@ -223,6 +223,18 @@ TEST_SUITE("UIntSet") {
             callCount++;
         });
         CHECK_EQ(128, callCount);
+    }
+
+    TEST_CASE("rounds up size to nearest 32") {
+        UIntSet set(10);
+        set.add(31);
+        CHECK(set.contains(31));
+        CHECK_EQ(1, set.size());
+
+        UIntSet bigger(33);
+        bigger.add(33);
+        CHECK(bigger.contains(33));
+        CHECK_EQ(1, bigger.size());
     }
 }
 
