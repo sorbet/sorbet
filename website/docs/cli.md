@@ -150,7 +150,7 @@ the Sorbet team. We have explicitly chosen only two output formats:
 - The human-readable error output seen when running `srb tc` from the CLI
   directly.
 
-- Output conforming to the [Language Server Protocol](lsp), which drives editor
+- Output conforming to the [Language Server Protocol][lsp], which drives editor
   integrations (see the `--lsp` flag).
 
 [lsp]: https://microsoft.github.io/language-server-protocol/
