@@ -540,31 +540,31 @@ int SelfType::kind() const {
     return 12;
 }
 
-bool ClassType::isFullyDefined() {
+bool ClassType::isFullyDefined() const {
     return true;
 }
 
-bool LiteralType::isFullyDefined() {
+bool LiteralType::isFullyDefined() const {
     return true;
 }
 
-bool ShapeType::isFullyDefined() {
+bool ShapeType::isFullyDefined() const {
     return absl::c_all_of(values, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
-bool TupleType::isFullyDefined() {
+bool TupleType::isFullyDefined() const {
     return absl::c_all_of(elems, [](TypePtr t) { return t->isFullyDefined(); });
 }
 
-bool AliasType::isFullyDefined() {
+bool AliasType::isFullyDefined() const {
     return true;
 }
 
-bool AndType::isFullyDefined() {
+bool AndType::isFullyDefined() const {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
 
-bool OrType::isFullyDefined() {
+bool OrType::isFullyDefined() const {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
 
@@ -653,7 +653,7 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::isFullyDefined() {
+bool TypeVar::isFullyDefined() const {
     return false;
 }
 
@@ -673,7 +673,7 @@ void TypeVar::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->sym.exists());
 }
 
-bool AppliedType::isFullyDefined() {
+bool AppliedType::isFullyDefined() const {
     for (auto &targ : this->targs) {
         if (!targ->isFullyDefined()) {
             return false;
@@ -742,11 +742,11 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
 
-bool LambdaParam::isFullyDefined() {
+bool LambdaParam::isFullyDefined() const {
     return false;
 }
 
-bool SelfTypeParam::isFullyDefined() {
+bool SelfTypeParam::isFullyDefined() const {
     return true;
 }
 
@@ -841,7 +841,7 @@ string SelfType::typeName() const {
     return "SelfType";
 }
 
-bool SelfType::isFullyDefined() {
+bool SelfType::isFullyDefined() const {
     return false;
 }
 

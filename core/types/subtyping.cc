@@ -1375,7 +1375,7 @@ void MetaType::_sanityCheck(const GlobalState &gs) {
     this->wrapped->sanityCheck(gs);
 }
 
-bool MetaType::isFullyDefined() {
+bool MetaType::isFullyDefined() const {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
