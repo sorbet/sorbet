@@ -160,6 +160,74 @@ def cant_call_only_absurd(x)
   T.absurd(x) # error: This code is unreachable
 end
 
+# --- reasonable usage on global, class, instance, and local variables --------
+$some_global = T.let(true, T::Boolean)
+
+sig {void}
+def absurd_not_reached_on_global_var
+  if $some_global
+    return
+  else
+    return
+  end
+
+  T.absurd($some_global)
+end
+
+sig {void}
+def absurd_reached_on_global_var
+  # Note T.nilable, because $some_global was not declared in this scope.
+  T.absurd($some_global) if !$some_global # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
+end
+
+class SomeClass
+  extend T::Sig
+
+  @@some_class_var = T.let(true, T::Boolean)
+
+  sig {void}
+  def initialize
+    @some_instance_var = T.let(true, T::Boolean)
+  end
+
+  sig {void}
+  def absurd_not_reached_on_class_var
+    if @@some_class_var
+      return
+    else
+      return
+    end
+
+    T.absurd(@@some_class_var)
+  end
+
+  sig {void}
+  def absurd_reached_on_class_var
+    T.absurd(@@some_class_var) if !@@some_class_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+  end
+
+  sig {void}
+  def absurd_not_reached_on_instance_var
+    if @some_instance_var
+      return
+    else
+      return
+    end
+
+    T.absurd(@some_instance_var)
+  end
+
+  sig {void}
+  def absurd_reached_on_instance_var
+    T.absurd(@some_instance_var) if !@some_instance_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+  end
+end
+
+sig {params(some_local_var: T::Boolean).void}
+def absurd_reached_on_local_var(some_local_var)
+  T.absurd(some_local_var) if !some_local_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+end
+
 # --- incorrect usage ---------------------------------------------------------
 
 sig {params(x: Integer).void}
@@ -200,9 +268,4 @@ end
 sig{void}
 def rejects_absurd_on_integer_literal
   T.absurd(42) # error: `T.absurd` expects to be called on a variable
-end
-
-sig{void}
-def rejects_absurd_on_list_literal
-  T.absurd([2,4,6,8]) # error: `T.absurd` expects to be called on a variable
 end
