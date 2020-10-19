@@ -488,55 +488,55 @@ void ClassType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-int AppliedType::kind() {
+int AppliedType::kind() const {
     return 1;
 }
 
-int ClassType::kind() {
+int ClassType::kind() const {
     return 2;
 }
 
-int LiteralType::kind() {
+int LiteralType::kind() const {
     return 3;
 }
 
-int ShapeType::kind() {
+int ShapeType::kind() const {
     return 4;
 }
 
-int TupleType::kind() {
+int TupleType::kind() const {
     return 5;
 }
 
-int LambdaParam::kind() {
+int LambdaParam::kind() const {
     return 6;
 }
 
-int SelfTypeParam::kind() {
+int SelfTypeParam::kind() const {
     return 6;
 }
 
-int MetaType::kind() {
+int MetaType::kind() const {
     return 7;
 }
 
-int TypeVar::kind() {
+int TypeVar::kind() const {
     return 8;
 }
 
-int AliasType::kind() {
+int AliasType::kind() const {
     return 9;
 }
 
-int OrType::kind() {
+int OrType::kind() const {
     return 10;
 }
 
-int AndType::kind() {
+int AndType::kind() const {
     return 11;
 }
 
-int SelfType::kind() {
+int SelfType::kind() const {
     return 12;
 }
 
