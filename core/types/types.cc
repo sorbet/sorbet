@@ -549,11 +549,11 @@ bool LiteralType::isFullyDefined() const {
 }
 
 bool ShapeType::isFullyDefined() const {
-    return absl::c_all_of(values, [](TypePtr t) { return t->isFullyDefined(); });
+    return absl::c_all_of(values, [](const TypePtr &t) { return t->isFullyDefined(); });
 }
 
 bool TupleType::isFullyDefined() const {
-    return absl::c_all_of(elems, [](TypePtr t) { return t->isFullyDefined(); });
+    return absl::c_all_of(elems, [](const TypePtr &t) { return t->isFullyDefined(); });
 }
 
 bool AliasType::isFullyDefined() const {
