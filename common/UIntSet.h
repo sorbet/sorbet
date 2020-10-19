@@ -9,11 +9,13 @@ class UIntSet final {
     InlinedVector<u4, 4> _members;
 
 public:
+    // Creates a new set with the given capacity as the maximum acceptable item ID.
     UIntSet(u4 capacity);
 
     // Add number to set.
     void add(u4 item);
 
+    // Returns true if the set contains the given item.
     bool contains(u4 item) const;
 
     // Defined in UIntSetForEach.h so that it's only included where it is called.
@@ -28,8 +30,10 @@ public:
     // Mutates the set to contain the intersection of this set and the passed-in set.
     void intersection(const UIntSet &set);
 
+    // Returns true if the set is empty.
     bool empty() const;
 
+    // Returns the number of elements in the set.
     size_t size() const;
 };
 
