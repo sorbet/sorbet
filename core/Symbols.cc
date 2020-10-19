@@ -714,50 +714,19 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         fmt::format_to(buf, " -> {}", resultType);
     }
     if (!locs_.empty()) {
+        // root should have no locs. We used to have special handling here to hide locs on root
+        // when censorForSnapshotTests was passed, but it's not needed anymore.
+        ENFORCE(ref(gs) != core::Symbols::root());
+
         fmt::format_to(buf, " @ ");
         if (locs_.size() > 1) {
-            if (ref(gs) == core::Symbols::root() && gs.censorForSnapshotTests) {
-                const auto payloadPathPrefix = "https://github.com/sorbet/sorbet/tree/master/";
-                bool hasPayloadLoc = absl::c_any_of(locs_, [&](const auto loc) {
-                    return absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix);
-                });
-
-                fmt::format_to(buf, "(");
-                if (hasPayloadLoc) {
-                    fmt::format_to(buf, "... removed core rbi locs ...");
-                }
-
-                bool first = true;
-                vector<Loc> sortedLocs;
-                sortedLocs.reserve(locs_.size());
-                for (const auto loc : locs_) {
-                    sortedLocs.emplace_back(loc);
-                }
-                fast_sort(sortedLocs,
-                          [&](const Loc &lhs, const Loc &rhs) { return lhs.showRaw(gs) < rhs.showRaw(gs); });
-                for (const auto loc : sortedLocs) {
-                    if (absl::StartsWith(loc.file().data(gs).path(), payloadPathPrefix)) {
-                        continue;
-                    }
-
-                    if (first) {
-                        first = false;
-                        if (hasPayloadLoc) {
-                            fmt::format_to(buf, ", ");
-                        }
-                    } else {
-                        fmt::format_to(buf, ", ");
-                    }
-                    fmt::format_to(buf, "{}", showRaw ? loc.showRaw(gs) : loc.filePosToString(gs));
-                }
-                fmt::format_to(buf, ")");
-            } else {
-                fmt::format_to(buf, "({})", fmt::map_join(locs_, ", ", [&](auto loc) {
-                                   return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
-                               }));
-            }
-        } else {
-            fmt::format_to(buf, "{}", showRaw ? locs_[0].showRaw(gs) : locs_[0].filePosToString(gs));
+            fmt::format_to(buf, "(");
+        }
+        fmt::format_to(buf, "{}", fmt::map_join(locs_, ", ", [&](auto loc) {
+                           return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
+                       }));
+        if (locs_.size() > 1) {
+            fmt::format_to(buf, ")");
         }
     }
 
