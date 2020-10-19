@@ -150,11 +150,7 @@ end
 
 # --- trying to subvert normal usage ------------------------------------------
 
-def only_absurd_1
-  T.absurd(T.let(T.unsafe(nil), T.noreturn)) # error: This code is unreachable
-end
-
-def only_absurd_2
+def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
   T.absurd(temp1) # error: This code is unreachable
 end
@@ -162,6 +158,74 @@ end
 sig {params(x: T.noreturn).returns(T.noreturn)}
 def cant_call_only_absurd(x)
   T.absurd(x) # error: This code is unreachable
+end
+
+# --- reasonable usage on global, class, instance, and local variables --------
+$some_global = T.let(true, T::Boolean)
+
+sig {void}
+def absurd_not_reached_on_global_var
+  if $some_global
+    return
+  else
+    return
+  end
+
+  T.absurd($some_global)
+end
+
+sig {void}
+def absurd_reached_on_global_var
+  # Note T.nilable, because $some_global was not declared in this scope.
+  T.absurd($some_global) if !$some_global # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
+end
+
+class SomeClass
+  extend T::Sig
+
+  @@some_class_var = T.let(true, T::Boolean)
+
+  sig {void}
+  def initialize
+    @some_instance_var = T.let(true, T::Boolean)
+  end
+
+  sig {void}
+  def absurd_not_reached_on_class_var
+    if @@some_class_var
+      return
+    else
+      return
+    end
+
+    T.absurd(@@some_class_var)
+  end
+
+  sig {void}
+  def absurd_reached_on_class_var
+    T.absurd(@@some_class_var) if !@@some_class_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+  end
+
+  sig {void}
+  def absurd_not_reached_on_instance_var
+    if @some_instance_var
+      return
+    else
+      return
+    end
+
+    T.absurd(@some_instance_var)
+  end
+
+  sig {void}
+  def absurd_reached_on_instance_var
+    T.absurd(@some_instance_var) if !@some_instance_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+  end
+end
+
+sig {params(some_local_var: T::Boolean).void}
+def absurd_reached_on_local_var(some_local_var)
+  T.absurd(some_local_var) if !some_local_var # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
 end
 
 # --- incorrect usage ---------------------------------------------------------
@@ -183,7 +247,7 @@ end
 
 sig {params(x: Integer).void}
 def only_keyword_arg(x)
-  T.absurd(x: nil) if x.nil? # error: Control flow could reach `T.absurd` because the type `{x: NilClass}` wasn't handled
+  T.absurd(x: nil) if x.nil? # error: `T.absurd` expects to be called on a variable
 end
 
 sig {returns(T.any(Integer, String))}
@@ -192,11 +256,16 @@ def looks_like_a_variable
 end
 
 sig {void}
-def rejects_absurd_on_non_variable
+def rejects_absurd_on_method_call_that_looks_like_a_variable
   case looks_like_a_variable
   when Integer
   when String
   else
     T.absurd(looks_like_a_variable) # error: `T.absurd` expects to be called on a variable, not a method call
   end
+end
+
+sig{void}
+def rejects_absurd_on_integer_literal
+  T.absurd(42) # error: `T.absurd` expects to be called on a variable
 end
