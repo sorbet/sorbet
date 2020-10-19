@@ -3,7 +3,7 @@
 extend T::Sig
 
 module Boolean
-  sealed!
+  sealed! # error: `sealed!` does not exist
 end
 
 sig {params(x: Boolean).void}
