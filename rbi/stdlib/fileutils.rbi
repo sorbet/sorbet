@@ -156,7 +156,7 @@ module FileUtils
   # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
   sig do
     params(
-      list: T.any(String, T::Array[String]),
+      list: T.any(String, T::Array[T.any(String, Pathname)], Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
@@ -907,7 +907,7 @@ module FileUtils
   # [`rmtree`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-rmtree)
   sig do
     params(
-      list: T.untyped,
+      list: T.any(String, T::Array[T.any(String, Pathname)], Pathname),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
