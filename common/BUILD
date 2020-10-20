@@ -20,6 +20,8 @@ cc_library(
         "FileSystem.h",
         "JSON.h",
         "Levenstein.h",
+        "UIntSet.h",
+        "UIntSetForEach.h",
         "common.h",
         "typecase.h",
     ],
