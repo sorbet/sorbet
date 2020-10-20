@@ -304,9 +304,10 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams>
         if (!config->isFileIgnored(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = getFileType(localPath, config->opts);
+            auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
             edit->updates.push_back(file);
-            openFiles[localPath] = move(file);
+            slot = move(file);
         }
     }
     return edit;
@@ -321,9 +322,10 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> o
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             auto fileType = getFileType(localPath, config->opts);
+            auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
             edit->updates.push_back(file);
-            openFiles[localPath] = move(file);
+            slot = move(file);
         }
     }
     return edit;
@@ -340,8 +342,8 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidCloseTextDocumentParams> 
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = getFileType(localPath, config->opts);
-            edit->updates.push_back(
-                make_shared<core::File>(move(localPath), readFile(localPath, *config->opts.fs), fileType, v));
+            auto fileContents = readFile(localPath, *config->opts.fs);
+            edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }
     return edit;
@@ -357,8 +359,8 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> query
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             auto fileType = getFileType(localPath, config->opts);
-            edit->updates.push_back(
-                make_shared<core::File>(move(localPath), readFile(localPath, *config->opts.fs), fileType, v));
+            auto fileContents = readFile(localPath, *config->opts.fs);
+            edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }
     return edit;
