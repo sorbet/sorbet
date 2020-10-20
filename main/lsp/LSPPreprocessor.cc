@@ -304,9 +304,10 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidChangeTextDocumentParams>
         if (!config->isFileIgnored(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = getFileType(localPath, config->opts);
-            auto file = make_shared<core::File>(string(localPath), move(fileContents), fileType, v);
+            auto &slot = openFiles[localPath];
+            auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
             edit->updates.push_back(file);
-            openFiles[localPath] = move(file);
+            slot = move(file);
         }
     }
     return edit;
@@ -321,9 +322,10 @@ LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<DidOpenTextDocumentParams> o
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             auto fileType = getFileType(localPath, config->opts);
-            auto file = make_shared<core::File>(string(localPath), move(openParams->textDocument->text), fileType, v);
+            auto &slot = openFiles[localPath];
+            auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
             edit->updates.push_back(file);
-            openFiles[localPath] = move(file);
+            slot = move(file);
         }
     }
     return edit;
