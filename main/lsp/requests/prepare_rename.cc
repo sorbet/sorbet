@@ -7,13 +7,20 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-unique_ptr<PrepareRenameResult> getPrepareRenameResult(const core::GlobalState &gs, core::SymbolRef symbol) {
+namespace {
+variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(const core::GlobalState &gs,
+                                                                                core::SymbolRef symbol) {
     auto range = Range::fromLoc(gs, symbol.data(gs)->loc());
+    if (range == nullptr) {
+        return JSONNullObject();
+    }
+
     auto result = make_unique<PrepareRenameResult>(move(range));
     auto name = symbol.data(gs)->name.show(gs);
     result->placeholder = name;
     return result;
 }
+} // namespace
 
 PrepareRenameTask::PrepareRenameTask(const LSPConfiguration &config, MessageId id,
                                      unique_ptr<TextDocumentPositionParams> params)
