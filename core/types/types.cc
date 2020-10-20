@@ -21,6 +21,76 @@ namespace sorbet::core {
 
 using namespace std;
 
+void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
+    ENFORCE(ptr != nullptr);
+
+    switch (tag) {
+        case Tag::ClassType:
+            delete reinterpret_cast<ClassType *>(ptr);
+            break;
+
+        case Tag::LambdaParam:
+            delete reinterpret_cast<LambdaParam *>(ptr);
+            break;
+
+        case Tag::SelfTypeParam:
+            delete reinterpret_cast<SelfTypeParam *>(ptr);
+            break;
+
+        case Tag::AliasType:
+            delete reinterpret_cast<AliasType *>(ptr);
+            break;
+
+        case Tag::SelfType:
+            delete reinterpret_cast<SelfType *>(ptr);
+            break;
+
+        case Tag::LiteralType:
+            delete reinterpret_cast<LiteralType *>(ptr);
+            break;
+
+        case Tag::TypeVar:
+            delete reinterpret_cast<TypeVar *>(ptr);
+            break;
+
+        case Tag::OrType:
+            delete reinterpret_cast<OrType *>(ptr);
+            break;
+
+        case Tag::AndType:
+            delete reinterpret_cast<AndType *>(ptr);
+            break;
+
+        case Tag::ShapeType:
+            delete reinterpret_cast<ShapeType *>(ptr);
+            break;
+
+        case Tag::TupleType:
+            delete reinterpret_cast<TupleType *>(ptr);
+            break;
+
+        case Tag::AppliedType:
+            delete reinterpret_cast<AppliedType *>(ptr);
+            break;
+
+        case Tag::MetaType:
+            delete reinterpret_cast<MetaType *>(ptr);
+            break;
+
+        case Tag::BlamedUntyped:
+            delete reinterpret_cast<BlamedUntyped *>(ptr);
+            break;
+
+        case Tag::UnresolvedClassType:
+            delete reinterpret_cast<UnresolvedClassType *>(ptr);
+            break;
+
+        case Tag::UnresolvedAppliedType:
+            delete reinterpret_cast<UnresolvedAppliedType *>(ptr);
+            break;
+    }
+}
+
 TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, DispatchArgs args) {
     auto dispatched = recv->dispatchCall(gs, move(args));
     auto link = &dispatched;
@@ -32,8 +102,6 @@ TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &re
     }
     return move(dispatched.returnType);
 }
-
-TypePtr::TypePtr(shared_ptr<Type> &&store) : store(move(store)){};
 
 TypePtr Types::top() {
     static auto res = make_type<ClassType>(Symbols::top());
@@ -763,7 +831,7 @@ bool OrType::hasUntyped() const {
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
-    TypePtr res(new OrType(left, right));
+    TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
     return res;
 }
 
@@ -772,7 +840,7 @@ bool AndType::hasUntyped() const {
 }
 
 TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
-    TypePtr res(new AndType(left, right));
+    TypePtr res(TypePtr::Tag::AndType, new AndType(left, right));
     return res;
 }
 
