@@ -86,7 +86,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             tp.origins.emplace_back(symbol.data(ctx)->loc());
 
             if (symbol.data(ctx)->isClassOrModule()) {
-                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
+                tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
                 auto resultType = symbol.data(ctx)->resultType;
                 tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;

@@ -227,7 +227,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
         }
-        result = targetClass.data(gs)->externalType(gs);
+        result = targetClass.data(gs)->externalType();
     } else {
         auto resultType = constant.data(gs)->resultType;
         result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;
