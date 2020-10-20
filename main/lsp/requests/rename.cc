@@ -12,33 +12,45 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-bool isDefinedInRBI(const InlinedVector<sorbet::core::Loc, 2UL> locs, const core::GlobalState &gs) {
+namespace {
+bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalState &gs,
+                           unique_ptr<ResponseMessage> &response) {
+    auto locs = symbol.data(gs)->locs();
+    string filetype;
     for (auto loc : locs) {
         if (loc.file().data(gs).isRBI()) {
-            return true;
+            filetype = ".rbi";
+        } else if (loc.file().data(gs).isPayload()) {
+            filetype = "payload";
+        }
+
+        if (!filetype.empty()) {
+            auto error =
+                fmt::format("Renaming constants defined in {} files is not supported; symbol {} is defined at {}",
+                            filetype, symbol.data(gs)->name.show(gs), loc.filePosToString(gs));
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, error);
+
+            return false;
         }
     }
-
-    return false;
+    return true;
 }
+} // namespace
 
-unique_ptr<WorkspaceEdit> RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                                                     std::string_view newName) {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
+RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
     const core::GlobalState &gs = typechecker.state();
-    vector<unique_ptr<Location>> references;
-    references = getReferencesToSymbol(typechecker, symbol);
+    vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, symbol);
     auto originalName = symbol.data(gs)->name.toString(gs);
     auto we = make_unique<WorkspaceEdit>();
-    // TextEdit
+
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
     for (auto &location : references) {
         // Get text at location.
-        // TODO: Not payload files...?
         auto fref = config.uri2FileRef(gs, location->uri);
         if (fref.data(gs).isPayload()) {
             // We don't support renaming things in payload files.
-            // TODO: Error?
-            continue;
+            return JSONNullObject();
         }
 
         auto loc = location->range->toLoc(gs, fref);
@@ -95,22 +107,14 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             auto resp = move(queryResponses[0]);
             // Only supports rename requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
-                if (isDefinedInRBI(constResp->symbol.data(gs)->locs(), gs)) {
-                    response->error =
-                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   "Renaming constants defined in .rbi files is not supported.");
-                    return response;
+                if (isValidRenameLocation(constResp->symbol, gs, response)) {
+                    response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
                 }
-                response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
             } else if (auto defResp = resp->isDefinition()) {
                 if (defResp->symbol.data(gs)->isClassOrModule()) {
-                    if (isDefinedInRBI(defResp->symbol.data(gs)->locs(), gs)) {
-                        response->error =
-                            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                       "Renaming constants defined in .rbi files is not supported.");
-                        return response;
+                    if (isValidRenameLocation(defResp->symbol, gs, response)) {
+                        response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);
                     }
-                    response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);
                 }
             }
         }
