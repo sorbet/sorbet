@@ -201,8 +201,7 @@ void assertLocationsMatch(const LSPConfiguration &config,
 }
 
 string updatedFilePath(string filename, string version) {
-    size_t index = filename.rfind('.', filename.length());
-    string fileExtension = filename.substr(index, filename.size() - 1);
+    string fileExtension = FileOps::getExtension(filename);
 
     return fmt::format("{}.{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
 }
@@ -1239,7 +1238,7 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
 
     ADD_FAIL_CHECK_AT(
         string(filename).c_str(), assertionLine + 1,
-        fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] <index>'. Found '{}'",
+        fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name>'. Found '{}'",
                     assertionContents));
 
     return nullptr;
@@ -1327,7 +1326,7 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 }
 
 string ApplyRenameAssertion::toString() const {
-    return fmt::format("apply-rename: [{}] item: {}", version, index);
+    return fmt::format("apply-rename: [{}] newName: {}", version, newName);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
