@@ -29,7 +29,7 @@ module Opus::Types::Test
       assert_equal(true, builder.decl.finalized)
     end
 
-    it 'requires paramms be keyword args' do
+    it 'requires params be keyword args' do
       ex = assert_raises do
         Class.new do
           extend T::Sig
@@ -38,6 +38,17 @@ module Opus::Types::Test
         end
       end
       assert_includes(ex.message, "params expects keyword arguments")
+    end
+
+    it 'requires params have an arg' do
+      ex = assert_raises do
+        Class.new do
+          extend T::Sig
+          sig {params.void}
+          def self.foo; end; foo
+        end
+      end
+      assert_includes(ex.message, "wrong number of arguments (given 0, expected 1)")
     end
 
     describe 'modes' do
