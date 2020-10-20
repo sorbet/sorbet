@@ -149,9 +149,9 @@ package(default_visibility = ["//visibility:public"])
     # https://github.com/DarkDimius/bazel-toolchain/tree/dp-srb-now
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("DarkDimius/bazel-toolchain/archive/e9d159aa3100905f83415c8a663627e74edaa4fd.zip"),
-        sha256 = "52d14c50a22de18a818f286a057d1ad5ef082b2980b2ad676f1e7db18edded63",
-        strip_prefix = "bazel-toolchain-e9d159aa3100905f83415c8a663627e74edaa4fd",
+        urls = _github_public_urls("DarkDimius/bazel-toolchain/archive/59ef7ae0d5999fc1df641afd60b874d2144f4d10.zip"),
+        sha256 = "3da66ee16a6261d2d6b0283ca0ac858ab7d47edfa73a76dbdc3f7c21c93101a0",
+        strip_prefix = "bazel-toolchain-59ef7ae0d5999fc1df641afd60b874d2144f4d10",
     )
 
     http_archive(
