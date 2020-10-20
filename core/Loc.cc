@@ -169,6 +169,13 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return buf.str();
 }
 
+string LocOffsets::showRaw(const Context ctx) const {
+    return Loc(ctx.file, *this).showRaw(ctx);
+}
+string LocOffsets::showRaw(const MutableContext ctx) const {
+    return Loc(ctx.file, *this).showRaw(ctx);
+}
+
 string Loc::showRaw(const GlobalState &gs) const {
     string_view path;
     if (file().exists()) {
