@@ -353,7 +353,7 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(u4 v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    for (auto file : queryResponse->files) {
+    for (auto &file : queryResponse->files) {
         // Don't append rootPath if it is empty.
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supercede file system updates.

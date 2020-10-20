@@ -380,14 +380,14 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
-        for (auto value : shapeType->values) {
+        for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
         return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
-        for (auto elem : tupleType->elems) {
+        for (auto &elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, unwrappedElems);

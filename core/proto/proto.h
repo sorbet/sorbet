@@ -23,7 +23,7 @@ public:
     static com::stripe::rubytyper::Symbol toProto(const GlobalState &gs, SymbolRef sym, bool showFull);
 
     static com::stripe::rubytyper::Type::Literal toProto(const GlobalState &gs, const LiteralType &lit);
-    static com::stripe::rubytyper::Type toProto(const GlobalState &gs, TypePtr typ);
+    static com::stripe::rubytyper::Type toProto(const GlobalState &gs, const TypePtr &typ);
 
     static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);
     static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs);

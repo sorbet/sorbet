@@ -507,7 +507,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
         }
-        for (auto e : globalBest) {
+        for (auto &e : globalBest) {
             result.emplace_back(e);
         }
     }
