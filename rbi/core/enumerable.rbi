@@ -758,11 +758,11 @@ module Enumerable
     .returns(T.untyped)
   end
   sig do
-    params(
-        initial: Elem,
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Elem),
+    type_parameters(:Any).params(
+        initial: T.type_parameter(:Any),
+        blk: T.proc.params(arg0: T.type_parameter(:Any), arg1: Elem).returns(Elem),
     )
-    .returns(Elem)
+    .returns(T.type_parameter(:Any))
   end
   sig do
     params(
