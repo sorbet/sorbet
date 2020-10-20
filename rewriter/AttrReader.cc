@@ -70,27 +70,35 @@ bool isTNilableOrUntyped(const ast::TreePtr &expr) {
            isT(send->recv);
 }
 
+ast::Send *findSendReturns(core::MutableContext ctx, ast::Send *sharedSig) {
+    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
+
+    auto block = ast::cast_tree<ast::Block>(sharedSig->block);
+    auto body = ast::cast_tree<ast::Send>(block->body);
+
+    while (body->fun != core::Names::returns() && body->fun != core::Names::void_()) {
+        body = ast::cast_tree<ast::Send>(body->recv);
+    }
+
+    return body->fun == core::Names::returns() ? body : nullptr;
+}
+
 bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
-            "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto &send = ast::cast_tree_nonnull<ast::Send>(sharedSig);
-    auto &block = ast::cast_tree_nonnull<ast::Block>(send.block);
-    auto &body = ast::cast_tree_nonnull<ast::Send>(block.body);
+    auto *body = findSendReturns(ctx, ASTUtil::castSig(sharedSig));
 
-    ENFORCE(body.fun == core::Names::returns());
-    if (body.args.size() != 1) {
+    ENFORCE(body->fun == core::Names::returns());
+    if (body->args.size() != 1) {
         return false;
     }
-    return isTNilableOrUntyped(body.args[0]);
+    return isTNilableOrUntyped(body->args[0]);
 }
 
 ast::TreePtr dupReturnsType(core::MutableContext ctx, ast::Send *sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
-            "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto block = ast::cast_tree_const<ast::Block>(sharedSig->block);
-    auto body = ast::cast_tree_const<ast::Send>(block->body);
+    auto *body = findSendReturns(ctx, ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {
@@ -120,17 +128,14 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, const core::NameRef name,
                                 core::LocOffsets nameLoc) {
-    ENFORCE(ASTUtil::castSig(sharedSig, core::Names::returns()),
-            "We weren't given a send node that's a valid signature");
+    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
     ast::TreePtr sigExpr = sharedSig->deepCopy();
     auto *sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
-    // Loop down the chain of recv's until we get to the inner 'sig' node.
-    auto block = ast::cast_tree<ast::Block>(sig->block);
-    auto body = ast::cast_tree<ast::Send>(block->body);
+    auto *body = findSendReturns(ctx, sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {
@@ -176,7 +181,9 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
 // above will actually be untouched in the syntax tree, but (2), (3), and (4)
 // will have to be synthesized. Handling this case gets a little tricky
 // considering that this Rewriter pass handles all three of attr_reader,
-// attr_writer, and attr_accessor.
+// attr_writer, and attr_accessor. Also the `sig` might contain an
+// explicit checked (or on_failure) call as in
+// `sig {returns(String}.checked(:always)}` that needs to be preserved.
 //
 // Also note that the burden is on the user to provide an accurate type signature.
 // All attr_accessor's should probably have `T.nilable(...)` to account for a
@@ -206,8 +213,10 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
 
     ast::Send *sig = nullptr;
     if (prevStat) {
-        sig = ASTUtil::castSig(*prevStat, core::Names::returns());
-        if (sig != nullptr) {
+        sig = ASTUtil::castSig(*prevStat);
+        if (sig != nullptr && findSendReturns(ctx, sig) == nullptr) {
+            sig = nullptr;
+        } else if (sig != nullptr) {
             ensureSafeSig(ctx, send->fun, sig);
         }
     }
