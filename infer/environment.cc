@@ -565,7 +565,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &klassType = send->args[0].type;
         core::SymbolRef klass = core::Types::getRepresentedClass(ctx, klassType.get());
         if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType(ctx);
+            auto ty = klass.data(ctx)->externalType();
             if (!ty->isUntyped()) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
@@ -618,7 +618,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // `when` against class literal
         core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType.get());
         if (representedClass.exists()) {
-            auto representedType = representedClass.data(ctx)->externalType(ctx);
+            auto representedType = representedClass.data(ctx)->externalType();
             if (!representedType->isUntyped()) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
@@ -1029,7 +1029,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (data->isClassOrModule()) {
                     auto singletonClass = data->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
-                    tp.type = singletonClass.data(ctx)->externalType(ctx);
+                    tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
                 } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
                     if (data->resultType.get() != nullptr) {
@@ -1227,7 +1227,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             [&](cfg::LoadSelf *l) {
                 ENFORCE(l->link);
                 if (l->link->result->main.blockSpec.rebind.exists()) {
-                    tp.type = l->link->result->main.blockSpec.rebind.data(ctx)->externalType(ctx);
+                    tp.type = l->link->result->main.blockSpec.rebind.data(ctx)->externalType();
                     tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
 
                 } else {

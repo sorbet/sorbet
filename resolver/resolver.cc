@@ -1111,7 +1111,7 @@ class ResolveTypeMembersWalk {
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
-            lambdaParam->upperBound = sym.data(ctx)->externalType(ctx);
+            lambdaParam->upperBound = sym.data(ctx)->unsafeComputeExternalType(ctx);
             lambdaParam->lowerBound = core::Types::bottom();
         }
 
@@ -2382,6 +2382,15 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.computeExternalType");
+        // Ensure all symbols have `externalType` computed.
+        for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
+            core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+        }
+    }
+
     result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;

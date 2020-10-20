@@ -48,66 +48,64 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClassOrModule());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return externalType(gs);
+        return externalType();
     } else {
         return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
 }
 
-TypePtr Symbol::externalType(const GlobalState &gs) const {
-    ENFORCE(isClassOrModule());
-    if (!resultType) {
-        // note that sometimes resultType is set externally to not be a result of this computation
-        // this happens e.g. in case this is a stub class
-        TypePtr newResultType;
-        auto ref = this->ref(gs);
-        if (typeMembers().empty()) {
-            newResultType = make_type<ClassType>(ref);
-        } else {
-            vector<TypePtr> targs;
-            targs.reserve(typeMembers().size());
+TypePtr Symbol::externalType() const {
+    ENFORCE_NO_TIMER(resultType);
+    return resultType;
+}
 
-            // Special-case covariant stdlib generics to have their types
-            // defaulted to `T.untyped`. This set *should not* grow over time.
-            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
-                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
+    ENFORCE_NO_TIMER(isClassOrModule());
+    if (resultType) {
+        return resultType;
+    }
 
-            for (auto &tm : typeMembers()) {
-                auto tmData = tm.data(gs);
-                auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
-                ENFORCE(lambdaParam != nullptr);
+    // note that sometimes resultType is set externally to not be a result of this computation
+    // this happens e.g. in case this is a stub class
+    auto ref = this->ref(gs);
+    if (typeMembers().empty()) {
+        resultType = make_type<ClassType>(ref);
+    } else {
+        vector<TypePtr> targs;
+        targs.reserve(typeMembers().size());
 
-                if (isStdlibGeneric) {
-                    // For backwards compatibility, instantiate stdlib generics
-                    // with T.untyped.
-                    targs.emplace_back(Types::untyped(gs, ref));
-                } else if (tmData->isFixed() || tmData->isCovariant()) {
-                    // Default fixed or covariant parameters to their upper
-                    // bound.
-                    targs.emplace_back(lambdaParam->upperBound);
-                } else if (tmData->isInvariant()) {
-                    // We instantiate Invariant type members as T.untyped as
-                    // this will behave a bit like a unification variable with
-                    // Types::glb.
-                    targs.emplace_back(Types::untyped(gs, ref));
-                } else {
-                    // The remaining case is a contravariant parameter, which
-                    // gets defaulted to its lower bound.
-                    targs.emplace_back(lambdaParam->lowerBound);
-                }
+        // Special-case covariant stdlib generics to have their types
+        // defaulted to `T.untyped`. This set *should not* grow over time.
+        bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
+                               ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
+                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+
+        for (auto &tm : typeMembers()) {
+            auto tmData = tm.data(gs);
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+            ENFORCE(lambdaParam != nullptr);
+
+            if (isStdlibGeneric) {
+                // For backwards compatibility, instantiate stdlib generics
+                // with T.untyped.
+                targs.emplace_back(Types::untyped(gs, ref));
+            } else if (tmData->isFixed() || tmData->isCovariant()) {
+                // Default fixed or covariant parameters to their upper
+                // bound.
+                targs.emplace_back(lambdaParam->upperBound);
+            } else if (tmData->isInvariant()) {
+                // We instantiate Invariant type members as T.untyped as
+                // this will behave a bit like a unification variable with
+                // Types::glb.
+                targs.emplace_back(Types::untyped(gs, ref));
+            } else {
+                // The remaining case is a contravariant parameter, which
+                // gets defaulted to its lower bound.
+                targs.emplace_back(lambdaParam->lowerBound);
             }
+        }
 
-            newResultType = make_type<AppliedType>(ref, targs);
-        }
-        {
-            // this method is supposed to be idempotent. The lines below implement "safe publication" of a value that is
-            // safe to be used in presence of multiple threads running this tion concurrently
-            auto mutableThis = const_cast<Symbol *>(this);
-            shared_ptr<core::Type> current(nullptr);
-            atomic_compare_exchange_weak(&mutableThis->resultType.store, &current, newResultType.store);
-        }
-        return externalType(gs);
+        resultType = make_type<AppliedType>(ref, targs);
     }
     return resultType;
 }

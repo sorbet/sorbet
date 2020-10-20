@@ -362,7 +362,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             return Types::untypedUntracked();
         }
 
-        return attachedClass.data(gs)->externalType(gs);
+        return attachedClass.data(gs)->externalType();
     }
 
     if (auto *appType = cast_type<AppliedType>(tp.get())) {
@@ -374,7 +374,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             return Types::untypedUntracked();
         }
 
-        return attachedClass.data(gs)->externalType(gs);
+        return attachedClass.data(gs)->externalType();
     }
 
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
@@ -1147,7 +1147,7 @@ public:
         SymbolRef self = unwrapSymbol(thisType);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
-            res.returnType = singleton.data(gs)->externalType(gs);
+            res.returnType = singleton.data(gs)->externalType();
         } else {
             res.returnType = Types::classClass();
         }
@@ -1169,7 +1169,7 @@ public:
                 return;
             }
         }
-        auto instanceTy = attachedClass.data(gs)->externalType(gs);
+        auto instanceTy = attachedClass.data(gs)->externalType();
         DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
         auto dispatched = instanceTy->dispatchCall(gs, innerArgs);
 
@@ -1864,7 +1864,7 @@ public:
             // AttachedClass will only be missing on `T.untyped`
             ENFORCE(attachedClass.exists());
 
-            auto instanceTy = self.data(gs)->attachedClass(gs).data(gs)->externalType(gs);
+            auto instanceTy = self.data(gs)->attachedClass(gs).data(gs)->externalType();
             DispatchArgs innerArgs{Names::initialize(), sendLocs, sendArgStore, instanceTy, instanceTy, args.block};
             dispatched = instanceTy->dispatchCall(gs, innerArgs);
 
@@ -2253,7 +2253,7 @@ public:
             res.returnType = Types::Boolean();
             return;
         }
-        auto lhs = rc.data(gs)->externalType(gs);
+        auto lhs = rc.data(gs)->externalType();
         ENFORCE(!lhs->isUntyped(), "lhs of Module.=== must be typed");
         if (Types::isSubType(gs, rhs, lhs)) {
             res.returnType = Types::trueClass();
