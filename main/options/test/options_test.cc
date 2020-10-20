@@ -80,4 +80,5 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
     CHECK_EQ(empty.stripeMode, opts.stripeMode);
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
+    CHECK_EQ(empty.lspRenameEnabled, opts.lspRenameEnabled);
 }
