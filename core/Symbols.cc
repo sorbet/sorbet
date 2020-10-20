@@ -32,7 +32,7 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
-    for (auto tm : typeMembers()) {
+    for (auto &tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->isFixed()) {
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
@@ -507,7 +507,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
         }
-        for (auto e : globalBest) {
+        for (auto &e : globalBest) {
             result.emplace_back(e);
         }
     }

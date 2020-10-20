@@ -788,7 +788,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
     UnorderedMap<string, FileRef> fileRefByPath;
     int i = 0;
-    for (auto f : files) {
+    for (auto &f : files) {
         if (f && !f->path().empty()) {
             fileRefByPath[string(f->path())] = FileRef(i);
         }
