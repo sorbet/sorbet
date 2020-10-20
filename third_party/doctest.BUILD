@@ -1,7 +1,10 @@
 cc_library(
     name = "doctest",
     hdrs = glob(["doctest/**/*.h"]),
-    defines = ["DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL"],
+    defines = [
+        "DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
+        "DOCTEST_CONFIG_NO_UNPREFIXED_OPTIONS",
+    ],
     strip_include_prefix = "doctest",
     visibility = ["//visibility:public"],
 )
