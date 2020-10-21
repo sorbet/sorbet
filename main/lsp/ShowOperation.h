@@ -13,11 +13,19 @@ class LSPConfiguration;
  */
 class ShowOperation final {
     const LSPConfiguration &config;
+    const Kind kind;
     const std::string operationName;
     const std::string description;
 
 public:
-    ShowOperation(const LSPConfiguration &config, std::string operationName, std::string description);
+    enum class Kind {
+        Indexing = 1,
+        SlowPathBlocking,
+        SlowPathNonBlocking,
+        References,
+        SymbolSearch,
+    };
+    ShowOperation(const LSPConfiguration &config, Kind kind);
     ~ShowOperation();
 };
 } // namespace sorbet::realmain::lsp
