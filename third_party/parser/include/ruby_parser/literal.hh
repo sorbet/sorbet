@@ -68,6 +68,8 @@ namespace ruby_parser {
     bool interpolate() const;
     bool regexp() const;
     bool heredoc() const;
+    bool squiggly_heredoc() const;
+    bool support_line_continuation_via_slash() const;
 
     token_type start_token_type() const;
 

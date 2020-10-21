@@ -1,0 +1,52 @@
+inherit_from: .rubocop_todo.yml
+require: rubocop-performance
+
+AllCops:
+  NewCops: enable
+
+# Stripe in-house styles that are prevalent in the codebase already.
+#
+# Generally, prefer not to add things here; unless there's a specific reason
+# to disable a cop (like those with their own comments below), we'd rather stick
+# to the community defaults.
+Style/RaiseArgs:
+  EnforcedStyle: compact
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+Layout/SpaceInsideBlockBraces:
+  EnforcedStyle: no_space
+  SpaceBeforeBlockParameters: false
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: start_of_line
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrivialAccessors:
+  IgnoreClassMethods: true
+
+# This doesn't play very well with implementations of Sorbet abstract methods
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+# Prone to false positives when we care about which class owns a method
+Lint/UselessMethodDefinition:
+  Enabled: false
+
+Naming/FileName:
+  Exclude:
+    # Filename deliberately matches gem name
+    - 'lib/sorbet-runtime.rb'
+
+Lint/MissingSuper:
+  Exclude:
+    # Don't force type definitions to call `super` in initialize
+    - 'lib/types/types/**/*'
+    - 'lib/types/private/types/**/*'
+
+Performance/CollectionLiteralInLoop:
+  Exclude:
+    # Ok to prioritize brevity over perf in tests
+    - 'test/**/*'

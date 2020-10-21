@@ -35,8 +35,17 @@ class Sorbet::Private::FindGemRBIs
     gemspecs = Bundler.load.specs.sort_by(&:name)
 
     gem_source_paths = T.let([], T::Array[String])
-    gemspecs.each do |gemspec|
-      gem_source_paths << paths_within_gem_sources(gemspec)
+
+    # Tapioca (https://github.com/Shopify/tapioca) does not require gems `rbi/` folders
+    # to be passed to Sorbet as it copies the signatures at RBI generation time.
+    #
+    # To avoid conflicts between RBIs generated with tapioca and the one provided by the
+    # gem, we disable the `rbi/` caching and let Sorbet use the RBIs from `sorbet/rbi/gems`.
+
+    unless gemspecs.any? { |g| g.name == 'tapioca' }
+      gemspecs.each do |gemspec|
+        gem_source_paths << paths_within_gem_sources(gemspec)
+      end
     end
 
     File.write(output_file, gem_source_paths.compact.join("\n"))

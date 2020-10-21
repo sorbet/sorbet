@@ -186,6 +186,6 @@ end
 
 module T::NonForcingConstants
   # See <https://sorbet.org/docs/non-forcing-constants> for full docs.
-  sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
-  def self.non_forcing_is_a?(val, klass); end
+  sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
+  def self.non_forcing_is_a?(val, klass, package: nil); end
 end

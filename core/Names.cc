@@ -7,6 +7,8 @@
 #include <numeric> // accumulate
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_split.h"
 
 using namespace std;
 
@@ -73,9 +75,6 @@ string Name::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::TEnum:
                     kind = "E";
                     break;
-                case UniqueNameKind::DefaultArg:
-                    kind = "DA";
-                    break;
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
@@ -98,8 +97,6 @@ string Name::toString(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
-            } else if (this->unique.uniqueNameKind == UniqueNameKind::DefaultArg) {
-                return fmt::format("{}<defaultArg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
@@ -127,8 +124,6 @@ string Name::show(const GlobalState &gs) const {
                 // The entire goal of UniqueNameKind::TEnum is to have Name::show print the name as if on the
                 // original name, so that our T::Enum DSL-synthesized class names are kept as an implementation detail.
                 // Thus, we fall through.
-            } else if (this->unique.uniqueNameKind == UniqueNameKind::DefaultArg) {
-                return fmt::format("{}<defaultArg>{}", this->unique.original.data(gs)->show(gs), this->unique.num);
             }
             return this->unique.original.data(gs)->show(gs);
         case NameKind::CONSTANT:
@@ -296,6 +291,14 @@ NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     ENFORCE(name->kind == NameKind::UTF8, "prepend over non-utf8 name");
     string nameEq = absl::StrCat(s, name->raw.utf8);
     return gs.enterNameUTF8(nameEq);
+}
+
+NameRef NameRef::lookupMangledPackageName(const GlobalState &gs) const {
+    auto name = this->data(gs);
+    ENFORCE(name->kind == NameKind::UTF8, "manglePackageName over non-utf8 name");
+    auto parts = absl::StrSplit(name->raw.utf8, "::");
+    string nameEq = absl::StrCat(absl::StrJoin(parts, "_"), "_Package");
+    return gs.lookupNameConstant(nameEq);
 }
 
 Name Name::deepCopy(const GlobalState &to) const {

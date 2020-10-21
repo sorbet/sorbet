@@ -24,7 +24,7 @@ module T::Types
       obj.is_a?(Enumerator)
     end
 
-    def new(*args, &blk) # rubocop:disable PrisonGuard/BanBuiltinMethodOverride
+    def new(*args, &blk)
       T.unsafe(Enumerator).new(*args, &blk)
     end
 

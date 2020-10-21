@@ -37,6 +37,94 @@ class RubyVM < Object
   def self.stat(*_); end
 end
 
+# [`AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html)
+# provides methods to parse Ruby code into abstract syntax trees. The nodes in
+# the tree are instances of
+# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree/Node.html).
+module RubyVM::AbstractSyntaxTree
+  # Returns AST nodes of the given proc or method.
+  #
+  # ```ruby
+  # RubyVM::AbstractSyntaxTree.of(proc {1 + 2})
+  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:35, 1:42): >
+  #
+  # def hello
+  #   puts "hello, world"
+  # end
+  #
+  # RubyVM::AbstractSyntaxTree.of(method(:hello))
+  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 3:3): >
+  # ```
+  sig { params(arg: T.any(T::proc.void, Method)).returns(RubyVM::AbstractSyntaxTree::Node) }
+  def self.of(arg); end
+
+  # Parses the given string into an abstract syntax tree, returning the root
+  # node of that tree.
+  #
+  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.6.0/SyntaxError.html) is
+  # raised if the given string is invalid syntax.
+  #
+  # ```ruby
+  # RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
+  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 1:9): >
+  # ```
+  sig { params(string: String).returns(RubyVM::AbstractSyntaxTree::Node) }
+  def self.parse(string); end
+
+  # Reads the file from `pathname`, then parses it like
+  # [`::parse`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html#method-c-parse),
+  # returning the root node of the abstract syntax tree.
+  #
+  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.6.0/SyntaxError.html) is
+  # raised if `pathname`'s contents are not valid Ruby syntax.
+  #
+  # ```ruby
+  # RubyVM::AbstractSyntaxTree.parse_file("my-app/app.rb")
+  # # => #<RubyVM::AbstractSyntaxTree::Node(NODE_SCOPE(0) 1:0, 31:3): >
+  # ```
+  sig { params(pathname: String).returns(RubyVM::AbstractSyntaxTree::Node) }
+  def self.parse_file(pathname); end
+end
+
+# [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree/Node.html)
+# instances are created by parse methods in
+# [`RubyVM::AbstractSyntaxTree`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/AbstractSyntaxTree.html).
+class RubyVM::AbstractSyntaxTree::Node
+  # Returns AST nodes under this one. Each kind of node has different children,
+  # depending on what kind of node it is.
+  #
+  # The returned array may contain other nodes or `nil`.
+  sig { returns(T::Array[T.nilable(RubyVM::AbstractSyntaxTree::Node)]) }
+  def children; end
+
+  # The column number in the source code where this AST's text began.
+  sig { returns(Integer) }
+  def first_column; end
+
+  # The line number in the source code where this AST's text began.
+  sig { returns(Integer) }
+  def first_lineno; end
+
+  # The column number in the source code where this AST's text ended.
+  sig { returns(Integer) }
+  def last_column; end
+
+  # The line number in the source code where this AST's text ended.
+  sig { returns(Integer) }
+  def last_lineno; end
+
+  # Returns the type of this node as a symbol.
+  #
+  # ```ruby
+  # root = RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
+  # root.type # => :SCOPE
+  # call = root.children[2]
+  # call.type # => :OPCALL
+  # ```
+  sig { returns(Symbol) }
+  def type; end
+end
+
 # The
 # [`InstructionSequence`](https://docs.ruby-lang.org/en/2.6.0/RubyVM/InstructionSequence.html)
 # class represents a compiled sequence of instructions for the Ruby Virtual

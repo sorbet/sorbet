@@ -120,7 +120,7 @@ sig do
   params(
     # Integer describes a single element of args
     args: Integer, # rest positional params
-    # Float describes a single value of args
+    # Float describes a single value of kwargs
     kwargs: Float  # rest keyword params
   )
   .void

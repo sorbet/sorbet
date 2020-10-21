@@ -264,7 +264,7 @@ module Opus::Types::Test
           blk.call(4)
         end
 
-        @mod.foo {|i| i * i}
+        @mod.foo {|i| i**2}
       end
 
       it "allows procs to bind" do

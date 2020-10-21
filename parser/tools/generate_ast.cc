@@ -13,6 +13,7 @@ enum class FieldType {
     String,
     Uint,
     Loc,
+    Bool,
 };
 
 struct FieldDef {
@@ -262,7 +263,7 @@ NodeDef nodes[] = {
     {
         "Hash",
         "hash",
-        vector<FieldDef>({{"pairs", FieldType::NodeVec}}),
+        vector<FieldDef>({{"kwargs", FieldType::Bool}, {"pairs", FieldType::NodeVec}}),
     },
     // Bareword identifier (foo); should only exist transiently while parsing
     {
@@ -309,6 +310,12 @@ NodeDef nodes[] = {
         "Kwarg",
         "kwarg",
         vector<FieldDef>({{"name", FieldType::Name}}),
+    },
+    // Keyword nil argument
+    {
+        "Kwnilarg",
+        "kwnilarg",
+        vector<FieldDef>(),
     },
     // explicit `begin` keyword.
     // `kwbegin` is emitted _only_ for post-while and post-until loops
@@ -398,6 +405,18 @@ NodeDef nodes[] = {
         "NthRef",
         "nth_ref",
         vector<FieldDef>({{"ref", FieldType::Uint}}),
+    },
+    // numbered parameters
+    {
+        "NumParams",
+        "numparams",
+        vector<FieldDef>({{"decls", FieldType::NodeVec}}),
+    },
+    // a block with numbered parameters
+    {
+        "NumBlock",
+        "numblock",
+        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
     },
     // foo += 6 for += and other ops
     {
@@ -622,6 +641,8 @@ string fieldType(FieldType arg) {
             return "u4";
         case FieldType::Loc:
             return "core::LocOffsets";
+        case FieldType::Bool:
+            return "bool";
     }
 }
 
@@ -709,6 +730,9 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 // Placate the compiler; we skip these
                 abort();
                 break;
+            case FieldType::Bool:
+                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                break;
         }
     }
     out << "    printTabs(buf, tabs);\n";
@@ -718,6 +742,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << '\n';
 
     // toJSON
+    // TODO: This function would be faster and safer if we used rapidjson or proto to build the JSON.
+    // (See tracing.cc and/or any of the proto stuff)
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf,  \"{{\\n\");\n";
@@ -779,6 +805,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 // quiet the compiler; we skip Loc fields above
                 abort();
                 break;
+            case FieldType::Bool:
+                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
+                    << arg.name << ");\n";
+                break;
         }
     }
     out << "    printTabs(buf, tabs);" << '\n';
@@ -830,6 +860,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(buf, \", {}\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
+                continue;
+            case FieldType::Bool:
                 continue;
         }
     }

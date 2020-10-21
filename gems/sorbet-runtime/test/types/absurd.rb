@@ -12,7 +12,7 @@ module Opus::Types::Test
 
     it 'calls the T::Configuration handler' do
       begin
-        T::Configuration.inline_type_error_handler = lambda do |ex|
+        T::Configuration.inline_type_error_handler = lambda do |_ex|
           raise "Called custom handler"
         end
         ex = assert_raises(RuntimeError) do

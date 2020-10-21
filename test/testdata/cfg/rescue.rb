@@ -1,14 +1,14 @@
 # typed: true
 def main
-    begin
-        a
-    rescue
-        b
-    else
-        c
-    ensure
-        d
-    end
+  begin
+    a
+  rescue
+    b
+  else
+    c
+  ensure
+    d
+  end
 end
 
 def a; end

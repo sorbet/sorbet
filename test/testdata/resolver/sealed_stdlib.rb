@@ -23,3 +23,5 @@ def foo(x)
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
   end
 end
+
+T.reveal_type(Boolean.sealed_subclasses) # error: Revealed type: `T::Set[T.any(T.class_of(FalseClass), T.class_of(TrueClass))]`

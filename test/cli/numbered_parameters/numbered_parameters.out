@@ -1,0 +1,48 @@
+test/cli/numbered_parameters/numbered_parameters.rb:12: Revealed type: `Integer` https://srb.help/7014
+    12 |foo { T.reveal_type(_1) }
+              ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:12:
+    12 |foo { T.reveal_type(_1) }
+                            ^^
+
+test/cli/numbered_parameters/numbered_parameters.rb:13: Revealed type: `String` https://srb.help/7014
+    13 |foo do T.reveal_type(_2) end
+               ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:13:
+    13 |foo do T.reveal_type(_2) end
+                             ^^
+
+test/cli/numbered_parameters/numbered_parameters.rb:14: Revealed type: `T.untyped` https://srb.help/7014
+    14 |-> { T.reveal_type(_1) }
+             ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:14:
+    14 |-> { T.reveal_type(_1) }
+                           ^^
+
+test/cli/numbered_parameters/numbered_parameters.rb:15: Revealed type: `String` https://srb.help/7014
+    15 |[''].each { T.reveal_type(_1) }
+                    ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:15:
+    15 |[''].each { T.reveal_type(_1) }
+                                  ^^
+
+test/cli/numbered_parameters/numbered_parameters.rb:21: Revealed type: `T.untyped` https://srb.help/7014
+    21 |  T.reveal_type(_2)
+          ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:18:
+    18 |  1 + _2
+              ^^
+
+test/cli/numbered_parameters/numbered_parameters.rb:22: Revealed type: `T.untyped` https://srb.help/7014
+    22 |  T.reveal_type(_1)
+          ^^^^^^^^^^^^^^^^^
+  From:
+    test/cli/numbered_parameters/numbered_parameters.rb:19:
+    19 |  puts _1
+               ^^
+Errors: 6

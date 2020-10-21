@@ -296,7 +296,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
 
     it "validates setting 'immutable' argument when defining with 'immutable' keyword" do
       assert_prop_error(/Cannot pass 'immutable' argument/) do
-        const :foo, String, immutable: :false
+        const :foo, String, immutable: false
       end
     end
   end

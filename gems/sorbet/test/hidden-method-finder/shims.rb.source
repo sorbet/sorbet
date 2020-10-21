@@ -45,6 +45,7 @@ class Socket < BasicSocket
   IPPROTO_MAX = nil
   IPPROTO_ND = nil
   IPPROTO_XTP = nil
+  IP_DONTFRAG = nil
   IP_PORTRANGE = nil
   IP_RECVDSTADDR = nil
   IP_RECVIF = nil
@@ -172,6 +173,7 @@ module Socket::Constants
   IPPROTO_MAX = nil
   IPPROTO_ND = nil
   IPPROTO_XTP = nil
+  IP_DONTFRAG = nil
   IP_PORTRANGE = nil
   IP_RECVDSTADDR = nil
   IP_RECVIF = nil
@@ -415,6 +417,8 @@ class Integer
   def to_bn(); end
   GMP_VERSION = nil
 end
+
+Gem::Resolver::DependencyConflict = Gem::Resolver::Conflict
 
 module Gem::Security
   def self.alt_name_or_x509_entry(certificate, x509_entry); end

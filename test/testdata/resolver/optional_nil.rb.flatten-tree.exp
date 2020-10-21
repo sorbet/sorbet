@@ -26,22 +26,6 @@ begin
       w
     end
 
-    def foo<defaultArg>1(x, <blk>)
-      nil
-    end
-
-    def bar<defaultArg>1(y, <blk>)
-      nil
-    end
-
-    def qux<defaultArg>1(z, <blk>)
-      ""
-    end
-
-    def baz<defaultArg>1(w, <blk>)
-      ""
-    end
-
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
@@ -61,22 +45,6 @@ begin
         ::Sorbet::Private::Static.keep_def(<self>, :"bar")
         ::Sorbet::Private::Static.keep_def(<self>, :"qux")
         ::Sorbet::Private::Static.keep_def(<self>, :"baz")
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"x" => ::String}).returns(::String)
-        end
-        ::Sorbet::Private::Static.keep_def(<self>, :"foo<defaultArg>1")
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"y" => ::String}).returns(::String)
-        end
-        ::Sorbet::Private::Static.keep_def(<self>, :"bar<defaultArg>1")
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"z" => ::String}).returns(::String)
-        end
-        ::Sorbet::Private::Static.keep_def(<self>, :"qux<defaultArg>1")
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"w" => ::String}).returns(::String)
-        end
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz<defaultArg>1")
         <emptyTree>
       end
     end

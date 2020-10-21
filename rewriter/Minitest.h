@@ -27,7 +27,7 @@ namespace sorbet::rewriter {
  *    end
  *
  * which is sort of a lie in that each `test_` method should actually running in
- * its own instance where `.name` retuns `test_0001_bar` but I think it is
+ * its own instance where `.name` returns `test_0001_bar` but I think it is
  * close enough for our purposes.
  */
 class Minitest final {

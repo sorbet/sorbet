@@ -1,0 +1,122 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f1>
+      args = Args {
+        args = [
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f2>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
+          }
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f3>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+          Arg {
+            name = <U c>
+          }
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f4>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+          Restarg {
+            name = <U c>
+          }
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f5>
+      args = Args {
+        args = [
+          Kwnilarg {
+          }
+          Blockarg {
+            name = <U blk>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f6>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+          Arg {
+            name = <U c>
+          }
+          Kwnilarg {
+          }
+          Blockarg {
+            name = <U blk>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f7>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+          Restarg {
+            name = <U c>
+          }
+          Kwnilarg {
+          }
+          Blockarg {
+            name = <U blk>
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}

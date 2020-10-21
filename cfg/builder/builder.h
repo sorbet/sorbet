@@ -15,14 +15,22 @@ private:
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
     static void sanityCheck(core::Context ctx, CFG &cfg);
-    static void fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
-    static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
+                                  const std::vector<UIntSet> &blockArgs);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
     static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
+    static void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
+                                core::LocOffsets loc);
+    static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, std::unique_ptr<Instruction> inst);
     static BasicBlock *walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method);
+    static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
+    walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,
+                ast::TreePtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
+    static BasicBlock *joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b);
 };
 
 class CFGContext {

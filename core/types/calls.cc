@@ -249,7 +249,7 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
                 return true;
             }
             if (getArity(gs, s1) == getArity(gs, s2)) {
-                return s1._id < s2._id;
+                return s1.rawId() < s2.rawId();
             }
             return false;
         });
@@ -380,14 +380,14 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
-        for (auto value : shapeType->values) {
+        for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
         return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
-        for (auto elem : tupleType->elems) {
+        for (auto &elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, unwrappedElems);
@@ -433,14 +433,8 @@ bool extendsTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass) {
 /**
  * Make an autocorrection for adding `extend T::Helpers`, when needed.
  */
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalState &gs, const Type *thisType,
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass,
                                                                  const Loc &call) {
-    auto *classType = cast_type<ClassType>(thisType);
-    if (classType == nullptr) {
-        return nullopt;
-    }
-
-    auto enclosingClass = classType->symbol.data(gs)->topAttachedClass(gs);
     if (extendsTHelpers(gs, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
@@ -489,7 +483,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
                                   const Type *thisType, core::SymbolRef symbol, vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, thisType->untypedBlame()), std::move(args.selfType),
-                              Symbols::untyped());
+                              Symbols::noSymbol());
     } else if (symbol == Symbols::void_()) {
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
@@ -516,7 +510,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::untyped());
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         // This is a hack. We want to always be able to build the error object
@@ -536,9 +530,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args,
                 // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
-                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed()) {
+                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
+                    args.name == core::Names::mixesInClassMethods()) {
+                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
                     if (auto suggestion =
-                            maybeSuggestExtendTHelpers(gs, thisType, core::Loc(args.locs.file, args.locs.call))) {
+                            maybeSuggestExtendTHelpers(gs, attachedClass, core::Loc(args.locs.file, args.locs.call))) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
@@ -1006,6 +1002,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
             return original;
         }
         default:
+            auto loc = core::Loc(args.locs.file, args.locs.call);
+            if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
+                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
+                            this->wrapped->show(gs));
+                if (args.name == core::Names::tripleEq()) {
+                    if (auto appliedType = cast_type<AppliedType>(this->wrapped.get())) {
+                        e.addErrorSection(
+                            ErrorSection("It looks like you're trying to pattern match on a generic", {}));
+                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
+                    }
+                }
+            }
             return ProxyType::dispatchCall(gs, args);
     }
 }
@@ -1362,6 +1370,31 @@ public:
         res.returnType = move(tuple);
     }
 } Magic_buildArray;
+
+class Magic_buildRange : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
+
+        auto rangeElemType = Types::dropLiteral(args.args[0]->type);
+        auto firstArgIsNil = rangeElemType->isNilClass();
+        if (!firstArgIsNil) {
+            rangeElemType = Types::dropNil(gs, rangeElemType);
+        }
+        auto other = Types::dropLiteral(args.args[1]->type);
+        auto secondArgIsNil = other->isNilClass();
+        if (firstArgIsNil) {
+            if (secondArgIsNil) {
+                rangeElemType = Types::untypedUntracked();
+            } else {
+                rangeElemType = Types::dropNil(gs, other);
+            }
+        } else if (!secondArgIsNil) {
+            rangeElemType = Types::any(gs, rangeElemType, Types::dropNil(gs, other));
+        }
+        res.returnType = Types::rangeOf(gs, rangeElemType);
+    }
+} Magic_buildRange;
 
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
@@ -2265,6 +2298,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildKeywordArgs(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},

@@ -249,17 +249,17 @@ public:
         Exception::raise("Should not happen");
     }
 
-    inline bool isPublic() const {
+    inline bool isMethodPublic() const {
         ENFORCE_NO_TIMER(isMethod());
-        return !isProtected() && !isPrivate();
+        return !isMethodProtected() && !isMethodPrivate();
     }
 
-    inline bool isProtected() const {
+    inline bool isMethodProtected() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PROTECTED) != 0;
     }
 
-    inline bool isPrivate() const {
+    inline bool isMethodPrivate() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
@@ -411,18 +411,18 @@ public:
         return (flags & Symbol::Flags::METHOD_FINAL) != 0;
     }
 
-    inline void setPublic() {
+    inline void setMethodPublic() {
         ENFORCE(isMethod());
         flags &= ~Symbol::Flags::METHOD_PRIVATE;
         flags &= ~Symbol::Flags::METHOD_PROTECTED;
     }
 
-    inline void setProtected() {
+    inline void setMethodProtected() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_PROTECTED;
     }
 
-    inline void setPrivate() {
+    inline void setMethodPrivate() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
@@ -489,8 +489,8 @@ public:
     std::string toStringFullName(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
 
-    // Not printed when showing name table
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
+    // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
+    bool isPrintable(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
         bool showFull = false;
@@ -604,6 +604,9 @@ public:
 private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
+
+    // Not printed when showing symbol table
+    bool isHiddenFromPrinting(const GlobalState &gs) const;
 
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
                                     bool showRaw = false) const;

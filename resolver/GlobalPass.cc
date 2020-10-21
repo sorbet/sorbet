@@ -30,7 +30,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
             if (!cursor.exists()) {
                 return cursor;
             }
-            for (auto aliasPair : typeAliases[cursor._id]) {
+            for (auto aliasPair : typeAliases[cursor.classOrModuleIndex()]) {
                 if (aliasPair.first == tparam) {
                     return dealiasAt(gs, aliasPair.second, klass, typeAliases);
                 }
@@ -82,17 +82,17 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         return true;
     }
-    typeAliases[sym._id].emplace_back(parentTypeMember, my);
+    typeAliases[sym.classOrModuleIndex()].emplace_back(parentTypeMember, my);
     return true;
 } // namespace
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
     ENFORCE(sym.data(gs)->isClassOrModule());
-    if (resolved[sym._id]) {
+    if (resolved[sym.classOrModuleIndex()]) {
         return;
     }
-    resolved[sym._id] = true;
+    resolved[sym.classOrModuleIndex()] = true;
 
     if (sym.data(gs)->superClass().exists()) {
         auto parent = sym.data(gs)->superClass();
@@ -180,23 +180,29 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto ref = core::SymbolRef(&gs, i);
+    int moduleCount = 0;
+    for (int i = 0; i < gs.methodsUsed(); ++i) {
+        auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::Method, i);
+        ENFORCE(ref.data(gs)->isMethod());
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
-            if (ref.data(gs)->isMethod()) {
-                methodCount++;
-            } else if (ref.data(gs)->isClassOrModule()) {
-                classCount++;
-            }
+            methodCount++;
         }
-        if (!ref.data(gs)->isClassOrModule()) {
-            continue;
-        }
-        classCount++;
+    }
+    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        ENFORCE(ref.data(gs)->isClassOrModule());
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
+        }
+        auto loc = ref.data(gs)->loc();
+        if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
+            if (ref.data(gs)->isClassOrModuleClass()) {
+                classCount++;
+            } else {
+                moduleCount++;
+            }
         }
         if (ref.data(gs)->superClass().exists() && ref.data(gs)->superClass() != core::Symbols::todo()) {
             continue;
@@ -219,7 +225,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
-                ref.data(gs)->setSuperClass(attached.data(gs)->superClass().data(gs)->singletonClass(gs));
+                auto singleton = attached.data(gs)->superClass().data(gs)->singletonClass(gs);
+                ref.data(gs)->setSuperClass(singleton);
             }
         } else {
             if (ref.data(gs)->isClassOrModuleClass()) {
@@ -235,6 +242,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         }
     }
 
+    prodCounterAdd("types.input.modules.total", moduleCount);
     prodCounterAdd("types.input.classes.total", classCount);
     prodCounterAdd("types.input.methods.total", methodCount);
 }
@@ -354,12 +362,10 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        const auto &data = core::SymbolRef(&gs, i).data(gs);
-        if (!data->isClassOrModule()) {
-            continue;
-        }
-        computeClassLinearization(gs, core::SymbolRef(&gs, i));
+    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+        const auto &ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        ENFORCE(ref.data(gs)->isClassOrModule());
+        computeClassLinearization(gs, ref);
     }
 }
 
@@ -370,11 +376,9 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // that resolves types and we don't want to introduce additional passes if
     // we don't have to. It would be a tractable refactor to merge it
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, i);
-        if (!sym.data(gs)->isClassOrModule()) {
-            continue;
-        }
+    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        ENFORCE(sym.data(gs)->isClassOrModule());
 
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
@@ -392,14 +396,13 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     computeLinearization(gs);
 
     vector<vector<pair<core::SymbolRef, core::SymbolRef>>> typeAliases;
-    typeAliases.resize(gs.symbolsUsed());
+    typeAliases.resize(gs.classAndModulesUsed());
     vector<bool> resolved;
-    resolved.resize(gs.symbolsUsed());
-    for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, i);
-        if (sym.data(gs)->isClassOrModule()) {
-            resolveTypeMembers(gs, sym, typeAliases, resolved);
-        }
+    resolved.resize(gs.classAndModulesUsed());
+    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        ENFORCE(sym.data(gs)->isClassOrModule());
+        resolveTypeMembers(gs, sym, typeAliases, resolved);
     }
 }
 

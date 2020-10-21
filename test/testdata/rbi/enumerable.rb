@@ -20,6 +20,7 @@
 
 T.assert_type!([1].lazy, Enumerator::Lazy[Integer])
 T.assert_type!([1, 2].filter_map { |x| x.odd? ? x.to_f : x.to_s }, T::Array[T.any(Float, String)])
+T.assert_type!([1, 2, "3", nil].tally, T::Hash[T.nilable(T.any(Integer, String)), Integer])
 
 # There are 3 different ways to call all?, any? and none?
 a = [1, 3, 20]
@@ -35,3 +36,12 @@ a.none? { |i| i }
 a.one?
 a.one?(1)
 a.one? { |i| i }
+
+# detect
+p = T.let(->{ 1 }, T.proc.returns(Integer))
+T.reveal_type([1,2].detect) # error: Revealed type: `T::Enumerator[Integer]`
+T.reveal_type([1,2].detect {|x| false}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type([1,2].detect(-> {}) {|x| false}) # error: Revealed type: `T.untyped`
+T.reveal_type([1,2].detect(-> {})) # error: Revealed type: `T::Enumerator[T.untyped]`
+T.reveal_type([1,2].detect(p) {|x| false}) # error: Revealed type: `Integer`
+T.reveal_type([1,2].detect(p)) # error: Revealed type: `T::Enumerator[Integer]`

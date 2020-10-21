@@ -1,0 +1,101 @@
+{
+  "type" : "Begin",
+  "stmts" : [
+    {
+      "type" : "Assign",
+      "lhs" : {
+        "type" : "GVarLhs",
+        "name" : "$global"
+      },
+      "rhs" : {
+        "type" : "Send",
+        "receiver" : {
+          "type" : "Integer",
+          "val" : "1"
+        },
+        "method" : "+",
+        "args" : [
+          {
+            "type" : "Integer",
+            "val" : "2"
+          }
+        ]
+      }
+    },
+    {
+      "type" : "Assign",
+      "lhs" : {
+        "type" : "IVarLhs",
+        "name" : "@a"
+      },
+      "rhs" : {
+        "type" : "Integer",
+        "val" : "1"
+      }
+    },
+    {
+      "type" : "Assign",
+      "lhs" : {
+        "type" : "CVarLhs",
+        "name" : "@@a"
+      },
+      "rhs" : {
+        "type" : "Integer",
+        "val" : "1"
+      }
+    },
+    {
+      "type" : "Assign",
+      "lhs" : {
+        "type" : "LVarLhs",
+        "name" : "a"
+      },
+      "rhs" : {
+        "type" : "Integer",
+        "val" : "2"
+      }
+    },
+    {
+      "type" : "Masgn",
+      "lhs" : {
+        "type" : "Mlhs",
+        "exprs" : [
+          {
+            "type" : "SplatLhs",
+            "var" : {
+              "type" : "LVarLhs",
+              "name" : "a"
+            }
+          }
+        ]
+      },
+      "rhs" : {
+        "type" : "Integer",
+        "val" : "1"
+      }
+    },
+    {
+      "type" : "Send",
+      "receiver" : null,
+      "method" : "puts",
+      "args" : [
+        {
+          "type" : "Integer",
+          "val" : "1"
+        },
+        {
+          "type" : "String",
+          "val" : "👋 a string \u0000 \u001b with control chars and emojis"
+        },
+        {
+          "type" : "GVar",
+          "name" : "$global"
+        },
+        {
+          "type" : "NthRef",
+          "ref" : "1"
+        }
+      ]
+    }
+  ]
+}

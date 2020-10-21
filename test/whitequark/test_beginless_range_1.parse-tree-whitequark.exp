@@ -1,0 +1,2 @@
+s(:erange, nil,
+  s(:int, "100"))

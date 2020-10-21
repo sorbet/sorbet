@@ -8,6 +8,8 @@ namespace serialize {
 class SerializerImpl;
 }
 class GlobalState;
+class Context;
+class MutableContext;
 
 constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
@@ -31,6 +33,9 @@ struct LocOffsets {
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};
     }
+
+    std::string showRaw(const Context ctx) const;
+    std::string showRaw(const MutableContext ctx) const;
 };
 CheckSize(LocOffsets, 8, 4);
 

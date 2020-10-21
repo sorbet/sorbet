@@ -1,6 +1,6 @@
 #include "cfg/builder/builder.h"
-#include "cfg/sorted_vector_helpers.h"
 #include "common/Timer.h"
+#include "common/UIntSetForEach.h"
 #include "common/sort.h"
 #include "core/Names.h"
 
@@ -181,16 +181,16 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
         // Overapproximation of the set of variables that have aliases.
         // Will have false positives, but no false negatives. Avoids an expensive inner loop below.
-        UnorderedSet<LocalRef> mayHaveAlias;
+        UIntSet mayHaveAlias(cfg.numLocalVariables());
         for (auto &alias : current) {
-            mayHaveAlias.insert(alias.second);
+            mayHaveAlias.add(alias.second.id());
         }
 
         for (Binding &bind : bb->exprs) {
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 i->what = maybeDealias(ctx, cfg, i->what, current);
             }
-            if (mayHaveAlias.contains(bind.bind.variable)) {
+            if (mayHaveAlias.contains(bind.bind.variable.id())) {
                 /* invalidate a stale record (uncommon) */
                 for (auto it = current.begin(); it != current.end(); /* nothing */) {
                     if (it->second == bind.bind.variable) {
@@ -222,7 +222,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 current[bind.bind.variable] = i->what;
-                mayHaveAlias.insert(i->what);
+                mayHaveAlias.add(i->what.id());
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
@@ -241,7 +241,9 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
         }
     }
 }
-void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
+                                   const vector<UIntSet> &blockArgs) {
+    ENFORCE_NO_TIMER(blockArgs.size() == cfg.maxBasicBlockId);
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
     }
@@ -249,50 +251,33 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
     Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
-        for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
-            Binding &bind = *expIt;
-            if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
-                ++expIt;
-                continue;
-            }
+        it->exprs.erase(remove_if(it->exprs.begin(), it->exprs.end(),
+                                  [&ctx, &cfg, &RnW, &blockArgs, &it](auto &bind) -> bool {
+                                      if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
+                                          return false;
+                                      }
+                                      bool wasRead = RnW.reads[it->id].contains(
+                                                         bind.bind.variable.id()) || // read in the same block
+                                                     blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
+                                                     blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
 
-            bool wasRead = RnW.readsSet[it->id].contains(bind.bind.variable.id()); // read in the same block
-
-            // TODO(jvilk): When I change the sort order of block args to be in LocalRef variable order, we can
-            // early-abort the loops below if `arg.variable > bind.bind.variable`.
-            if (!wasRead) {
-                for (const auto &arg : it->bexit.thenb->args) {
-                    if (arg.variable == bind.bind.variable) {
-                        wasRead = true;
-                        break;
-                    }
-                }
-            }
-            if (!wasRead) {
-                for (const auto &arg : it->bexit.elseb->args) {
-                    if (arg.variable == bind.bind.variable) {
-                        wasRead = true;
-                        break;
-                    }
-                }
-            }
-            if (!wasRead) {
-                // These are all instructions with no side effects, which can be
-                // deleted if the assignment is dead. It would be slightly
-                // shorter to list the converse set -- those which *do* have
-                // side effects -- but doing it this way is more robust to us
-                // adding more instruction types in the future.
-                if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<Literal>(bind.value.get()) ||
-                    isa_instruction<LoadSelf>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
-                    isa_instruction<LoadYieldParams>(bind.value.get())) {
-                    expIt = it->exprs.erase(expIt);
-                } else {
-                    ++expIt;
-                }
-            } else {
-                ++expIt;
-            }
-        }
+                                      if (!wasRead) {
+                                          // These are all instructions with no side effects, which can be
+                                          // deleted if the assignment is dead. It would be slightly
+                                          // shorter to list the converse set -- those which *do* have
+                                          // side effects -- but doing it this way is more robust to us
+                                          // adding more instruction types in the future.
+                                          if (isa_instruction<Ident>(bind.value.get()) ||
+                                              isa_instruction<Literal>(bind.value.get()) ||
+                                              isa_instruction<LoadSelf>(bind.value.get()) ||
+                                              isa_instruction<LoadArg>(bind.value.get()) ||
+                                              isa_instruction<LoadYieldParams>(bind.value.get())) {
+                                              return true;
+                                          }
+                                      }
+                                      return false;
+                                  }),
+                        it->exprs.end());
     }
 }
 
@@ -302,13 +287,13 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
-        for (auto local : RnW.reads[bb->id]) {
+        RnW.reads[bb->id].forEach([&cfg, &bb](u4 local) {
             auto curMin = cfg.minLoops[local];
             if (curMin > bb->outerLoops) {
                 curMin = bb->outerLoops;
             }
             cfg.minLoops[local] = curMin;
-        }
+        });
     }
     for (const auto &bb : cfg.basicBlocks) {
         if (bb.get() == cfg.deadBlock()) {
@@ -331,7 +316,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
-void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -344,12 +329,12 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    const vector<vector<int>> &readsByBlock = RnW.reads;
-    const vector<vector<int>> &writesByBlock = RnW.writes;
-    const vector<vector<int>> &deadByBlock = RnW.dead;
+    const auto &readsByBlock = RnW.reads;
+    const auto &writesByBlock = RnW.writes;
+    const auto &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<vector<int>> upperBounds1;
+    vector<UIntSet> upperBounds1;
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
@@ -358,37 +343,38 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
                 auto &upperBoundsForBlock = upperBounds1[bb->id];
+
                 const auto sz = upperBoundsForBlock.size();
+
                 if (bb->bexit.thenb != cfg.deadBlock()) {
-                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.thenb->id]);
+                    upperBoundsForBlock.add(upperBounds1[bb->bexit.thenb->id]);
                 }
                 if (bb->bexit.elseb != cfg.deadBlock()) {
-                    SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds1[bb->bexit.elseb->id]);
+                    upperBoundsForBlock.add(upperBounds1[bb->bexit.elseb->id]);
                 }
 
                 // Any variable that we write and do not read is dead on entry to
                 // this block, and we do not require it.
                 const auto &deadForBlock = deadByBlock[bb->id];
                 if (!deadForBlock.empty()) {
-                    vector<int> toRemove;
-                    for (auto local : deadForBlock) {
+                    UIntSet toRemove(cfg.numLocalVariables());
+                    deadForBlock.forEach([&bb, &cfg, &toRemove](u4 local) -> void {
                         // TODO(nelhage) We can't erase for variables inside loops, due
                         // to how our "pinning" type inference works. We can remove this
                         // inner condition when we get a better type inference
                         // algorithm.
                         if (bb->outerLoops <= cfg.minLoops[local]) {
-                            toRemove.emplace_back(local);
+                            toRemove.add(local);
                         }
-                    }
-                    SortedVectorHelpers::setDifferenceInplace(upperBoundsForBlock, toRemove);
+                    });
+                    upperBoundsForBlock.remove(toRemove);
                 }
-
                 changed = changed || (upperBoundsForBlock.size() != sz);
             }
         }
     }
 
-    vector<vector<int>> upperBounds2(cfg.maxBasicBlockId);
+    vector<UIntSet> upperBounds2(cfg.maxBasicBlockId, UIntSet(cfg.numLocalVariables()));
 
     changed = true;
     {
@@ -401,11 +387,10 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, writesByBlock[edge->id]);
-                        SortedVectorHelpers::setUnionInplace(upperBoundsForBlock, upperBounds2[edge->id]);
+                        upperBoundsForBlock.add(writesByBlock[edge->id]);
+                        upperBoundsForBlock.add(upperBounds2[edge->id]);
                     }
                 }
-
                 changed = changed || sz != upperBoundsForBlock.size();
             }
         }
@@ -414,33 +399,20 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrit
         Timer timeit(ctx.state.tracer(), "upperBoundsMerge");
         /** Combine two upper bounds */
         for (auto &it : cfg.basicBlocks) {
-            const auto &set1 = upperBounds1[it->id];
-            const auto &set2 = upperBounds2[it->id];
-            auto set1It = set1.begin();
-            auto set2It = set2.begin();
-            // Note: The loop enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
+            // Intentionally mutate upperBounds1 here for return value.
+            auto &intersection = upperBounds1[it->id];
+            intersection.intersect(upperBounds2[it->id]);
+            // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
-            while (set1It != set1.end() && set2It != set2.end()) {
-                const auto set1El = *set1It;
-                const auto set2El = *set2It;
-                if (set1El == set2El) {
-                    it->args.emplace_back(set1El);
-                    set1It++;
-                    set2It++;
-                } else if (set1El < set2El) {
-                    set1It++;
-                } else {
-                    set2It++;
-                }
-            }
+            intersection.forEach([&it](u4 local) -> void { it->args.emplace_back(local); });
             // it->args is now sorted in LocalRef ID order.
-            // TODO(jvilk): Remove this sort. I've kept it for now to avoid dirtying the PR diff.
-            fast_sort(it->args, [&cfg](const auto &lhs, const auto &rhs) -> bool {
-                return lhs.variable.data(cfg) < rhs.variable.data(cfg);
-            });
+            ENFORCE(absl::c_is_sorted(it->args,
+                                      [](auto &a, auto &b) -> bool { return a.variable.id() < b.variable.id(); }));
             histogramInc("cfgbuilder.blockArguments", it->args.size());
         }
     }
+    // upperBounds1 now contains the intersection of upperBounds2 and 1.
+    return upperBounds1;
 }
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {

@@ -196,6 +196,6 @@ int main(int argc, char *argv[]) {
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 
-    doctest::Context context;
+    doctest::Context context(argc, argv);
     return context.run();
 }

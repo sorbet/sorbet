@@ -1,0 +1,402 @@
+ClassDef{
+  kind = class
+  name = EmptyTree<<C <U <root>>>>
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U foo><<C <U <todo sym>>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _1>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _4>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _5>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _6>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _7>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _8>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _9>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _9>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          fun = <U *>
+          block = nullptr
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+          ]
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _1>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _4>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _5>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _6>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _7>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _8>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _9>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _9>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          fun = <U *>
+          block = nullptr
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+          ]
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <C <U Kernel>>
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _1>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <C <U Kernel>>
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _4>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _5>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _6>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _7>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _8>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _9>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _9>
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <C <U Kernel>>
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          fun = <U *>
+          block = nullptr
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+          ]
+        }
+      }
+      args = [
+      ]
+    }
+
+    Send{
+      recv = Local{
+        localVariable = <U <self>>
+      }
+      fun = <U foo>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+        ]
+        body = InsSeq{
+          stats = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _3>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+            UnresolvedIdent{
+              kind = Local
+              name = <U _3>
+            }
+          ],
+          expr = UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+        }
+      }
+      args = [
+      ]
+    }
+  ]
+}

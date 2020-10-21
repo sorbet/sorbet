@@ -8,7 +8,7 @@ class Family
     def son_catchphrase
         Bart::CatchPhrase
     #   ^^^^ usage: bart
-    #   ^^^^ hover: T.class_of(Bart)
+    #   ^^^^ hover: T.class_of(Simpsons::Bart)
         #     ^^^^^^^^^^^ usage: catchphrase
         #     ^^^^^^^^^^^ hover: String("Don\'t have a cow, man.")
     end
@@ -20,7 +20,7 @@ class Family
         Bart::Character.new
     #   ^^^^ usage: bart
         #     ^^^^^^^^^ usage: character
-        #     ^^^^^^^^^ hover: T.class_of(Character)
+        #     ^^^^^^^^^ hover: T.class_of(Bart::Character)
         #     ^^^^^^^^^ hover: Character class description
         #               ^^^ hover: Description of Character initialize
         Bart::C # error: Unable to resolve constant `C`

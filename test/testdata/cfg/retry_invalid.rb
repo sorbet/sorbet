@@ -1,4 +1,4 @@
 # typed: true
 def main
-    retry # error: No `begin` block around `retry`
+  retry # error: No `begin` block around `retry`
 end

@@ -74,6 +74,17 @@ gemfile_lock_deps(
     ],
 )
 
+load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+
+rust_repositories(
+    edition = "2018",
+    version = "1.46.0",
+)
+
+load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+
+bazel_version(name = "bazel_version")
+
 BAZEL_VERSION = "3.4.1"
 
 BAZEL_INSTALLER_VERSION_linux_SHA = "9808adad931ac652e8ff5022a74507c532250c2091d21d6aebc7064573669cc5"

@@ -52,7 +52,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root()._id);
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
     }
 
     DefinitionKind kind() const {
@@ -200,7 +200,7 @@ public:
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        return FoundDefinitionRef(DefinitionKind::Symbol, symbol._id);
+        return FoundDefinitionRef(DefinitionKind::Symbol, symbol.rawId());
     }
 
     void addModifier(Modifier &&mod) {
@@ -283,7 +283,7 @@ const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &fo
 
 core::SymbolRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == DefinitionKind::Symbol);
-    return core::SymbolRef(nullptr, _id);
+    return core::SymbolRef::fromRaw(_id);
 }
 
 struct SymbolFinderResult {
@@ -921,9 +921,9 @@ class SymbolDefiner {
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
-        auto symTableSize = ctx.state.symbolsUsed();
+        auto symTableSize = ctx.state.methodsUsed();
         auto sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
-        const bool isNewSymbol = symTableSize != ctx.state.symbolsUsed();
+        const bool isNewSymbol = symTableSize != ctx.state.methodsUsed();
         if (!isNewSymbol) {
             // See if this is == to the method we're defining now, or if we have a redefinition error.
             auto matchingSym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
@@ -966,10 +966,10 @@ class SymbolDefiner {
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
-            symbol.data(ctx)->setPrivate();
+            symbol.data(ctx)->setMethodPrivate();
         } else {
             // All other methods default to public (their visibility might be changed later)
-            symbol.data(ctx)->setPublic();
+            symbol.data(ctx)->setMethodPublic();
         }
         return symbol;
     }
@@ -986,13 +986,13 @@ class SymbolDefiner {
             switch (mod.name._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
-                    method.data(ctx)->setPrivate();
+                    method.data(ctx)->setMethodPrivate();
                     break;
                 case core::Names::protected_()._id:
-                    method.data(ctx)->setProtected();
+                    method.data(ctx)->setMethodProtected();
                     break;
                 case core::Names::public_()._id:
-                    method.data(ctx)->setPublic();
+                    method.data(ctx)->setMethodPublic();
                     break;
                 default:
                     break;
@@ -1020,9 +1020,9 @@ class SymbolDefiner {
             symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName);
             symbol.data(ctx)->setIsModule(isModule);
 
-            auto oldSymCount = ctx.state.symbolsUsed();
+            auto oldSymCount = ctx.state.classAndModulesUsed();
             auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton._id >= oldSymCount,
+            ENFORCE(newSingleton.classOrModuleIndex() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return symbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
@@ -1099,7 +1099,8 @@ class SymbolDefiner {
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
-            sealedSubclasses.data(ctx)->resultType = core::Types::arrayOf(ctx, core::Types::bottom());
+            vector<core::TypePtr> targs{core::Types::bottom()};
+            sealedSubclasses.data(ctx)->resultType = core::make_type<core::AppliedType>(core::Symbols::Set(), targs);
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
             symbolData->setClassOrModuleAbstract();

@@ -81,6 +81,7 @@ NameDef names[] = {
     {"cfgAlias", "<cfgAlias>"},
     {"magic", "<magic>"},
     {"unconditional", "<unconditional>"},
+    {"argPresent", "<argPresent>"},
     // end CFG temporaries
 
     {"include"},
@@ -308,6 +309,7 @@ NameDef names[] = {
     {"buildHash", "<build-hash>"},
     {"buildKeywordArgs", "<build-keyword-args>"},
     {"buildArray", "<build-array>"},
+    {"buildRange", "<build-range>"},
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
     {"suggestType", "<suggest-type>"},
@@ -328,6 +330,7 @@ NameDef names[] = {
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
     {"lessThan", "<"},
+    {"equal_p", "equal?"},
     {"eqeq", "=="},
     {"neq", "!="},
     {"leq", "<="},

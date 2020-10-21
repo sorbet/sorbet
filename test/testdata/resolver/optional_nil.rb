@@ -5,11 +5,13 @@ class Test
   sig {params(x: String).returns(String)}
   def foo(x = nil) # error: Argument does not have asserted type `String`
     x
+  # ^ error: Returning value that does not conform to method result type
   end
 
   sig {params(y: String).returns(String)}
   def bar(y: nil) # error: Argument does not have asserted type `String`
     y
+  # ^ error: Returning value that does not conform to method result type
   end
 
   sig {params(z: String).returns(String)}

@@ -1028,7 +1028,7 @@ void lexer::set_state_expr_value() {
 
   action extend_string_escaped {
     auto& current_literal = literal_();
-
+    // Get the first character after the backslash.
     // TODO multibyte
     auto escaped_char = *escape_s;
 
@@ -1071,7 +1071,26 @@ void lexer::set_state_expr_value() {
       }
     } else {
       // It does not. So this is an actual escape sequence, yay!
-      if (current_literal.regexp()) {
+      if (current_literal.squiggly_heredoc() && escaped_char == '\n') {
+        // Squiggly heredocs like
+        //   <<~-HERE
+        //     1\
+        //     2
+        //   HERE
+        // treat '\' as a line continuation, but still dedent the body, so the heredoc above becomes "12\n".
+        // This information is emitted as is, without escaping,
+        // later this escape sequence (\\\n) gets handled manually in the dedenter
+        std::string str = gsub(tok(), "\\\n", "");
+        current_literal.extend_string(str, ts, te);
+      } else if (current_literal.support_line_continuation_via_slash() && escaped_char == '\n') {
+        // Heredocs, regexp and a few other types of literals support line
+        // continuation via \\\n sequence. The code like
+        //   "a\
+        //   b"
+        // must be parsed as "ab"
+        std::string str = gsub(tok(), "\\\n", "");
+        current_literal.extend_string(str, ts, te);
+      } else if (current_literal.regexp()) {
         // Regular expressions should include escape sequences in their
         // escaped form. On the other hand, escaped newlines are removed.
         std::string str = gsub(tok(), "\\\n", "");
@@ -2128,6 +2147,23 @@ void lexer::set_state_expr_value() {
             operator_fname | operator_arithmetic | operator_rest )
       => {
         emit(token_type::tSYMBOL, tok(ts + 1), ts, te);
+        fnext expr_end; fbreak;
+      };
+
+      ':' ( '@'  %{ tm = p - 1; }
+          | '@@' %{ tm = p - 2; }
+          ) [0-9]*
+      => {
+        if (version == ruby_version::RUBY_27) {
+          if (ts[0] == ':' && ts[1] == '@' && ts[2] == '@') {
+            diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts + 1, te));
+          } else {
+            diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts + 1, te));
+          }
+        } else {
+          emit(token_type::tCOLON, tok(ts, ts + 1), ts, ts + 1);
+          p = ts;
+        }
         fnext expr_end; fbreak;
       };
 

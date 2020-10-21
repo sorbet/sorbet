@@ -36,13 +36,54 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
                                          selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
                                          core::Names::cast()));
 
+        BasicBlock *presentCont = entry;
+        BasicBlock *defaultCont = nullptr;
+
+        auto &argInfos = md.symbol.data(ctx)->arguments();
+        bool isAbstract = md.symbol.data(ctx)->isAbstract();
+        bool seenKeyword = false;
         int i = -1;
         for (auto &argExpr : md.args) {
             i++;
             auto *a = ast::MK::arg2Local(argExpr);
-            synthesizeExpr(entry, res->enterLocal(a->localVariable), a->loc, make_unique<LoadArg>(md.symbol, i));
+            auto local = res->enterLocal(a->localVariable);
+            auto &argInfo = argInfos[i];
+
+            seenKeyword = seenKeyword || argInfo.flags.isKeyword;
+
+            // If defaultCont is non-null, that means that the previous argument had a default. If the current argument
+            // has a default and also is not a keyword, block or repeated arg, then we can continue by extending that
+            // fall-through case. However if any of those conditions fail, we must merge the two paths back together,
+            // and break out of the fast-path for defaulting.
+            if (defaultCont &&
+                (seenKeyword || argInfo.flags.isBlock || argInfo.flags.isRepeated || !argInfo.flags.isDefault)) {
+                presentCont = joinBlocks(cctx, presentCont, defaultCont);
+                defaultCont = nullptr;
+            }
+
+            // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
+            if (!isAbstract) {
+                // Only emit conditional arg loading if the arg has a default
+                if (auto *opt = ast::cast_tree<ast::OptionalArg>(argExpr)) {
+                    auto [result, presentNext, defaultNext] =
+                        walkDefault(cctx, i, argInfo, local, a->loc, opt->default_, presentCont, defaultCont);
+
+                    synthesizeExpr(defaultNext, local, a->loc, make_unique<Ident>(result));
+
+                    presentCont = presentNext;
+                    defaultCont = defaultNext;
+                }
+            }
+
+            synthesizeExpr(presentCont, local, a->loc, make_unique<LoadArg>(md.symbol, i));
         }
-        cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
+
+        // Join the presentCont and defaultCont paths together
+        if (defaultCont) {
+            presentCont = joinBlocks(cctx, presentCont, defaultCont);
+        }
+
+        cont = walk(cctx.withTarget(retSym), md.rhs.get(), presentCont);
     }
     // Past this point, res->localVariables is a fixed size.
 
@@ -84,8 +125,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     dealias(ctx, *res);
     CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites(ctx);
     computeMinMaxLoops(ctx, RnW, *res);
-    fillInBlockArguments(ctx, RnW, *res);
-    removeDeadAssigns(ctx, RnW, *res); // requires block arguments to be filled
+    auto blockArgs = fillInBlockArguments(ctx, RnW, *res);
+    removeDeadAssigns(ctx, RnW, *res, blockArgs); // requires block arguments to be filled
     simplify(ctx, *res);
     histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);

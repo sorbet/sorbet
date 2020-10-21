@@ -15,7 +15,7 @@ class A
 
   sig {params(x: T1, y: T2, z: T3).void}
   def f2(x:, y: T2.new, z:); end
-  #                     ^^ error-with-dupes: Malformed `sig`. Required parameter `z` must be declared before all the optional ones
+  #                     ^^ error: Malformed `sig`. Required parameter `z` must be declared before all the optional ones
 end
 
 # Check parameters order match between signature and declaration
@@ -32,7 +32,7 @@ class B
 
   sig {params(v: T1, w: T2, x: T1, y: T2, z: T3).void}
   def f3(v, w = T2.new, *y, z:, x: T1.new); end
-  #                      ^ error-with-dupes: Bad parameter ordering for `y`, expected `x` instead
-  #                         ^^ error-with-dupes: Bad parameter ordering for `z`, expected `y` instead
+  #                      ^ error: Bad parameter ordering for `y`, expected `x` instead
+  #                         ^^ error: Bad parameter ordering for `z`, expected `y` instead
   #                             ^^ error-with-dupes: Bad parameter ordering for `x`, expected `z` instead
 end

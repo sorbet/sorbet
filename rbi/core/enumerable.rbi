@@ -374,17 +374,28 @@ module Enumerable
   # (1..100).find    { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
   # ```
   sig do
-    params(
-        ifnone: Proc,
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      )
+      .returns(T.any(T.type_parameter(:U), Elem))
+  end
+  sig do
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator[T.any(T.type_parameter(:U), Elem)])
+  end
+  sig do
+    params(
+      blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T.nilable(Elem))
   end
   sig do
-    params(
-        ifnone: Proc,
-    )
-    .returns(T::Enumerator[Elem])
+    returns(T::Enumerator[Elem])
   end
   def detect(ifnone=T.unsafe(nil), &blk); end
 
@@ -1550,6 +1561,16 @@ module Enumerable
   end
   sig {returns(T::Enumerator[Elem])}
   def take_while(&blk); end
+
+  # Tallies the collection, i.e., counts the occurrences of each element.
+  # Returns a hash with the elements of the collection as keys and the
+  # corresponding counts as values.
+  #
+  # ```ruby
+  # ["a", "b", "c", "b"].tally  #=> {"a"=>1, "b"=>2, "c"=>1}
+  # ```
+  sig {returns(T::Hash[Elem, Integer])}
+  def tally(); end
 
   ### Implemented in C++
 

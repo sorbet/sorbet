@@ -112,6 +112,8 @@ another or make modifications within the IR they were given.
 
 > `*`: Even though these passes modify the IR they're given, they have another
 > important job which is to populate GlobalState.
+>
+> `**`: This pass doesn't even modify the AST. It just emits errors.
 
 
 |     | Translation Pass                 | IR                  | Rewrite Pass                      |
@@ -124,7 +126,8 @@ another or make modifications within the IR they were given.
 | 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`    |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
-| 6   |                                  | [`ast::Expression`] | [Flattener], `-p ast`             |
+| 6   |                                  | [`ast::Expression`] | [DefinitionValidator] (**)        |
+| 6   |                                  | [`ast::Expression`] | [ClassFlatten], `-p ast`          |
 | 7   | [CFG], `-p cfg --stop-after cfg` |                     |                                   |
 | 8   |                                  | [`cfg::CFG`]        | [Infer], `-p cfg`                 |
 
@@ -150,8 +153,10 @@ We will discuss individual phases and IRs below.
 ### Parser
 
 The parser we're using is based on whitequark/parser, the popular Ruby parser.
-It was ported to yacc / C++ by Charlie Somerville for use in the TypedRuby
-project. You can find the sources in `third_party/parser/`.
+The Ruby 2.4 whitequark parser was ported to yacc / C++ by Charlie Somerville
+for use in his [TypedRuby] project, and has since seen many external
+contributions to support later Ruby versions. You can find the sources in
+`third_party/parser/`.
 
 We interact with the TypedRuby parser using code generation to build a C++
 header. To see the C++ header, first build Sorbet, then look inside bazel at
@@ -159,9 +164,9 @@ header. To see the C++ header, first build Sorbet, then look inside bazel at
 
 The header itself is generated using [parser/tools/generate_ast.cc].
 
-In general, the IR the parser generates is intended to model Ruby very
-granularly, but is frequently redundant for the purpose of typechecking. We use
-the Desugar and Rewriter passes to simplify the IR before typechecking.
+In general, the IR the parser generates models Ruby very granularly. This fine
+granularity is frequently extra fine for the purpose of typechecking. We use the
+Desugar and Rewriter passes to simplify the IR before typechecking.
 
 
 ### Desugar
@@ -204,35 +209,45 @@ examples of DSLs that are rewritten by this pass:
 The core Rewriter pass lives in [rewriter/rewriter.cc].
 Each Rewriter pass lives in its own file in the [rewriter/] folder.
 
-In the future, we anticipate rewriting the DSL phase with a plugin architecture.
-This will allow for a wider audience of Rubyists to teach Sorbet about DSLs
-they've written.
+We've envisioned the Rewriter pass as a potential extension point for some sort
+of plugin system. This will allow for a wider audience of Rubyists to teach
+Sorbet about DSLs they've written. This is why we've intentionally limited the
+power of Rewriter passes.
 
-We artificially limit what code we call from Rewriter passes. Sometimes it would
-be convenient to call into other phases of Sorbet, but instead we've
-reimplemented functionality in the Rewriter pass. This keeps the surface area of
-the API we'll have to present to plugins in the future small.
+Specfically, we artificially limit what code we call from Rewriter passes.
+Sometimes it would be convenient to call into other phases of Sorbet (like
+resolver or infer), but instead we've reimplemented functionality in the
+Rewriter pass. This keeps the surface area of the API we'd have to present to
+plugins in the future small.
 
 
 ### LocalVars
 
-TODO(jez) This needs to be documented more fully.
+This is a fairly short pass. It converts the `ast::UnresolvedIdent` AST nodes
+that correspond to local variables to `ast::Local` nodes (`ast::UnresolvedIdent`
+nodes are also used for instance variables, class variables, and global
+variables, not just local variables, but those are handled by other phases).
 
-Creates `ast::Local`s from `ast::UnresolvedIdent`s.
+For the most part doing this is very straightforwardly accomplished with a tree
+traversal. One trick is that local variables record which Ruby block (like `do
+... end`) they're a part of. (Ruby blocks introduce new lexical scopes; things
+like `if` / `else` and `begin` / `end` expressions do not.)
 
 ### Namer
 
 Namer is in charge of creating `Symbol`s for classes, methods, globals, and
 method arguments. (Counterintuitively, Namer is not in charge of creating
-`Name`s. See below for the difference between [`Symbol`s] and [`Name`s].) The
-file you'll want to see is [namer/namer.cc].
+`Name`s. See below for the difference between [`Symbol`s] and [`Name`s].)
+
+The file you'll want to see is [namer/namer.cc].
 
 Symbols are the canonical store of information about definitions in Sorbet.
 Namer walks the [`ast::Expression`] tree and calls various methods to create a
-`Symbol` and hand off ownership to `GlobalState` (for example,
-`enterMethodSymbol` and `enterClassSymbol`). These methods return a `SymbolRef`,
-which is conceptually a newtype wrapper around a pointer to a `Symbol`. See
-below for a discussion of [`Symbol`s vs `SymbolRef`s](#refs-ie-symbol-vs-symbolref).
+`Symbol` which is owned by `GlobalState` and get back a reference to what was
+created (for example, `enterMethodSymbol` and `enterClassSymbol`). These methods
+return a `SymbolRef`, which is conceptually a newtype wrapper around a pointer
+to a `Symbol`. See below for a discussion of [`Symbol`s vs
+`SymbolRef`s](#refs-ie-symbol-vs-symbolref).
 
 The key datastructure for the Namer pass is the `Symbol` table, which we can
 print out. Given this file:
@@ -286,17 +301,23 @@ Some notes:
 - None of the type / inheritance information is filled in yet. This is left to
   [Resolver].
 
+> Namer used to be a relatively simple phase. It still conceptually follows this
+> pattern (walk definitions, create `Symbol`s for definitions) but it has been
+> optimized for parallelism and speed.
+>
+> See [Namer & Resolver Pipeline](namer-resolver-pipeline.md) for more details.
+
 
 ### Resolver
 
 After [Namer] has run, we've created [`Symbol`s] for most (but not all) things,
 but these `Symbol`s haven't been woven together yet. For example, after Namer,
 we had a bunch of `Symbol`s marked `<todo sym>` representing classes' ancestors.
-Another example: after Namer, we'd created `Symbol`s for methods and arguments,
-but none of these `Symbol`s carried knowledge of their types.
+Another example: after Namer, we'd created `Symbol`s for methods, but none of
+these `Symbol`s carried knowledge of their arguments' types.
 
-These are the two main jobs of the Resolver: resolve constants and fill in sigs.
-We'll discuss each in turn.
+There are many specialized jobs of Resolver, but we're just going to call out
+two: resolve constants, and resolve sigs. We'll discuss each in turn.
 
 **Resolve constants**: After Namer, constants literals (like `A::B`) in our
 trees manifest as `UnresolvedConstantLit` nodes. An `ast::UnresolvedConstantLit`
@@ -311,10 +332,14 @@ nodes corresponding to sig builder methods, uses this to create `core::Type`s,
 and stores those types on the `Symbol`s corresponding to the method and
 arguments of that method.
 
+<!-- TODO(trevor) Do we want to talk about resolve type members here? -->
+
 There are a handful of other things that the Resolver does (it computes and
 records a linearization of the ancestor hierarchy so `derivesFrom` checks are
-fast, it computes bounds for generic type members, etc.) There are pretty good
-comments at the top of [resolver/resolver.cc] which say more.
+fast, it computes bounds for generic type members, it handles [`T.type_alias`]
+declarations, it finalizes the information needed to power [`T.attached_class`],
+etc.) There are pretty good comments at the top of [resolver/resolver.cc] which
+say more.
 
 To give you an idea, this is what our Namer example looks like after the
 Resolver pass:
@@ -339,23 +364,35 @@ class ::<root> < ::Object ()
 - All the `<todo sym>`s are gone (because constants have been resolved).
 - There are more fields now (like `::A#@field`).
 
-As one last note: we've discussed ways to restructure the Namer + Resolver
-passes to tease apart some implicit dependencies to achieve more parallelism and
-more modularity. In particular, it's feasible that we enter `Symbol`s for
-constants and then resolve constants before entering `Symbol`s for methods and
-resolving sigs.
+> Resolver has always been a somewhat complex phase. It has been made somewhat
+> more complex with the introduction of parallelism, though it still
+> conceptually follows the patterns discussed here.
+>
+> See [Namer & Resolver Pipeline](namer-resolver-pipeline.md) for more details.
 
-### Flattener
 
-<!-- TODO(jez) This is out of date; where should flatten be discussed? -->
+### ClassFlatten
 
-The flattener is (currently) the final pass that processes the ast. The goal
-here is to move around all the nodes so that the final result only had top level
-classes and they only contain method definitions. All the bodies of the classes
-are moved to special `<static-init>` methods. The top level statements in
-the file are moved to a `<static-init>` method on the synthetic `<root>` object.
+The class_flatten is the final pass that processes the AST. The goal
+here is to move around all the nodes so that the final result only has top level
+classes and they only contain method definitions. Code that executes at the
+top-level of a Ruby class is gathered up into a special `self.<static-init>`
+method inside that class. The top level statements in a file are moved to a
+unique `<static-init>` method on the synthetic `<root>` object.
 
-You can always view the final result of all ast transforms with `-p ast`.
+After this pass, all code that could be type checked is in a method. This means
+that in the next pass, CFG, we can look only at `ast::MethodDef` AST nodes and
+ignore `ast::ClassDef` nodes (all the information we could ever want about a
+class def has already been entered into `GlobalState`).
+
+> **Note**: There is also a phase in Rewriter called `rewritter::Flatten`. That
+> pass is designed to pull nested `ast::MethodDef`s out into the top-level of a
+> class. (This has some nice properties, e.g., it's possible to define all
+> `Symbol`s without traversing into method bodies. And since it's done in
+> [Rewriter], the output is cached and invalidated at the file level.)
+>
+> If you have better names for these two phases to make them more distinct, they
+> would be very welcome!
 
 
 ### CFG
@@ -391,30 +428,32 @@ class CFG {
 }
 ```
 
-So pretty much a CFG is a vector of basic blocks, and a basic block is a vector
-of instructions that assign their result to a local variable. None of the
-instructions in a basic block can branch (whether on a condition or
-unconditionally). But at the end of a basic block, we allow one branch. We look
-at the value of a specified local variable and then control jumps to the
-`whenTrue` basic block or the `whenFalse` basic block.
+A CFG is pretty much a vector of basic blocks, and a basic block is a vector
+of instructions that compute something and assign their result to a local
+variable. None of the instructions in a basic block can branch (whether on a
+condition or unconditionally). But at the end of a basic block, we allow one
+branch. We distinguish the contents of one of the variables in the basic block
+as the branch condition, and then record which other basic block to jump to
+depending on the value of that variable (`whenTrue` when truthy, `whenFalse`
+when falsy).
 
 Again, the structure above is **highly** abbreviated; look at [cfg/CFG.h] and
 [cfg/Instruction.h] for more specifics.
 
-Note that while basic blocks can't have local branches, they can still "jump" by
-calling into other methods. By the time that the CFG + Infer passes run, we will
-have created `Symbol`s for all methods, which have argument and return types for
-every method (defaulting to `T.untyped` if no sig was given). When sorbet
-encounters a method call (`cfg::Send`), it *always* looks up the type on record
-for that method rather than trying to infer it from the flow of control.
+Note that while basic blocks can't have internal branches, they can still "jump"
+by calling into other methods.
 
 Some things which are different about Sorbet's CFG than other CFG's you might be
 familiar with:
 
-- In Ruby, nearly every instruction can `raise` inside a `begin ... rescue`
-  block. But in Sorbet, we pretend that the jump to the `rescue` block happens
-  instead either immediately after entering a block, or at the very end of a
-  block.
+- In Ruby, nearly every instruction can `raise` inside a `begin ... rescue` and
+  jump to the start of the `rescue` block before subsequent expressions in the
+  `begin` block run. But in Sorbet, we pretend that the jump to the `rescue`
+  block happens instead either immediately after entering the `begin`, or after
+  all expressions in the `begin` have executed. This simiplifying assumption
+  (either nothing has run or everything has run) is in practice enough to model
+  the control-flow sensitive typing context of variables used inside the
+  `rescue` block.
 
 - Our CFG is **not** static single assignment (SSA), because we haven't needed
   the power that SSA gives rise to. Instead, we largely make do by "pinning"
@@ -453,9 +492,9 @@ Some notes about how to read these:
 ### Infer
 
 Infer is the last pass. It operates directly on a [`cfg::CFG`]. In particular,
-when the CFG is created, each binding has `nullptr` for the local's type. By the
-end of inference, reachable bindings within basic blocks will have had their
-types directly filled in.
+when the CFG is created, each binding has `nullptr` its local's type. By the end
+of inference, reachable bindings within basic blocks will have had their types
+annotated with the result of inference.
 
 Inference itself pretty much iterates over a (best-effort) topological sort of
 the basic blocks. ("Best effort" because there might be cycles in basic blocks).
@@ -465,10 +504,22 @@ For each binding in each basic block, we
   types, this is not so hard!)
 - use this binding to update our knowledge of the types for future bindings
 
-In particular, we visit each binding once to decide on its type. There is no
-backsolving for types or iterating until a fixed point. Since the CFG can have
-cycles, we require that within a cycle of basic blocks a variable's type cannot
-be widened or changed. (See <http://srb.help/7001>.)
+This loop over instructions happens in [infer/environment.cc]. Look for
+`processBinding`, which is a big `typecase` over each `cfg::Instruction` type.
+
+By far the most complicated thing about inference is checking `cfg::Send`
+instructions (method calls). Checking if a method call is well typed, and
+figuring out what the return type should be is implemented in
+[core/types/calls.cc].
+
+Sorbet visits each binding at most once to decide on its type. There is no
+backsolving for types or iterating until a fixed point, and there is no
+constraint generataion plus unification step. This single-shot style of
+inference is fast, because we only make one decision about typing per
+instruction, but it restricts the power of Sorbet's inference in user-visible
+ways. Also, since the CFG can have cycles, we require that within a cycle of
+basic blocks a variable's type cannot be widened or changed. (See
+<http://srb.help/7001>.)
 
 The inference pass itself is largely just traversing the the CFG for each method
 and processing bindings. It delegates much of the implementation of the type
@@ -497,7 +548,10 @@ There are a handful of such paired data structures: `Symbol`/`SymbolRef`, and
 `Name`/`NameRef`, and `File`/`FileRef` are the most widespread.
 
 Why not just use pointers? `Ref`s are usually smaller than an 8-byte pointer.
-It's also nice to have the distinction reinforced in the type system.
+It's also nice to have the distinction reinforced in the type system. Also the
+"dereference" operation on these types is written `foo.data()` instead of `*foo`
+or `foo->`. Sorbet subscribes to the philosophy that slow operations should be
+longer to type.
 
 We use various `.enterFoo` methods on `GlobalState` to create new
 objects owned directly by `GlobalState`. These methods return `FooRef`s. These
@@ -551,6 +605,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
   - Link to chapter 4 of dmitry's thesis
 - gotcha: cast_tree will just return `nullptr` if you pass in `nullptr`. if you
   expect that the thing you're trying to cast is not null, `ENFORCE` it!
+- tagged pointers to avoid virtual dispatch
 
 ### `typecase`
 
@@ -662,4 +717,10 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 [core/types/]: ../core/types/
 [core/Symbols.h]: ../core/Symbols.h
 [core/SymbolRef.h]: ../core/SymbolRef.h
+[infer/environment.cc]: ../infer/environment.cc
+[core/types/calls.cc]: ../core/types/calls.cc
 
+<!-- External -->
+[TypedRuby]: https://github.com/typedruby/typedruby
+[`T.type_alias`]: https://sorbet.org/docs/type-aliases
+[`T.attached_class`]: https://sorbet.org/docs/attached-class

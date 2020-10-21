@@ -150,7 +150,7 @@ fi
   ruby_loc=$(bundle exec which ruby | sed -e 's,toolchain/bin/,,')
   if [[ "$ruby_loc" == "$RUBY_WRAPPER_LOC" ]] ; then
     info "├─ Bundle was able to find ruby"
-  else 
+  else
     attn "├─ ruby in path:  ${ruby_loc}"
     attn "├─ expected ruby: ${RUBY_WRAPPER_LOC}"
     error "└─ Bundle failed to find ruby"
@@ -164,17 +164,26 @@ fi
   bundle config set no_prune true
   bundle install --verbose --local
 
-  info "├─ Checking installation"
+  info "├─ Checking srb commands"
   bundle check
+
+  # By default we only run `srb init` for each test but they can contain a
+  # `test.sh` file with the list of commands to run.
+  test_cmd=("bundle" "exec" "$srb" "init")
+  test_script="test.sh"
+  if [ -f "$test_script" ]; then
+    test_cmd=("./$test_script" "$srb")
+    chmod +x "$test_script"
+  fi
 
   # Uses /dev/null for stdin so any binding.pry would exit immediately
   # (otherwise, pry will be waiting for input, but it's impossible to tell
   # because the pry output is hiding in the *.log files)
   #
   # note: redirects stderr before the pipe
-  info "├─ Running srb init"
-  if ! SRB_YES=1 bundle exec "$srb" init < /dev/null 2> "err.log" > "out.log"; then
-    error "├─ srb init failed."
+  info "├─ Running srb"
+  if ! SRB_YES=1 ${test_cmd[*]} < /dev/null 2> "err.log" > "out.log"; then
+    error "├─ srb failed."
     error "├─ stdout (out.log):"
     cat "out.log"
     error "├─ stderr (err.log):"

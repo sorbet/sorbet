@@ -2008,14 +2008,12 @@ end
 
 class Dir
   def self.exists?(_); end
-
 end
 
 class ERB
   def def_method(mod, methodname, fname=T.unsafe(nil)); end
 
   def def_module(methodname=T.unsafe(nil)); end
-
 end
 
 class Encoding
@@ -2511,8 +2509,6 @@ end
 class Gem::Resolver::CurrentSet
 end
 
-Gem::Resolver::DependencyConflict = Gem::Resolver::Conflict
-
 class Gem::Resolver::DependencyRequest
   def pretty_print(q); end
 end
@@ -2600,7 +2596,6 @@ class Gem::Security::Signer
   include ::Gem::DefaultUserInteraction
   include ::Gem::Text
   def options(); end
-
 end
 
 class Gem::Security::Signer
@@ -2898,34 +2893,6 @@ module RbConfig
   def self.fire_update!(key, val, mkconf=T.unsafe(nil), conf=T.unsafe(nil)); end
 
   def self.ruby(); end
-end
-
-module RubyVM::AbstractSyntaxTree
-end
-
-class RubyVM::AbstractSyntaxTree::Node
-  def children(); end
-
-  def first_column(); end
-
-  def first_lineno(); end
-
-  def last_column(); end
-
-  def last_lineno(); end
-
-  def type(); end
-end
-
-class RubyVM::AbstractSyntaxTree::Node
-end
-
-module RubyVM::AbstractSyntaxTree
-  def self.of(_); end
-
-  def self.parse(_); end
-
-  def self.parse_file(_); end
 end
 
 module RubyVM::MJIT

@@ -10,10 +10,8 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-namespace {
-
-void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
-                     core::LocOffsets loc) {
+void CFGBuilder::conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
+                                 core::LocOffsets loc) {
     thenb->flags |= CFG::WAS_JUMP_DESTINATION;
     elseb->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
@@ -29,7 +27,7 @@ void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBl
     }
 }
 
-void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
+void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
     to->flags |= CFG::WAS_JUMP_DESTINATION;
     if (from != inWhat.deadBlock()) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
@@ -42,6 +40,8 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocO
         to->backEdges.emplace_back(from);
     }
 }
+
+namespace {
 
 LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     // Note: this will add an empty local to aliases if 'what' is not there
@@ -135,6 +135,45 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *curr
     auto isPrivateOk = false;
     current->exprs.emplace_back(cctx.target, h->loc, make_unique<Send>(magic, method, h->loc, vars, locs, isPrivateOk));
     return current;
+}
+
+BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
+    auto *join = cctx.inWhat.freshBlock(cctx.loops, a->rubyBlockId);
+    unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
+    unconditionalJump(b, join, cctx.inWhat, core::LocOffsets::none());
+    return join;
+}
+
+tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
+                                                                    const core::ArgInfo &argInfo, LocalRef argLocal,
+                                                                    core::LocOffsets argLoc, ast::TreePtr &def,
+                                                                    BasicBlock *presentCont, BasicBlock *defaultCont) {
+    auto defLoc = def->loc;
+
+    auto *presentNext = cctx.inWhat.freshBlock(cctx.loops, presentCont->rubyBlockId);
+    auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops, presentCont->rubyBlockId);
+
+    auto present = cctx.newTemporary(core::Names::argPresent());
+    auto methodSymbol = cctx.inWhat.symbol;
+    synthesizeExpr(presentCont, present, argLoc, make_unique<ArgPresent>(methodSymbol, argIndex));
+    conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, argLoc);
+
+    if (defaultCont != nullptr) {
+        unconditionalJump(defaultCont, defaultNext, cctx.inWhat, core::LocOffsets::none());
+    }
+
+    // Walk the default, and check the type of its final value
+    // Walk the default, and check the type of its final value, but discard the result of the cast.
+    auto result = cctx.newTemporary(core::Names::statTemp());
+    defaultNext = walk(cctx.withTarget(result), *def, defaultNext);
+
+    if (argInfo.type != nullptr) {
+        auto tmp = cctx.newTemporary(core::Names::castTemp());
+        synthesizeExpr(defaultNext, tmp, defLoc, make_unique<Cast>(result, argInfo.type, core::Names::let()));
+        cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
+    }
+
+    return {result, presentNext, defaultNext};
 }
 
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
@@ -305,11 +344,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                 return;
                             }
 
-                            if (ast::isa_tree<ast::Send>(s->args[0])) {
-                                // Providing a send is the most common way T.absurd is misused
+                            if (!ast::isa_tree<ast::Local>(s->args[0]) &&
+                                !ast::isa_tree<ast::UnresolvedIdent>(s->args[0])) {
                                 if (auto e = cctx.ctx.beginError(s->loc, core::errors::CFG::MalformedTAbsurd)) {
-                                    e.setHeader("`{}` expects to be called on a variable, not a method call",
-                                                "T.absurd", s->args.size());
+                                    // Providing a send is the most common way T.absurd is misused, so we provide a
+                                    // little extra hint in the error message in that case.
+                                    if (ast::isa_tree<ast::Send>(s->args[0])) {
+                                        e.setHeader("`{}` expects to be called on a variable, not a method call",
+                                                    "T.absurd");
+                                    } else {
+                                        e.setHeader("`{}` expects to be called on a variable", "T.absurd");
+                                    }
                                 }
                                 ret = current;
                                 return;

@@ -33,7 +33,7 @@ sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
 if [[ "mac" == "$platform" ]]; then
     # Our binary should work on almost all OSes. The oldest v8 publishes is -14
     # so I'm going with that for now.
-    for i in {14..19}; do
+    for i in {14..20}; do
         sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin-$i'/" sorbet-static.gemspec
         gem build sorbet-static.gemspec
         mv sorbet-static.gemspec.bak sorbet-static.gemspec

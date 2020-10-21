@@ -917,24 +917,41 @@ class Hash < Object
   end
   def merge(*arg0, &blk); end
 
-  # Adds the contents of *other_hash* to *hsh*. If no block is specified,
-  # entries with duplicate keys are overwritten with the values from
-  # *other_hash*, otherwise the value of each duplicate key is determined by
-  # calling the block with the key, its value in *hsh* and its value in
-  # *other_hash*.
+  # Adds the contents of the given hashes to the receiver.
+  #
+  # If no block is given, entries with duplicate keys are overwritten with the
+  # values from each `other_hash` successively, otherwise the value for each
+  # duplicate key is determined by calling the block with the key, its value in
+  # the receiver and its value in each `other_hash`.
   #
   # ```ruby
   # h1 = { "a" => 100, "b" => 200 }
-  # h2 = { "b" => 254, "c" => 300 }
-  # h1.merge!(h2)   #=> {"a"=>100, "b"=>254, "c"=>300}
-  # h1              #=> {"a"=>100, "b"=>254, "c"=>300}
+  # h1.merge!          #=> {"a"=>100, "b"=>200}
+  # h1                 #=> {"a"=>100, "b"=>200}
   #
   # h1 = { "a" => 100, "b" => 200 }
-  # h2 = { "b" => 254, "c" => 300 }
-  # h1.merge!(h2) { |key, v1, v2| v1 }
-  #                 #=> {"a"=>100, "b"=>200, "c"=>300}
-  # h1              #=> {"a"=>100, "b"=>200, "c"=>300}
+  # h2 = { "b" => 246, "c" => 300 }
+  # h1.merge!(h2)      #=> {"a"=>100, "b"=>246, "c"=>300}
+  # h1                 #=> {"a"=>100, "b"=>246, "c"=>300}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 246, "c" => 300 }
+  # h3 = { "b" => 357, "d" => 400 }
+  # h1.merge!(h2, h3)
+  #                    #=> {"a"=>100, "b"=>357, "c"=>300, "d"=>400}
+  # h1                 #=> {"a"=>100, "b"=>357, "c"=>300, "d"=>400}
+  #
+  # h1 = { "a" => 100, "b" => 200 }
+  # h2 = { "b" => 246, "c" => 300 }
+  # h3 = { "b" => 357, "d" => 400 }
+  # h1.merge!(h2, h3) {|key, v1, v2| v1 }
+  #                    #=> {"a"=>100, "b"=>200, "c"=>300, "d"=>400}
+  # h1                 #=> {"a"=>100, "b"=>200, "c"=>300, "d"=>400}
   # ```
+  #
+  # [`Hash#update`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-update)
+  # is an alias for
+  # [`Hash#merge!`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-merge-21).
   sig do
     type_parameters(:A ,:B).params(
         other_hash: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
@@ -948,7 +965,7 @@ class Hash < Object
     )
     .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
   end
-  def merge!(other_hash, &blk); end
+  def merge!(*other_hash, &blk); end
 
   # Searches through the hash comparing *obj* with the value using `==`. Returns
   # the first key-value pair (two-element array) that matches. See also
@@ -961,9 +978,9 @@ class Hash < Object
   # ```
   sig do
     params(
-        arg0: K,
+        arg0: V,
     )
-    .returns(T::Array[T.any(K, V)])
+    .returns(T.nilable([K, V]))
   end
   def rassoc(arg0); end
 
@@ -1176,7 +1193,16 @@ class Hash < Object
   #
   # If a block is given, the results of the block on each pair of the receiver
   # will be used as pairs.
-  def to_h; end
+  sig do
+    type_parameters(:A, :B)
+      .params(
+        blk: T.proc.params(arg0: K, arg1: V)
+              .returns([T.type_parameter(:A), T.type_parameter(:B)])
+      )
+      .returns(T::Hash[T.type_parameter(:A), T.type_parameter(:B)])
+  end
+  sig {returns(T::Hash[K, V])}
+  def to_h(&blk); end
 
   # Returns `self`.
   sig {returns(T::Hash[K, V])}

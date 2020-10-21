@@ -29,6 +29,7 @@ T.assert_type!(
 )
 
 {a: 1}.merge({b: 2}, {c: 3})
+{a: 1}.merge!({b: 2}, {c: 3})
 
 
 h1 = T::Hash[Integer, String].new
@@ -53,6 +54,10 @@ h3[nil] = "foo" # error: Expected `Integer` but found `NilClass` for argument `a
 h3[3] = nil # error: Expected `String` but found `NilClass` for argument `arg1`
 
 initial_hash = T.let({ a: 1.0, b: 3.0 }, T::Hash[Symbol, Float])
+hash_to_h_1 = initial_hash.to_h
+T.assert_type!(hash_to_h_1, T::Hash[Symbol, Float])
+hash_to_h_2 = initial_hash.to_h { |k, v| [k.to_s, v.to_d] }
+T.assert_type!(hash_to_h_2, T::Hash[String, BigDecimal])
 
 transformed_keys_hash = initial_hash.transform_keys(&:to_s)
 T.assert_type!(transformed_keys_hash, T::Hash[String, Float])

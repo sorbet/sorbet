@@ -51,4 +51,27 @@ module Main
   def generic_class_module_glb
     T.assert_type!(0, T.all(A, T::Hash[String, String])) # error: does not have asserted type `T.all(T::Hash[String, String], A)`
   end
+
+  def generic_class_lub(b)
+    if b == 1
+      xs = T::Array[T.nilable(String)].new
+    elsif b == 2
+      xs = nil
+    else
+      xs = T::Array[T.untyped].new
+    end
+    
+    # T.any(nil, T::Array[T.nilable(String)], T::Array[T.untyped]) => T.nilable(T::Array[T.untyped])
+    T.reveal_type(xs) # error: Revealed type: `T.nilable(T::Array[T.untyped])`
+  end
+
+  def generic_class_nilable_array_tuple_lub
+    a = T.let(nil, T.nilable(T::Array[Float]))
+    b = T.let(nil, T.nilable(T::Array[Integer]))
+    T.reveal_type([a, b]) # error: Revealed type: `[T.nilable(T::Array[Float]), T.nilable(T::Array[Integer])] (2-tuple)`
+    # This reproduces a bug in Sorbet. In the buggy version, the above T.reveal_type passes,
+    # but the below statement would not error.
+    [a, b].each(&:lazy)
+    #            ^^^^^ error: Method `lazy` does not exist on `NilClass`
+  end
 end

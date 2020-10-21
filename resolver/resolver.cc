@@ -1886,7 +1886,7 @@ private:
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
-        if (send.args.size() != 2) {
+        if (send.args.size() != 2 && send.args.size() != 3) {
             return;
         }
 
@@ -1913,6 +1913,38 @@ private:
             return;
         }
 
+        core::LiteralType *package = nullptr;
+        optional<core::LocOffsets> packageLoc;
+        if (send.args.size() == 3) {
+            // this means we got the third package arg
+            auto *kwargs = ast::cast_tree_const<ast::Hash>(send.args[2]);
+            if (!kwargs || kwargs->keys.size() != 1) {
+                // Infer will report an error
+                return;
+            }
+            auto *key = ast::cast_tree_const<ast::Literal>(kwargs->keys.front());
+            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
+                return;
+            }
+
+            auto *packageNode = ast::cast_tree_const<ast::Literal>(kwargs->values.front());
+            packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
+            if (packageNode == nullptr) {
+                if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {
+                    e.setHeader("`{}` only accepts string literals", method);
+                }
+                return;
+            }
+
+            package = core::cast_type<core::LiteralType>(packageNode->value.get());
+            if (package == nullptr || package->literalKind != core::LiteralType::LiteralTypeKind::String) {
+                // Infer will report a type error
+                return;
+            }
+        }
+        // if we got two args, then package should be null, and if we got three args, then package should be non-null
+        ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
+
         auto name = core::NameRef(ctx.state, literal->value);
         auto shortName = name.data(ctx)->shortName(ctx);
         if (shortName.empty()) {
@@ -1922,45 +1954,74 @@ private:
             return;
         }
 
+        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
+        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
+        // did or did not begin with `::`.
         auto parts = absl::StrSplit(shortName, "::");
         core::SymbolRef current;
         for (auto part : parts) {
             if (!current.exists()) {
                 // First iteration
-                if (part != "") {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        e.setHeader(
-                            "The string given to `{}` must be an absolute constant reference that starts with `{}`",
-                            method, "::");
+                if (!package) {
+                    if (part != "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader(
+                                "The string given to `{}` must be an absolute constant reference that starts with `{}`",
+                                method, "::");
+                        }
+                        return;
                     }
-                    return;
-                }
+                    current = core::Symbols::root();
+                    continue;
+                } else {
+                    if (part == "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
+                                        "package name is also provided",
+                                        method);
+                        }
+                        return;
+                    }
 
-                current = core::Symbols::root();
-            } else {
-                auto member = ctx.state.lookupNameConstant(part);
-                if (!member.exists()) {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        auto prettyCurrent =
-                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    auto packageName = core::NameRef(ctx.state, package->value);
+                    auto mangledName = packageName.lookupMangledPackageName(ctx.state);
+                    // if the mangled name doesn't exist, then this means probably there's no package named this
+                    if (!mangledName.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
+                        }
+                        return;
                     }
-                    return;
-                }
-
-                auto newCurrent = current.data(ctx)->findMember(ctx, member);
-                if (!newCurrent.exists()) {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        auto prettyCurrent =
-                            current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                        auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                        e.setHeader("Unable to resolve constant `{}`", pretty);
+                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
+                    if (!current.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
+                        }
+                        return;
                     }
-                    return;
                 }
-                current = newCurrent;
             }
+
+            auto member = ctx.state.lookupNameConstant(part);
+            if (!member.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+
+            auto newCurrent = current.data(ctx)->findMember(ctx, member);
+            if (!newCurrent.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+            current = newCurrent;
         }
 
         ENFORCE(current.exists(), "Loop invariant violated");
@@ -2214,10 +2275,7 @@ class ResolveMixesInClassMethodsWalk {
         }
 
         if (send.args.size() != 1) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
-                            send.fun.data(ctx)->show(ctx), 1, send.args.size());
-            }
+            // The arity mismatch error will be emitted later by infer.
             return;
         }
         auto &front = send.args.front();
@@ -2258,7 +2316,6 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, send);
-            return ast::MK::EmptyTree();
         }
         return tree;
     }

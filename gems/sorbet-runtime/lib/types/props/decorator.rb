@@ -427,7 +427,7 @@ class T::Props::Decorator
       # TODO(PRIVACYENG-982) Ideally we'd also check for 'password' and possibly
       # other terms, but this interacts badly with ProtoDefinedDocument because
       # the proto syntax currently can't declare "sensitivity: []"
-      if prop_name =~ /\bsecret\b/
+      if /\bsecret\b/.match?(prop_name)
         T::Configuration.hard_assert_handler(
           "#{@class}##{prop_name} has the word 'secret' in its name, but no " \
           "'sensitivity:' annotation. This is probably wrong, because if a " \

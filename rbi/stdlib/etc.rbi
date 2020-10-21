@@ -320,7 +320,7 @@ module Etc
   # Etc.getlogin -> 'guest'
   # ```
   sig do
-    returns(String)
+    returns(T.nilable(String))
   end
   def self.getlogin; end
 
@@ -533,7 +533,7 @@ module Etc
   # #    :machine=>"i686"}
   # ```
   sig do
-    returns(String)
+    returns(T::Hash[Symbol, String])
   end
   def self.uname; end
 end

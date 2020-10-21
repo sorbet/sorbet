@@ -34,7 +34,7 @@ class HasOverloads
     )
     .returns(Symbol)
   end
-  def overloaded(_=_0, _1=_, _2=_);
+  def overloaded(_, _1=_, _2=_);
     make_untyped
   end
 
